@@ -15,6 +15,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplayHitCircle extends GameObject {
@@ -24,6 +25,7 @@ public class GameplayHitCircle extends GameObject {
     private GameObjectListener listener;
     private Scene scene;
     private HitCircle beatmapCircle;
+    private StatisticV2 stat;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
@@ -43,11 +45,11 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
-    public void init(final GameObjectListener listener, final Scene pScene,
-                     final HitCircle beatmapCircle, final float secPassed,
-                     final RGBColor comboColor) {
+    public void init(final GameObjectListener listener, final Scene pScene, final StatisticV2 stat,
+                     final HitCircle beatmapCircle, final float secPassed, final RGBColor comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
+        this.stat = stat;
         replayObjectData = null;
 
         var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
@@ -258,14 +260,13 @@ public class GameplayHitCircle extends GameObject {
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
-                final float acc = Math.abs(replayObjectData.accuracy / 1000f);
-                if (acc <= mehWindow) {
-                    playHitSamples();
-                }
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
+                if (Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow) {
+                    playHitSamples();
+                }
                 removeFromScene();
                 return;
             }
@@ -275,15 +276,14 @@ public class GameplayHitCircle extends GameObject {
             // dt is 0 here as the current time is updated *after* this judgement.
             if (canBeHit(0, frameHitOffset) && isHit()) {
                 float signAcc = passedTime - timePreempt + frameHitOffset;
-                final float acc = Math.abs(signAcc);
-                if (acc <= mehWindow) {
-                    playHitSamples();
-                }
                 listener.registerAccuracy(signAcc);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 startHit = true;
                 listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
+                if (Math.abs(signAcc) <= mehWindow) {
+                    playHitSamples();
+                }
                 removeFromScene();
                 return;
             }
@@ -311,10 +311,10 @@ public class GameplayHitCircle extends GameObject {
         }
 
         if (autoPlay) {
-            playHitSamples();
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
+            playHitSamples();
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
@@ -344,14 +344,13 @@ public class GameplayHitCircle extends GameObject {
             // However, hit judgements require the object's state to be in the previous tick.
             // Therefore, we subtract dt to get the object's state in the previous tick.
             float signAcc = passedTime - timePreempt - dt + frameHitOffset;
-            final float acc = Math.abs(signAcc);
-            if (acc <= beatmapCircle.hitWindow.getMehWindow() / 1000) {
-                playHitSamples();
-            }
             listener.registerAccuracy(signAcc);
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
+            if (Math.abs(signAcc) <= beatmapCircle.hitWindow.getMehWindow() / 1000) {
+                playHitSamples();
+            }
             removeFromScene();
         }
     }
