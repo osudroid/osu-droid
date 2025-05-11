@@ -49,6 +49,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
         DatabaseManager.modPresetTable.insert(modPreset)
         loadPresets()
+        onModsChanged()
     }
 
     fun loadPresets() {
