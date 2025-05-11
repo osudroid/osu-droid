@@ -26,6 +26,7 @@ object ModUtils {
             ModDoubleTime(),
             ModEasy(),
             ModFlashlight(),
+            ModGrow(),
             ModHalfTime(),
             ModHardRock(),
             ModHidden(),
