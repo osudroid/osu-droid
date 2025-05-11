@@ -2100,7 +2100,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var muted = GameHelper.getMuted();
 
         if (muted != null && muted.affectsHitSounds()) {
-            volume = muted.volumeAt(stat.getCombo());
+            volume = 1 - muted.volumeAt(stat.getCombo());
         }
 
         for (int i = 0; i < samples.length; ++i) {

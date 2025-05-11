@@ -404,7 +404,7 @@ public class GameplaySpinner extends GameObject {
         var muted = GameHelper.getMuted();
 
         if (muted != null && muted.affectsHitSounds()) {
-            float volume = muted.volumeAt(stat.getCombo());
+            float volume = 1 - muted.volumeAt(stat.getCombo());
 
             spinnerSpinSample.setVolume(volume);
             spinnerBonusSample.setVolume(volume);

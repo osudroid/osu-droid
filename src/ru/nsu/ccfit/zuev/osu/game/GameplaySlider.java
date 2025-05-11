@@ -1295,7 +1295,7 @@ public class GameplaySlider extends GameObject {
         var muted = GameHelper.getMuted();
 
         if (muted != null && muted.affectsHitSounds()) {
-            float volume = muted.volumeAt(stat.getCombo());
+            float volume = 1 - muted.volumeAt(stat.getCombo());
 
             sliderSlideSample.setVolume(volume);
             sliderWhistleSample.setVolume(volume);
