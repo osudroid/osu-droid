@@ -15,6 +15,7 @@ import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
+import com.reco1l.framework.EasingKt;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -55,6 +56,7 @@ public class GameplaySlider extends GameObject {
     private double spanDuration;
     private int completedSpanCount;
     private boolean reverse;
+    private boolean applyIncreasedVisibility;
     private final boolean isSliderBallFlip;
 
     private GameplayHitSampleInfo[][] nestedHitSamples;
@@ -210,7 +212,7 @@ public class GameplaySlider extends GameObject {
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
 
-        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+        applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
         var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
 
         // Start circle piece
@@ -326,9 +328,8 @@ public class GameplaySlider extends GameObject {
         // Slider track
         superPath = renderPath;
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
-        sliderBody.setScale(scale);
-        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth());
-        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth());
+        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
         sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
 
         // Head circle not being visible means Traceable is applied to this slider
@@ -340,7 +341,7 @@ public class GameplaySlider extends GameObject {
 
         if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
             sliderBody.setHintVisible(true);
-            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth());
+            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
 
             RGBColor hintColor = OsuSkin.get().getSliderHintColor();
             if (hintColor != null) {
@@ -424,10 +425,6 @@ public class GameplaySlider extends GameObject {
                 timePreempt, startScale, endScale, null, Easing.OutSine
             ));
 
-            sliderBody.registerEntityModifier(Modifiers.scale(
-                timePreempt, startScale, endScale, null, Easing.OutSine
-            ));
-
             if (startArrow.hasParent()) {
                 startArrow.registerEntityModifier(Modifiers.scale(
                     timePreempt, startScale, endScale, null, Easing.OutSine
@@ -439,6 +436,9 @@ public class GameplaySlider extends GameObject {
                     timePreempt, startScale, endScale, null, Easing.OutSine
                 ));
             }
+
+            // We scale the slider body in update() instead since its background, border, and hint width is individually
+            // scaled. It would look wrong with an entity modifier.
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -863,6 +863,21 @@ public class GameplaySlider extends GameObject {
                 headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
                 kiai = false;
             }
+        }
+
+        var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            float percentage = FMath.clamp((float) (timePreempt + elapsedSpanTime) / timePreempt, 0, 1);
+
+            float scale = beatmapSlider.getScreenSpaceGameplayScale() * Interpolation.linear(
+                objectScaleTweenMod.getStartScale(),
+                objectScaleTweenMod.getEndScale(),
+                EasingKt.interpolate(Easing.OutSine, percentage)
+            );
+
+            sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+            sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
         }
 
         if (elapsedSpanTime < 0) // we at approach time
