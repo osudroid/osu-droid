@@ -65,7 +65,7 @@ class ModCustomizationMenu : Modal(
     private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): FormControl<*, *> {
 
         val component = when (setting) {
-            is FloatModSetting -> ModSettingSlider(mod, setting)
+            is FloatModSetting -> FloatModSettingSlider(mod, setting)
             is NullableFloatModSetting -> NullableModSettingSlider(mod, setting)
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
@@ -127,50 +127,38 @@ private interface IModSettingComponent<V : Any?> {
     fun update()
 }
 
-private class ModSettingSlider(val mod: Mod, override val setting: ModSetting<Float>) :
-    FormSlider(setting.initialValue),
-    IModSettingComponent<Float> {
+private sealed class ModSettingSlider<V : Number?>(val mod: Mod, override val setting: ModSetting<V>) :
+    FormSlider(setting.initialValue?.toFloat() ?: 0f),
+    IModSettingComponent<V> {
 
-    override fun update() {
+    final override fun update() {
         label = setting.name
 
-        if (setting is RangeConstrainedModSetting<Float>) {
-            control.min = setting.minValue
-            control.max = setting.maxValue
-            control.step = setting.step
+        if (setting is RangeConstrainedModSetting<V>) {
+            val setting = setting as RangeConstrainedModSetting<V>
+            control.min = setting.minValue!!.toFloat()
+            control.max = setting.maxValue!!.toFloat()
+            control.step = setting.step!!.toFloat()
         }
 
-        defaultValue = setting.defaultValue
-        value = setting.value
-        valueFormatter = setting.valueFormatter!!
+        defaultValue = setting.defaultValue?.toFloat() ?: 0f
+        value = setting.value?.toFloat() ?: 0f
+        valueFormatter = { setting.valueFormatter!!.invoke(convertValue(it)) }
         onValueChanged = {
-            setting.value = it
+            setting.value = convertValue(it)
             ModMenu.queueModChange(mod)
         }
     }
+
+    abstract fun convertValue(value: Float): V
 }
 
-private class NullableModSettingSlider(val mod: Mod, override val setting: ModSetting<Float?>) :
-    FormSlider(setting.initialValue ?: 0f),
-    IModSettingComponent<Float?> {
+private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
+    override fun convertValue(value: Float) = value
+}
 
-    override fun update() {
-        label = setting.name
-
-        if (setting is RangeConstrainedModSetting<Float?>) {
-            control.min = setting.minValue!!
-            control.max = setting.maxValue!!
-            control.step = setting.step!!
-        }
-
-        defaultValue = setting.defaultValue ?: 0f
-        value = setting.value ?: setting.defaultValue ?: 0f
-        valueFormatter = setting.valueFormatter!!
-        onValueChanged = { value ->
-            setting.value = if (value == setting.defaultValue) null else value
-            ModMenu.queueModChange(mod)
-        }
-    }
+private class NullableModSettingSlider(mod: Mod, setting: ModSetting<Float?>) : ModSettingSlider<Float?>(mod, setting) {
+    override fun convertValue(value: Float) = if (value == setting.defaultValue) null else value
 }
 
 private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<Boolean>) :
