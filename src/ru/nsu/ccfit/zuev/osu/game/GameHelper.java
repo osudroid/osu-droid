@@ -31,6 +31,7 @@ public class GameHelper {
     private static ModSynesthesia synesthesia;
     private static ModScoreV2 scoreV2;
     private static ModEasy easy;
+    private static ModMuted muted;
     private static boolean isKiai = false;
     private static ModAutoplay autoplay;
     private static double beatLength = 0;
@@ -278,6 +279,18 @@ public class GameHelper {
 
     public static void setSynesthesia(final ModSynesthesia synesthesia) {
         GameHelper.synesthesia = synesthesia;
+    }
+
+    public static ModMuted getMuted() {
+        return muted;
+    }
+
+    public static boolean isMuted() {
+        return muted != null;
+    }
+
+    public static void setMuted(final ModMuted muted) {
+        GameHelper.muted = muted;
     }
 
     public static ModScoreV2 getScoreV2() {
