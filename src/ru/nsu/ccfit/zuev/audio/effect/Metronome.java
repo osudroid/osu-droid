@@ -58,4 +58,11 @@ public class Metronome {
         // 每小节奇数拍hat
         hatSound.play();
     }
+
+    public void setVolume(float volume) {
+        kickSound.setVolume(volume);
+        finishSound.setVolume(volume);
+        clapSound.setVolume(volume);
+        hatSound.setVolume(volume);
+    }
 }
