@@ -35,7 +35,7 @@ class ModMuted : Mod() {
         }
 
         private fun onValueChange(newValue: Boolean) {
-            (::muteComboCount).run {
+            ::muteComboCount.run {
                 isAccessible = true
                 (getDelegate() as IntegerModSetting).minValue = if (newValue) 1 else 0
             }
@@ -79,7 +79,7 @@ class ModMuted : Mod() {
     fun volumeAt(combo: Int): Float {
         val volume = (combo / max(1f, muteComboCount.toFloat())).coerceIn(0f, 1f)
 
-        return if (inverseMuting) volume else 1 - volume
+        return if (inverseMuting) 1 - volume else volume
     }
 
     override fun copySettings(settings: JSONObject) {
