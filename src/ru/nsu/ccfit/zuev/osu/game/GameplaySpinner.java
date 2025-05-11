@@ -400,13 +400,30 @@ public class GameplaySpinner extends GameObject {
         }
 
         spinnerSpinSample.setLooping(true);
+
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            float volume = muted.volumeAt(stat.getCombo());
+
+            spinnerSpinSample.setVolume(volume);
+            spinnerBonusSample.setVolume(volume);
+        }
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {
+        float volume = 1;
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            volume = muted.volumeAt(stat.getCombo());
+        }
+
         for (int i = 0; i < hitSamples.length; ++i) {
             var sample = hitSamples[i];
 
             if (obtainedScore > 0) {
+                sample.setVolume(volume);
                 sample.play();
             }
 
