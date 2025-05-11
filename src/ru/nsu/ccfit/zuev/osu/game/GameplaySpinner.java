@@ -412,21 +412,12 @@ public class GameplaySpinner extends GameObject {
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {
-        float volume = 1;
-        var muted = GameHelper.getMuted();
-
-        if (muted != null && muted.affectsHitSounds()) {
-            volume = muted.volumeAt(stat.getCombo());
+        if (obtainedScore > 0) {
+            listener.playHitSamples(hitSamples);
         }
 
         for (int i = 0; i < hitSamples.length; ++i) {
             var sample = hitSamples[i];
-
-            if (obtainedScore > 0) {
-                sample.setVolume(volume);
-                sample.play();
-            }
-
             sample.reset();
             GameplayHitSampleInfo.pool.free(sample);
         }

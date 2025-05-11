@@ -15,7 +15,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplayHitCircle extends GameObject {
@@ -25,7 +24,6 @@ public class GameplayHitCircle extends GameObject {
     private GameObjectListener listener;
     private Scene scene;
     private HitCircle beatmapCircle;
-    private StatisticV2 stat;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
@@ -45,11 +43,10 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
-    public void init(final GameObjectListener listener, final Scene pScene, final StatisticV2 stat,
-                     final HitCircle beatmapCircle, final float secPassed, final RGBColor comboColor) {
+    public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
+                     final float secPassed, final RGBColor comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
-        this.stat = stat;
         replayObjectData = null;
 
         var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
@@ -237,18 +234,7 @@ public class GameplayHitCircle extends GameObject {
     }
 
     private void playHitSamples() {
-        float volume = 1;
-        var muted = GameHelper.getMuted();
-
-        if (muted != null && muted.affectsHitSounds()) {
-            volume = muted.volumeAt(stat.getCombo());
-        }
-
-        for (int i = 0; i < hitSamples.length; ++i) {
-            var sample = hitSamples[i];
-            sample.setVolume(volume);
-            sample.play();
-        }
+        listener.playHitSamples(hitSamples);
     }
 
     @Override
