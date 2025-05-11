@@ -30,6 +30,7 @@ object ModUtils {
             ModHardRock(),
             ModHidden(),
             ModMirror(),
+            ModMuted(),
             ModNightCore(),
             ModNoFail(),
             ModPerfect(),
