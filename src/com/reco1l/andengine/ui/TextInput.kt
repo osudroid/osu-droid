@@ -233,9 +233,6 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
                     caretPosition = max(0, caretPosition - 1)
                 }
 
-                KEYCODE_DPAD_LEFT -> caretPosition = max(0, caretPosition - 1)
-                KEYCODE_DPAD_RIGHT -> caretPosition = min(value.length, caretPosition + 1)
-
                 KEYCODE_ENTER -> {
                     if (confirmOnEnter) {
                         blur()
@@ -244,13 +241,10 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
                     }
                 }
 
-                else -> {
-                    val char = event.unicodeChar.toChar()
+                KEYCODE_DPAD_LEFT -> caretPosition = max(0, caretPosition - 1)
+                KEYCODE_DPAD_RIGHT -> caretPosition = min(value.length, caretPosition + 1)
 
-                    if (char.isLetterOrDigit() || char.isWhitespace()) {
-                        appendCharacter(char)
-                    }
-                }
+                else -> appendCharacter(event.unicodeChar.toChar())
             }
         }
 
