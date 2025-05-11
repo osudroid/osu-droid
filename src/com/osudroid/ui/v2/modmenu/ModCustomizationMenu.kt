@@ -66,6 +66,7 @@ class ModCustomizationMenu : Modal(
 
         val component = when (setting) {
             is FloatModSetting -> FloatModSettingSlider(mod, setting)
+            is IntegerModSetting -> IntegerModSettingSlider(mod, setting)
             is NullableFloatModSetting -> NullableModSettingSlider(mod, setting)
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
@@ -151,6 +152,10 @@ private sealed class ModSettingSlider<V : Number?>(val mod: Mod, override val se
     }
 
     abstract fun convertValue(value: Float): V
+}
+
+private class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModSettingSlider<Int>(mod, setting) {
+    override fun convertValue(value: Float) = value.toInt()
 }
 
 private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
