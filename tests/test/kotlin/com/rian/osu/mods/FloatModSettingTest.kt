@@ -90,8 +90,8 @@ class FloatModSettingTest {
         var setting by FloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
-            // Intentional multiplications to introduce floating point errors.
-            minValue = 0.012f * 10,
+            minValue = 0.12f,
+            // Intentional multiplication to introduce floating point errors.
             maxValue = 0.12f * 10,
             step = 0.12f,
             precision = 2,
