@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.timings.TimingControlPoint;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class Metronome {
 
