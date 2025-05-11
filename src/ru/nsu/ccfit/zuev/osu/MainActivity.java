@@ -814,7 +814,7 @@ public class MainActivity extends BaseGameActivity implements
                         gameScene.cancelLoading();
                     }
 
-                    engine.setScene(songMenu.getScene());
+                    GlobalManager.getInstance().getEngine().setScene(songMenu.getScene());
                     return true;
                 }
 
