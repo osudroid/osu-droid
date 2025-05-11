@@ -56,6 +56,7 @@ import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
+import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.*;
 import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
@@ -2084,6 +2085,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         createHitEffect(pos, scoreName, null);
 
         hud.onNoteHit(stat);
+    }
+
+    @Override
+    public void playHitSamples(GameplayHitSampleInfo[] samples) {
+        float volume = 1;
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            volume = muted.volumeAt(stat.getCombo());
+        }
+
+        for (int i = 0; i < samples.length; ++i) {
+            var sample = samples[i];
+            sample.setVolume(volume);
+            sample.play();
+        }
     }
 
     private void stopLoopingSamples() {
