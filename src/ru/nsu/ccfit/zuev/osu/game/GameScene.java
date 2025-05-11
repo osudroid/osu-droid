@@ -1477,7 +1477,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             metronome.update(elapsedTime, activeTimingPoint);
 
             if (mutedMod != null) {
-                metronome.setVolume(1 - mutedMod.volumeAt(stat.getCombo()));
+                metronome.setVolume(mutedMod.volumeAt(stat.getCombo()));
             }
         }
 
