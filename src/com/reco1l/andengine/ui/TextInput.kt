@@ -14,6 +14,7 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 import kotlin.synchronized
+import kotlin.text.substring
 
 class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
 
@@ -181,7 +182,22 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
     }
 
 
+    override fun onProcessValue(value: String): String {
+
+        // Calculate the width of the text with a dummy character appended to it when we type with whitespaces at
+        // the end of the line the function getStringWidth() will return the width of the text trimmed which will
+        // cause the caret to be misplaced.
+        val dummyCharWidth = font!!.getStringWidth("0")
+
+        letterPositions = IntArray(value.length + 1) { i ->
+            if (i > 0) font!!.getStringWidth(value.substring(0, i) + "0") - dummyCharWidth else 0
+        }
+
+        return super.onProcessValue(value)
+    }
+
     private fun appendCharacter(char: Char) {
+
         if (value.length == maxCharacters && maxCharacters != 0) {
             return
         }
@@ -191,17 +207,6 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
 
         value = currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
         caretPosition++
-
-        val text = value
-
-        // Calculate the width of the text with a dummy character appended to it when we type with whitespaces at
-        // the end of the line the function getStringWidth() will return the width of the text trimmed which will
-        // cause the caret to be misplaced.
-        val dummyCharWidth = font!!.getStringWidth("0")
-
-        letterPositions = IntArray(text.length + 1) { i ->
-            if (i > 0) font!!.getStringWidth(text.substring(0, i) + "0") - dummyCharWidth else 0
-        }
     }
 
 
