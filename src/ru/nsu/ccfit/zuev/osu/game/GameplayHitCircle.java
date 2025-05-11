@@ -88,7 +88,7 @@ public class GameplayHitCircle extends GameObject {
         circlePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * 3);
+        approachCircle.setScale(scale * 3 * (float) (beatmapCircle.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
