@@ -14,15 +14,18 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 class SliderTickContainer : Container() {
     private var slider: Slider? = null
+    private var applyIncreasedVisibility = false
 
-    fun init(currentTimeSec: Double, beatmapSlider: Slider) {
+    fun init(currentTimeSec: Double, beatmapSlider: Slider, applyIncreasedVisibility: Boolean) {
         slider = beatmapSlider
+        this.applyIncreasedVisibility = applyIncreasedVisibility
 
         detachChildren()
 
         val position = beatmapSlider.screenSpaceGameplayStackedPosition
 
         setPosition(position.x, position.y)
+        setScaleCenter(position.x, position.y)
 
         for (i in 1 until beatmapSlider.nestedHitObjects.size) {
 
@@ -34,7 +37,7 @@ class SliderTickContainer : Container() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(currentTimeSec, tick)
+            sprite.init(currentTimeSec, tick, applyIncreasedVisibility)
 
             attachChild(sprite)
         }
@@ -61,7 +64,7 @@ class SliderTickContainer : Container() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(currentTimeSec, tick)
+            sprite.init(currentTimeSec, tick, applyIncreasedVisibility)
         }
     }
 
@@ -85,8 +88,9 @@ class SliderTickSprite : ExtendedSprite() {
      *
      * @param currentTimeSec The current time in seconds.
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
+     * @param applyIncreasedVisibility Whether to apply increased visibility.
      */
-    fun init(currentTimeSec: Double, tick: SliderTick) {
+    fun init(currentTimeSec: Double, tick: SliderTick, applyIncreasedVisibility: Boolean) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
 
@@ -115,6 +119,19 @@ class SliderTickSprite : ExtendedSprite() {
                 Modifiers.sequence(null,
                     Modifiers.delay(fadeOutStartTime - currentTimeSec.toFloat()),
                     Modifiers.fadeOut(fadeOutDuration)
+                )
+            )
+        }
+
+        val objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod()
+
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            registerEntityModifier(
+                Modifiers.scale(
+                    timePreempt,
+                    objectScaleTweenMod.startScale * scaleX,
+                    objectScaleTweenMod.endScale * scaleX,
+                    easing = Easing.OutSine
                 )
             )
         }

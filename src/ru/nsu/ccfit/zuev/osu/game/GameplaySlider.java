@@ -353,7 +353,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(secPassed, beatmapSlider);
+        tickContainer.init(secPassed, beatmapSlider, applyIncreasedVisibility);
 
         scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
@@ -418,10 +418,6 @@ public class GameplaySlider extends GameObject {
             ));
 
             tailCirclePiece.registerEntityModifier(Modifiers.scale(
-                timePreempt, startScale, endScale, null, Easing.OutSine
-            ));
-
-            tickContainer.registerEntityModifier(Modifiers.scale(
                 timePreempt, startScale, endScale, null, Easing.OutSine
             ));
 
