@@ -68,8 +68,6 @@ class ModCustomizationMenu : Modal(
             is FloatModSetting -> ModSettingSlider(mod, setting)
             is NullableFloatModSetting -> NullableModSettingSlider(mod, setting)
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
-
-            else -> throw IllegalArgumentException("Unsupported setting type or component not defined for: ${setting::class}")
         }
         modSettingComponents.add(component)
         component.update()
