@@ -211,6 +211,7 @@ public class GameplaySlider extends GameObject {
         currentNestedObjectIndex = 0;
 
         boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+        var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -229,7 +230,7 @@ public class GameplaySlider extends GameObject {
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
+        approachCircle.setVisible((!GameHelper.isHidden() && objectScaleTweenMod == null) || applyIncreasedVisibility);
 
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
