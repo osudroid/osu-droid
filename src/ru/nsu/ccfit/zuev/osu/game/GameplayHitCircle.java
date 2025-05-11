@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.edlplan.framework.easing.Easing;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -157,6 +158,16 @@ public class GameplayHitCircle extends GameObject {
             }
 
             hitSamples[i] = gameplaySample;
+        }
+
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            circlePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt,
+                objectScaleTweenMod.getStartScale() * scale,
+                objectScaleTweenMod.getEndScale() * scale,
+                null,
+                Easing.OutSine
+            ));
         }
 
         scene.attachChild(circlePiece, 0);
