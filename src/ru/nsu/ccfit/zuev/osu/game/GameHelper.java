@@ -319,6 +319,18 @@ public class GameHelper {
         GameHelper.deflate = deflate;
     }
 
+    public static ModObjectScaleTween getObjectScaleTweeningMod() {
+        if (isGrow()) {
+            return grow;
+        }
+
+        if (isDeflate()) {
+            return deflate;
+        }
+
+        return null;
+    }
+
     public static ModScoreV2 getScoreV2() {
         return scoreV2;
     }
