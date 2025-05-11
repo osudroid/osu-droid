@@ -407,6 +407,39 @@ public class GameplaySlider extends GameObject {
             ));
         }
 
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            float startScale = objectScaleTweenMod.getStartScale() * scale;
+            float endScale = objectScaleTweenMod.getEndScale() * scale;
+
+            headCirclePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            tailCirclePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            tickContainer.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            sliderBody.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            if (startArrow.hasParent()) {
+                startArrow.registerEntityModifier(Modifiers.scale(
+                    timePreempt, startScale, endScale, null, Easing.OutSine
+                ));
+            }
+
+            if (endArrow.hasParent()) {
+                endArrow.registerEntityModifier(Modifiers.scale(
+                    timePreempt, startScale, endScale, null, Easing.OutSine
+                ));
+            }
+        }
+
         applyBodyFadeAdjustments(fadeInDuration);
     }
 
