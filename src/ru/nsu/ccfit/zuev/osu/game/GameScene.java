@@ -834,6 +834,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setScoreV2(lastMods.ofType(ModScoreV2.class));
         GameHelper.setEasy(lastMods.ofType(ModEasy.class));
         GameHelper.setMuted(lastMods.ofType(ModMuted.class));
+        GameHelper.setGrow(lastMods.ofType(ModGrow.class));
+        GameHelper.setDeflate(lastMods.ofType(ModDeflate.class));
 
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
