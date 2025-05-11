@@ -1471,6 +1471,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // 节拍器
         if (metronome != null) {
             metronome.update(elapsedTime, activeTimingPoint);
+
+            var muted = GameHelper.getMuted();
+
+            if (muted != null) {
+                metronome.setVolume(1 - muted.volumeAt(stat.getCombo()));
+            }
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
