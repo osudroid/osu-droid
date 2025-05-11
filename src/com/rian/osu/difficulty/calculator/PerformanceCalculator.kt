@@ -31,7 +31,7 @@ abstract class PerformanceCalculator<
      * The accuracy of the parameters.
      */
     protected val accuracy: Double
-        get() = (countGreat * 6.0 + countOk * 2 + countMeh) / (totalHits * 6)
+        get() = if (totalHits > 0) (countGreat * 6.0 + countOk * 2 + countMeh) / (totalHits * 6) else 1.0
 
     /**
      * The total hits that can be done in the beatmap.
