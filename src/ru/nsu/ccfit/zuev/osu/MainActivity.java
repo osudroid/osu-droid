@@ -736,7 +736,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        Scene scene = GlobalManager.getInstance().getEngine().getScene();
+        Scene currentScene = GlobalManager.getInstance().getEngine().getScene();
 
         if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
             return true;
@@ -744,69 +744,63 @@ public class MainActivity extends BaseGameActivity implements
 
         var gameScene = GlobalManager.getInstance().getGameScene();
 
-        if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
-            if (gameScene.isLoading()) {
-                gameScene.cancelLoading();
-                return true;
+        if (gameScene != null && currentScene == gameScene.getScene() &&
+                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (gameScene.isPaused()) {
+                gameScene.resume();
+            } else {
+                gameScene.pause();
             }
-
-            if (scene == gameScene.getScene()) {
-                if (gameScene.isPaused()) {
-                    gameScene.resume();
-                } else {
-                    gameScene.pause();
-                }
-                return true;
-            }
-        }
-        if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
-                && scene == GlobalManager.getInstance().getScoring().getScene()) {
-            GlobalManager.getInstance().getScoring().back();
             return true;
         }
+
+        var scoringScene = GlobalManager.getInstance().getScoring();
+
+        if (scoringScene != null && keyCode == KeyEvent.KEYCODE_BACK && currentScene == scoringScene.getScene()) {
+            scoringScene.back();
+            return true;
+        }
+
+        var songMenu = GlobalManager.getInstance().getSongMenu();
+
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
-                && GlobalManager.getInstance().getEngine() != null
-                && GlobalManager.getInstance().getSongMenu() != null
-                && scene == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
-                    GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
-                GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
+                && songMenu != null && currentScene == songMenu.getScene() && songMenu.getScene().hasChildScene()) {
+            var searchBar = songMenu.getSearchBar();
+
+            if (searchBar != null && songMenu.getScene().getChildScene() == searchBar.getScene()) {
+                searchBar.hideMenu();
             }
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.INSTANCE) {
+            if (songMenu.getScene().getChildScene() == ModMenu.INSTANCE) {
                 ModMenu.INSTANCE.back();
             }
 
             return true;
         }
-        if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
-                && keyCode == KeyEvent.KEYCODE_MENU
-                && scene == GlobalManager.getInstance().getSongMenu().getScene()
-                && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
-            GlobalManager.getInstance().getSongMenu().stopScroll(0);
-            GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
+
+        if (songMenu != null && keyCode == KeyEvent.KEYCODE_MENU
+                && currentScene == songMenu.getScene() && !songMenu.getScene().hasChildScene()) {
+            songMenu.stopScroll(0);
+            songMenu.showPropertiesMenu(null);
             return true;
         }
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
-                    scene == GlobalManager.getInstance().getSongMenu().getScene()) {
 
+        if (keyCode == KeyEvent.KEYCODE_BACK && songMenu != null) {
+            if (currentScene == songMenu.getScene()) {
                 //SongMenu 界面按返回按钮（系统按钮）
-                GlobalManager.getInstance().getSongMenu().back();
+                songMenu.back();
             } else {
-
-                if (scene instanceof LoadingScreen.LoadingScene || scene instanceof GameLoaderScene) {
+                if (currentScene instanceof LoadingScreen.LoadingScene) {
                     return true;
                 }
 
                 if (Multiplayer.isMultiplayer) {
-                    if (scene == LobbyScene.INSTANCE) {
+                    if (currentScene == LobbyScene.INSTANCE) {
                         LobbyScene.INSTANCE.back();
                         return true;
                     }
 
-                    if (scene == RoomScene.INSTANCE) {
+                    if (currentScene == RoomScene.INSTANCE) {
 
                         if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
                             ModMenu.INSTANCE.back();
@@ -815,6 +809,13 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
                         return true;
                     }
+                } else if (currentScene instanceof GameLoaderScene) {
+                    if (gameScene != null) {
+                        gameScene.cancelLoading();
+                    }
+
+                    engine.setScene(songMenu.getScene());
+                    return true;
                 }
 
                 GlobalManager.getInstance().getMainScene().showExitDialog();

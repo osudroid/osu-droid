@@ -202,10 +202,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 
-    override fun toString() = buildString {
-        append(super.toString())
-
-        if (isRelevant) {
+    override val extraInformation: String
+        get() {
             val settings = mutableListOf<String>()
 
             if (cs != null) {
@@ -224,9 +222,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
                 settings += "HP%.1f".format(hp)
             }
 
-            append(" (${settings.joinToString(", ")})")
+            return settings.joinToString(", ")
         }
-    }
 
     override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp)
 }

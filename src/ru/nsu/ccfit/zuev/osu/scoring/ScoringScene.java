@@ -6,6 +6,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
+import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
@@ -327,9 +328,11 @@ public class ScoringScene {
                 continue;
             }
 
-            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(mod.getTextureName()));
+            var modIcon = new ModIcon(mod);
+            modIcon.setPosition(modX, modY);
+            modIcon.setSize(68, 66);
             modX -= 30;
-            scene.attachChild(modSprite);
+            scene.attachChild(modIcon);
         }
 
         String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";

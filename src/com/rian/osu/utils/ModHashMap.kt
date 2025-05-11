@@ -305,6 +305,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             ModNoFail(),
             ModHardRock(),
             ModMirror(),
+            ModRandom(),
             ModHidden(),
             ModTraceable(),
             ModFlashlight(),
@@ -317,6 +318,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             ModReallyEasy(),
             ModPerfect(),
             ModSuddenDeath(),
+            ModMuted(),
             ModSynesthesia(),
             ModScoreV2(),
             ModReplayV6()

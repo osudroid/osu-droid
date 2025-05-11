@@ -64,9 +64,9 @@ open class Container : ExtendedEntity() {
         this@Container.detachChild(this@unaryMinus)
     }
 
-    operator fun <T : IEntity> get(index: Int): T {
+    operator fun <T : IEntity> get(index: Int): T? {
         @Suppress("UNCHECKED_CAST")
-        return getChild(index) as T
+        return getChild(index) as? T
     }
 
     operator fun set(index: Int, entity: IEntity) {

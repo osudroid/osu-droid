@@ -27,7 +27,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     protected open val difficultyAdjustmentMods = setOf(
         ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
         ModMirror::class, ModHardRock::class, ModHidden::class, ModFlashlight::class,
-        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class
+        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class, ModRandom::class
     )
 
     /**
@@ -199,7 +199,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         /**
          * The epoch time of the last change to the difficulty calculator, in milliseconds.
          */
-        const val VERSION = 1741359220000
+        const val VERSION = 1746800175000
     }
 }
 

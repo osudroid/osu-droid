@@ -167,9 +167,20 @@ sealed class Mod {
         return result
     }
 
-    override fun toString(): String {
-        return acronym
+    final override fun toString() = buildString {
+        append(acronym)
+
+        val extendedInformation = extraInformation
+
+        if (extendedInformation.isNotEmpty()) {
+            append(" ($extendedInformation)")
+        }
     }
+
+    /**
+     * Extra information to be appended to the [toString] representation of this [Mod].
+     */
+    protected open val extraInformation = ""
 
     /**
      * Creates a deep copy of this [Mod].

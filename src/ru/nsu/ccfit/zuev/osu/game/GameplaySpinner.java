@@ -300,7 +300,7 @@ public class GameplaySpinner extends GameObject {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
             //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
                float angle = (rotations + dfill / 4f) * 360;
                float pX = position.x + 50 * (float)Math.sin(angle);
                float pY = position.y + 50 * (float)Math.cos(angle);
@@ -400,16 +400,24 @@ public class GameplaySpinner extends GameObject {
         }
 
         spinnerSpinSample.setLooping(true);
+
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            float volume = muted.volumeAt(stat.getCombo());
+
+            spinnerSpinSample.setVolume(volume);
+            spinnerBonusSample.setVolume(volume);
+        }
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {
+        if (obtainedScore > 0) {
+            listener.playHitSamples(hitSamples);
+        }
+
         for (int i = 0; i < hitSamples.length; ++i) {
             var sample = hitSamples[i];
-
-            if (obtainedScore > 0) {
-                sample.play();
-            }
-
             sample.reset();
             GameplayHitSampleInfo.pool.free(sample);
         }

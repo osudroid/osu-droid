@@ -29,7 +29,7 @@ sealed class ModSetting<V>(
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
      */
-    var defaultValue: V
+    open var defaultValue: V
 
 ) : ReadWriteProperty<Any?, V> {
 
@@ -69,19 +69,58 @@ sealed class RangeConstrainedModSetting<V>(
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    val minValue: V,
+    minValue: V,
 
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    val maxValue: V,
+    maxValue: V,
 
     /**
      * The step size for the value of this [RangeConstrainedModSetting].
      */
-    val step: V,
+    step: V,
 
 ) : ModSetting<V>(name, valueFormatter, defaultValue) {
+    /**
+     * The minimum value of this [RangeConstrainedModSetting].
+     */
+    open var minValue = minValue
+        set(value) {
+            if (field != value) {
+                field = value
+
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    /**
+     * The maximum value of this [RangeConstrainedModSetting].
+     */
+    open var maxValue = maxValue
+        set(value) {
+            if (field != value) {
+                field = value
+
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    /**
+     * The step size for the value of this [RangeConstrainedModSetting].
+     */
+    open var step = step
+        set(value) {
+            if (field != value) {
+                field = value
+
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
     override var value
         get() = super.value
         set(value) {
@@ -98,6 +137,68 @@ sealed class RangeConstrainedModSetting<V>(
 //endregion
 
 
+open class IntegerModSetting(
+    name: String,
+    valueFormatter: (Int) -> String = { it.toString() },
+    defaultValue: Int,
+    minValue: Int = Int.MIN_VALUE,
+    maxValue: Int = Int.MAX_VALUE,
+    step: Int = 1
+) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            if (value !in minValue..maxValue) {
+                throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
+            }
+
+            super.defaultValue = value
+        }
+
+    override var minValue
+        get() = super.minValue
+        set(value) {
+            if (value > maxValue) {
+                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
+            }
+
+            super.minValue = value
+        }
+
+    override var maxValue
+        get() = super.maxValue
+        set(value) {
+            if (value < minValue) {
+                throw IllegalArgumentException("maxValue cannot be less than minValue.")
+            }
+
+            super.maxValue = value
+        }
+
+    override var step
+        get() = super.step
+        set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("step cannot be less than 0.")
+            }
+
+            super.step = value
+        }
+
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+    }
+
+    override fun processValue(value: Int) = when {
+        value < minValue -> minValue
+        value > maxValue -> maxValue
+        step == 0 -> value
+        else -> (round((value - minValue) / step.toFloat()) * step + minValue).roundToInt()
+    }
+}
+
 open class FloatModSetting(
     name: String,
     valueFormatter: (Float) -> String = { it.toString() },
@@ -111,7 +212,7 @@ open class FloatModSetting(
      *
      * When set to `null`, the value will not be rounded.
      */
-    val precision: Int? = null
+    precision: Int? = null
 
 ) : RangeConstrainedModSetting<Float>(
     name,
@@ -121,14 +222,70 @@ open class FloatModSetting(
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
     if (precision != null) step.preciseRoundBy(precision) else step
 ) {
-    init {
-        require(this.minValue <= this.maxValue) { "minValue must be less than or equal to maxValue." }
-        require(this.step >= 0f) { "step must be greater than or equal to 0." }
-        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+    override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            if (value !in minValue..maxValue) {
+                throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
+            }
 
-        require(this.defaultValue in this.minValue..this.maxValue) {
-            "defaultValue must be between minValue and maxValue."
+            super.defaultValue = value
         }
+
+    override var minValue
+        get() = super.minValue
+        set(value) {
+            if (value > maxValue) {
+                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
+            }
+
+            super.minValue = value
+        }
+
+    override var maxValue
+        get() = super.maxValue
+        set(value) {
+            if (value < minValue) {
+                throw IllegalArgumentException("maxValue cannot be less than minValue.")
+            }
+
+            super.maxValue = value
+        }
+
+    override var step
+        get() = super.step
+        set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("step cannot be less than 0.")
+            }
+
+            super.step = value
+        }
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    var precision = precision
+        set(value) {
+            if (value != null && value < 0) {
+                throw IllegalArgumentException("precision must be greater than or equal to 0.")
+            }
+
+            field = value
+
+            if (value != null) {
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+        require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
     }
 
     override fun processValue(value: Float) = when {
@@ -138,6 +295,7 @@ open class FloatModSetting(
 
         else -> {
             val value = round((value - minValue) / step) * step + minValue
+            val precision = precision
 
             if (precision != null) value.preciseRoundBy(precision) else value
         }
@@ -157,7 +315,7 @@ open class NullableFloatModSetting(
      *
      * When set to `null`, the value will not be rounded.
      */
-    val precision: Int? = null
+    precision: Int? = null
 
 ) : RangeConstrainedModSetting<Float?>(
     name,
@@ -167,12 +325,83 @@ open class NullableFloatModSetting(
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
     if (precision != null) step.preciseRoundBy(precision) else step,
 ) {
+    override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            if (value != null && value !in minValue!!..maxValue!!) {
+                throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
+            }
+
+            super.defaultValue = value
+        }
+
+    override var minValue
+        get() = super.minValue
+        set(value) {
+            if (value == null) {
+                throw IllegalArgumentException("minValue cannot be null.")
+            }
+
+            if (value > maxValue!!) {
+                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
+            }
+
+            super.minValue = value
+        }
+
+    override var maxValue
+        get() = super.maxValue
+        set(value) {
+            if (value == null) {
+                throw IllegalArgumentException("maxValue cannot be null.")
+            }
+
+            if (value < minValue!!) {
+                throw IllegalArgumentException("maxValue cannot be less than minValue.")
+            }
+
+            super.maxValue = value
+        }
+
+    override var step
+        get() = super.step
+        set(value) {
+            if (value == null) {
+                throw IllegalArgumentException("step cannot be null.")
+            }
+
+            if (value < 0) {
+                throw IllegalArgumentException("step cannot be less than 0.")
+            }
+
+            super.step = value
+        }
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    var precision = precision
+        set(value) {
+            if (value != null && value < 0) {
+                throw IllegalArgumentException("precision must be greater than or equal to 0.")
+            }
+
+            field = value
+
+            if (value != null) {
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
     init {
-        require(this.minValue!! <= this.maxValue!!) { "minValue must be less than or equal to maxValue." }
-        require(this.step!! >= 0f) { "step must be greater than or equal to 0." }
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
         require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
 
-        require(this.defaultValue == null || this.defaultValue!! in this.minValue..this.maxValue) {
+        require(defaultValue == null || defaultValue in minValue..maxValue) {
             "defaultValue must be between minValue and maxValue."
         }
     }
@@ -184,7 +413,11 @@ open class NullableFloatModSetting(
         step == 0f -> value
 
         else -> {
-            val value = round((value - minValue) / step!!) * step + minValue
+            val minValue = minValue!!
+            val step = step!!
+            val precision = precision
+
+            val value = round((value - minValue) / step) * step + minValue
 
             if (precision != null) value.preciseRoundBy(precision) else value
         }

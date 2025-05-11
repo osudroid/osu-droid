@@ -222,6 +222,10 @@ open class TextButton : Button() {
         +content
     }
 
+    override fun onEnableStateChange() {
+        clearModifiers(ModifierType.Alpha)
+        fadeTo(if (isEnabled) 1f else 0.5f, 0.2f)
+    }
 }
 
 open class IconButton : Button() {

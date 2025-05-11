@@ -33,6 +33,22 @@ class HitObjectGenerationUtilsTest {
         }
     }
 
+    @Test
+    fun `Test flip slider in place horizontally`() {
+        val slider = createSlider()
+
+        HitObjectGenerationUtils.flipSliderInPlaceHorizontally(slider)
+
+        slider.apply {
+            Assert.assertEquals(Vector2(100, 100), position)
+            Assert.assertEquals(Vector2(100, 100), head.position)
+            Assert.assertEquals(Vector2(0, 100), nestedHitObjects[1].position)
+            Assert.assertEquals(Vector2(-100, 100), endPosition)
+            Assert.assertEquals(Vector2(-100, 100), tail.position)
+            Assert.assertEquals(Vector2(-200, 0), path.controlPoints[1])
+        }
+    }
+
     private fun createSlider() = Slider(
         0.0, Vector2(100, 100), 0, SliderPath(
             SliderPathType.Linear, listOf(Vector2(0), Vector2(200, 0)), 200.0

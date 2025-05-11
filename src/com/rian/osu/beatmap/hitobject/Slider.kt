@@ -447,12 +447,20 @@ class Slider(
 
         head.position = position
         tail.position = endPosition
+
+        for (i in 1 until nestedHitObjects.size - 1) {
+            val nestedHitObject = nestedHitObjects[i]
+            val progress = (nestedHitObject.startTime - startTime) / duration
+
+            nestedHitObject.position = position + curvePositionAt(progress)
+        }
     }
 
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
+        screenSpaceGameplayStackedEndPositionCache.invalidate()
     }
 
     private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {

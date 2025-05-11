@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.gameplay.GameplayHitSampleInfo;
+
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -42,4 +44,6 @@ public interface GameObjectListener {
     void onTrackingSliders(boolean isTrackingSliders);
 
     void onUpdatedAutoCursor(float pX, float pY);
+
+    void playHitSamples(GameplayHitSampleInfo[] samples);
 }

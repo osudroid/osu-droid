@@ -34,6 +34,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
@@ -45,6 +46,7 @@ public class GameplaySlider extends GameObject {
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private Scene scene;
+    private StatisticV2 stat;
     private GameObjectListener listener;
     private SliderPath path;
     private double elapsedSpanTime;
@@ -162,11 +164,13 @@ public class GameplaySlider extends GameObject {
         sliderWhistleSample = new GameplaySequenceHitSampleInfo();
     }
 
-    public void init(final GameObjectListener listener, final Scene scene, final Slider beatmapSlider,
-                     final BeatmapControlPoints controlPoints, final float secPassed, final RGBColor comboColor,
-                     final RGBColor borderColor, final SliderPath sliderPath, final LinePath renderPath) {
+    public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
+                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
+                     final RGBColor comboColor, final RGBColor borderColor, final SliderPath sliderPath,
+                     final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
+        this.stat = stat;
         this.beatmapSlider = beatmapSlider;
         this.controlPoints = controlPoints;
 
@@ -264,7 +268,7 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
@@ -500,7 +504,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
 
             // If the animation is enabled, at this point it will be still animating.
@@ -597,6 +601,7 @@ public class GameplaySlider extends GameObject {
                         bodyColor, GameObjectListener.SLIDER_REPEAT, isTracking);
             }
 
+            updateSlidingSamplesVolume();
             currentNestedObjectIndex++;
         }
 
@@ -648,6 +653,7 @@ public class GameplaySlider extends GameObject {
                 // slider tick judgements in this span to be skipped. Ensure that all slider ticks in the current
                 // span has been judged before proceeding to the next span.
                 judgeSliderTicks();
+                updateSlidingSamplesVolume();
 
                 onSpanFinish();
             }
@@ -719,7 +725,7 @@ public class GameplaySlider extends GameObject {
                     followCircle.detachSelf();
 
                     // When hidden mod is enabled, the follow circle is the last object to finish animating.
-                    if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+                    if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
                         poolObject();
                     }
                 });
@@ -742,14 +748,14 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && elapsedSpanTime >= 0 && inPosition) {
+            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
                 return true;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return true;
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return true;
             }
         }
@@ -768,14 +774,14 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && elapsedSpanTime >= 0 && inPosition) {
+            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
                 return 0;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return listener.downFrameOffset(i);
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return 0;
             }
         }
@@ -909,13 +915,14 @@ public class GameplaySlider extends GameObject {
         updateTracking(isTracking);
 
         judgeSliderTicks();
+        updateSlidingSamplesVolume();
 
         // Setting position of ball and follow circle
         followCircle.setPosition(ballPos.x, ballPos.y);
         ball.setPosition(ballPos.x, ballPos.y);
         ball.setRotation(ballAngle);
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             listener.updateAutoBasedPos(ballPos.x, ballPos.y);
         }
 
@@ -974,6 +981,7 @@ public class GameplaySlider extends GameObject {
                     false, bodyColor, GameObjectListener.SLIDER_START, true);
         }
 
+        updateSlidingSamplesVolume();
         currentNestedObjectIndex++;
 
         // When the head is hit late:
@@ -1074,7 +1082,7 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
             var isPressed = listener.isMouseDown(i);
 
-            if (GameHelper.isAutopilotMod() && isPressed) {
+            if (GameHelper.isAutopilot() && isPressed) {
                 return true;
             }
 
@@ -1195,7 +1203,7 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 
@@ -1259,14 +1267,12 @@ public class GameplaySlider extends GameObject {
 
         sliderSlideSample.setLooping(true);
         sliderWhistleSample.setLooping(true);
+
+        updateSlidingSamplesVolume();
     }
 
     private void playCurrentNestedObjectHitSound() {
-        var samples = nestedHitSamples[currentNestedObjectIndex];
-
-        for (int i = 0; i < samples.length; ++i) {
-            samples[i].play();
-        }
+        listener.playHitSamples(nestedHitSamples[currentNestedObjectIndex]);
     }
 
     @Override
@@ -1283,6 +1289,17 @@ public class GameplaySlider extends GameObject {
     private void stopSlidingSamples() {
         sliderSlideSample.stop();
         sliderWhistleSample.stop();
+    }
+
+    private void updateSlidingSamplesVolume() {
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            float volume = muted.volumeAt(stat.getCombo());
+
+            sliderSlideSample.setVolume(volume);
+            sliderWhistleSample.setVolume(volume);
+        }
     }
 
     private boolean isTracking() {

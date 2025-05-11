@@ -15,6 +15,7 @@ public class BassSoundProvider {
 
     private int sample = 0;
     private int channel = 0;
+    private float volume = 1;
     private boolean looping;
 
     /**
@@ -62,6 +63,7 @@ public class BassSoundProvider {
             return;
         }
 
+        this.volume = volume;
         float finalVolume = volume * Config.getSoundVolume();
 
         if (finalVolume == 0) {
@@ -134,6 +136,17 @@ public class BassSoundProvider {
         applyAudioEffectsToChannel();
     }
 
+    public void setVolume(float volume) {
+        // Prevent redundant processing when state is already correct.
+        if (this.volume == volume) {
+            return;
+        }
+
+        this.volume = volume;
+
+        applyAudioEffectsToChannel();
+    }
+
     private void applyAudioEffectsToSample() {
         if (sample == 0) {
             return;
@@ -159,6 +172,7 @@ public class BassSoundProvider {
             BASS.BASS_ChannelFlags(channel, 0, BASS.BASS_SAMPLE_LOOP);
         }
 
+        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume * Config.getSoundVolume());
         BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, sampleInfo.freq * frequency);
     }
 }

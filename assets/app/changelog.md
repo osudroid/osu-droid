@@ -1,116 +1,82 @@
-Version 1.8.3.1
-===============
-
-# Additions
-
-- Added support for osu!lazer's perfect curve sliders with more than 3 control points <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Such sliders will be parsed as Bézier sliders.
-
-# Changes
-
-- Always show HUD back button regardless of hide gameplay UI setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Display leaderboard, unstable rate counter, average offset counter, and hit error meter in default HUD <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-# Bug Fixes
-
-- Fix Traceable mod being displayed as SU instead of TC <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix hide gameplay UI setting not working <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix "show scoreboard" setting in mod menu not working <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix presses in Autopilot mod not being counted towards taps per second counter <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix inherited blending not using the blending function of an entity's parent <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fix gameplay music potentially starting one frame late <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix gameplay progression potentially going backwards when music has not started <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix team VS score potentially being saved and uploaded as solo score in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix slider path anchor coordinates being parsed into integer instead of decimal for osu!lazer exported beatmaps <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - osu!lazer exports these coordinates to decimals, so the current decoding logic will invalidate such sliders.
-  - I'm not sure if the coordinates are supposed to be exported in decimals, since osu!stable appears to decode such
-    beatmaps successfully but truncates the coordinates after import.
-- Fix hitobject position coordinates being parsed into integer instead of decimal for osu!lazer exported beatmaps <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - osu!lazer supports decimal coordinates, but truncates them when exporting for compatibility with osu!stable (`.osz`).
-    However, during import, it does not truncate the coordinates in v128 beatmaps or later. This change adds support for
-    such beatmaps.
-
-# Removals
-
-- Remove memory usage counter in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This only affects test clients.
-
-Version 1.8.3
+Version 1.8.4
 =============
 
 # Additions
 
-- Add snaking out sliders setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Add gameplay HUD editor <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span> 
-  - For the time being, the editor only allows you to resize and rescale elements. More elements and operations will be
-    added in the future (divide and conquer, as they say).
-  - The HUD settings are saved in `skin.json` under the `HUD` property.
-- Add hit judgement result specific colors to hit error meter indicators <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Add vibration feedback on hitobject hit <span style="font-size: 0.75em">by [Acivev](https://github.com/Acivev)</span>
-  - This can be managed under the `Input` category in options
-- Add Traceable (TC) mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Only shows approach circles, slider body borders, slider ticks, and slider repeat arrows
-  - Incompatible with the Hidden (HD) mod
-  - Current score multiplier is 1.06
-  - Impacts star rating (and therefore performance points) for osu!droid star rating system and performance points for
-    osu!standard star rating system
-  - Mod icon can be skinned with `selection-mod-traceable`
+- Add mod preset <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+  - Can be used to save and quickly switch between different mod configurations.
+- Add ability to customize redesigned user interfaces' theme via `skin.json` <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Add Wind Down mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Slows the game down as gameplay progresses.
+  - Initial and final speed can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-winddown`.
+- Add Wind Up mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Speeds the game up as gameplay progresses.
+  - Initial and final speed can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-windup`.
+- Add Mirror mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Flips hit objects vertically or horizontally.
+  - Can be configured in the mod menu. 
+  - Mod icon is skinnable with `selection-mod-mirror`.
+- Add Synesthesia mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Colors hit objects based on their rhythm.
+  - Mod icon is skinnable with `selection-mod-synesthesia`.
+- Add Random mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Randomizes the position of hit objects.
+  - A custom seed can be provided in the mod menu to ensure the same randomization in the same beatmap.
+  - Angle sharpness of jumps can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-random`.
+- Add "only fade approach circles" setting to Hidden mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This setting only fades the approach circles of hit objects and nothing else.
+  - Enabling this setting will mark the mod as unranked.
 
 # Changes
 
-- Offset input time with audio time instead of frame time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This only applies when you have the `Fix frame offset` setting enabled. Theoretically, this setting should be
-    removed (and enabled by default) to enforce the proper offset in input time. However, due to numerous feedbacks,
-    this option has been kept.
-- Optimize cursor animation performance during gameplay <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Hide beatmap count of default beatmap collection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Cycle between score online beatmap leaderboard - pp online beatmap leaderboard - local beatmap leaderboard in
-  leaderboard switcher button <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Replace the Precise (PR) default mod icon <span style="font-size: 0.75em">by [Acivev](https://github.com/Acivev)</span>
-- Optimize difficulty calculation by only calculating necessary skills <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Improve hit error meter readability <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-  - The hit error area is now slightly transparent to give a better visibility for hit error indicators.
-- Stretch game surface to fullscreen <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-  - This is an attempt to fix an (abnormally) large blank area in some devices. This area restriction is provided by
-    Android and is called the **cutout area**.
-  - This means that the game will **also render in the display's cutout area (i.e., front camera notches)**. This is
-    intended for now and is aimed to be improved in later versions.
-- Bump difficulty calculator version <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Triggers difficulty calculation across all beatmaps to apply the most recent update and bug fixes towards the
-    algorithm.
+- Rework mod storage system <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span>
+  - Allows for more mods and more expansive mod capabilities, some of them have been demonstrated via the new mods that
+    have been added alongside this release!
+- Redesign mod menu user interface <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span>
+  - With the addition of many more mods, the current mod menu became too cluttered and could not handle them. As such,
+    it has been redesigned to also account for the overall theme of other interfaces.
+- Replace speed modify with Custom Speed mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - As a part of the mod storage system rework, speed modify is now considered an actual mod.
+- Replace forced difficulty statistics with Difficulty Adjust mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - As a part of the mod storage system rework, forced difficulty statistics are now considered an actual mod.
+- Redesign gameplay loading screen <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+  - Now displays epilepsy warning. 
+  - Now includes settings that were removed from the current mod menu, plus additional ones such as beatmap-specific
+    offset.
+- Unify hit object scaling equation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Previously, the scaling of hit objects was inconsistent as it was influenced by the height of the device. This means
+    that under osu!pixels measurement, a hit object may have had a bigger size in some devices compared to others.
+  - Now, the scaling of hit objects is consistent across all devices with respect to osu!pixels measurement.
+  - **This means that circle sizes change in all devices. However, the change has been made to match the new circle sizes
+    to the current ones as close as possible**.
+  - To ensure proper playback and difficulty calculation of replays to this date, a new system mod called "Replay V6"
+    has been added to restore the old scaling equation. This mod cannot be picked by players and is only available for
+    replays.
+- Partially match stacking behavior with osu!stable <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - The previous stacking behavior was wrong for a multitude of reasons, namely:
+    - It does not stack sliders
+    - It is based on the delta time of two objects instead of approach rate, the factor that actually affects
+      readability
+    - Stacking can still apply even when two objects are not in the same position
+  - More importantly, or perhaps the primary driving factor of this change, is because stack offset calculation depends
+    on the device's screen resolution.
+  - These have now been fixed.
+  - Like the previous change, the new Replay V6 mod restores the old stacking behavior.
+- Bump osu!droid skill multipliers <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Increases star rating and performance points of all beatmaps to account for hit object stacking and scale changes.
+- Exclude some accessibility services from accessibility detection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Some system services could not be disabled, but they would prevent the player from playing.
+  - Current excluded services are:
+    - `com.android.systemui`
+    - `com.miui.voiceassist`
 
 # Bug Fixes
 
-- Fix beatmaps completely disappearing after selecting the default beatmap collection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix input dialogs being completely hidden <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fix another potential crash of video playback not supporting custom speed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix wallpaper blending into game surface in some devices <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fix periodic banner swapping breaking after clicking on the banner <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fix osu!standard slider tail generation using legacy last tick rather than actual slider tail <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Affects osu!standard difficulty calculation.
-- Fix classical spinners being able to be spun at 3/4th preempt time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix faulty rhythm grouping comparison in rhythm difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Affects both osu!droid and osu!standard difficulty calculation.
-- Fix slider head judgement in replays set before version 1.8 if the 50 hit window is shorter than the slider's
-  duration <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix slider head, tick, repeat, and tail fade in durations being affected by force AR <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-# Removals
-
-- Remove offset minimalization between beatmap time and audio time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - When beatmap time was offset from audio time by a certain duration, the game would attempt to match with audio time
-    by slowing down or speeding up gameplay. This happened due to differences in frame time and audio time progression.
-  - This has been removed and beatmap time is now equal to audio time.
-- Remove `Low-latency synchronization` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This setting influenced the operation above by reducing the maximum allowable offset when enabled. Since the
-    operation has been removed, this setting is now irrelevant.
-- Remove the following settings as they have been merged with the HUD editor: <span style="font-size: 0.75em">(by [Reco1I](https://github.com/Reco1I))</span>
-  - Progress indicator type
-  - Hit error meter
-  - Show average offset
-  - Show unstable rate
-  - Display real-time PP counter
-- Remove `Hide navigation bar` setting <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-  - This is now enabled by default. 
-- Remove `Global beatmap leaderboard scoring mode` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This has been moved to the leaderboard switcher button.
+- Fix a potential crash when stopping hitsounds during pausing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay space not being clipped <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Now, hit object parts that are outside the gameplay space would not be rendered.
+- Fix circle size conversion in Easy, Really Easy, and Hard Rock mod using wrong scale unit in difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Affects the performance points of scores with these mods applied.

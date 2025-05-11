@@ -36,7 +36,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.8.3.1'
+    def baseline = '1.8.4'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
