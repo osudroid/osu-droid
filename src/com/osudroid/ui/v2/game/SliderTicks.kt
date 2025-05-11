@@ -107,7 +107,7 @@ class SliderTickSprite : ExtendedSprite() {
             )
         )
 
-        if (GameHelper.getHidden()?.onlyFadeApproachCircles != true) {
+        if (GameHelper.isHidden() && !GameHelper.getHidden().onlyFadeApproachCircles) {
             val fadeOutDuration = min(timePreempt - ANIM_DURATION, 1f)
             val fadeOutStartTime = startTime - fadeOutDuration
 
