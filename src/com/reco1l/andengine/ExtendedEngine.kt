@@ -33,6 +33,9 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
 
+    /**
+     * Called when the skin is changed.
+     */
     fun onSkinChange() {
         val scene = scene ?: return
 
@@ -47,7 +50,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
     /**
-     * Sets the current theme for the engine's properties.
+     * Called when the theme is changed.
      */
     fun onThemeChange(theme: Theme) {
         val scene = scene ?: return
@@ -89,6 +92,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         return scene.propagateKeyPress(keyCode, event)
     }
+
 
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {
 
