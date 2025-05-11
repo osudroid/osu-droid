@@ -1477,13 +1477,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             metronome.update(elapsedTime, activeTimingPoint);
 
             if (mutedMod != null) {
-                metronome.setVolume(mutedMod.volumeAt(stat.getCombo()));
+                metronome.setVolume(1 - mutedMod.volumeAt(stat.getCombo()));
             }
         }
 
         if (musicStarted && mutedMod != null) {
             GlobalManager.getInstance().getSongService().setVolume(
-                Config.getBgmVolume() * (1 - mutedMod.volumeAt(stat.getCombo()))
+                Config.getBgmVolume() * mutedMod.volumeAt(stat.getCombo())
             );
         }
 
@@ -2100,7 +2100,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var muted = GameHelper.getMuted();
 
         if (muted != null && muted.affectsHitSounds()) {
-            volume = 1 - muted.volumeAt(stat.getCombo());
+            volume = muted.volumeAt(stat.getCombo());
         }
 
         for (int i = 0; i < samples.length; ++i) {

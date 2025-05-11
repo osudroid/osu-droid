@@ -79,7 +79,7 @@ class ModMuted : Mod() {
     fun volumeAt(combo: Int): Float {
         val volume = (combo / max(1f, muteComboCount.toFloat())).coerceIn(0f, 1f)
 
-        return if (inverseMuting) 1 - volume else volume
+        return if (inverseMuting) volume else 1 - volume
     }
 
     override fun copySettings(settings: JSONObject) {

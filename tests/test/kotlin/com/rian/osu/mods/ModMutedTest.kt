@@ -41,7 +41,7 @@ class ModMutedTest {
 
             Assert.assertEquals(1f, volumeAt(-1), 1e-2f)
             Assert.assertEquals(1f, volumeAt(0), 1e-2f)
-            Assert.assertEquals(0.25f, volumeAt(25), 1e-2f)
+            Assert.assertEquals(0.75f, volumeAt(25), 1e-2f)
             Assert.assertEquals(0f, volumeAt(100), 1e-2f)
             Assert.assertEquals(0f, volumeAt(150), 1e-2f)
 
