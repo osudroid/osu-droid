@@ -136,6 +136,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         index = 0
         elapsedTime = 0f
         frequency = 1f
+        volume = 1f
         isLooping = false
         hasSamplePlaying = false
     }

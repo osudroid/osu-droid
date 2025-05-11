@@ -74,6 +74,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
 
     override fun reset() {
         frequency = 1f
+        volume = 1f
         isLooping = false
         sampleInfo = null
         soundProvider = null
