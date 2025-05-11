@@ -15,6 +15,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
+    private static float originalTimePreempt = 0;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static ModHidden hidden;
@@ -54,6 +55,14 @@ public class GameHelper {
 
     public static void setOverallDifficulty(final float overallDifficulty) {
         GameHelper.overallDifficulty = overallDifficulty;
+    }
+
+    public static float getOriginalTimePreempt() {
+        return originalTimePreempt;
+    }
+
+    public static void setOriginalTimePreempt(final float originalTimePreempt) {
+        GameHelper.originalTimePreempt = originalTimePreempt;
     }
 
     /**

@@ -50,6 +50,7 @@ import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -551,6 +552,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
         GameHelper.setSpeedMultiplier(playableBeatmap.speedMultiplier);
+
+        GameHelper.setOriginalTimePreempt((float) BeatmapDifficulty.difficultyRange(
+            playableBeatmap.getDifficulty().getAr(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ));
 
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
