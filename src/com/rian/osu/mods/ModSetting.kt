@@ -121,14 +121,6 @@ sealed class RangeConstrainedModSetting<V>(
             }
         }
 
-    init {
-        // Re-set to enforce any constraints
-        this.defaultValue = defaultValue
-        this.minValue = minValue
-        this.maxValue = maxValue
-        this.step = step
-    }
-
     override var value
         get() = super.value
         set(value) {
@@ -192,6 +184,12 @@ open class IntegerModSetting(
 
             super.step = value
         }
+
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+    }
 
     override fun processValue(value: Int) = when {
         value < minValue -> minValue
@@ -284,8 +282,10 @@ open class FloatModSetting(
         }
 
     init {
-        // Re-set to enforce any constraints
-        this.precision = precision
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+        require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
     }
 
     override fun processValue(value: Float) = when {
@@ -397,8 +397,13 @@ open class NullableFloatModSetting(
         }
 
     init {
-        // Re-set to enforce any constraints
-        this.precision = precision
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+
+        require(defaultValue == null || defaultValue in minValue..maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
     }
 
     override fun processValue(value: Float?) = when {
