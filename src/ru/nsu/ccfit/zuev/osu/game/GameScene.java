@@ -1446,8 +1446,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
-                gameplaySlider.init(this, mgScene, parsedSlider, playableBeatmap.getControlPoints(), elapsedTime,
-                    comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
+                gameplaySlider.init(this, mgScene, stat, parsedSlider, playableBeatmap.getControlPoints(),
+                        elapsedTime, comboColor, sliderBorderColor, getSliderPath(sliderIndex),
+                        getSliderRenderPath(sliderIndex));
 
                 ++sliderIndex;
                 addObject(gameplaySlider);
