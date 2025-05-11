@@ -32,6 +32,7 @@ public class GameHelper {
     private static ModScoreV2 scoreV2;
     private static ModEasy easy;
     private static ModMuted muted;
+    private static ModFreezeFrame freezeFrame;
     private static boolean isKiai = false;
     private static ModAutoplay autoplay;
     private static double beatLength = 0;
@@ -291,6 +292,18 @@ public class GameHelper {
 
     public static void setMuted(final ModMuted muted) {
         GameHelper.muted = muted;
+    }
+
+    public static ModFreezeFrame getFreezeFrame() {
+        return freezeFrame;
+    }
+
+    public static boolean isFreezeFrame() {
+        return freezeFrame != null;
+    }
+
+    public static void setFreezeFrame(final ModFreezeFrame freezeFrame) {
+        GameHelper.freezeFrame = freezeFrame;
     }
 
     public static ModScoreV2 getScoreV2() {
