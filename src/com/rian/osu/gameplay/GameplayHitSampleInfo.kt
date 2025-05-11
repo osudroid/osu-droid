@@ -30,7 +30,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
         set(value) {
             field = value
 
-            soundProvider?.setVolume(value)
+            soundProvider?.setVolume(getFinalVolume(value))
         }
 
     private var sampleInfo: HitSampleInfo? = null
@@ -65,7 +65,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             return
         }
 
-        soundProvider?.play(volume * max(0.05f, sampleInfo!!.volume / 100f))
+        soundProvider?.play(getFinalVolume(volume))
     }
 
     override fun stop() {
@@ -79,6 +79,8 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
         sampleInfo = null
         soundProvider = null
     }
+
+    private fun getFinalVolume(volume: Float) = volume * max(0.05f, sampleInfo!!.volume / 100f)
 
     companion object {
         /**
