@@ -237,8 +237,17 @@ public class GameplayHitCircle extends GameObject {
     }
 
     private void playHitSamples() {
+        float volume = 1;
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            volume = muted.volumeAt(stat.getCombo());
+        }
+
         for (int i = 0; i < hitSamples.length; ++i) {
-            hitSamples[i].play();
+            var sample = hitSamples[i];
+            sample.setVolume(volume);
+            sample.play();
         }
     }
 
