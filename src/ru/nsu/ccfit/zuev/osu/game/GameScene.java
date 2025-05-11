@@ -1470,15 +1470,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
+        var mutedMod = GameHelper.getMuted();
+
         // 节拍器
         if (metronome != null) {
             metronome.update(elapsedTime, activeTimingPoint);
 
-            var muted = GameHelper.getMuted();
-
-            if (muted != null) {
-                metronome.setVolume(1 - muted.volumeAt(stat.getCombo()));
+            if (mutedMod != null) {
+                metronome.setVolume(1 - mutedMod.volumeAt(stat.getCombo()));
             }
+        }
+
+        if (musicStarted && mutedMod != null) {
+            GlobalManager.getInstance().getSongService().setVolume(
+                Config.getBgmVolume() * (1 - mutedMod.volumeAt(stat.getCombo()))
+            );
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
