@@ -15,6 +15,7 @@ import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
+import com.reco1l.framework.EasingKt;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -55,6 +56,7 @@ public class GameplaySlider extends GameObject {
     private double spanDuration;
     private int completedSpanCount;
     private boolean reverse;
+    private boolean applyIncreasedVisibility;
     private final boolean isSliderBallFlip;
 
     private GameplayHitSampleInfo[][] nestedHitSamples;
@@ -210,7 +212,8 @@ public class GameplaySlider extends GameObject {
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
 
-        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+        applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+        var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -229,7 +232,7 @@ public class GameplaySlider extends GameObject {
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
+        approachCircle.setVisible((!GameHelper.isHidden() && objectScaleTweenMod == null) || applyIncreasedVisibility);
 
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
@@ -350,7 +353,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(secPassed, beatmapSlider);
+        tickContainer.init(secPassed, beatmapSlider, applyIncreasedVisibility);
 
         scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
@@ -404,6 +407,34 @@ public class GameplaySlider extends GameObject {
                     sliderBody.getBlue(), 1f
                 )
             ));
+        }
+
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            float startScale = objectScaleTweenMod.getStartScale() * scale;
+            float endScale = objectScaleTweenMod.getEndScale() * scale;
+
+            headCirclePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            tailCirclePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt, startScale, endScale, null, Easing.OutSine
+            ));
+
+            if (startArrow.hasParent()) {
+                startArrow.registerEntityModifier(Modifiers.scale(
+                    timePreempt, startScale, endScale, null, Easing.OutSine
+                ));
+            }
+
+            if (endArrow.hasParent()) {
+                endArrow.registerEntityModifier(Modifiers.scale(
+                    timePreempt, startScale, endScale, null, Easing.OutSine
+                ));
+            }
+
+            // We scale the slider body in update() instead since its background, border, and hint width is individually
+            // scaled. It would look wrong with an entity modifier.
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -828,6 +859,21 @@ public class GameplaySlider extends GameObject {
                 headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
                 kiai = false;
             }
+        }
+
+        var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            float percentage = FMath.clamp((float) (timePreempt + elapsedSpanTime) / timePreempt, 0, 1);
+
+            float scale = beatmapSlider.getScreenSpaceGameplayScale() * Interpolation.linear(
+                objectScaleTweenMod.getStartScale(),
+                objectScaleTweenMod.getEndScale(),
+                EasingKt.interpolate(Easing.OutSine, percentage)
+            );
+
+            sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+            sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
         }
 
         if (elapsedSpanTime < 0) // we at approach time

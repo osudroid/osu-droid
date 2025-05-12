@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.edlplan.framework.easing.Easing;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -84,6 +85,7 @@ public class GameplayHitCircle extends GameObject {
         }
 
         boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote();
+        var objectScaleTweenMod = GameHelper.getObjectScaleTweeningMod();
 
         circlePiece.setNumberText(comboNum);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
@@ -93,7 +95,7 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
         approachCircle.setAlpha(0.9f * fadeInProgress);
         approachCircle.setPosition(this.position.x, this.position.y);
-        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
+        approachCircle.setVisible((!GameHelper.isHidden() && objectScaleTweenMod == null) || applyIncreasedVisibility);
 
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
@@ -156,6 +158,16 @@ public class GameplayHitCircle extends GameObject {
             }
 
             hitSamples[i] = gameplaySample;
+        }
+
+        if (objectScaleTweenMod != null && !applyIncreasedVisibility) {
+            circlePiece.registerEntityModifier(Modifiers.scale(
+                timePreempt,
+                objectScaleTweenMod.getStartScale() * scale,
+                objectScaleTweenMod.getEndScale() * scale,
+                null,
+                Easing.OutSine
+            ));
         }
 
         scene.attachChild(circlePiece, 0);

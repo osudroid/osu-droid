@@ -81,7 +81,12 @@ public class SliderBody extends Container {
 
 
     public void setBackgroundWidth(float value) {
+        if (backgroundWidth == value) {
+            return;
+        }
+
         backgroundWidth = value;
+        shouldRebuildVertices = true;
     }
 
     public void setBackgroundColor(float r, float g, float b, float a) {
@@ -101,7 +106,12 @@ public class SliderBody extends Container {
     }
 
     public void setHintWidth(float value) {
+        if (hint == null || !hint.isVisible() || hintWidth == value) {
+            return;
+        }
+
         hintWidth = value;
+        shouldRebuildVertices = true;
     }
 
     public void setHintColor(float r, float g, float b, float a) {
@@ -112,7 +122,12 @@ public class SliderBody extends Container {
 
 
     public void setBorderWidth(float value) {
+        if (borderWidth == value) {
+            return;
+        }
+
         borderWidth = value;
+        shouldRebuildVertices = true;
     }
 
     public void setBorderColor(float r, float g, float b) {

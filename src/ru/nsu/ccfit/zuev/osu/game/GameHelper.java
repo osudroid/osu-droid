@@ -32,6 +32,8 @@ public class GameHelper {
     private static ModScoreV2 scoreV2;
     private static ModEasy easy;
     private static ModMuted muted;
+    private static ModGrow grow;
+    private static ModDeflate deflate;
     private static boolean isKiai = false;
     private static ModAutoplay autoplay;
     private static double beatLength = 0;
@@ -291,6 +293,42 @@ public class GameHelper {
 
     public static void setMuted(final ModMuted muted) {
         GameHelper.muted = muted;
+    }
+
+    public static ModGrow getGrow() {
+        return grow;
+    }
+
+    public static boolean isGrow() {
+        return grow != null;
+    }
+
+    public static void setGrow(final ModGrow grow) {
+        GameHelper.grow = grow;
+    }
+
+    public static ModDeflate getDeflate() {
+        return deflate;
+    }
+
+    public static boolean isDeflate() {
+        return deflate != null;
+    }
+
+    public static void setDeflate(final ModDeflate deflate) {
+        GameHelper.deflate = deflate;
+    }
+
+    public static ModObjectScaleTween getObjectScaleTweeningMod() {
+        if (isGrow()) {
+            return grow;
+        }
+
+        if (isDeflate()) {
+            return deflate;
+        }
+
+        return null;
     }
 
     public static ModScoreV2 getScoreV2() {
