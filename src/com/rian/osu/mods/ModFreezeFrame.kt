@@ -4,6 +4,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents the Freeze Frame mod.
@@ -20,6 +21,8 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
         lastNewComboTime = 0.0
 
         for (obj in beatmap.hitObjects.objects) {
+            scope?.ensureActive()
+
             if (obj.isNewCombo) {
                 lastNewComboTime = obj.startTime
             }
