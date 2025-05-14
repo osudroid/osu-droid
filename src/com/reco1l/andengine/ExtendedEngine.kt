@@ -2,6 +2,9 @@ package com.reco1l.andengine
 
 import android.app.Activity
 import android.view.*
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.ui.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions
@@ -9,7 +12,7 @@ import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options), OnApplyWindowInsetsListener {
 
     /**
      * The current focused entity.
@@ -27,42 +30,50 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             }
         }
 
+    /**
+     * The height of the virtual keyboard.
+     */
+    var keyboardHeight = 0
+        private set
+
 
     init {
         Current = this
+
+        ViewCompat.setOnApplyWindowInsetsListener(context.window.decorView, this)
     }
 
 
+    /**
+     * Called when the skin is changed.
+     */
     fun onSkinChange() {
         val scene = scene ?: return
 
-        fun IEntity.updateSkin() {
-            callOnChildren { it.updateSkin() }
-
+        fun IEntity.propagateSkinChange() {
+            callOnChildren { it.propagateSkinChange() }
             if (this is ISkinnable) {
                 onSkinChanged()
             }
         }
 
-        scene.updateSkin()
+        scene.propagateSkinChange()
     }
 
-
     /**
-     * Sets the current theme for the engine's properties.
+     * Called when the theme is changed.
      */
     fun onThemeChange(theme: Theme) {
         val scene = scene ?: return
 
-        fun IEntity.updateTheme() {
-            callOnChildren { it.updateTheme() }
-
+        fun IEntity.propagateThemeChange() {
+            callOnChildren { it.propagateThemeChange() }
             if (this is ExtendedEntity) {
                 onThemeChanged(theme)
             }
         }
 
-        scene.updateTheme()
+        scene.propagateThemeChange()
     }
 
     /**
@@ -70,22 +81,29 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
      */
     fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-        fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        fun IEntity.propagateKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-            for (i in childCount - 1 downTo 0) {
-                if (getChild(i).onKeyPress(keyCode, event)) {
-                    return true
-                }
+            if (this is ExtendedEntity && onKeyPress(keyCode, event)) {
+                return true
             }
 
-            if (this is ExtendedEntity) {
-                onKeyPress(keyCode, event)
+            for (i in childCount - 1 downTo 0) {
+                if (getChild(i).propagateKeyPress(keyCode, event)) {
+                    return true
+                }
             }
             return false
         }
 
-        return scene?.onKeyPress(keyCode, event) == true
+        val scene = scene ?: return false
+
+        if (scene.childScene?.propagateKeyPress(keyCode, event) == true) {
+            return true
+        }
+
+        return scene.propagateKeyPress(keyCode, event)
     }
+
 
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {
 
@@ -100,6 +118,11 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         }
 
         return super.onTouchScene(scene, event)
+    }
+
+    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
+        keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+        return insets
     }
 
 

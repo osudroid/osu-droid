@@ -1,8 +1,17 @@
 package com.reco1l.andengine
 
-import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.util.MathUtils
+import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.util.*
 
+
+private val TEMP_COORDINATES = FloatArray(2)
+
+
+fun Camera.getScreenSpaceCoordinates(x: Float, y: Float): FloatArray {
+    TEMP_COORDINATES[0] = x
+    TEMP_COORDINATES[1] = y
+    return getScreenSpaceCoordinates(TEMP_COORDINATES)
+}
 
 fun Camera.getScreenSpaceCoordinates(coordinates: FloatArray): FloatArray {
 

@@ -1,13 +1,7 @@
 package com.osudroid.data
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
+import com.rian.osu.utils.*
 
 /**
  * Represents a mod preset.
@@ -29,7 +23,15 @@ data class ModPreset(
      */
     @JvmField
     var serializedMods: String
-)
+) {
+
+    /**
+     * The mods that are in this [ModPreset] in deserialized form.
+     */
+    @Ignore
+    lateinit var mods: ModHashMap
+
+}
 
 @Dao
 interface IModPresetDAO {

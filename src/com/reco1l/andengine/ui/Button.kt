@@ -52,6 +52,9 @@ open class Button : LinearContainer() {
             }
         }
 
+
+    private var pressStartTime = 0L
+
     //endregion
 
     //region Actions
@@ -71,7 +74,13 @@ open class Button : LinearContainer() {
      */
     var onActionCancel: (() -> Unit)? = null
 
+    /**
+     * The action to perform when the button is long pressed.
+     */
+    var onActionLongPress: (() -> Unit)? = null
+
     //endregion
+
 
     init {
         padding = Vec4(12f, 16f)
@@ -79,6 +88,7 @@ open class Button : LinearContainer() {
         foreground = BezelOutline(12f)
         background = Box().apply { cornerRadius = 12f }
     }
+
 
     //region Callbacks
 
@@ -129,6 +139,7 @@ open class Button : LinearContainer() {
             event.isActionDown -> {
                 isPressed = true
                 onActionDown?.invoke()
+                pressStartTime = System.currentTimeMillis()
             }
 
             event.isActionUp -> {
@@ -149,6 +160,18 @@ open class Button : LinearContainer() {
         }
 
         return true
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (onActionLongPress != null) {
+            if (isPressed && System.currentTimeMillis() - pressStartTime >= 500L) {
+                onActionLongPress?.invoke()
+                propagateTouchEvent(TouchEvent.ACTION_CANCEL)
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 }

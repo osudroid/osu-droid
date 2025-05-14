@@ -7,7 +7,7 @@ import com.reco1l.framework.*
 import com.rian.osu.utils.*
 import org.anddev.andengine.input.touch.*
 
-class ModsIndicator(val mods: ModHashMap) : LinearContainer() {
+class ModsIndicator(val mods: ModHashMap, val iconSize: Float = 42f) : LinearContainer() {
 
     /**
      * Indicator for the mods.
@@ -21,8 +21,8 @@ class ModsIndicator(val mods: ModHashMap) : LinearContainer() {
 
         for (mod in mods.values) {
             +ModIcon(mod).apply {
-                width = 42f
-                height = 42f
+                width = iconSize
+                height = iconSize
             }
         }
     }
