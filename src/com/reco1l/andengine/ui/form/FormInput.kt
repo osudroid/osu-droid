@@ -33,17 +33,17 @@ open class FormInput(initialValue: String = "") : FormControl<String, TextInput>
 }
 
 open class IntegerFormInput(
-    initialValue: Int,
+    initialValue: Int?,
     val minValue: Int? = -Int.MAX_VALUE,
     val maxValue: Int? = Int.MAX_VALUE
-) : FormInput(initialValue.toString()) {
-    override fun createControl() = IntegerTextInput(defaultValue.toInt(), minValue, maxValue)
+) : FormInput(initialValue?.toString() ?: "") {
+    override fun createControl() = IntegerTextInput(defaultValue.toIntOrNull(), minValue, maxValue)
 }
 
 open class FloatFormInput(
-    initialValue: Float,
+    initialValue: Float?,
     val minValue: Float? = -Float.MAX_VALUE,
     val maxValue: Float? = Float.MAX_VALUE
-) : FormInput(initialValue.toString()) {
-    override fun createControl() = FloatTextInput(defaultValue.toFloat(), minValue, maxValue)
+) : FormInput(initialValue?.toString() ?: "") {
+    override fun createControl() = FloatTextInput(defaultValue.toFloatOrNull(), minValue, maxValue)
 }
