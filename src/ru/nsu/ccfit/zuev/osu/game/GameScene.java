@@ -1517,7 +1517,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             breakPeriods.clear();
             cursorSprites = null;
             playableBeatmap = null;
-            lastMods = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
             sliderPaths = null;
