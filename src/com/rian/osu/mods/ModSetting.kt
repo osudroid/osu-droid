@@ -29,9 +29,14 @@ sealed class ModSetting<V>(
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
      */
-    open var defaultValue: V
+    open var defaultValue: V,
 
-) : ReadWriteProperty<Any?, V> {
+    /**
+     * The position of this [ModSetting] in the mod customization menu.
+     */
+    val orderPosition: Int? = null
+
+) : ReadWriteProperty<Any?, V>, Comparable<ModSetting<*>> {
 
     /**
      * The initial value.
@@ -55,6 +60,15 @@ sealed class ModSetting<V>(
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
         this.value = value
+    }
+
+    override fun compareTo(other: ModSetting<*>) = when {
+        orderPosition == other.orderPosition -> 0
+        // Unordered settings come last (are greater than any ordered settings).
+        orderPosition == null -> 1
+        other.orderPosition == null -> -1
+        // Ordered settings are sorted by their order position.
+        else -> orderPosition.compareTo(other.orderPosition)
     }
 }
 
@@ -81,7 +95,12 @@ sealed class RangeConstrainedModSetting<V>(
      */
     step: V,
 
-) : ModSetting<V>(name, valueFormatter, defaultValue) {
+    /**
+     * The position of this [RangeConstrainedModSetting] in the mod customization menu.
+     */
+    orderPosition: Int? = null
+
+) : ModSetting<V>(name, valueFormatter, defaultValue, orderPosition) {
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
@@ -143,8 +162,9 @@ open class IntegerModSetting(
     defaultValue: Int,
     minValue: Int = Int.MIN_VALUE,
     maxValue: Int = Int.MAX_VALUE,
-    step: Int = 1
-) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    step: Int = 1,
+    orderPosition: Int? = null
+) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
     override var defaultValue
         get() = super.defaultValue
         set(value) {
@@ -212,7 +232,9 @@ open class FloatModSetting(
      *
      * When set to `null`, the value will not be rounded.
      */
-    precision: Int? = null
+    precision: Int? = null,
+
+    orderPosition: Int? = null
 
 ) : RangeConstrainedModSetting<Float>(
     name,
@@ -220,7 +242,8 @@ open class FloatModSetting(
     if (precision != null) defaultValue.preciseRoundBy(precision) else defaultValue,
     if (precision != null) minValue.preciseRoundBy(precision) else minValue,
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
-    if (precision != null) step.preciseRoundBy(precision) else step
+    if (precision != null) step.preciseRoundBy(precision) else step,
+    orderPosition
 ) {
     override var defaultValue
         get() = super.defaultValue
@@ -315,7 +338,9 @@ open class NullableFloatModSetting(
      *
      * When set to `null`, the value will not be rounded.
      */
-    precision: Int? = null
+    precision: Int? = null,
+
+    orderPosition: Int? = null
 
 ) : RangeConstrainedModSetting<Float?>(
     name,
@@ -324,6 +349,7 @@ open class NullableFloatModSetting(
     if (precision != null) minValue.preciseRoundBy(precision) else minValue,
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
     if (precision != null) step.preciseRoundBy(precision) else step,
+    orderPosition
 ) {
     override var defaultValue
         get() = super.defaultValue
@@ -426,5 +452,6 @@ open class NullableFloatModSetting(
 
 open class BooleanModSetting(
     name: String,
-    defaultValue: Boolean
-) : ModSetting<Boolean>(name, null, defaultValue)
+    defaultValue: Boolean,
+    orderPosition: Int? = null
+) : ModSetting<Boolean>(name, null, defaultValue, orderPosition)

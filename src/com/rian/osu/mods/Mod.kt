@@ -89,7 +89,7 @@ sealed class Mod {
             property as KProperty1<Mod, Any?>
             property.isAccessible = true
             property.getDelegate(this) as? ModSetting<Any?>
-        }.also { settingsBacking = it }
+        }.sorted().also { settingsBacking = it }
 
     /**
      * Whether all [ModSetting]s in this [Mod] are set to their default values.
