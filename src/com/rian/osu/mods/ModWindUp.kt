@@ -20,7 +20,8 @@ class ModWindUp : ModTimeRamp() {
         minValue = 0.5f,
         maxValue = 1.95f,
         step = 0.05f,
-        precision = 2
+        precision = 2,
+        orderPosition = 0
     ) {
         override var value
             get() = super.value
@@ -42,7 +43,8 @@ class ModWindUp : ModTimeRamp() {
         minValue = 0.55f,
         maxValue = 2f,
         step = 0.05f,
-        precision = 2
+        precision = 2,
+        orderPosition = 1
     ) {
         override var value
             get() = super.value
