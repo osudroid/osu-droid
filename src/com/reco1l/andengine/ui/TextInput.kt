@@ -226,7 +226,8 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
 
         val currentText = value
         val currentCaretPosition = caretPosition
-        val newText = currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
+        val newText =
+            currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
 
         if (!isTextValid(newText)) {
             notifyInputError()
@@ -235,6 +236,26 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
 
         value = newText
         caretPosition++
+    }
+
+    private fun deleteCharacterAt(position: Int) {
+        if (value.isEmpty()) {
+            return
+        }
+
+        val currentText = value
+
+        val newText =
+            if (position > 0) currentText.substring(0, position - 1) + currentText.substring(position)
+            else currentText.substring(1)
+
+        if (!isTextValid(newText)) {
+            notifyInputError()
+            return
+        }
+
+        value = newText
+        caretPosition = max(0, caretPosition - 1)
     }
 
     private fun notifyInputError() {
@@ -264,10 +285,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
 
             when (keyCode) {
 
-                KEYCODE_DEL -> {
-                    value = value.removeRange(max(0, caretPosition - 1), caretPosition)
-                    caretPosition = max(0, caretPosition - 1)
-                }
+                KEYCODE_DEL -> deleteCharacterAt(caretPosition)
 
                 KEYCODE_ENTER -> {
                     if (confirmOnEnter) {
