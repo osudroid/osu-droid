@@ -186,9 +186,14 @@ private sealed class ModSettingTextInput<V : Number?>(val mod: Mod, override val
     Container(),
     IModSettingComponent<V> {
 
-    abstract val control: FormInput
+    val control = createControl().apply {
+        width = FillParent
+    }
 
-    init { +control }
+    init {
+        width = FillParent
+        +control
+    }
 
     final override fun update() {
         control.label = setting.name
@@ -207,11 +212,12 @@ private sealed class ModSettingTextInput<V : Number?>(val mod: Mod, override val
         }
     }
 
+    abstract fun createControl(): FormInput
     abstract fun convertValue(value: String): V?
 }
 
 private class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettingTextInput<Int>(mod, setting) {
-    override val control = IntegerFormInput(
+    override fun createControl() = IntegerFormInput(
         setting.initialValue,
         (setting as? RangeConstrainedModSetting<Int>)?.minValue,
         (setting as? RangeConstrainedModSetting<Int>)?.maxValue
@@ -221,7 +227,7 @@ private class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : M
 }
 
 private class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : ModSettingTextInput<Float>(mod, setting) {
-    override val control = FloatFormInput(
+    override fun createControl() = FloatFormInput(
         setting.initialValue,
         (setting as? RangeConstrainedModSetting<Float>)?.minValue,
         (setting as? RangeConstrainedModSetting<Float>)?.maxValue
@@ -232,8 +238,7 @@ private class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : M
 
 private class NullableFloatModSettingTextInput(mod: Mod, setting: ModSetting<Float?>) :
     ModSettingTextInput<Float?>(mod, setting) {
-
-    override val control = FloatFormInput(
+    override fun createControl() = FloatFormInput(
         setting.initialValue ?: 0f,
         (setting as? RangeConstrainedModSetting<Float?>)?.minValue,
         (setting as? RangeConstrainedModSetting<Float?>)?.maxValue
