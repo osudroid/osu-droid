@@ -306,3 +306,47 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     }
 
 }
+
+/**
+ * A [TextInput] whose [value] is constrained to a range of values.
+ */
+sealed class RangeConstrainedTextInput<T : Comparable<T>>(
+    initialValue: T,
+
+    /**
+     * The minimum value that can be entered in this [RangeConstrainedTextInput].
+     *
+     * If set to `null`, there is no minimum value.
+     */
+    val minValue: T? = null,
+
+    /**
+     * The maximum value that can be entered in this [RangeConstrainedTextInput].
+     *
+     * If set to `null`, there is no maximum value.
+     */
+    val maxValue: T? = null
+) : TextInput(initialValue.toString()) {
+    override fun isTextValid(text: String): Boolean {
+        // Avoid calling convertValue whenever necessary, in case it is expensive
+        if (!super.isTextValid(text)) {
+            return false
+        }
+
+        if (minValue == null && maxValue == null) {
+            return true
+        }
+
+        val value = convertValue(text)
+
+        return (minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)
+    }
+
+    /**
+     * Converts a value from a [String] to a [T].
+     *
+     * @param value The value to convert.
+     * @return The converted value.
+     */
+    protected abstract fun convertValue(value: String): T
+}
