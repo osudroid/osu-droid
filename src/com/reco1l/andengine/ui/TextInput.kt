@@ -16,7 +16,7 @@ import kotlin.math.*
 import kotlin.synchronized
 import kotlin.text.substring
 
-sealed class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
+open class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
 
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
