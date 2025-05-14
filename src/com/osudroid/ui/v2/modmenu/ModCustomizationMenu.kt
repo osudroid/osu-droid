@@ -181,4 +181,65 @@ private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<
     }
 }
 
+
+private sealed class ModSettingTextInput<V : Number?>(val mod: Mod, override val setting: ModSetting<V>) :
+    Container(),
+    IModSettingComponent<V> {
+
+    abstract val control: FormInput
+
+    init { +control }
+
+    final override fun update() {
+        control.label = setting.name
+        control.defaultValue = setting.defaultValue?.toString() ?: setting.initialValue?.toString() ?: ""
+        control.value = setting.value?.toString() ?: control.defaultValue
+
+        control.valueFormatter = {
+            val value = convertValue(it)
+
+            if (value != null) setting.valueFormatter!!.invoke(value) else control.defaultValue
+        }
+
+        control.onValueChanged = {
+            setting.value = convertValue(it) ?: setting.defaultValue
+            ModMenu.queueModChange(mod)
+        }
+    }
+
+    abstract fun convertValue(value: String): V?
+}
+
+private class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettingTextInput<Int>(mod, setting) {
+    override val control = IntegerFormInput(
+        setting.initialValue,
+        (setting as? RangeConstrainedModSetting<Int>)?.minValue,
+        (setting as? RangeConstrainedModSetting<Int>)?.maxValue
+    )
+
+    override fun convertValue(value: String) = value.toIntOrNull()
+}
+
+private class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : ModSettingTextInput<Float>(mod, setting) {
+    override val control = FloatFormInput(
+        setting.initialValue,
+        (setting as? RangeConstrainedModSetting<Float>)?.minValue,
+        (setting as? RangeConstrainedModSetting<Float>)?.maxValue
+    )
+
+    override fun convertValue(value: String) = value.toFloatOrNull()
+}
+
+private class NullableFloatModSettingTextInput(mod: Mod, setting: ModSetting<Float?>) :
+    ModSettingTextInput<Float?>(mod, setting) {
+
+    override val control = FloatFormInput(
+        setting.initialValue ?: 0f,
+        (setting as? RangeConstrainedModSetting<Float?>)?.minValue,
+        (setting as? RangeConstrainedModSetting<Float?>)?.maxValue
+    )
+
+    override fun convertValue(value: String) = value.toFloatOrNull()
+}
+
 //endregion
