@@ -5,7 +5,6 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -62,7 +61,7 @@ class ModCustomizationMenu : Modal(
         modSettingComponents.fastForEach { it.update() }
     }
 
-    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): Container {
+    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): ModSettingComponent<*, *> {
 
         val component = when (setting) {
             is FloatModSetting ->
@@ -83,6 +82,7 @@ class ModCustomizationMenu : Modal(
 
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
+
         modSettingComponents.add(component)
         component.update()
         return component
@@ -132,155 +132,3 @@ class ModCustomizationMenu : Modal(
         }
     }
 }
-
-
-//region Components
-
-private interface IModSettingComponent<V : Any?> {
-    val setting: ModSetting<V>
-    fun update()
-}
-
-private sealed class ModSettingSlider<V : Number?>(val mod: Mod, override val setting: ModSetting<V>) :
-    FormSlider(setting.initialValue?.toFloat() ?: 0f),
-    IModSettingComponent<V> {
-
-    final override fun update() {
-        label = setting.name
-
-        if (setting is RangeConstrainedModSetting<V>) {
-            val setting = setting as RangeConstrainedModSetting<V>
-            control.min = setting.minValue!!.toFloat()
-            control.max = setting.maxValue!!.toFloat()
-            control.step = setting.step!!.toFloat()
-        }
-
-        defaultValue = setting.defaultValue?.toFloat() ?: 0f
-        value = setting.value?.toFloat() ?: 0f
-        valueFormatter = { setting.valueFormatter!!.invoke(convertValue(it)) }
-        onValueChanged = {
-            setting.value = convertValue(it)
-            ModMenu.queueModChange(mod)
-        }
-    }
-
-    abstract fun convertValue(value: Float): V
-}
-
-private class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModSettingSlider<Int>(mod, setting) {
-    override fun convertValue(value: Float) = value.toInt()
-}
-
-private class NullableIntegerModSettingSlider(mod: Mod, setting: ModSetting<Int?>) :
-    ModSettingSlider<Int?>(mod, setting) {
-    override fun convertValue(value: Float): Int? {
-        val converted = value.toInt()
-
-        return if (converted == setting.defaultValue) null else converted
-    }
-}
-
-private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
-    override fun convertValue(value: Float) = value
-}
-
-private class NullableFloatModSettingSlider(
-    mod: Mod,
-    setting: ModSetting<Float?>
-) : ModSettingSlider<Float?>(mod, setting) {
-    override fun convertValue(value: Float) = if (value == setting.defaultValue) null else value
-}
-
-private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<Boolean>) :
-    FormCheckbox(setting.initialValue),
-    IModSettingComponent<Boolean> {
-
-    override fun update() {
-        label = setting.name
-        defaultValue = setting.defaultValue
-        value = setting.value
-        onValueChanged = {
-            setting.value = it
-            ModMenu.queueModChange(mod)
-        }
-    }
-}
-
-
-private sealed class ModSettingTextInput<V : Number?>(val mod: Mod, override val setting: ModSetting<V>) :
-    Container(),
-    IModSettingComponent<V> {
-
-    val control = createControl().apply {
-        width = FillParent
-    }
-
-    init {
-        width = FillParent
-        +control
-    }
-
-    final override fun update() {
-        control.label = setting.name
-        control.defaultValue = setting.defaultValue?.toString() ?: setting.initialValue?.toString() ?: ""
-        control.value = setting.value?.toString() ?: control.defaultValue
-
-        control.valueFormatter = {
-            val value = convertValue(it)
-
-            if (value != null) setting.valueFormatter!!.invoke(value) else control.defaultValue
-        }
-
-        control.onValueChanged = {
-            setting.value = convertValue(it) ?: setting.defaultValue
-            ModMenu.queueModChange(mod)
-        }
-    }
-
-    abstract fun createControl(): FormInput
-    abstract fun convertValue(value: String): V?
-}
-
-private class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettingTextInput<Int>(mod, setting) {
-    override fun createControl() = IntegerFormInput(
-        setting.initialValue,
-        (setting as? RangeConstrainedModSetting<Int>)?.minValue,
-        (setting as? RangeConstrainedModSetting<Int>)?.maxValue
-    )
-
-    override fun convertValue(value: String) = value.toIntOrNull()
-}
-
-private class NullableIntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int?>) :
-    ModSettingTextInput<Int?>(mod, setting) {
-    override fun createControl() = IntegerFormInput(
-        setting.initialValue,
-        (setting as? RangeConstrainedModSetting<Int?>)?.minValue,
-        (setting as? RangeConstrainedModSetting<Int?>)?.maxValue
-    )
-
-    override fun convertValue(value: String) = value.toIntOrNull()
-}
-
-private class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : ModSettingTextInput<Float>(mod, setting) {
-    override fun createControl() = FloatFormInput(
-        setting.initialValue,
-        (setting as? RangeConstrainedModSetting<Float>)?.minValue,
-        (setting as? RangeConstrainedModSetting<Float>)?.maxValue
-    )
-
-    override fun convertValue(value: String) = value.toFloatOrNull()
-}
-
-private class NullableFloatModSettingTextInput(mod: Mod, setting: ModSetting<Float?>) :
-    ModSettingTextInput<Float?>(mod, setting) {
-    override fun createControl() = FloatFormInput(
-        setting.initialValue ?: 0f,
-        (setting as? RangeConstrainedModSetting<Float?>)?.minValue,
-        (setting as? RangeConstrainedModSetting<Float?>)?.maxValue
-    )
-
-    override fun convertValue(value: String) = value.toFloatOrNull()
-}
-
-//endregion
