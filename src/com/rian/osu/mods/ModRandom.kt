@@ -22,8 +22,14 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
     override val description = "It never gets boring!"
     override val type = ModType.Conversion
 
-    // TODO: Make this a mod setting once user input is possible
-    var seed: Int? = null
+    var seed by NullableIntegerModSetting(
+        name = "Seed",
+        valueFormatter = { it.toString() },
+        defaultValue = null,
+        minValue = 0,
+        orderPosition = 0,
+        useManualInput = true
+    )
 
     /**
      * Defines how sharp the angles of [HitObject]s should be.
