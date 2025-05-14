@@ -32,7 +32,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         defaultValue = cs,
         minValue = 0f,
         maxValue = 15f,
-        step = 0.1f
+        step = 0.1f,
+        precision = 1,
     )
 
     /**
