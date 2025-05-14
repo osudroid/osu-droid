@@ -5,7 +5,6 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -62,14 +61,28 @@ class ModCustomizationMenu : Modal(
         modSettingComponents.fastForEach { it.update() }
     }
 
-    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): FormControl<*, *> {
+    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): ModSettingComponent<*, *> {
 
         val component = when (setting) {
-            is FloatModSetting -> FloatModSettingSlider(mod, setting)
-            is IntegerModSetting -> IntegerModSettingSlider(mod, setting)
-            is NullableFloatModSetting -> NullableModSettingSlider(mod, setting)
+            is FloatModSetting ->
+                if (setting.useManualInput) FloatModSettingTextInput(mod, setting)
+                else FloatModSettingSlider(mod, setting)
+
+            is IntegerModSetting ->
+                if (setting.useManualInput) IntegerModSettingTextInput(mod, setting)
+                else IntegerModSettingSlider(mod, setting)
+
+            is NullableFloatModSetting ->
+                if (setting.useManualInput) NullableFloatModSettingTextInput(mod, setting)
+                else NullableFloatModSettingSlider(mod, setting)
+
+            is NullableIntegerModSetting ->
+                if (setting.useManualInput) NullableIntegerModSettingTextInput(mod, setting)
+                else NullableIntegerModSettingSlider(mod, setting)
+
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
+
         modSettingComponents.add(component)
         component.update()
         return component
@@ -119,66 +132,3 @@ class ModCustomizationMenu : Modal(
         }
     }
 }
-
-
-//region Components
-
-private interface IModSettingComponent<V : Any?> {
-    val setting: ModSetting<V>
-    fun update()
-}
-
-private sealed class ModSettingSlider<V : Number?>(val mod: Mod, override val setting: ModSetting<V>) :
-    FormSlider(setting.initialValue?.toFloat() ?: 0f),
-    IModSettingComponent<V> {
-
-    final override fun update() {
-        label = setting.name
-
-        if (setting is RangeConstrainedModSetting<V>) {
-            val setting = setting as RangeConstrainedModSetting<V>
-            control.min = setting.minValue!!.toFloat()
-            control.max = setting.maxValue!!.toFloat()
-            control.step = setting.step!!.toFloat()
-        }
-
-        defaultValue = setting.defaultValue?.toFloat() ?: 0f
-        value = setting.value?.toFloat() ?: 0f
-        valueFormatter = { setting.valueFormatter!!.invoke(convertValue(it)) }
-        onValueChanged = {
-            setting.value = convertValue(it)
-            ModMenu.queueModChange(mod)
-        }
-    }
-
-    abstract fun convertValue(value: Float): V
-}
-
-private class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModSettingSlider<Int>(mod, setting) {
-    override fun convertValue(value: Float) = value.toInt()
-}
-
-private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
-    override fun convertValue(value: Float) = value
-}
-
-private class NullableModSettingSlider(mod: Mod, setting: ModSetting<Float?>) : ModSettingSlider<Float?>(mod, setting) {
-    override fun convertValue(value: Float) = if (value == setting.defaultValue) null else value
-}
-
-private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<Boolean>) :
-    FormCheckbox(setting.initialValue),
-    IModSettingComponent<Boolean> {
-
-    override fun update() {
-        label = setting.name
-        defaultValue = setting.defaultValue
-        value = setting.value
-        onValueChanged = {
-            setting.value = it
-            ModMenu.queueModChange(mod)
-        }
-    }
-}
-
-//endregion
