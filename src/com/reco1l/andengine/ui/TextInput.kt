@@ -229,7 +229,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         val newText =
             currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
 
-        if (!isTextValid(newText)) {
+        if (newText.isNotEmpty() && !isTextValid(newText)) {
             notifyInputError()
             return
         }
@@ -249,7 +249,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
             if (position > 0) currentText.substring(0, position - 1) + currentText.substring(position)
             else currentText.substring(1)
 
-        if (!isTextValid(newText)) {
+        if (newText.isNotEmpty() && !isTextValid(newText)) {
             notifyInputError()
             return
         }
