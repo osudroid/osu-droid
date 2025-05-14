@@ -16,7 +16,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
     override val setting: ModSetting<TSettingValue>
 ) : Container(), IModSettingComponent<TSettingValue> {
 
-    val control = createControl().apply {
+    protected val control = createControl().apply {
         width = FillParent
     }
 
