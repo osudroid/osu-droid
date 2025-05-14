@@ -62,12 +62,21 @@ class ModCustomizationMenu : Modal(
         modSettingComponents.fastForEach { it.update() }
     }
 
-    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): FormControl<*, *> {
+    private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): Container {
 
         val component = when (setting) {
-            is FloatModSetting -> FloatModSettingSlider(mod, setting)
-            is IntegerModSetting -> IntegerModSettingSlider(mod, setting)
-            is NullableFloatModSetting -> NullableModSettingSlider(mod, setting)
+            is FloatModSetting ->
+                if (setting.useManualInput) FloatModSettingTextInput(mod, setting)
+                else FloatModSettingSlider(mod, setting)
+
+            is IntegerModSetting ->
+                if (setting.useManualInput) IntegerModSettingTextInput(mod, setting)
+                else IntegerModSettingSlider(mod, setting)
+
+            is NullableFloatModSetting ->
+                if (setting.useManualInput) NullableFloatModSettingTextInput(mod, setting)
+                else NullableFloatModSettingSlider(mod, setting)
+
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
         modSettingComponents.add(component)
@@ -162,7 +171,10 @@ private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModS
     override fun convertValue(value: Float) = value
 }
 
-private class NullableModSettingSlider(mod: Mod, setting: ModSetting<Float?>) : ModSettingSlider<Float?>(mod, setting) {
+private class NullableFloatModSettingSlider(
+    mod: Mod,
+    setting: ModSetting<Float?>
+) : ModSettingSlider<Float?>(mod, setting) {
     override fun convertValue(value: Float) = if (value == setting.defaultValue) null else value
 }
 
