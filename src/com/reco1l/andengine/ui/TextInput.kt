@@ -9,6 +9,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -219,6 +220,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         }
 
         if (!isCharacterAllowed(char)) {
+            notifyInputError()
             return
         }
 
@@ -226,7 +228,8 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         val currentCaretPosition = caretPosition
         val newText = currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
 
-        if (newText.isNotEmpty() && !isTextValid(newText)) {
+        if (!isTextValid(newText)) {
+            notifyInputError()
             return
         }
 
@@ -234,6 +237,14 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         caretPosition++
     }
 
+    private fun notifyInputError() {
+        background?.apply {
+            clearEntityModifiers()
+
+            color = ColorARGB.Red
+            colorTo(Theme.current.accentColor * 0.25f, 0.2f)
+        }
+    }
 
     override fun onValueChanged() {
         super.onValueChanged()
