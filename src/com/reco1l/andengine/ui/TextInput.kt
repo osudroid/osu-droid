@@ -16,7 +16,7 @@ import kotlin.math.*
 import kotlin.synchronized
 import kotlin.text.substring
 
-class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
+sealed class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
 
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
@@ -196,16 +196,41 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         return super.onProcessValue(value)
     }
 
+    /**
+     * Checks if a [Char] is allowed to be appended to this [TextInput].
+     *
+     * @param char The [Char] to check.
+     * @return `true` if [char] is allowed to be appended to this [TextInput], `false` otherwise.
+     */
+    protected open fun isCharacterAllowed(char: Char) = true
+
+    /**
+     * Checks whether a text is valid as a [value] for this [TextInput].
+     *
+     * @param text The text to check.
+     * @return `true` if [text] is valid as a [value] for this [TextInput], `false` otherwise.
+     */
+    protected open fun isTextValid(text: String) = true
+
     private fun appendCharacter(char: Char) {
 
         if (value.length == maxCharacters && maxCharacters != 0) {
             return
         }
 
+        if (!isCharacterAllowed(char)) {
+            return
+        }
+
         val currentText = value
         val currentCaretPosition = caretPosition
+        val newText = currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
 
-        value = currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
+        if (newText.isNotEmpty() && !isTextValid(newText)) {
+            return
+        }
+
+        value = newText
         caretPosition++
     }
 
