@@ -226,7 +226,7 @@ public class GameplaySlider extends GameObject {
         headCirclePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * 3);
+        approachCircle.setScale(scale * 3 * (float) (beatmapSlider.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
@@ -294,7 +294,7 @@ public class GameplaySlider extends GameObject {
 
         if (approachCircle.isVisible()) {
             approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, scale * 3, scale, e -> e.setAlpha(0)));
+            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, approachCircle.getScaleX(), scale, e -> e.setAlpha(0)));
         }
 
         scene.attachChild(headCirclePiece, 0);

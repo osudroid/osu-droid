@@ -50,6 +50,7 @@ import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -552,6 +553,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
         GameHelper.setSpeedMultiplier(playableBeatmap.speedMultiplier);
 
+        GameHelper.setOriginalTimePreempt((float) BeatmapDifficulty.difficultyRange(
+            playableBeatmap.getDifficulty().getAr(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ));
+
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }
@@ -834,6 +839,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setScoreV2(lastMods.ofType(ModScoreV2.class));
         GameHelper.setEasy(lastMods.ofType(ModEasy.class));
         GameHelper.setMuted(lastMods.ofType(ModMuted.class));
+        GameHelper.setFreezeFrame(lastMods.ofType(ModFreezeFrame.class));
 
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();

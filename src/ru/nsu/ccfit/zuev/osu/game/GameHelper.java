@@ -15,6 +15,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
+    private static float originalTimePreempt = 0;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static ModHidden hidden;
@@ -32,6 +33,7 @@ public class GameHelper {
     private static ModScoreV2 scoreV2;
     private static ModEasy easy;
     private static ModMuted muted;
+    private static ModFreezeFrame freezeFrame;
     private static boolean isKiai = false;
     private static ModAutoplay autoplay;
     private static double beatLength = 0;
@@ -53,6 +55,14 @@ public class GameHelper {
 
     public static void setOverallDifficulty(final float overallDifficulty) {
         GameHelper.overallDifficulty = overallDifficulty;
+    }
+
+    public static float getOriginalTimePreempt() {
+        return originalTimePreempt;
+    }
+
+    public static void setOriginalTimePreempt(final float originalTimePreempt) {
+        GameHelper.originalTimePreempt = originalTimePreempt;
     }
 
     /**
@@ -291,6 +301,18 @@ public class GameHelper {
 
     public static void setMuted(final ModMuted muted) {
         GameHelper.muted = muted;
+    }
+
+    public static ModFreezeFrame getFreezeFrame() {
+        return freezeFrame;
+    }
+
+    public static boolean isFreezeFrame() {
+        return freezeFrame != null;
+    }
+
+    public static void setFreezeFrame(final ModFreezeFrame freezeFrame) {
+        GameHelper.freezeFrame = freezeFrame;
     }
 
     public static ModScoreV2 getScoreV2() {

@@ -68,14 +68,12 @@ public class GameplayHitCircle extends GameObject {
         radiusSquared = (float) beatmapCircle.getScreenSpaceGameplayRadius();
         radiusSquared *= radiusSquared;
 
-        float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
-        float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime);
-        float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
+        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
 
         // Initializing sprites
         circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         circlePiece.setScale(scale);
-        circlePiece.setAlpha(fadeInProgress);
+        circlePiece.setAlpha(0);
         circlePiece.setPosition(this.position.x, this.position.y);
 
         int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
@@ -90,40 +88,30 @@ public class GameplayHitCircle extends GameObject {
         circlePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
-        approachCircle.setAlpha(0.9f * fadeInProgress);
+        approachCircle.setScale(scale * 3 * (float) (beatmapCircle.timePreempt / GameHelper.getOriginalTimePreempt()));
+        approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
 
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
-            float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
-            float remainingFadeOutDuration = Math.min(
-                actualFadeOutDuration,
-                Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime)
-            );
-            float fadeOutProgress = remainingFadeOutDuration / actualFadeOutDuration;
+            float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             circlePiece.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
+                Modifiers.fadeIn(fadeInDuration),
+                Modifiers.fadeOut(fadeOutDuration)
             ));
         } else if (circlePiece.isVisible()) {
-            circlePiece.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
+            circlePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
 
         if (approachCircle.isVisible()) {
             approachCircle.registerEntityModifier(
-                Modifiers.alpha(
-                    Math.min(
-                        Math.min(actualFadeInDuration * 2, remainingFadeInDuration),
-                        timePreempt
-                    ),
-                    0.9f * fadeInProgress,
-                    0.9f
-                )
+                Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f)
             );
 
-            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime), approachCircle.getScaleX(), scale, e -> e.setAlpha(0)));
+            approachCircle.registerEntityModifier(
+                Modifiers.scale(timePreempt, approachCircle.getScaleX(), scale, e -> e.setAlpha(0))
+            );
         }
 
         if (Config.isDimHitObjects() && circlePiece.isVisible()) {
