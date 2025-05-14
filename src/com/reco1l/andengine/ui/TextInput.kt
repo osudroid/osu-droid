@@ -84,7 +84,7 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
     }
 
     override fun onFocus() {
-        setKeyboardVisibilty(true)
+        setKeyboardVisibility(true)
         caret.isVisible = true
 
         foreground?.clearModifiers(ModifierType.Color)
@@ -93,7 +93,7 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
     }
 
     override fun onBlur() {
-        setKeyboardVisibilty(false)
+        setKeyboardVisibility(false)
         caret.isVisible = false
 
         foreground?.clearModifiers(ModifierType.Color)
@@ -103,7 +103,7 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
     }
 
     @Suppress("DEPRECATION")
-    private fun setKeyboardVisibilty(value: Boolean) {
+    private fun setKeyboardVisibility(value: Boolean) {
 
         val imm = ExtendedEngine.Current.context.getSystemService<InputMethodManager>()
             ?: throw NullPointerException("InputMethodManager is null")
@@ -111,7 +111,7 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         val windowInsets = ViewCompat.getRootWindowInsets(ExtendedEngine.Current.context.window.decorView)
         val keyboardHeight = windowInsets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
 
-        // Tricky prevention from openning the keyboard while it should be closed and vice versa.
+        // Tricky prevention from opening the keyboard while it should be closed and vice versa.
         if (value == (keyboardHeight > 0) || !value == (keyboardHeight == 0)) {
             return
         }
