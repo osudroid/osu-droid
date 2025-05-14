@@ -77,6 +77,10 @@ class ModCustomizationMenu : Modal(
                 if (setting.useManualInput) NullableFloatModSettingTextInput(mod, setting)
                 else NullableFloatModSettingSlider(mod, setting)
 
+            is NullableIntegerModSetting ->
+                if (setting.useManualInput) NullableIntegerModSettingTextInput(mod, setting)
+                else NullableIntegerModSettingSlider(mod, setting)
+
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
         }
         modSettingComponents.add(component)
@@ -167,6 +171,15 @@ private class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModS
     override fun convertValue(value: Float) = value.toInt()
 }
 
+private class NullableIntegerModSettingSlider(mod: Mod, setting: ModSetting<Int?>) :
+    ModSettingSlider<Int?>(mod, setting) {
+    override fun convertValue(value: Float): Int? {
+        val converted = value.toInt()
+
+        return if (converted == setting.defaultValue) null else converted
+    }
+}
+
 private class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
     override fun convertValue(value: Float) = value
 }
@@ -233,6 +246,17 @@ private class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : M
         setting.initialValue,
         (setting as? RangeConstrainedModSetting<Int>)?.minValue,
         (setting as? RangeConstrainedModSetting<Int>)?.maxValue
+    )
+
+    override fun convertValue(value: String) = value.toIntOrNull()
+}
+
+private class NullableIntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int?>) :
+    ModSettingTextInput<Int?>(mod, setting) {
+    override fun createControl() = IntegerFormInput(
+        setting.initialValue,
+        (setting as? RangeConstrainedModSetting<Int?>)?.minValue,
+        (setting as? RangeConstrainedModSetting<Int?>)?.maxValue
     )
 
     override fun convertValue(value: String) = value.toIntOrNull()
