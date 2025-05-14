@@ -83,17 +83,17 @@ sealed class RangeConstrainedModSetting<V>(
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    minValue: V,
+    minValue: V & Any,
 
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    maxValue: V,
+    maxValue: V & Any,
 
     /**
      * The step size for the value of this [RangeConstrainedModSetting].
      */
-    step: V,
+    step: V & Any,
 
     /**
      * The position of this [RangeConstrainedModSetting] in the mod customization menu.
@@ -243,7 +243,7 @@ open class NullableIntegerModSetting(
     override var defaultValue
         get() = super.defaultValue
         set(value) {
-            if (value != null && value !in minValue!!..maxValue!!) {
+            if (value != null && value !in minValue..maxValue) {
                 throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
             }
 
@@ -253,11 +253,7 @@ open class NullableIntegerModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("minValue cannot be null.")
-            }
-
-            if (value > maxValue!!) {
+            if (value > maxValue) {
                 throw IllegalArgumentException("minValue cannot be greater than maxValue.")
             }
 
@@ -267,11 +263,7 @@ open class NullableIntegerModSetting(
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("maxValue cannot be null.")
-            }
-
-            if (value < minValue!!) {
+            if (value < minValue) {
                 throw IllegalArgumentException("maxValue cannot be less than minValue.")
             }
 
@@ -281,10 +273,6 @@ open class NullableIntegerModSetting(
     override var step
         get() = super.step
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("step cannot be null.")
-            }
-
             if (value < 0) {
                 throw IllegalArgumentException("step cannot be less than 0.")
             }
@@ -300,11 +288,11 @@ open class NullableIntegerModSetting(
 
     override fun processValue(value: Int?) = when {
         value == null -> null
-        value < minValue!! -> minValue
-        value > maxValue!! -> maxValue
+        value < minValue -> minValue
+        value > maxValue -> maxValue
         step == 0 -> value
 
-        else -> (round((value - minValue!!) / step!!.toFloat()) * step!! + minValue!!).roundToInt()
+        else -> (round((value - minValue) / step.toFloat()) * step + minValue).roundToInt()
     }
 }
 
@@ -453,7 +441,7 @@ open class NullableFloatModSetting(
     override var defaultValue
         get() = super.defaultValue
         set(value) {
-            if (value != null && value !in minValue!!..maxValue!!) {
+            if (value != null && value !in minValue..maxValue) {
                 throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
             }
 
@@ -463,11 +451,7 @@ open class NullableFloatModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("minValue cannot be null.")
-            }
-
-            if (value > maxValue!!) {
+            if (value > maxValue) {
                 throw IllegalArgumentException("minValue cannot be greater than maxValue.")
             }
 
@@ -477,11 +461,7 @@ open class NullableFloatModSetting(
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("maxValue cannot be null.")
-            }
-
-            if (value < minValue!!) {
+            if (value < minValue) {
                 throw IllegalArgumentException("maxValue cannot be less than minValue.")
             }
 
@@ -491,10 +471,6 @@ open class NullableFloatModSetting(
     override var step
         get() = super.step
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("step cannot be null.")
-            }
-
             if (value < 0) {
                 throw IllegalArgumentException("step cannot be less than 0.")
             }
@@ -533,13 +509,13 @@ open class NullableFloatModSetting(
 
     override fun processValue(value: Float?) = when {
         value == null -> null
-        value < minValue!! -> minValue
-        value > maxValue!! -> maxValue
+        value < minValue -> minValue
+        value > maxValue -> maxValue
         step == 0f -> value
 
         else -> {
-            val minValue = minValue!!
-            val step = step!!
+            val minValue = minValue
+            val step = step
             val precision = precision
 
             val value = round((value - minValue) / step) * step + minValue
