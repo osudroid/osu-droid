@@ -2882,24 +2882,29 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return new ExtendedScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
-                float maxDt = secElapsed * GameHelper.getSpeedMultiplier();
-                float dt = maxDt;
                 var songService = GlobalManager.getInstance().getSongService();
+                float dt = secElapsed * GameHelper.getSpeedMultiplier();
+
+                // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
+                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and 2 times
+                // the actual progressed time (meaning we allow up to 2 frames of error).
+                //
+                // See https://github.com/ppy/osu/issues/26879 for more information. The issue has been closed, but the
+                // BASS binary required for the fix is not available for Android at the time of this commit.
+                //
+                // The 2 frames of error threshold is chosen to allow gameplay time to still catch up to audio time in
+                // cases where gameplay is significantly behind such that it requires an offset greater than `dt` to
+                // catch up with audio time. Without this, gameplay time may consistently be behind audio time until the
+                // player restarts gameplay.
+                float maxDt = dt * 2;
 
                 if (songService.getStatus() == Status.PLAYING) {
-                    // BASS may report the wrong position. When that happens, `dt` will
-                    // be negative. In that case, we should ignore the update.
-                    // See https://github.com/ppy/osu/issues/26879 for more information.
                     dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
                 }
 
-                // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
-                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and the
-                // actual progressed time.
-                // See https://github.com/ppy/osu/issues/26879 for more information.
                 dt = FMath.clamp(dt, 0, maxDt);
 
                 update(dt);
