@@ -29,7 +29,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      */
     var seed by NullableIntegerModSetting(
         name = "Seed",
-        valueFormatter = { it.toString() },
+        valueFormatter = { it?.toString() ?: "" },
         defaultValue = null,
         minValue = 0,
         orderPosition = 0,
