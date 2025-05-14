@@ -41,7 +41,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
         }
     }
 
-    abstract fun createControl(): FormControl<TControlValue, Control<TControlValue>>
-    abstract fun convertSettingValue(value: TSettingValue): TControlValue
-    abstract fun convertControlValue(value: TControlValue): TSettingValue?
+    protected abstract fun createControl(): FormControl<TControlValue, Control<TControlValue>>
+    protected abstract fun convertSettingValue(value: TSettingValue): TControlValue
+    protected abstract fun convertControlValue(value: TControlValue): TSettingValue?
 }
