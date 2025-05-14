@@ -32,12 +32,8 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
      */
     var min = 0f
         set(min) {
-            if (min > max) {
-                throw IllegalArgumentException("min must be less than or equal to max")
-            }
-
             if (field != min) {
-                field = min
+                field = min(min, max)
                 value = onProcessValue(value)
             }
         }
@@ -47,12 +43,8 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
      */
     var max = 1f
         set(max) {
-            if (max < min) {
-                throw IllegalArgumentException("max must be greater than or equal to min")
-            }
-
             if (field != max) {
-                field = max
+                field = max(min, max)
                 value = onProcessValue(value)
             }
         }
