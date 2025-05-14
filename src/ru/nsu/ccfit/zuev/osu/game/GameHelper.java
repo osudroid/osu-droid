@@ -34,6 +34,7 @@ public class GameHelper {
     private static ModEasy easy;
     private static ModMuted muted;
     private static ModFreezeFrame freezeFrame;
+    private static ModApproachDifferent approachDifferent;
     private static boolean isKiai = false;
     private static ModAutoplay autoplay;
     private static double beatLength = 0;
@@ -313,6 +314,18 @@ public class GameHelper {
 
     public static void setFreezeFrame(final ModFreezeFrame freezeFrame) {
         GameHelper.freezeFrame = freezeFrame;
+    }
+
+    public static ModApproachDifferent getApproachDifferent() {
+        return approachDifferent;
+    }
+
+    public static boolean isApproachDifferent() {
+        return approachDifferent != null;
+    }
+
+    public static void setApproachDifferent(final ModApproachDifferent approachDifferent) {
+        GameHelper.approachDifferent = approachDifferent;
     }
 
     public static ModScoreV2 getScoreV2() {
