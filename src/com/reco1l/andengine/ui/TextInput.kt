@@ -350,3 +350,30 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>>(
      */
     protected abstract fun convertValue(value: String): T
 }
+
+/**
+ * A [TextInput] that only allows [Int]s to be entered.
+ */
+class IntegerTextInput(
+    initialValue: Int,
+    minValue: Int? = -Int.MAX_VALUE,
+    maxValue: Int? = Int.MAX_VALUE
+) : RangeConstrainedTextInput<Int>(initialValue, minValue, maxValue) {
+    override fun isCharacterAllowed(char: Char) = super.isCharacterAllowed(char) && (char.isDigit() || char == '-')
+
+    override fun convertValue(value: String) = value.toInt()
+}
+
+/**
+ * A [TextInput] that only allows [Float]s to be entered.
+ */
+class FloatTextInput(
+    initialValue: Float,
+    minValue: Float? = -Float.MAX_VALUE,
+    maxValue: Float? = Float.MAX_VALUE
+) : RangeConstrainedTextInput<Float>(initialValue, minValue, maxValue) {
+    override fun isCharacterAllowed(char: Char) =
+        super.isCharacterAllowed(char) && (char.isDigit() || char == '.' || char == '-')
+
+    override fun convertValue(value: String) = value.toFloat()
+}
