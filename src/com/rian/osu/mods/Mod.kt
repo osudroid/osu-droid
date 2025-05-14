@@ -78,16 +78,18 @@ sealed class Mod {
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
 
+    private var settingsBacking: List<ModSetting<Any?>>? = null
+
     /**
      * The mod specific settings.
      */
     @Suppress("UNCHECKED_CAST")
-    open val settings
-        get() = this::class.memberProperties.mapNotNull { property ->
+    open val settings: List<ModSetting<Any?>>
+        get() = settingsBacking ?: this::class.memberProperties.mapNotNull { property ->
             property as KProperty1<Mod, Any?>
             property.isAccessible = true
             property.getDelegate(this) as? ModSetting<Any?>
-        }
+        }.also { settingsBacking = it }
 
     /**
      * Whether all [ModSetting]s in this [Mod] are set to their default values.
