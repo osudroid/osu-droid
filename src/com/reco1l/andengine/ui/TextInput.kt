@@ -358,7 +358,7 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
  * A [TextInput] that only allows [Int]s to be entered.
  */
 class IntegerTextInput(
-    initialValue: Int,
+    initialValue: Int?,
     minValue: Int? = -Int.MAX_VALUE,
     maxValue: Int? = Int.MAX_VALUE
 ) : RangeConstrainedTextInput<Int>(initialValue, minValue, maxValue) {
@@ -371,7 +371,7 @@ class IntegerTextInput(
  * A [TextInput] that only allows [Float]s to be entered.
  */
 class FloatTextInput(
-    initialValue: Float,
+    initialValue: Float?,
     minValue: Float? = -Float.MAX_VALUE,
     maxValue: Float? = Float.MAX_VALUE
 ) : RangeConstrainedTextInput<Float>(initialValue, minValue, maxValue) {
