@@ -163,7 +163,13 @@ open class IntegerModSetting(
     minValue: Int = Int.MIN_VALUE,
     maxValue: Int = Int.MAX_VALUE,
     step: Int = 1,
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [IntegerModSetting] manually.
+     */
+    val useManualInput: Boolean = false
+
 ) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
     override var defaultValue
         get() = super.defaultValue
@@ -234,7 +240,12 @@ open class FloatModSetting(
      */
     precision: Int? = null,
 
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [FloatModSetting] manually.
+     */
+    val useManualInput: Boolean = false
 
 ) : RangeConstrainedModSetting<Float>(
     name,
@@ -340,7 +351,12 @@ open class NullableFloatModSetting(
      */
     precision: Int? = null,
 
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [NullableFloatModSetting] manually.
+     */
+    val useManualInput: Boolean = false
 
 ) : RangeConstrainedModSetting<Float?>(
     name,
