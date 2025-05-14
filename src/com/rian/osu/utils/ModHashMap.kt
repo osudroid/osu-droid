@@ -307,6 +307,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             ModMirror(),
             ModRandom(),
             ModHidden(),
+            ModApproachDifferent(),
             ModFreezeFrame(),
             ModTraceable(),
             ModFlashlight(),
