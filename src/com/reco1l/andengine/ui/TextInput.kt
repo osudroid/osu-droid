@@ -258,7 +258,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         value = newText
 
         // Move the caret to the left if it's located after the deleted character
-        if (position > currentCaretPosition) {
+        if (position < currentCaretPosition) {
             caretPosition = max(0, currentCaretPosition - 1)
         }
     }
