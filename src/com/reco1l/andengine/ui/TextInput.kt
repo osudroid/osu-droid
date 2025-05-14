@@ -275,6 +275,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     override fun onValueChanged() {
         super.onValueChanged()
         textEntity.text = value
+        caretPosition = min(caretPosition, value.length)
     }
 
     override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean = synchronized(value) {
