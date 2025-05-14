@@ -8,13 +8,14 @@ import com.reco1l.framework.math.*
 @Suppress("LeakingThis")
 open class FormInput(initialValue: String = "") : FormControl<String, TextInput>(initialValue) {
 
-    override val control = TextInput(initialValue)
+    final override val control = createControl().apply {
+        width = FillParent
+    }
+
     override val valueText = null
 
 
     init {
-        control.width = FillParent
-
         orientation = Orientation.Vertical
         spacing = 12f
 
@@ -27,20 +28,22 @@ open class FormInput(initialValue: String = "") : FormControl<String, TextInput>
         }
         +control
     }
+
+    open fun createControl() = TextInput(defaultValue)
 }
 
 open class IntegerFormInput(
     initialValue: Int,
-    minValue: Int? = -Int.MAX_VALUE,
-    maxValue: Int? = Int.MAX_VALUE
+    val minValue: Int? = -Int.MAX_VALUE,
+    val maxValue: Int? = Int.MAX_VALUE
 ) : FormInput(initialValue.toString()) {
-    override val control = IntegerTextInput(initialValue, minValue, maxValue)
+    override fun createControl() = IntegerTextInput(defaultValue.toInt(), minValue, maxValue)
 }
 
 open class FloatFormInput(
     initialValue: Float,
-    minValue: Float? = -Float.MAX_VALUE,
-    maxValue: Float? = Float.MAX_VALUE
+    val minValue: Float? = -Float.MAX_VALUE,
+    val maxValue: Float? = Float.MAX_VALUE
 ) : FormInput(initialValue.toString()) {
-    override val control = FloatTextInput(initialValue, minValue, maxValue)
+    override fun createControl() = FloatTextInput(defaultValue.toFloat(), minValue, maxValue)
 }
