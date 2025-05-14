@@ -244,6 +244,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         }
 
         val currentText = value
+        val currentCaretPosition = caretPosition
 
         val newText =
             if (position > 0) currentText.substring(0, position - 1) + currentText.substring(position)
@@ -255,7 +256,11 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         }
 
         value = newText
-        caretPosition = max(0, caretPosition - 1)
+
+        // Move the caret to the left if it's located after the deleted character
+        if (position > currentCaretPosition) {
+            caretPosition = max(0, currentCaretPosition - 1)
+        }
     }
 
     private fun notifyInputError() {
