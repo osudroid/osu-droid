@@ -34,6 +34,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         maxValue = 15f,
         step = 0.1f,
         precision = 1,
+        orderPosition = 0
     )
 
     /**
@@ -47,6 +48,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         maxValue = 12.5f,
         step = 0.1f,
         precision = 1,
+        orderPosition = 1
     )
 
     /**
@@ -60,6 +62,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         maxValue = 11f,
         step = 0.1f,
         precision = 1,
+        orderPosition = 2
     )
 
     /**
@@ -73,6 +76,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         maxValue = 11f,
         step = 0.1f,
         precision = 1,
+        orderPosition = 3
     )
 
 
