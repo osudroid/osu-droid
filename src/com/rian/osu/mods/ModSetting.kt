@@ -253,21 +253,13 @@ open class NullableIntegerModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value > maxValue) {
-                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
-            }
-
-            super.minValue = value
+            super.minValue = min(value, maxValue)
         }
 
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value < minValue) {
-                throw IllegalArgumentException("maxValue cannot be less than minValue.")
-            }
-
-            super.maxValue = value
+            super.maxValue = max(value, minValue)
         }
 
     override var step
@@ -340,21 +332,13 @@ open class FloatModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value > maxValue) {
-                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
-            }
-
-            super.minValue = value
+            super.minValue = min(value, maxValue)
         }
 
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value < minValue) {
-                throw IllegalArgumentException("maxValue cannot be less than minValue.")
-            }
-
-            super.maxValue = value
+            super.maxValue = max(value, minValue)
         }
 
     override var step
@@ -451,21 +435,13 @@ open class NullableFloatModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value > maxValue) {
-                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
-            }
-
-            super.minValue = value
+            super.minValue = min(value, maxValue)
         }
 
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value < minValue) {
-                throw IllegalArgumentException("maxValue cannot be less than minValue.")
-            }
-
-            super.maxValue = value
+            super.maxValue = max(value, minValue)
         }
 
     override var step
