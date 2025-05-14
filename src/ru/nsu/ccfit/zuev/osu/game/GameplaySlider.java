@@ -293,8 +293,21 @@ public class GameplaySlider extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, approachCircle.getScaleX(), scale, e -> e.setAlpha(0)));
+            var easing = Easing.None;
+            var approachDifferentMod = GameHelper.getApproachDifferent();
+
+            if (approachDifferentMod != null) {
+                approachCircle.setScale(scale * approachDifferentMod.getScale());
+                easing = approachDifferentMod.getEasing();
+            }
+
+            approachCircle.registerEntityModifier(Modifiers.alpha(
+                Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f
+            ));
+
+            approachCircle.registerEntityModifier(Modifiers.scale(
+                timePreempt, approachCircle.getScaleX(), scale, e -> e.setAlpha(0), easing
+            ));
         }
 
         scene.attachChild(headCirclePiece, 0);
