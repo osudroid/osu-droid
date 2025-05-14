@@ -310,8 +310,8 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
 /**
  * A [TextInput] whose [value] is constrained to a range of values.
  */
-sealed class RangeConstrainedTextInput<T : Comparable<T>>(
-    initialValue: T,
+sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
+    initialValue: T?,
 
     /**
      * The minimum value that can be entered in this [RangeConstrainedTextInput].
@@ -326,12 +326,15 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>>(
      * If set to `null`, there is no maximum value.
      */
     val maxValue: T? = null
-) : TextInput(initialValue.toString()) {
+) : TextInput(initialValue?.toString() ?: "") {
     override fun isTextValid(text: String): Boolean {
         // Avoid calling convertValue whenever necessary, in case it is expensive
         if (!super.isTextValid(text)) {
             return false
         }
+
+        val minValue = minValue
+        val maxValue = maxValue
 
         if (minValue == null && maxValue == null) {
             return true
@@ -339,16 +342,16 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>>(
 
         val value = convertValue(text)
 
-        return (minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)
+        return value == null || (value >= minValue!! && value <= maxValue!!)
     }
 
     /**
      * Converts a value from a [String] to a [T].
      *
      * @param value The value to convert.
-     * @return The converted value.
+     * @return The converted value. If `null`, [value] is always considered valid.
      */
-    protected abstract fun convertValue(value: String): T
+    protected abstract fun convertValue(value: String): T?
 }
 
 /**
@@ -361,7 +364,7 @@ class IntegerTextInput(
 ) : RangeConstrainedTextInput<Int>(initialValue, minValue, maxValue) {
     override fun isCharacterAllowed(char: Char) = super.isCharacterAllowed(char) && (char.isDigit() || char == '-')
 
-    override fun convertValue(value: String) = value.toInt()
+    override fun convertValue(value: String) = value.toIntOrNull()
 }
 
 /**
@@ -375,5 +378,5 @@ class FloatTextInput(
     override fun isCharacterAllowed(char: Char) =
         super.isCharacterAllowed(char) && (char.isDigit() || char == '.' || char == '-')
 
-    override fun convertValue(value: String) = value.toFloat()
+    override fun convertValue(value: String) = value.toFloatOrNull()
 }
