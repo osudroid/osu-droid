@@ -14,6 +14,7 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
     override val acronym = "FR"
     override val description = "Burn the notes into your memory."
     override val type = ModType.Fun
+    override val incompatibleMods = super.incompatibleMods + ModApproachDifferent::class
 
     private var lastNewComboTime = 0.0
 

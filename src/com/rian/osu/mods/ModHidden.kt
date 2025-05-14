@@ -20,7 +20,7 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
     override val isRanked
         get() = usesDefaultSettings
 
-    override val incompatibleMods = super.incompatibleMods + ModTraceable::class
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModTraceable::class)
 
     /**
      * Whether to only fade approach circles.
