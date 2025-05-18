@@ -70,6 +70,10 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
 
     /**
      * Converts a value from the [FormControl] to a value that can be used in the [ModSetting].
+     *
+     * @param value The value from the [FormControl].
+     * @return The value that can be used in the [ModSetting]. If `null` is returned, the default value of the
+     * [ModSetting] will be used.
      */
     protected abstract fun convertControlValue(value: TControlValue): TSettingValue?
 }
