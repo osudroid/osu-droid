@@ -28,7 +28,7 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     final override fun createControl() =
         FormSlider(convertSettingValue(setting.initialValue)) as FormControl<Float, Control<Float>>
 
-    final override fun convertSettingValue(value: V) = value?.toFloat() ?: setting.initialValue?.toFloat() ?: 0f
+    final override fun convertSettingValue(value: V) = value?.toFloat() ?: setting.defaultValue?.toFloat() ?: 0f
 }
 
 class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModSettingSlider<Int>(mod, setting) {

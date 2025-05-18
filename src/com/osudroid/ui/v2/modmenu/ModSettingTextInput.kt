@@ -11,7 +11,7 @@ import com.rian.osu.mods.RangeConstrainedModSetting
 sealed class ModSettingTextInput<V : Any?>(mod: Mod, setting: ModSetting<V>) :
     ModSettingComponent<V, String>(mod, setting) {
 
-    final override fun convertSettingValue(value: V) = value?.toString() ?: setting.initialValue?.toString() ?: ""
+    final override fun convertSettingValue(value: V) = value?.toString() ?: setting.defaultValue?.toString() ?: ""
 }
 
 class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettingTextInput<Int>(mod, setting) {
