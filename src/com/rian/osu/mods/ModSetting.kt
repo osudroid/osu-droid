@@ -24,7 +24,7 @@ sealed class ModSetting<V>(
      *
      * This is used to format the value of this [ModSetting] when displaying it.
      */
-    val valueFormatter: ((V) -> String)?,
+    val valueFormatter: (ModSetting<V>.(V) -> String)?,
 
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
@@ -77,23 +77,23 @@ sealed class ModSetting<V>(
  */
 sealed class RangeConstrainedModSetting<V>(
     name: String,
-    valueFormatter: (V) -> String = { it.toString() },
+    valueFormatter: ModSetting<V>.(V) -> String = { it.toString() },
     defaultValue: V,
 
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    minValue: V,
+    minValue: V & Any,
 
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    maxValue: V,
+    maxValue: V & Any,
 
     /**
      * The step size for the value of this [RangeConstrainedModSetting].
      */
-    step: V,
+    step: V & Any,
 
     /**
      * The position of this [RangeConstrainedModSetting] in the mod customization menu.
@@ -158,12 +158,18 @@ sealed class RangeConstrainedModSetting<V>(
 
 open class IntegerModSetting(
     name: String,
-    valueFormatter: (Int) -> String = { it.toString() },
+    valueFormatter: ModSetting<Int>.(Int) -> String = { it.toString() },
     defaultValue: Int,
     minValue: Int = Int.MIN_VALUE,
     maxValue: Int = Int.MAX_VALUE,
     step: Int = 1,
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [IntegerModSetting] manually.
+     */
+    val useManualInput: Boolean = false
+
 ) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
     override var defaultValue
         get() = super.defaultValue
@@ -219,9 +225,72 @@ open class IntegerModSetting(
     }
 }
 
+open class NullableIntegerModSetting(
+    name: String,
+    valueFormatter: ModSetting<Int?>.(Int?) -> String = { it.toString() },
+    defaultValue: Int?,
+    minValue: Int = Int.MIN_VALUE,
+    maxValue: Int = Int.MAX_VALUE,
+    step: Int = 1,
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [NullableIntegerModSetting] manually.
+     */
+    val useManualInput: Boolean = false
+
+) : RangeConstrainedModSetting<Int?>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
+    override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            if (value != null && value !in minValue..maxValue) {
+                throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
+            }
+
+            super.defaultValue = value
+        }
+
+    override var minValue
+        get() = super.minValue
+        set(value) {
+            super.minValue = min(value, maxValue)
+        }
+
+    override var maxValue
+        get() = super.maxValue
+        set(value) {
+            super.maxValue = max(value, minValue)
+        }
+
+    override var step
+        get() = super.step
+        set(value) {
+            if (value < 0) {
+                throw IllegalArgumentException("step cannot be less than 0.")
+            }
+
+            super.step = value
+        }
+
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(step >= 0f) { "step must be greater than or equal to 0." }
+        require(defaultValue == null || defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+    }
+
+    override fun processValue(value: Int?) = when {
+        value == null -> null
+        value < minValue -> minValue
+        value > maxValue -> maxValue
+        step == 0 -> value
+
+        else -> (round((value - minValue) / step.toFloat()) * step + minValue).roundToInt()
+    }
+}
+
 open class FloatModSetting(
     name: String,
-    valueFormatter: (Float) -> String = { it.toString() },
+    valueFormatter: ModSetting<Float>.(Float) -> String = { it.toString() },
     defaultValue: Float,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
@@ -234,7 +303,12 @@ open class FloatModSetting(
      */
     precision: Int? = null,
 
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [FloatModSetting] manually.
+     */
+    val useManualInput: Boolean = false
 
 ) : RangeConstrainedModSetting<Float>(
     name,
@@ -258,21 +332,13 @@ open class FloatModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value > maxValue) {
-                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
-            }
-
-            super.minValue = value
+            super.minValue = min(value, maxValue)
         }
 
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value < minValue) {
-                throw IllegalArgumentException("maxValue cannot be less than minValue.")
-            }
-
-            super.maxValue = value
+            super.maxValue = max(value, minValue)
         }
 
     override var step
@@ -327,7 +393,7 @@ open class FloatModSetting(
 
 open class NullableFloatModSetting(
     name: String,
-    valueFormatter: (Float?) -> String = { it.toString() },
+    valueFormatter: ModSetting<Float?>.(Float?) -> String = { it.toString() },
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
@@ -340,7 +406,12 @@ open class NullableFloatModSetting(
      */
     precision: Int? = null,
 
-    orderPosition: Int? = null
+    orderPosition: Int? = null,
+
+    /**
+     * Whether to allow the user to input the value of this [NullableFloatModSetting] manually.
+     */
+    val useManualInput: Boolean = false
 
 ) : RangeConstrainedModSetting<Float?>(
     name,
@@ -354,7 +425,7 @@ open class NullableFloatModSetting(
     override var defaultValue
         get() = super.defaultValue
         set(value) {
-            if (value != null && value !in minValue!!..maxValue!!) {
+            if (value != null && value !in minValue..maxValue) {
                 throw IllegalArgumentException("defaultValue must be between minValue and maxValue.")
             }
 
@@ -364,38 +435,18 @@ open class NullableFloatModSetting(
     override var minValue
         get() = super.minValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("minValue cannot be null.")
-            }
-
-            if (value > maxValue!!) {
-                throw IllegalArgumentException("minValue cannot be greater than maxValue.")
-            }
-
-            super.minValue = value
+            super.minValue = min(value, maxValue)
         }
 
     override var maxValue
         get() = super.maxValue
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("maxValue cannot be null.")
-            }
-
-            if (value < minValue!!) {
-                throw IllegalArgumentException("maxValue cannot be less than minValue.")
-            }
-
-            super.maxValue = value
+            super.maxValue = max(value, minValue)
         }
 
     override var step
         get() = super.step
         set(value) {
-            if (value == null) {
-                throw IllegalArgumentException("step cannot be null.")
-            }
-
             if (value < 0) {
                 throw IllegalArgumentException("step cannot be less than 0.")
             }
@@ -434,13 +485,13 @@ open class NullableFloatModSetting(
 
     override fun processValue(value: Float?) = when {
         value == null -> null
-        value < minValue!! -> minValue
-        value > maxValue!! -> maxValue
+        value < minValue -> minValue
+        value > maxValue -> maxValue
         step == 0f -> value
 
         else -> {
-            val minValue = minValue!!
-            val step = step!!
+            val minValue = minValue
+            val step = step
             val precision = precision
 
             val value = round((value - minValue) / step) * step + minValue

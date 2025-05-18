@@ -244,6 +244,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         }
 
         val currentText = value
+        val currentCaretPosition = caretPosition
 
         val newText =
             if (position > 0) currentText.substring(0, position - 1) + currentText.substring(position)
@@ -255,7 +256,11 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         }
 
         value = newText
-        caretPosition = max(0, caretPosition - 1)
+
+        // Move the caret to the left if it's located after the deleted character
+        if (position < currentCaretPosition) {
+            caretPosition = max(0, currentCaretPosition - 1)
+        }
     }
 
     private fun notifyInputError() {
@@ -270,6 +275,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     override fun onValueChanged() {
         super.onValueChanged()
         textEntity.text = value
+        caretPosition = min(caretPosition, value.length)
     }
 
     override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean = synchronized(value) {
@@ -305,4 +311,86 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         return true
     }
 
+}
+
+/**
+ * A [TextInput] whose [value] is constrained to a range of values.
+ */
+sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
+    initialValue: T?,
+
+    /**
+     * The minimum value that can be entered in this [RangeConstrainedTextInput].
+     *
+     * If set to `null`, there is no minimum value.
+     */
+    val minValue: T? = null,
+
+    /**
+     * The maximum value that can be entered in this [RangeConstrainedTextInput].
+     *
+     * If set to `null`, there is no maximum value.
+     */
+    val maxValue: T? = null
+) : TextInput(initialValue?.toString() ?: "") {
+    override fun isTextValid(text: String): Boolean {
+        // Avoid calling convertValue whenever necessary, in case it is expensive
+        if (!super.isTextValid(text)) {
+            return false
+        }
+
+        val minValue = minValue
+        val maxValue = maxValue
+
+        if (minValue == null && maxValue == null) {
+            return true
+        }
+
+        val value = convertValue(text)
+
+        return value == null || (value >= minValue!! && value <= maxValue!!)
+    }
+
+    /**
+     * Converts a value from a [String] to a [T].
+     *
+     * @param value The value to convert.
+     * @return The converted value. If `null`, [value] is always considered valid.
+     */
+    protected abstract fun convertValue(value: String): T?
+}
+
+/**
+ * A [TextInput] that only allows [Int]s to be entered.
+ */
+class IntegerTextInput(
+    initialValue: Int?,
+    minValue: Int? = -Int.MAX_VALUE,
+    maxValue: Int? = Int.MAX_VALUE
+) : RangeConstrainedTextInput<Int>(initialValue, minValue, maxValue) {
+    override fun isCharacterAllowed(char: Char) = super.isCharacterAllowed(char) && (char.isDigit() || char == '-')
+
+    override fun isTextValid(text: String) =
+        // Check for underflow/overflow
+        super.isTextValid(text) && text.toIntOrNull() != null
+
+    override fun convertValue(value: String) = value.toIntOrNull()
+}
+
+/**
+ * A [TextInput] that only allows [Float]s to be entered.
+ */
+class FloatTextInput(
+    initialValue: Float?,
+    minValue: Float? = -Float.MAX_VALUE,
+    maxValue: Float? = Float.MAX_VALUE
+) : RangeConstrainedTextInput<Float>(initialValue, minValue, maxValue) {
+    override fun isCharacterAllowed(char: Char) =
+        super.isCharacterAllowed(char) && (char.isDigit() || char == '.' || char == '-')
+
+    override fun isTextValid(text: String) =
+        // Check for underflow/overflow
+        super.isTextValid(text) && text.toFloatOrNull() != null
+
+    override fun convertValue(value: String) = value.toFloatOrNull()
 }
