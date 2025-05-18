@@ -24,7 +24,7 @@ sealed class ModSetting<V>(
      *
      * This is used to format the value of this [ModSetting] when displaying it.
      */
-    val valueFormatter: ((V) -> String)?,
+    val valueFormatter: (ModSetting<V>.(V) -> String)?,
 
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
@@ -77,7 +77,7 @@ sealed class ModSetting<V>(
  */
 sealed class RangeConstrainedModSetting<V>(
     name: String,
-    valueFormatter: (V) -> String = { it.toString() },
+    valueFormatter: ModSetting<V>.(V) -> String = { it.toString() },
     defaultValue: V,
 
     /**
@@ -158,7 +158,7 @@ sealed class RangeConstrainedModSetting<V>(
 
 open class IntegerModSetting(
     name: String,
-    valueFormatter: (Int) -> String = { it.toString() },
+    valueFormatter: ModSetting<Int>.(Int) -> String = { it.toString() },
     defaultValue: Int,
     minValue: Int = Int.MIN_VALUE,
     maxValue: Int = Int.MAX_VALUE,
@@ -227,7 +227,7 @@ open class IntegerModSetting(
 
 open class NullableIntegerModSetting(
     name: String,
-    valueFormatter: (Int?) -> String = { it.toString() },
+    valueFormatter: ModSetting<Int?>.(Int?) -> String = { it.toString() },
     defaultValue: Int?,
     minValue: Int = Int.MIN_VALUE,
     maxValue: Int = Int.MAX_VALUE,
@@ -290,7 +290,7 @@ open class NullableIntegerModSetting(
 
 open class FloatModSetting(
     name: String,
-    valueFormatter: (Float) -> String = { it.toString() },
+    valueFormatter: ModSetting<Float>.(Float) -> String = { it.toString() },
     defaultValue: Float,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
@@ -393,7 +393,7 @@ open class FloatModSetting(
 
 open class NullableFloatModSetting(
     name: String,
-    valueFormatter: (Float?) -> String = { it.toString() },
+    valueFormatter: ModSetting<Float?>.(Float?) -> String = { it.toString() },
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
