@@ -27,17 +27,16 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     @Suppress("UNCHECKED_CAST")
     final override fun createControl() =
         FormSlider(convertSettingValue(setting.initialValue)) as FormControl<Float, Control<Float>>
+
+    final override fun convertSettingValue(value: V) = value?.toFloat() ?: setting.initialValue?.toFloat() ?: 0f
 }
 
 class IntegerModSettingSlider(mod: Mod, setting: ModSetting<Int>) : ModSettingSlider<Int>(mod, setting) {
-    override fun convertSettingValue(value: Int) = value.toFloat()
     override fun convertControlValue(value: Float) = value.toInt()
 }
 
 class NullableIntegerModSettingSlider(mod: Mod, setting: ModSetting<Int?>) :
     ModSettingSlider<Int?>(mod, setting) {
-    override fun convertSettingValue(value: Int?) = value?.toFloat() ?: setting.initialValue?.toFloat() ?: 0f
-
     override fun convertControlValue(value: Float): Int? {
         val converted = value.toInt()
 
@@ -46,7 +45,6 @@ class NullableIntegerModSettingSlider(mod: Mod, setting: ModSetting<Int?>) :
 }
 
 class FloatModSettingSlider(mod: Mod, setting: ModSetting<Float>) : ModSettingSlider<Float>(mod, setting) {
-    override fun convertSettingValue(value: Float) = value
     override fun convertControlValue(value: Float) = value
 }
 
@@ -54,6 +52,5 @@ class NullableFloatModSettingSlider(
     mod: Mod,
     setting: ModSetting<Float?>
 ) : ModSettingSlider<Float?>(mod, setting) {
-    override fun convertSettingValue(value: Float?) = value ?: setting.initialValue ?: 0f
     override fun convertControlValue(value: Float) = if (value == setting.defaultValue) null else value
 }
