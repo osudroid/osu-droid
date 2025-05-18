@@ -370,6 +370,10 @@ class IntegerTextInput(
 ) : RangeConstrainedTextInput<Int>(initialValue, minValue, maxValue) {
     override fun isCharacterAllowed(char: Char) = super.isCharacterAllowed(char) && (char.isDigit() || char == '-')
 
+    override fun isTextValid(text: String) =
+        // Check for underflow/overflow
+        super.isTextValid(text) && text.toIntOrNull() != null
+
     override fun convertValue(value: String) = value.toIntOrNull()
 }
 
@@ -383,6 +387,10 @@ class FloatTextInput(
 ) : RangeConstrainedTextInput<Float>(initialValue, minValue, maxValue) {
     override fun isCharacterAllowed(char: Char) =
         super.isCharacterAllowed(char) && (char.isDigit() || char == '.' || char == '-')
+
+    override fun isTextValid(text: String) =
+        // Check for underflow/overflow
+        super.isTextValid(text) && text.toFloatOrNull() != null
 
     override fun convertValue(value: String) = value.toFloatOrNull()
 }
