@@ -16,9 +16,18 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
         if (setting is RangeConstrainedModSetting<V>) {
             val setting = setting as RangeConstrainedModSetting<V>
 
+            // Assigning the min, max and step values to the slider may unexpectedly change the value of the setting
+            // due to their boundaries. We will reset the value to the current value after doing this. The same applies
+            // to the default value.
+            val currentValue = setting.value
+            val currentDefaultValue = setting.defaultValue
+
             slider.min = convertSettingValue(setting.minValue)
             slider.max = convertSettingValue(setting.maxValue)
             slider.step = convertSettingValue(setting.step)
+
+            control.defaultValue = convertSettingValue(currentDefaultValue)
+            control.value = convertSettingValue(currentValue)
         }
 
         super.update()
