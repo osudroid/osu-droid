@@ -9,7 +9,10 @@ import com.rian.osu.mods.ModSetting
 import com.rian.osu.mods.RangeConstrainedModSetting
 
 sealed class ModSettingTextInput<V : Any?>(mod: Mod, setting: ModSetting<V>) :
-    ModSettingComponent<V, String>(mod, setting)
+    ModSettingComponent<V, String>(mod, setting) {
+
+    final override fun convertSettingValue(value: V) = value?.toString() ?: setting.initialValue?.toString() ?: ""
+}
 
 class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettingTextInput<Int>(mod, setting) {
 
@@ -20,7 +23,6 @@ class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettin
         (setting as? RangeConstrainedModSetting<Int>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertSettingValue(value: Int) = value.toString()
     override fun convertControlValue(value: String) = value.toIntOrNull()
 }
 
@@ -33,7 +35,6 @@ class NullableIntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int?>) : 
         (setting as? RangeConstrainedModSetting<Int?>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertSettingValue(value: Int?) = value?.toString() ?: setting.initialValue?.toString() ?: ""
     override fun convertControlValue(value: String) = value.toIntOrNull()
 }
 
@@ -45,7 +46,6 @@ class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : ModSettin
         (setting as? RangeConstrainedModSetting<Float>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertSettingValue(value: Float) = value.toString()
     override fun convertControlValue(value: String) = value.toFloatOrNull()
 }
 
@@ -57,6 +57,5 @@ class NullableFloatModSettingTextInput(mod: Mod, setting: ModSetting<Float?>) : 
         (setting as? RangeConstrainedModSetting<Float?>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertSettingValue(value: Float?) = value?.toString() ?: setting.initialValue?.toString() ?: ""
     override fun convertControlValue(value: String) = value.toFloatOrNull()
 }
