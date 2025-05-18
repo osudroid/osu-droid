@@ -36,6 +36,14 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
      */
     protected val control = createControl().apply {
         width = FillParent
+
+        label = setting.name
+        valueFormatter = { setting.valueFormatter!!.invoke(convertControlValue(it) ?: setting.defaultValue) }
+
+        onValueChanged = {
+            setting.value = convertControlValue(it) ?: setting.defaultValue
+            ModMenu.queueModChange(mod)
+        }
     }
 
     init {
@@ -45,17 +53,8 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
 
     override fun update() {
         control.apply {
-            label = setting.name
             defaultValue = convertSettingValue(setting.defaultValue)
             value = convertSettingValue(setting.value)
-            valueFormatter = {
-                setting.valueFormatter!!.invoke(convertControlValue(it) ?: setting.defaultValue)
-            }
-
-            onValueChanged = {
-                setting.value = convertControlValue(it) ?: setting.defaultValue
-                ModMenu.queueModChange(mod)
-            }
         }
     }
 
