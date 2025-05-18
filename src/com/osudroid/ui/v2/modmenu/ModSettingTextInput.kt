@@ -23,7 +23,7 @@ class IntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int>) : ModSettin
         (setting as? RangeConstrainedModSetting<Int>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertControlValue(value: String) = value.toIntOrNull()
+    override fun convertControlValue(value: String) = value.toInt()
 }
 
 class NullableIntegerModSettingTextInput(mod: Mod, setting: ModSetting<Int?>) : ModSettingTextInput<Int?>(mod, setting) {
@@ -46,7 +46,7 @@ class FloatModSettingTextInput(mod: Mod, setting: ModSetting<Float>) : ModSettin
         (setting as? RangeConstrainedModSetting<Float>)?.maxValue
     ) as FormControl<String, Control<String>>
 
-    override fun convertControlValue(value: String) = value.toFloatOrNull()
+    override fun convertControlValue(value: String) = value.toFloat()
 }
 
 class NullableFloatModSettingTextInput(mod: Mod, setting: ModSetting<Float?>) : ModSettingTextInput<Float?>(mod, setting) {

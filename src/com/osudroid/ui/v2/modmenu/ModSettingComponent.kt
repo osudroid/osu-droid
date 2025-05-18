@@ -38,10 +38,10 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
         width = FillParent
 
         label = setting.name
-        valueFormatter = { setting.valueFormatter!!.invoke(convertControlValue(it) ?: setting.defaultValue) }
+        valueFormatter = { setting.valueFormatter!!.invoke(convertControlValue(it)) }
 
         onValueChanged = {
-            setting.value = convertControlValue(it) ?: setting.defaultValue
+            setting.value = convertControlValue(it)
             ModMenu.queueModChange(mod)
         }
     }
@@ -75,8 +75,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
      * Converts a value from the [FormControl] to a value that can be used in the [ModSetting].
      *
      * @param value The value from the [FormControl].
-     * @return The value that can be used in the [ModSetting]. If `null` is returned, the default value of the
-     * [ModSetting] will be used.
+     * @return The value that can be used in the [ModSetting].
      */
-    protected abstract fun convertControlValue(value: TControlValue): TSettingValue?
+    protected abstract fun convertControlValue(value: TControlValue): TSettingValue
 }
