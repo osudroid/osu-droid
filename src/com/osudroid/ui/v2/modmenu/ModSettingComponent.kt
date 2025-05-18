@@ -38,7 +38,10 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
         width = FillParent
 
         label = setting.name
-        valueFormatter = { setting.valueFormatter!!.invoke(setting, convertControlValue(it)) }
+
+        valueFormatter = {
+            setting.valueFormatter?.invoke(setting, convertControlValue(it)) ?: it.toString()
+        }
 
         onValueChanged = {
             setting.value = convertControlValue(it)
