@@ -32,7 +32,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
     override val setting: ModSetting<TSettingValue>
 ) : Container(), IModSettingComponent<TSettingValue> {
     /**
-     * The [FormControl] that is used to display this [ModSettingComponent]
+     * The [FormControl] that is used to display this [ModSettingComponent].
      */
     protected val control = createControl().apply {
         width = FillParent
@@ -65,6 +65,9 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
 
     /**
      * Converts a value from the [ModSetting] to a value that can be displayed in the [FormControl].
+     *
+     * @param value The value from the [ModSetting].
+     * @return The value that can be displayed in the [FormControl].
      */
     protected abstract fun convertSettingValue(value: TSettingValue): TControlValue
 
