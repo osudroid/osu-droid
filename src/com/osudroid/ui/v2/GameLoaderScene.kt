@@ -93,6 +93,13 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 text {
                     font = ResourceManager.getInstance().getFont("bigFont")
                     text = beatmapInfo.titleText
+
+                    if (!isRestart) {
+                        width = 700f
+                        clipToBounds = true
+                    }
+
+                    autoScrollSpeed = 30f
                     applyTheme = { color = it.accentColor }
                 }
 
@@ -100,6 +107,12 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = beatmapInfo.version
+
+                    if (!isRestart) {
+                        width = 700f
+                        clipToBounds = true
+                    }
+
                     applyTheme = { color = it.accentColor }
                 }
 
