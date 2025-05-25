@@ -167,9 +167,13 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      *
      * @param includeNonUserPlayable Whether to include non-user-playable [Mod]s in the serialization.
      * Defaults to `true`.
+     * @param includeIrrelevantMods Whether to include irrelevant [Mod]s in the serialization.
+     * Defaults to `false`.
+     * @return The serialized [Mod]s in a [JSONArray].
      */
     @JvmOverloads
-    fun serializeMods(includeNonUserPlayable: Boolean = true) = ModUtils.serializeMods(values, includeNonUserPlayable)
+    fun serializeMods(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
+        ModUtils.serializeMods(values, includeNonUserPlayable)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
