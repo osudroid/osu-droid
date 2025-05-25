@@ -84,9 +84,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val acronym = "DA"
     override val description = "Override a beatmap's difficulty settings."
     override val type = ModType.Conversion
-
-    override val isRelevant
-        get() = cs != null || ar != null || od != null || hp != null
+    override val requiresConfiguration = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
         // Graph: https://www.desmos.com/calculator/yrggkhrkzz
