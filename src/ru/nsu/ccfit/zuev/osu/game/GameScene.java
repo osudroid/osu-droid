@@ -746,10 +746,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
-        ModHashMap modsToUse = mods != null ? mods.deepCopy() : lastMods;
         BeatmapInfo beatmapToUse = beatmapInfo != null ? beatmapInfo : lastBeatmapInfo;
-
         boolean isRestart = beatmapInfo == null && replayFile == null && mods == null;
+        ModHashMap modsToUse;
+
+        if (isHUDEditor) {
+            modsToUse = new ModHashMap();
+            modsToUse.put(ModAutoplay.class);
+        } else {
+            modsToUse = mods != null ? mods.deepCopy() : lastMods;
+        }
 
         GameLoaderScene scene = new GameLoaderScene(this, beatmapToUse, modsToUse, isRestart);
         engine.getCamera().setHUD(null);
