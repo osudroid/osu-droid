@@ -51,8 +51,10 @@ Version 1.8.4
     it has been redesigned to also account for the overall theme of other interfaces.
 - Replace speed modify with Custom Speed mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - As a part of the mod storage system rework, speed modify is now considered an actual mod.
+  - Mod icon is skinnable with `selection-mod-customspeed`.
 - Replace forced difficulty statistics with Difficulty Adjust mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - As a part of the mod storage system rework, forced difficulty statistics are now considered an actual mod.
+  - Mod icon is skinnable with `selection-mod-difficultyadjust`.
 - Redesign gameplay loading screen <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
   - Now displays epilepsy warning. 
   - Now includes settings that were removed from the current mod menu, plus additional ones such as beatmap-specific
@@ -83,6 +85,7 @@ Version 1.8.4
   - Current excluded services are:
     - `com.android.systemui`
     - `com.miui.voiceassist`
+- Ensure that HUD editor only uses Autoplay mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span> 
 
 # Bug Fixes
 
@@ -93,3 +96,4 @@ Version 1.8.4
   - Affects the performance points of scores with these mods applied.
 - Fix gameplay time potentially being behind audio time until gameplay is restarted or finished <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix gameplay loading screen being scaled incorrectly when playfield size settings are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix Autoplay mod being persisted after quitting from HUD editor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
