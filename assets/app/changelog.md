@@ -26,9 +26,20 @@ Version 1.8.4
   - A custom seed can be provided in the mod menu to ensure the same randomization in the same beatmap.
   - Angle sharpness of jumps can be configured in the mod menu.
   - Mod icon is skinnable with `selection-mod-random`.
+- Add Muted mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Gradually adjusts the volume of the music (and optionally hitsounds) as gameplay progresses.
+  - Can be configured to start from full volume or silence, or to add a metronome beat for assistance.
+  - Mod icon is skinnable with `selection-mod-muted`.
+- Add Freeze Frame mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Advances the approach rate of hit objects that are in the same combo.
+  - Mod icon is skinnable with `selection-mod-freezeframe`.
+- Add Approach Different mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Changes the way approach circles shrinks towards hit objects.
+  - Available changes are initial scale and rate of shrink.
+  - Mod icon is skinnable with `selection-mod-approachdifferent`.
 - Add "only fade approach circles" setting to Hidden mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This setting only fades the approach circles of hit objects and nothing else.
-  - Enabling this setting will mark the mod as unranked.
+  - Enabling this setting will set the mod's score multiplier to 1x and mark scores as unranked.
 
 # Changes
 
@@ -80,3 +91,5 @@ Version 1.8.4
   - Now, hit object parts that are outside the gameplay space would not be rendered.
 - Fix circle size conversion in Easy, Really Easy, and Hard Rock mod using wrong scale unit in difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Affects the performance points of scores with these mods applied.
+- Fix gameplay time potentially being behind audio time until gameplay is restarted or finished <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay loading screen being scaled incorrectly when playfield size settings are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
