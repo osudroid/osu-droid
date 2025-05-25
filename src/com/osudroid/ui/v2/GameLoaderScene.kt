@@ -141,16 +141,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
             }
 
             if (!isRestart) {
-                scrollableContainer {
-                    anchor = Anchor.CenterRight
-                    origin = Anchor.CenterRight
-                    width = 460f
-                    height = FillParent
-                    x = -20f
-                    scrollAxes = Axes.Y
-
-                    +QuickSettingsLayout()
-                }
+                +QuickSettingsLayout()
             }
         }
     }
@@ -197,92 +188,101 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
     }
 
 
-    private inner class QuickSettingsLayout : LinearContainer() {
+    private inner class QuickSettingsLayout : ScrollableContainer() {
 
         init {
-            width = FillParent
-            spacing = 20f
-            padding = Vec4(0f, 20f)
-            orientation = Orientation.Vertical
-            alpha = 0.5f
+            anchor = Anchor.CenterRight
+            origin = Anchor.CenterRight
+            width = 460f
+            height = FillParent
+            x = -20f
+            scrollAxes = Axes.Y
 
-            collapsibleCard {
+            linearContainer {
                 width = FillParent
-                title = "Beatmap"
+                spacing = 20f
+                padding = Vec4(0f, 20f)
+                orientation = Orientation.Vertical
+                alpha = 0.5f
 
-                content.apply {
+                collapsibleCard {
+                    width = FillParent
+                    title = "Beatmap"
 
-                    val offsetSlider = FormSlider(0f).apply {
-                        label = "Offset"
-                        control.min = -250f
-                        control.max = 250f
-                        valueFormatter = { "${it.roundToInt()}ms" }
-                    }
-                    +offsetSlider
+                    content.apply {
 
-                    linearContainer {
-                        spacing = 10f
-                        padding = Vec4(0f, 16f)
-                        anchor = Anchor.TopCenter
-                        origin = Anchor.TopCenter
-
-                        fun StepButton(step: Int) = textButton {
-                            text = abs(step).toString()
-                            height = 42f
-                            spacing = 2f
-                            padding = Vec4(12f, 0f, 24f, 0f)
-
-                            leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
-                            leadingIcon!!.height = 20f
-
-                            onActionUp = {
-                                offsetSlider.value += step
-                            }
+                        val offsetSlider = FormSlider(0f).apply {
+                            label = "Offset"
+                            control.min = -250f
+                            control.max = 250f
+                            valueFormatter = { "${it.roundToInt()}ms" }
                         }
+                        +offsetSlider
 
-                        StepButton(-5)
-                        StepButton(-1)
-                        StepButton(1)
-                        StepButton(5)
+                        linearContainer {
+                            spacing = 10f
+                            padding = Vec4(0f, 16f)
+                            anchor = Anchor.TopCenter
+                            origin = Anchor.TopCenter
+
+                            fun StepButton(step: Int) = textButton {
+                                text = abs(step).toString()
+                                height = 42f
+                                spacing = 2f
+                                padding = Vec4(12f, 0f, 24f, 0f)
+
+                                leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
+                                leadingIcon!!.height = 20f
+
+                                onActionUp = {
+                                    offsetSlider.value += step
+                                }
+                            }
+
+                            StepButton(-5)
+                            StepButton(-1)
+                            StepButton(1)
+                            StepButton(5)
+                        }
                     }
                 }
-            }
 
-            collapsibleCard {
-                width = FillParent
-                title = "Settings"
+                collapsibleCard {
+                    width = FillParent
+                    title = "Settings"
 
-                content.apply {
+                    content.apply {
 
-                    +IntPreferenceSlider("bgbrightness", 25).apply {
-                        label = "Background brightness"
-                        control.min = 0f
-                        control.max = 100f
-                        control.onStopDragging = {
-                            if (!isStarting) {
-                                dimBox.fadeTo(0.7f, 0.1f)
+                        +IntPreferenceSlider("bgbrightness", 25).apply {
+                            label = "Background brightness"
+                            control.min = 0f
+                            control.max = 100f
+                            control.onStopDragging = {
+                                if (!isStarting) {
+                                    dimBox.fadeTo(0.7f, 0.1f)
+                                }
+                            }
+                            valueFormatter = { "${it.roundToInt()}%" }
+                            onValueChanged = {
+                                Config.setBackgroundBrightness(it / 100f)
+
+                                if (!isStarting) {
+                                    dimBox.alpha = 1f - it / 100f
+                                }
                             }
                         }
-                        valueFormatter = { "${it.roundToInt()}%" }
-                        onValueChanged = {
-                            Config.setBackgroundBrightness(it / 100f)
 
-                            if (!isStarting) {
-                                dimBox.alpha = 1f - it / 100f
-                            }
+                        +PreferenceCheckbox("enableStoryboard").apply {
+                            label = "Enable storyboard"
                         }
-                    }
 
-                    +PreferenceCheckbox("enableStoryboard").apply {
-                        label = "Enable storyboard"
-                    }
+                        +PreferenceCheckbox("enableVideo").apply {
+                            label = "Enable background video"
+                        }
 
-                    +PreferenceCheckbox("enableVideo").apply {
-                        label = "Enable background video"
-                    }
-
-                    +PreferenceCheckbox("showscoreboard").apply {
-                        label = "Show scoreboard"
+                        +PreferenceCheckbox("showscoreboard").apply {
+                            label = "Show scoreboard"
+                        }
                     }
                 }
             }
