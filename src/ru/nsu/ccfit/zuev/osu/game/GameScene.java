@@ -727,6 +727,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         isReadyToStart = false;
         isHUDEditorMode = isHUDEditor;
         startedFromHUDEditor = isHUDEditor;
+        resetPlayfieldSizeScale();
 
         scene = createMainScene();
         bgScene = new ExtendedScene();
@@ -796,13 +797,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
-        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
-            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
-            camera.setZoomFactorDirect(Config.getPlayfieldSize());
-            if (Config.isShrinkPlayfieldDownwards()) {
-                camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2 * Config.getPlayfieldSize());
-            }
-        }
 
         stat = new StatisticV2();
         stat.setMod(lastMods);
@@ -1056,6 +1050,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (skipTime <= 1)
             RoomScene.INSTANCE.getChat().dismiss();
 
+        applyPlayfieldSizeScale();
         loadBackground(lastBeatmapInfo);
 
         leadOut = 0;
@@ -1531,13 +1526,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.setStat(stat);
                 replay.save(replayPath);
             }
-            if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
-                SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
-                camera.setZoomFactorDirect(1f);
-                if (Config.isShrinkPlayfieldDownwards()) {
-                    camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
-                }
-            }
+            resetPlayfieldSizeScale();
 
             if (blockAreaFragment != null) {
                 blockAreaFragment.dismiss();
@@ -1788,13 +1777,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         onExit();
-        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
-            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
-            camera.setZoomFactorDirect(1f);
-            if (Config.isShrinkPlayfieldDownwards()) {
-                camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
-            }
-        }
+        resetPlayfieldSizeScale();
         scene = createMainScene();
         engine.getCamera().setHUD(null);
 
@@ -2911,5 +2894,31 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 super.onManagedUpdate(dt);
             }
         };
+    }
+
+    private void applyPlayfieldSizeScale() {
+        // IMPORTANT: This MUST be called only when the game scene is displayed, otherwise it will scale the currently
+        // displayed scene (the one before gameplay starts), which is not what we want.
+        if (!(GlobalManager.getInstance().getCamera() instanceof SmoothCamera camera)) {
+            return;
+        }
+
+        float playfieldSize = Config.getPlayfieldSize();
+
+        camera.setZoomFactorDirect(playfieldSize);
+        if (Config.isShrinkPlayfieldDownwards()) {
+            camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f * playfieldSize);
+        }
+    }
+
+    private void resetPlayfieldSizeScale() {
+        if (!(GlobalManager.getInstance().getCamera() instanceof SmoothCamera camera)) {
+            return;
+        }
+
+        camera.setZoomFactorDirect(1f);
+        if (Config.isShrinkPlayfieldDownwards()) {
+            camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        }
     }
 }
