@@ -48,9 +48,15 @@ sealed class Mod {
     open val isRanked = false
 
     /**
+     * Whether this [Mod] requires configuration by the user to make any meaningful changes to gameplay.
+     */
+    open val requiresConfiguration = false
+
+    /**
      * Whether adding this [Mod] will affect gameplay.
      */
-    open val isRelevant = true
+    open val isRelevant
+        get() = !requiresConfiguration || !usesDefaultSettings
 
     /**
      * Whether this [Mod] is playable by a real human user.
