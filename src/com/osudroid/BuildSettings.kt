@@ -21,6 +21,11 @@ object BuildSettings {
      * Whether to use fake multiplayer mode or not.
      */
     const val MOCK_MULTIPLAYER = false
+
+    /**
+     * Whether to use the debug playground scene or not.
+     */
+    const val DEBUG_PLAYGROUND = false
 }
 
 
