@@ -23,7 +23,6 @@ open class Badge : CompoundText() {
 
     init {
         padding = Vec4(12f, 8f)
-        foreground = BezelOutline(12f)
         background = Box().apply { cornerRadius = 12f }
     }
 
@@ -80,7 +79,6 @@ open class LabeledBadge : LinearContainer() {
 
     init {
         orientation = Orientation.Horizontal
-        foreground = BezelOutline(12f)
         background = Box().apply { cornerRadius = 12f }
     }
 }

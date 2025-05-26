@@ -85,7 +85,6 @@ open class Button : LinearContainer() {
     init {
         padding = Vec4(12f, 16f)
         scaleCenter = Anchor.Center
-        foreground = BezelOutline(12f)
         background = Box().apply { cornerRadius = 12f }
     }
 
