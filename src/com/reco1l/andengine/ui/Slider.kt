@@ -91,7 +91,6 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
         foreground = Box().apply {
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
-            depthInfo = DepthInfo.Default
         }
         depthInfo = DepthInfo.Default
     }
