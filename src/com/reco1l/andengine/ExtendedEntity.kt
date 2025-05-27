@@ -77,6 +77,15 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         }
     }
 
+    /**
+     * The minimum width of the entity.
+     */
+    var minWidth = 0f
+
+    /**
+     * The maximum width of the entity.
+     */
+    var maxWidth = Float.MAX_VALUE
 
     /**
      * The width of the entity.
@@ -90,13 +99,23 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             } else {
                 field + padding.horizontal
             }
-        }
+        }.coerceAtLeast(minWidth).coerceAtMost(maxWidth)
         set(value) {
             if (field != value) {
                 field = value
                 invalidate(InvalidationFlag.Size)
             }
         }
+
+    /**
+     * The minimum height of the entity.
+     */
+    var minHeight = 0f
+
+    /**
+     * The maximum height of the entity.
+     */
+    var maxHeight = Float.MAX_VALUE
 
     /**
      * The height of the entity.
@@ -110,7 +129,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             } else {
                 field + padding.vertical
             }
-        }
+        }.coerceAtLeast(minHeight).coerceAtMost(maxHeight)
         set(value) {
             if (field != value) {
                 field = value
