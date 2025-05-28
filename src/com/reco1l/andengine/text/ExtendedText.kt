@@ -163,6 +163,8 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
                 scrollX = x
                 scrollXTimeoutElapsed = timeout
+            } else {
+                scrollX = 0f
             }
 
             val maxScrollY = contentHeight - height
@@ -172,7 +174,13 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
                 scrollY = y
                 scrollYTimeoutElapsed = timeout
+            } else {
+                scrollY = 0f
             }
+
+        } else {
+            scrollX = 0f
+            scrollY = 0f
         }
 
         super.onManagedUpdate(deltaTimeSec)
