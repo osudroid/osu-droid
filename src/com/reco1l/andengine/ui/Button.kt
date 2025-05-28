@@ -15,9 +15,6 @@ open class Button : LinearContainer() {
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.175f
         color = if (isSelected) theme.accentColor * 0.1f else theme.accentColor
-
-        onSelectionChange()
-        onEnableStateChange()
     }
 
 
