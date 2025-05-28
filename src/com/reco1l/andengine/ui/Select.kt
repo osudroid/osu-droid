@@ -40,7 +40,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
         clipToBounds = true
         background = Box().apply {
             cornerRadius = 14f
-            applyTheme = { color = it.accentColor * 0.15f }
+            applyTheme = { color = it.accentColor * 0.175f }
         }
 
         optionsContainer = linearContainer {
@@ -71,7 +71,36 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
     /**
      * The button that toggles the dropdown menu.
      */
-    val button = TextButton()
+    val button = object : TextButton() {
+
+        init {
+            width = FillParent
+            content.textEntity.clipToBounds = true
+            onActionUp = {
+                if (isExpanded) {
+                    collapse()
+                } else {
+                    expand()
+                }
+            }
+
+            trailingIcon = Triangle()
+            trailingIcon!!.apply {
+                width = 14f
+                height = 8f
+                color = ColorARGB.White
+                alpha = 0.25f
+                rotationCenter = Anchor.Center
+                rotation = 180f
+                padding = Vec4(12f, 0f)
+            }
+        }
+
+        override fun onThemeChanged(theme: Theme) {
+            super.onThemeChanged(theme)
+            background?.color = theme.accentColor * 0.25f
+        }
+    }
 
 
     /**
@@ -112,30 +141,10 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
 
 
     init {
-        //clipToBounds = true
+        clipToBounds = true
 
         +button.apply {
-            width = FillParent
             text = placeholder
-            content.textEntity.clipToBounds = true
-            onActionUp = {
-                if (isExpanded) {
-                    collapse()
-                } else {
-                    expand()
-                }
-            }
-
-            trailingIcon = Triangle()
-            trailingIcon!!.apply {
-                width = 14f
-                height = 8f
-                color = ColorARGB.White
-                alpha = 0.25f
-                rotationCenter = Anchor.Center
-                rotation = 180f
-                padding = Vec4(12f, 0f)
-            }
         }
 
         menu.apply {
