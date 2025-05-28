@@ -9,6 +9,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
+import com.rian.osu.mods.settings.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class ModCustomizationMenu : Modal(
@@ -61,6 +62,7 @@ class ModCustomizationMenu : Modal(
         modSettingComponents.fastForEach { it.update() }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): ModSettingComponent<*, *> {
 
         val component = when (setting) {
@@ -81,6 +83,10 @@ class ModCustomizationMenu : Modal(
                 else NullableIntegerModSettingSlider(mod, setting)
 
             is BooleanModSetting -> ModSettingCheckbox(mod, setting)
+
+            is EnumModSetting<*> -> ModSettingEnum(mod, setting as EnumModSetting<Enum<*>>)
+
+            else -> throw IllegalArgumentException("Unsupported mod setting type: ${setting::class.java.simpleName}")
         }
 
         modSettingComponents.add(component)

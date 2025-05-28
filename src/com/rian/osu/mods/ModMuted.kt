@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.mods.settings.*
 import kotlin.math.max
 import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.isAccessible

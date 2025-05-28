@@ -4,8 +4,8 @@ import com.reco1l.andengine.ui.Control
 import com.reco1l.andengine.ui.form.FormControl
 import com.reco1l.andengine.ui.form.FormSlider
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModSetting
-import com.rian.osu.mods.RangeConstrainedModSetting
+import com.rian.osu.mods.settings.ModSetting
+import com.rian.osu.mods.settings.RangeConstrainedModSetting
 
 sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     ModSettingComponent<V, Float>(mod, setting) {

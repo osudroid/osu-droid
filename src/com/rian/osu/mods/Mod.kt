@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.mods.settings.*
 import org.json.JSONObject
 import kotlin.reflect.*
 import kotlin.reflect.full.*

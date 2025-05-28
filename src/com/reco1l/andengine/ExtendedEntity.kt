@@ -88,14 +88,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The minimum width of the entity.
      */
     var minWidth = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.horizontal,
-            position = x,
-            isRelative = relativeSizeAxes.isHorizontal,
-            contentSize = contentWidth,
-            containerSize = parent.innerWidth,
-        )
         set(value) {
             if (field != value) {
                 field = value
@@ -107,14 +99,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The maximum width of the entity.
      */
     var maxWidth = Float.MAX_VALUE
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.horizontal,
-            position = x,
-            isRelative = relativeSizeAxes.isHorizontal,
-            contentSize = contentWidth,
-            containerSize = parent.innerWidth,
-        )
         set(value) {
             if (field != value) {
                 field = value
@@ -144,14 +128,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The minimum height of the entity.
      */
     var minHeight = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.vertical,
-            position = y,
-            isRelative = relativeSizeAxes.isVertical,
-            contentSize = contentHeight,
-            containerSize = parent.innerHeight,
-        )
         set(value) {
             if (field != value) {
                 field = value
@@ -162,14 +138,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The maximum height of the entity.
      */
     var maxHeight = Float.MAX_VALUE
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.vertical,
-            position = y,
-            isRelative = relativeSizeAxes.isVertical,
-            contentSize = contentHeight,
-            containerSize = parent.innerHeight,
-        )
         set(value) {
             if (field != value) {
                 field = value

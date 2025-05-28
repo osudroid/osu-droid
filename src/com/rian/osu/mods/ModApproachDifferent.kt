@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.toolkt.roundBy
+import com.rian.osu.mods.settings.*
 import org.json.JSONObject
 
 /**
@@ -34,7 +35,11 @@ class ModApproachDifferent : Mod() {
      * The animation style of the approach circles.
      */
     // TODO: change to dropdown input
-    var style = AnimationStyle.Gravity
+    var style by EnumModSetting(
+        name = "Animation style",
+        valueFormatter = { it.name },
+        defaultValue = AnimationStyle.Gravity,
+    )
 
     /**
      * The [Easing] to apply to the approach circle animation.
