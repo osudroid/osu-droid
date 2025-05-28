@@ -177,6 +177,11 @@ open class ScrollableContainer : Container() {
     //region Dimension properties
 
     /**
+     * The padding for the scrollable content.
+     */
+    var scrollPadding = Vec2(0f, 0f)
+
+    /**
      * The maximum scroll position on the x-axis.
      *
      * This does not take into account the overscroll.
@@ -197,14 +202,14 @@ open class ScrollableContainer : Container() {
      * the width of the vertical indicator.
      */
     val scrollableContentWidth
-        get() = max(0f, contentWidth)
+        get() = max(0f, contentWidth) + scrollPadding.x
 
     /**
      * The height of the content that can be scrolled. That is [contentHeight] minus
      * the height of the horizontal indicator.
      */
     val scrollableContentHeight
-        get() = max(0f, contentHeight)
+        get() = max(0f, contentHeight) + scrollPadding.y
 
     //endregion
 
