@@ -183,3 +183,14 @@ var IEntity.rotationCenter
 
 //endregion
 
+
+//region Utilities
+
+/**
+ * Traverses the parent hierarchy of the entity to find the first scene it belongs to.
+ */
+fun IEntity.getParentScene(): Scene? {
+    return if (this is Scene) this else parent?.getParentScene()
+}
+
+//endregion
