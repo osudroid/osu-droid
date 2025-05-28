@@ -156,7 +156,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
         }
 
         if (isExpanded) {
-            optionsContainer.minWidth = max(buttons.values.maxOf { it.contentWidth + it.padding.horizontal }, button.width)
+            optionsContainer.minWidth = max(buttons.values.maxOfOrNull { it.contentWidth + it.padding.horizontal } ?: 0f, button.width)
         }
 
         super.onManagedUpdate(deltaTimeSec)
