@@ -96,7 +96,7 @@ open class Button : LinearContainer() {
      */
     open fun onEnableStateChange() {
         clearModifiers(ModifierType.Alpha)
-        fadeTo(if (isEnabled) 1f else 0.25f, 0.2f)
+        fadeTo(if (isEnabled) 1f else 0.5f, 0.2f)
     }
 
     /**
@@ -221,10 +221,6 @@ open class TextButton : Button() {
         +content
     }
 
-    override fun onEnableStateChange() {
-        clearModifiers(ModifierType.Alpha)
-        fadeTo(if (isEnabled) 1f else 0.5f, 0.2f)
-    }
 }
 
 open class IconButton : Button() {
