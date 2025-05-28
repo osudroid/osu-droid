@@ -23,6 +23,7 @@ class ModCustomizationMenu : Modal(
         y = 90f
         scaleCenter = Anchor.TopCenter
         clipToBounds = true
+        scrollPadding = Vec2(0f, 300f)
 
         +LinearContainer().apply {
             width = FillParent
