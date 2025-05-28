@@ -194,6 +194,10 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
 
             val button = object : TextButton() {
 
+                override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+                    color = theme.accentColor
+                }
+
                 init {
                     width = FillParent
                     text = option.text
