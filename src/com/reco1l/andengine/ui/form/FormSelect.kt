@@ -5,7 +5,6 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 
-@Suppress("LeakingThis")
 open class FormSelect<T : Any>(initialValues: List<T> = emptyList()) : FormControl<List<T>, Select<T>>(initialValues) {
 
     final override val control = Select<T>().apply {
