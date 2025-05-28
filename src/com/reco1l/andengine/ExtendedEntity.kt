@@ -68,38 +68,71 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             || value == FitParent
     }
 
-    private fun handleReservedSizeValue(value: Float, contentSize: Float, padding: Float, parentInnerSize: Float, position: Float): Float {
-        return when (value) {
-            MatchContent -> contentSize + padding
-            FillParent -> parentInnerSize - position
-            FitParent -> min(contentSize + padding, parentInnerSize - position)
-            else -> value
+    private fun computeSizeValue(value: Float, padding: Float, position: Float, isRelative: Boolean, contentSize: Float, containerSize: Float): Float {
+
+        if (isReservedSizeValue(value)) {
+            return when (value) {
+                MatchContent -> contentSize + padding
+                FillParent -> containerSize - position
+                FitParent -> min(contentSize + padding, containerSize - position)
+
+                // This is unreachable, if it happens means the function `isReservedSizeValue` is not working properly.
+                else -> throw IllegalArgumentException("Invalid reserved size value: $value")
+            }
         }
+
+        return if (isRelative) value * containerSize else value + padding
     }
 
     /**
      * The minimum width of the entity.
      */
     var minWidth = 0f
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.horizontal,
+            position = x,
+            isRelative = relativeSizeAxes.isHorizontal,
+            contentSize = contentWidth,
+            containerSize = parent.innerWidth,
+        )
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
 
     /**
      * The maximum width of the entity.
      */
     var maxWidth = Float.MAX_VALUE
-
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.horizontal,
+            position = x,
+            isRelative = relativeSizeAxes.isHorizontal,
+            contentSize = contentWidth,
+            containerSize = parent.innerWidth,
+        )
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
     /**
      * The width of the entity.
      */
     var width: Float = 0f
-        get() = when {
-            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentWidth, padding.horizontal, parent.innerWidth, x)
-
-            else -> if (relativeSizeAxes.isHorizontal) {
-                field * parent.innerWidth
-            } else {
-                field + padding.horizontal
-            }
-        }.coerceAtLeast(minWidth).coerceAtMost(maxWidth)
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.horizontal,
+            position = x,
+            isRelative = relativeSizeAxes.isHorizontal,
+            contentSize = contentWidth,
+            containerSize = parent.innerWidth,
+        ).coerceAtMost(maxWidth).coerceAtLeast(minWidth)
         set(value) {
             if (field != value) {
                 field = value
@@ -111,25 +144,50 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The minimum height of the entity.
      */
     var minHeight = 0f
-
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.vertical,
+            position = y,
+            isRelative = relativeSizeAxes.isVertical,
+            contentSize = contentHeight,
+            containerSize = parent.innerHeight,
+        )
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
     /**
      * The maximum height of the entity.
      */
     var maxHeight = Float.MAX_VALUE
-
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.vertical,
+            position = y,
+            isRelative = relativeSizeAxes.isVertical,
+            contentSize = contentHeight,
+            containerSize = parent.innerHeight,
+        )
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
     /**
      * The height of the entity.
      */
     var height = 0f
-        get() = when {
-            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentHeight, padding.vertical, parent.innerHeight, y)
-
-            else -> if (relativeSizeAxes.isVertical) {
-                field * parent.innerHeight
-            } else {
-                field + padding.vertical
-            }
-        }.coerceAtLeast(minHeight).coerceAtMost(maxHeight)
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.vertical,
+            position = y,
+            isRelative = relativeSizeAxes.isVertical,
+            contentSize = contentHeight,
+            containerSize = parent.innerHeight,
+        ).coerceAtMost(maxHeight).coerceAtLeast(minHeight)
         set(value) {
             if (field != value) {
                 field = value
