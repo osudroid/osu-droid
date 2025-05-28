@@ -209,6 +209,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
                             alpha = 0f
                         }
                     }
+                    isSelected = option.value in value
                 }
 
                 override fun onSelectionChange() {
