@@ -15,6 +15,7 @@ class ModMenuToggle(val mod: Mod): Button() {
         orientation = Orientation.Horizontal
         width = FillParent
         spacing = 8f
+        cullingMode = CullingMode.CameraBounds
 
         background = Box().apply {
             cornerRadius = 12f
