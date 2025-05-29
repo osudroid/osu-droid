@@ -2,8 +2,8 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
-import com.osudroid.BuildSettings
-import com.osudroid.debug.EntityInspector
+import com.osudroid.*
+import com.osudroid.debug.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
@@ -354,6 +354,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     var decoratedEntity: ExtendedEntity? = null
 
     /**
+     * Whether the entity should be culled when it is outside the parent's bounds.
+     */
+    var cullingMode = CullingMode.Disabled
+
+    /**
      * The current invalidation flags. Indicates which properties were updated and need to be handled.
      *
      * @see InvalidationFlag
@@ -459,6 +464,39 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     //region Position
 
     /**
+     * Whether the entity is outside the camera's or parent's bounds.
+     */
+    open fun isCulled(camera: Camera): Boolean {
+
+        when (cullingMode) {
+
+            CullingMode.CameraBounds -> {
+                val (x1, y1) = convertLocalToSceneCoordinates(0f, 0f)
+                val (x2, y2) = convertLocalToSceneCoordinates(width, height)
+
+                return x2 < camera.minX || y2 < camera.minY || x1 > camera.maxX || y1 > camera.maxY
+            }
+
+            CullingMode.ParentBounds -> {
+
+                if (parent !is ExtendedEntity && parent !is ExtendedScene) {
+                    return false
+                }
+
+                val x1 = absoluteX
+                val y1 = absoluteY
+                val x2 = x1 + width
+                val y2 = y1 + height
+
+                return x2 < 0f || y2 < 0f || x1 > parent.getWidth() || y1 > parent.getHeight()
+            }
+
+            else -> return false
+        }
+
+    }
+
+    /**
      * Called when the position of a child entity changes.
      */
     open fun onChildPositionChanged(child: IEntity) {}
@@ -553,7 +591,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
     override fun onDraw(gl: GL10, camera: Camera) {
 
-        if (!isVisible) {
+        val isCulled = isCulled(camera)
+
+        if (!isVisible || isCulled) {
             // We're going to still handle invalidations flags even if the entity is not visible
             // because some of them like size-related flags might change the parent's layout.
             handleInvalidation(true)
