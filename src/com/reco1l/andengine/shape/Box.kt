@@ -1,5 +1,7 @@
 package com.reco1l.andengine.shape
 
+import android.util.Log
+import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.Box.*
@@ -57,7 +59,7 @@ open class Box : BufferedEntity<BoxVBO>() {
         val segments = if (radius > 0f) Circle.approximateSegments(radius, radius, 90f) else 0
 
         val buffer = buffer
-        if (buffer?.radius == radius && buffer.segments == segments) {
+        if (buffer?.radius == radius && buffer.segments == segments && buffer.paintStyle == paintStyle) {
             return buffer
         }
 
@@ -73,10 +75,10 @@ open class Box : BufferedEntity<BoxVBO>() {
     }
 
 
-    inner class BoxVBO(
+    class BoxVBO(
         val radius: Float,
         val segments: Int,
-        paintStyle: PaintStyle
+        val paintStyle: PaintStyle
     ) : VertexBuffer(
 
         // Segments * Arc count + Center point + Closing point
@@ -91,8 +93,8 @@ open class Box : BufferedEntity<BoxVBO>() {
     ) {
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-            val width = width
-            val height = height
+            val width = entity.width
+            val height = entity.height
             val segments = max(1, segments)
 
             var position = 0
