@@ -51,11 +51,6 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     var maxCharacters = 0
 
     /**
-     * The entity that will be used to translate the text input field when the keyboard overlaps it.
-     */
-    var translateTarget: ExtendedEntity = this
-
-    /**
      * The font used to render the text.
      */
     var font by textEntity::font
@@ -137,19 +132,6 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
             caret.alpha = if (caretFading) 1f - alphaFactor else alphaFactor
 
             elapsedTimeSec += deltaTimeSec
-        }
-
-        val keyboardHeight = ExtendedEngine.Current.keyboardHeight
-
-        if (isFocused) {
-            val (_, sceneY) = convertLocalToSceneCoordinates(0f, height)
-            val (_, screenY) = ExtendedEngine.Current.camera.getScreenSpaceCoordinates(0f, sceneY)
-
-            if (screenY < keyboardHeight) {
-                translateTarget.translationY = -(keyboardHeight - screenY)
-            }
-        } else {
-            translateTarget.translationY = 0f
         }
 
         super.onManagedUpdate(deltaTimeSec)
