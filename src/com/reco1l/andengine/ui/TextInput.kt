@@ -246,11 +246,16 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     }
 
     private fun notifyInputError() {
-        background?.apply {
-            clearEntityModifiers()
-
+        textEntity.apply {
+            clearModifiers(ModifierType.Color)
             color = ColorARGB.Red
-            colorTo(Theme.current.accentColor * 0.25f, 0.2f)
+            colorTo(Theme.current.accentColor, 0.2f)
+        }
+
+        foreground?.apply {
+            clearModifiers(ModifierType.Color)
+            color = ColorARGB.Red
+            colorTo(Theme.current.accentColor, 0.2f)
         }
     }
 
