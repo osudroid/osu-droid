@@ -34,7 +34,6 @@ class ModApproachDifferent : Mod() {
     /**
      * The animation style of the approach circles.
      */
-    // TODO: change to dropdown input
     var style by EnumModSetting(
         name = "Animation style",
         valueFormatter = { it.name },

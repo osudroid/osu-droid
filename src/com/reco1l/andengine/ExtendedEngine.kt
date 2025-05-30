@@ -1,9 +1,7 @@
 package com.reco1l.andengine
 
 import android.app.Activity
-import android.util.Log
 import android.view.*
-import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.ui.*
@@ -31,9 +29,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                 field = value
 
                 if (value != null) {
-                    if (value is IFocusable) {
-                        value.onFocus()
-                    }
+                    value.onFocus()
 
                     val (_, sceneY) = value.convertLocalToSceneCoordinates(0f, value.height)
                     val (_, surfaceY) = camera.convertSceneToSurfaceCoordinates(0f, sceneY, invertYAxis = false)
