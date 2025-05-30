@@ -16,35 +16,24 @@ class ModMirror : Mod(), IModApplicableToHitObject {
     override val type = ModType.Conversion
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
-    override val isRelevant
-        get() = flipHorizontally || flipVertically
-
     /**
-     * Whether to flip the [HitObject]s horizontally.
+     * The axes along which to flip the [HitObject]s.
      */
-    var flipHorizontally by BooleanModSetting(
-        name = "Flip Horizontally",
-        defaultValue = true
-    )
-
-    /**
-     * Whether to flip the [HitObject]s vertically.
-     */
-    var flipVertically by BooleanModSetting(
-        name = "Flip Vertically",
-        defaultValue = false
+    var reflection by EnumModSetting(
+        name = "Flipped axes",
+        valueFormatter = { it.name },
+        defaultValue = MirrorType.Horizontal
     )
 
     override fun copySettings(settings: JSONObject) {
         super.copySettings(settings)
 
-        if (!settings.has("flippedAxes")) {
-            return
+        reflection = when (settings.optInt("flippedAxes")) {
+            0 -> MirrorType.Horizontal
+            1 -> MirrorType.Vertical
+            2 -> MirrorType.Both
+            else -> reflection
         }
-
-        val flippedAxes = settings.getInt("flippedAxes")
-        flipHorizontally = flippedAxes and 1 == 1
-        flipVertically = flippedAxes and 2 == 2
     }
 
     override fun serializeSettings(): JSONObject? {
@@ -53,14 +42,7 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         }
 
         return JSONObject().apply {
-            put(
-                "flippedAxes", when {
-                    flipHorizontally && flipVertically -> 2
-                    flipHorizontally -> 0
-                    flipVertically -> 1
-                    else -> null
-                }
-            )
+            put("flippedAxes", reflection.ordinal)
         }
     }
 
@@ -69,12 +51,17 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         hitObject: HitObject,
         adjustmentMods: Iterable<IModFacilitatesAdjustment>
     ) {
-        if (flipHorizontally) {
-            HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
-        }
+        when (reflection) {
+            MirrorType.Horizontal ->
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
 
-        if (flipVertically) {
-            HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+            MirrorType.Vertical ->
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+
+            MirrorType.Both -> {
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+            }
         }
     }
 
@@ -82,11 +69,11 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         get() {
             val settings = mutableListOf<Char>()
 
-            if (flipHorizontally) {
+            if (reflection == MirrorType.Horizontal || reflection == MirrorType.Both) {
                 settings.add('↔')
             }
 
-            if (flipVertically) {
+            if (reflection == MirrorType.Vertical || reflection == MirrorType.Both) {
                 settings.add('↕')
             }
 
@@ -94,7 +81,12 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         }
 
     override fun deepCopy() = ModMirror().also {
-        it.flipHorizontally = flipHorizontally
-        it.flipVertically = flipVertically
+        it.reflection = reflection
+    }
+
+    enum class MirrorType {
+        Horizontal,
+        Vertical,
+        Both
     }
 }
