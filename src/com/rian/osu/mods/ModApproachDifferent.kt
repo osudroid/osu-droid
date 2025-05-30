@@ -69,7 +69,10 @@ class ModApproachDifferent : Mod() {
         put("style", style.ordinal)
     }
 
-    override fun deepCopy() = ModApproachDifferent()
+    override fun deepCopy() = ModApproachDifferent().also {
+        it.scale = scale
+        it.style = style
+    }
 
     enum class AnimationStyle {
         Linear,
