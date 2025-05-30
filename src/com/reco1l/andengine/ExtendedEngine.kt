@@ -2,7 +2,6 @@ package com.reco1l.andengine
 
 import android.app.Activity
 import android.view.*
-import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.ui.*
@@ -11,8 +10,10 @@ import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
+import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options), OnApplyWindowInsetsListener {
+class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
     /**
      * The current focused entity.
@@ -26,21 +27,56 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             if (field != value) {
                 (field as? IFocusable)?.onBlur()
                 field = value
-                (value as? IFocusable)?.onFocus()
+
+                if (value != null) {
+                    value.onFocus()
+
+                    val (_, sceneY) = value.convertLocalToSceneCoordinates(0f, value.height)
+                    val (_, surfaceY) = camera.convertSceneToSurfaceCoordinates(0f, sceneY, invertYAxis = false)
+
+                    focusedEntitySurfacePositionY = surfaceY
+                }
             }
         }
 
-    /**
-     * The height of the virtual keyboard.
-     */
-    var keyboardHeight = 0
-        private set
+
+    private var focusedEntitySurfacePositionY = 0f
 
 
     init {
         Current = this
+    }
 
-        ViewCompat.setOnApplyWindowInsetsListener(context.window.decorView, this)
+
+    override fun onDrawScene(pGL: GL10) {
+
+        val focusedEntity = focusedEntity
+
+        if (focusedEntity != null) {
+
+            if (focusedEntity is TextInput) {
+
+                val keyboardHeight = ViewCompat.getRootWindowInsets(context.window.decorView)
+                    ?.getInsets(WindowInsetsCompat.Type.ime())
+                    ?.bottom
+                    ?.toFloat() ?: 0f
+
+                val offset = max(0f, focusedEntitySurfacePositionY - (surfaceHeight - keyboardHeight))
+
+                val (_, sceneOffset) = camera.convertSurfaceToSceneCoordinates(0f, offset)
+
+                // Current scene isn't supposed to have any other position rather than 0,0
+                // so we assume it is safe to override the position.
+                scene.setPosition(0f, -sceneOffset)
+                scene.childScene?.setPosition(0f, -sceneOffset)
+            }
+
+        } else {
+            scene.setPosition(0f, 0f)
+            scene.childScene?.setPosition(0f, 0f)
+        }
+
+        super.onDrawScene(pGL)
     }
 
 
@@ -118,11 +154,6 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         }
 
         return super.onTouchScene(scene, event)
-    }
-
-    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
-        keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-        return insets
     }
 
 

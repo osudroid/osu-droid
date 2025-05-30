@@ -5,6 +5,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.math.Random
+import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.exp
 import kotlin.math.max

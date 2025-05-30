@@ -18,6 +18,7 @@ open class ModMenuSection(name: String, toggles: List<Button> = listOf()) : Line
         orientation = Orientation.Vertical
         width = 340f
         height = FillParent
+        cullingMode = CullingMode.CameraBounds
 
         background = Box().apply {
             applyTheme = { color = it.accentColor * 0.1f }

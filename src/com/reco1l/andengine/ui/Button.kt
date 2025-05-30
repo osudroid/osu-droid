@@ -15,9 +15,6 @@ open class Button : LinearContainer() {
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.175f
         color = if (isSelected) theme.accentColor * 0.1f else theme.accentColor
-
-        onSelectionChange()
-        onEnableStateChange()
     }
 
 
@@ -85,7 +82,6 @@ open class Button : LinearContainer() {
     init {
         padding = Vec4(12f, 16f)
         scaleCenter = Anchor.Center
-        foreground = BezelOutline(12f)
         background = Box().apply { cornerRadius = 12f }
     }
 
@@ -97,7 +93,7 @@ open class Button : LinearContainer() {
      */
     open fun onEnableStateChange() {
         clearModifiers(ModifierType.Alpha)
-        fadeTo(if (isEnabled) 1f else 0.25f, 0.2f)
+        fadeTo(if (isEnabled) 1f else 0.5f, 0.2f)
     }
 
     /**
@@ -222,10 +218,6 @@ open class TextButton : Button() {
         +content
     }
 
-    override fun onEnableStateChange() {
-        clearModifiers(ModifierType.Alpha)
-        fadeTo(if (isEnabled) 1f else 0.5f, 0.2f)
-    }
 }
 
 open class IconButton : Button() {

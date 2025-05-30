@@ -87,6 +87,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
             orientation = Orientation.Vertical
             spacing = 8f
             width = FillParent
+            cullingMode = CullingMode.CameraBounds
 
             onActionUp = {
                 ModMenu.modToggles.fastForEach { toggle ->

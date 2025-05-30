@@ -2,8 +2,8 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
-import com.osudroid.BuildSettings
-import com.osudroid.debug.EntityInspector
+import com.osudroid.*
+import com.osudroid.debug.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
@@ -68,29 +68,26 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             || value == FitParent
     }
 
-    private fun handleReservedSizeValue(value: Float, contentSize: Float, padding: Float, parentInnerSize: Float, position: Float): Float {
-        return when (value) {
-            MatchContent -> contentSize + padding
-            FillParent -> parentInnerSize - position
-            FitParent -> min(contentSize + padding, parentInnerSize - position)
-            else -> value
-        }
-    }
+    private fun computeSizeValue(value: Float, padding: Float, position: Float, isRelative: Boolean, contentSize: Float, containerSize: Float): Float {
 
+        if (isReservedSizeValue(value)) {
+            return when (value) {
+                MatchContent -> contentSize + padding
+                FillParent -> containerSize - position
+                FitParent -> min(contentSize + padding, containerSize - position)
 
-    /**
-     * The width of the entity.
-     */
-    var width: Float = 0f
-        get() = when {
-            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentWidth, padding.horizontal, parent.innerWidth, x)
-
-            else -> if (relativeSizeAxes.isHorizontal) {
-                field * parent.innerWidth
-            } else {
-                field + padding.horizontal
+                // This is unreachable, if it happens means the function `isReservedSizeValue` is not working properly.
+                else -> throw IllegalArgumentException("Invalid reserved size value: $value")
             }
         }
+
+        return if (isRelative) value * containerSize else value + padding
+    }
+
+    /**
+     * The minimum width of the entity.
+     */
+    var minWidth = 0f
         set(value) {
             if (field != value) {
                 field = value
@@ -99,18 +96,66 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         }
 
     /**
+     * The maximum width of the entity.
+     */
+    var maxWidth = Float.MAX_VALUE
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
+    /**
+     * The width of the entity.
+     */
+    var width: Float = 0f
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.horizontal,
+            position = x,
+            isRelative = relativeSizeAxes.isHorizontal,
+            contentSize = contentWidth,
+            containerSize = parent.innerWidth,
+        ).coerceAtMost(maxWidth).coerceAtLeast(minWidth)
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
+
+    /**
+     * The minimum height of the entity.
+     */
+    var minHeight = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
+    /**
+     * The maximum height of the entity.
+     */
+    var maxHeight = Float.MAX_VALUE
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
+    /**
      * The height of the entity.
      */
     var height = 0f
-        get() = when {
-            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentHeight, padding.vertical, parent.innerHeight, y)
-
-            else -> if (relativeSizeAxes.isVertical) {
-                field * parent.innerHeight
-            } else {
-                field + padding.vertical
-            }
-        }
+        get() = computeSizeValue(
+            value = field,
+            padding = padding.vertical,
+            position = y,
+            isRelative = relativeSizeAxes.isVertical,
+            contentSize = contentHeight,
+            containerSize = parent.innerHeight,
+        ).coerceAtMost(maxHeight).coerceAtLeast(minHeight)
         set(value) {
             if (field != value) {
                 field = value
@@ -309,6 +354,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     var decoratedEntity: ExtendedEntity? = null
 
     /**
+     * Whether the entity should be culled when it is outside the parent's bounds.
+     */
+    var cullingMode = CullingMode.Disabled
+
+    /**
      * The current invalidation flags. Indicates which properties were updated and need to be handled.
      *
      * @see InvalidationFlag
@@ -414,6 +464,39 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     //region Position
 
     /**
+     * Whether the entity is outside the camera's or parent's bounds.
+     */
+    open fun isCulled(camera: Camera): Boolean {
+
+        when (cullingMode) {
+
+            CullingMode.CameraBounds -> {
+                val (x1, y1) = convertLocalToSceneCoordinates(0f, 0f)
+                val (x2, y2) = convertLocalToSceneCoordinates(width, height)
+
+                return x2 < camera.minX || y2 < camera.minY || x1 > camera.maxX || y1 > camera.maxY
+            }
+
+            CullingMode.ParentBounds -> {
+
+                if (parent !is ExtendedEntity && parent !is ExtendedScene) {
+                    return false
+                }
+
+                val x1 = absoluteX
+                val y1 = absoluteY
+                val x2 = x1 + width
+                val y2 = y1 + height
+
+                return x2 < 0f || y2 < 0f || x1 > parent.getWidth() || y1 > parent.getHeight()
+            }
+
+            else -> return false
+        }
+
+    }
+
+    /**
      * Called when the position of a child entity changes.
      */
     open fun onChildPositionChanged(child: IEntity) {}
@@ -508,7 +591,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
     override fun onDraw(gl: GL10, camera: Camera) {
 
-        if (!isVisible) {
+        val isCulled = isCulled(camera)
+
+        if (!isVisible || isCulled) {
             // We're going to still handle invalidations flags even if the entity is not visible
             // because some of them like size-related flags might change the parent's layout.
             handleInvalidation(true)
@@ -520,10 +605,10 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             GLHelper.enableScissorTest(gl)
 
             // Entity coordinates in screen's space.
-            val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
-            val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
-            val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
-            val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
+            val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            val (topRightX, topRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
+            val (bottomRightX, bottomRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, height))
+            val (bottomLeftX, bottomLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, height))
 
             val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)

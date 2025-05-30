@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.reco1l.toolkt.*
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.mods.settings.*
 import kotlin.math.pow
 
 /**

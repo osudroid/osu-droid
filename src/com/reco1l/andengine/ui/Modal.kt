@@ -51,7 +51,6 @@ open class Modal(
         card.scaleX = 0.9f
         card.scaleY = 0.9f
         card.background = Box().apply { cornerRadius = 16f }
-        card.foreground = BezelOutline(16f)
 
         background = Box().apply {
             color = ColorARGB.Black

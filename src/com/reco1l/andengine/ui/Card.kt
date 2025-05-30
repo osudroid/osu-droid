@@ -49,7 +49,6 @@ open class Card(
 
     init {
         orientation = Orientation.Vertical
-        foreground = BezelOutline(14f)
         background = Box().apply {
             cornerRadius = 14f
             applyTheme = { color = it.accentColor * 0.15f }

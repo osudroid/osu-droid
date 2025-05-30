@@ -4,7 +4,7 @@ import com.reco1l.andengine.ui.Control
 import com.reco1l.andengine.ui.form.FormCheckbox
 import com.reco1l.andengine.ui.form.FormControl
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModSetting
+import com.rian.osu.mods.settings.ModSetting
 
 class ModSettingCheckbox(mod: Mod, setting: ModSetting<Boolean>) :
     ModSettingComponent<Boolean, Boolean>(mod, setting),

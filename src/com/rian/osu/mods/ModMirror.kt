@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
+import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
 import org.json.JSONObject
 

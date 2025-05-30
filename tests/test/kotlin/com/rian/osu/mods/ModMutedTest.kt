@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.mods.settings.*
 import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test

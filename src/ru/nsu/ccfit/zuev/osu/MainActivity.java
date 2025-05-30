@@ -41,6 +41,8 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.osudroid.BuildSettings;
+import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.ExtendedEngine;
@@ -284,6 +286,9 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public Scene onLoadScene() {
+        if (BuildSettings.DEBUG_PLAYGROUND) {
+            return DebugPlaygroundScene.INSTANCE;
+        }
         return SplashScene.INSTANCE.getScene();
     }
 
@@ -312,7 +317,11 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+
+                if (!BuildSettings.DEBUG_PLAYGROUND) {
+                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                }
+
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();

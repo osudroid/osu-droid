@@ -60,10 +60,10 @@ open class ExtendedScene : Scene(), IShape {
             GLHelper.enableScissorTest(gl)
 
             // Entity coordinates in screen's space.
-            val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
-            val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
-            val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
-            val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
+            val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            val (topRightX, topRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
+            val (bottomRightX, bottomRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, height))
+            val (bottomLeftX, bottomLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, height))
 
             val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
