@@ -97,3 +97,9 @@ Version 1.8.4
 - Fix gameplay time potentially being behind audio time until gameplay is restarted or finished <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix gameplay loading screen being scaled incorrectly when playfield size settings are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix Autoplay mod being persisted after quitting from HUD editor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+# Removals
+
+- Remove force AR scaling against speed modify <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This brings force AR's behavior in line with forced difficulty statistics.
+  - Scores set before this version will retain the old behavior.
