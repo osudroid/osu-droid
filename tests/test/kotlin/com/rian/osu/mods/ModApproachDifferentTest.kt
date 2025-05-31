@@ -45,5 +45,8 @@ class ModApproachDifferentTest {
         test(ModApproachDifferent.AnimationStyle.Decelerate1, Easing.Out)
         test(ModApproachDifferent.AnimationStyle.Decelerate2, Easing.OutCubic)
         test(ModApproachDifferent.AnimationStyle.Decelerate3, Easing.OutQuint)
+        test(ModApproachDifferent.AnimationStyle.BounceIn, Easing.InBounce)
+        test(ModApproachDifferent.AnimationStyle.BounceOut, Easing.OutBounce)
+        test(ModApproachDifferent.AnimationStyle.BounceInOut, Easing.InOutBounce)
     }
 }
