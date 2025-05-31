@@ -102,4 +102,4 @@ Version 1.8.4
 
 - Remove force AR scaling against speed modify <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This brings force AR's behavior in line with forced difficulty statistics.
-  - Scores set before this version will retain the old behavior.
+  - Scores set before this version will retain the scaling.
