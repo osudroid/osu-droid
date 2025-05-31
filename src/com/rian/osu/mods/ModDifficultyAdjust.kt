@@ -229,5 +229,19 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             return settings.joinToString(", ")
         }
 
-    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp)
+    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp).also {
+        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
+            property.isAccessible = true
+            return property.getDelegate() as NullableFloatModSetting
+        }
+
+        fun setDefault(original: NullableFloatModSetting, copy: NullableFloatModSetting) {
+            copy.defaultValue = original.defaultValue
+        }
+
+        setDefault(getDelegate(::cs), getDelegate(it::cs))
+        setDefault(getDelegate(::ar), getDelegate(it::ar))
+        setDefault(getDelegate(::od), getDelegate(it::od))
+        setDefault(getDelegate(::hp), getDelegate(it::hp))
+    }
 }
