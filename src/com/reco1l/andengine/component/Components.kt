@@ -1,5 +1,6 @@
 package com.reco1l.andengine.component
 
+import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec2
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.CameraScene
@@ -180,6 +181,12 @@ var IEntity.scaleCenter
 var IEntity.rotationCenter
     get() = Vec2(rotationCenterX, rotationCenterY)
     set(value) = setRotationCenter(value.x, value.y)
+
+var IEntity.colorARGB
+    get() = ColorARGB(red, green, blue, alpha)
+    set(value) {
+        setColor(value.red, value.green, value.blue, value.alpha)
+    }
 
 //endregion
 

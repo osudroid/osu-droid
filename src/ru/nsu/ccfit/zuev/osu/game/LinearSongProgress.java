@@ -2,10 +2,12 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.framework.ColorARGB;
+
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class LinearSongProgress extends GameObject {
@@ -66,8 +68,8 @@ public class LinearSongProgress extends GameObject {
         this.initialPassedTime = initialPassedTime;
     }
 
-    public void setProgressRectColor(RGBColor color) {
-        this.progressRect.setColor(color.r(), color.g(), color.b());
+    public void setProgressRectColor(ColorARGB color) {
+        ComponentsKt.setColorARGB(progressRect, color);
     }
 
     public void setProgressRectAlpha(float alpha) {

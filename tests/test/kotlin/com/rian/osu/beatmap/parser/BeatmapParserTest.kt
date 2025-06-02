@@ -1,5 +1,6 @@
 package com.rian.osu.beatmap.parser
 
+import com.reco1l.framework.*
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.constants.BeatmapCountdown
 import com.rian.osu.beatmap.constants.SampleBank
@@ -11,7 +12,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import ru.nsu.ccfit.zuev.osu.RGBColor
 
 @RunWith(RobolectricTestRunner::class)
 class BeatmapParserTest {
@@ -28,20 +28,20 @@ class BeatmapParserTest {
 
     @Test
     fun `Test version 14 beatmap colors section`() {
-        fun test(color: RGBColor, red: Float, green: Float, blue: Float) {
-            Assert.assertEquals(color.r(), red, 0f)
-            Assert.assertEquals(color.g(), green, 0f)
-            Assert.assertEquals(color.b(), blue, 0f)
+        fun test(color: ColorARGB, red: Float, green: Float, blue: Float) {
+            Assert.assertEquals(color.red, red, 0f)
+            Assert.assertEquals(color.green, green, 0f)
+            Assert.assertEquals(color.blue, blue, 0f)
         }
 
         val colors = v14Beatmap.colors
 
         Assert.assertEquals(colors.comboColors.size, 4)
 
-        test(colors.comboColors[0], 98f, 243f, 255f)
-        test(colors.comboColors[1], 251f, 170f, 251f)
-        test(colors.comboColors[2], 102f, 171f, 255f)
-        test(colors.comboColors[3], 162f, 205f, 232f)
+        test(colors.comboColors[0].color, 98f, 243f, 255f)
+        test(colors.comboColors[1].color, 251f, 170f, 251f)
+        test(colors.comboColors[2].color, 102f, 171f, 255f)
+        test(colors.comboColors[3].color, 162f, 205f, 232f)
 
         Assert.assertNull(colors.sliderBorderColor)
     }
@@ -98,9 +98,9 @@ class BeatmapParserTest {
             Assert.assertEquals(backgroundFilename, "katamari2.jpg")
 
             Assert.assertNotNull(backgroundColor)
-            Assert.assertEquals(backgroundColor!!.r(), 54f, 0f)
-            Assert.assertEquals(backgroundColor!!.g(), 140f, 0f)
-            Assert.assertEquals(backgroundColor!!.b(), 191f, 0f)
+            Assert.assertEquals(backgroundColor!!.red, 54f, 0f)
+            Assert.assertEquals(backgroundColor!!.green, 140f, 0f)
+            Assert.assertEquals(backgroundColor!!.blue, 191f, 0f)
 
             Assert.assertEquals(breaks.size, 3)
             Assert.assertNull(videoFilename)

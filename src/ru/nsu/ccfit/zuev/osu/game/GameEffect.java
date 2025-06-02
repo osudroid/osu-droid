@@ -5,10 +5,12 @@ import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
+import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
+import com.reco1l.framework.ColorARGB;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
@@ -16,7 +18,8 @@ import org.anddev.andengine.entity.shape.Shape;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
+import javax.annotation.Nullable;
+
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -45,11 +48,11 @@ public class GameEffect extends GameObject {
         return animationEffects.contains(textureName);
     }
 
-    public void setColor(final RGBColor color) {
+    public void setColor(@Nullable ColorARGB color) {
         if (color == null) {
             hit.setColor(1f, 1f, 1f);
         } else {
-            hit.setColor(color.r(), color.g(), color.b());
+            ComponentsKt.setColorARGB(hit, color);
         }
     }
 

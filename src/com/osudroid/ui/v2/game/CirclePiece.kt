@@ -4,6 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.osudroid.ui.v2.SpriteFont
+import com.reco1l.framework.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
@@ -41,6 +42,10 @@ open class CirclePiece(
 
     fun setCircleColor(red: Float, green: Float, blue: Float) {
         circle.setColor(red, green, blue)
+    }
+
+    fun setCircleColor(color: ColorARGB) {
+        circle.color = color
     }
 }
 

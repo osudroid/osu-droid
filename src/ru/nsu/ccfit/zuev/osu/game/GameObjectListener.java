@@ -2,20 +2,19 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.framework.ColorARGB;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 
 import java.util.BitSet;
-
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public interface GameObjectListener {
 
     int SLIDER_START = 1, SLIDER_REPEAT = 2, SLIDER_END = 3, SLIDER_TICK = 4;
 
-    void onCircleHit(int id, float accuracy, PointF pos, boolean endCombo, byte forcedScore, RGBColor color);
+    void onCircleHit(int id, float accuracy, PointF pos, boolean endCombo, byte forcedScore, ColorARGB color);
 
     void onSliderHit(int id, int score, PointF judgementPos,
-                     boolean endCombo, RGBColor color, int type, boolean incrementCombo);
+                     boolean endCombo, ColorARGB color, int type, boolean incrementCombo);
 
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 

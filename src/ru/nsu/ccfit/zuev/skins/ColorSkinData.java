@@ -2,17 +2,19 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
+import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.HexComposition;
+
 import org.json.JSONObject;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultRGBColor;
 
-public class ColorSkinData extends SkinData<RGBColor> {
+public class ColorSkinData extends SkinData<ColorARGB> {
     private final String defaultHex;
     private String currentHex;
 
     public ColorSkinData(String tag, String defaultHex) {
-        super(tag, new DefaultRGBColor(RGBColor.hex2Rgb(defaultHex)));
+        super(tag, new DefaultRGBColor(new ColorARGB(defaultHex, HexComposition.RRGGBB)));
         this.defaultHex = defaultHex;
         this.currentHex = defaultHex;
     }
@@ -25,7 +27,7 @@ public class ColorSkinData extends SkinData<RGBColor> {
             setCurrentValue(getDefaultValue());
         } else {
             currentHex = hex;
-            setCurrentValue(RGBColor.hex2Rgb(hex));
+            setCurrentValue(new ColorARGB(hex, HexComposition.RRGGBB));
         }
     }
 

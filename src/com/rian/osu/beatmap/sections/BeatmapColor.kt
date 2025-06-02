@@ -1,7 +1,7 @@
 package com.rian.osu.beatmap.sections
 
+import com.reco1l.framework.*
 import com.rian.osu.beatmap.ComboColor
-import ru.nsu.ccfit.zuev.osu.RGBColor
 
 /**
  * Contains information about combo and skin colors of a beatmap.
@@ -16,6 +16,5 @@ class BeatmapColor {
     /**
      * The color of the slider border.
      */
-    @JvmField
-    var sliderBorderColor: RGBColor? = null
+    var sliderBorderColor: ColorARGB? = null
 }
