@@ -10,9 +10,9 @@ import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.TouchEvent
 
 @Suppress("LeakingThis")
-open class Button : LinearContainer() {
+open class UIButton : UILinearContainer() {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.175f
         color = if (isSelected) theme.accentColor * 0.1f else theme.accentColor
     }
@@ -82,7 +82,7 @@ open class Button : LinearContainer() {
     init {
         padding = Vec4(12f, 16f)
         scaleCenter = Anchor.Center
-        background = Box().apply { cornerRadius = 12f }
+        background = UIBox().apply { cornerRadius = 12f }
     }
 
 
@@ -176,7 +176,7 @@ open class Button : LinearContainer() {
 /**
  * A button that displays a text.
  */
-open class TextButton : Button() {
+open class UITextButton : UIButton() {
 
     /**
      * The compound text of the button.
@@ -220,7 +220,7 @@ open class TextButton : Button() {
 
 }
 
-open class IconButton : Button() {
+open class UIIconButton : UIButton() {
 
     protected val sprite = sprite {
         scaleType = ScaleType.Fit

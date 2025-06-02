@@ -7,9 +7,9 @@ import com.reco1l.andengine.shape.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
+class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         if (value) {
             background?.color = theme.accentColor * 0.5f
             foreground?.color = theme.accentColor
@@ -41,11 +41,11 @@ class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
         width = 48f
         height = 48f
 
-        foreground = Box().apply {
+        foreground = UIBox().apply {
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
         }
-        background = Box().apply {
+        background = UIBox().apply {
             cornerRadius = 12f
         }
     }

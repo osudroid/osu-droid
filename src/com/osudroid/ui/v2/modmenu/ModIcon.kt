@@ -17,7 +17,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * The icon for a mod in the mod menu.
  */
-class ModIcon(val mod: Mod) : Container(), ISkinnable {
+class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
     init {
         inheritAncestorsColor = false
@@ -32,12 +32,12 @@ class ModIcon(val mod: Mod) : Container(), ISkinnable {
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        val acronymText = get<ExtendedEntity>(0)
-        if (acronymText is ExtendedText) {
+        val acronymText = get<UIComponent>(0)
+        if (acronymText is UIText) {
             acronymText.setScale(height * 0.6f / acronymText.contentHeight)
         }
 
-        (background as? Box)?.cornerRadius = height * 0.2f
+        (background as? UIBox)?.cornerRadius = height * 0.2f
 
         super.onManagedDraw(gl, camera)
     }
@@ -48,11 +48,11 @@ class ModIcon(val mod: Mod) : Container(), ISkinnable {
         val texture = fetchTextureRegion()
 
         if (texture == null) {
-            background = Box().apply {
+            background = UIBox().apply {
                 applyTheme = { color = it.accentColor * 0.1f }
             }
 
-            attachChild(ExtendedText().apply {
+            attachChild(UIText().apply {
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 text = mod.acronym

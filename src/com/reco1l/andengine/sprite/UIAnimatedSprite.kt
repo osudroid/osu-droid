@@ -7,7 +7,7 @@ import kotlin.math.*
 
 
 
-open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
+open class UIAnimatedSprite(frames: Array<TextureRegion?>) : UISprite() {
 
     /**
      * Creates an animated sprite with the texture name and frame count.

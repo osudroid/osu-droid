@@ -14,27 +14,27 @@ annotation class InvalidationFlag {
     companion object {
 
         /**
-         * The size of the entity has changed. Calls [ExtendedEntity.onSizeChanged].
+         * The size of the entity has changed. Calls [UIComponent.onSizeChanged].
          */
         const val Size = 1
 
         /**
-         * The content of the entity has changed. Calls [ExtendedEntity.onContentChanged].
+         * The content of the entity has changed. Calls [UIComponent.onContentChanged].
          */
         const val Content = 1 shl 1
 
         /**
-         * The position of the entity has changed. Calls [ExtendedEntity.onPositionChanged].
+         * The position of the entity has changed. Calls [UIComponent.onPositionChanged].
          */
         const val Position = 1 shl 2
 
         /**
-         * The transformations of the entity have changed. Calls [ExtendedEntity.onInvalidateTransformations].
+         * The transformations of the entity have changed. Calls [UIComponent.onInvalidateTransformations].
          */
         const val Transformations = 1 shl 3
 
         /**
-         * The input bindings were removed. Calls [ExtendedEntity.onInvalidateInputBindings].
+         * The input bindings were removed. Calls [UIComponent.onInvalidateInputBindings].
          */
         const val InputBindings = 1 shl 4
 

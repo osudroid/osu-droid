@@ -1,7 +1,7 @@
 package com.reco1l.andengine.text
 
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.text.TextureFont.*
+import com.reco1l.andengine.text.UITextureText.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
@@ -9,7 +9,10 @@ import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
 
-open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : BufferedEntity<TextureTextVertexBuffer>() {
+/**
+ * A text component that uses textures for each character.
+ */
+open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBufferedComponent<TextureTextVertexBuffer>() {
 
     /**
      * The spacing between glyphs.
@@ -147,7 +150,7 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Buffer
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
             addQuad(0, 0f, 0f, data[0] as Float, data[1] as Float)
         }
     }

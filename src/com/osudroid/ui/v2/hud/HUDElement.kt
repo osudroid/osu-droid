@@ -19,7 +19,7 @@ import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.osudroid.ui.v2.hud.elements.HUDTapsPerSecondCounter
 import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.Container
+import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
@@ -68,7 +68,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
 }
 
 
-abstract class HUDElement : Container(), IGameplayEvents {
+abstract class HUDElement : UIContainer(), IGameplayEvents {
 
     /**
      * Returns the name of this element.
@@ -102,7 +102,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         private set
 
 
-    private var connectionLine: Line? = null
+    private var connectionLine: UILine? = null
 
 
     //region Skinning
@@ -156,7 +156,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         isInEditMode = value
 
         if (value) {
-            background = Box().apply {
+            background = UIBox().apply {
                 color = ColorARGB(0x29F27272)
                 alpha = 0.15f
             }
@@ -285,7 +285,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         val drawSize = size * scale
         val drawPosition = anchorPosition + position - drawSize * origin
-        val parentDrawSize = (parent as ExtendedEntity).size
+        val parentDrawSize = (parent as UIComponent).size
 
         val relativeTopLeft = drawPosition / parentDrawSize
         val relativeTopRight = (drawPosition + Vec2(drawSize.x, 0f)) / parentDrawSize
@@ -318,7 +318,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
     private fun updateConnectionLine() {
 
         if (connectionLine == null) {
-            connectionLine = Line().apply {
+            connectionLine = UILine().apply {
                 color = ColorARGB(0xFFF27272)
                 lineWidth = 10f
                 alpha = 0f

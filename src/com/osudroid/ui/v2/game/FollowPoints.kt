@@ -27,7 +27,7 @@ object FollowPointConnection {
 
         // For optimization, we avoid using AnimatedSprite if there's one frame.
         if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
-            AnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
+            UIAnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
                 sprite.frames.fastForEach {
                     it?.applyFollowPointMaxSize()
                 }
@@ -36,7 +36,7 @@ object FollowPointConnection {
                 sprite.isLoop = false
             }
         } else {
-            ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
+            UISprite(ResourceManager.getInstance().getTexture("followpoint")).also {
                 it.textureRegion?.applyFollowPointMaxSize()
                 it.invalidate(InvalidationFlag.Content)
             }
@@ -48,7 +48,7 @@ object FollowPointConnection {
         updateThread {
             fp.detachSelf()
             fp.reset()
-            pool.free(fp as ExtendedSprite)
+            pool.free(fp as UISprite)
         }
     }
 

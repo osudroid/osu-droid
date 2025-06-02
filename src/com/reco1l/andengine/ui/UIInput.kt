@@ -17,22 +17,22 @@ import kotlin.math.*
 import kotlin.synchronized
 import kotlin.text.substring
 
-open class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
+open class UIInput(initialValue: String) : UIControl<String>(initialValue), IFocusable {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
         foreground?.color = if (isFocused) theme.accentColor else theme.accentColor * 0.4f
         textEntity.color = theme.accentColor
     }
 
 
-    private val textEntity = ExtendedText().apply {
+    private val textEntity = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
     }
 
-    private val caret = Box().apply {
+    private val caret = UIBox().apply {
         width = 2f
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
@@ -72,8 +72,8 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
         +textEntity
         +caret
 
-        background = Box().apply { cornerRadius = 12f }
-        foreground = Box().apply {
+        background = UIBox().apply { cornerRadius = 12f }
+        foreground = UIBox().apply {
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
         }
@@ -180,18 +180,18 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
     }
 
     /**
-     * Checks if a [Char] is allowed to be appended to this [TextInput].
+     * Checks if a [Char] is allowed to be appended to this [UIInput].
      *
      * @param char The [Char] to check.
-     * @return `true` if [char] is allowed to be appended to this [TextInput], `false` otherwise.
+     * @return `true` if [char] is allowed to be appended to this [UIInput], `false` otherwise.
      */
     protected open fun isCharacterAllowed(char: Char) = true
 
     /**
-     * Checks whether a text is valid as a [value] for this [TextInput].
+     * Checks whether a text is valid as a [value] for this [UIInput].
      *
      * @param text The text to check.
-     * @return `true` if [text] is valid as a [value] for this [TextInput], `false` otherwise.
+     * @return `true` if [text] is valid as a [value] for this [UIInput], `false` otherwise.
      */
     protected open fun isTextValid(text: String) = true
 
@@ -301,7 +301,7 @@ open class TextInput(initialValue: String) : Control<String>(initialValue), IFoc
 }
 
 /**
- * A [TextInput] whose [value] is constrained to a range of values.
+ * A [UIInput] whose [value] is constrained to a range of values.
  */
 sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
     initialValue: T?,
@@ -319,7 +319,7 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
      * If set to `null`, there is no maximum value.
      */
     val maxValue: T? = null
-) : TextInput(initialValue?.toString() ?: "") {
+) : UIInput(initialValue?.toString() ?: "") {
     override fun isTextValid(text: String): Boolean {
         // Avoid calling convertValue whenever necessary, in case it is expensive
         if (!super.isTextValid(text)) {
@@ -348,7 +348,7 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
 }
 
 /**
- * A [TextInput] that only allows [Int]s to be entered.
+ * A [UIInput] that only allows [Int]s to be entered.
  */
 class IntegerTextInput(
     initialValue: Int?,
@@ -365,7 +365,7 @@ class IntegerTextInput(
 }
 
 /**
- * A [TextInput] that only allows [Float]s to be entered.
+ * A [UIInput] that only allows [Float]s to be entered.
  */
 class FloatTextInput(
     initialValue: Float?,

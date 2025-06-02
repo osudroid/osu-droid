@@ -6,9 +6,9 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class FormCheckbox(initialValue: Boolean = false) : FormControl<Boolean, Checkbox>(initialValue) {
+open class FormCheckbox(initialValue: Boolean = false) : FormControl<Boolean, UICheckbox>(initialValue) {
 
-    override val control = Checkbox(initialValue).apply {
+    override val control = UICheckbox(initialValue).apply {
         anchor = Anchor.CenterRight
         origin = Anchor.CenterRight
     }

@@ -4,7 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Orientation.*
 import kotlin.math.*
 
-open class LinearContainer : Container() {
+open class UILinearContainer : UIContainer() {
 
     /**
      * The orientation of the container.
@@ -30,7 +30,7 @@ open class LinearContainer : Container() {
 
         for (i in 0 until childCount) {
 
-            val child = getChild(i) as? ExtendedEntity ?: continue
+            val child = getChild(i) as? UIComponent ?: continue
 
             if (!child.isVisible) {
                 continue

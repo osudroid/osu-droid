@@ -6,7 +6,7 @@ import com.reco1l.andengine.ui.form.*
 /**
  * Interface for a control that has a value and can notify when the value changes.
  */
-abstract class Control<T : Any>(initialValue: T) : Container() {
+abstract class UIControl<T : Any>(initialValue: T) : UIContainer() {
 
     /**
      * The value of the control.

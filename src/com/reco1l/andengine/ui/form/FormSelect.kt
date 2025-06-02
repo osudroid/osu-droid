@@ -5,9 +5,9 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 
-open class FormSelect<T : Any>(initialValues: List<T> = emptyList()) : FormControl<List<T>, Select<T>>(initialValues) {
+open class FormSelect<T : Any>(initialValues: List<T> = emptyList()) : FormControl<List<T>, UISelect<T>>(initialValues) {
 
-    final override val control = Select<T>().apply {
+    final override val control = UISelect<T>().apply {
         width = FillParent
     }
 

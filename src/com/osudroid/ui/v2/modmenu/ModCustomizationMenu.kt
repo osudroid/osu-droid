@@ -12,9 +12,9 @@ import com.rian.osu.mods.*
 import com.rian.osu.mods.settings.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class ModCustomizationMenu : Modal(
+class ModCustomizationMenu : UIModal(
 
-    card = ScrollableContainer().apply {
+    card = UIScrollableContainer().apply {
         scrollAxes = Axes.Y
         relativeSizeAxes = Axes.Both
         width = 0.475f
@@ -25,7 +25,7 @@ class ModCustomizationMenu : Modal(
         clipToBounds = true
         scrollPadding = Vec2(0f, 300f)
 
-        +LinearContainer().apply {
+        +UILinearContainer().apply {
             width = FillParent
             orientation = Orientation.Vertical
         }
@@ -33,7 +33,7 @@ class ModCustomizationMenu : Modal(
 
 ) {
 
-    private val modSettings: LinearContainer = card[0]!!
+    private val modSettings: UILinearContainer = card[0]!!
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
 
 
@@ -98,19 +98,19 @@ class ModCustomizationMenu : Modal(
     //endregion
 
 
-    private inner class ModSettingsSection(val mod: Mod, settings: List<ModSetting<*>>) : LinearContainer() {
+    private inner class ModSettingsSection(val mod: Mod, settings: List<ModSetting<*>>) : UILinearContainer() {
 
         init {
             orientation = Orientation.Vertical
             width = FillParent
             padding = Vec4(0f, 0f, 0f, 16f)
 
-            +LinearContainer().apply {
+            +UILinearContainer().apply {
                 orientation = Orientation.Horizontal
                 width = FillParent
                 padding = Vec4(20f, 14f)
                 spacing = 12f
-                background = Box().apply {
+                background = UIBox().apply {
                     color = ColorARGB.Black
                     alpha = 0.05f
                     cornerRadius = 12f
@@ -123,7 +123,7 @@ class ModCustomizationMenu : Modal(
                     height = 34f
                 }
 
-                +ExtendedText().apply {
+                +UIText().apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     font = ResourceManager.getInstance().getFont("smallFont")

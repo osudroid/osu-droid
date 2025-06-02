@@ -11,7 +11,7 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * An entity that uses a buffer to draw itself.
  */
-abstract class BufferedEntity<T: IBuffer> : ExtendedEntity() {
+abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     /**
      * The buffer itself.
@@ -145,7 +145,7 @@ abstract class BufferedEntity<T: IBuffer> : ExtendedEntity() {
         if (blendInfo == BlendInfo.Inherit) {
             val parent = parent
 
-            if (parent is BufferedEntity<*>) {
+            if (parent is UIBufferedComponent<*>) {
                 sourceFactor = parent.blendInfo.sourceFactor
                 destinationFactor = parent.blendInfo.destinationFactor
             }

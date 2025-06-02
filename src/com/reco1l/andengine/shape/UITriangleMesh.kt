@@ -9,7 +9,7 @@ import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 
 // TODO: This class should be replaced with a more efficient BufferedEntity implementation.
-class TriangleMesh : ExtendedEntity() {
+class UITriangleMesh : UIComponent() {
 
 
     /**

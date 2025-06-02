@@ -11,7 +11,7 @@ import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
-class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
+class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
     TextureRegion(it, 0, 0, it.width, it.height)
 }) {
 

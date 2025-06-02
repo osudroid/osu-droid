@@ -1,12 +1,12 @@
 package com.osudroid.ui.v2.hud.editor
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.container.LinearContainer
+import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.container.UILinearContainer
 import com.reco1l.andengine.container.Orientation
-import com.reco1l.andengine.container.ScrollableContainer
-import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.text.ExtendedText
+import com.reco1l.andengine.container.UIScrollableContainer
+import com.reco1l.andengine.shape.UIBox
+import com.reco1l.andengine.text.UIText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.reflect.full.primaryConstructor
 
-class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayEvents {
+class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGameplayEvents {
 
 
     /**
@@ -32,17 +32,17 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
     private val elements = HUDElements.entries.map { it.type.primaryConstructor!!.call() }
 
-    private val elementList = ScrollableContainer().apply {
+    private val elementList = UIScrollableContainer().apply {
 
         scrollAxes = Axes.Y
         height = FillParent
         width = SELECTOR_WIDTH
 
-        background = Box().apply {
+        background = UIBox().apply {
             color = ColorARGB(0xFF1E1E2E)
         }
 
-        attachChild(LinearContainer().apply {
+        attachChild(UILinearContainer().apply {
             width = FillParent
             padding = Vec4(16f)
             spacing = 12f
@@ -62,10 +62,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         x = -SELECTOR_WIDTH
 
         // The button to show/hide the element selector
-        attachChild(object : Container() {
+        attachChild(object : UIContainer() {
 
             init {
-                background = Box().apply {
+                background = UIBox().apply {
                     cornerRadius = BUTTON_RADIUS
                     color = ColorARGB(0xFF181825)
                 }
@@ -76,7 +76,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
 
-                attachChild(ExtendedText().apply {
+                attachChild(UIText().apply {
                     rotation = -90f
                     anchor = Anchor.Center
                     origin = Anchor.Center

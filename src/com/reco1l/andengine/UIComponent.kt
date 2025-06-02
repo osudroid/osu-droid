@@ -28,7 +28,7 @@ import kotlin.math.*
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
+abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
 
     //region Axes properties
 
@@ -279,13 +279,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
     //region Cosmetic properties
 
-    override var applyTheme: ExtendedEntity.(theme: Theme) -> Unit = {}
+    override var applyTheme: UIComponent.(theme: Theme) -> Unit = {}
 
     /**
      * The background entity. This entity will be drawn before the entity children and will not be
      * affected by padding.
      */
-    open var background: ExtendedEntity? = null
+    open var background: UIComponent? = null
         set(value) {
             if (field != value) {
                 if (value?.parent != null) {
@@ -303,7 +303,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * The foreground entity. This entity will be drawn after the entity children and will not be
      * affected by padding.
      */
-    open var foreground: ExtendedEntity? = null
+    open var foreground: UIComponent? = null
         set(value) {
             if (field != value) {
                 if (value?.parent != null) {
@@ -351,7 +351,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     /**
      * The entity that is currently being decorated by this entity.
      */
-    var decoratedEntity: ExtendedEntity? = null
+    var decoratedEntity: UIComponent? = null
 
     /**
      * Whether the entity should be culled when it is outside the parent's bounds.
@@ -368,7 +368,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     /**
      * The input bindings of the entity. This is used to handle touch events.
      */
-    protected val inputBindings = arrayOfNulls<ExtendedEntity>(10)
+    protected val inputBindings = arrayOfNulls<UIComponent>(10)
 
     //endregion
 
@@ -395,12 +395,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     override fun setParent(newParent: IEntity?) {
         when (val parent = parent) {
             is Scene -> parent.unregisterTouchArea(this)
-            is ExtendedEntity -> parent.onChildDetached(this)
+            is UIComponent -> parent.onChildDetached(this)
         }
         super.setParent(newParent)
         when (newParent) {
-            is ExtendedScene -> newParent.registerTouchArea(this)
-            is ExtendedEntity -> newParent.onChildAttached(this)
+            is UIScene -> newParent.registerTouchArea(this)
+            is UIComponent -> newParent.onChildAttached(this)
         }
     }
 
@@ -438,7 +438,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * Called when the size of this entity changes.
      */
     open fun onSizeChanged() {
-        (parent as? ExtendedEntity)?.onChildSizeChanged(this)
+        (parent as? UIComponent)?.onChildSizeChanged(this)
     }
 
     /**
@@ -479,7 +479,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
             CullingMode.ParentBounds -> {
 
-                if (parent !is ExtendedEntity && parent !is ExtendedScene) {
+                if (parent !is UIComponent && parent !is UIScene) {
                     return false
                 }
 
@@ -505,7 +505,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
      * Called when the position of this entity changes.
      */
     open fun onPositionChanged() {
-        (parent as? ExtendedEntity)?.onChildPositionChanged(this)
+        (parent as? UIComponent)?.onChildPositionChanged(this)
     }
 
     /**
@@ -579,7 +579,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
                 break
             }
 
-            if (parent is ExtendedEntity && !parent.inheritAncestorsColor) {
+            if (parent is UIComponent && !parent.inheritAncestorsColor) {
                 multiplyColor = false
             }
 
@@ -659,7 +659,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             }
 
             mChildren?.fastForEach { child ->
-                if (child is ExtendedEntity) {
+                if (child is UIComponent) {
                     child.invalidate(recursiveInvalidationFlags)
                 }
             }
@@ -672,7 +672,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
         if (handleRecursively) {
             mChildren?.fastForEach { child ->
-                if (child is ExtendedEntity) {
+                if (child is UIComponent) {
                     child.handleInvalidation(true)
                 }
             }
@@ -696,9 +696,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         foreground?.onDraw(gl, camera)
 
 
-        if ((BuildSettings.SHOW_ENTITY_BOUNDARIES || EntityInspector.SELECTED_ENTITY == this) && DEBUG_FOREGROUND != this) {
-            DEBUG_FOREGROUND.color = if (EntityInspector.SELECTED_ENTITY == this) ColorARGB(0xFF00FF00) else ColorARGB.White
-            DEBUG_FOREGROUND.lineWidth = if (EntityInspector.SELECTED_ENTITY == this) 3f else 1f
+        if (BuildSettings.SHOW_ENTITY_BOUNDARIES && DEBUG_FOREGROUND != this) {
             DEBUG_FOREGROUND.setSize(width, height)
             DEBUG_FOREGROUND.onDraw(gl, camera)
         }
@@ -954,7 +952,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
-                if (child is ExtendedEntity && child.contains(localX, localY)) {
+                if (child is UIComponent && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child
                         return true
@@ -1004,9 +1002,10 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         private val VERTICES_WRAPPER = FloatArray(8)
 
         private val DEBUG_FOREGROUND by lazy {
-            Box().apply {
+            UIBox().apply {
                 paintStyle = PaintStyle.Outline
                 color = ColorARGB.White
+                lineWidth = 1f
             }
         }
     }

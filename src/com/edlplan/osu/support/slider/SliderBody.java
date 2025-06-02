@@ -4,23 +4,23 @@ import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
 import com.reco1l.andengine.info.ClearInfo;
 import com.reco1l.andengine.info.DepthInfo;
-import com.reco1l.andengine.shape.TriangleMesh;
-import com.reco1l.andengine.container.Container;
+import com.reco1l.andengine.shape.UITriangleMesh;
+import com.reco1l.andengine.container.UIContainer;
 import com.rian.osu.math.Vector2;
 
 
-public class SliderBody extends Container {
+public class SliderBody extends UIContainer {
 
     private static final BuildCache buildCache = new BuildCache();
 
 
     private LinePath path;
 
-    private final TriangleMesh background;
+    private final UITriangleMesh background;
 
-    private final TriangleMesh border;
+    private final UITriangleMesh border;
 
-    private final TriangleMesh hint;
+    private final UITriangleMesh hint;
 
     private float backgroundWidth;
 
@@ -38,7 +38,7 @@ public class SliderBody extends Container {
     public SliderBody(boolean allowHint) {
 
         if (allowHint) {
-            hint = new TriangleMesh();
+            hint = new UITriangleMesh();
             hint.setVisible(false);
             hint.setClearInfo(ClearInfo.ClearDepthBuffer);
             hint.setDepthInfo(DepthInfo.Less);
@@ -46,11 +46,11 @@ public class SliderBody extends Container {
             hint = null;
         }
 
-        border = new TriangleMesh();
+        border = new UITriangleMesh();
         border.setDepthInfo(DepthInfo.Default);
         attachChild(border, 0);
 
-        background = new TriangleMesh();
+        background = new UITriangleMesh();
         background.setDepthInfo(DepthInfo.Default);
         attachChild(background, 0);
 

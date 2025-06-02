@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
-import com.reco1l.andengine.text.ExtendedText
+import com.reco1l.andengine.text.UIText
 import com.osudroid.ui.v2.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -9,7 +9,7 @@ class HUDUnstableRateCounter : HUDElement() {
 
     override val name = "Unstable rate counter"
 
-    private val text = ExtendedText().apply {
+    private val text = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         text = "UR: 0.00"
     }

@@ -9,9 +9,9 @@ import org.anddev.andengine.input.touch.*
 import kotlin.math.*
 
 @Suppress("LeakingThis")
-open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
+open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
 
         background?.apply {
             color = theme.accentColor * 0.25f
@@ -71,7 +71,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
     var onStopDragging: () -> Unit = {}
 
 
-    private val thumb = Box().apply {
+    private val thumb = UIBox().apply {
         width = 24f
         height = FillParent
         anchor = Anchor.CenterLeft
@@ -82,13 +82,13 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
         clearInfo = ClearInfo.ClearDepthBuffer
     }
 
-    private val progressBar = Box().apply {
+    private val progressBar = UIBox().apply {
         width = 24f
         height = FillParent
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         cornerRadius = 12f
-        foreground = Box().apply {
+        foreground = UIBox().apply {
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
         }
@@ -100,10 +100,10 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
         width = FillParent
         height = 48f
 
-        background = Box().apply {
+        background = UIBox().apply {
             cornerRadius = 12f
 
-            foreground = Box().apply {
+            foreground = UIBox().apply {
                 cornerRadius = 12f
                 paintStyle = PaintStyle.Outline
             }

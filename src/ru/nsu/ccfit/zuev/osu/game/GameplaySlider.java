@@ -7,8 +7,8 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -41,8 +41,8 @@ import java.util.BitSet;
 
 public class GameplaySlider extends GameObject {
 
-    private final ExtendedSprite approachCircle;
-    private final ExtendedSprite startArrow, endArrow;
+    private final UISprite approachCircle;
+    private final UISprite startArrow, endArrow;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private Scene scene;
@@ -65,7 +65,7 @@ public class GameplaySlider extends GameObject {
     private int ticksGot;
     private int currentTickSpriteIndex;
 
-    private final ExtendedSprite followCircle;
+    private final UISprite followCircle;
 
     // Temporarily used PointF to avoid allocations
     private final PointF tmpPoint = new PointF();
@@ -94,7 +94,7 @@ public class GameplaySlider extends GameObject {
     /**
      * The slider ball sprite.
      */
-    private final AnimatedSprite ball;
+    private final UIAnimatedSprite ball;
 
     /**
      * The start circle piece of the slider.
@@ -132,26 +132,26 @@ public class GameplaySlider extends GameObject {
         headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
 
-        approachCircle = new ExtendedSprite();
+        approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
-        startArrow = new ExtendedSprite();
+        startArrow = new UISprite();
         startArrow.setOrigin(Anchor.Center);
         startArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        endArrow = new ExtendedSprite();
+        endArrow = new UISprite();
         endArrow.setOrigin(Anchor.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        ball = new AnimatedSprite("sliderb", false, 60f);
+        ball = new UIAnimatedSprite("sliderb", false, 60f);
         ball.setOrigin(Anchor.Center);
 
         // Avoid to use AnimatedSprite if not necessary.
         if (ResourceManager.getInstance().isTextureLoaded("sliderfollowcircle-0")) {
-            followCircle = new AnimatedSprite("sliderfollowcircle", true, OsuSkin.get().getAnimationFramerate());
+            followCircle = new UIAnimatedSprite("sliderfollowcircle", true, OsuSkin.get().getAnimationFramerate());
         } else {
-            followCircle = new ExtendedSprite();
+            followCircle = new UISprite();
             followCircle.setTextureRegion(ResourceManager.getInstance().getTexture("sliderfollowcircle"));
         }
         followCircle.setOrigin(Anchor.Center);

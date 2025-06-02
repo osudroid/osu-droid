@@ -14,7 +14,7 @@ class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
     }
 
 
-    override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+    override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
         buffers.fastForEach { buffer ->
             buffer.update(gl, entity, *data)
             buffer.setHardwareBufferNeedsUpdate()
@@ -27,11 +27,11 @@ class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
         buffers.fastForEach { it.beginDraw(gl) }
     }
 
-    override fun declarePointers(gl: GL10, entity: BufferedEntity<*>) {
+    override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
         buffers.fastForEach { it.declarePointers(gl, entity) }
     }
 
-    override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+    override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
         buffers.fastForEach { it.draw(gl, entity) }
     }
 

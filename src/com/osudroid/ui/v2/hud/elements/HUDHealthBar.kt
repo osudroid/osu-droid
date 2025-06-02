@@ -16,11 +16,11 @@ import ru.nsu.ccfit.zuev.skins.*
 
 class HUDHealthBar : HUDElement() {
 
-    private val fill: AnimatedSprite
-    private val fillClear: Box
+    private val fill: UIAnimatedSprite
+    private val fillClear: UIBox
 
-    private val marker: ExtendedSprite
-    private val explode: ExtendedSprite
+    private val marker: UISprite
+    private val explode: UISprite
 
     private val markerNormalTexture: TextureRegion?
     private val markerDangerTexture: TextureRegion?
@@ -41,26 +41,26 @@ class HUDHealthBar : HUDElement() {
         isNewStyle = backgroundTexture !is BlankTextureRegion && markerTexture != null
 
         // background implementation is the same for both versions.
-        attachChild(ExtendedSprite().apply { textureRegion = backgroundTexture })
+        attachChild(UISprite().apply { textureRegion = backgroundTexture })
 
-        fillClear = Box()
+        fillClear = UIBox()
         fillClear.origin = Anchor.TopRight
         fillClear.clearInfo = ClearInfo.ClearDepthBuffer
         fillClear.depthInfo = DepthInfo.Less
         fillClear.alpha = 0f
         attachChild(fillClear)
 
-        fill = AnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
+        fill = UIAnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
         fill.depthInfo = DepthInfo.Default
         fill.width = fill.width // Preserve the first frame width.
         attachChild(fill)
 
-        marker = ExtendedSprite()
+        marker = UISprite()
         marker.origin = Anchor.Center
         marker.blendInfo = BlendInfo.Additive
         attachChild(marker)
 
-        explode = ExtendedSprite()
+        explode = UISprite()
         explode.origin = Anchor.Center
         explode.blendInfo = BlendInfo.Additive
         explode.alpha = 0f

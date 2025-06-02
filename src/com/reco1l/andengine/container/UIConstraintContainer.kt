@@ -11,16 +11,16 @@ import javax.microedition.khronos.opengles.*
  *
  * This is useful for creating complex layouts.
  */
-open class ConstraintContainer : Container() {
+open class UIConstraintContainer : UIContainer() {
 
-    private val constraints = mutableMapOf<ExtendedEntity, ExtendedEntity>()
+    private val constraints = mutableMapOf<UIComponent, UIComponent>()
 
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
 
         mChildren?.fastForEach { child ->
 
-            if (child !is ExtendedEntity) {
+            if (child !is UIComponent) {
                 return@fastForEach
             }
 
@@ -48,7 +48,7 @@ open class ConstraintContainer : Container() {
     /**
      * Adds a constraint to a child.
      */
-    fun addConstraint(child: ExtendedEntity, target: ExtendedEntity) {
+    fun addConstraint(child: UIComponent, target: UIComponent) {
 
         if (child == target) {
             throw IllegalArgumentException("Cannot constrain a child to itself.")
@@ -68,14 +68,14 @@ open class ConstraintContainer : Container() {
     /**
      * Removes a constraint from a child.
      */
-    fun removeConstraint(child: ExtendedEntity?) {
+    fun removeConstraint(child: UIComponent?) {
         constraints.remove(child ?: return)
     }
 
 
     override fun onChildDetached(child: IEntity) {
         super.onChildDetached(child)
-        removeConstraint(child as? ExtendedEntity)
+        removeConstraint(child as? UIComponent)
     }
 
     override fun onChildPositionChanged(child: IEntity) {

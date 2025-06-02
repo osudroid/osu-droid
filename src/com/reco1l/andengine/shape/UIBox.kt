@@ -1,10 +1,8 @@
 package com.reco1l.andengine.shape
 
-import android.util.Log
-import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.shape.Box.*
+import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
@@ -12,9 +10,9 @@ import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
 
 /**
- * A rectangle shape based on [ExtendedEntity].
+ * A rectangle shape based on [UIComponent].
  */
-open class Box : BufferedEntity<BoxVBO>() {
+open class UIBox : UIBufferedComponent<BoxVBO>() {
 
     /**
      * The style of painting for the box.
@@ -56,7 +54,7 @@ open class Box : BufferedEntity<BoxVBO>() {
     override fun onCreateBuffer(gl: GL10): BoxVBO {
 
         val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
-        val segments = if (radius > 0f) Circle.approximateSegments(radius, radius, 90f) else 0
+        val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
 
         val buffer = buffer
         if (buffer?.radius == radius && buffer.segments == segments && buffer.paintStyle == paintStyle) {
@@ -91,7 +89,7 @@ open class Box : BufferedEntity<BoxVBO>() {
             Outline -> GL_LINE_STRIP
         }
     ) {
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
 
             val width = entity.width
             val height = entity.height

@@ -10,31 +10,31 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class Card(
+open class UICard(
 
     /**
      * The content of the card.
      */
-    val content: Container = LinearContainer().apply {
+    val content: UIContainer = UILinearContainer().apply {
         orientation = Orientation.Vertical
         width = FillParent
         clipToBounds = true
     },
 
-) : LinearContainer() {
+) : UILinearContainer() {
 
     /**
      * The title of the card.
      */
     var title
-        get() = titleBar.firstOf<ExtendedText>()?.text ?: ""
-        set(value) { titleBar.firstOf<ExtendedText>()?.text = value }
+        get() = titleBar.firstOf<UIText>()?.text ?: ""
+        set(value) { titleBar.firstOf<UIText>()?.text = value }
 
 
-    private val titleBar = object : Container() {
+    private val titleBar = object : UIContainer() {
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             if (event.isActionUp) {
-                (parent as Card).apply {
+                (parent as UICard).apply {
                     if (content.isVisible) {
                         collapse()
                     } else {
@@ -49,7 +49,7 @@ open class Card(
 
     init {
         orientation = Orientation.Vertical
-        background = Box().apply {
+        background = UIBox().apply {
             cornerRadius = 14f
             applyTheme = { color = it.accentColor * 0.15f }
         }
@@ -58,14 +58,14 @@ open class Card(
             width = FillParent
             padding = Vec4(12f, 8f)
 
-            +ExtendedText().apply {
+            +UIText().apply {
                 font = ResourceManager.getInstance().getFont("smallFont")
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
                 applyTheme = { color = it.accentColor }
             }
 
-            +Triangle().apply {
+            +UITriangle().apply {
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
                 rotationCenter = Anchor.Center
@@ -78,7 +78,7 @@ open class Card(
             }
         }
 
-        +Box().apply {
+        +UIBox().apply {
             width = FillParent
             height = 1f
             applyTheme = {
@@ -96,7 +96,7 @@ open class Card(
      */
     fun collapse() {
         if (content.isVisible) {
-            val triangle = titleBar.firstOf<Triangle>()
+            val triangle = titleBar.firstOf<UITriangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(180f, 0.1f)
 
@@ -113,7 +113,7 @@ open class Card(
      */
     fun expand() {
         if (!content.isVisible) {
-            val triangle = titleBar.firstOf<Triangle>()
+            val triangle = titleBar.firstOf<UITriangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(0f, 0.1f)
 

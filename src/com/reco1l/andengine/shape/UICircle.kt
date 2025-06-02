@@ -3,7 +3,7 @@ package com.reco1l.andengine.shape
 import androidx.annotation.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
-import com.reco1l.andengine.shape.Circle.*
+import com.reco1l.andengine.shape.UICircle.*
 import com.reco1l.toolkt.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
@@ -16,7 +16,7 @@ import kotlin.math.*
  *
  * @author Reco1l
  */
-open class Circle : BufferedEntity<CircleVertexBuffer>() {
+open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
 
     /**
      * The paint style of the circle.
@@ -92,7 +92,7 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
         drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_STRIP
     ) {
 
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
 
             val halfWidth = entity.width / 2f
             val halfHeight = entity.height / 2f

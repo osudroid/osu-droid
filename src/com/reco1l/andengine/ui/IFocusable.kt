@@ -6,7 +6,7 @@ interface IFocusable {
 
 
     val isFocused
-        get() = ExtendedEngine.Current.focusedEntity == this as? ExtendedEntity
+        get() = ExtendedEngine.Current.focusedEntity == this as? UIComponent
 
 
     /**
@@ -24,7 +24,7 @@ interface IFocusable {
      * Request focus for this entity.
      */
     fun focus() {
-        ExtendedEngine.Current.focusedEntity = this as ExtendedEntity
+        ExtendedEngine.Current.focusedEntity = this as UIComponent
     }
 
     /**

@@ -14,7 +14,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class ExtendedScene : Scene(), IShape {
+open class UIScene : Scene(), IShape {
 
     /**
      * The time multiplier for the scene.
@@ -24,7 +24,7 @@ open class ExtendedScene : Scene(), IShape {
     var timeMultiplier = 1f
 
     /**
-     * Whether this [ExtendedScene] should clip its children.
+     * Whether this [UIScene] should clip its children.
      */
     open var clipToBounds = false
 

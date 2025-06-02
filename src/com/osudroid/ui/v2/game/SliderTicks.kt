@@ -12,7 +12,7 @@ import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
-class SliderTickContainer : Container() {
+class SliderTickContainer : UIContainer() {
     private var slider: Slider? = null
 
     fun init(currentTimeSec: Double, beatmapSlider: Slider) {
@@ -73,7 +73,7 @@ class SliderTickContainer : Container() {
 }
 
 
-class SliderTickSprite : ExtendedSprite() {
+class SliderTickSprite : UISprite() {
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")

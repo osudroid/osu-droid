@@ -2,15 +2,15 @@ package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.shape.Triangle.*
+import com.reco1l.andengine.shape.UITriangle.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 
 /**
- * A rectangle shape based on [ExtendedEntity].
+ * A rectangle shape based on [UIComponent].
  */
-open class Triangle : BufferedEntity<TriangleVBO>() {
+open class UITriangle : UIBufferedComponent<TriangleVBO>() {
 
     /**
      * The style of painting for the triangle.
@@ -40,7 +40,7 @@ open class Triangle : BufferedEntity<TriangleVBO>() {
 
     inner class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D, GL_STATIC_DRAW) {
 
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
             addTriangle(
                 index = 0,
                 centerX = entity.width / 2f,
@@ -50,7 +50,7 @@ open class Triangle : BufferedEntity<TriangleVBO>() {
             )
         }
 
-        override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+        override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
             gl.glDrawArrays(if (paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP, 0, vertexCount)
         }
 

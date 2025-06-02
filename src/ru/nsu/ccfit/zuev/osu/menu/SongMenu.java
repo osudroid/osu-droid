@@ -16,8 +16,8 @@ import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.BeatmapSetInfo;
 import com.osudroid.data.DatabaseManager;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
 
@@ -123,8 +123,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapHitObjectsText,
             beatmapDifficultyText;
 
-    private ExtendedSprite currentPressedButton;
-    private ExtendedSprite scoringSwitcher = null;
+    private UISprite currentPressedButton;
+    private UISprite scoringSwitcher = null;
     private SearchBarFragment searchBar = null;
     private GroupType groupType = GroupType.MapSet;
 
@@ -337,7 +337,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
 
-        var backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
+        var backButton = new UIAnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
             boolean moved = false;
             float dx = 0, dy = 0;
             boolean scaleWhenHold = true;
@@ -390,10 +390,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        ExtendedSprite modSelection = null;
+        UISprite modSelection = null;
 
         if (!Multiplayer.isMultiplayer)
-            modSelection = new ExtendedSprite() {
+            modSelection = new UISprite() {
                 boolean moved = false;
                 private float dx = 0, dy = 0;
 
@@ -446,7 +446,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             };
 
-        var optionSelection = new ExtendedSprite() {
+        var optionSelection = new UISprite() {
             boolean moved = false;
             private float dx = 0, dy = 0;
 
@@ -502,7 +502,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        var randomMap = new ExtendedSprite() {
+        var randomMap = new UISprite() {
             boolean moved = false;
             private float dx = 0, dy = 0;
 
@@ -679,7 +679,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-            scoringSwitcher = new ExtendedSprite() {
+            scoringSwitcher = new UISprite() {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                     if (!pSceneTouchEvent.isActionDown()) return false;

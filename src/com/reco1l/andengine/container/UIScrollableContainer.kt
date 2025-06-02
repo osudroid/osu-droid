@@ -14,7 +14,7 @@ import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 @Suppress("MemberVisibilityCanBePrivate")
-open class ScrollableContainer : Container() {
+open class UIScrollableContainer : UIContainer() {
 
     /**
      * Determines which axes can be scrolled by the user.
@@ -140,7 +140,7 @@ open class ScrollableContainer : Container() {
     /**
      * The scroll indicator for the x-axis that shows the current scroll position.
      */
-    var horizontalIndicator: ExtendedEntity? = Box().apply {
+    var horizontalIndicator: UIComponent? = UIBox().apply {
         color = ColorARGB.White
         height = 6f
         alpha = 0.5f
@@ -150,25 +150,25 @@ open class ScrollableContainer : Container() {
             if (field != value) {
                 field?.decoratedEntity = null
                 field = value
-                value?.decoratedEntity = this@ScrollableContainer
+                value?.decoratedEntity = this@UIScrollableContainer
             }
         }
 
     /**
      * The scroll indicator for the y-axis that shows the current scroll position.
      */
-    var verticalIndicator: ExtendedEntity? = Box().apply {
+    var verticalIndicator: UIComponent? = UIBox().apply {
         color = ColorARGB.White
         width = 6f
         alpha = 0.5f
         cornerRadius = 3f
-        decoratedEntity = this@ScrollableContainer
+        decoratedEntity = this@UIScrollableContainer
     }
         set(value) {
             if (field != value) {
                 field?.decoratedEntity = null
                 field = value
-                value?.decoratedEntity = this@ScrollableContainer
+                value?.decoratedEntity = this@UIScrollableContainer
             }
         }
 
@@ -467,14 +467,14 @@ open class ScrollableContainer : Container() {
 }
 
 /**
- * Sets the [ScrollableContainer.preventScrolling] property for all scrollable containers
+ * Sets the [UIScrollableContainer.preventScrolling] property for all scrollable containers
  * in the hierarchy of this entity.
  */
-fun ExtendedEntity.setHierarchyScrollPrevention(value: Boolean) {
+fun UIComponent.setHierarchyScrollPrevention(value: Boolean) {
 
     var parent = parent
     while (parent != null) {
-        if (parent is ScrollableContainer) {
+        if (parent is UIScrollableContainer) {
             parent.preventScrolling = value
         }
         parent = parent.parent
@@ -482,7 +482,7 @@ fun ExtendedEntity.setHierarchyScrollPrevention(value: Boolean) {
 
     for (i in 0 until childCount) {
         val child = getChild(i)
-        if (child is ScrollableContainer) {
+        if (child is UIScrollableContainer) {
             child.preventScrolling = value
         }
     }

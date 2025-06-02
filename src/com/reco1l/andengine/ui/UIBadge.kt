@@ -14,16 +14,16 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 /**
  * A badge is a small piece of information that can be used to display a value or a status.
  */
-open class Badge : CompoundText() {
+open class UIBadge : CompoundText() {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         color = theme.accentColor
         background?.color = theme.accentColor * 0.15f
     }
 
     init {
         padding = Vec4(12f, 8f)
-        background = Box().apply { cornerRadius = 12f }
+        background = UIBox().apply { cornerRadius = 12f }
     }
 
 }
@@ -31,9 +31,9 @@ open class Badge : CompoundText() {
 /**
  * A statistic badge is a badge that displays a value next to a label.
  */
-open class LabeledBadge : LinearContainer() {
+open class UILabeledBadge : UILinearContainer() {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         color = theme.accentColor
         background?.color = theme.accentColor * 0.15f
     }
@@ -46,7 +46,7 @@ open class LabeledBadge : LinearContainer() {
         font = ResourceManager.getInstance().getFont("smallFont")
         padding = Vec4(12f, 8f)
         alignment = Anchor.Center
-        background = Box().apply {
+        background = UIBox().apply {
             color = ColorARGB.Black
             alpha = 0.1f
             cornerRadius = 12f
@@ -79,7 +79,7 @@ open class LabeledBadge : LinearContainer() {
 
     init {
         orientation = Orientation.Horizontal
-        background = Box().apply { cornerRadius = 12f }
+        background = UIBox().apply { cornerRadius = 12f }
     }
 }
 

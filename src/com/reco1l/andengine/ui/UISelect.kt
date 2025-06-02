@@ -17,12 +17,12 @@ import kotlin.math.*
  * A dropdown menu that allows the user to select an option from a list.
  */
 @Suppress("LeakingThis")
-open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<T>>(initialValues) {
+open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<List<T>>(initialValues) {
 
 
-    private val optionsContainer: LinearContainer
+    private val optionsContainer: UILinearContainer
 
-    private val menuWrapper: Container
+    private val menuWrapper: UIContainer
 
 
     /**
@@ -34,11 +34,11 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
     /**
      * The menu that contains the options.
      */
-    val menu = ScrollableContainer().apply menu@{
+    val menu = UIScrollableContainer().apply menu@{
         width = MatchContent
         scrollAxes = Axes.Y
         clipToBounds = true
-        background = Box().apply {
+        background = UIBox().apply {
             cornerRadius = 14f
             applyTheme = { color = it.accentColor * 0.175f }
         }
@@ -49,7 +49,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
             padding = Vec4(4f)
         }
 
-        menuWrapper = object : Container() {
+        menuWrapper = object : UIContainer() {
 
             init {
                 width = FillParent
@@ -71,7 +71,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
     /**
      * The button that toggles the dropdown menu.
      */
-    val button = object : TextButton() {
+    val button = object : UITextButton() {
 
         init {
             width = FillParent
@@ -84,7 +84,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
                 }
             }
 
-            trailingIcon = Triangle()
+            trailingIcon = UITriangle()
             trailingIcon!!.apply {
                 width = 14f
                 height = 8f
@@ -135,7 +135,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
         }
 
 
-    private var buttons = mapOf<Option<T>, TextButton>()
+    private var buttons = mapOf<Option<T>, UITextButton>()
 
     private var listChanged = true
 
@@ -192,9 +192,9 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
 
         options.fastForEach { option ->
 
-            val button = object : TextButton() {
+            val button = object : UITextButton() {
 
-                override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+                override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
                     color = theme.accentColor
                 }
 
@@ -206,7 +206,7 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
                     trailingIcon = option.trailingIcon
                     onActionUp = { onOptionPress(option) }
                     background = null
-                    foreground = Box().apply {
+                    foreground = UIBox().apply {
                         cornerRadius = 12f
                         applyTheme = {
                             color = it.accentColor
@@ -305,8 +305,8 @@ open class Select<T : Any>(initialValues: List<T> = emptyList()) : Control<List<
         val value: T,
         val text: String,
         val color: ColorARGB = Theme.current.accentColor,
-        val leadingIcon: ExtendedEntity? = null,
-        val trailingIcon: ExtendedEntity? = null,
+        val leadingIcon: UIComponent? = null,
+        val trailingIcon: UIComponent? = null,
     )
 
 }

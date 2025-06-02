@@ -16,7 +16,7 @@ import kotlin.math.*
 /**
  * A text entity that can be displayed on the screen.
  */
-open class ExtendedText : BufferedEntity<CompoundBuffer>() {
+open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
     /**
      * The text to be displayed
@@ -197,7 +197,7 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
     ) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
 
             val font = data[0] as Font
             val lines = data[1] as Array<String>
@@ -233,7 +233,7 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
             }
         }
 
-        override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+        override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
             gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(currentLength, length))
         }
     }
@@ -246,7 +246,7 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
     ) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
             setPosition(0)
 
             val font = data[0] as Font
@@ -289,12 +289,12 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 /**
  * A compound text entity that can be displayed with leading and trailing icons.
  */
-open class CompoundText : LinearContainer() {
+open class CompoundText : UILinearContainer() {
 
     /**
      * The text entity.
      */
-    val textEntity = ExtendedText().apply {
+    val textEntity = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
@@ -325,7 +325,7 @@ open class CompoundText : LinearContainer() {
     /**
      * The leading icon.
      */
-    var leadingIcon: ExtendedEntity? = null
+    var leadingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
                 field?.detachSelf()
@@ -341,7 +341,7 @@ open class CompoundText : LinearContainer() {
     /**
      * The trailing icon.
      */
-    var trailingIcon: ExtendedEntity? = null
+    var trailingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
                 field?.detachSelf()
@@ -357,7 +357,7 @@ open class CompoundText : LinearContainer() {
     /**
      * Called when one of the icons changes.
      */
-    open var onIconChange: (ExtendedEntity) -> Unit = { icon ->
+    open var onIconChange: (UIComponent) -> Unit = { icon ->
         icon.width = 28f
         icon.height = 28f
         icon.anchor = Anchor.CenterLeft

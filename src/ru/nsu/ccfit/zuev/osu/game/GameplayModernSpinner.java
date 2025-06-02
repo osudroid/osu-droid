@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
@@ -23,11 +23,11 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  */
 public class GameplayModernSpinner extends GameplaySpinner {
 
-    private final ExtendedSprite middle;
-    private final ExtendedSprite middle2;
-    private final ExtendedSprite bottom;
-    private final ExtendedSprite top;
-    private final ExtendedSprite glow;
+    private final UISprite middle;
+    private final UISprite middle2;
+    private final UISprite bottom;
+    private final UISprite top;
+    private final UISprite glow;
     private final ScoreNumber bonusScore;
 
     public GameplayModernSpinner() {
@@ -35,27 +35,27 @@ public class GameplayModernSpinner extends GameplaySpinner {
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         Utils.trackToRealCoords(position);
 
-        middle = new ExtendedSprite();
+        middle = new UISprite();
         middle.setOrigin(Anchor.Center);
         middle.setPosition(position.x, position.y);
         middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
 
-        middle2 = new ExtendedSprite();
+        middle2 = new UISprite();
         middle2.setOrigin(Anchor.Center);
         middle2.setPosition(position.x, position.y);
         middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
 
-        bottom = new ExtendedSprite();
+        bottom = new UISprite();
         bottom.setOrigin(Anchor.Center);
         bottom.setPosition(position.x, position.y);
         bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
 
-        top = new ExtendedSprite();
+        top = new UISprite();
         top.setOrigin(Anchor.Center);
         top.setPosition(position.x, position.y);
         top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
 
-        glow = new ExtendedSprite();
+        glow = new UISprite();
         glow.setOrigin(Anchor.Center);
         glow.setPosition(position.x, position.y);
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));

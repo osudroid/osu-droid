@@ -45,7 +45,7 @@ object LobbyScene : Scene() {
         }
 
 
-    private var backButton: ExtendedSprite? = null
+    private var backButton: UISprite? = null
 
     private var createButton: TextButton? = null
 
@@ -101,7 +101,7 @@ object LobbyScene : Scene() {
         // Back button code copy and paste from legacy code but improved, don't blame on me.
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
 
-        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
+        backButton = object : UIAnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false

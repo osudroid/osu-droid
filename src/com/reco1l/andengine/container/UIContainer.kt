@@ -4,7 +4,7 @@ import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import kotlin.math.*
 
-open class Container : ExtendedEntity() {
+open class UIContainer : UIComponent() {
 
     init {
         width = MatchContent
@@ -56,12 +56,12 @@ open class Container : ExtendedEntity() {
         return findChild { it is T } as? T
     }
 
-    operator fun ExtendedEntity.unaryPlus() {
-        this@Container.attachChild(this@unaryPlus)
+    operator fun UIComponent.unaryPlus() {
+        this@UIContainer.attachChild(this@unaryPlus)
     }
 
-    operator fun ExtendedEntity.unaryMinus() {
-        this@Container.detachChild(this@unaryMinus)
+    operator fun UIComponent.unaryMinus() {
+        this@UIContainer.detachChild(this@unaryMinus)
     }
 
     operator fun <T : IEntity> get(index: Int): T? {

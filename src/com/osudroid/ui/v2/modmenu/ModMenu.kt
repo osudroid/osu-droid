@@ -1,8 +1,8 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.ExtendedEntity.Companion.MatchContent
-import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
+import com.reco1l.andengine.UIComponent.Companion.MatchContent
+import com.reco1l.andengine.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -16,7 +16,7 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.osudroid.utils.updateThread
-import com.reco1l.andengine.ui.TextButton
+import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
@@ -37,7 +37,7 @@ import java.util.LinkedList
 import java.util.concurrent.CancellationException
 import kotlin.math.*
 
-object ModMenu : ExtendedScene() {
+object ModMenu : UIScene() {
 
 
     /**
@@ -54,17 +54,17 @@ object ModMenu : ExtendedScene() {
     private val modChangeQueue = LinkedList<Mod>()
     private val modPresetsSection: ModMenuPresetsSection
 
-    private val customizeButton: TextButton
+    private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
 
-    private val rankedBadge: Badge
-    private val arBadge: LabeledBadge
-    private val odBadge: LabeledBadge
-    private val csBadge: LabeledBadge
-    private val hpBadge: LabeledBadge
-    private val bpmBadge: LabeledBadge
-    private val starRatingBadge: LabeledBadge
-    private val scoreMultiplierBadge: LabeledBadge
+    private val rankedBadge: UIBadge
+    private val arBadge: UILabeledBadge
+    private val odBadge: UILabeledBadge
+    private val csBadge: UILabeledBadge
+    private val hpBadge: UILabeledBadge
+    private val bpmBadge: UILabeledBadge
+    private val starRatingBadge: UILabeledBadge
+    private val scoreMultiplierBadge: UILabeledBadge
 
     private var parsedBeatmap: Beatmap? = null
     private var calculationJob: Job? = null
@@ -81,32 +81,32 @@ object ModMenu : ExtendedScene() {
 
         customizationMenu = ModCustomizationMenu()
 
-        attachChild(LinearContainer().apply {
+        attachChild(UILinearContainer().apply {
             width = FillParent
             height = FillParent
             orientation = Orientation.Vertical
-            background = Box().apply {
+            background = UIBox().apply {
                 applyTheme = {
                     color = it.accentColor * 0.1f
                     alpha = 0.9f
                 }
             }
 
-            attachChild(Container().apply {
+            attachChild(UIContainer().apply {
                 width = FillParent
                 height = MatchContent
                 padding = Vec4(60f, 12f)
 
-                attachChild(LinearContainer().apply {
+                attachChild(UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     height = MatchContent
                     spacing = 10f
 
-                    attachChild(TextButton().apply {
+                    attachChild(UITextButton().apply {
                         text = "Back"
-                        leadingIcon = ExtendedSprite().apply {
+                        leadingIcon = UISprite().apply {
                             textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
                             width = 28f
                             height = 28f
@@ -118,10 +118,10 @@ object ModMenu : ExtendedScene() {
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
 
-                    customizeButton = TextButton().apply {
+                    customizeButton = UITextButton().apply {
                         text = "Customize"
                         isEnabled = false
-                        leadingIcon = ExtendedSprite().apply {
+                        leadingIcon = UISprite().apply {
                             textureRegion = ResourceManager.getInstance().getTexture("tune")
                             width = 28f
                             height = 28f
@@ -138,12 +138,12 @@ object ModMenu : ExtendedScene() {
                     }
                     attachChild(customizeButton)
 
-                    attachChild(TextButton().apply {
+                    attachChild(UITextButton().apply {
                         text = "Clear"
                         applyTheme = {}
                         color = ColorARGB(0xFFFFBFBF)
                         background?.color = ColorARGB(0xFF342121)
-                        leadingIcon = ExtendedSprite().apply {
+                        leadingIcon = UISprite().apply {
                             textureRegion = ResourceManager.getInstance().getTexture("backspace")
                             width = 28f
                             height = 28f
@@ -156,13 +156,13 @@ object ModMenu : ExtendedScene() {
                     })
                 })
 
-                attachChild(LinearContainer().apply {
+                attachChild(UILinearContainer().apply {
                     orientation = Orientation.Vertical
                     spacing = 10f
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
 
-                    +LinearContainer().apply {
+                    +UILinearContainer().apply {
                         orientation = Orientation.Horizontal
                         anchor = Anchor.TopRight
                         origin = Anchor.TopRight
@@ -186,7 +186,7 @@ object ModMenu : ExtendedScene() {
                         }
                     }
 
-                    +LinearContainer().apply {
+                    +UILinearContainer().apply {
                         orientation = Orientation.Horizontal
                         origin = Anchor.TopRight
                         anchor = Anchor.TopRight
@@ -216,12 +216,12 @@ object ModMenu : ExtendedScene() {
                 })
             })
 
-            attachChild(ScrollableContainer().apply {
+            attachChild(UIScrollableContainer().apply {
                 width = FillParent
                 height = FillParent
                 scrollAxes = Axes.X
 
-                attachChild(LinearContainer().apply {
+                attachChild(UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     width = MatchContent
                     height = FillParent
@@ -543,7 +543,7 @@ object ModMenu : ExtendedScene() {
 
     //region Components
 
-    private fun <T : Comparable<T>> LabeledBadge.updateStatisticBadge(initialValue: T, finalValue: T) {
+    private fun <T : Comparable<T>> UILabeledBadge.updateStatisticBadge(initialValue: T, finalValue: T) {
 
         val newText = if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 

@@ -11,21 +11,21 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class Modal(
+open class UIModal(
 
     /**
      * The content of the modal. This is where you should add your UI elements.
      */
-    val card: Container = Container().apply {
+    val card: UIContainer = UIContainer().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
         clipToBounds = true
         scaleCenter = Anchor.Center
     }
 
-) : ExtendedEntity() {
+) : UIComponent() {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         card.background?.color = theme.accentColor * 0.15f
     }
 
@@ -50,9 +50,9 @@ open class Modal(
 
         card.scaleX = 0.9f
         card.scaleY = 0.9f
-        card.background = Box().apply { cornerRadius = 16f }
+        card.background = UIBox().apply { cornerRadius = 16f }
 
-        background = Box().apply {
+        background = UIBox().apply {
             color = ColorARGB.Black
             alpha = 0.2f
         }
@@ -158,18 +158,18 @@ open class Modal(
 }
 
 
-abstract class Dialog<T : ExtendedEntity>(val innerContent: T) : Modal(card = LinearContainer().apply {
+abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = UILinearContainer().apply {
     orientation = Orientation.Vertical
 }) {
 
-    val titleEntity = ExtendedText().apply {
+    val titleEntity = UIText().apply {
         width = FillParent
         font = ResourceManager.getInstance().getFont("smallFont")
         alignment = Anchor.Center
         padding = Vec4(0f, 12f)
     }
 
-    val buttonLayout: LinearContainer
+    val buttonLayout: UILinearContainer
 
 
     /**
@@ -210,13 +210,13 @@ abstract class Dialog<T : ExtendedEntity>(val innerContent: T) : Modal(card = Li
     }
 
 
-    fun addButton(button: Button) {
+    fun addButton(button: UIButton) {
         buttonLayout += button
     }
 }
 
-open class MessageDialog : Dialog<ExtendedText>(
-    innerContent = ExtendedText().apply {
+open class UIMessageDialog : UIDialog<UIText>(
+    innerContent = UIText().apply {
         width = FillParent
         font = ResourceManager.getInstance().getFont("smallFont")
         alignment = Anchor.Center

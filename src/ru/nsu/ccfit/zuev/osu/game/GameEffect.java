@@ -5,8 +5,8 @@ import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
 
@@ -25,18 +25,18 @@ public class GameEffect extends GameObject {
             "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
 
-    ExtendedSprite hit;
+    UISprite hit;
     String texname;
 
     public GameEffect(final String texname) {
         this.texname = texname;
 
         if (isAnimationEffect(texname) && ResourceManager.getInstance().isTextureLoaded(texname + "-0")) {
-            var hit = new AnimatedSprite(texname, true, OsuSkin.get().getAnimationFramerate());
+            var hit = new UIAnimatedSprite(texname, true, OsuSkin.get().getAnimationFramerate());
             hit.setLoop(false);
             this.hit = hit;
         } else {
-            hit = new ExtendedSprite();
+            hit = new UISprite();
             hit.setTextureRegion(ResourceManager.getInstance().getTexture(texname));
         }
     }
@@ -55,7 +55,7 @@ public class GameEffect extends GameObject {
 
     public void init(final Scene scene, final PointF pos, final float scale,
                      final UniversalModifier... entityModifiers) {
-        if (hit instanceof AnimatedSprite animatedHit) {
+        if (hit instanceof UIAnimatedSprite animatedHit) {
             animatedHit.reset();
         }
         hit.setPosition(pos.x, pos.y);

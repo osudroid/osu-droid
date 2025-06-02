@@ -105,7 +105,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     }
 
 
-    private var backButton: AnimatedSprite? = null
+    private var backButton: UIAnimatedSprite? = null
 
     private var readyButton: TextButton? = null
 
@@ -113,7 +113,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     private var beatmapInfoButton: BeatmapButton? = null
 
-    private var modsButton: ExtendedSprite? = null
+    private var modsButton: UISprite? = null
 
     private var playerList: RoomPlayerList? = null
 
@@ -303,7 +303,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val layoutMods = OsuSkin.get().getLayout("ModsButton")
 
-        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
+        backButton = object : UIAnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false
@@ -361,7 +361,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             attachChild(it)
         }
 
-        modsButton = object : ExtendedSprite() {
+        modsButton = object : UISprite() {
 
             var moved = false
             var dx = 0f

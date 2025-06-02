@@ -3,7 +3,7 @@ package com.reco1l.andengine.sprite
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.info.*
-import com.reco1l.andengine.sprite.ExtendedSprite.*
+import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.opengl.texture.region.*
@@ -16,7 +16,7 @@ import kotlin.math.*
  * Sprite that allows to change texture once created.
  */
 @Suppress("LeakingThis")
-open class ExtendedSprite(textureRegion: TextureRegion? = null) : BufferedEntity<SpriteVBO>() {
+open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<SpriteVBO>() {
 
     override var contentWidth: Float
         get() = textureRegion?.width?.toFloat() ?: 0f
@@ -146,7 +146,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : BufferedEntity
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
 
             val textureWidth = contentWidth
             val textureHeight = contentHeight

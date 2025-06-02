@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.Config
 //region Size related properties
 
 fun IEntity?.getWidth() = when (this) {
-    is ExtendedEntity -> width
+    is UIComponent -> width
     is CameraScene -> camera.widthRaw
     is IShape -> width
     is Scene -> Config.getRES_WIDTH().toFloat()
@@ -18,7 +18,7 @@ fun IEntity?.getWidth() = when (this) {
 }
 
 fun IEntity?.getHeight() = when (this) {
-    is ExtendedEntity -> height
+    is UIComponent -> height
     is CameraScene -> camera.heightRaw
     is IShape -> height
     is Scene -> Config.getRES_HEIGHT().toFloat()
@@ -29,63 +29,63 @@ fun IEntity?.getHeight() = when (this) {
 /**
  * The size of the entity.
  */
-var ExtendedEntity.size: Vec2
+var UIComponent.size: Vec2
     get() = Vec2(width, height)
     set(value) = setSize(value.x, value.y)
 
 /**
  * The content size of the entity.
  */
-val ExtendedEntity.contentSize: Vec2
+val UIComponent.contentSize: Vec2
     get() = Vec2(contentWidth, contentHeight)
 
 /**
  * The position of the content in the x-axis of the entity.
  */
 val IEntity?.contentX: Float
-    get() = if (this is ExtendedEntity) padding.left else 0f
+    get() = if (this is UIComponent) padding.left else 0f
 
 /**
  * The position of the content in the y-axis of the entity.
  */
 val IEntity?.contentY: Float
-    get() = if (this is ExtendedEntity) padding.top else 0f
+    get() = if (this is UIComponent) padding.top else 0f
 
 /**
  * The size with transformations applied.
  */
-val ExtendedEntity.transformedSize: Vec2
+val UIComponent.transformedSize: Vec2
     get() = Vec2(transformedWidth, transformedHeight)
 
 /**
  * The width with transformations applied.
  */
-val ExtendedEntity.transformedWidth: Float
+val UIComponent.transformedWidth: Float
     get() = width * scaleX
 
 /**
  * The height with transformations applied.
  */
-val ExtendedEntity.transformedHeight: Float
+val UIComponent.transformedHeight: Float
     get() = height * scaleY
 
 /**
  * The size minus padding of the entity.
  */
-val ExtendedEntity.innerSize: Vec2
+val UIComponent.innerSize: Vec2
     get() = Vec2(innerWidth, innerHeight)
 
 /**
  * The width minus padding of the entity.
  */
 val IEntity?.innerWidth: Float
-    get() = if (this is ExtendedEntity) width - padding.horizontal else getWidth()
+    get() = if (this is UIComponent) width - padding.horizontal else getWidth()
 
 /**
  * The height minus padding of the entity.
  */
 val IEntity?.innerHeight: Float
-    get() = if (this is ExtendedEntity) height - padding.vertical else getHeight()
+    get() = if (this is UIComponent) height - padding.vertical else getHeight()
 
 //endregion
 
@@ -95,7 +95,7 @@ val IEntity?.innerHeight: Float
  * The absolute position of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
-val ExtendedEntity.absolutePosition: Vec2
+val UIComponent.absolutePosition: Vec2
     get() = Vec2(absoluteX, absoluteY)
 
 /**
@@ -103,57 +103,57 @@ val ExtendedEntity.absolutePosition: Vec2
  * This takes into account the anchor and origin.
  */
 val IEntity.absoluteX: Float
-    get() = if (this is ExtendedEntity) parent.contentX + anchorPositionX - originPositionX + x + translationX else x
+    get() = if (this is UIComponent) parent.contentX + anchorPositionX - originPositionX + x + translationX else x
 
 /**
  * The absolute position of the Y axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
 val IEntity.absoluteY: Float
-    get() = if (this is ExtendedEntity) parent.contentY + anchorPositionY - originPositionY + y + translationY else y
+    get() = if (this is UIComponent) parent.contentY + anchorPositionY - originPositionY + y + translationY else y
 
 /**
  * The position of the entity. This does not take into account the anchor and origin.
  */
-var ExtendedEntity.position
+var UIComponent.position
     get() = Vec2(x, y)
     set(value) = setPosition(value.x, value.y)
 
 /**
  * The anchor position of the entity.
  */
-val ExtendedEntity.anchorPosition: Vec2
+val UIComponent.anchorPosition: Vec2
     get() = Vec2(anchorPositionX, anchorPositionY)
 
 /**
  * The anchor position of the entity in the X axis.
  */
-val ExtendedEntity.anchorPositionX: Float
+val UIComponent.anchorPositionX: Float
     get() = parent.innerWidth * anchor.x
 
 /**
  * The anchor position of the entity in the Y axis.
  */
-val ExtendedEntity.anchorPositionY: Float
+val UIComponent.anchorPositionY: Float
     get() = parent.innerHeight * anchor.y
 
 
 /**
  * The origin position of the entity.
  */
-val ExtendedEntity.originPosition: Vec2
+val UIComponent.originPosition: Vec2
     get() = Vec2(originPositionX, originPositionY)
 
 /**
  * The origin position of the entity in the X axis.
  */
-val ExtendedEntity.originPositionX: Float
+val UIComponent.originPositionX: Float
     get() = width * origin.x
 
 /**
  * The origin position of the entity in the Y axis.
  */
-val ExtendedEntity.originPositionY: Float
+val UIComponent.originPositionY: Float
     get() = height * origin.y
 
 //endregion
@@ -191,6 +191,18 @@ var IEntity.rotationCenter
  */
 fun IEntity.getParentScene(): Scene? {
     return if (this is Scene) this else parent?.getParentScene()
+}
+
+inline fun IEntity.forEach(block: (IEntity) -> Unit) {
+    for (i in 0 until childCount) {
+        block(getChild(i))
+    }
+}
+
+inline fun IEntity.forEachIndexed(block: (Int, IEntity) -> Unit) {
+    for (i in 0 until childCount) {
+        block(i, getChild(i))
+    }
 }
 
 //endregion

@@ -3,8 +3,8 @@ package com.osudroid.ui.v2.hud.elements
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.info.*
-import com.reco1l.andengine.shape.Circle
-import com.reco1l.andengine.sprite.ExtendedSprite
+import com.reco1l.andengine.shape.UICircle
+import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
 import com.osudroid.ui.v2.hud.HUDElement
@@ -19,7 +19,7 @@ class HUDBackButton : HUDElement() {
 
     private val requiredPressTimeMs = Config.getInt("back_button_press_time", 300).toFloat()
 
-    private val arrow = ExtendedSprite().apply {
+    private val arrow = UISprite().apply {
         textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
         anchor = Anchor.Center
         origin = Anchor.Center
@@ -28,7 +28,7 @@ class HUDBackButton : HUDElement() {
         setSize(0.6f, 0.6f)
     }
 
-    private val backCircle = Circle().apply {
+    private val backCircle = UICircle().apply {
         setPortion(0f)
         anchor = Anchor.Center
         origin = Anchor.Center
@@ -39,7 +39,7 @@ class HUDBackButton : HUDElement() {
         setSize(1f, 1f)
     }
 
-    private val frontCircle = Circle().apply {
+    private val frontCircle = UICircle().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
         color = ColorARGB(0xFF002626)
@@ -91,7 +91,7 @@ class HUDBackButton : HUDElement() {
                 if (holdDurationMs >= requiredPressTimeMs) {
                     isPressed = false
                     GlobalManager.getInstance().gameScene.pause()
-                    (parent as ExtendedEntity).invalidate(InvalidationFlag.InputBindings)
+                    (parent as UIComponent).invalidate(InvalidationFlag.InputBindings)
                 }
             } else {
                 holdDurationMs -= realMsElapsed * 2

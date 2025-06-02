@@ -5,9 +5,9 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.info.*
 import com.reco1l.framework.*
 
-open class CircularProgressBar : Container() {
+open class CircularProgressBar : UIContainer() {
 
-    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         trackCircle.color = theme.accentColor.copy(alpha = trackCircle.alpha)
         rotatingCircle.color = theme.accentColor
     }

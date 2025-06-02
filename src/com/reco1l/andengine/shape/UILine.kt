@@ -2,16 +2,16 @@ package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.shape.Line.*
+import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 
 /**
- * A rectangle shape based on [ExtendedEntity].
+ * A rectangle shape based on [UIComponent].
  */
-class Line : BufferedEntity<LineVertexBuffer>() {
+class UILine : UIBufferedComponent<LineVertexBuffer>() {
 
     /**
      * The width of the line.
@@ -57,7 +57,7 @@ class Line : BufferedEntity<LineVertexBuffer>() {
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
             putVertex(0, fromPoint.x, fromPoint.y)
             putVertex(1, toPoint.x, toPoint.y)
         }

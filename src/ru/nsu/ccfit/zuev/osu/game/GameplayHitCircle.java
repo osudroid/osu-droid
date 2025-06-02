@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplayHitCircle extends GameObject {
 
-    private final ExtendedSprite approachCircle;
+    private final UISprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
     private GameObjectListener listener;
     private Scene scene;
@@ -39,7 +39,7 @@ public class GameplayHitCircle extends GameObject {
 
     public GameplayHitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
-        approachCircle = new ExtendedSprite();
+        approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }

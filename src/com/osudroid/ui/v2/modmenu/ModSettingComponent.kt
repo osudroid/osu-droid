@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
-import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.ui.Control
+import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FormControl
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.settings.ModSetting
@@ -30,7 +30,7 @@ interface IModSettingComponent<V : Any?> {
 sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
     val mod: Mod,
     override val setting: ModSetting<TSettingValue>
-) : Container(), IModSettingComponent<TSettingValue> {
+) : UIContainer(), IModSettingComponent<TSettingValue> {
     /**
      * The [FormControl] that is used to display this [ModSettingComponent].
      */
@@ -64,7 +64,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
     /**
      * Creates the [FormControl] that is used to display this [ModSettingComponent].
      */
-    protected abstract fun createControl(): FormControl<TControlValue, Control<TControlValue>>
+    protected abstract fun createControl(): FormControl<TControlValue, UIControl<TControlValue>>
 
     /**
      * Converts a value from the [ModSetting] to a value that can be displayed in the [FormControl].
