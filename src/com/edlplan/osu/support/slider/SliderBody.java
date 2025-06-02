@@ -2,8 +2,8 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.andengine.info.ClearInfo;
-import com.reco1l.andengine.info.DepthInfo;
+import com.reco1l.andengine.component.ClearInfo;
+import com.reco1l.andengine.component.DepthInfo;
 import com.reco1l.andengine.shape.UITriangleMesh;
 import com.reco1l.andengine.container.UIContainer;
 import com.rian.osu.math.Vector2;

@@ -1,4 +1,4 @@
-package com.reco1l.andengine.info
+package com.reco1l.andengine.component
 
 data class ClearInfo(
 

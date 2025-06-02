@@ -2,7 +2,6 @@ package com.osudroid.ui.v2.hud.elements
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
-import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.UICircle
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.framework.ColorARGB

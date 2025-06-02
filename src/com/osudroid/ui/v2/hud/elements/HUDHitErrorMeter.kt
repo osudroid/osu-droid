@@ -1,12 +1,12 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Pool
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager

@@ -1,11 +1,11 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.shape.UICircle
 import com.reco1l.framework.ColorARGB
 import com.osudroid.ui.v2.hud.HUDElement
+import com.reco1l.andengine.component.*
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 

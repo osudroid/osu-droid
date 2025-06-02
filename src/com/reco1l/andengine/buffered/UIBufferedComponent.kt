@@ -1,7 +1,6 @@
 package com.reco1l.andengine.buffered
 
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.info.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.shape.Shape.*
 import org.anddev.andengine.opengl.util.*
