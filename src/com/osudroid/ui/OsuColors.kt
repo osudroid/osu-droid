@@ -3,7 +3,7 @@ package com.osudroid.ui
 import android.graphics.Color
 import com.reco1l.framework.Color4
 import com.reco1l.framework.Colors
-import com.reco1l.framework.toColorARGB
+import com.reco1l.framework.toColor4
 import com.reco1l.toolkt.roundBy
 import kotlin.math.ceil
 
@@ -38,7 +38,7 @@ object OsuColors {
         val sr = ceil(point).toFloat().roundBy(2)
 
         if (sr < 0.1f) {
-            return (0xAAAAAA).toColorARGB()
+            return (0xAAAAAA).toColor4()
         }
 
         for (i in 0 until STAR_RATING_GRADIENT.size - 1) {
@@ -53,7 +53,7 @@ object OsuColors {
             return Colors.interpolate(sr, startColor, endColor, startDomain, endDomain)
         }
 
-        return Color.BLACK.toColorARGB()
+        return Color.BLACK.toColor4()
     }
 
     val red = Color4(0xFFED1121)

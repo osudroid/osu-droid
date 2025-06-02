@@ -104,6 +104,7 @@ enum class HexComposition {
     RRGGBBAA,
     RRGGBB,
 }
-fun Int.toColorARGB() = Color4(this)
 
-fun Long.toColorARGB() = Color4(this)
+fun Int.toColor4() = Color4(this)
+
+fun Long.toColor4() = Color4(this)
