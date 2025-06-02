@@ -6,6 +6,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.*
 import androidx.core.view.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*

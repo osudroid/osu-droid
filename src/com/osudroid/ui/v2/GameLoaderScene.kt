@@ -4,7 +4,8 @@ import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
-import com.reco1l.andengine.UIComponent.Companion.FillParent
+import com.reco1l.andengine.component.*
+import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*

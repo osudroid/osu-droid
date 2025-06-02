@@ -1,6 +1,7 @@
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 
 interface IFocusable {
 

@@ -1,7 +1,6 @@
 package com.osudroid.multiplayer
 
 import com.osudroid.BuildSettings
-import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import com.osudroid.multiplayer.api.IPlayerEventListener
 import com.osudroid.multiplayer.api.IRoomEventListener
@@ -33,6 +32,7 @@ import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera

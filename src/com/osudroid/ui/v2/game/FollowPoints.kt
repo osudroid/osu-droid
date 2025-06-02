@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.game
 import com.edlplan.framework.easing.*
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*

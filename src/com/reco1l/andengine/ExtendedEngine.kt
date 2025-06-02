@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions

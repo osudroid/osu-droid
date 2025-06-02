@@ -25,6 +25,7 @@ import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.capitalize
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent

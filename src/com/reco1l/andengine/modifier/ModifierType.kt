@@ -1,6 +1,7 @@
 package com.reco1l.andengine.modifier
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import org.anddev.andengine.entity.*
 
 

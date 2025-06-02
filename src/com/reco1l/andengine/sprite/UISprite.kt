@@ -2,6 +2,7 @@ package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.info.*
 import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*

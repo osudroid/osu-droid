@@ -3,6 +3,7 @@ package com.reco1l.andengine.text
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*

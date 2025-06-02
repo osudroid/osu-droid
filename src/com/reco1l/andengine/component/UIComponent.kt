@@ -1,9 +1,9 @@
-package com.reco1l.andengine
+package com.reco1l.andengine.component
 
 import android.util.*
 import android.view.*
 import com.osudroid.*
-import com.osudroid.debug.*
+import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*

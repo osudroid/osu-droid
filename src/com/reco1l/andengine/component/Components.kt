@@ -1,4 +1,4 @@
-package com.reco1l.andengine
+package com.reco1l.andengine.component
 
 import com.reco1l.framework.math.Vec2
 import org.anddev.andengine.entity.IEntity

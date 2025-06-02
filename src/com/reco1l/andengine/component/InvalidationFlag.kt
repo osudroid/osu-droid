@@ -1,4 +1,4 @@
-package com.reco1l.andengine
+package com.reco1l.andengine.component
 
 import androidx.annotation.*
 
