@@ -28,7 +28,7 @@ class BeatmapParserTest {
 
     @Test
     fun `Test version 14 beatmap colors section`() {
-        fun test(color: ColorARGB, red: Float, green: Float, blue: Float) {
+        fun test(color: Color4, red: Float, green: Float, blue: Float) {
             Assert.assertEquals(color.red, red, 0f)
             Assert.assertEquals(color.green, green, 0f)
             Assert.assertEquals(color.blue, blue, 0f)

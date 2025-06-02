@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.osudroid.multiplayer.Multiplayer;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -96,7 +96,7 @@ public class Config {
 
     private static Map<String, String> skins;
 
-    private static ColorARGB[] comboColors;
+    private static Color4[] comboColors;
     private static Context context;
 
 
@@ -186,9 +186,9 @@ public class Config {
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
-        comboColors = new ColorARGB[4];
+        comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = new ColorARGB(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)), HexComposition.RRGGBB);
+            comboColors[i - 1] = new Color4(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)), HexComposition.RRGGBB);
         }
 
         // beatmaps
@@ -579,7 +579,7 @@ public class Config {
         Config.useCustomComboColors = useCustomComboColors;
     }
 
-    public static ColorARGB[] getComboColors() {
+    public static Color4[] getComboColors() {
         return comboColors;
     }
 

@@ -44,7 +44,7 @@ open class CirclePiece(
         circle.setColor(red, green, blue)
     }
 
-    fun setCircleColor(color: ColorARGB) {
+    fun setCircleColor(color: Color4) {
         circle.color = color
     }
 }

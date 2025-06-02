@@ -5,7 +5,7 @@ import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 public class GameplayHitCircle extends GameObject {
 
     private final UISprite approachCircle;
-    private ColorARGB comboColor = new ColorARGB();
+    private Color4 comboColor = new Color4();
     private GameObjectListener listener;
     private Scene scene;
     private HitCircle beatmapCircle;
@@ -45,7 +45,7 @@ public class GameplayHitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
-                     final float secPassed, final ColorARGB comboColor) {
+                     final float secPassed, final Color4 comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;

@@ -127,8 +127,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
 
-        RoomScene.chatPreviewText.tag.colorARGB = ColorARGB(tagColor ?: "#FFFFFF")
-        RoomScene.chatPreviewText.content.colorARGB = ColorARGB(contentColor ?: "#FFFFFF")
+        RoomScene.chatPreviewText.tag.color4 = Color4(tagColor ?: "#FFFFFF")
+        RoomScene.chatPreviewText.content.color4 = Color4(contentColor ?: "#FFFFFF")
 
         RoomScene.chatPreviewText.setTagText(tag ?: "")
         RoomScene.chatPreviewText.setContentText(content)

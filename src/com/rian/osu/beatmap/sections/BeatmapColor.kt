@@ -16,5 +16,5 @@ class BeatmapColor {
     /**
      * The color of the slider border.
      */
-    var sliderBorderColor: ColorARGB? = null
+    var sliderBorderColor: Color4? = null
 }

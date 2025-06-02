@@ -141,8 +141,8 @@ object ModMenu : UIScene() {
                     attachChild(UITextButton().apply {
                         text = "Clear"
                         applyTheme = {}
-                        color = ColorARGB(0xFFFFBFBF)
-                        background?.color = ColorARGB(0xFF342121)
+                        color = Color4(0xFFFFBFBF)
+                        background?.color = Color4(0xFF342121)
                         leadingIcon = UISprite().apply {
                             textureRegion = ResourceManager.getInstance().getTexture("backspace")
                             width = 28f
@@ -180,8 +180,8 @@ object ModMenu : UIScene() {
 
                         rankedBadge = badge {
                             text = "Ranked"
-                            background!!.color = ColorARGB(0xFF83DF6B)
-                            color = ColorARGB(0xFF161622)
+                            background!!.color = Color4(0xFF83DF6B)
+                            color = Color4(0xFF161622)
                             applyTheme = {}
                         }
                     }
@@ -338,10 +338,10 @@ object ModMenu : UIScene() {
             starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
 
             if (attributes.starRating >= 6.5) {
-                starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
+                starRatingBadge.colorTo(Color4(0xFFFFD966), 0.1f)
                 starRatingBadge.fadeTo(1f, 0.1f)
             } else {
-                starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
+                starRatingBadge.colorTo(Color4.Black, 0.1f)
                 starRatingBadge.fadeTo(0.75f, 0.1f)
             }
 
@@ -469,10 +469,10 @@ object ModMenu : UIScene() {
             text = if (isRanked) "Ranked" else "Unranked"
 
             clearEntityModifiers()
-            colorTo(if (isRanked) ColorARGB(0xFF161622) else Theme.current.accentColor, 0.1f)
+            colorTo(if (isRanked) Color4(0xFF161622) else Theme.current.accentColor, 0.1f)
 
             background!!.clearEntityModifiers()
-            background!!.colorTo(if (isRanked) ColorARGB(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
+            background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
         }
 
         val beatmap = GlobalManager.getInstance().selectedBeatmap
@@ -553,7 +553,7 @@ object ModMenu : UIScene() {
         valueEntity.text = newText
 
         valueEntity.clearEntityModifiers()
-        valueEntity.colorTo(ColorARGB(when {
+        valueEntity.colorTo(Color4(when {
             initialValue < finalValue -> 0xFFF78383
             initialValue > finalValue -> 0xFF40CF5D
             else -> 0xFFFFFFFF

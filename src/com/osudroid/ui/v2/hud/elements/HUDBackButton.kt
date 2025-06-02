@@ -4,7 +4,7 @@ import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UICircle
 import com.reco1l.andengine.sprite.UISprite
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
@@ -32,7 +32,7 @@ class HUDBackButton : HUDElement() {
         setPortion(0f)
         anchor = Anchor.Center
         origin = Anchor.Center
-        color = ColorARGB.White
+        color = Color4.White
         depthInfo = DepthInfo.Default
 
         relativeSizeAxes = Axes.Both
@@ -42,7 +42,7 @@ class HUDBackButton : HUDElement() {
     private val frontCircle = UICircle().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
-        color = ColorARGB(0xFF002626)
+        color = Color4(0xFF002626)
         clearInfo = ClearInfo.ClearDepthBuffer
         depthInfo = DepthInfo.Less
 

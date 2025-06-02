@@ -3,7 +3,7 @@ package com.rian.osu.beatmap
 import com.reco1l.framework.*
 
 /**
- * A wrapper of [ColorARGB] specifically for combo colors.
+ * A wrapper of [Color4] specifically for combo colors.
  */
 data class ComboColor(
     /**
@@ -12,7 +12,7 @@ data class ComboColor(
     @JvmField val index: Int,
 
     /**
-     * The wrapped [ColorARGB].
+     * The wrapped [Color4].
      */
-    val color: ColorARGB
+    val color: Color4
 )

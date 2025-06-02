@@ -34,5 +34,5 @@ class BeatmapEvents {
     /**
      * The background color of this beatmap.
      */
-    var backgroundColor: ColorARGB? = null
+    var backgroundColor: Color4? = null
 }

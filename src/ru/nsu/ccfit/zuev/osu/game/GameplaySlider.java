@@ -15,7 +15,7 @@ import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -72,8 +72,8 @@ public class GameplaySlider extends GameObject {
     private float ballAngle;
 
     private boolean kiai;
-    private ColorARGB bodyColor = new ColorARGB();
-    private ColorARGB circleColor = new ColorARGB();
+    private Color4 bodyColor = new Color4();
+    private Color4 circleColor = new Color4();
 
     //for replay
     private int firstHitAccuracy;
@@ -166,7 +166,7 @@ public class GameplaySlider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
                      final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
-                     final ColorARGB comboColor, final ColorARGB borderColor, final SliderPath sliderPath,
+                     final Color4 comboColor, final Color4 borderColor, final SliderPath sliderPath,
                      final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
@@ -352,7 +352,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(true);
             sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
 
-            ColorARGB hintColor = OsuSkin.get().getSliderHintColor();
+            Color4 hintColor = OsuSkin.get().getSliderHintColor();
             if (hintColor != null) {
                 sliderBody.setHintColor(hintColor, OsuSkin.get().getSliderHintAlpha());
             } else {
@@ -1317,12 +1317,12 @@ public class GameplaySlider extends GameObject {
         return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
     }
 
-    private ColorARGB getSynesthesiaComboColor(HitObject hitObject) {
+    private Color4 getSynesthesiaComboColor(HitObject hitObject) {
         return getSynesthesiaComboColor(hitObject.startTime);
     }
 
-    private ColorARGB getSynesthesiaComboColor(double time) {
-        return new ColorARGB(ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time)));
+    private Color4 getSynesthesiaComboColor(double time) {
+        return new Color4(ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time)));
     }
 
     @Override

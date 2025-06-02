@@ -16,7 +16,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -480,7 +480,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         progressBar = new LinearSongProgress(scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
-        progressBar.setProgressRectColor(new ColorARGB(0.9f, 0.9f, 0.9f));
+        progressBar.setProgressRectColor(new Color4(0.9f, 0.9f, 0.9f));
         progressBar.setProgressRectAlpha(0.8f);
 
         createOnlinePanel(scene);

@@ -182,8 +182,8 @@ var IEntity.rotationCenter
     get() = Vec2(rotationCenterX, rotationCenterY)
     set(value) = setRotationCenter(value.x, value.y)
 
-var IEntity.colorARGB
-    get() = ColorARGB(red, green, blue, alpha)
+var IEntity.color4
+    get() = Color4(red, green, blue, alpha)
     set(value) {
         setColor(value.red, value.green, value.blue, value.alpha)
     }

@@ -12,9 +12,9 @@ data class Theme(
     /**
      * The accent color of the theme.
      */
-    val accentColor: ColorARGB = ColorARGB(0xFFC2CAFF),
+    val accentColor: Color4 = Color4(0xFFC2CAFF),
 
-) {
+    ) {
     companion object {
 
         /**

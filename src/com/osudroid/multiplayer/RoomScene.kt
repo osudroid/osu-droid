@@ -184,7 +184,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
             attachChild(beatmapInfoRectangle)
         }
-        beatmapInfoText.colorARGB = OsuSkin.get().getColor("MenuItemDefaultTextColor", ColorARGB(1f, 1f, 1f))
+        beatmapInfoText.color4 = OsuSkin.get().getColor("MenuItemDefaultTextColor", Color4(1f, 1f, 1f))
 
 
         readyButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Ready") {

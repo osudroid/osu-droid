@@ -54,7 +54,7 @@ open class UIModal(
         card.background = UIBox().apply { cornerRadius = 16f }
 
         background = UIBox().apply {
-            color = ColorARGB.Black
+            color = Color4.Black
             alpha = 0.2f
         }
 

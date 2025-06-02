@@ -142,7 +142,7 @@ open class UIScrollableContainer : UIContainer() {
      * The scroll indicator for the x-axis that shows the current scroll position.
      */
     var horizontalIndicator: UIComponent? = UIBox().apply {
-        color = ColorARGB.White
+        color = Color4.White
         height = 6f
         alpha = 0.5f
         cornerRadius = 3f
@@ -159,7 +159,7 @@ open class UIScrollableContainer : UIContainer() {
      * The scroll indicator for the y-axis that shows the current scroll position.
      */
     var verticalIndicator: UIComponent? = UIBox().apply {
-        color = ColorARGB.White
+        color = Color4.White
         width = 6f
         alpha = 0.5f
         cornerRadius = 3f

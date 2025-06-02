@@ -20,7 +20,7 @@ object BeatmapColorParser : BeatmapKeyValueSectionParser() {
             throw UnsupportedOperationException("Color specified in incorrect format (should be R,G,B or R,G,B,A)")
         }
 
-        val color = ColorARGB(
+        val color = Color4(
             parseInt(s[0]).toFloat(),
             parseInt(s[1]).toFloat(),
             parseInt(s[2]).toFloat()

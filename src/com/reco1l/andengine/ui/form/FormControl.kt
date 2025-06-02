@@ -130,7 +130,7 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
         width = FillParent
         padding = Vec4(24f, 8f)
         background = UIBox().apply {
-            color = ColorARGB.White
+            color = Color4.White
             alpha = 0f
         }
     }

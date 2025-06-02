@@ -49,11 +49,11 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
 
 
     init {
-        colorARGB = OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR)
+        color4 = OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR)
 
-        val menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", ColorARGB(1f, 1f, 1f))
-        trackTitle.colorARGB = menuItemDefaultTextColor
-        creatorInfo.colorARGB = menuItemDefaultTextColor
+        val menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", Color4(1f, 1f, 1f))
+        trackTitle.color4 = menuItemDefaultTextColor
+        creatorInfo.color4 = menuItemDefaultTextColor
 
         alpha = 0.8f
         creatorInfo.apply {
@@ -163,7 +163,7 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
 
     companion object {
 
-        private val DEFAULT_COLOR = ColorARGB(25 / 255f, 25 / 255f, 240 / 255f)
+        private val DEFAULT_COLOR = Color4(25 / 255f, 25 / 255f, 240 / 255f)
 
     }
 }

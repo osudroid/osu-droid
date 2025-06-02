@@ -32,7 +32,7 @@ open class CircularProgressBar : UIContainer() {
         relativeSizeAxes = Axes.Both
         width = 0.9f
         height = 0.9f
-        color = ColorARGB.Transparent
+        color = Color4.Transparent
         clearInfo = ClearInfo.ClearDepthBuffer
         depthInfo = DepthInfo.Less
     }

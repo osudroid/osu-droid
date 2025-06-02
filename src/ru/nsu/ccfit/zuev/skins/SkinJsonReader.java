@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
 import com.osudroid.ui.v2.hud.HUDSkinData;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
 import org.jetbrains.annotations.Nullable;
@@ -94,11 +94,11 @@ public class SkinJsonReader extends SkinReader {
         skin.comboColor.clear();
         JSONArray array = data.optJSONArray("colors");
         if (array == null || array.length() == 0) {
-            skin.comboColor.add(new ColorARGB(skin.DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
+            skin.comboColor.add(new Color4(skin.DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
         } else {
             for (int i = 0; i < array.length(); i++) {
                 String hex = array.optString(i, skin.DEFAULT_COLOR_HEX);
-                skin.comboColor.add(new ColorARGB(hex, HexComposition.RRGGBB));
+                skin.comboColor.add(new Color4(hex, HexComposition.RRGGBB));
             }
         }
     }
@@ -158,7 +158,7 @@ public class SkinJsonReader extends SkinReader {
         JSONArray names = data.names();
         if (names == null) return;
         for (int i = 0; i < names.length(); i++) {
-            skin.colorData.put(names.optString(i), new ColorARGB(data.optString(names.optString(i)), HexComposition.RRGGBB));
+            skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
         }
     }
 

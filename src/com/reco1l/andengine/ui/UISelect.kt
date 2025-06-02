@@ -89,7 +89,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
             trailingIcon!!.apply {
                 width = 14f
                 height = 8f
-                color = ColorARGB.White
+                color = Color4.White
                 alpha = 0.25f
                 rotationCenter = Anchor.Center
                 rotation = 180f
@@ -305,7 +305,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
     data class Option<T : Any>(
         val value: T,
         val text: String,
-        val color: ColorARGB = Theme.current.accentColor,
+        val color: Color4 = Theme.current.accentColor,
         val leadingIcon: UIComponent? = null,
         val trailingIcon: UIComponent? = null,
     )

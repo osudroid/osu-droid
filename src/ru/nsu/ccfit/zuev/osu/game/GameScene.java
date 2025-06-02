@@ -41,7 +41,7 @@ import com.osudroid.ui.v1.BlockAreaFragment;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
 
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.ComboColor;
@@ -141,7 +141,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private int lastObjectId = -1;
     private float leadOut = 0;
     private LinkedList<HitObject> objects;
-    private ArrayList<ColorARGB> comboColors;
+    private ArrayList<Color4> comboColors;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
@@ -170,7 +170,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
-    private ColorARGB sliderBorderColor;
+    private Color4 sliderBorderColor;
     private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private LinePath[] sliderRenderPaths = null;
@@ -337,11 +337,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (textureRegion == null) {
             Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
-            ColorARGB backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
+            Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
-                backgroundColor = new ColorARGB(0, 0, 0);
+                backgroundColor = new Color4(0, 0, 0);
             }
-            ComponentsKt.setColorARGB(rectangle, backgroundColor);
+            ComponentsKt.setColor4(rectangle, backgroundColor);
 
             applyBackground(rectangle, brightness);
         } else {
@@ -1081,7 +1081,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    public ColorARGB getComboColor(HitObject hitObject) {
+    public Color4 getComboColor(HitObject hitObject) {
         if (GameHelper.isSynesthesia()) {
             return ModSynesthesia.getColorFor(playableBeatmap.getControlPoints().getClosestBeatDivisor(hitObject.startTime));
         }
@@ -1418,7 +1418,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             hud.onHitObjectLifetimeStart(obj);
 
-            final ColorARGB comboColor = getComboColor(obj);
+            final Color4 comboColor = getComboColor(obj);
 
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
@@ -1897,7 +1897,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public void onCircleHit(int id, final float acc, final PointF pos,
-                            final boolean endCombo, byte forcedScore, ColorARGB color) {
+                            final boolean endCombo, byte forcedScore, Color4 color) {
         if (GameHelper.isAutoplay()) {
             autoCursor.click();
             hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
@@ -1944,12 +1944,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         hud.onNoteHit(stat);
     }
 
-    public void onSliderReverse(PointF pos, float ang, ColorARGB color) {
+    public void onSliderReverse(PointF pos, float ang, Color4 color) {
         createBurstEffectSliderReverse(pos, ang, color);
     }
 
     public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
-                            ColorARGB color, int type, boolean incrementCombo) {
+                            Color4 color, int type, boolean incrementCombo) {
         if (GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
             if (nearestCursorId >= 0) {
@@ -2516,7 +2516,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return paused;
     }
 
-    private void createHitEffect(final PointF pos, final String name, ColorARGB color) {
+    private void createHitEffect(final PointF pos, final String name, Color4 color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
         var isAnimated = effect.hit instanceof UIAnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
@@ -2622,7 +2622,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         );
     }
 
-    private void createBurstEffect(final PointF pos, final ColorARGB color) {
+    private void createBurstEffect(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2636,7 +2636,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderStart(final PointF pos, final ColorARGB color) {
+    private void createBurstEffectSliderStart(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2650,7 +2650,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderEnd(final PointF pos, final ColorARGB color) {
+    private void createBurstEffectSliderEnd(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2664,7 +2664,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderReverse(final PointF pos, float ang, final ColorARGB color) {
+    private void createBurstEffectSliderReverse(final PointF pos, float ang, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())

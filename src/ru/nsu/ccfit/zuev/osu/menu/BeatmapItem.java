@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.component.ComponentsKt;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
@@ -19,11 +19,11 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class BeatmapItem extends Sprite {
 
-    private static final ColorARGB DEFAULT_COLOR = new ColorARGB(25 / 255f, 25 / 255f, 240 / 255f);
-    private static final ColorARGB SELECTED_COLOR = new ColorARGB(1f, 1f, 1f);
+    private static final Color4 DEFAULT_COLOR = new Color4(25 / 255f, 25 / 255f, 240 / 255f);
+    private static final Color4 SELECTED_COLOR = new Color4(1f, 1f, 1f);
 
-    private static final ColorARGB DEFAULT_TEXT_COLOR = new ColorARGB(1f, 1f, 1f);
-    private static final ColorARGB SELECTED_TEXT_COLOR = new ColorARGB(0f, 0f, 0f);
+    private static final Color4 DEFAULT_TEXT_COLOR = new Color4(1f, 1f, 1f);
+    private static final Color4 SELECTED_TEXT_COLOR = new Color4(0f, 0f, 0f);
     private final ChangeableText beatmapTitle, beatmapLeftText;
     private final Sprite[] stars;
     private final Sprite halfStar;
@@ -45,11 +45,11 @@ public class BeatmapItem extends Sprite {
                 ResourceManager.getInstance().getFont("font"), "", 30);
 
 
-        ComponentsKt.setColorARGB(this, OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR));
+        ComponentsKt.setColor4(this, OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR));
 
-        ColorARGB menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
-        ComponentsKt.setColorARGB(beatmapTitle, menuItemDefaultTextColor);
-        ComponentsKt.setColorARGB(beatmapLeftText, menuItemDefaultTextColor);
+        Color4 menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
+        ComponentsKt.setColor4(beatmapTitle, menuItemDefaultTextColor);
+        ComponentsKt.setColor4(beatmapLeftText, menuItemDefaultTextColor);
 
         setAlpha(0.8f);
         attachChild(beatmapTitle);
@@ -131,21 +131,21 @@ public class BeatmapItem extends Sprite {
     }
 
     public void setDeselectColor() {
-        ComponentsKt.setColorARGB(this, OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR));
+        ComponentsKt.setColor4(this, OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR));
 
-        ColorARGB menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
+        Color4 menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
 
-        ComponentsKt.setColorARGB(beatmapTitle, menuItemDefaultTextColor);
-        ComponentsKt.setColorARGB(beatmapLeftText, menuItemDefaultTextColor);
+        ComponentsKt.setColor4(beatmapTitle, menuItemDefaultTextColor);
+        ComponentsKt.setColor4(beatmapLeftText, menuItemDefaultTextColor);
     }
 
     public void setSelectedColor() {
 
-        ComponentsKt.setColorARGB(this, OsuSkin.get().getColor("MenuItemVersionsSelectedColor", SELECTED_COLOR));
+        ComponentsKt.setColor4(this, OsuSkin.get().getColor("MenuItemVersionsSelectedColor", SELECTED_COLOR));
 
-        ColorARGB menuItemSelectedTextColor = OsuSkin.get().getColor("MenuItemSelectedTextColor", SELECTED_TEXT_COLOR);
-        ComponentsKt.setColorARGB(beatmapTitle, menuItemSelectedTextColor);
-        ComponentsKt.setColorARGB(beatmapLeftText, menuItemSelectedTextColor);
+        Color4 menuItemSelectedTextColor = OsuSkin.get().getColor("MenuItemSelectedTextColor", SELECTED_TEXT_COLOR);
+        ComponentsKt.setColor4(beatmapTitle, menuItemSelectedTextColor);
+        ComponentsKt.setColor4(beatmapLeftText, menuItemSelectedTextColor);
     }
 
     @Override

@@ -2,13 +2,13 @@ package com.reco1l.framework
 
 import android.graphics.*
 
-data class ColorARGB(private val hex: Int) {
+data class Color4(private val hex: Int) {
 
     constructor() : this(Color.BLACK)
 
     constructor(hex: Long): this(hex.toInt())
 
-    constructor(other: ColorARGB) : this(other.hex)
+    constructor(other: Color4) : this(other.hex)
 
     @JvmOverloads
     constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this(Color.argb(alpha, red, green, blue))
@@ -39,28 +39,28 @@ data class ColorARGB(private val hex: Int) {
         get() = Color.blue(hex) / 255f
 
 
-    operator fun plus(other: ColorARGB) = ColorARGB(
+    operator fun plus(other: Color4) = Color4(
         red = red + other.red,
         green = green + other.green,
         blue = blue + other.blue,
         alpha = alpha + other.alpha
     )
 
-    operator fun minus(other: ColorARGB) = ColorARGB(
+    operator fun minus(other: Color4) = Color4(
         red = red - other.red,
         green = green - other.green,
         blue = blue - other.blue,
         alpha = alpha - other.alpha
     )
 
-    operator fun times(other: ColorARGB) = ColorARGB(
+    operator fun times(other: Color4) = Color4(
         red = red * other.red,
         green = green * other.green,
         blue = blue * other.blue,
         alpha = alpha * other.alpha
     )
 
-    operator fun times(scalar: Float) = ColorARGB(
+    operator fun times(scalar: Float) = Color4(
         red = red * scalar,
         green = green * scalar,
         blue = blue * scalar,
@@ -73,27 +73,27 @@ data class ColorARGB(private val hex: Int) {
         green: Float = this.green,
         blue: Float = this.blue,
         alpha: Float = this.alpha
-    ) = ColorARGB(red, green, blue, alpha)
+    ) = Color4(red, green, blue, alpha)
 
 
     fun toInt() = hex
 
-    fun colorEquals(other: ColorARGB) = red == other.red && green == other.green && blue == other.blue
+    fun colorEquals(other: Color4) = red == other.red && green == other.green && blue == other.blue
 
 
     companion object {
 
-        val Black = ColorARGB(Color.BLACK)
+        val Black = Color4(Color.BLACK)
 
-        val White = ColorARGB(Color.WHITE)
+        val White = Color4(Color.WHITE)
 
-        val Red = ColorARGB(Color.RED)
+        val Red = Color4(Color.RED)
 
-        val Green = ColorARGB(Color.GREEN)
+        val Green = Color4(Color.GREEN)
 
-        val Blue = ColorARGB(Color.BLUE)
+        val Blue = Color4(Color.BLUE)
 
-        val Transparent = ColorARGB(Color.TRANSPARENT)
+        val Transparent = Color4(Color.TRANSPARENT)
 
     }
 
@@ -104,6 +104,6 @@ enum class HexComposition {
     RRGGBBAA,
     RRGGBB,
 }
-fun Int.toColorARGB() = ColorARGB(this)
+fun Int.toColorARGB() = Color4(this)
 
-fun Long.toColorARGB() = ColorARGB(this)
+fun Long.toColorARGB() = Color4(this)

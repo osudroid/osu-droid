@@ -249,13 +249,13 @@ open class UIInput(initialValue: String) : UIControl<String>(initialValue), IFoc
     private fun notifyInputError() {
         textEntity.apply {
             clearModifiers(ModifierType.Color)
-            color = ColorARGB.Red
+            color = Color4.Red
             colorTo(Theme.current.accentColor, 0.2f)
         }
 
         foreground?.apply {
             clearModifiers(ModifierType.Color)
-            color = ColorARGB.Red
+            color = Color4.Red
             colorTo(Theme.current.accentColor, 0.2f)
         }
     }

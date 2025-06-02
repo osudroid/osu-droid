@@ -39,7 +39,7 @@ object BeatmapEventsParser : BeatmapSectionParser() {
             }
     
             if (it.size >= 5 && line.startsWith("3")) {
-                beatmap.events.backgroundColor = ColorARGB(
+                beatmap.events.backgroundColor = Color4(
                     parseInt(it[2]).toFloat(),
                     parseInt(it[3]).toFloat(),
                     parseInt(it[4]).toFloat()

@@ -21,7 +21,7 @@ import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.*
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
@@ -158,7 +158,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
 
         if (value) {
             background = UIBox().apply {
-                color = ColorARGB(0x29F27272)
+                color = Color4(0x29F27272)
                 alpha = 0.15f
             }
             editorOverlay = HUDElementOverlay(this)
@@ -320,7 +320,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
 
         if (connectionLine == null) {
             connectionLine = UILine().apply {
-                color = ColorARGB(0xFFF27272)
+                color = Color4(0xFFF27272)
                 lineWidth = 10f
                 alpha = 0f
             }

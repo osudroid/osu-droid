@@ -45,7 +45,7 @@ sealed class HUDStatisticCounter(label: String) : HUDElement() {
 
 sealed class HUDHitStatisticCounter(
     label: String,
-    tint: ColorARGB,
+    tint: Color4,
     private val dataSupplier: StatisticV2.() -> String
 ) : HUDStatisticCounter(label) {
 
@@ -59,7 +59,7 @@ sealed class HUDHitStatisticCounter(
     }
 }
 
-class HUDGreatCounter : HUDHitStatisticCounter("Great", ColorARGB(0xFF46b4dc),  { hit300.toString() })
-class HUDOkCounter : HUDHitStatisticCounter("Ok", ColorARGB(0xFF64DC28), { hit100.toString() })
-class HUDMehCounter : HUDHitStatisticCounter("Meh", ColorARGB(0xFFc8b46e), { hit50.toString() })
-class HUDMissCounter : HUDHitStatisticCounter("Miss", ColorARGB.Red, { misses.toString() })
+class HUDGreatCounter : HUDHitStatisticCounter("Great", Color4(0xFF46b4dc),  { hit300.toString() })
+class HUDOkCounter : HUDHitStatisticCounter("Ok", Color4(0xFF64DC28), { hit100.toString() })
+class HUDMehCounter : HUDHitStatisticCounter("Meh", Color4(0xFFc8b46e), { hit50.toString() })
+class HUDMissCounter : HUDHitStatisticCounter("Miss", Color4.Red, { misses.toString() })

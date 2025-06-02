@@ -6,7 +6,7 @@ import com.reco1l.andengine.component.ClearInfo;
 import com.reco1l.andengine.component.DepthInfo;
 import com.reco1l.andengine.shape.UITriangleMesh;
 import com.reco1l.andengine.container.UIContainer;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 import com.rian.osu.math.Vector2;
 
 
@@ -89,7 +89,7 @@ public class SliderBody extends UIContainer {
         background.setColor(r, g, b, a);
     }
 
-    public void setBackgroundColor(ColorARGB color, float alpha) {
+    public void setBackgroundColor(Color4 color, float alpha) {
         background.setColor(color);
         background.setAlpha(alpha);
     }
@@ -116,7 +116,7 @@ public class SliderBody extends UIContainer {
         }
     }
 
-    public void setHintColor(ColorARGB color, float alpha) {
+    public void setHintColor(Color4 color, float alpha) {
         if (hint != null) {
             hint.setColor(color);
             hint.setAlpha(alpha);
@@ -128,7 +128,7 @@ public class SliderBody extends UIContainer {
         borderWidth = value;
     }
 
-    public void setBorderColor(ColorARGB color) {
+    public void setBorderColor(Color4 color) {
         border.setColor(color);
     }
 

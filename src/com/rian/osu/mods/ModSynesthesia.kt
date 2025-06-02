@@ -23,19 +23,19 @@ class ModSynesthesia : Mod() {
          * @return The applicable color for [beatDivisor].
          */
         @JvmStatic
-        fun getColorFor(beatDivisor: Int): ColorARGB = beatDivisorColors[beatDivisor] ?: defaultDivisorColor
+        fun getColorFor(beatDivisor: Int): Color4 = beatDivisorColors[beatDivisor] ?: defaultDivisorColor
 
         private val beatDivisorColors = mutableMapOf(
-            1 to ColorARGB(1f, 1f, 1f),
-            2 to ColorARGB("#ED1121"),
-            3 to ColorARGB("#8866EE"),
-            4 to ColorARGB("#66CCFF"),
-            6 to ColorARGB("#EEAA00"),
-            8 to ColorARGB("#FFCC22"),
-            12 to ColorARGB("#CC6600"),
-            16 to ColorARGB("#441188")
+            1 to Color4(1f, 1f, 1f),
+            2 to Color4("#ED1121"),
+            3 to Color4("#8866EE"),
+            4 to Color4("#66CCFF"),
+            6 to Color4("#EEAA00"),
+            8 to Color4("#FFCC22"),
+            12 to Color4("#CC6600"),
+            16 to Color4("#441188")
         )
 
-        private val defaultDivisorColor = ColorARGB("#ff0000")
+        private val defaultDivisorColor = Color4("#ff0000")
     }
 }

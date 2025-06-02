@@ -10,7 +10,7 @@ import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
-import com.reco1l.framework.ColorARGB;
+import com.reco1l.framework.Color4;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
@@ -48,11 +48,11 @@ public class GameEffect extends GameObject {
         return animationEffects.contains(textureName);
     }
 
-    public void setColor(@Nullable ColorARGB color) {
+    public void setColor(@Nullable Color4 color) {
         if (color == null) {
             hit.setColor(1f, 1f, 1f);
         } else {
-            ComponentsKt.setColorARGB(hit, color);
+            ComponentsKt.setColor4(hit, color);
         }
     }
 

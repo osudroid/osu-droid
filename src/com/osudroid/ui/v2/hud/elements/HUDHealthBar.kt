@@ -161,10 +161,10 @@ class HUDHealthBar : HUDElement() {
 
     private fun getFillColor(hp: Float) = when {
 
-        hp < 0.2f -> Colors.interpolateNonLinear(0.2f - hp, ColorARGB.Black, ColorARGB.Red, 0f, 0.2f)
-        hp < EPIC_CUTOFF -> Colors.interpolateNonLinear(0.5f - hp, ColorARGB.White, ColorARGB.Black, 0f, 0.5f)
+        hp < 0.2f -> Colors.interpolateNonLinear(0.2f - hp, Color4.Black, Color4.Red, 0f, 0.2f)
+        hp < EPIC_CUTOFF -> Colors.interpolateNonLinear(0.5f - hp, Color4.White, Color4.Black, 0f, 0.5f)
 
-        else -> ColorARGB.White
+        else -> Color4.White
     }
 
     companion object {

@@ -8,7 +8,7 @@ import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.*
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
@@ -28,7 +28,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
 
     private val outline = UIBox().apply {
         paintStyle = PaintStyle.Outline
-        color = ColorARGB(0xFFF27272)
+        color = Color4(0xFFF27272)
         lineWidth = 8f
     }
 
@@ -41,7 +41,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
 
         // Toolbar buttons:
 
-        attachChild(Button("delete", ColorARGB(0xFF260000)) {
+        attachChild(Button("delete", Color4(0xFF260000)) {
             updateThread {
                 element.remove()
             }
@@ -57,7 +57,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
         anchor = Anchor.BottomCenter
         origin = Anchor.TopCenter
         font = ResourceManager.getInstance().getFont("smallFont")
-        color = ColorARGB(0xFFF27272)
+        color = Color4(0xFFF27272)
         text = element.name
     }
 
@@ -143,7 +143,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
             attachChild(UIBox().apply {
                 anchor = Anchor.Center
                 origin = Anchor.Center
-                color = ColorARGB(0xFFF27272)
+                color = Color4(0xFFF27272)
                 cornerRadius = TIP_SIZE
                 relativeSizeAxes = Axes.Both
                 setSize(0.5f, 0.5f)
@@ -192,7 +192,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
     /**
      * Represents a button in the overlay toolbar.
      */
-    private inner class Button(texture: String, back: ColorARGB = ColorARGB(0xFF002626), val action: () -> Unit) : UIContainer() {
+    private inner class Button(texture: String, back: Color4 = Color4(0xFF002626), val action: () -> Unit) : UIContainer() {
 
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
