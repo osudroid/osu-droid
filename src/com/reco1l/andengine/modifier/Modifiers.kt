@@ -1,7 +1,6 @@
-package com.reco1l.andengine
+package com.reco1l.andengine.modifier
 
 import com.edlplan.framework.easing.Easing
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.andengine.modifier.UniversalModifier.Companion.GlobalPool
 
@@ -11,7 +10,7 @@ import com.reco1l.andengine.modifier.UniversalModifier.Companion.GlobalPool
  * @see ModifierType
  * @author Reco1l
  */
-@Deprecated(message = "Use ExtendedEntity integrated functions instead.")
+@Deprecated(message = "Use UIComponent integrated functions instead.")
 object Modifiers {
 
     @JvmStatic

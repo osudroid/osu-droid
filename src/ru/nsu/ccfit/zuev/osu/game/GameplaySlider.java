@@ -9,7 +9,7 @@ import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.game.CirclePiece;

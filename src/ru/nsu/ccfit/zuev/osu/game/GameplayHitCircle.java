@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;

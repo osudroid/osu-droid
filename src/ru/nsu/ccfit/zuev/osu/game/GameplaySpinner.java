@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;

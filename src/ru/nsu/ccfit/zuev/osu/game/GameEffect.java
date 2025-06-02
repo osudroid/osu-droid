@@ -7,7 +7,7 @@ import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
 
 import org.anddev.andengine.entity.scene.Scene;
