@@ -1,21 +1,16 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import java.io.File;
 
-import androidx.core.app.NotificationManagerCompat;
-
 import com.un4seen.bass.BASS;
 
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
@@ -58,24 +53,8 @@ public class SongService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         System.out.println("Service unbind");
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         exit();
         return super.onUnbind(intent);
-    }
-
-    @Override
-    public void onDestroy() {
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
-    }
-
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
-    }
-
-    @Override
-    public void onLowMemory() {
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
     }
 
     @Override

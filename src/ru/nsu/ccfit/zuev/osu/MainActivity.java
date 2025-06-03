@@ -880,9 +880,4 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
-        super.onDestroy();
-    }
 }
