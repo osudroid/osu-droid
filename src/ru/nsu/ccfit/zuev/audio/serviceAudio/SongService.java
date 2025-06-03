@@ -25,7 +25,6 @@ public class SongService extends Service {
     private BassAudioFunc audioFunc;
     private boolean isGaming = false;
     // private boolean isSettingMenu = false;
-    private NotifyPlayer notify;
 
     public static void initBASS() {
         // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
@@ -50,15 +49,8 @@ public class SongService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (notify == null) {
-            notify = new NotifyPlayer();
-            notify.load(this);
-        }
         if (audioFunc == null) {
             audioFunc = new BassAudioFunc();
-
-            registerReceiver(notify.getReceiver(), notify.getFilter());
-            setReceiverStuff(notify.getReceiver(), notify.getFilter());
         }
         return new ReturnBindObject();
     }
@@ -66,7 +58,6 @@ public class SongService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         System.out.println("Service unbind");
-        hideNotification();
         NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         exit();
         return super.onUnbind(intent);
@@ -121,27 +112,16 @@ public class SongService extends Service {
     public void play() {
         if (audioFunc == null) return;
         audioFunc.play();
-        notify.updateState();
     }
 
     public void pause() {
         if (audioFunc == null) return;
         audioFunc.pause();
-        notify.updateState();
     }
 
     public boolean stop() {
         if (audioFunc == null) return false;
-        notify.updateState();
         return audioFunc.stop();
-    }
-
-    public void stopWithoutNotify()
-    {
-        if (audioFunc != null)
-        {
-            audioFunc.stop();
-        }
     }
 
     public boolean exit() {
@@ -150,7 +130,6 @@ public class SongService extends Service {
         audioFunc.stop();
         audioFunc.unregisterReceiverBM();
         audioFunc.freeALL();
-        unregisterReceiver(notify.getReceiver());
         stopSelf();
         return true;
     }
@@ -166,9 +145,6 @@ public class SongService extends Service {
 
     public void setGaming(boolean isGaming) {
         audioFunc.setGaming(isGaming);
-        if (!isGaming) {
-            hideNotification();
-        }
         Log.w("Gaming Mode", "In Gamming mode :" + isGaming);
         this.isGaming = isGaming;
     }
@@ -257,25 +233,6 @@ public class SongService extends Service {
         if (audioFunc != null) {
             audioFunc.onGamePause();
         }
-
-        notify.show();
-        notify.updateSong(GlobalManager.getInstance().getMainScene().getBeatmapInfo());
-        notify.updateState();
-    }
-
-    public boolean hideNotification() {
-        // Checking if the notification is shown is pretty hacky, but for now it is the case
-        // only if the player leaves the game from the main menu, which is when we want to
-        // reload BASS after being altered in `showNotification`.
-        if (notify.isShowing && audioFunc != null) {
-            audioFunc.onGameResume();
-        }
-
-        return notify.hide();
-    }
-
-    public void setReceiverStuff(BroadcastReceiver receiver, IntentFilter filter) {
-        if (audioFunc != null) audioFunc.setReciverStuff(receiver, filter, this);
     }
 
     public boolean checkFileExist(String path) {
