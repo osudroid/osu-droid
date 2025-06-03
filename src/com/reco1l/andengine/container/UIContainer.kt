@@ -12,22 +12,6 @@ open class UIContainer : UIComponent() {
     }
 
 
-    override fun onChildDetached(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
-    override fun onChildAttached(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
-    override fun onChildPositionChanged(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
-    override fun onChildSizeChanged(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
     override fun onContentChanged() {
         var right = 0f
         var bottom = 0f

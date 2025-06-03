@@ -292,10 +292,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                     Log.e("ExtendedEntity", "The background entity is already attached to another entity.")
                     return
                 }
-                field?.decoratedEntity = null
+                field?.detachSelf()
                 field = value
-                field?.decoratedEntity = this
-                field?.onThemeChanged(Theme.current)
+                field?.setParent(this, AttachmentMode.Decorator)
             }
         }
 
@@ -310,10 +309,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                     Log.e("ExtendedEntity", "The foreground entity is already attached to another entity.")
                     return
                 }
-                field?.decoratedEntity = null
+                field?.detachSelf()
                 field = value
-                field?.decoratedEntity = this
-                field?.onThemeChanged(Theme.current)
+                field?.setParent(this, AttachmentMode.Decorator)
             }
         }
 
@@ -349,9 +347,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     var modifierPool = UniversalModifier.GlobalPool
 
     /**
-     * The entity that is currently being decorated by this entity.
+     * The mode in which the entity is attached to its parent.
      */
-    var decoratedEntity: UIComponent? = null
+    var attachmentMode = AttachmentMode.None
+        private set
 
     /**
      * Whether the entity should be culled when it is outside the parent's bounds.
@@ -392,27 +391,64 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      */
     protected open fun onContentChanged() {}
 
-    override fun setParent(newParent: IEntity?) {
+
+    override fun detachSelf(): Boolean {
+
+        if (parent == null) {
+            return false
+        }
+
+        if (attachmentMode == AttachmentMode.Decorator) {
+            parent = null
+            onDetached()
+            return true
+        }
+
+        return super.detachSelf()
+    }
+
+    fun setParent(entity: IEntity?, mode: AttachmentMode?) {
+
         when (val parent = parent) {
             is Scene -> parent.unregisterTouchArea(this)
             is UIComponent -> parent.onChildDetached(this)
         }
-        super.setParent(newParent)
-        when (newParent) {
-            is UIScene -> newParent.registerTouchArea(this)
-            is UIComponent -> newParent.onChildAttached(this)
+
+        super.setParent(entity)
+
+        attachmentMode = if (entity == null) AttachmentMode.None else mode ?: AttachmentMode.Child
+
+        when (entity) {
+            is UIScene -> entity.registerTouchArea(this)
+            is UIComponent -> entity.onChildAttached(this)
         }
+
+        if (attachmentMode == AttachmentMode.Decorator) {
+            if (entity == null) {
+                onDetached()
+            } else {
+                onAttached()
+            }
+        }
+    }
+
+    override fun setParent(parent: IEntity?) {
+        setParent(parent, null)
     }
 
     /**
      * Called when a child is attached to this entity.
      */
-    open fun onChildAttached(child: IEntity) {}
+    open fun onChildAttached(child: IEntity) {
+        onContentChanged()
+    }
 
     /**
      * Called when a child is detached from this entity.
      */
-    open fun onChildDetached(child: IEntity) {}
+    open fun onChildDetached(child: IEntity) {
+        onContentChanged()
+    }
 
     override fun setVisible(value: Boolean) {
         if (mVisible != value) {
@@ -432,7 +468,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Called when the size of a child entity changes.
      */
-    open fun onChildSizeChanged(child: IEntity) {}
+    open fun onChildSizeChanged(child: IEntity) {
+        onContentChanged()
+    }
 
     /**
      * Called when the size of this entity changes.
@@ -499,7 +537,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Called when the position of a child entity changes.
      */
-    open fun onChildPositionChanged(child: IEntity) {}
+    open fun onChildPositionChanged(child: IEntity) {
+        onContentChanged()
+    }
 
     /**
      * Called when the position of this entity changes.
@@ -561,13 +601,13 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         var green = mGreen
         var blue = mBlue
         var alpha = mAlpha
-        var parent = parent ?: decoratedEntity
+        var parent = parent
         var multiplyColor = inheritAncestorsColor
 
         while (parent != null) {
 
             // If this entity is a decoration we only multiply the alpha.
-            if (decoratedEntity == null && multiplyColor) {
+            if (attachmentMode == AttachmentMode.Child && multiplyColor) {
                 red *= parent.red
                 green *= parent.green
                 blue *= parent.blue
@@ -596,7 +636,13 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         if (!isVisible || isCulled) {
             // We're going to still handle invalidations flags even if the entity is not visible
             // because some of them like size-related flags might change the parent's layout.
-            handleInvalidation(true)
+            onHandleInvalidations()
+
+            mChildren?.fastForEach { child ->
+                if (child is UIComponent) {
+                    onHandleInvalidations()
+                }
+            }
             return
         }
 
@@ -627,61 +673,60 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
     }
 
-    fun handleInvalidation(handleRecursively: Boolean) {
-        val invalidationFlags = invalidationFlags
+    /**
+     * Called when an invalidation flag should be processed.
+     */
+    protected open fun processInvalidationFlag(flag: Int) {
+        when (flag) {
+            InvalidationFlag.Position -> onPositionChanged()
+            InvalidationFlag.Content -> onContentChanged()
+            InvalidationFlag.Size -> onSizeChanged()
+            InvalidationFlag.Transformations -> onInvalidateTransformations()
+            InvalidationFlag.InputBindings -> onInvalidateInputBindings()
+        }
+    }
 
-        if (invalidationFlags != 0) {
+    private fun onHandleInvalidations() {
 
-            var recursiveInvalidationFlags = 0
+        val flags = invalidationFlags
 
-            if (invalidationFlags and InvalidationFlag.Position != 0) {
-                onPositionChanged()
-            }
-
-            if (invalidationFlags and InvalidationFlag.Content != 0) {
-                onContentChanged()
-            }
-
-            if (invalidationFlags and InvalidationFlag.Size != 0) {
-                onSizeChanged()
-            }
-
-            if (invalidationFlags and InvalidationFlag.Transformations != 0
-                || invalidationFlags and InvalidationFlag.Position != 0
-                || invalidationFlags and InvalidationFlag.Size != 0) {
-                onInvalidateTransformations()
-                recursiveInvalidationFlags = InvalidationFlag.Transformations
-            }
-
-            if (invalidationFlags and InvalidationFlag.InputBindings != 0) {
-                onInvalidateInputBindings()
-                recursiveInvalidationFlags = recursiveInvalidationFlags or InvalidationFlag.InputBindings
-            }
-
-            mChildren?.fastForEach { child ->
-                if (child is UIComponent) {
-                    child.invalidate(recursiveInvalidationFlags)
-                }
-            }
-
-            // During the invalidation process the flags could be changed.
-            if (this.invalidationFlags == invalidationFlags) {
-                this.invalidationFlags = 0
-            }
+        if (flags == 0) {
+            return
         }
 
-        if (handleRecursively) {
-            mChildren?.fastForEach { child ->
-                if (child is UIComponent) {
-                    child.handleInvalidation(true)
-                }
-            }
+        operator fun Int.contains(flag: Int): Boolean {
+            return flags and flag != 0
+        }
+
+        if (InvalidationFlag.Size in flags) {
+            processInvalidationFlag(InvalidationFlag.Size)
+        }
+
+        if (InvalidationFlag.Content in flags) {
+            processInvalidationFlag(InvalidationFlag.Content)
+        }
+
+        if (InvalidationFlag.Position in flags) {
+            processInvalidationFlag(InvalidationFlag.Position)
+        }
+
+        if (InvalidationFlag.Transformations in flags || InvalidationFlag.Size in flags || InvalidationFlag.Position in flags) {
+            processInvalidationFlag(InvalidationFlag.Transformations)
+        }
+
+        if (InvalidationFlag.InputBindings in flags) {
+            processInvalidationFlag(InvalidationFlag.InputBindings)
+        }
+
+        // During the invalidation process the flags could be changed.
+        if (this.invalidationFlags == flags) {
+            this.invalidationFlags = 0
         }
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        handleInvalidation(false)
+        onHandleInvalidations()
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)
@@ -765,10 +810,17 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     open fun onInvalidateTransformations() {
         mLocalToParentTransformationDirty = true
-        localToParentTransformation
-
         mParentToLocalTransformationDirty = true
+
+        // This recreates and calculates the transformation matrices.
+        localToParentTransformation
         parentToLocalTransformation
+
+        mChildren?.fastForEach {
+            if (it is UIComponent) {
+                it.onInvalidateTransformations()
+            }
+        }
     }
 
 
@@ -925,6 +977,12 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             }
         }
         inputBindings.fill(null)
+
+        mChildren?.fastForEach { child ->
+            if (child is UIComponent) {
+                child.onInvalidateInputBindings()
+            }
+        }
     }
 
     /**
