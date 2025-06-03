@@ -10,14 +10,14 @@ class ModSettingEnum(mod: Mod, setting: EnumModSetting<Enum<*>>) :
     IModSettingComponent<Enum<*>> {
 
     @Suppress("UNCHECKED_CAST")
-    override fun createControl() = FormSelect(listOf(setting.initialValue)) as FormControl<List<Enum<*>>, Control<List<Enum<*>>>>
+    override fun createControl() = FormSelect(listOf(setting.initialValue)) as FormControl<List<Enum<*>>, UIControl<List<Enum<*>>>>
 
     override fun update() {
         setting as EnumModSetting<*>
 
-        (control.control as Select).apply {
+        (control.control as UISelect).apply {
             options = setting.entries.map {
-                Select.Option(
+                UISelect.Option(
                     value = it,
                     text = setting.valueFormatter?.invoke(setting, it) ?: it.toString()
                 )

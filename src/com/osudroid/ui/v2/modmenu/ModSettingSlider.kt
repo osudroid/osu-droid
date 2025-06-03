@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
-import com.reco1l.andengine.ui.Control
+import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FormControl
 import com.reco1l.andengine.ui.form.FormSlider
 import com.rian.osu.mods.Mod
@@ -33,7 +33,7 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
 
     @Suppress("UNCHECKED_CAST")
     final override fun createControl() =
-        FormSlider(convertSettingValue(setting.initialValue)) as FormControl<Float, Control<Float>>
+        FormSlider(convertSettingValue(setting.initialValue)) as FormControl<Float, UIControl<Float>>
 
     final override fun convertSettingValue(value: V) = value?.toFloat() ?: setting.defaultValue?.toFloat() ?: 0f
 }

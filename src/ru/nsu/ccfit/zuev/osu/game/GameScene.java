@@ -26,12 +26,13 @@ import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.sprite.VideoSprite;
-import com.reco1l.andengine.ExtendedScene;
+import com.reco1l.andengine.sprite.UIVideoSprite;
+import com.reco1l.andengine.UIScene;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -40,8 +41,10 @@ import com.osudroid.ui.v1.BlockAreaFragment;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
 
+import com.reco1l.framework.Color4;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.beatmap.ComboColor;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
@@ -97,7 +100,6 @@ import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -125,8 +127,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private final Cursor[] cursors = new Cursor[CursorCount];
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
     public String audioFilePath = null;
-    private ExtendedScene scene;
-    private ExtendedScene bgScene, mgScene, fgScene;
+    private UIScene scene;
+    private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap parsedBeatmap;
     private DroidPlayableBeatmap playableBeatmap;
@@ -139,7 +141,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private int lastObjectId = -1;
     private float leadOut = 0;
     private LinkedList<HitObject> objects;
-    private ArrayList<RGBColor> comboColors;
+    private ArrayList<Color4> comboColors;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
@@ -152,7 +154,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float totalOffset;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
-    private ExtendedSprite skipBtn;
+    private UISprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
     private double distToNextObject;
@@ -168,12 +170,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
-    private RGBColor sliderBorderColor;
+    private Color4 sliderBorderColor;
     private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
-    private ExtendedSprite unrankedSprite;
+    private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
 
     private StoryboardSprite storyboardSprite;
@@ -267,7 +269,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     // Video support
 
     /**The video sprite*/
-    private VideoSprite video;
+    private UIVideoSprite video;
 
     /**Video offset aka video start time in seconds*/
     private float videoOffset;
@@ -303,9 +305,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public GameScene(final Engine engine) {
         this.engine = engine;
         scene = createMainScene();
-        bgScene = new ExtendedScene();
-        fgScene = new ExtendedScene();
-        mgScene = new ExtendedScene();
+        bgScene = new UIScene();
+        fgScene = new UIScene();
+        mgScene = new UIScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
@@ -335,11 +337,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (textureRegion == null) {
             Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
-            RGBColor backgroundColor = playableBeatmap.getEvents().backgroundColor;
+            Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
-                backgroundColor = new RGBColor(0, 0, 0);
+                backgroundColor = new Color4(0, 0, 0);
             }
-            backgroundColor.apply(rectangle);
+            ComponentsKt.setColor4(rectangle, backgroundColor);
 
             applyBackground(rectangle, brightness);
         } else {
@@ -369,7 +371,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
 
                     try {
-                        video = new VideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
+                        video = new UIVideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
                         video.setAlpha(0f);
 
                         ensureActive(scope.getCoroutineContext());
@@ -576,8 +578,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         lastObjectId = -1;
 
         sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
-        if (playableBeatmap.getColors().sliderBorderColor != null) {
-            sliderBorderColor = playableBeatmap.getColors().sliderBorderColor;
+        if (playableBeatmap.getColors().getSliderBorderColor() != null) {
+            sliderBorderColor = playableBeatmap.getColors().getSliderBorderColor();
         }
 
         if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
@@ -585,11 +587,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         comboColors = new ArrayList<>();
-        for (RGBColor color : playableBeatmap.getColors().comboColors) {
+        for (ComboColor comboColor : playableBeatmap.getColors().comboColors) {
             if (scope != null) {
                 ensureActive(scope.getCoroutineContext());
             }
-            comboColors.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
+
+            comboColors.add(comboColor.getColor());
         }
 
         if (comboColors.isEmpty() || Config.isUseCustomComboColors()) {
@@ -730,10 +733,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         resetPlayfieldSizeScale();
 
         scene = createMainScene();
-        bgScene = new ExtendedScene();
-        mgScene = new ExtendedScene();
+        bgScene = new UIScene();
+        mgScene = new UIScene();
         mgScene.setClipToBounds(true);
-        fgScene = new ExtendedScene();
+        fgScene = new UIScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
@@ -917,7 +920,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         skipBtn = null;
         if (skipTime > 1) {
-            skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
+            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
             skipBtn.setOrigin(Anchor.BottomRight);
             skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
@@ -962,7 +965,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
         if (hasUnrankedMod || Config.isRemoveSliderLock()) {
-            unrankedSprite = new ExtendedSprite(ResourceManager.getInstance().getTexture("play-unranked"));
+            unrankedSprite = new UISprite(ResourceManager.getInstance().getTexture("play-unranked"));
             unrankedSprite.setAnchor(Anchor.TopCenter);
             unrankedSprite.setOrigin(Anchor.Center);
             unrankedSprite.setPosition(0, 80);
@@ -1078,11 +1081,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    public RGBColor getComboColor(HitObject hitObject) {
+    public Color4 getComboColor(HitObject hitObject) {
         if (GameHelper.isSynesthesia()) {
-            return ModSynesthesia.getColorFor(
-                playableBeatmap.getControlPoints().getClosestBeatDivisor(hitObject.startTime)
-            );
+            return ModSynesthesia.getColorFor(playableBeatmap.getControlPoints().getClosestBeatDivisor(hitObject.startTime));
         }
 
         return comboColors.get(hitObject.getComboIndexWithOffsets() % comboColors.size());
@@ -1417,7 +1418,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             hud.onHitObjectLifetimeStart(obj);
 
-            final RGBColor comboColor = getComboColor(obj);
+            final Color4 comboColor = getComboColor(obj);
 
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
@@ -1896,7 +1897,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public void onCircleHit(int id, final float acc, final PointF pos,
-                            final boolean endCombo, byte forcedScore, RGBColor color) {
+                            final boolean endCombo, byte forcedScore, Color4 color) {
         if (GameHelper.isAutoplay()) {
             autoCursor.click();
             hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
@@ -1943,12 +1944,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         hud.onNoteHit(stat);
     }
 
-    public void onSliderReverse(PointF pos, float ang, RGBColor color) {
+    public void onSliderReverse(PointF pos, float ang, Color4 color) {
         createBurstEffectSliderReverse(pos, ang, color);
     }
 
     public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
-                            RGBColor color, int type, boolean incrementCombo) {
+                            Color4 color, int type, boolean incrementCombo) {
         if (GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
             if (nearestCursorId >= 0) {
@@ -2385,9 +2386,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float initialFrequency = songService.getFrequency();
 
         // Locally saving the scenes references to avoid unexpected behavior when the scene is changed.
-        ExtendedScene scene = this.scene;
-        ExtendedScene mgScene = this.mgScene;
-        ExtendedScene bgScene = this.bgScene;
+        UIScene scene = this.scene;
+        UIScene mgScene = this.mgScene;
+        UIScene bgScene = this.bgScene;
 
         // Wind down animation for failing based on osu!stable behavior.
         engine.registerUpdateHandler(new IUpdateHandler() {
@@ -2515,10 +2516,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return paused;
     }
 
-    private void createHitEffect(final PointF pos, final String name, RGBColor color) {
+    private void createHitEffect(final PointF pos, final String name, Color4 color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
-        var isAnimated = effect.hit instanceof AnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
+        var isAnimated = effect.hit instanceof UIAnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
@@ -2621,7 +2622,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         );
     }
 
-    private void createBurstEffect(final PointF pos, final RGBColor color) {
+    private void createBurstEffect(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2635,7 +2636,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
+    private void createBurstEffectSliderStart(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2649,7 +2650,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
+    private void createBurstEffectSliderEnd(final PointF pos, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2663,7 +2664,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyBurstEffect(burst2, pos);
     }
 
-    private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
+    private void createBurstEffectSliderReverse(final PointF pos, float ang, final Color4 color) {
         if (!Config.isBurstEffects() ||
                 (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
@@ -2867,8 +2868,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
     }
 
-    private ExtendedScene createMainScene() {
-        return new ExtendedScene() {
+    private UIScene createMainScene() {
+        return new UIScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
                 var songService = GlobalManager.getInstance().getSongService();

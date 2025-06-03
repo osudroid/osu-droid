@@ -4,7 +4,8 @@ import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
-import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
+import com.reco1l.andengine.component.*
+import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
@@ -19,13 +20,13 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import kotlin.math.*
 
-class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
+class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : UIScene() {
 
     private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
 
-    private val dimBox: Box
-    private val mainContainer: Container
+    private val dimBox: UIBox
+    private val mainContainer: UIContainer
 
 
     init {
@@ -43,7 +44,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
         dimBox = box {
             width = FillParent
             height = FillParent
-            color = ColorARGB.Black
+            color = Color4.Black
             alpha = 0.7f
         }
 
@@ -65,7 +66,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 linearContainer {
                     x = 60f
                     y = 60f
-                    color = ColorARGB(0xFFFFA726)
+                    color = Color4(0xFFFFA726)
                     spacing = 6f
 
                     sprite {
@@ -188,7 +189,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
     }
 
 
-    private inner class QuickSettingsLayout : ScrollableContainer() {
+    private inner class QuickSettingsLayout : UIScrollableContainer() {
 
         init {
             anchor = Anchor.CenterRight
@@ -231,7 +232,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                                 spacing = 2f
                                 padding = Vec4(12f, 0f, 24f, 0f)
 
-                                leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
+                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
                                 leadingIcon!!.height = 20f
 
                                 onActionUp = {

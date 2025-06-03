@@ -1,9 +1,9 @@
 package com.osudroid
 
 import android.content.Intent
+import android.net.*
 import android.util.Log
 import androidx.core.content.FileProvider
-import com.edlplan.ui.fragment.MarkdownFragment
 import com.osudroid.resources.R
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IFileRequestObserver
@@ -19,6 +19,8 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.File
+
+private const val CHANGELOG_URL = "https://github.com/osudroid/osu-droid/blob/master/assets/app/changelog.md"
 
 object UpdateManager: IFileRequestObserver
 {
@@ -43,11 +45,7 @@ object UpdateManager: IFileRequestObserver
                 .setMessage("Game was updated to a newer version.\nDo you want to see the changelog?")
                 .addButton("Yes") {
                     it.dismiss()
-
-                    MarkdownFragment()
-                        .setTitle(R.string.changelog_title)
-                        .setMarkdown(activity.assets.open("app/changelog.md").reader().readText())
-                        .show()
+                    GlobalManager.getInstance().mainActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CHANGELOG_URL)))
                 }
                 .addButton("No", clickListener = MessageDialog::dismiss)
                 .show()
@@ -93,7 +91,6 @@ object UpdateManager: IFileRequestObserver
                         .setTitle("New update available!")
                         .setMessage(StringTable.get(R.string.update_dialog_message))
                         .addButton(StringTable.get(R.string.update_dialog_button_update)) { dialog ->
-
                             dialog.dismiss()
 
                             progressDialog = ProgressDialog().apply {

@@ -5,6 +5,7 @@ import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu.addMod
 import com.osudroid.ui.v2.modmenu.ModMenu.removeMod
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.*
@@ -16,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.*
 class ModMenuPresetsSection : ModMenuSection("Presets") {
 
 
-    private val addButton: TextButton
+    private val addButton: UITextButton
 
     private var modPresets = listOf<ModPreset>()
 
@@ -24,10 +25,10 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
     init {
         width = 300f
 
-        addButton = TextButton().apply {
+        addButton = UITextButton().apply {
             width = FillParent
             text = "Add preset"
-            leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("plus"))
+            leadingIcon = UISprite(ResourceManager.getInstance().getTexture("plus"))
             onActionUp = {
                 ModMenu.attachChild(ModPresetsForm(this@ModMenuPresetsSection))
             }
@@ -81,7 +82,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
     }
 
 
-    inner class ModPresetToggle(val preset: ModPreset) : Button() {
+    inner class ModPresetToggle(val preset: ModPreset) : UIButton() {
 
         init {
             orientation = Orientation.Vertical
@@ -107,11 +108,11 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
             }
 
             onActionLongPress = {
-                ModMenu.attachChild(MessageDialog().apply {
+                ModMenu.attachChild(UIMessageDialog().apply {
                     title = "Delete preset"
                     text = "Delete preset \"${preset.name}\"?"
 
-                    addButton(TextButton().apply {
+                    addButton(UITextButton().apply {
                         text = "Delete"
                         isSelected = true
                         onActionUp = {
@@ -121,7 +122,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                         }
                     })
 
-                    addButton(TextButton().apply {
+                    addButton(UITextButton().apply {
                         text = "Cancel"
                         onActionUp = {
                             hide()

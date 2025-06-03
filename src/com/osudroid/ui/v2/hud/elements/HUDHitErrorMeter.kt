@@ -1,12 +1,12 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.info.*
-import com.reco1l.andengine.shape.Box
-import com.reco1l.framework.ColorARGB
+import com.reco1l.andengine.shape.UIBox
+import com.reco1l.framework.Color4
 import com.reco1l.framework.Pool
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -15,18 +15,18 @@ import kotlin.math.abs
 
 class HUDHitErrorMeter : HUDElement() {
 
-    private val expiredIndicators = Pool(20) { Indicator(0f, 0f, ColorARGB.White) }
+    private val expiredIndicators = Pool(20) { Indicator(0f, 0f, Color4.White) }
     private val activeIndicators = mutableListOf<Indicator>()
 
     private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
 
-    private val greatColor = ColorARGB(70, 180, 220)
-    private val okColor = ColorARGB(100, 220, 40)
-    private val mehColor = ColorARGB(200, 180, 110)
+    private val greatColor = Color4(70, 180, 220)
+    private val okColor = Color4(100, 220, 40)
+    private val mehColor = Color4(200, 180, 110)
 
 
     // Using a shared box for drawing indicators to reduce memory usage.
-    private val indicatorBox = Box().apply {
+    private val indicatorBox = UIBox().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
         setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT - 2f)
@@ -39,7 +39,7 @@ class HUDHitErrorMeter : HUDElement() {
     init {
         setSize(WIDTH, INDICATOR_HEIGHT)
 
-        val mehWindow = Box().apply {
+        val mehWindow = UIBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             color = mehColor
@@ -49,7 +49,7 @@ class HUDHitErrorMeter : HUDElement() {
             depthInfo = DepthInfo.Default
         }
 
-        val okWindow = Box().apply {
+        val okWindow = UIBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             color = okColor
@@ -58,7 +58,7 @@ class HUDHitErrorMeter : HUDElement() {
             depthInfo = DepthInfo.Default
         }
 
-        val greatWindow = Box().apply {
+        val greatWindow = UIBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
@@ -73,7 +73,7 @@ class HUDHitErrorMeter : HUDElement() {
         attachChild(greatWindow, 0)
 
         // Indicator
-        attachChild(Box().apply {
+        attachChild(UIBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(INDICATOR_WIDTH / 2, INDICATOR_HEIGHT)
@@ -127,7 +127,7 @@ class HUDHitErrorMeter : HUDElement() {
     //endregion
 
 
-    private inner class Indicator(var x: Float, var alpha: Float, var color: ColorARGB) {
+    private inner class Indicator(var x: Float, var alpha: Float, var color: Color4) {
 
         fun update() {
             if (alpha > 0f) {

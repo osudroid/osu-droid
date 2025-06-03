@@ -8,14 +8,15 @@ import android.util.Log;
 import com.acivev.VibratorManager;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.shape.Box;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.shape.UIBox;
+import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.ui.BannerManager;
 import com.osudroid.ui.BannerManager.BannerSprite;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;
+import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -176,7 +177,7 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        Box box = new Box() {
+        UIBox box = new UIBox() {
 
             {
                 Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
@@ -461,7 +462,7 @@ public class MainScene implements IUpdateHandler {
         if (BuildConfig.DEBUG) {
             ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
-            ExtendedSprite debugOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+            UISprite debugOverlay = new UISprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
             debugOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
             debugOverlay.setOrigin(Anchor.BottomCenter);
             scene.attachChild(debugOverlay);
@@ -479,7 +480,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         progressBar = new LinearSongProgress(scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
-        progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
+        progressBar.setProgressRectColor(new Color4(0.9f, 0.9f, 0.9f));
         progressBar.setProgressRectAlpha(0.8f);
 
         createOnlinePanel(scene);

@@ -15,14 +15,14 @@ fun Random.nextColor(until: Int = 255, alpha: Int = until): Int {
 }
 
 
-fun ColorARGB.toLinear() = ColorARGB(
+fun Color4.toLinear() = Color4(
     Colors.toLinear(red),
     Colors.toLinear(green),
     Colors.toLinear(blue),
     alpha
 )
 
-fun ColorARGB.toSRGB() = ColorARGB(
+fun Color4.toSRGB() = Color4(
     Colors.toSRGB(red),
     Colors.toSRGB(green),
     Colors.toSRGB(blue),
@@ -54,7 +54,7 @@ object Colors {
      *
      * [Information regarding linear interpolation](https://blog.johnnovak.net/2016/09/21/what-every-coder-should-know-about-gamma/#gradients)
      */
-    fun interpolate(time: Float, startColour: ColorARGB, endColour: ColorARGB, startTime: Float, endTime: Float, easing: Easing = Easing.None): ColorARGB {
+    fun interpolate(time: Float, startColour: Color4, endColour: Color4, startTime: Float, endTime: Float, easing: Easing = Easing.None): Color4 {
 
         if (startColour == endColour) {
             return startColour
@@ -72,7 +72,7 @@ object Colors {
         val startLinear = startColour.toLinear()
         val endLinear = endColour.toLinear()
 
-        return ColorARGB(
+        return Color4(
             startLinear.red + t * (endLinear.red - startLinear.red),
             startLinear.green + t * (endLinear.green - startLinear.green),
             startLinear.blue + t * (endLinear.blue - startLinear.blue),
@@ -83,7 +83,7 @@ object Colors {
     /**
      * Interpolates between two sRGB colors directly in sRGB space.
      */
-    fun interpolateNonLinear(time: Float, startColour: ColorARGB, endColour: ColorARGB, startTime: Float, endTime: Float, easing: Easing = Easing.None): ColorARGB {
+    fun interpolateNonLinear(time: Float, startColour: Color4, endColour: Color4, startTime: Float, endTime: Float, easing: Easing = Easing.None): Color4 {
 
         if (startColour == endColour) {
             return startColour
@@ -98,7 +98,7 @@ object Colors {
 
         val t = EasingManager.apply(easing, (current / duration).toDouble()).toFloat().coerceIn(0f, 1f)
 
-        return ColorARGB(
+        return Color4(
             startColour.red + t * (endColour.red - startColour.red),
             startColour.green + t * (endColour.green - startColour.green),
             startColour.blue + t * (endColour.blue - startColour.blue),

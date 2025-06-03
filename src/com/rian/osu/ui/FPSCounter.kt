@@ -2,7 +2,7 @@ package com.rian.osu.ui
 
 import android.content.Context
 import android.view.WindowManager
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.rian.osu.math.Interpolation.dampContinuously
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -105,9 +105,9 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
     private var timeSinceLastUpdate = 0f
     private val updateInterval = 0.1f
 
-    private val minimumTextColor = ColorARGB(0xed1121)
-    private val middleTextColor = ColorARGB(0xebc247)
-    private val maximumTextColor = ColorARGB(0xccff99)
+    private val minimumTextColor = Color4(0xed1121)
+    private val middleTextColor = Color4(0xebc247)
+    private val maximumTextColor = Color4(0xccff99)
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         super.onManagedUpdate(pSecondsElapsed)

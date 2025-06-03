@@ -4,7 +4,7 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class OsuSkinnableSprite(val textureLookup: String) : ExtendedSprite(), ISkinnable {
+class OsuSkinnableSprite(val textureLookup: String) : UISprite(), ISkinnable {
 
     init {
         onSkinChanged()

@@ -14,7 +14,7 @@ abstract class TextureCoordinatesBuffer(
         GLHelper.enableTexCoordArray(gl)
     }
 
-    override fun declarePointers(gl: GL10, entity: BufferedEntity<*>) {
+    override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
         if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
             selectOnHardware(gl as GL11)
             GLHelper.texCoordZeroPointer(gl)
@@ -23,6 +23,6 @@ abstract class TextureCoordinatesBuffer(
         }
     }
 
-    override fun draw(gl: GL10, entity: BufferedEntity<*>) = Unit
+    override fun draw(gl: GL10, entity: UIBufferedComponent<*>) = Unit
 
 }

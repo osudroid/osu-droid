@@ -2,13 +2,14 @@ package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class ModMenuToggle(val mod: Mod): Button() {
+class ModMenuToggle(val mod: Mod): UIButton() {
 
 
     init {
@@ -17,7 +18,7 @@ class ModMenuToggle(val mod: Mod): Button() {
         spacing = 8f
         cullingMode = CullingMode.CameraBounds
 
-        background = Box().apply {
+        background = UIBox().apply {
             cornerRadius = 12f
             // Sharing the same VBO across all toggles to reduce memory usage.
             buffer = sharedButtonVBO
@@ -75,7 +76,7 @@ class ModMenuToggle(val mod: Mod): Button() {
 
     companion object {
 
-        private val sharedButtonVBO = Box.BoxVBO(12f, Circle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
+        private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
 
     }
 

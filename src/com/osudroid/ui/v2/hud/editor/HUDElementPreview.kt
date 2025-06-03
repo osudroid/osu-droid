@@ -1,14 +1,15 @@
 package com.osudroid.ui.v2.hud.editor
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.Container
+import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.text.ExtendedText
-import com.reco1l.framework.ColorARGB
+import com.reco1l.andengine.text.UIText
+import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.hud.HUDElementSkinData
+import com.reco1l.andengine.component.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -16,15 +17,15 @@ import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 import kotlin.math.min
 
-class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): Container() {
+class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): UIContainer() {
 
 
-    private val label = ExtendedText().apply {
+    private val label = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.BottomLeft
         origin = Anchor.BottomLeft
         text = element.name
-        color = ColorARGB.White
+        color = Color4.White
     }
 
     init {
@@ -34,8 +35,8 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         scaleCenterX = 0.5f
         scaleCenterY = 0.5f
 
-        background = Box().apply {
-            color = ColorARGB(0xFF363653)
+        background = UIBox().apply {
+            color = Color4(0xFF363653)
             cornerRadius = 12f
         }
 

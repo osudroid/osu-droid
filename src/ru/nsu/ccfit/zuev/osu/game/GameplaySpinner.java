@@ -3,8 +3,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
@@ -26,14 +26,14 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplaySpinner extends GameObject {
-    private final ExtendedSprite background;
-    private final ExtendedSprite circle;
-    private final ExtendedSprite approachCircle;
+    private final UISprite background;
+    private final UISprite circle;
+    private final UISprite approachCircle;
     private final Sprite metre;
     private float metreY;
-    private final ExtendedSprite spinText;
+    private final UISprite spinText;
     private final TextureRegion metreRegion;
-    private final ExtendedSprite clearText;
+    private final UISprite clearText;
     private final ScoreNumber bonusScore;
 
     protected Spinner beatmapSpinner;
@@ -61,13 +61,13 @@ public class GameplaySpinner extends GameObject {
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         Utils.trackToRealCoords(position);
 
-        background = new ExtendedSprite();
+        background = new UISprite();
         background.setOrigin(Anchor.Center);
         background.setPosition(position.x, position.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
         background.setScale(Config.getRES_WIDTH() / background.getWidth());
 
-        circle = new ExtendedSprite();
+        circle = new UISprite();
         circle.setOrigin(Anchor.Center);
         circle.setPosition(position.x, position.y);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
@@ -78,17 +78,17 @@ public class GameplaySpinner extends GameObject {
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
-        approachCircle = new ExtendedSprite();
+        approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
         approachCircle.setPosition(position.x, position.y);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-approachcircle"));
 
-        spinText = new ExtendedSprite();
+        spinText = new UISprite();
         spinText.setOrigin(Anchor.Center);
         spinText.setPosition(position.x, position.y * 1.5f);
         spinText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-spin"));
 
-        clearText = new ExtendedSprite();
+        clearText = new UISprite();
         clearText.setOrigin(Anchor.Center);
         clearText.setPosition(position.x, position.y * 0.5f);
         clearText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-clear"));

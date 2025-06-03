@@ -6,7 +6,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.math.*
 
-class ModPresetsForm(section: ModMenuPresetsSection) : Dialog<LinearContainer>(innerContent = LinearContainer().apply {
+class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContainer>(innerContent = UILinearContainer().apply {
     orientation = Orientation.Vertical
     width = FillParent
 }) {
@@ -30,7 +30,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : Dialog<LinearContainer>(i
             }
         }
 
-        addButton(TextButton().apply {
+        addButton(UITextButton().apply {
             text = "Save"
             isSelected = true
             onActionUp = {
@@ -39,7 +39,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : Dialog<LinearContainer>(i
             }
         })
 
-        addButton(TextButton().apply {
+        addButton(UITextButton().apply {
             text = "Cancel"
             onActionUp = {
                 hide()

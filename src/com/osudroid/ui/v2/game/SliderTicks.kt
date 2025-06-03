@@ -2,7 +2,7 @@ package com.osudroid.ui.v2.game
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Modifiers
+import com.reco1l.andengine.modifier.Modifiers
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
@@ -12,7 +12,7 @@ import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
-class SliderTickContainer : Container() {
+class SliderTickContainer : UIContainer() {
     private var slider: Slider? = null
 
     fun init(currentTimeSec: Double, beatmapSlider: Slider) {
@@ -73,7 +73,7 @@ class SliderTickContainer : Container() {
 }
 
 
-class SliderTickSprite : ExtendedSprite() {
+class SliderTickSprite : UISprite() {
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")

@@ -10,10 +10,10 @@ class ModSynesthesiaTest {
     @Test
     fun `Test beat divisor combo color`() {
         fun test(beatDivisor: Int, red: Int, green: Int, blue: Int) {
-            ModSynesthesia.getColorFor(beatDivisor).apply {
-                Assert.assertEquals(red / 255f, r())
-                Assert.assertEquals(green / 255f, g())
-                Assert.assertEquals(blue / 255f, b())
+            ModSynesthesia.getColorFor(beatDivisor).let { color ->
+                Assert.assertEquals(red / 255f, color.red)
+                Assert.assertEquals(green / 255f, color.green)
+                Assert.assertEquals(blue / 255f, color.blue)
             }
         }
 

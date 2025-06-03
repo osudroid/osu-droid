@@ -6,7 +6,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 
 @Suppress("LeakingThis")
-open class FormInput(initialValue: String = "") : FormControl<String, TextInput>(initialValue) {
+open class FormInput(initialValue: String = "") : FormControl<String, UIInput>(initialValue) {
 
     final override val control = createControl().apply {
         width = FillParent
@@ -29,7 +29,7 @@ open class FormInput(initialValue: String = "") : FormControl<String, TextInput>
         +control
     }
 
-    open fun createControl() = TextInput(defaultValue)
+    open fun createControl() = UIInput(defaultValue)
 }
 
 open class IntegerFormInput(

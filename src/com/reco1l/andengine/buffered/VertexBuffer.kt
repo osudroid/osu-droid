@@ -20,7 +20,7 @@ abstract class VertexBuffer(
         GLHelper.enableVertexArray(gl)
     }
 
-    override fun declarePointers(gl: GL10, entity: BufferedEntity<*>) {
+    override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
 
         if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
             selectOnHardware(gl as GL11)
@@ -30,7 +30,7 @@ abstract class VertexBuffer(
         }
     }
 
-    override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+    override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
         gl.glDrawArrays(drawTopology, 0, vertexCount)
     }
 

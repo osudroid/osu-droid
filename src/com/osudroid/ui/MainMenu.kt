@@ -3,7 +3,7 @@ package com.osudroid.ui
 import com.osudroid.BuildSettings
 import com.osudroid.resources.R
 import com.osudroid.ui.v1.SettingsFragment
-import com.reco1l.andengine.sprite.ExtendedSprite
+import com.reco1l.andengine.sprite.UISprite
 import com.osudroid.utils.async
 import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
@@ -41,7 +41,7 @@ class MainMenu(val main: MainScene) {
     /**
      * This button will switch between `Play` and `Solo`.
      */
-    val first = object : ExtendedSprite() {
+    val first = object : UISprite() {
 
         init {
             textureRegion = playTexture
@@ -98,7 +98,7 @@ class MainMenu(val main: MainScene) {
     /**
      * This button will switch between `Settings` and `Multiplayer`
      */
-    val second = object : ExtendedSprite() {
+    val second = object : UISprite() {
 
         init {
             textureRegion = optionsTexture
@@ -153,7 +153,7 @@ class MainMenu(val main: MainScene) {
     /**
      * This button will switch between `Exit` and `Back`
      */
-    val third = object : ExtendedSprite() {
+    val third = object : UISprite() {
 
         init {
             textureRegion = exitTexture

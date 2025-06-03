@@ -4,6 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.osudroid.ui.v2.SpriteFont
+import com.reco1l.framework.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
@@ -12,7 +13,7 @@ open class CirclePiece(
     circleTexture: String,
     overlayTexture: String
 
-) : Container() {
+) : UIContainer() {
 
 
     init {
@@ -20,7 +21,7 @@ open class CirclePiece(
     }
 
 
-    private val circle = ExtendedSprite().also {
+    private val circle = UISprite().also {
 
         it.origin = Anchor.Center
         it.anchor = Anchor.Center
@@ -29,7 +30,7 @@ open class CirclePiece(
         attachChild(it)
     }
 
-    private val overlay = ExtendedSprite().also {
+    private val overlay = UISprite().also {
 
         it.origin = Anchor.Center
         it.anchor = Anchor.Center
@@ -41,6 +42,10 @@ open class CirclePiece(
 
     fun setCircleColor(red: Float, green: Float, blue: Float) {
         circle.setColor(red, green, blue)
+    }
+
+    fun setCircleColor(color: Color4) {
+        circle.color = color
     }
 }
 

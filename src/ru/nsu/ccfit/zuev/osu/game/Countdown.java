@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 
 import org.anddev.andengine.entity.modifier.DelayModifier;
@@ -23,9 +23,9 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class Countdown extends GameObject {
     public static final float COUNTDOWN_LENGTH = 3f;
-    private final ExtendedSprite ready;
+    private final UISprite ready;
     private final Sprite count1, count2, count3;
-    private final ExtendedSprite go;
+    private final UISprite go;
     private final float speed;
     private float timepassed;
     private Scene scene;
@@ -37,7 +37,7 @@ public class Countdown extends GameObject {
         timepassed = -time + COUNTDOWN_LENGTH * speed;
         final PointF center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
 
-        ready = new ExtendedSprite();
+        ready = new UISprite();
         ready.setOrigin(Anchor.Center);
         ready.setPosition(center.x, center.y);
         ready.setTextureRegion(ResourceManager.getInstance().getTexture("ready"));
@@ -86,7 +86,7 @@ public class Countdown extends GameObject {
                 new DelayModifier(COUNTDOWN_LENGTH * speed * 2 / 18),
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
-        go = new ExtendedSprite();
+        go = new UISprite();
         go.setOrigin(Anchor.Center);
         go.setPosition(center.x, center.y);
         go.setTextureRegion(ResourceManager.getInstance().getTexture("go"));

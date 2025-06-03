@@ -7,14 +7,15 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
+import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -29,7 +30,6 @@ import com.rian.osu.mods.ModSynesthesia;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
@@ -41,8 +41,8 @@ import java.util.BitSet;
 
 public class GameplaySlider extends GameObject {
 
-    private final ExtendedSprite approachCircle;
-    private final ExtendedSprite startArrow, endArrow;
+    private final UISprite approachCircle;
+    private final UISprite startArrow, endArrow;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private Scene scene;
@@ -65,15 +65,15 @@ public class GameplaySlider extends GameObject {
     private int ticksGot;
     private int currentTickSpriteIndex;
 
-    private final ExtendedSprite followCircle;
+    private final UISprite followCircle;
 
     // Temporarily used PointF to avoid allocations
     private final PointF tmpPoint = new PointF();
     private float ballAngle;
 
     private boolean kiai;
-    private final RGBColor bodyColor = new RGBColor();
-    private final RGBColor circleColor = new RGBColor();
+    private Color4 bodyColor = new Color4();
+    private Color4 circleColor = new Color4();
 
     //for replay
     private int firstHitAccuracy;
@@ -94,7 +94,7 @@ public class GameplaySlider extends GameObject {
     /**
      * The slider ball sprite.
      */
-    private final AnimatedSprite ball;
+    private final UIAnimatedSprite ball;
 
     /**
      * The start circle piece of the slider.
@@ -132,26 +132,26 @@ public class GameplaySlider extends GameObject {
         headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
 
-        approachCircle = new ExtendedSprite();
+        approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
-        startArrow = new ExtendedSprite();
+        startArrow = new UISprite();
         startArrow.setOrigin(Anchor.Center);
         startArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        endArrow = new ExtendedSprite();
+        endArrow = new UISprite();
         endArrow.setOrigin(Anchor.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        ball = new AnimatedSprite("sliderb", false, 60f);
+        ball = new UIAnimatedSprite("sliderb", false, 60f);
         ball.setOrigin(Anchor.Center);
 
         // Avoid to use AnimatedSprite if not necessary.
         if (ResourceManager.getInstance().isTextureLoaded("sliderfollowcircle-0")) {
-            followCircle = new AnimatedSprite("sliderfollowcircle", true, OsuSkin.get().getAnimationFramerate());
+            followCircle = new UIAnimatedSprite("sliderfollowcircle", true, OsuSkin.get().getAnimationFramerate());
         } else {
-            followCircle = new ExtendedSprite();
+            followCircle = new UISprite();
             followCircle.setTextureRegion(ResourceManager.getInstance().getTexture("sliderfollowcircle"));
         }
         followCircle.setOrigin(Anchor.Center);
@@ -166,7 +166,7 @@ public class GameplaySlider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
                      final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
-                     final RGBColor comboColor, final RGBColor borderColor, final SliderPath sliderPath,
+                     final Color4 comboColor, final Color4 borderColor, final SliderPath sliderPath,
                      final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
@@ -202,19 +202,18 @@ public class GameplaySlider extends GameObject {
         tickSet.clear();
         kiai = GameHelper.isKiai();
         preStageFinish = false;
-        bodyColor.set(comboColor.r(), comboColor.g(), comboColor.b());
+        bodyColor = comboColor;
         if (!OsuSkin.get().isSliderFollowComboColor()) {
-            var sliderBodyColor = OsuSkin.get().getSliderBodyColor();
-            bodyColor.set(sliderBodyColor.r(), sliderBodyColor.g(), sliderBodyColor.b());
+            bodyColor = OsuSkin.get().getSliderBodyColor();
         }
-        circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
+        circleColor = comboColor;
         currentNestedObjectIndex = 0;
 
         boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
 
         // Start circle piece
         headCirclePiece.setScale(scale);
-        headCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+        headCirclePiece.setCircleColor(comboColor);
         headCirclePiece.setAlpha(0);
         headCirclePiece.setPosition(this.position.x, this.position.y);
         int comboNum = beatmapSlider.getIndexInCurrentCombo() + 1;
@@ -225,7 +224,7 @@ public class GameplaySlider extends GameObject {
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
         headCirclePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
-        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
+        approachCircle.setColor(comboColor);
         approachCircle.setScale(scale * 3 * (float) (beatmapSlider.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
@@ -239,7 +238,7 @@ public class GameplaySlider extends GameObject {
             comboColor;
 
         tailCirclePiece.setScale(scale);
-        tailCirclePiece.setCircleColor(initialTailColor.r(), initialTailColor.g(), initialTailColor.b());
+        tailCirclePiece.setCircleColor(initialTailColor);
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
 
@@ -340,24 +339,24 @@ public class GameplaySlider extends GameObject {
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
         sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
         sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
-        sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
+        sliderBody.setBorderColor(borderColor);
 
         // Head circle not being visible means Traceable is applied to this slider
         if (GameHelper.isTraceable() && !headCirclePiece.isVisible()) {
             sliderBody.setBackgroundColor(0, 0, 0, 0);
         } else {
-            sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
+            sliderBody.setBackgroundColor(bodyColor, OsuSkin.get().getSliderBodyBaseAlpha());
         }
 
         if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
             sliderBody.setHintVisible(true);
             sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
 
-            RGBColor hintColor = OsuSkin.get().getSliderHintColor();
+            Color4 hintColor = OsuSkin.get().getSliderHintColor();
             if (hintColor != null) {
-                sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b(), OsuSkin.get().getSliderHintAlpha());
+                sliderBody.setHintColor(hintColor, OsuSkin.get().getSliderHintAlpha());
             } else {
-                sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderHintAlpha());
+                sliderBody.setHintColor(bodyColor, OsuSkin.get().getSliderHintAlpha());
             }
         } else {
             sliderBody.setHintVisible(false);
@@ -637,10 +636,9 @@ public class GameplaySlider extends GameObject {
                     endArrow.setAlpha(0);
                     tailCirclePiece.setAlpha(0);
                 } else if (GameHelper.isSynesthesia()) {
-                    var newColor =
-                        getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+                    var newColor = getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
 
-                    tailCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
+                    tailCirclePiece.setColor(newColor);
                 }
 
                 if (remainingSpans > 1) {
@@ -653,7 +651,7 @@ public class GameplaySlider extends GameObject {
                 var newColor =
                     getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
 
-                headCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
+                headCirclePiece.setColor(newColor);
             }
 
             ((GameScene) listener).onSliderReverse(
@@ -832,13 +830,13 @@ public class GameplaySlider extends GameObject {
         if (headCirclePiece.isVisible()) {
             if (GameHelper.isKiai()) {
                 var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-                var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
-                var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
-                var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
+                var r = Math.min(1, circleColor.getRed() + (1 - circleColor.getRed()) * kiaiModifier);
+                var g = Math.min(1, circleColor.getGreen() + (1 - circleColor.getGreen()) * kiaiModifier);
+                var b = Math.min(1, circleColor.getBlue() + (1 - circleColor.getBlue()) * kiaiModifier);
                 kiai = true;
                 headCirclePiece.setCircleColor(r, g, b);
             } else if (kiai) {
-                headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
+                headCirclePiece.setCircleColor(circleColor);
                 kiai = false;
             }
         }
@@ -1319,12 +1317,12 @@ public class GameplaySlider extends GameObject {
         return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
     }
 
-    private RGBColor getSynesthesiaComboColor(HitObject hitObject) {
+    private Color4 getSynesthesiaComboColor(HitObject hitObject) {
         return getSynesthesiaComboColor(hitObject.startTime);
     }
 
-    private RGBColor getSynesthesiaComboColor(double time) {
-        return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
+    private Color4 getSynesthesiaComboColor(double time) {
+        return new Color4(ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time)));
     }
 
     @Override
