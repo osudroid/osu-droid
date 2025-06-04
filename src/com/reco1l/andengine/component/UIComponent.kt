@@ -686,7 +686,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
     }
 
-    private fun onHandleInvalidations() {
+    fun onHandleInvalidations() {
 
         val flags = invalidationFlags
 
