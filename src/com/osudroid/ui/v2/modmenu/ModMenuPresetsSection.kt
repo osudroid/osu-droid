@@ -91,14 +91,22 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
             cullingMode = CullingMode.CameraBounds
 
             onActionUp = {
-                ModMenu.modToggles.fastForEach { toggle ->
-                    if (toggle.mod in preset.mods) {
-                        addMod(toggle.mod)
-                    } else {
-                        removeMod(toggle.mod)
+                if (isSelected) {
+                    ModMenu.clear()
+                } else {
+                    ModMenu.modToggles.fastForEach { toggle ->
+                        val presetMod = preset.mods[toggle.mod::class]
+
+                        if (presetMod != null) {
+                            // Prevent operations from modifying mods in the preset.
+                            addMod(presetMod.deepCopy())
+                        } else {
+                            removeMod(toggle.mod)
+                        }
                     }
                 }
             }
+
             onActionLongPress = {
                 ModMenu.attachChild(UIMessageDialog().apply {
                     title = "Delete preset"

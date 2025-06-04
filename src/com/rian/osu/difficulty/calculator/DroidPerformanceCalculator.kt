@@ -108,16 +108,25 @@ class DroidPerformanceCalculator(
         aimValue *= calculateDeviationBasedLengthScaling()
 
         if (aimDifficultSliderCount > 0) {
-            // Consider all missing combo to be dropped difficult sliders.
-            val estimateImproperlyFollowedDifficultSliders =
-                min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+            val estimateImproperlyFollowedDifficultSliders: Double
 
-            val sliderNerfFactor =
+            if (usingClassicSliderCalculation) {
+                // When the score is considered classic (regardless if it was made on old client or not),
+                // we consider all missing combo to be dropped difficult sliders.
+                estimateImproperlyFollowedDifficultSliders =
+                    min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+            } else {
+                // We add tick misses here since they too mean that the player didn't follow the slider
+                // properly. However, we aren't adding misses here because missing slider heads has a harsh
+                // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
+                estimateImproperlyFollowedDifficultSliders =
+                    (sliderEndsDropped!! + sliderTicksMissed!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+            }
+
+            aimValue *=
                 (1 - aimSliderFactor) *
                 (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
                 aimSliderFactor
-
-            aimValue *= sliderNerfFactor
         }
 
         aimValue *= sliderCheesePenalty.aim

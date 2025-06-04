@@ -34,7 +34,6 @@ class ModApproachDifferent : Mod() {
     /**
      * The animation style of the approach circles.
      */
-    // TODO: change to dropdown input
     var style by EnumModSetting(
         name = "Animation style",
         valueFormatter = { it.name },
@@ -56,6 +55,9 @@ class ModApproachDifferent : Mod() {
             AnimationStyle.Decelerate1 -> Easing.Out
             AnimationStyle.Decelerate2 -> Easing.OutCubic
             AnimationStyle.Decelerate3 -> Easing.OutQuint
+            AnimationStyle.BounceIn -> Easing.InBounce
+            AnimationStyle.BounceOut -> Easing.OutBounce
+            AnimationStyle.BounceInOut -> Easing.InOutBounce
         }
 
     override fun copySettings(settings: JSONObject) {
@@ -70,7 +72,10 @@ class ModApproachDifferent : Mod() {
         put("style", style.ordinal)
     }
 
-    override fun deepCopy() = ModApproachDifferent()
+    override fun deepCopy() = ModApproachDifferent().also {
+        it.scale = scale
+        it.style = style
+    }
 
     enum class AnimationStyle {
         Linear,
@@ -83,5 +88,8 @@ class ModApproachDifferent : Mod() {
         Decelerate1,
         Decelerate2,
         Decelerate3,
+        BounceIn,
+        BounceOut,
+        BounceInOut;
     }
 }

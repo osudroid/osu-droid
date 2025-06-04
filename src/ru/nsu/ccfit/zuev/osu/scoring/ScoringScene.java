@@ -14,8 +14,10 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.DifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
-import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
+import com.rian.osu.difficulty.attributes.PerformanceAttributes;
+import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.mods.ModAutoplay;
 import com.rian.osu.mods.ModCustomSpeed;
 import com.rian.osu.mods.ModDifficultyAdjust;
@@ -37,6 +39,8 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.apache.commons.io.FilenameUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -339,7 +343,7 @@ public class ScoringScene {
 
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
-                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+                new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
@@ -403,57 +407,78 @@ public class ScoringScene {
             }
 
             if (beatmapData != null) {
-                switch (Config.getDifficultyAlgorithm()) {
-                    case droid -> {
-                        DroidDifficultyAttributes difficultyAttributes;
-                        DroidPerformanceAttributes performanceAttributes;
+                DifficultyAttributes difficultyAttributes = null;
+                PerformanceAttributes performanceAttributes = null;
 
-                        // Don't try to load online replay
-                        if (replayPath != null && beatmapToReplay != null && !replayPath.startsWith("https://")) {
-                            var replay = new Replay();
-                            replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
-                            replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
+                // Don't try to load online replay
+                if (replayPath != null && beatmapToReplay != null && !replayPath.startsWith("https://")) {
+                    var replay = new Replay();
+                    replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
+                    replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
-                            if (replay.load(replayPath, true)) {
-                                var copiedMods = mods;
+                    if (replay.load(replayPath, true)) {
+                        var copiedMods = mods;
 
-                                if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
-                                    copiedMods = mods.deepCopy();
-                                    copiedMods.removeOfType(ModNightCore.class);
-                                    copiedMods.put(ModOldNightCore.class);
-                                }
+                        if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
+                            copiedMods = mods.deepCopy();
+                            copiedMods.removeOfType(ModNightCore.class);
+                            copiedMods.put(ModOldNightCore.class);
+                        }
 
+                        switch (Config.getDifficultyAlgorithm()) {
+                            case droid -> {
                                 var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
 
                                 difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
+
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
-                                    playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
+                                    playableBeatmap, (DroidDifficultyAttributes) difficultyAttributes, replay.cursorMoves,
+                                    replay.objectData, stat
                                 );
-                            } else {
-                                var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
-
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
-                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
                             }
-                        } else {
-                            var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
 
-                            difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
-                            performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
+                            case standard -> {
+                                var playableBeatmap = beatmapData.createStandardPlayableBeatmap(copiedMods.values());
+
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(playableBeatmap);
+
+                                performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformanceWithReplayStat(
+                                    playableBeatmap, (StandardDifficultyAttributes) difficultyAttributes, replay.cursorMoves,
+                                    replay.objectData, stat
+                                );
+                            }
                         }
-
-                        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes);
-
-                        ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
-                    }
-                    case standard -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, mods.values());
-                        var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
-                        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
-
-                        ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
                     }
                 }
+
+                if (difficultyAttributes == null) {
+                    difficultyAttributes = switch (Config.getDifficultyAlgorithm()) {
+                        case droid -> BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmapData, mods.values());
+                        case standard -> BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, mods.values());
+                    };
+
+                    performanceAttributes = switch (Config.getDifficultyAlgorithm()) {
+                        case droid -> BeatmapDifficultyCalculator.calculateDroidPerformance(
+                            (DroidDifficultyAttributes) difficultyAttributes, stat
+                        );
+
+                        case standard -> BeatmapDifficultyCalculator.calculateStandardPerformance(
+                            (StandardDifficultyAttributes) difficultyAttributes, stat
+                        );
+                    };
+                }
+
+                var maxPerformanceAttributes = switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> BeatmapDifficultyCalculator.calculateDroidPerformance(
+                        (DroidDifficultyAttributes) difficultyAttributes
+                    );
+
+                    case standard -> BeatmapDifficultyCalculator.calculateStandardPerformance(
+                        (StandardDifficultyAttributes) difficultyAttributes
+                    );
+                };
+
+                ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
             }
 
             if (stat.getUnstableRate() > 0) {
