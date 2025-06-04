@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.game
 import com.edlplan.framework.easing.*
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
@@ -27,7 +28,7 @@ object FollowPointConnection {
 
         // For optimization, we avoid using AnimatedSprite if there's one frame.
         if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
-            AnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
+            UIAnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
                 sprite.frames.fastForEach {
                     it?.applyFollowPointMaxSize()
                 }
@@ -36,7 +37,7 @@ object FollowPointConnection {
                 sprite.isLoop = false
             }
         } else {
-            ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
+            UISprite(ResourceManager.getInstance().getTexture("followpoint")).also {
                 it.textureRegion?.applyFollowPointMaxSize()
                 it.invalidate(InvalidationFlag.Content)
             }
@@ -48,7 +49,7 @@ object FollowPointConnection {
         updateThread {
             fp.detachSelf()
             fp.reset()
-            pool.free(fp as ExtendedSprite)
+            pool.free(fp as UISprite)
         }
     }
 

@@ -1,21 +1,22 @@
 package com.osudroid.ui.v2.hud.editor
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.ConstraintContainer
-import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.container.LinearContainer
+import com.reco1l.andengine.container.UIConstraintContainer
+import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.container.UILinearContainer
 import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.sprite.ExtendedSprite
+import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.ColorARGB
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
+class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer() {
 
 
     /**
@@ -25,13 +26,13 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         get() = outline.absolutePosition
 
 
-    private val outline = Box().apply {
+    private val outline = UIBox().apply {
         paintStyle = PaintStyle.Outline
         color = ColorARGB(0xFFF27272)
         lineWidth = 8f
     }
 
-    private val toolbar = LinearContainer().apply {
+    private val toolbar = UILinearContainer().apply {
         anchor = Anchor.TopCenter
         origin = Anchor.BottomCenter
         orientation = Orientation.Horizontal
@@ -52,7 +53,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
     }
 
-    private val nameText = ExtendedText().apply {
+    private val nameText = UIText().apply {
         anchor = Anchor.BottomCenter
         origin = Anchor.TopCenter
         font = ResourceManager.getInstance().getFont("smallFont")
@@ -132,14 +133,14 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     /**
      * Represents a tip in the overlay toolbar.
      */
-    private inner class Tip : Container() {
+    private inner class Tip : UIContainer() {
 
         init {
             origin = Anchor.Center
             setSize(TIP_SIZE, TIP_SIZE)
 
             // The tip container is bigger than the actual tip in order to make it easier to touch.
-            attachChild(Box().apply {
+            attachChild(UIBox().apply {
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 color = ColorARGB(0xFFF27272)
@@ -191,20 +192,20 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     /**
      * Represents a button in the overlay toolbar.
      */
-    private inner class Button(texture: String, back: ColorARGB = ColorARGB(0xFF002626), val action: () -> Unit) : Container() {
+    private inner class Button(texture: String, back: ColorARGB = ColorARGB(0xFF002626), val action: () -> Unit) : UIContainer() {
 
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
             scaleCenter = Anchor.Center
 
-            attachChild(Box().apply {
+            attachChild(UIBox().apply {
                 cornerRadius = 12f
                 color = back
                 relativeSizeAxes = Axes.Both
                 setSize(1f, 1f)
             })
 
-            attachChild(ExtendedSprite().apply {
+            attachChild(UISprite().apply {
                 textureRegion = ResourceManager.getInstance().getTexture(texture)
                 anchor = Anchor.Center
                 origin = Anchor.Center

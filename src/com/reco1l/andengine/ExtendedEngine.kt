@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions
@@ -18,7 +19,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     /**
      * The current focused entity.
      */
-    var focusedEntity: ExtendedEntity? = null
+    var focusedEntity: UIComponent? = null
         set(value) {
             if (value != null && value !is IFocusable) {
                 throw IllegalArgumentException("value must be an instance of IFocusable")
@@ -54,7 +55,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         if (focusedEntity != null) {
 
-            if (focusedEntity is TextInput) {
+            if (focusedEntity is UITextInput) {
 
                 val keyboardHeight = ViewCompat.getRootWindowInsets(context.window.decorView)
                     ?.getInsets(WindowInsetsCompat.Type.ime())
@@ -104,7 +105,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         fun IEntity.propagateThemeChange() {
             callOnChildren { it.propagateThemeChange() }
-            if (this is ExtendedEntity) {
+            if (this is UIComponent) {
                 onThemeChanged(theme)
             }
         }
@@ -119,7 +120,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         fun IEntity.propagateKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-            if (this is ExtendedEntity && onKeyPress(keyCode, event)) {
+            if (this is UIComponent && onKeyPress(keyCode, event)) {
                 return true
             }
 

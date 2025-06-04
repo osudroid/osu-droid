@@ -2,12 +2,12 @@ package com.osudroid.multiplayer
 
 import android.net.Uri
 import android.util.Log
-import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
 import org.anddev.andengine.entity.modifier.RotationByModifier
@@ -45,7 +45,7 @@ object LobbyScene : Scene() {
         }
 
 
-    private var backButton: ExtendedSprite? = null
+    private var backButton: UISprite? = null
 
     private var createButton: TextButton? = null
 
@@ -101,7 +101,7 @@ object LobbyScene : Scene() {
         // Back button code copy and paste from legacy code but improved, don't blame on me.
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
 
-        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
+        backButton = object : UIAnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false

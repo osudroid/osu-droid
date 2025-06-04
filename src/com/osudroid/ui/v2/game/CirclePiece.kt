@@ -12,7 +12,7 @@ open class CirclePiece(
     circleTexture: String,
     overlayTexture: String
 
-) : Container() {
+) : UIContainer() {
 
 
     init {
@@ -20,7 +20,7 @@ open class CirclePiece(
     }
 
 
-    private val circle = ExtendedSprite().also {
+    private val circle = UISprite().also {
 
         it.origin = Anchor.Center
         it.anchor = Anchor.Center
@@ -29,7 +29,7 @@ open class CirclePiece(
         attachChild(it)
     }
 
-    private val overlay = ExtendedSprite().also {
+    private val overlay = UISprite().also {
 
         it.origin = Anchor.Center
         it.anchor = Anchor.Center

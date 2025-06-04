@@ -1,6 +1,7 @@
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.framework.*
 
 /**
@@ -35,5 +36,5 @@ interface IThemeable {
     /**
      * Called when the theme is changed. This is used to apply the theme to the entity.
      */
-    var applyTheme: ExtendedEntity.(theme: Theme) -> Unit
+    var applyTheme: UIComponent.(theme: Theme) -> Unit
 }

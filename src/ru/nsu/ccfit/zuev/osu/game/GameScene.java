@@ -26,12 +26,12 @@ import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.reco1l.andengine.sprite.UIAnimatedSprite;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.sprite.VideoSprite;
-import com.reco1l.andengine.ExtendedScene;
+import com.reco1l.andengine.sprite.UIVideoSprite;
+import com.reco1l.andengine.UIScene;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -125,8 +125,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private final Cursor[] cursors = new Cursor[CursorCount];
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
     public String audioFilePath = null;
-    private ExtendedScene scene;
-    private ExtendedScene bgScene, mgScene, fgScene;
+    private UIScene scene;
+    private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap parsedBeatmap;
     private DroidPlayableBeatmap playableBeatmap;
@@ -152,7 +152,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float totalOffset;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
-    private ExtendedSprite skipBtn;
+    private UISprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
     private double distToNextObject;
@@ -173,7 +173,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private SliderPath[] sliderPaths = null;
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
-    private ExtendedSprite unrankedSprite;
+    private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
 
     private StoryboardSprite storyboardSprite;
@@ -267,7 +267,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     // Video support
 
     /**The video sprite*/
-    private VideoSprite video;
+    private UIVideoSprite video;
 
     /**Video offset aka video start time in seconds*/
     private float videoOffset;
@@ -303,9 +303,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public GameScene(final Engine engine) {
         this.engine = engine;
         scene = createMainScene();
-        bgScene = new ExtendedScene();
-        fgScene = new ExtendedScene();
-        mgScene = new ExtendedScene();
+        bgScene = new UIScene();
+        fgScene = new UIScene();
+        mgScene = new UIScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
@@ -369,7 +369,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
 
                     try {
-                        video = new VideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
+                        video = new UIVideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
                         video.setAlpha(0f);
 
                         ensureActive(scope.getCoroutineContext());
@@ -730,10 +730,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         resetPlayfieldSizeScale();
 
         scene = createMainScene();
-        bgScene = new ExtendedScene();
-        mgScene = new ExtendedScene();
+        bgScene = new UIScene();
+        mgScene = new UIScene();
         mgScene.setClipToBounds(true);
-        fgScene = new ExtendedScene();
+        fgScene = new UIScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
@@ -917,7 +917,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         skipBtn = null;
         if (skipTime > 1) {
-            skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
+            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
             skipBtn.setOrigin(Anchor.BottomRight);
             skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
@@ -962,7 +962,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
         if (hasUnrankedMod || Config.isRemoveSliderLock()) {
-            unrankedSprite = new ExtendedSprite(ResourceManager.getInstance().getTexture("play-unranked"));
+            unrankedSprite = new UISprite(ResourceManager.getInstance().getTexture("play-unranked"));
             unrankedSprite.setAnchor(Anchor.TopCenter);
             unrankedSprite.setOrigin(Anchor.Center);
             unrankedSprite.setPosition(0, 80);
@@ -2385,9 +2385,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float initialFrequency = songService.getFrequency();
 
         // Locally saving the scenes references to avoid unexpected behavior when the scene is changed.
-        ExtendedScene scene = this.scene;
-        ExtendedScene mgScene = this.mgScene;
-        ExtendedScene bgScene = this.bgScene;
+        UIScene scene = this.scene;
+        UIScene mgScene = this.mgScene;
+        UIScene bgScene = this.bgScene;
 
         // Wind down animation for failing based on osu!stable behavior.
         engine.registerUpdateHandler(new IUpdateHandler() {
@@ -2518,7 +2518,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
-        var isAnimated = effect.hit instanceof AnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
+        var isAnimated = effect.hit instanceof UIAnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
@@ -2867,8 +2867,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
     }
 
-    private ExtendedScene createMainScene() {
-        return new ExtendedScene() {
+    private UIScene createMainScene() {
+        return new UIScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
                 var songService = GlobalManager.getInstance().getSongService();

@@ -1,11 +1,11 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.info.*
-import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.shape.Circle
+import com.reco1l.andengine.shape.UIBox
+import com.reco1l.andengine.shape.UICircle
 import com.reco1l.framework.ColorARGB
 import com.osudroid.ui.v2.hud.HUDElement
+import com.reco1l.andengine.component.*
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 
@@ -23,7 +23,7 @@ sealed class HUDSongProgress : HUDElement() {
 
 class HUDLinearSongProgress : HUDSongProgress() {
 
-    private val backgroundRect = Box().apply {
+    private val backgroundRect = UIBox().apply {
 
         anchor = Anchor.BottomLeft
         origin = Anchor.BottomLeft
@@ -34,7 +34,7 @@ class HUDLinearSongProgress : HUDSongProgress() {
         alpha = 0.3f
     }
 
-    private val progressRect = Box().apply {
+    private val progressRect = UIBox().apply {
 
         anchor = Anchor.BottomLeft
         origin = Anchor.BottomLeft
@@ -72,7 +72,7 @@ class HUDLinearSongProgress : HUDSongProgress() {
 
 class HUDPieSongProgress : HUDSongProgress() {
 
-    private val circularProgress: Circle
+    private val circularProgress: UICircle
 
 
     init {
@@ -81,7 +81,7 @@ class HUDPieSongProgress : HUDSongProgress() {
 
         // Reference: https://github.com/ppy/osu/blob/6455c0583b5e607baeca7f584410bc63515aa619/osu.Game/Skinning/LegacySongProgress.cs
 
-        Circle().also { clear ->
+        UICircle().also { clear ->
 
             clear.setSize(30f, 30f)
             clear.anchor = Anchor.Center
@@ -93,7 +93,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             attachChild(clear)
         }
 
-        Circle().also { background ->
+        UICircle().also { background ->
 
             background.setSize(33f, 33f)
             background.anchor = Anchor.Center
@@ -104,7 +104,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             attachChild(background)
         }
 
-        circularProgress = Circle().also { progress ->
+        circularProgress = UICircle().also { progress ->
 
             progress.setSize(30f, 30f)
             progress.anchor = Anchor.Center
@@ -115,7 +115,7 @@ class HUDPieSongProgress : HUDSongProgress() {
         }
 
 
-        Circle().also { dot ->
+        UICircle().also { dot ->
 
             dot.setSize(4f, 4f)
             dot.anchor = Anchor.Center

@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.reco1l.andengine.modifier.ModifierType
 import com.reco1l.andengine.modifier.UniversalModifier
-import com.reco1l.andengine.sprite.ExtendedSprite
+import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.WebRequest
 import com.reco1l.toolkt.data.writeToFile
@@ -81,7 +81,7 @@ object BannerManager {
         val image: TextureRegion,
     )
 
-    class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
+    class BannerSprite(private val banners: List<Banner>) : UISprite() {
 
 
         private var currentBannerIndex = 0

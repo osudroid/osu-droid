@@ -13,17 +13,17 @@ interface IBuffer {
     /**
      * Called when the buffer should declare its pointers and submit its data.
      */
-    fun declarePointers(gl: GL10, entity: BufferedEntity<*>)
+    fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>)
 
     /**
      * Called when the buffer should update its data.
      */
-    fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any)
+    fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any)
 
     /**
      * Called when the buffer should draw itself.
      */
-    fun draw(gl: GL10, entity: BufferedEntity<*>)
+    fun draw(gl: GL10, entity: UIBufferedComponent<*>)
 
     /**
      * Called during disposal.

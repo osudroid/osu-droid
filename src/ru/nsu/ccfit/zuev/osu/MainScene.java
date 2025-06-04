@@ -8,8 +8,8 @@ import android.util.Log;
 import com.acivev.VibratorManager;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.shape.Box;
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.shape.UIBox;
+import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.ui.BannerManager;
 import com.osudroid.ui.BannerManager.BannerSprite;
 import com.osudroid.data.BeatmapInfo;
@@ -176,7 +176,7 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        Box box = new Box() {
+        UIBox box = new UIBox() {
 
             {
                 Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
@@ -461,7 +461,7 @@ public class MainScene implements IUpdateHandler {
         if (BuildConfig.DEBUG) {
             ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
-            ExtendedSprite debugOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+            UISprite debugOverlay = new UISprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
             debugOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
             debugOverlay.setOrigin(Anchor.BottomCenter);
             scene.attachChild(debugOverlay);

@@ -1,6 +1,7 @@
 package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
@@ -16,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  * Represents a form control that is used to change the value of a property.
  */
 @Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
-abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearContainer() {
+abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearContainer() {
 
     /**
      * The control that is used to change the value.
@@ -27,12 +28,12 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
     /**
      * The text that is displayed as the value of the control.
      */
-    open val valueText: ExtendedText? = null
+    open val valueText: UIText? = null
 
     /**
      * The text that is displayed as the label of the control.
      */
-    open val labelText = ExtendedText().apply {
+    open val labelText = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
@@ -42,7 +43,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
     /**
      * The button that is used to reset the value of the control to its default value.
      */
-    open val resetButton = TextButton().apply {
+    open val resetButton = UITextButton().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         scaleCenter = Anchor.Center
@@ -50,7 +51,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
         text = "Reset"
         padding = Vec4(4f, 0f, 8f, 0f)
         content.spacing = -2f
-        leadingIcon = ExtendedSprite().apply {
+        leadingIcon = UISprite().apply {
             textureRegion = ResourceManager.getInstance().getTexture("reset")
             width = 16f
             height = 16f
@@ -128,7 +129,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
     init {
         width = FillParent
         padding = Vec4(24f, 8f)
-        background = Box().apply {
+        background = UIBox().apply {
             color = ColorARGB.White
             alpha = 0f
         }

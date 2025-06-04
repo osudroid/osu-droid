@@ -1,11 +1,11 @@
 package com.osudroid.ui.v2
 
-import com.reco1l.andengine.text.TextureFont
+import com.reco1l.andengine.text.UITextureText
 import org.anddev.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.skins.StringSkinData
 
-open class SpriteFont(private val texturePrefix: StringSkinData) : TextureFont(mutableMapOf<Char, TextureRegion>().also {
+open class SpriteFont(private val texturePrefix: StringSkinData) : UITextureText(mutableMapOf<Char, TextureRegion>().also {
 
     fun addChar(char: Char, textureName: String) {
         it[char] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, textureName)

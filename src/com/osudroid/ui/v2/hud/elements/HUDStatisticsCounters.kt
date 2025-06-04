@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.skins.*
 @Suppress("LeakingThis")
 sealed class HUDStatisticCounter(label: String) : HUDElement() {
 
-    protected val labelText = ExtendedText().apply {
+    protected val labelText = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         text = label
     }

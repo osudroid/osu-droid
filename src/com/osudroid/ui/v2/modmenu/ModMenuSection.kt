@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
@@ -9,9 +10,9 @@ import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class ModMenuSection(name: String, toggles: List<Button> = listOf()) : LinearContainer() {
+open class ModMenuSection(name: String, toggles: List<UIButton> = listOf()) : UILinearContainer() {
 
-    protected val toggleContainer: LinearContainer
+    protected val toggleContainer: UILinearContainer
 
 
     init {
@@ -20,12 +21,12 @@ open class ModMenuSection(name: String, toggles: List<Button> = listOf()) : Line
         height = FillParent
         cullingMode = CullingMode.CameraBounds
 
-        background = Box().apply {
+        background = UIBox().apply {
             applyTheme = { color = it.accentColor * 0.1f }
             cornerRadius = 16f
         }
 
-        +ExtendedText().apply {
+        +UIText().apply {
             width = FillParent
             text = name
             alignment = Anchor.Center
@@ -37,13 +38,13 @@ open class ModMenuSection(name: String, toggles: List<Button> = listOf()) : Line
             }
         }
 
-        +ScrollableContainer().apply {
+        +UIScrollableContainer().apply {
             scrollAxes = Axes.Y
             width = FillParent
             height = FillParent
             clipToBounds = true
 
-            +LinearContainer().apply {
+            +UILinearContainer().apply {
                 width = FillParent
                 orientation = Orientation.Vertical
                 padding = Vec4(12f, 0f, 12f, 12f)

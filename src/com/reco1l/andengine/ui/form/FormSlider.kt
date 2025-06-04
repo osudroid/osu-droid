@@ -11,13 +11,13 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 @Suppress("LeakingThis")
-open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(initialValue) {
+open class FormSlider(initialValue: Float = 0f) : FormControl<Float, UISlider>(initialValue) {
 
-    override val control = Slider(initialValue).apply {
+    override val control = UISlider(initialValue).apply {
         width = FillParent
     }
 
-    override val valueText = ExtendedText().apply {
+    override val valueText = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterRight
         origin = Anchor.CenterRight
@@ -25,7 +25,7 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(ini
         alignment = Anchor.Center
         applyTheme = { color = it.accentColor }
 
-        background = Box().apply {
+        background = UIBox().apply {
             color = ColorARGB.Black
             alpha = 0.1f
             cornerRadius = 8f
