@@ -57,7 +57,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         if (focusedEntity != null) {
 
-            if (focusedEntity is UIInput) {
+            if (focusedEntity is UITextInput) {
 
                 val keyboardHeight = ViewCompat.getRootWindowInsets(context.window.decorView)
                     ?.getInsets(WindowInsetsCompat.Type.ime())
