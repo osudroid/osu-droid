@@ -28,20 +28,20 @@ class BeatmapParserTest {
 
     @Test
     fun `Test version 14 beatmap colors section`() {
-        fun test(color: Color4, red: Float, green: Float, blue: Float) {
-            Assert.assertEquals(color.red, red, 0f)
-            Assert.assertEquals(color.green, green, 0f)
-            Assert.assertEquals(color.blue, blue, 0f)
+        fun test(color: Color4, red: Int, green: Int, blue: Int) {
+            Assert.assertEquals(color.redInt, red)
+            Assert.assertEquals(color.greenInt, green)
+            Assert.assertEquals(color.blueInt, blue)
         }
 
         val colors = v14Beatmap.colors
 
         Assert.assertEquals(colors.comboColors.size, 4)
 
-        test(colors.comboColors[0].color, 98f, 243f, 255f)
-        test(colors.comboColors[1].color, 251f, 170f, 251f)
-        test(colors.comboColors[2].color, 102f, 171f, 255f)
-        test(colors.comboColors[3].color, 162f, 205f, 232f)
+        test(colors.comboColors[0].color, 98, 243, 255)
+        test(colors.comboColors[1].color, 251, 170, 251)
+        test(colors.comboColors[2].color, 102, 171, 255)
+        test(colors.comboColors[3].color, 162, 205, 232)
 
         Assert.assertNull(colors.sliderBorderColor)
     }

@@ -27,16 +27,16 @@ data class Color4(private val hex: Long) {
 
 
     val alphaInt
-        get() = (hex ushr 24) and 0xFF
+        get() = ((hex ushr 24) and 0xFF).toInt()
 
     val redInt
-        get() = (hex shr 16) and 0xFF
+        get() = ((hex shr 16) and 0xFF).toInt()
 
     val greenInt
-        get() = (hex shr 8) and 0xFF
+        get() = ((hex shr 8) and 0xFF).toInt()
 
     val blueInt
-        get() = hex and 0xFF
+        get() = (hex and 0xFF).toInt()
 
 
     val alpha
