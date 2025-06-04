@@ -2,16 +2,16 @@ package com.reco1l.framework
 
 import android.graphics.*
 
-data class Color4(private val hex: Int) {
+data class Color4(private val hex: Long) {
 
     constructor() : this(Color.BLACK)
 
-    constructor(hex: Long): this(hex.toInt())
+    constructor(hex: Int): this(hex.toLong())
 
     constructor(other: Color4) : this(other.hex)
 
     @JvmOverloads
-    constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this(Color.argb(alpha, red, green, blue))
+    constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this((alpha shl 24) or (red shl 16) or (green shl 8) or blue)
 
     @JvmOverloads
     constructor(red: Float, green: Float, blue: Float, alpha: Float = 1f) : this(
@@ -26,17 +26,30 @@ data class Color4(private val hex: Int) {
     })
 
 
+    val alphaInt
+        get() = (hex ushr 24) and 0xFF
+
+    val redInt
+        get() = (hex shr 16) and 0xFF
+
+    val greenInt
+        get() = (hex shr 8) and 0xFF
+
+    val blueInt
+        get() = hex and 0xFF
+
+
     val alpha
-        get() = Color.alpha(hex) / 255f
+        get() = alphaInt / 255f
 
     val red
-        get() = Color.red(hex) / 255f
+        get() = redInt / 255f
 
     val green
-        get() = Color.green(hex) / 255f
+        get() = greenInt / 255f
 
     val blue
-        get() = Color.blue(hex) / 255f
+        get() = blueInt / 255f
 
 
     operator fun plus(other: Color4) = Color4(
@@ -72,11 +85,11 @@ data class Color4(private val hex: Int) {
         red: Float = this.red,
         green: Float = this.green,
         blue: Float = this.blue,
-        alpha: Float = this.alpha
+        alpha: Float = this.alpha,
     ) = Color4(red, green, blue, alpha)
 
 
-    fun toInt() = hex
+    fun toInt() = hex.toInt()
 
     fun colorEquals(other: Color4) = red == other.red && green == other.green && blue == other.blue
 

@@ -98,9 +98,9 @@ class BeatmapParserTest {
             Assert.assertEquals(backgroundFilename, "katamari2.jpg")
 
             Assert.assertNotNull(backgroundColor)
-            Assert.assertEquals(backgroundColor!!.red, 54f, 0f)
-            Assert.assertEquals(backgroundColor!!.green, 140f, 0f)
-            Assert.assertEquals(backgroundColor!!.blue, 191f, 0f)
+            Assert.assertEquals(backgroundColor!!.redInt, 54)
+            Assert.assertEquals(backgroundColor!!.greenInt, 140)
+            Assert.assertEquals(backgroundColor!!.blueInt, 191)
 
             Assert.assertEquals(breaks.size, 3)
             Assert.assertNull(videoFilename)
