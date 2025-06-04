@@ -29,8 +29,8 @@ open class UIContainer : UIComponent() {
             }
         }
 
-        contentWidth = right
-        contentHeight = bottom
+        contentWidth = right - contentX
+        contentHeight = bottom - contentY
     }
 
 
