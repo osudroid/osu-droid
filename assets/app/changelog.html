@@ -1,3 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>1.8.4 Changelog</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-dark.min.css"/>
+</head>
+<body style="background: #0d1117">
+<article id="content" class="markdown-body">
 Version 1.8.4
 =============
 
@@ -97,3 +106,11 @@ Version 1.8.4
 - Fix gameplay time potentially being behind audio time until gameplay is restarted or finished <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix gameplay loading screen being scaled incorrectly when playfield size settings are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix Autoplay mod being persisted after quitting from HUD editor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+</article>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  const content = document.getElementById('content');
+  content.innerHTML = marked.parse(content.innerHTML);
+</script>
+</body>
+</html>
