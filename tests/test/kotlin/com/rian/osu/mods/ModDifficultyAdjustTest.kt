@@ -7,6 +7,9 @@ import com.rian.osu.beatmap.hitobject.SliderPathType
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
+import com.rian.osu.mods.settings.NullableFloatModSetting
+import kotlin.reflect.KProperty0
+import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +50,15 @@ class ModDifficultyAdjustTest {
         BeatmapDifficulty().apply {
             ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, this, listOf(ModDoubleTime()))
 
+            Assert.assertEquals(9f, ar)
+        }
+    }
+
+    @Test
+    fun `Test AR override with non-1x speed multiplier with old scaling`() {
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, this, listOf(ModDoubleTime(), ModReplayV6()))
+
             Assert.assertEquals(7f, ar)
         }
     }
@@ -54,6 +66,37 @@ class ModDifficultyAdjustTest {
     @Test
     fun `Test object fade in adjustments with non-1x speed multiplier AR override`() {
         val mods = listOf(ModDoubleTime())
+        val difficulty = BeatmapDifficulty()
+        val difficultyAdjust = ModDifficultyAdjust(ar = 9f)
+
+        difficultyAdjust.applyToDifficulty(GameMode.Droid, difficulty, mods)
+
+        Slider(
+            0.0, Vector2(0), 0, SliderPath(
+                SliderPathType.Linear, listOf(Vector2(0), Vector2(256, 0)), 256.0
+            ), true, 0, mutableListOf()
+        ).apply {
+            applyDefaults(BeatmapControlPoints(), difficulty, GameMode.Droid)
+            difficultyAdjust.applyToHitObject(GameMode.Droid, this, mods)
+
+            Assert.assertEquals(timePreempt, 600.0, 1e-2)
+            Assert.assertEquals(timeFadeIn, 400.0, 1e-2)
+
+            Assert.assertEquals(head.timePreempt, 600.0, 1e-2)
+            Assert.assertEquals(head.timeFadeIn, 400.0, 1e-2)
+
+            Assert.assertTrue(nestedHitObjects.size > 2)
+
+            val tick = nestedHitObjects[1]
+
+            Assert.assertEquals(tick.timePreempt, 896.0, 1e-2)
+            Assert.assertEquals(tick.timeFadeIn, 400.0, 1e-2)
+        }
+    }
+
+    @Test
+    fun `Test object fade in adjustments with non-1x speed multiplier AR override with old scaling`() {
+        val mods = listOf(ModDoubleTime(), ModReplayV6())
         val difficulty = BeatmapDifficulty()
         val difficultyAdjust = ModDifficultyAdjust(ar = 9f)
 
@@ -122,6 +165,35 @@ class ModDifficultyAdjustTest {
             hp = 6f
 
             Assert.assertEquals("DA (CS4.0, AR9.0, OD8.0, HP6.0)", toString())
+        }
+    }
+
+    @Test
+    fun `Test deep copy`() {
+        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
+            property.isAccessible = true
+            return property.getDelegate() as NullableFloatModSetting
+        }
+
+        ModDifficultyAdjust(4f, 9f, 8f, 6f).apply {
+            getDelegate(::cs).defaultValue = 2f
+            getDelegate(::ar).defaultValue = 3f
+            getDelegate(::od).defaultValue = 5f
+            getDelegate(::hp).defaultValue = 1f
+
+            val copy = deepCopy()
+
+            Assert.assertNotSame(this, copy)
+
+            Assert.assertEquals(4f, copy.cs)
+            Assert.assertEquals(9f, copy.ar)
+            Assert.assertEquals(8f, copy.od)
+            Assert.assertEquals(6f, copy.hp)
+
+            Assert.assertEquals(2f, getDelegate(copy::cs).defaultValue)
+            Assert.assertEquals(3f, getDelegate(copy::ar).defaultValue)
+            Assert.assertEquals(5f, getDelegate(copy::od).defaultValue)
+            Assert.assertEquals(1f, getDelegate(copy::hp).defaultValue)
         }
     }
 }

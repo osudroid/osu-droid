@@ -30,9 +30,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                 field = value
 
                 if (value != null) {
-                    if (value is IFocusable) {
-                        value.onFocus()
-                    }
+                    value.onFocus()
 
                     val (_, sceneY) = value.convertLocalToSceneCoordinates(0f, value.height)
                     val (_, surfaceY) = camera.convertSceneToSurfaceCoordinates(0f, sceneY, invertYAxis = false)
@@ -57,7 +55,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         if (focusedEntity != null) {
 
-            if (focusedEntity is UIInput) {
+            if (focusedEntity is UITextInput) {
 
                 val keyboardHeight = ViewCompat.getRootWindowInsets(context.window.decorView)
                     ?.getInsets(WindowInsetsCompat.Type.ime())

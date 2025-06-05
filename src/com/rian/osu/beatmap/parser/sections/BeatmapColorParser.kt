@@ -21,9 +21,9 @@ object BeatmapColorParser : BeatmapKeyValueSectionParser() {
         }
 
         val color = Color4(
-            parseInt(s[0]).toFloat(),
-            parseInt(s[1]).toFloat(),
-            parseInt(s[2]).toFloat()
+            parseInt(s[0]),
+            parseInt(s[1]),
+            parseInt(s[2])
         )
 
         if (p.first.startsWith("Combo")) {

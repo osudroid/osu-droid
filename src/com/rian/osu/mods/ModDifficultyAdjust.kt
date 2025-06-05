@@ -151,9 +151,9 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             it.od = getValue(od, it.od)
             it.hp = getValue(hp, it.hp)
 
-            // Special case for force AR, where the AR value is kept constant with respect to game time.
-            // This makes the player perceive the AR as is under all speed multipliers.
-            if (ar != null) {
+            // Special case for force AR in replay version 6 and older, where the AR value is kept constant with respect
+            // to game time. This makes the player perceive the AR as is under all speed multipliers.
+            if (ar != null && mods.any { it is ModReplayV6 }) {
                 val preempt = BeatmapDifficulty.difficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
                 val trackRate = ModUtils.calculateRateWithMods(mods)
 
@@ -162,16 +162,16 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>) {
-        // Special case for force AR, where the AR value is kept constant with respect to game time.
-        // This makes the player perceive the fade in animation as is under all speed multipliers.
-        if (ar == null) {
+        // Special case for force AR in replay version 6 and older, where the AR value is kept constant with respect to
+        // game time. This makes the player perceive the fade in animation as is under all speed multipliers.
+        if (ar == null || mods.none { it is ModReplayV6 }) {
             return
         }
 
-        applyFadeAdjustment(hitObject, mods)
+        applyOldFadeAdjustment(hitObject, mods)
 
         if (hitObject is Slider) {
-            hitObject.nestedHitObjects.forEach { applyFadeAdjustment(it, mods) }
+            hitObject.nestedHitObjects.forEach { applyOldFadeAdjustment(it, mods) }
         }
     }
 
@@ -193,7 +193,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         property.isAccessible = false
     }
 
-    private fun applyFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
+    private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
         val initialTrackRate = ModUtils.calculateRateWithMods(mods)
         val currentTrackRate = ModUtils.calculateRateWithMods(mods, hitObject.startTime)
 
@@ -229,5 +229,19 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             return settings.joinToString(", ")
         }
 
-    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp)
+    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp).also {
+        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
+            property.isAccessible = true
+            return property.getDelegate() as NullableFloatModSetting
+        }
+
+        fun setDefault(original: NullableFloatModSetting, copy: NullableFloatModSetting) {
+            copy.defaultValue = original.defaultValue
+        }
+
+        setDefault(getDelegate(::cs), getDelegate(it::cs))
+        setDefault(getDelegate(::ar), getDelegate(it::ar))
+        setDefault(getDelegate(::od), getDelegate(it::od))
+        setDefault(getDelegate(::hp), getDelegate(it::hp))
+    }
 }
