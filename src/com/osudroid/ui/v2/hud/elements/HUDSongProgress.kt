@@ -3,7 +3,7 @@ package com.osudroid.ui.v2.hud.elements
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.shape.UICircle
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
 import ru.nsu.ccfit.zuev.osu.Config
@@ -30,7 +30,7 @@ class HUDLinearSongProgress : HUDSongProgress() {
         relativeSizeAxes = Axes.X
         setSize(1f, BAR_HEIGHT)
 
-        color = ColorARGB.Black
+        color = Color4.Black
         alpha = 0.3f
     }
 
@@ -86,7 +86,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             clear.setSize(30f, 30f)
             clear.anchor = Anchor.Center
             clear.origin = Anchor.Center
-            clear.color = ColorARGB.Transparent
+            clear.color = Color4.Transparent
             clear.clearInfo = ClearInfo.ClearDepthBuffer
             clear.depthInfo = DepthInfo.Less
 
@@ -98,7 +98,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             background.setSize(33f, 33f)
             background.anchor = Anchor.Center
             background.origin = Anchor.Center
-            background.color = ColorARGB.White
+            background.color = Color4.White
             background.depthInfo = DepthInfo.Default
 
             attachChild(background)
@@ -120,7 +120,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             dot.setSize(4f, 4f)
             dot.anchor = Anchor.Center
             dot.origin = Anchor.Center
-            dot.color = ColorARGB.White
+            dot.color = Color4.White
 
             attachChild(dot)
         }

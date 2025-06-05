@@ -318,10 +318,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
 
     /**
-     * The color of the entity boxed in a [ColorARGB] object.
+     * The color of the entity boxed in a [Color4] object.
      */
-    open var color: ColorARGB
-        get() = ColorARGB(mRed, mGreen, mBlue, mAlpha)
+    open var color: Color4
+        get() = Color4(mRed, mGreen, mBlue, mAlpha)
         set(value) {
             mRed = value.red
             mGreen = value.green
@@ -1004,7 +1004,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         private val DEBUG_FOREGROUND by lazy {
             UIBox().apply {
                 paintStyle = PaintStyle.Outline
-                color = ColorARGB.White
+                color = Color4.White
                 lineWidth = 1f
             }
         }

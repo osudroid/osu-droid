@@ -26,12 +26,13 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.utils.mainThread
+import com.reco1l.andengine.component.*
+import com.reco1l.framework.*
 import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.kotlin.async
 import java.text.SimpleDateFormat
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
@@ -126,8 +127,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
 
-        RGBColor.hex2Rgb(tagColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.tag)
-        RGBColor.hex2Rgb(contentColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.content)
+        RoomScene.chatPreviewText.tag.color4 = Color4(tagColor ?: "#FFFFFF")
+        RoomScene.chatPreviewText.content.color4 = Color4(contentColor ?: "#FFFFFF")
 
         RoomScene.chatPreviewText.setTagText(tag ?: "")
         RoomScene.chatPreviewText.setContentText(content)

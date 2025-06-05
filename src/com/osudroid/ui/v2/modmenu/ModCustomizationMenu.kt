@@ -112,7 +112,7 @@ class ModCustomizationMenu : UIModal(
                 padding = Vec4(20f, 14f)
                 spacing = 12f
                 background = UIBox().apply {
-                    color = ColorARGB.Black
+                    color = Color4.Black
                     alpha = 0.05f
                     cornerRadius = 12f
                 }

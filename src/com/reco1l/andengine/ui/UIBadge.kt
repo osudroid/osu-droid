@@ -48,7 +48,7 @@ open class UILabeledBadge : UILinearContainer() {
         padding = Vec4(12f, 8f)
         alignment = Anchor.Center
         background = UIBox().apply {
-            color = ColorARGB.Black
+            color = Color4.Black
             alpha = 0.1f
             cornerRadius = 12f
         }

@@ -7,7 +7,7 @@ import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.container.UIScrollableContainer
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.text.UIText
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
@@ -39,7 +39,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
         width = SELECTOR_WIDTH
 
         background = UIBox().apply {
-            color = ColorARGB(0xFF1E1E2E)
+            color = Color4(0xFF1E1E2E)
         }
 
         attachChild(UILinearContainer().apply {
@@ -67,7 +67,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
             init {
                 background = UIBox().apply {
                     cornerRadius = BUTTON_RADIUS
-                    color = ColorARGB(0xFF181825)
+                    color = Color4(0xFF181825)
                 }
 
                 setSize(BUTTON_WIDTH, 150f)

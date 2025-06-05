@@ -5,6 +5,7 @@ import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
+import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -12,7 +13,6 @@ import com.rian.osu.mods.ModHidden;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 public class GameplayHitCircle extends GameObject {
 
     private final UISprite approachCircle;
-    private final RGBColor comboColor = new RGBColor();
+    private Color4 comboColor = new Color4();
     private GameObjectListener listener;
     private Scene scene;
     private HitCircle beatmapCircle;
@@ -45,7 +45,7 @@ public class GameplayHitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
-                     final float secPassed, final RGBColor comboColor) {
+                     final float secPassed, final Color4 comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
@@ -62,7 +62,7 @@ public class GameplayHitCircle extends GameObject {
         passedTime = secPassed - (hitTime - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
-        this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
+        this.comboColor = comboColor;
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getScreenSpaceGameplayScale();
@@ -72,7 +72,7 @@ public class GameplayHitCircle extends GameObject {
         float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
 
         // Initializing sprites
-        circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+        circlePiece.setCircleColor(comboColor);
         circlePiece.setScale(scale);
         circlePiece.setAlpha(0);
         circlePiece.setPosition(this.position.x, this.position.y);
@@ -88,7 +88,7 @@ public class GameplayHitCircle extends GameObject {
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
         circlePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
-        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
+        approachCircle.setColor(comboColor);
         approachCircle.setScale(scale * 3 * (float) (beatmapCircle.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
@@ -284,13 +284,13 @@ public class GameplayHitCircle extends GameObject {
         if (circlePiece.isVisible()) {
             if (GameHelper.isKiai()) {
                 var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-                var r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
-                var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
-                var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
+                var r = Math.min(1, comboColor.getRed() + (1 - comboColor.getRed()) * kiaiModifier);
+                var g = Math.min(1, comboColor.getGreen() + (1 - comboColor.getGreen()) * kiaiModifier);
+                var b = Math.min(1, comboColor.getBlue() + (1 - comboColor.getBlue()) * kiaiModifier);
                 kiai = true;
                 circlePiece.setCircleColor(r, g, b);
             } else if (kiai) {
-                circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+                circlePiece.setCircleColor(comboColor);
                 kiai = false;
             }
         }

@@ -33,6 +33,7 @@ import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
+import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
@@ -183,8 +184,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
             attachChild(beatmapInfoRectangle)
         }
-
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", RGBColor(1f, 1f, 1f)).apply(beatmapInfoText)
+        beatmapInfoText.color4 = OsuSkin.get().getColor("MenuItemDefaultTextColor", Color4(1f, 1f, 1f))
 
 
         readyButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Ready") {

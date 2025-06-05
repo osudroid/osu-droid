@@ -44,7 +44,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
         dimBox = box {
             width = FillParent
             height = FillParent
-            color = ColorARGB.Black
+            color = Color4.Black
             alpha = 0.7f
         }
 
@@ -66,7 +66,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 linearContainer {
                     x = 60f
                     y = 60f
-                    color = ColorARGB(0xFFFFA726)
+                    color = Color4(0xFFFFA726)
                     spacing = 6f
 
                     sprite {

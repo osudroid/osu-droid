@@ -1,18 +1,18 @@
 package com.rian.osu.beatmap
 
-import ru.nsu.ccfit.zuev.osu.RGBColor
+import com.reco1l.framework.*
 
 /**
- * An extension to [RGBColor] specifically for combo colors.
+ * A wrapper of [Color4] specifically for combo colors.
  */
-class ComboColor(
+data class ComboColor(
     /**
      * The index of this combo color.
      */
     @JvmField val index: Int,
 
     /**
-     * The underlying [RGBColor].
+     * The wrapped [Color4].
      */
-    color: RGBColor
-) : RGBColor(color)
+    val color: Color4
+)

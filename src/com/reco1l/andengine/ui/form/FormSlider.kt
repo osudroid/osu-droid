@@ -26,7 +26,7 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, UISlider>(i
         applyTheme = { color = it.accentColor }
 
         background = UIBox().apply {
-            color = ColorARGB.Black
+            color = Color4.Black
             alpha = 0.1f
             cornerRadius = 8f
         }

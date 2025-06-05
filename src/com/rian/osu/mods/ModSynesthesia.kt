@@ -1,7 +1,7 @@
 package com.rian.osu.mods
 
+import com.reco1l.framework.*
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import ru.nsu.ccfit.zuev.osu.RGBColor
 
 /**
  * Represents the Synesthesia mod.
@@ -23,19 +23,19 @@ class ModSynesthesia : Mod() {
          * @return The applicable color for [beatDivisor].
          */
         @JvmStatic
-        fun getColorFor(beatDivisor: Int): RGBColor = beatDivisorColors[beatDivisor] ?: defaultDivisorColor
+        fun getColorFor(beatDivisor: Int): Color4 = beatDivisorColors[beatDivisor] ?: defaultDivisorColor
 
-        private val beatDivisorColors = mutableMapOf<Int, RGBColor>(
-            1 to RGBColor(1f, 1f, 1f),
-            2 to RGBColor.hex2Rgb("#ED1121"),
-            3 to RGBColor.hex2Rgb("#8866EE"),
-            4 to RGBColor.hex2Rgb("#66CCFF"),
-            6 to RGBColor.hex2Rgb("#EEAA00"),
-            8 to RGBColor.hex2Rgb("#FFCC22"),
-            12 to RGBColor.hex2Rgb("#CC6600"),
-            16 to RGBColor.hex2Rgb("#441188")
+        private val beatDivisorColors = mutableMapOf(
+            1 to Color4(1f, 1f, 1f),
+            2 to Color4("#ED1121"),
+            3 to Color4("#8866EE"),
+            4 to Color4("#66CCFF"),
+            6 to Color4("#EEAA00"),
+            8 to Color4("#FFCC22"),
+            12 to Color4("#CC6600"),
+            16 to Color4("#441188")
         )
 
-        private val defaultDivisorColor = RGBColor.hex2Rgb("#ff0000")
+        private val defaultDivisorColor = Color4("#ff0000")
     }
 }

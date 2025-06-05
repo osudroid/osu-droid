@@ -2,7 +2,7 @@ package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UIBox
-import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Color4
 import com.reco1l.framework.Pool
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
@@ -15,14 +15,14 @@ import kotlin.math.abs
 
 class HUDHitErrorMeter : HUDElement() {
 
-    private val expiredIndicators = Pool(20) { Indicator(0f, 0f, ColorARGB.White) }
+    private val expiredIndicators = Pool(20) { Indicator(0f, 0f, Color4.White) }
     private val activeIndicators = mutableListOf<Indicator>()
 
     private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
 
-    private val greatColor = ColorARGB(70, 180, 220)
-    private val okColor = ColorARGB(100, 220, 40)
-    private val mehColor = ColorARGB(200, 180, 110)
+    private val greatColor = Color4(70, 180, 220)
+    private val okColor = Color4(100, 220, 40)
+    private val mehColor = Color4(200, 180, 110)
 
 
     // Using a shared box for drawing indicators to reduce memory usage.
@@ -127,7 +127,7 @@ class HUDHitErrorMeter : HUDElement() {
     //endregion
 
 
-    private inner class Indicator(var x: Float, var alpha: Float, var color: ColorARGB) {
+    private inner class Indicator(var x: Float, var alpha: Float, var color: Color4) {
 
         fun update() {
             if (alpha > 0f) {

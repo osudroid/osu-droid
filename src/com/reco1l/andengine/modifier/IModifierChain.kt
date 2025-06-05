@@ -182,10 +182,10 @@ interface IModifierChain {
 
 
     fun colorTo(color: Long, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return colorTo(ColorARGB(color), durationSec, easing)
+        return colorTo(Color4(color), durationSec, easing)
     }
 
-    fun colorTo(color: ColorARGB, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+    fun colorTo(color: Color4, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return colorTo(color.red, color.green, color.blue, durationSec, easing)
     }
 
