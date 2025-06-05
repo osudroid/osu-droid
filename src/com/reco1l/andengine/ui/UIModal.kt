@@ -8,6 +8,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
@@ -55,7 +56,7 @@ open class UIModal(
 
         background = UIBox().apply {
             color = Color4.Black
-            alpha = 0.2f
+            alpha = 0.3f
         }
 
         attachChild(card)
@@ -102,7 +103,22 @@ open class UIModal(
     /**
      * Called when [show] is called. This is where you should set up the modal's animations.
      */
-    protected open fun onShow() = Unit
+    protected open fun onShow() {
+        // If there's not parent previously set, attach to the current scene.
+        if (parent == null) {
+            var currentScene = ExtendedEngine.Current.scene
+
+            // Find the top-most scene in the hierarchy.
+            while (currentScene.hasChildScene()) {
+                currentScene = currentScene.childScene
+            }
+
+            currentScene.attachChild(this)
+            if (currentScene is Scene) {
+                currentScene.registerTouchArea(this)
+            }
+        }
+    }
 
     /**
      * Called after all show animations are finished.
@@ -167,10 +183,14 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
         width = FillParent
         font = ResourceManager.getInstance().getFont("smallFont")
         alignment = Anchor.Center
-        padding = Vec4(0f, 12f)
+        padding = Vec4(0f, 16f)
+
+        applyTheme = { theme ->
+            color = theme.accentColor * 0.7f
+        }
     }
 
-    val buttonLayout: UILinearContainer
+    val buttonLayout: UIFlexContainer
 
 
     /**
@@ -201,18 +221,24 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
 
             +innerContent
 
-            buttonLayout = linearContainer {
-                anchor = Anchor.TopRight
-                origin = Anchor.TopRight
+            buttonLayout = flexContainer {
+                width = FillParent
+                anchor = Anchor.TopCenter
+                origin = Anchor.TopCenter
                 padding = Vec4(24f)
-                spacing = 12f
+                gap = 12f
             }
         }
     }
 
 
     fun addButton(button: UIButton) {
-        buttonLayout += button
+        buttonLayout.apply {
+            attachChild(button.apply {
+                flexRules { grow = 1f }
+            })
+        }
+
     }
 }
 
@@ -222,6 +248,10 @@ open class UIMessageDialog : UIDialog<UIText>(
         font = ResourceManager.getInstance().getFont("smallFont")
         alignment = Anchor.Center
         padding = Vec4(24f)
+
+        applyTheme = { theme ->
+            color = theme.accentColor
+        }
     }
 ) {
 
@@ -229,5 +259,39 @@ open class UIMessageDialog : UIDialog<UIText>(
      * The text of the dialog.
      */
     var text by innerContent::text
+
+}
+
+open class UIConfirmDialog : UIMessageDialog() {
+
+    /**
+     * Callback invoked when the user confirms the dialog.
+     */
+    var onConfirm: (() -> Unit)? = null
+
+    /**
+     * Callback invoked when the user cancels the dialog.
+     */
+    var onCancel: (() -> Unit)? = null
+
+
+    init {
+        addButton(UITextButton().apply {
+            text = "Yes"
+            isSelected = true
+            onActionUp = {
+                onConfirm?.invoke()
+                hide()
+            }
+        })
+
+        addButton(UITextButton().apply {
+            text = "No"
+            onActionUp = {
+                onCancel?.invoke()
+                hide()
+            }
+        })
+    }
 
 }

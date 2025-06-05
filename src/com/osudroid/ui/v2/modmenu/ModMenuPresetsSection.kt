@@ -30,7 +30,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
             text = "Add preset"
             leadingIcon = UISprite(ResourceManager.getInstance().getTexture("plus"))
             onActionUp = {
-                ModMenu.attachChild(ModPresetsForm(this@ModMenuPresetsSection))
+                ModPresetsForm(this@ModMenuPresetsSection).show()
             }
         }
         toggleContainer += addButton
@@ -100,7 +100,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                 }
             }
             onActionLongPress = {
-                ModMenu.attachChild(UIMessageDialog().apply {
+                UIMessageDialog().apply {
                     title = "Delete preset"
                     text = "Delete preset \"${preset.name}\"?"
 
@@ -121,7 +121,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                         }
                     })
                     show()
-                })
+                }
             }
 
             text {
