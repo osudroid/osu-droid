@@ -149,9 +149,9 @@ open class UIScrollableContainer : UIContainer() {
     }
         set(value) {
             if (field != value) {
-                field?.decoratedEntity = null
+                field?.detachSelf()
                 field = value
-                value?.decoratedEntity = this@UIScrollableContainer
+                field?.setParent(this, AttachmentMode.Decorator)
             }
         }
 
@@ -163,13 +163,12 @@ open class UIScrollableContainer : UIContainer() {
         width = 6f
         alpha = 0.5f
         cornerRadius = 3f
-        decoratedEntity = this@UIScrollableContainer
     }
         set(value) {
             if (field != value) {
-                field?.decoratedEntity = null
+                field?.detachSelf()
                 field = value
-                value?.decoratedEntity = this@UIScrollableContainer
+                field?.setParent(this, AttachmentMode.Decorator)
             }
         }
 

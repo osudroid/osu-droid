@@ -1,5 +1,6 @@
 package com.reco1l.andengine.component
 
+import com.reco1l.andengine.component.AttachmentMode.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec2
 import org.anddev.andengine.entity.IEntity
@@ -104,14 +105,14 @@ val UIComponent.absolutePosition: Vec2
  * This takes into account the anchor and origin.
  */
 val IEntity.absoluteX: Float
-    get() = if (this is UIComponent) parent.contentX + anchorPositionX - originPositionX + x + translationX else x
+    get() = if (this is UIComponent) (if (attachmentMode == Child) parent.contentX else 0f) + anchorPositionX - originPositionX + x + translationX else x
 
 /**
  * The absolute position of the Y axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
 val IEntity.absoluteY: Float
-    get() = if (this is UIComponent) parent.contentY + anchorPositionY - originPositionY + y + translationY else y
+    get() = if (this is UIComponent) (if (attachmentMode == Child) parent.contentY else 0f) + anchorPositionY - originPositionY + y + translationY else y
 
 /**
  * The position of the entity. This does not take into account the anchor and origin.
