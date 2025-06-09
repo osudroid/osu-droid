@@ -10,29 +10,21 @@ class ModMirrorTest {
     @Test
     fun `Test serialization`() {
         ModMirror().apply {
-            flipHorizontally = false
-            flipVertically = false
-
-            serialize().apply {
-                Assert.assertFalse(has("settings"))
-            }
-
-            flipHorizontally = true
+            reflection = ModMirror.MirrorType.Horizontal
 
             serialize().getJSONObject("settings").apply {
                 Assert.assertTrue(has("flippedAxes"))
                 Assert.assertEquals(0, getInt("flippedAxes"))
             }
 
-            flipHorizontally = false
-            flipVertically = true
+            reflection = ModMirror.MirrorType.Vertical
 
             serialize().getJSONObject("settings").apply {
                 Assert.assertTrue(has("flippedAxes"))
                 Assert.assertEquals(1, getInt("flippedAxes"))
             }
 
-            flipHorizontally = true
+            reflection = ModMirror.MirrorType.Both
 
             serialize().getJSONObject("settings").apply {
                 Assert.assertTrue(has("flippedAxes"))
@@ -44,22 +36,13 @@ class ModMirrorTest {
     @Test
     fun `Test toString`() {
         ModMirror().apply {
-            flipHorizontally = false
-            flipVertically = false
-
-            Assert.assertEquals("MR", toString())
-
-            flipHorizontally = true
-
+            reflection = ModMirror.MirrorType.Horizontal
             Assert.assertEquals("MR (↔)", toString())
 
-            flipHorizontally = false
-            flipVertically = true
-
+            reflection = ModMirror.MirrorType.Vertical
             Assert.assertEquals("MR (↕)", toString())
 
-            flipHorizontally = true
-
+            reflection = ModMirror.MirrorType.Both
             Assert.assertEquals("MR (↔, ↕)", toString())
         }
     }

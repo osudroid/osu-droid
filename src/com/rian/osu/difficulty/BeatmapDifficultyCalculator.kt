@@ -5,6 +5,9 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.beatmap.StandardPlayableBeatmap
+import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTail
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.difficulty.calculator.*
 import com.rian.osu.mods.Mod
@@ -18,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 private val droidDifficultyCalculator = DroidDifficultyCalculator()
 private val standardDifficultyCalculator = StandardDifficultyCalculator()
@@ -307,6 +311,8 @@ object BeatmapDifficultyCalculator {
                 it.sliderCheesePenalty = SliderCheeseChecker(
                     beatmap, attributes, cursorGroups, replayObjectData
                 ).calculatePenalty()
+
+                it.populateNestedSliderObjectParameters(beatmap, replayObjectData)
             }
 
         return DroidPerformanceCalculator(attributes).calculate(actualParameters)
@@ -336,6 +342,82 @@ object BeatmapDifficultyCalculator {
         attributes: StandardDifficultyAttributes,
         parameters: PerformanceCalculationParameters? = null
     ) = StandardPerformanceCalculator(attributes).calculate(parameters)
+
+    /**
+     * Calculates the performance of a [StandardDifficultyAttributes] and applies necessary adjustments to
+     * the performance value using replay data.
+     *
+     * @param beatmap The [StandardPlayableBeatmap] to calculate.
+     * @param attributes The [StandardDifficultyAttributes] of the [Beatmap].
+     * @param replayMovements The replay movements of the player.
+     * @param replayObjectData The replay object data of the player.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the [StatisticV2].
+     */
+    @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateStandardPerformanceWithReplayStat")
+    fun calculateStandardPerformance(
+        beatmap: StandardPlayableBeatmap,
+        attributes: StandardDifficultyAttributes,
+        replayMovements: List<MoveArray>,
+        replayObjectData: Array<ReplayObjectData>,
+        stat: StatisticV2? = null
+    ) = calculateStandardPerformance(beatmap, attributes, replayMovements, replayObjectData, constructStandardPerformanceParameters(stat))
+
+    /**
+     * Calculates the performance of a [StandardDifficultyAttributes] and applies necessary adjustments to
+     * the performance value using replay data.
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param attributes The [StandardDifficultyAttributes] of the [Beatmap].
+     * @param replayMovements The replay movements of the player.
+     * @param replayObjectData The replay object data of the player.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateStandardPerformanceWithParameters")
+    fun calculateStandardPerformance(
+        beatmap: Beatmap,
+        attributes: StandardDifficultyAttributes,
+        replayMovements: List<MoveArray>,
+        replayObjectData: Array<ReplayObjectData>,
+        parameters: PerformanceCalculationParameters? = null
+    ) = calculateStandardPerformance(
+            beatmap.createStandardPlayableBeatmap(attributes.mods),
+            attributes, replayMovements, replayObjectData, parameters
+        )
+
+    /**
+     * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
+     * the performance value using replay data.
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param attributes The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
+     * @param replayMovements The replay movements of the player.
+     * @param replayObjectData The replay object data of the player.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateStandardPerformanceWithReplayParameters")
+    fun calculateStandardPerformance(
+        beatmap: StandardPlayableBeatmap,
+        attributes: StandardDifficultyAttributes,
+        replayMovements: List<MoveArray>,
+        replayObjectData: Array<ReplayObjectData>,
+        parameters: PerformanceCalculationParameters? = null
+    ): StandardPerformanceAttributes {
+        val actualParameters =
+            (parameters ?: PerformanceCalculationParameters()).also {
+                it.populateNestedSliderObjectParameters(beatmap, replayObjectData)
+            }
+
+        return StandardPerformanceCalculator(attributes).calculate(actualParameters)
+    }
 
     /**
      * Invalidates expired cache.
@@ -372,6 +454,44 @@ object BeatmapDifficultyCalculator {
      */
     private fun addCache(beatmap: IBeatmap, attributes: StandardDifficultyAttributes) =
         difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(attributes, 60 * 1000) }
+
+    private fun PerformanceCalculationParameters.populateNestedSliderObjectParameters(
+        beatmap: IBeatmap,
+        replayObjectData: Array<ReplayObjectData>,
+        scope: CoroutineScope? = null
+    ) {
+        sliderEndsDropped = 0
+        sliderTicksMissed = 0
+
+        val objects = beatmap.hitObjects.objects
+
+        for (i in objects.indices) {
+            scope?.ensureActive()
+
+            val obj = objects[i] as? Slider ?: continue
+            val objData = replayObjectData.getOrNull(i)
+
+            if (objData?.tickSet == null) {
+                // No object data - assume all slider ticks and the end were dropped.
+                sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
+                sliderTicksMissed = (sliderTicksMissed ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
+                continue
+            }
+
+            for (j in 1 until obj.nestedHitObjects.size) {
+                scope?.ensureActive()
+
+                if (objData.tickSet[j - 1]) {
+                    continue
+                }
+
+                when (obj.nestedHitObjects[j]) {
+                    is SliderTick -> sliderTicksMissed = (sliderTicksMissed ?: 0) + 1
+                    is SliderTail -> sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
+                }
+            }
+        }
+    }
 
     /**
      * Adds a cache to the difficulty cache.

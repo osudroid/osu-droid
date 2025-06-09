@@ -18,7 +18,7 @@ import kotlin.math.*
 import kotlin.synchronized
 import kotlin.text.substring
 
-open class UIInput(initialValue: String) : UIControl<String>(initialValue), IFocusable {
+open class UITextInput(initialValue: String) : UIControl<String>(initialValue), IFocusable {
 
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
@@ -181,18 +181,18 @@ open class UIInput(initialValue: String) : UIControl<String>(initialValue), IFoc
     }
 
     /**
-     * Checks if a [Char] is allowed to be appended to this [UIInput].
+     * Checks if a [Char] is allowed to be appended to this [UITextInput].
      *
      * @param char The [Char] to check.
-     * @return `true` if [char] is allowed to be appended to this [UIInput], `false` otherwise.
+     * @return `true` if [char] is allowed to be appended to this [UITextInput], `false` otherwise.
      */
     protected open fun isCharacterAllowed(char: Char) = true
 
     /**
-     * Checks whether a text is valid as a [value] for this [UIInput].
+     * Checks whether a text is valid as a [value] for this [UITextInput].
      *
      * @param text The text to check.
-     * @return `true` if [text] is valid as a [value] for this [UIInput], `false` otherwise.
+     * @return `true` if [text] is valid as a [value] for this [UITextInput], `false` otherwise.
      */
     protected open fun isTextValid(text: String) = true
 
@@ -302,7 +302,7 @@ open class UIInput(initialValue: String) : UIControl<String>(initialValue), IFoc
 }
 
 /**
- * A [UIInput] whose [value] is constrained to a range of values.
+ * A [UITextInput] whose [value] is constrained to a range of values.
  */
 sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
     initialValue: T?,
@@ -320,7 +320,7 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
      * If set to `null`, there is no maximum value.
      */
     val maxValue: T? = null
-) : UIInput(initialValue?.toString() ?: "") {
+) : UITextInput(initialValue?.toString() ?: "") {
     override fun isTextValid(text: String): Boolean {
         // Avoid calling convertValue whenever necessary, in case it is expensive
         if (!super.isTextValid(text)) {
@@ -349,7 +349,7 @@ sealed class RangeConstrainedTextInput<T : Comparable<T>?>(
 }
 
 /**
- * A [UIInput] that only allows [Int]s to be entered.
+ * A [UITextInput] that only allows [Int]s to be entered.
  */
 class IntegerTextInput(
     initialValue: Int?,
@@ -366,7 +366,7 @@ class IntegerTextInput(
 }
 
 /**
- * A [UIInput] that only allows [Float]s to be entered.
+ * A [UITextInput] that only allows [Float]s to be entered.
  */
 class FloatTextInput(
     initialValue: Float?,
