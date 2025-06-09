@@ -629,7 +629,7 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
         }
-        if (GlobalManager.getInstance().getMainScene() != null && songService != null && songService.hideNotification()) {
+        if (GlobalManager.getInstance().getMainScene() != null && songService != null) {
             if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
             GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
             GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
@@ -880,9 +880,4 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
-        super.onDestroy();
-    }
 }
