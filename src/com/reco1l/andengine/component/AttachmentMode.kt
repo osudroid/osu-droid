@@ -10,7 +10,7 @@ enum class AttachmentMode {
     None,
 
     /**
-     * The component is attached to a parent as a sibling.
+     * The component is attached to a parent as a child.
      */
     Child,
 
