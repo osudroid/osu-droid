@@ -1,8 +1,11 @@
 package com.reco1l.andengine
 
 import android.util.Log
+import com.reco1l.andengine.component.*
+import com.reco1l.andengine.ui.*
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
+import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.input.touch.TouchEvent
@@ -44,6 +47,26 @@ open class UIScene : Scene(), IShape {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         super.onManagedUpdate(deltaTimeSec * timeMultiplier)
+    }
+
+    override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
+        childScene?.onDetached()
+        super.setChildScene(childScene, modalDraw, modalUpdate, modalTouch)
+        childScene?.onAttached()
+    }
+
+    override fun onAttached() {
+
+        fun IEntity.propagateThemeChange() {
+
+            if (this is UIComponent) {
+                onThemeChanged(Theme.current)
+            }
+
+            forEach { it.propagateThemeChange() }
+        }
+
+        propagateThemeChange()
     }
 
     //endregion
