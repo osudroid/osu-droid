@@ -429,14 +429,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when a child is attached to this entity.
      */
     open fun onChildAttached(child: IEntity) {
-        onContentChanged()
+        invalidate(InvalidationFlag.Content)
     }
 
     /**
      * Called when a child is detached from this entity.
      */
     open fun onChildDetached(child: IEntity) {
-        onContentChanged()
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun setVisible(value: Boolean) {
@@ -448,6 +448,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     override fun onAttached() {
         onThemeChanged(Theme.current)
+        onHandleInvalidations(false)
     }
 
     //endregion
@@ -458,7 +459,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when the size of a child entity changes.
      */
     open fun onChildSizeChanged(child: IEntity) {
-        onContentChanged()
+        invalidate(InvalidationFlag.Content)
     }
 
     /**
@@ -527,7 +528,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when the position of a child entity changes.
      */
     open fun onChildPositionChanged(child: IEntity) {
-        onContentChanged()
+        invalidate(InvalidationFlag.Content)
     }
 
     /**
@@ -675,7 +676,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
     }
 
-    fun onHandleInvalidations() {
+    open fun onHandleInvalidations(restoreFlags: Boolean = true) {
 
         val flags = invalidationFlags
 
@@ -708,9 +709,12 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
 
         // During the invalidation process the flags could be changed.
-        if (this.invalidationFlags == flags) {
+        if (this.invalidationFlags == flags && restoreFlags) {
             this.invalidationFlags = 0
         }
+
+        background?.onHandleInvalidations()
+        foreground?.onHandleInvalidations()
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
