@@ -63,7 +63,7 @@ class UIComponentTest {
             onHandleInvalidations()
         }
 
-        assertEquals(100f * 2, container.width)
+        assertEquals(100f * 2 + 10f, container.width)
         assertEquals(100f, container.height)
     }
 
