@@ -32,10 +32,9 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
                 if (currentLength > previousLength) {
                     invalidateBuffer(BufferInvalidationFlag.Instance)
-                } else {
-                    invalidateBuffer(BufferInvalidationFlag.Data)
                 }
 
+                invalidate(InvalidationFlag.Content)
             }
         }
 
@@ -47,7 +46,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                invalidate(InvalidationFlag.Content)
             }
         }
 
@@ -86,13 +85,39 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
     private var scrollYTimeoutElapsed = 0f
 
 
+    private var lines: List<String>? = null
+    private var linesWidth: IntArray? = null
+
+
     init {
         width = MatchContent
         height = MatchContent
+        invalidate(InvalidationFlag.Content)
     }
 
 
-    override fun onCreateBuffer(gl: GL10): CompoundBuffer {
+    override fun onContentChanged() {
+        val text = text
+        val font = font
+
+        if (font == null) {
+            lines = emptyList()
+            linesWidth = IntArray(0)
+            contentWidth = 0f
+            contentHeight = 0f
+            return
+        }
+
+        lines = text.split('\n')
+        linesWidth = IntArray(lines!!.size) { i -> lines!![i].sumOf { char -> font.getLetter(char).mAdvance } }
+
+        contentWidth = linesWidth!!.max().toFloat()
+        contentHeight = (lines!!.size * font.lineHeight + (lines!!.size - 1) * font.lineGap).toFloat()
+
+        invalidateBuffer(BufferInvalidationFlag.Data)
+    }
+
+    override fun onCreateBuffer(): CompoundBuffer {
         val currentLength = currentLength
         val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
 
@@ -105,18 +130,9 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return buffer!!
     }
 
-    override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
-
-        val text = text
-        val font = font ?: return
-
-        val lines = text.split('\n').toTypedArray()
-        val linesWidth = IntArray(lines.size) { i -> lines[i].sumOf { char -> font.getLetter(char).mAdvance } }
-
-        contentWidth = linesWidth.max().toFloat()
-        contentHeight = (lines.size * font.lineHeight + (lines.size - 1) * font.lineGap).toFloat()
-
-        super.onUpdateBuffer(gl, font, lines, linesWidth)
+    override fun onUpdateBuffer() {
+        buffer?.getFirstOf<TextTextureBuffer>()?.update(font, lines)
+        buffer?.getFirstOf<TextVertexBuffer>()?.update(this, font, lines, linesWidth)
     }
 
     override fun onDeclarePointers(gl: GL10) {
@@ -190,27 +206,27 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
     //region Buffers
 
-    inner class TextVertexBuffer(val length: Int) : VertexBuffer(
+    class TextVertexBuffer(val length: Int) : VertexBuffer(
         drawTopology = GL_TRIANGLES,
         vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
+        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
 
-            val font = data[0] as Font
-            val lines = data[1] as Array<String>
-            val linesWidth = data[2] as IntArray
+            if (font == null || lines == null || linesWidth == null) {
+                mFloatBuffer.clear()
+                return
+            }
 
             val lineHeight = font.lineHeight + font.lineGap
             var i = 0
 
             lines.fastForEachIndexed { lineIndex, line ->
 
-                var lineX = width * alignment.x - linesWidth[lineIndex] * alignment.x
-                val lineY = height * alignment.y - lines.size * lineHeight * alignment.y + lineIndex * lineHeight
+                var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
+                val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
 
                 line.forEach { character ->
                     val letter = font.getLetter(character)
@@ -235,23 +251,26 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         }
 
         override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
-            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(currentLength, length))
+            entity as UIText
+            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
         }
     }
 
 
-    inner class TextTextureBuffer(length: Int) : TextureCoordinatesBuffer(
+    class TextTextureBuffer(length: Int) : TextureCoordinatesBuffer(
         vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
-            setPosition(0)
+        fun update(font: Font?, lines: List<String>?) {
 
-            val font = data[0] as Font
-            val lines = data[1] as Array<String>
+            if (font == null || lines == null) {
+                mFloatBuffer.clear()
+                return
+            }
+
+            setPosition(0)
 
             lines.fastForEach { line ->
                 line.forEach { character ->
