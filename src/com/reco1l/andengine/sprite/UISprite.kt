@@ -124,9 +124,20 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    override fun onCreateBuffer(gl: GL10): SpriteVBO {
-        return SpriteVBO()
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        invalidateBuffer(BufferInvalidationFlag.Data)
     }
+
+
+    override fun onCreateBuffer(): SpriteVBO {
+        return buffer ?: SpriteVBO()
+    }
+
+    override fun onUpdateBuffer() {
+        buffer?.update(this)
+    }
+
 
     override fun beginDraw(gl: GL10) {
         super.beginDraw(gl)
@@ -140,30 +151,29 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    inner class SpriteVBO : VertexBuffer(
+    class SpriteVBO : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
         vertexCount = 4,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
-
-            val textureWidth = contentWidth
-            val textureHeight = contentHeight
+        fun update(entity: UISprite) {
+            val textureWidth = entity.contentWidth
+            val textureHeight = entity.contentHeight
 
             var quadWidth = textureWidth
             var quadHeight = textureHeight
 
-            when (scaleType) {
+            when (entity.scaleType) {
 
                 Crop -> {
-                    val scale = max(width / textureWidth, height / textureHeight)
+                    val scale = max(entity.width / textureWidth, entity.height / textureHeight)
                     quadWidth = textureWidth * scale
                     quadHeight = textureHeight * scale
                 }
 
                 Fit -> {
-                    val scale = min(width / textureWidth, height / textureHeight)
+                    val scale = min(entity.width / textureWidth, entity.height / textureHeight)
                     quadWidth = textureWidth * scale
                     quadHeight = textureHeight * scale
                 }
@@ -171,8 +181,8 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
                 Stretch -> Unit
             }
 
-            val x = (width - quadWidth) * gravity.x
-            val y = (height - quadHeight) * gravity.y
+            val x = (entity.width - quadWidth) * entity.gravity.x
+            val y = (entity.height - quadHeight) * entity.gravity.y
 
             addQuad(0, x, y, x + quadWidth, y + quadHeight)
         }

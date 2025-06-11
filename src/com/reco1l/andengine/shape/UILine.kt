@@ -41,8 +41,12 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         }
 
 
-    override fun onCreateBuffer(gl: GL10): LineVertexBuffer {
+    override fun onCreateBuffer(): LineVertexBuffer {
         return LineVertexBuffer()
+    }
+
+    override fun onUpdateBuffer() {
+        buffer?.update(this)
     }
 
     override fun beginDraw(gl: GL10) {
@@ -51,15 +55,15 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
     }
 
 
-    inner class LineVertexBuffer : VertexBuffer(
+    class LineVertexBuffer : VertexBuffer(
         drawTopology = GL_LINES,
         vertexCount = 2,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
-            putVertex(0, fromPoint.x, fromPoint.y)
-            putVertex(1, toPoint.x, toPoint.y)
+        fun update(entity: UILine) {
+            putVertex(0, entity.fromPoint.x, entity.fromPoint.y)
+            putVertex(1, entity.toPoint.x, entity.toPoint.y)
         }
     }
 

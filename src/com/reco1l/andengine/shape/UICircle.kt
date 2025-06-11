@@ -77,12 +77,24 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         invalidateBuffer(BufferInvalidationFlag.Instance)
     }
 
-    override fun onCreateBuffer(gl: GL10): CircleVertexBuffer {
-        return CircleVertexBuffer(approximateSegments(width, height))
+    override fun onCreateBuffer(): CircleVertexBuffer {
+
+        val buffer = buffer
+        val segments = approximateSegments(width, height)
+
+        if (buffer?.segments == segments && buffer.paintStyle == paintStyle) {
+            return buffer
+        }
+
+        return CircleVertexBuffer(segments, paintStyle)
+    }
+
+    override fun onUpdateBuffer() {
+        buffer?.update(this)
     }
 
 
-    inner class CircleVertexBuffer(private val segments: Int) : VertexBuffer(
+    class CircleVertexBuffer(val segments: Int, val paintStyle: PaintStyle) : VertexBuffer(
 
         // Segments + Center point
         vertexCount = segments + if (paintStyle == PaintStyle.Fill) 1 else 0,
@@ -92,7 +104,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_STRIP
     ) {
 
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
+        fun update(entity: UICircle) {
 
             val halfWidth = entity.width / 2f
             val halfHeight = entity.height / 2f
@@ -103,7 +115,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
                 putVertex(position++, halfWidth, halfHeight)
             }
 
-            addArc(position, halfWidth, halfHeight, startAngle, endAngle, halfWidth, halfHeight, segments)
+            addArc(position, halfWidth, halfHeight, entity.startAngle, entity.endAngle, halfWidth, halfHeight, segments)
         }
     }
 

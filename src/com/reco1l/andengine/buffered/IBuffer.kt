@@ -5,6 +5,13 @@ import javax.microedition.khronos.opengles.GL10
 
 interface IBuffer {
 
+
+    /**
+     * Determines whether the buffer is shared between multiple entities and how it should be handled.
+     */
+    var sharingMode: BufferSharingMode
+
+
     /**
      * Called before drawing the buffer.
      */
@@ -16,11 +23,6 @@ interface IBuffer {
     fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>)
 
     /**
-     * Called when the buffer should update its data.
-     */
-    fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any)
-
-    /**
      * Called when the buffer should draw itself.
      */
     fun draw(gl: GL10, entity: UIBufferedComponent<*>)
@@ -30,6 +32,15 @@ interface IBuffer {
      */
     fun finalize() = Unit
 
+    /**
+     * Marks the buffer as needing an update in hardware buffers.
+     */
+    fun invalidateOnHardware() {
+        if (this is Buffer) {
+            setHardwareBufferNeedsUpdate()
+        }
+    }
+
 }
 
 abstract class Buffer(
@@ -38,6 +49,7 @@ abstract class Buffer(
     isManaged: Boolean = true
 ) : BufferObject(capacity, bufferUsage, isManaged), IBuffer {
 
+    override var sharingMode = BufferSharingMode.Off
 
     override fun finalize() {
         if (isManaged) {
@@ -45,4 +57,15 @@ abstract class Buffer(
         }
     }
 
+}
+
+
+fun <T : IBuffer> T.asSharedStatically(): T {
+    sharingMode = BufferSharingMode.Static
+    return this
+}
+
+fun <T : IBuffer> T.asSharedDynamically(): T {
+    sharingMode = BufferSharingMode.Dynamic
+    return this
 }

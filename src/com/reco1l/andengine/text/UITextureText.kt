@@ -119,7 +119,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
             gl.glPushMatrix()
             gl.glTranslatef(offsetX, 0f, 0f)
 
-            onUpdateBuffer(gl, textureWidth, textureHeight)
+            buffer?.update(textureWidth, textureHeight)
             texture.onApply(gl)
 
             onDeclarePointers(gl)
@@ -131,18 +131,13 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
     }
 
-    override fun onCreateBuffer(gl: GL10): TextureTextVertexBuffer {
+    override fun onCreateBuffer(): TextureTextVertexBuffer {
         return TextureTextVertexBuffer()
     }
 
-    override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
-        if (data.isEmpty()) {
-            super.onUpdateBuffer(gl, 0f, 0f)
-        } else {
-            super.onUpdateBuffer(gl, *data)
-        }
+    override fun onUpdateBuffer() {
+        // Nothing to do here, buffer is updated in `doDraw`.
     }
-
 
     inner class TextureTextVertexBuffer : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
@@ -150,8 +145,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
-            addQuad(0, 0f, 0f, data[0] as Float, data[1] as Float)
+        fun update(textureWidth: Float, textureHeight: Float) {
+            addQuad(0, 0f, 0f, textureWidth, textureHeight)
         }
     }
 }
