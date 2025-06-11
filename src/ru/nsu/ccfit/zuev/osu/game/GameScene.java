@@ -326,6 +326,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         videoStarted = false;
         videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
+        var previousVideo = video;
+        video = null;
+
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
@@ -365,9 +368,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 if (isVideoEnabled) {
 
-                    if (video != null) {
-                        video.release();
-                        video = null;
+                    if (previousVideo != null) {
+                        previousVideo.release();
                     }
 
                     try {
