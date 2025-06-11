@@ -23,5 +23,8 @@ class ModReplayV6Test {
         // screen height of the device). It goes to show just how broken it was, huh.
         Assert.assertEquals(0, objects[0].difficultyStackHeight)
         Assert.assertEquals(1, objects[1].difficultyStackHeight)
+
+        Assert.assertEquals(4f, objects[0].stackOffsetMultiplier)
+        Assert.assertEquals(4f, objects[1].stackOffsetMultiplier)
     }
 }

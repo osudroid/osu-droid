@@ -25,18 +25,20 @@ abstract class PerformanceCalculator<
     protected var countOk = 0
     protected var countMeh = 0
     protected var countMiss = 0
+    protected var sliderEndsDropped: Int? = null
+    protected var sliderTicksMissed: Int? = null
     protected var effectiveMissCount = 0.0
 
     /**
      * The accuracy of the parameters.
      */
-    protected val accuracy: Double
+    protected val accuracy
         get() = if (totalHits > 0) (countGreat * 6.0 + countOk * 2 + countMeh) / (totalHits * 6) else 1.0
 
     /**
      * The total hits that can be done in the beatmap.
      */
-    protected val totalHits: Int
+    protected val totalHits
         get() = difficultyAttributes.let { it.hitCircleCount + it.sliderCount + it.spinnerCount }
 
     /**
@@ -48,8 +50,14 @@ abstract class PerformanceCalculator<
     /**
      * The total hits that were successfully done.
      */
-    protected val totalSuccessfulHits: Int
+    protected val totalSuccessfulHits
         get() = countGreat + countOk + countMeh
+
+    /**
+     * Whether this score uses classic slider calculation.
+     */
+    protected val usingClassicSliderCalculation
+        get() = sliderEndsDropped == null || sliderTicksMissed == null
 
     /**
      * Calculates the performance value of the [DifficultyAttributes] with the specified parameters.
@@ -77,6 +85,8 @@ abstract class PerformanceCalculator<
             countOk = it.countOk
             countMeh = it.countMeh
             countMiss = it.countMiss
+            sliderEndsDropped = it.sliderEndsDropped
+            sliderTicksMissed = it.sliderTicksMissed
             effectiveMissCount = calculateEffectiveMissCount()
         } ?: resetDefaults()
 
@@ -89,24 +99,42 @@ abstract class PerformanceCalculator<
         countOk = 0
         countMeh = 0
         countMiss = 0
+        sliderEndsDropped = null
+        sliderTicksMissed = null
         effectiveMissCount = 0.0
     }
 
     private fun calculateEffectiveMissCount() = difficultyAttributes.run {
-        // Guess the number of misses + slider breaks from combo
-        var comboBasedMissCount = 0.0
+        var missCount = countMiss.toDouble()
 
         if (sliderCount > 0) {
-            val fullComboThreshold: Double = maxCombo - 0.1 * sliderCount
-            if (scoreMaxCombo < fullComboThreshold) {
-                // Clamp miss count to maximum amount of possible breaks.
-                comboBasedMissCount = min(
-                    fullComboThreshold / max(1, scoreMaxCombo),
-                    (countOk + countMeh + countMiss).toDouble()
-                )
+            if (usingClassicSliderCalculation) {
+                // Consider that full combo is maximum combo minus dropped slider tails since
+                // they don't contribute to combo but also don't break it.
+                // In classic scores, we can't know the amount of dropped sliders so we estimate
+                // to 10% of all sliders in the beatmap.
+                val fullComboThreshold = maxCombo - 0.1 * sliderCount
+
+                if (scoreMaxCombo < fullComboThreshold) {
+                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
+                }
+
+                // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
+                missCount = min(missCount, totalImperfectHits.toDouble())
+            } else {
+                val fullComboThreshold = maxCombo.toDouble() - sliderEndsDropped!!
+
+                if (scoreMaxCombo < fullComboThreshold) {
+                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
+                }
+
+                // Combine regular misses with tick misses, since tick misses break combo as well.
+                missCount = min(missCount, sliderTicksMissed!! + countMiss.toDouble())
             }
+        } else {
+            missCount = countMiss.toDouble()
         }
 
-        max(countMiss.toDouble(), comboBasedMissCount)
+        missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
     }
 }
