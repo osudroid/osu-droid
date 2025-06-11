@@ -28,8 +28,12 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         invalidateBuffer(BufferInvalidationFlag.Data)
     }
 
-    override fun onCreateBuffer(gl: GL10): TriangleVBO {
+    override fun onCreateBuffer(): TriangleVBO {
         return TriangleVBO()
+    }
+
+    override fun onUpdateBuffer() {
+        buffer?.update(this)
     }
 
     override fun beginDraw(gl: GL10) {
@@ -38,9 +42,9 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
     }
 
 
-    inner class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D, GL_STATIC_DRAW) {
+    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D, GL_STATIC_DRAW) {
 
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
+        fun update(entity: UITriangle) {
             addTriangle(
                 index = 0,
                 centerX = entity.width / 2f,
@@ -51,7 +55,8 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         }
 
         override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
-            gl.glDrawArrays(if (paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP, 0, vertexCount)
+            entity as UITriangle
+            gl.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP, 0, vertexCount)
         }
 
     }
