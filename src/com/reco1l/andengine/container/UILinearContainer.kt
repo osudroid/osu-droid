@@ -44,7 +44,7 @@ open class UILinearContainer : UIContainer() {
                     right += child.getWidth()
                     bottom = max(bottom, child.getHeight())
 
-                    if (i < childCount - 1) {
+                    if (childCount > 1 && i < childCount - 1) {
                         right += spacing
                     }
                 }
@@ -55,7 +55,7 @@ open class UILinearContainer : UIContainer() {
                     right = max(right, child.getWidth())
                     bottom += child.getHeight()
 
-                    if (i < childCount - 1) {
+                    if (childCount > 1 && i < childCount - 1) {
                         bottom += spacing
                     }
                 }
