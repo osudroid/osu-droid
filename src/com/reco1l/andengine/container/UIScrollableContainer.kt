@@ -370,14 +370,14 @@ open class UIScrollableContainer : UIContainer() {
         val length = hypot(deltaX, deltaY)
 
         fun decreaseInBoundary(current: Float, delta: Float, max: Float): Float {
-            if (current - delta < 0f || current - delta > max) {
+            if (current - delta > 0f && current - delta < max) {
                 return delta
             }
             return delta * if (length > 0) length.pow(0.7f) / length else 0f
         }
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
-            velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
+            velocityX = if (dragTimeSeconds > 0.3f) 0f else deltaX / dragTimeSeconds
             scrollX -= decreaseInBoundary(scrollX, deltaX, maxScrollX)
 
             if (!overflowAxes.isHorizontal) {
@@ -386,7 +386,7 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
-            velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
+            velocityY = if (dragTimeSeconds > 0.3f) 0f else deltaY / dragTimeSeconds
             scrollY -= decreaseInBoundary(scrollY, deltaY, maxScrollY)
 
             if (!overflowAxes.isVertical) {
