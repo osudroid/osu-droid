@@ -222,6 +222,15 @@ open class UIScrollableContainer : UIContainer() {
     private var dragStartTimeMillis = 0L
 
 
+    /**
+     * Stops the scrolling of the container by setting the velocity to 0.
+     */
+    fun stopScroll() {
+        velocityX = 0f
+        velocityY = 0f
+    }
+
+
     //region Callbacks
 
     @CallSuper
