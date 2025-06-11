@@ -170,6 +170,13 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
 
+    override fun setScene(scene: Scene?) {
+        mScene?.onDetached()
+        super.setScene(scene)
+        scene?.onAttached()
+    }
+
+
     companion object {
 
         @JvmStatic
