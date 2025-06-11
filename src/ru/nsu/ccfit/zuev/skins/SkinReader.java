@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.skins;
 
-import org.json.JSONObject;
-
 public abstract class SkinReader {
 
     public void loadSkin() {
@@ -17,6 +15,7 @@ public abstract class SkinReader {
     protected abstract void loadColor();
     protected abstract void loadCursor();
     protected abstract void loadFonts();
+    protected abstract void loadTheme();
     protected void putLayout(String name, SkinLayout layout) {
         OsuSkin.get().layoutData.put(name, layout);
     }

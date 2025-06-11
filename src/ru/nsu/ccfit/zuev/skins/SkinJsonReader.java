@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
 import com.osudroid.ui.v2.hud.HUDSkinData;
+import com.reco1l.andengine.ui.Theme;
 import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
@@ -22,6 +23,7 @@ public class SkinJsonReader extends SkinReader {
     private JSONObject currentColorData;
     private JSONObject currentCursorData;
     private JSONObject currentFontsData;
+    private JSONObject currentThemeData;
 
     private SkinJsonReader() {
 
@@ -70,6 +72,10 @@ public class SkinJsonReader extends SkinReader {
             OsuSkin.get().hudSkinData = json == null
                     ? HUDSkinData.Default
                     : HUDSkinData.readFromJSON(json);
+        });
+        load("Theme", currentData, (c) -> {
+            currentThemeData = c;
+            loadTheme();
         });
     }
 
@@ -168,6 +174,14 @@ public class SkinJsonReader extends SkinReader {
         JSONObject data = currentCursorData;
         skin.rotateCursor.setFromJson(data);
         skin.rotateCursorTrail.setFromJson(data);
+    }
+
+    @Override
+    protected void loadTheme() {
+        var accentColor =
+            new Color4(currentThemeData.optString("accentColor", "#C2CAFF"), HexComposition.RRGGBB);
+
+        Theme.Companion.setCurrent(new Theme(accentColor));
     }
 
     public void load(String tag, @NonNull JSONObject data, Consumer<JSONObject> consumer) {
