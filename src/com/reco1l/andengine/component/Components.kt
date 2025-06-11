@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.osu.Config
 
 fun IEntity?.getWidth() = when (this) {
     is UIComponent -> width
-    is CameraScene -> camera.widthRaw
+    is CameraScene -> camera?.widthRaw ?: 0f
     is IShape -> width
     is Scene -> Config.getRES_WIDTH().toFloat()
     else -> 0f
@@ -21,7 +21,7 @@ fun IEntity?.getWidth() = when (this) {
 
 fun IEntity?.getHeight() = when (this) {
     is UIComponent -> height
-    is CameraScene -> camera.heightRaw
+    is CameraScene -> camera?.heightRaw ?: 0f
     is IShape -> height
     is Scene -> Config.getRES_HEIGHT().toFloat()
     else -> 0f
