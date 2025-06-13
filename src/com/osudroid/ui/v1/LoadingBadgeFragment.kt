@@ -51,6 +51,10 @@ class LoadingBadgeFragment : BaseFragment() {
 
     private lateinit var progressView: CircularProgressIndicator
 
+    init {
+        isDismissOnBackPress = false
+        interceptBackPress = false
+    }
 
     override fun onLoadView() {
         progressView = findViewById(R.id.progress)!!
