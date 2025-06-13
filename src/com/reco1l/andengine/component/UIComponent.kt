@@ -331,6 +331,12 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     //region State properties
 
     /**
+     * Whether the component is currently animating.
+     */
+    val isAnimating
+        get() = !mEntityModifiers.isNullOrEmpty()
+
+    /**
      * The modifier pool used to manage the modifiers of this entity. By default [UniversalModifier.GlobalPool].
      */
     var modifierPool = UniversalModifier.GlobalPool
@@ -429,7 +435,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when a child is attached to this entity.
      */
     open fun onChildAttached(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
+        onContentChanged()
     }
 
     /**
