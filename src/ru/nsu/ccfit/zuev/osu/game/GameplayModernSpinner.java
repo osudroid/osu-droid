@@ -121,12 +121,12 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        top.registerEntityModifier(Modifiers.sequence(
+        top.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
             Modifiers.fadeIn(timePreempt, e -> {
                     spinnable = true;
                     listener.onSpinnerStart(id);
             }),
-            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
+            Modifiers.delay(duration)
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
