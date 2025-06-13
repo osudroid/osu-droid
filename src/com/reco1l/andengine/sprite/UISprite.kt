@@ -141,6 +141,13 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
     override fun beginDraw(gl: GL10) {
         super.beginDraw(gl)
+
+        if (textureRegion == null) {
+            GLHelper.disableTextures(gl)
+            GLHelper.disableTexCoordArray(gl)
+            return
+        }
+
         GLHelper.enableTextures(gl)
         GLHelper.enableTexCoordArray(gl)
     }
