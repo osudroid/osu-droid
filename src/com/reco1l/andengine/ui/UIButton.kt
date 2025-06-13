@@ -228,6 +228,8 @@ open class UIIconButton : UIButton() {
         scaleType = ScaleType.Fit
         anchor = Anchor.Center
         origin = Anchor.Center
+        width = 28f
+        height = 28f
     }
 
     /**
