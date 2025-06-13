@@ -7,9 +7,11 @@ import com.osudroid.utils.async
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
 import com.osudroid.utils.mainThread
+import com.osudroid.utils.stopAsync
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.parser.BeatmapParser
 import com.rian.osu.difficulty.calculator.DifficultyCalculator
+import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
@@ -36,12 +38,10 @@ object DifficultyCalculationManager {
 
 
     @JvmStatic
-    fun checkForOutdatedStarRatings() {
-        stopCalculation()
-
+    fun checkForOutdatedStarRatings(): CompletableFuture<Unit> = stopCalculation().thenApply {
         preferences.apply {
             if (getLong("starRatingVersion", 0) >= DifficultyCalculator.Companion.VERSION) {
-                return
+                return@apply
             }
 
             DatabaseManager.beatmapInfoTable.resetStarRatings()
@@ -155,9 +155,5 @@ object DifficultyCalculationManager {
 
 
     @JvmStatic
-    fun stopCalculation() {
-        job?.cancel()
-        job = null
-    }
-
+    fun stopCalculation(): CompletableFuture<Unit> = job.stopAsync().thenApply { job = null }
 }
