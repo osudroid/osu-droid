@@ -2,12 +2,17 @@
 
 package com.osudroid.utils
 
+import java.util.concurrent.CompletableFuture
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.future.future
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import com.reco1l.toolkt.kotlin.async as toolktAsync
-import com.reco1l.toolkt.kotlin.runSafe as toolktRunSafe
 import com.reco1l.toolkt.kotlin.delayed as toolktDelayed
+import com.reco1l.toolkt.kotlin.runSafe as toolktRunSafe
 
 /**
  * A [Runnable] intended specifically for Java interoperability with Kotlin coroutines.
@@ -66,3 +71,12 @@ fun mainThread(block: Runnable) = GlobalManager.getInstance().mainActivity.runOn
  */
 fun updateThread(block: Runnable) = GlobalManager.getInstance().engine.runOnUpdateThread(block)
 
+/**
+ * Wraps a [Job.cancelAndJoin] call inside a coroutine. Useful for asynchronously canceling and joining a [Job] with
+ * Java interoperability in mind.
+ *
+ * Returns a [CompletableFuture] that completes when the job is canceled and joined.
+ */
+fun Job?.stopAsync(): CompletableFuture<Unit> =
+    if (this?.isCompleted == false) CoroutineScope(EmptyCoroutineContext).future { this@stopAsync.cancelAndJoin() }
+    else CompletableFuture.completedFuture(Unit)
