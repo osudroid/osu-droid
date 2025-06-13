@@ -6,6 +6,7 @@ import android.graphics.PointF;
 import android.os.SystemClock;
 import android.util.Log;
 
+import kotlin.Unit;
 import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
@@ -91,6 +92,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 import javax.microedition.khronos.opengles.GL10;
@@ -766,44 +768,36 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.getCamera().setHUD(null);
         engine.setScene(scene);
 
-        cancelLoading();
-
-        loadingJob = Execution.async((scope) -> {
-            DifficultyCalculationManager.stopCalculation();
-
-            boolean succeeded = false;
-
-            try {
-                succeeded = loadGame(beatmapToUse, rfile, modsToUse, scope);
-
-                if (succeeded) {
-                    prepareScene();
-                }
-            } finally {
-                if (!succeeded) {
-                    quit();
-                }
-
-                loadingJob = null;
-            }
-        });
-
         ResourceManager.getInstance().getSound("failsound").stop();
+
+        cancelLoading()
+                .thenCompose((ignored) -> DifficultyCalculationManager.stopCalculation())
+                .thenRun(() -> loadingJob = Execution.async((scope) -> {
+                    boolean succeeded = false;
+
+                    try {
+                        succeeded = loadGame(beatmapToUse, rfile, modsToUse, scope);
+
+                        if (succeeded) {
+                            prepareScene();
+                        }
+                    } finally {
+                        if (!succeeded) {
+                            quit();
+                        }
+
+                        loadingJob = null;
+                    }
+                }));
     }
 
-    public void cancelLoading() {
+    public CompletableFuture<Unit> cancelLoading() {
         // Do not cancel loading in multiplayer.
         if (Multiplayer.isMultiplayer) {
-            return;
+            return CompletableFuture.completedFuture(Unit.INSTANCE);
         }
 
-        if (loadingJob != null) {
-            loadingJob.cancel(new CancellationException("Loading job cancelled"));
-        }
-
-        if (backgroundLoadingJob != null) {
-            backgroundLoadingJob.cancel(new CancellationException("Background loading job cancelled"));
-        }
+        return Execution.stopAsync(loadingJob).thenCompose((ignored) -> Execution.stopAsync(backgroundLoadingJob));
     }
 
     private void prepareScene() {
