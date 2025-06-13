@@ -45,7 +45,5 @@ class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContaine
                 hide()
             }
         })
-
-        show()
     }
 }

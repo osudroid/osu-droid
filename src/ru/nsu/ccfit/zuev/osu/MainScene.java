@@ -16,6 +16,9 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;
+import com.reco1l.andengine.ui.UIConfirmDialog;
+import com.reco1l.andengine.ui.UIMessageDialog;
+import com.reco1l.andengine.ui.UITextButton;
 import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
@@ -123,6 +126,7 @@ public class MainScene implements IUpdateHandler {
         Debug.i("Load: mainMenuLoaded()");
         VibratorManager.INSTANCE.init(context);
         scene = new Scene();
+        scene.setOnAreaTouchTraversalFrontToBack();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
 
@@ -907,20 +911,14 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-
-        new MessageDialog()
-            .setTitle("Exit")
-            .setMessage(context.getString(com.osudroid.resources.R.string.dialog_exit_message))
-            .addButton("Yes", dialog -> {
-                dialog.dismiss();
-                exit();
-                return null;
-            })
-            .addButton("No", dialog -> {
-                dialog.dismiss();
-                return null;
-            })
-            .show();
+        UIConfirmDialog dialog = new UIConfirmDialog();
+        dialog.setTitle("Exit");
+        dialog.setText(context.getString(com.osudroid.resources.R.string.dialog_exit_message));
+        dialog.setOnConfirm(() -> {
+            exit();
+            return null;
+        });
+        dialog.show();
     }
 
     public void exit() {

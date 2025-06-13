@@ -8,18 +8,13 @@ import javax.microedition.khronos.opengles.GL10
  */
 class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
 
+    override var sharingMode = BufferSharingMode.Off
+
 
     inline fun <reified T : Buffer> getFirstOf(): T {
         return buffers.first { it is T } as T
     }
 
-
-    override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
-        buffers.fastForEach { buffer ->
-            buffer.update(gl, entity, *data)
-            buffer.setHardwareBufferNeedsUpdate()
-        }
-    }
 
     //region Draw pipeline
 
@@ -33,6 +28,10 @@ class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
 
     override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
         buffers.fastForEach { it.draw(gl, entity) }
+    }
+
+    override fun invalidateOnHardware() {
+        buffers.fastForEach { it.invalidateOnHardware() }
     }
 
     //endregion

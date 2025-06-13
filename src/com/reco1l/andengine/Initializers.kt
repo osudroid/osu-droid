@@ -24,6 +24,10 @@ inline fun IEntity.constraintContainer(builder: UIConstraintContainer.() -> Unit
     return UIConstraintContainer().apply(builder).also(::attachChild)
 }
 
+inline fun IEntity.flexContainer(builder: UIFlexContainer.() -> Unit): UIFlexContainer {
+    return UIFlexContainer().apply(builder).also(::attachChild)
+}
+
 inline fun IEntity.scrollableContainer(builder: UIScrollableContainer.() -> Unit): UIScrollableContainer {
     return UIScrollableContainer().apply(builder).also(::attachChild)
 }

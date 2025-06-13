@@ -51,7 +51,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         invalidateBuffer(BufferInvalidationFlag.Instance)
     }
 
-    override fun onCreateBuffer(gl: GL10): BoxVBO {
+    override fun onCreateBuffer(): BoxVBO {
 
         val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
@@ -62,6 +62,10 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         }
 
         return BoxVBO(radius, segments, paintStyle)
+    }
+
+    override fun onUpdateBuffer() {
+        buffer?.update(this)
     }
 
     override fun beginDraw(gl: GL10) {
@@ -89,7 +93,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
             Outline -> GL_LINE_STRIP
         }
     ) {
-        override fun update(gl: GL10, entity: UIBufferedComponent<*>, vararg data: Any) {
+        fun update(entity: UIBox) {
 
             val width = entity.width
             val height = entity.height

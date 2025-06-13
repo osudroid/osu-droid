@@ -88,10 +88,12 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         val scene = scene ?: return
 
         fun IEntity.propagateSkinChange() {
-            callOnChildren { it.propagateSkinChange() }
+
             if (this is ISkinnable) {
                 onSkinChanged()
             }
+
+            forEach { it.propagateSkinChange() }
         }
 
         scene.propagateSkinChange()
@@ -104,10 +106,16 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         val scene = scene ?: return
 
         fun IEntity.propagateThemeChange() {
-            callOnChildren { it.propagateThemeChange() }
+
             if (this is UIComponent) {
                 onThemeChanged(theme)
             }
+
+            if (this is Scene) {
+                childScene?.propagateThemeChange()
+            }
+
+            forEach { it.propagateThemeChange() }
         }
 
         scene.propagateThemeChange()
@@ -129,6 +137,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                     return true
                 }
             }
+
             return false
         }
 
@@ -152,9 +161,17 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             if (event.x < left || event.x > right || event.y < top || event.y > bottom) {
                 (focusedEntity as IFocusable).blur()
             }
+            return true
         }
 
         return super.onTouchScene(scene, event)
+    }
+
+
+    override fun setScene(scene: Scene?) {
+        mScene?.onDetached()
+        super.setScene(scene)
+        scene?.onAttached()
     }
 
 

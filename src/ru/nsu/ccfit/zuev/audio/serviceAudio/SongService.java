@@ -107,7 +107,6 @@ public class SongService extends Service {
         Log.w("SongService", "Hei Service is on EXIT()");
         if (audioFunc == null) return false;
         audioFunc.stop();
-        audioFunc.unregisterReceiverBM();
         audioFunc.freeALL();
         stopSelf();
         return true;
