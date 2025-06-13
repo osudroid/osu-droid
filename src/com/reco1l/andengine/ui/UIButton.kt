@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -116,13 +117,12 @@ open class UIButton : UILinearContainer() {
     open fun processTouchFeedback(event: TouchEvent) {
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(0.9f, 0.2f)
+            scaleTo(0.9f, 0.3f).eased(Easing.Out)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
-
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(1f, 0.2f)
+            scaleTo(1f, 0.4f).eased(Easing.OutElastic)
         }
     }
 
