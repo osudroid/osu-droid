@@ -124,7 +124,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
-    public static final int CursorCount = 10;
+    public static final int CursorCount = 3;
     private final Engine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     private boolean[] cursorIIsDown = new boolean[CursorCount];
