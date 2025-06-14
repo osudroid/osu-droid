@@ -126,8 +126,8 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
     private final Engine engine;
-    private final Cursor[] cursors = new Cursor[CursorCount];
-    private final boolean[] cursorIIsDown = new boolean[CursorCount];
+    private Cursor[] cursors = new Cursor[CursorCount];
+    private boolean[] cursorIIsDown = new boolean[CursorCount];
     public String audioFilePath = null;
     private UIScene scene;
     private UIScene bgScene, mgScene, fgScene;
@@ -841,7 +841,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setFreezeFrame(lastMods.ofType(ModFreezeFrame.class));
         GameHelper.setApproachDifferent(lastMods.ofType(ModApproachDifferent.class));
 
-        for (int i = 0; i < CursorCount; i++) {
+        int cursorCount = replaying && replay != null ? replay.cursorMoves.size() : CursorCount;
+
+        cursors = new Cursor[cursorCount];
+        cursorIIsDown = new boolean[cursorCount];
+
+        for (int i = 0; i < cursorCount; i++) {
             cursors[i] = new Cursor();
             cursors[i].mouseDown = false;
             cursors[i].mousePressed = false;
@@ -891,8 +896,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            cursorSprites = new CursorEntity[CursorCount];
-            for (int i = 0; i < CursorCount; i++) {
+            cursorSprites = new CursorEntity[cursorCount];
+            for (int i = 0; i < cursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
                 cursorSprites[i].attachToScene(fgScene);
             }
@@ -1184,7 +1189,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < cursorSprites.length; i++) {
                 cursorSprites[i].update(dt);
 
                 if (replaying) {
@@ -1329,7 +1334,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (Config.isRemoveSliderLock()) {
             var downPressCursorCount = 0;
 
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < cursorIIsDown.length; i++) {
                 if (cursorIIsDown[i])
                     downPressCursorCount++;
                 cursorIIsDown[i] = false;
@@ -2187,7 +2192,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var id = event.getPointerID();
-        if (id < 0 || id >= CursorCount) {
+        if (id < 0 || id >= getCursorsCount()) {
             return false;
         }
 
@@ -2261,7 +2266,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void removeAllCursors() {
         int time = GlobalManager.getInstance().getSongService().getPosition();
 
-        for (int i = 0; i < CursorCount; ++i) {
+        for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
 
             if (cursor.mouseDown) {
@@ -2672,7 +2677,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public int getCursorsCount() {
-        return CursorCount;
+        return cursors.length;
     }
 
 

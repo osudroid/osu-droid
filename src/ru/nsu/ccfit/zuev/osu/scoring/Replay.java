@@ -101,17 +101,17 @@ public class Replay {
     }
 
     public void addPress(final int timeMs, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final int timeMs, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final int timeMs, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 
@@ -257,8 +257,13 @@ public class Replay {
 
                 if (withGameplayData) {
                     int msize = os.readInt();
+                    cursorIndex = new int[msize];
+                    lastMoveIndex = new int[msize];
+
                     for (int i = 0; i < msize; i++) {
                         cursorMoves.add(MoveArray.readFrom(os, this, stat.getMod()));
+                        cursorIndex[i] = 0;
+                        lastMoveIndex[i] = -1;
                     }
 
                     os.readInt();
