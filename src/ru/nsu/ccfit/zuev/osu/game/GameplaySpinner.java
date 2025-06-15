@@ -2,9 +2,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.Execution;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.osudroid.utils.Execution;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
@@ -26,14 +26,14 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplaySpinner extends GameObject {
-    private final ExtendedSprite background;
-    private final ExtendedSprite circle;
-    private final ExtendedSprite approachCircle;
+    private final UISprite background;
+    private final UISprite circle;
+    private final UISprite approachCircle;
     private final Sprite metre;
     private float metreY;
-    private final ExtendedSprite spinText;
+    private final UISprite spinText;
     private final TextureRegion metreRegion;
-    private final ExtendedSprite clearText;
+    private final UISprite clearText;
     private final ScoreNumber bonusScore;
 
     protected Spinner beatmapSpinner;
@@ -47,6 +47,7 @@ public class GameplaySpinner extends GameObject {
     protected int bonusScoreCounter = 1;
     protected StatisticV2 stat;
     protected float duration;
+    protected boolean spinnable;
 
     protected final boolean isSpinnerFrequencyModulate;
     protected GameplayHitSampleInfo[] hitSamples;
@@ -60,13 +61,13 @@ public class GameplaySpinner extends GameObject {
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         Utils.trackToRealCoords(position);
 
-        background = new ExtendedSprite();
+        background = new UISprite();
         background.setOrigin(Anchor.Center);
         background.setPosition(position.x, position.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
-        background.setScale(Config.getRES_WIDTH() / background.getDrawWidth());
+        background.setScale(Config.getRES_WIDTH() / background.getWidth());
 
-        circle = new ExtendedSprite();
+        circle = new UISprite();
         circle.setOrigin(Anchor.Center);
         circle.setPosition(position.x, position.y);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
@@ -77,17 +78,17 @@ public class GameplaySpinner extends GameObject {
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
-        approachCircle = new ExtendedSprite();
+        approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
         approachCircle.setPosition(position.x, position.y);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-approachcircle"));
 
-        spinText = new ExtendedSprite();
+        spinText = new UISprite();
         spinText.setOrigin(Anchor.Center);
         spinText.setPosition(position.x, position.y * 1.5f);
         spinText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-spin"));
 
-        clearText = new ExtendedSprite();
+        clearText = new UISprite();
         clearText.setOrigin(Anchor.Center);
         clearText.setPosition(position.x, position.y * 0.5f);
         clearText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-clear"));
@@ -120,20 +121,27 @@ public class GameplaySpinner extends GameObject {
         startHit = true;
         clear = duration <= 0f;
         bonusScoreCounter = 1;
+        spinnable = false;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        background.setAlpha(0);
-        background.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
+        // Technically, this is not right, as the configuration exclusivity should only apply to the first circle
+        // or slider. However, this is also the case for the Hidden mod, so we will leave it as is for the time being.
+        background.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote()));
+
+        if (background.isVisible()) {
+            background.setAlpha(0);
+            background.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(timePreempt * 0.75f),
+                Modifiers.fadeIn(timePreempt * 0.25f)
+            ));
+        }
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(
+        circle.registerEntityModifier(Modifiers.sequence(e -> listener.onSpinnerStart(id),
             Modifiers.delay(timePreempt * 0.75f),
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
@@ -151,7 +159,7 @@ public class GameplaySpinner extends GameObject {
             approachCircle.setVisible(false);
         }
         approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.delay(timePreempt),
+            Modifiers.delay(timePreempt, e -> spinnable = true),
             Modifiers.parallel(
                 Modifiers.alpha(duration, 0.75f, 1),
                 Modifiers.scale(duration, 2.0f, 0)
@@ -247,7 +255,8 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        if (circle.getAlpha() == 0) {
+        // Allow the spinner to fully fade in first before receiving spins.
+        if (!spinnable) {
             return;
         }
 
@@ -291,7 +300,7 @@ public class GameplaySpinner extends GameObject {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
             //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
                float angle = (rotations + dfill / 4f) * 360;
                float pX = position.x + 50 * (float)Math.sin(angle);
                float pY = position.y + 50 * (float)Math.cos(angle);
@@ -391,16 +400,24 @@ public class GameplaySpinner extends GameObject {
         }
 
         spinnerSpinSample.setLooping(true);
+
+        var muted = GameHelper.getMuted();
+
+        if (muted != null && muted.affectsHitSounds()) {
+            float volume = muted.volumeAt(stat.getCombo());
+
+            spinnerSpinSample.setVolume(volume);
+            spinnerBonusSample.setVolume(volume);
+        }
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {
+        if (obtainedScore > 0) {
+            listener.playHitSamples(hitSamples);
+        }
+
         for (int i = 0; i < hitSamples.length; ++i) {
             var sample = hitSamples[i];
-
-            if (obtainedScore > 0) {
-                sample.play();
-            }
-
             sample.reset();
             GameplayHitSampleInfo.pool.free(sample);
         }

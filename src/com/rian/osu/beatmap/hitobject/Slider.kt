@@ -7,7 +7,6 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
-import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -166,24 +165,6 @@ class Slider(
         private set
 
     /**
-     * The position of the cursor at the point of completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyEndPosition: Vector2? = null
-
-    /**
-     * The distance travelled by the cursor upon completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelDistance = 0f
-
-    /**
-     * The time taken by the cursor upon completion of this [Slider] if it was hit with
-     * as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelTime = 0.0
-
-    /**
      * The duration of one span of this [Slider] in milliseconds.
      */
     val spanDuration
@@ -216,65 +197,83 @@ class Slider(
     override var difficultyStackHeight
         get() = super.difficultyStackHeight
         set(value) {
+            val wasEqual = super.difficultyStackHeight == value
+
             super.difficultyStackHeight = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            }
         }
 
     override var difficultyScale
         get() = super.difficultyScale
         set(value) {
+            val wasEqual = super.difficultyScale == value
+
             super.difficultyScale = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyScale = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyScale = value }
+            }
         }
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(gameplayPosition)
-
-    override val gameplayEndPosition: Vector2
-        get() {
-            if (!gameplayEndPositionCache.isValid) {
-                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
-            }
-
-            return gameplayEndPositionCache.value
-        }
-
-    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
+    private val gameplayStackedEndPositionCache = Cached(endPosition)
 
     override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
-                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+                gameplayStackedEndPositionCache.value = endPosition + gameplayStackOffset
             }
 
             return gameplayStackedEndPositionCache.value
         }
 
+    private val screenSpaceGameplayStackedEndPositionCache =
+        Cached(convertPositionToRealCoordinates(gameplayStackedEndPosition))
+
+    override val screenSpaceGameplayStackedEndPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayStackedEndPositionCache.isValid) {
+                screenSpaceGameplayStackedEndPositionCache.value =
+                    convertPositionToRealCoordinates(gameplayStackedEndPosition)
+            }
+
+            return screenSpaceGameplayStackedEndPositionCache.value
+        }
+
     override var gameplayStackHeight
         get() = super.gameplayStackHeight
         set(value) {
+            val wasEqual = super.gameplayStackHeight == value
+
             super.gameplayStackHeight = value
 
-            gameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayStackHeight = value }
+                nestedHitObjects.forEach { it.gameplayStackHeight = value }
+            }
         }
 
     override var gameplayScale
         get() = super.gameplayScale
         set(value) {
+            val wasEqual = super.gameplayScale == value
+
             super.gameplayScale = value
 
-            gameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayScale = value }
+                nestedHitObjects.forEach { it.gameplayScale = value }
+            }
         }
 
     override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
@@ -303,7 +302,7 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         invalidateEndPositions()
 
-        createNestedHitObjects(mode, controlPoints, scope)
+        createNestedHitObjects(controlPoints, scope)
 
         nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
@@ -368,7 +367,7 @@ class Slider(
 
     override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 
-    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+    private fun createNestedHitObjects(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -428,27 +427,7 @@ class Slider(
             }
         }
 
-        tail = when (mode) {
-            GameMode.Droid -> SliderTail(this)
-
-            GameMode.Standard -> {
-                // Okay, I'll level with you. I made a mistake. It was 2007.
-                // Times were simpler. osu! was but in its infancy and sliders were a new concept.
-                // A hack was made, which has unfortunately lived through until this day.
-                //
-                // This legacy tick is used for some calculations and judgements where audio output is not required.
-                // Generally we are keeping this around just for difficulty compatibility.
-                // Optimistically we do not want to ever use this for anything user-facing going forwards.
-                val finalSpanIndex = repeatCount
-                val finalSpanStartTime = startTime + finalSpanIndex * spanDuration
-                val finalSpanEndTime = max(
-                    startTime + duration / 2,
-                    finalSpanStartTime + spanDuration - LEGACY_LAST_TICK_OFFSET
-                )
-
-                SliderTail(this, finalSpanEndTime)
-            }
-        }
+        tail = SliderTail(this)
 
         nestedHitObjects.apply {
             add(tail)
@@ -468,13 +447,20 @@ class Slider(
 
         head.position = position
         tail.position = endPosition
+
+        for (i in 1 until nestedHitObjects.size - 1) {
+            val nestedHitObject = nestedHitObjects[i]
+            val progress = (nestedHitObject.startTime - startTime) / duration
+
+            nestedHitObject.position = position + curvePositionAt(progress)
+        }
     }
 
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
-        gameplayEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
+        screenSpaceGameplayStackedEndPositionCache.invalidate()
     }
 
     private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {

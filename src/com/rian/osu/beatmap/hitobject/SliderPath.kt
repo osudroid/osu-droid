@@ -68,6 +68,36 @@ class SliderPath(
         progressToDistance(progress).let { interpolateVertices(indexOfDistance(it), it) }
 
     /**
+     * Computes the slider path until a given progress that ranges from 0 (beginning of the slider) to 1 (end of the
+     * slider).
+     *
+     * @param p0 Start progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
+     * @param p1 End progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
+     * @return The computed path between the two ranges.
+     */
+    fun getPathToProgress(p0: Double, p1: Double): MutableList<Vector2> {
+        val path = mutableListOf<Vector2>()
+        val d0 = progressToDistance(p0)
+        val d1 = progressToDistance(p1)
+
+        var i = 0
+
+        while (i < calculatedPath.size && cumulativeLength[i] < d0) {
+            i++
+        }
+
+        path.add(interpolateVertices(i, d0))
+
+        while (i < calculatedPath.size && cumulativeLength[i] <= d1) {
+            path.add(calculatedPath[i++])
+        }
+
+        path.add(interpolateVertices(i, d1))
+
+        return path
+    }
+
+    /**
      * Calculates the path of this [SliderPath].
      */
     private fun calculatePath() {

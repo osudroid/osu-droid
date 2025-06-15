@@ -1,6 +1,7 @@
 package com.reco1l.andengine.modifier
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import org.anddev.andengine.entity.*
 
 
@@ -52,21 +53,21 @@ enum class ModifierType {
     /**
      * Modifies the entity's X translation.
      *
-     * Note: This is only available for [ExtendedEntity] instances.
+     * Note: This is only available for [UIComponent] instances.
      */
     TranslateX,
 
     /**
      * Modifies the entity's Y translation.
      *
-     * Note: This is only available for [ExtendedEntity] instances.
+     * Note: This is only available for [UIComponent] instances.
      */
     TranslateY,
 
     /**
      * Modifies the entity's X and Y translation.
      *
-     * Note: This is only available for [ExtendedEntity] instances.
+     * Note: This is only available for [UIComponent] instances.
      */
     TranslateXY,
 
@@ -84,6 +85,12 @@ enum class ModifierType {
      * Modifies the entity's with inner modifiers in parallel.
      */
     Parallel,
+
+    SizeX,
+
+    SizeY,
+
+    SizeXY,
 
     /**
      * Does nothing, used as a delay modifier.
@@ -111,18 +118,33 @@ enum class ModifierType {
         MoveY -> floatArrayOf(entity.y)
         MoveXY -> floatArrayOf(entity.x, entity.y)
 
+        SizeX -> {
+            entity as? UIComponent ?: throw IllegalArgumentException("SizeX is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.width)
+        }
+
+        SizeY -> {
+            entity as? UIComponent ?: throw IllegalArgumentException("SizeY is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.height)
+        }
+
+        SizeXY -> {
+            entity as? UIComponent ?: throw IllegalArgumentException("SizeXY is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.width, entity.height)
+        }
+
         TranslateX -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            entity as? UIComponent ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
             floatArrayOf(entity.translationX)
         }
 
         TranslateY -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            entity as? UIComponent ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
             floatArrayOf(entity.translationY)
         }
 
         TranslateXY -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            entity as? UIComponent ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
             floatArrayOf(entity.translationX, entity.translationY)
         }
 
@@ -159,19 +181,34 @@ enum class ModifierType {
             MoveXY -> entity.setPosition(valueAt(0), valueAt(1))
 
             TranslateX -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+                entity as? UIComponent ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
                 entity.translationX = valueAt(0)
             }
 
             TranslateY -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateY is only available for ExtendedEntity instances.")
+                entity as? UIComponent ?: throw IllegalArgumentException("TranslateY is only available for ExtendedEntity instances.")
                 entity.translationY = valueAt(0)
             }
 
             TranslateXY -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
+                entity as? UIComponent ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
                 entity.translationX = valueAt(0)
                 entity.translationY = valueAt(1)
+            }
+
+            SizeX -> {
+                entity as? UIComponent ?: throw IllegalArgumentException("SizeX is only available for ExtendedEntity instances.")
+                entity.width = valueAt(0)
+            }
+
+            SizeY -> {
+                entity as? UIComponent ?: throw IllegalArgumentException("SizeY is only available for ExtendedEntity instances.")
+                entity.height = valueAt(0)
+            }
+
+            SizeXY -> {
+                entity as? UIComponent ?: throw IllegalArgumentException("SizeXY is only available for ExtendedEntity instances.")
+                entity.setSize(valueAt(0), valueAt(1))
             }
 
             Rotation -> entity.rotation = valueAt(0)

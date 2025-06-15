@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.DatabaseManager;
 import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.PromptDialog;
 import com.reco1l.toolkt.android.Dimensions;
@@ -243,7 +243,9 @@ public class CollectionsManagerFragment extends BaseFragment {
         }
 
         protected void updateFolderNameText(VH holder, String name) {
-            var maps = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
+            var maps = name.equals(StringTable.get(com.osudroid.resources.R.string.favorite_default))
+                    ? null
+                    : DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
 
             holder.folderName.setText(name);
 

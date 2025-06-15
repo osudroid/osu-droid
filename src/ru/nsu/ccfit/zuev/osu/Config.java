@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.framework.math.FMath;
@@ -16,8 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.playfield.ProgressIndicatorType;
+import com.osudroid.multiplayer.Multiplayer;
+import com.reco1l.framework.Color4;
+import com.reco1l.framework.HexComposition;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -46,21 +49,15 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
-        showAverageOffset,
-        showUnstableRate,
         animateFollowCircle,
         animateComboText,
         snakingInSliders,
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
-        hideNaviBar,
-        showScoreboard,
-        enablePP,
         enableExtension,
         loadAvatar,
         stayOnline,
-        syncMusic,
         burstEffects,
         hitLighting,
         useParticles,
@@ -73,7 +70,6 @@ public class Config {
         hideInGameUI,
         enableStoryboard,
         safeBeatmapBg,
-        displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
         deleteUnsupportedVideos,
@@ -81,27 +77,23 @@ public class Config {
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
         dimHitObjects,
-        allowMoreThanThreeCursors,
         forceMaxRefreshRate;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
-        errorMeter,
         spinnerStyle,
-        metronomeSwitch,
-        progressIndicatorType;
-    
+        metronomeSwitch;
+
     private static float soundVolume,
         bgmVolume,
         offset,
         backgroundBrightness,
-        scaleMultiplier,
         playfieldSize,
         cursorSize;
 
     private static Map<String, String> skins;
 
-    private static RGBColor[] comboColors;
+    private static Color4[] comboColors;
     private static Context context;
 
 
@@ -122,22 +114,17 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", true);
-        showAverageOffset = prefs.getBoolean("averageOffset", true);
-        showUnstableRate = prefs.getBoolean("unstableRate", true);
-        errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
-        showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
-        progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
-        setSize();
+        measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
 
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
@@ -190,16 +177,15 @@ public class Config {
             skinTopPath += "/";
         }
 
-        syncMusic = prefs.getBoolean("syncMusic", syncMusic);
         enableExtension = false;// prefs.getBoolean("enableExtension", false);
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
-        comboColors = new RGBColor[4];
+        comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
+            comboColors[i - 1] = new Color4(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)), HexComposition.RRGGBB);
         }
 
         // beatmaps
@@ -219,8 +205,6 @@ public class Config {
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
-        enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         allowMoreThanThreeCursors = prefs.getBoolean("allowMoreThanThreeCursors", true);
@@ -228,7 +212,6 @@ public class Config {
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -259,20 +242,22 @@ public class Config {
         loadAvatar = prefs.getBoolean("loadAvatar",false);
     }
 
-    public static void setSize() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
+    public static void measureDisplaySize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Activity activity = (Activity) context;
+        activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        int width = Math.max(dm.widthPixels, dm.heightPixels), height = Math.min(dm.widthPixels, dm.heightPixels);
-        //int width = dm.widthPixels, height =  dm.heightPixels;
-        setSize(width, height);
-        //ToastLogger.showText("width=" + dm.widthPixels + " height=" + dm.heightPixels, true);
-        Debug.i("width=" + dm.widthPixels + " height=" + dm.heightPixels);
-    }
+        int width = displayMetrics.widthPixels;
+        int height = displayMetrics.heightPixels;
 
-    public static void setSize(int width, int height) {
-        RES_WIDTH = 1280;
-        RES_HEIGHT = 1280 * height / width;
+        // Tries to emulate the original behavior, the game was designed for 1280x720
+        // resolution, so we try to approximate the scale factor.
+        float ratio = 1280f / width;
+
+        RES_WIDTH = (int) (width * ratio);
+        RES_HEIGHT = (int) (height * ratio);
+
+        Log.v("Config", "Display size: " + width + "x" + height + "\nViewport size: " + RES_WIDTH + "x" + RES_HEIGHT);
     }
 
     public static boolean isEnableStoryboard() {
@@ -292,19 +277,11 @@ public class Config {
         return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
     }
 
-    public static boolean isAllowMoreThanThreeCursors() {
-        //noinspection DataFlowIssue
-        return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().getAllowMoreThanThreeCursors() : allowMoreThanThreeCursors;
-    }
-
     public static boolean isDisplayScoreStatistics() {
         return displayScoreStatistics;
     }
 
-    public static boolean isDisplayRealTimePPCounter() {
-        return displayRealTimePPCounter;
-    }
-
+    @NonNull
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
         return Config.getString("difficultyAlgorithm", "0").equals("1")
                 ? DifficultyAlgorithm.standard
@@ -327,28 +304,12 @@ public class Config {
         Config.showFPS = showFPS;
     }
 
-    public static boolean isShowAverageOffset() {
-        return showAverageOffset;
-    }
-
-    public static void setShowAverageOffset(final boolean showAverageOffset) {
-        Config.showAverageOffset = showAverageOffset;
-    }
-
-    public static boolean isShowUnstableRate() {
-        return showUnstableRate;
-    }
-
-    public static void setShowUnstableRate(final boolean showUnstableRate) {
-        Config.showUnstableRate = showUnstableRate;
-    }
-
     public static boolean isShowScoreboard() {
-        return showScoreboard;
+        return getBoolean("showscoreboard", true);
     }
 
     public static void setShowScoreboard(final boolean showScoreboard) {
-        Config.showScoreboard = showScoreboard;
+        setBoolean("showscoreboard", showScoreboard);
     }
 
     public static boolean isCorovans() {
@@ -501,14 +462,6 @@ public class Config {
         Config.showCursor = showCursor;
     }
 
-    public static float getScaleMultiplier() {
-        return scaleMultiplier;
-    }
-
-    public static void setScaleMultiplier(final float scaleMultiplier) {
-        Config.scaleMultiplier = scaleMultiplier;
-    }
-
     public static String getOnlineUsername() {
         return !onlineUsername.isEmpty() ? onlineUsername : "Guest";
     }
@@ -533,6 +486,14 @@ public class Config {
         Config.stayOnline = stayOnline;
     }
 
+    public static BeatmapLeaderboardScoringMode getBeatmapLeaderboardScoringMode() {
+        return BeatmapLeaderboardScoringMode.parse(Integer.parseInt(getString("beatmapLeaderboardScoringMode", "0")));
+    }
+
+    public static void setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode) {
+        setString("beatmapLeaderboardScoringMode", String.valueOf(beatmapLeaderboardScoringMode.ordinal()));
+    }
+
     public static boolean getLoadAvatar() {
         return loadAvatar;
     }
@@ -543,14 +504,6 @@ public class Config {
 
     public static String getOnlineDeviceID() {
         return onlineDeviceID;
-    }
-
-    public static boolean isSyncMusic() {
-        return syncMusic;
-    }
-
-    public static void setSyncMusic(boolean syncMusic) {
-        Config.syncMusic = syncMusic;
     }
 
     public static String getCachePath() {
@@ -601,22 +554,6 @@ public class Config {
         Config.skinTopPath = skinTopPath;
     }
 
-    public static boolean isHideNaviBar() {
-        return hideNaviBar;
-    }
-
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
-    }
-
-    public static boolean isEnablePP() {
-        return enablePP;
-    }
-
-    public static void setEnablePP(boolean enablePP) {
-        Config.enablePP = enablePP;
-    }
-
     public static String getScorePath() {
         return scorePath;
     }
@@ -633,16 +570,8 @@ public class Config {
         Config.useCustomComboColors = useCustomComboColors;
     }
 
-    public static RGBColor[] getComboColors() {
+    public static Color4[] getComboColors() {
         return comboColors;
-    }
-
-    public static int getErrorMeter() {
-        return errorMeter;
-    }
-
-    public static void setErrorMeter(int errorMeter) {
-        Config.errorMeter = errorMeter;
     }
 
     public static int getSpinnerStyle() {
@@ -803,9 +732,8 @@ public class Config {
         return forceMaxRefreshRate;
     }
 
-    @ProgressIndicatorType
-    public static int getProgressIndicatorType() {
-        return progressIndicatorType;
+    public static boolean isShiftPitchInRateChange() {
+        return getBoolean("shiftPitchInRateChange", false);
     }
 
 

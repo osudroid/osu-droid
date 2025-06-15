@@ -4,7 +4,14 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
+import com.rian.osu.mods.LegacyModConverter;
+import com.rian.osu.mods.ModHardRock;
+import com.rian.osu.mods.ModReplayV6;
+import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.util.Debug;
+import org.json.JSONArray;
 
 import java.io.EOFException;
 import java.io.File;
@@ -27,13 +34,9 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 public class Replay {
-    public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-    public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
     protected int pointsSkipped = 0;
     public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
     public int[] cursorIndex;
@@ -45,13 +48,6 @@ public class Replay {
     private String beatmapName = "";
     private String beatmapsetName = "";
     private boolean isSaving;
-    public static float oldChangeSpeed = 1.0f;
-    public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
-
-    public static Float oldCustomAR;
-    public static Float oldCustomOD;
-    public static Float oldCustomCS;
-    public static Float oldCustomHP;
 
     public Replay() {
         this(false);
@@ -61,14 +57,14 @@ public class Replay {
         if (allocateMoves) {
             cursorMoves.add(new MoveArray(200));
             cursorMoves.add(new MoveArray(50));
-            for (int i = 2; i < GameScene.getCursorCount(); i++) {
+            for (int i = 2; i < GameScene.CursorCount; i++) {
                 cursorMoves.add(new MoveArray(15));
             }
         }
 
-        cursorIndex = new int[GameScene.getCursorCount()];
-        lastMoveIndex = new int[GameScene.getCursorCount()];
-        for (int i = 0; i < GameScene.getCursorCount(); i++) {
+        cursorIndex = new int[GameScene.CursorCount];
+        lastMoveIndex = new int[GameScene.CursorCount];
+        for (int i = 0; i < GameScene.CursorCount; i++) {
             cursorIndex[i] = 0;
             lastMoveIndex[i] = -1;
         }
@@ -105,17 +101,17 @@ public class Replay {
     }
 
     public void addPress(final int timeMs, final PointF pos, final int pid) {
-        if (pid > GameScene.getCursorCount() || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final int timeMs, final PointF pos, final int pid) {
-        if (pid > GameScene.getCursorCount() || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final int timeMs, final int pid) {
-        if (pid > GameScene.getCursorCount() || isSaving) return;
+        if (pid > cursorMoves.size() || isSaving) return;
         cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 
@@ -149,9 +145,7 @@ public class Replay {
                     os.writeInt(stat.getTotalScoreWithMultiplier());
                     os.writeInt(stat.getScoreMaxCombo());
                     os.writeObject(stat.getPlayerName());
-                    os.writeObject(stat.getMod());
-                    //Add in replay version 4
-                    os.writeObject(stat.getExtraModString());
+                    os.writeObject(stat.getMod().serializeMods().toString());
                 }
 
                 os.writeInt(cursorMoves.size());
@@ -243,17 +237,33 @@ public class Replay {
                     }
 
                     stat.setPlayerName((String) os.readObject());
-                    stat.setMod((EnumSet<GameMod>) os.readObject());
-                }
 
-                if (version >= 4) {
-                    stat.setExtraModFromString((String) os.readObject());
+                    if (version >= 7) {
+                        var modJsonStr = (String) os.readObject();
+                        stat.setMod(ModUtils.deserializeMods(new JSONArray(modJsonStr)));
+                    } else {
+                        //noinspection unchecked
+                        var mod = (EnumSet<GameMod>) os.readObject();
+                        var extraModString = "";
+
+                        if (version >= 4) {
+                            extraModString = (String) os.readObject();
+                        }
+
+                        stat.setMod(LegacyModConverter.convert(mod, extraModString));
+                        stat.getMod().put(new ModReplayV6());
+                    }
                 }
 
                 if (withGameplayData) {
                     int msize = os.readInt();
+                    cursorIndex = new int[msize];
+                    lastMoveIndex = new int[msize];
+
                     for (int i = 0; i < msize; i++) {
-                        cursorMoves.add(MoveArray.readFrom(os, this));
+                        cursorMoves.add(MoveArray.readFrom(os, this, stat.getMod()));
+                        cursorIndex[i] = 0;
+                        lastMoveIndex[i] = -1;
                     }
 
                     os.readInt();
@@ -323,10 +333,12 @@ public class Replay {
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
         Version 5: Changes coordinates to use the float primitive type
         Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
+        Version 7: Reworked mod storage to not serialize GameMod, object stacking behavior overhaul, device-independent
+                   object scaling
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 6;
+        int version = 7;
     }
 
     public static class ReplayObjectData {
@@ -337,15 +349,20 @@ public class Replay {
 
     public static class ReplayMovement {
         protected int time;
-        protected PointF point = new PointF();
+        protected float x;
+        protected float y;
         protected TouchType touchType;
 
         public int getTime() {
             return time;
         }
 
-        public PointF getPoint() {
-            return point;
+        public float getX() {
+            return x;
+        }
+
+        public float getY() {
+            return y;
         }
 
         public TouchType getTouchType() {
@@ -393,7 +410,8 @@ public class Replay {
                             Utils.realToTrackCoords(gamePoint, 1024, 600, true),
                             isHardRock
                         );
-                    movement.point.set(realPoint);
+                    movement.x = realPoint.x;
+                    movement.y = realPoint.y;
                 }
             }
 
@@ -414,10 +432,10 @@ public class Replay {
             ReplayMovement minusTwoMovement = movements[size - 2];
             ReplayMovement previousMovement = movements[size - 1];
 
-            float tx = (px + minusTwoMovement.point.x) * 0.5f;
-            float ty = (py + minusTwoMovement.point.y) * 0.5f;
+            float tx = (px + minusTwoMovement.x) * 0.5f;
+            float ty = (py + minusTwoMovement.y) * 0.5f;
 
-            return (Utils.sqr(previousMovement.point.x - tx) + Utils.sqr(previousMovement.point.y - ty)) <= 25;
+            return (Utils.sqr(previousMovement.x - tx) + Utils.sqr(previousMovement.y - ty)) <= 25;
         }
 
         public void pushBack(Replay replay, int time, float x, float y, TouchType touchType) {
@@ -434,8 +452,8 @@ public class Replay {
             ReplayMovement movement = new ReplayMovement();
             movements[idx] = movement;
             movement.time = time;
-            movement.point.x = x;
-            movement.point.y = y;
+            movement.x = x;
+            movement.y = y;
             movement.touchType = touchType;
         }
 
@@ -456,8 +474,8 @@ public class Replay {
                 ReplayMovement movement = movements[i];
                 os.writeInt((movement.time << 2) + movement.touchType.getId());
                 if (movement.touchType != TouchType.UP) {
-                    os.writeFloat(movement.point.x * Config.getTextureQuality());
-                    os.writeFloat(movement.point.y * Config.getTextureQuality());
+                    os.writeFloat(movement.x);
+                    os.writeFloat(movement.y);
                 }
             }
         }

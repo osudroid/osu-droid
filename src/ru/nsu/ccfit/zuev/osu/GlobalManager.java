@@ -1,14 +1,13 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.DatabaseManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 
@@ -29,7 +28,6 @@ public class GlobalManager {
     private SongService songService;
     private BeatmapInfo selectedBeatmap;
     private SaveServiceObject saveServiceObject;
-    private String skinNow;
 
     public static GlobalManager getInstance() {
         if (instance == null) {
@@ -55,8 +53,7 @@ public class GlobalManager {
         setMainScene(new MainScene());
         getMainScene().load(mainActivity);
         setInfo("Loading skin...");
-        skinNow = Config.getSkinPath();
-        ResourceManager.getInstance().loadSkin(skinNow);
+        ResourceManager.getInstance().loadSkin(Config.getSkinPath());
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
@@ -69,7 +66,6 @@ public class GlobalManager {
         getGameScene().setOldScene(getSongMenu().getScene());
         if (songService != null) {
             songService.stop();
-            songService.hideNotification();
         }
     }
 
@@ -79,14 +75,6 @@ public class GlobalManager {
 
     public void setEngine(Engine engine) {
         this.engine = engine;
-    }
-
-    public String getSkinNow() {
-        return skinNow;
-    }
-
-    public void setSkinNow(String skinNow) {
-        this.skinNow = skinNow;
     }
 
     public Camera getCamera() {

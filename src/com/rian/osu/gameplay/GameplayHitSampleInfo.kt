@@ -26,6 +26,13 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             soundProvider?.setLooping(value)
         }
 
+    override var volume = 1f
+        set(value) {
+            field = value
+
+            soundProvider?.setVolume(getFinalVolume(value))
+        }
+
     private var sampleInfo: HitSampleInfo? = null
     private var soundProvider: BassSoundProvider? = null
 
@@ -58,7 +65,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             return
         }
 
-        soundProvider?.play(max(0.05f, sampleInfo!!.volume / 100f))
+        soundProvider?.play(getFinalVolume(volume))
     }
 
     override fun stop() {
@@ -67,10 +74,13 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
 
     override fun reset() {
         frequency = 1f
+        volume = 1f
         isLooping = false
         sampleInfo = null
         soundProvider = null
     }
+
+    private fun getFinalVolume(volume: Float) = volume * max(0.05f, sampleInfo!!.volume / 100f)
 
     companion object {
         /**

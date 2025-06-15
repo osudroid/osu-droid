@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
 import android.widget.Toast;
 
 import com.edlplan.replay.OsuDroidReplayPack;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.DatabaseManager;
 
 import java.io.File;
 import java.io.FileInputStream;

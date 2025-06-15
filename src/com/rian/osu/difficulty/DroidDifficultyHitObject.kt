@@ -2,6 +2,8 @@ package com.rian.osu.difficulty
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModTraceable
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -22,11 +24,6 @@ class DroidDifficultyHitObject(
     lastObj: HitObject?,
 
     /**
-     * The [HitObject] that occurs before [lastObj].
-     */
-    lastLastObj: HitObject?,
-
-    /**
      * The clock rate being calculated.
      */
     clockRate: Double,
@@ -42,7 +39,7 @@ class DroidDifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     index: Int
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
@@ -97,6 +94,15 @@ class DroidDifficultyHitObject(
 
     override fun next(forwardsIndex: Int) = if (index + forwardsIndex + 2 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 2] else null
 
+    override fun opacityAt(time: Double, mods: Iterable<Mod>): Double {
+        // Traceable hides the primary piece of a hit circle (that is, its body), so consider it as fully invisible.
+        if (obj is HitCircle && mods.any { it is ModTraceable }) {
+            return 0.0
+        }
+
+        return super.opacityAt(time, mods)
+    }
+
     /**
      * Determines whether this [DroidDifficultyHitObject] is considered overlapping with the [DroidDifficultyHitObject]
      * before it.
@@ -126,10 +132,10 @@ class DroidDifficultyHitObject(
             val position = obj.difficultyStackedPosition
             var distance = previous.obj.difficultyStackedEndPosition.getDistance(position)
 
-            if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
+            if (previous.lazyEndPosition != null) {
                 distance = min(
                     distance,
-                    previous.obj.lazyEndPosition!!.getDistance(position)
+                    previous.lazyEndPosition!!.getDistance(position)
                 )
             }
 

@@ -11,6 +11,7 @@ import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModNoFail
 import com.rian.osu.mods.ModRelax
 import com.rian.osu.mods.ModScoreV2
+import com.rian.osu.mods.ModTraceable
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.log10
@@ -107,21 +108,30 @@ class StandardPerformanceCalculator(
             }
 
             // We want to give more reward for lower AR when it comes to aim and HD. This nerfs high AR and buffs lower AR.
-            if (mods.any { it is ModHidden }) {
+            if (mods.any { it is ModHidden || it is ModTraceable }) {
                 aimValue *= 1 + 0.04 * (12 - approachRate)
             }
 
             if (aimDifficultSliderCount > 0) {
-                // Consider all missing combo to be dropped difficult sliders.
-                val estimateImproperlyFollowedDifficultSliders =
-                    min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                val estimateImproperlyFollowedDifficultSliders: Double
 
-                val sliderNerfFactor =
+                if (usingClassicSliderCalculation) {
+                    // When the score is considered classic (regardless if it was made on old client or not),
+                    // we consider all missing combo to be dropped difficult sliders.
+                    estimateImproperlyFollowedDifficultSliders =
+                        min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                } else {
+                    // We add tick misses here since they too mean that the player didn't follow the slider
+                    // properly. However, we aren't adding misses here because missing slider heads has a harsh
+                    // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
+                    estimateImproperlyFollowedDifficultSliders =
+                        (sliderEndsDropped!! + sliderTicksMissed!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                }
+
+                aimValue *=
                     (1 - aimSliderFactor) *
                     (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
                     aimSliderFactor
-
-                aimValue *= sliderNerfFactor
             }
         }
 
@@ -153,7 +163,7 @@ class StandardPerformanceCalculator(
             speedValue *= 1 + 0.3 * (difficultyAttributes.approachRate - 10.33) * lengthBonus
         }
 
-        if (difficultyAttributes.mods.any { it is ModHidden }) {
+        if (difficultyAttributes.mods.any { it is ModHidden || it is ModTraceable }) {
             speedValue *= 1 + 0.04 * (12 - difficultyAttributes.approachRate)
         }
 
@@ -198,7 +208,7 @@ class StandardPerformanceCalculator(
         // Bonus for many hit circles - it's harder to keep good accuracy up for longer
         accuracyValue *= min(1.15, (hitObjectWithAccuracyCount / 1000.0).pow(0.3))
 
-        if (difficultyAttributes.mods.any { it is ModHidden }) {
+        if (difficultyAttributes.mods.any { it is ModHidden || it is ModTraceable }) {
             accuracyValue *= 1.08
         }
 

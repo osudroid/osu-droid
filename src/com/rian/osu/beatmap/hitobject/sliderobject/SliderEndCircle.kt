@@ -8,25 +8,20 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * Represents a [SliderHitObject] that is at the end of a slider path.
+ * Represents a [SliderHitObject] that is at the end of a [Slider]'s path.
  */
 abstract class SliderEndCircle(
     /**
-     * The [Slider] to which [SliderEndCircle] belongs to.
+     * The [Slider] to which this [SliderEndCircle] belongs to.
      */
     protected val slider: Slider,
 
     /**
      * The index of the span at which this [SliderEndCircle] lies.
      */
-    val spanIndex: Int,
-
-    /**
-     * An optional start time to override this [SliderEndCircle]'s [startTime].
-     */
-    startTime: Double = slider.startTime + slider.spanDuration * (spanIndex + 1)
+    val spanIndex: Int
 ) : SliderHitObject(
-    startTime,
+    slider.startTime + slider.spanDuration * (spanIndex + 1),
     if (spanIndex % 2 == 0) slider.endPosition else slider.position
 ) {
     override fun applyDefaults(

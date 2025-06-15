@@ -1,9 +1,10 @@
 package com.edlplan.replay;
 
-import static com.reco1l.osu.data.Scores.ScoreInfo;
+import static com.osudroid.data.Scores.ScoreInfo;
 
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.ScoreInfo;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.ScoreInfo;
+import com.rian.osu.mods.LegacyModConverter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
@@ -48,7 +49,7 @@ public class OsuDroidReplayPack {
             replayData.put("playername", scoreInfo.getPlayerName());
             replayData.put("replayfile", scoreInfo.getReplayFilename());
             replayData.put("beatmapMD5", scoreInfo.getBeatmapMD5());
-            replayData.put("mod", scoreInfo.getMods());
+            replayData.put("mods", scoreInfo.getMods());
             replayData.put("score", scoreInfo.getScore());
             replayData.put("combo", scoreInfo.getMaxCombo());
             replayData.put("mark", scoreInfo.getMark());
@@ -61,7 +62,7 @@ public class OsuDroidReplayPack {
             replayData.put("accuracy", scoreInfo.getAccuracy());
             replayData.put("time", scoreInfo.getTime());
 
-            entryJson.put("version", 2);
+            entryJson.put("version", 3);
             entryJson.put("replaydata", replayData);
 
             outputStream.write(entryJson.toString(2).getBytes());
@@ -116,6 +117,15 @@ public class OsuDroidReplayPack {
 
                 replayData.put("beatmapMD5", replay.getMd5());
             }
+        }
+
+        if (version < 3) {
+            // Exported replays older than v3 stores mods in the `mod` key.
+            // Additionally, it uses the legacy mods format and needs to be converted.
+            var oldMods = replayData.getString("mod");
+
+            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods(false).toString());
+            replayData.remove("mod");
         }
 
         entry.scoreInfo = ScoreInfo(replayData);

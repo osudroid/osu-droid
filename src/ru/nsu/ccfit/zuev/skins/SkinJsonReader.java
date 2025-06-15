@@ -3,11 +3,14 @@ package ru.nsu.ccfit.zuev.skins;
 import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
+import com.osudroid.ui.v2.hud.HUDSkinData;
+import com.reco1l.andengine.ui.Theme;
+import com.reco1l.framework.Color4;
+import com.reco1l.framework.HexComposition;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public class SkinJsonReader extends SkinReader {
     private static final SkinJsonReader reader = new SkinJsonReader();
@@ -20,6 +23,7 @@ public class SkinJsonReader extends SkinReader {
     private JSONObject currentColorData;
     private JSONObject currentCursorData;
     private JSONObject currentFontsData;
+    private JSONObject currentThemeData;
 
     private SkinJsonReader() {
 
@@ -64,6 +68,15 @@ public class SkinJsonReader extends SkinReader {
             currentFontsData = c;
             loadFonts();
         });
+        loadArray("HUD", currentData, (json) -> {
+            OsuSkin.get().hudSkinData = json == null
+                    ? HUDSkinData.Default
+                    : HUDSkinData.readFromJSON(json);
+        });
+        load("Theme", currentData, (c) -> {
+            currentThemeData = c;
+            loadTheme();
+        });
     }
 
     @Override
@@ -87,11 +100,11 @@ public class SkinJsonReader extends SkinReader {
         skin.comboColor.clear();
         JSONArray array = data.optJSONArray("colors");
         if (array == null || array.length() == 0) {
-            skin.comboColor.add(RGBColor.hex2Rgb(skin.DEFAULT_COLOR_HEX));
+            skin.comboColor.add(new Color4(skin.DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
         } else {
             for (int i = 0; i < array.length(); i++) {
                 String hex = array.optString(i, skin.DEFAULT_COLOR_HEX);
-                skin.comboColor.add(RGBColor.hex2Rgb(hex));
+                skin.comboColor.add(new Color4(hex, HexComposition.RRGGBB));
             }
         }
     }
@@ -151,7 +164,7 @@ public class SkinJsonReader extends SkinReader {
         JSONArray names = data.names();
         if (names == null) return;
         for (int i = 0; i < names.length(); i++) {
-            skin.colorData.put(names.optString(i), RGBColor.hex2Rgb(data.optString(names.optString(i))));
+            skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
         }
     }
 
@@ -163,12 +176,32 @@ public class SkinJsonReader extends SkinReader {
         skin.rotateCursorTrail.setFromJson(data);
     }
 
+    @Override
+    protected void loadTheme() {
+        var accentColor =
+            new Color4(currentThemeData.optString("accentColor", "#C2CAFF"), HexComposition.RRGGBB);
+
+        Theme.Companion.setCurrent(new Theme(accentColor));
+    }
+
     public void load(String tag, @NonNull JSONObject data, Consumer<JSONObject> consumer) {
         JSONObject object = data.optJSONObject(tag);
         if (object == null) {
             object = new JSONObject();
         }
         consumer.consume(object);
+    }
+
+    public void loadArray(String tag, @NonNull JSONObject data, Consumer<@Nullable JSONArray> consumer) {
+        consumer.consume(data.optJSONArray(tag));
+    }
+
+    public JSONObject getCurrentData() {
+        return currentData;
+    }
+
+    public JSONObject setCurrentData(JSONObject currentData) {
+        return this.currentData = currentData;
     }
 }
 

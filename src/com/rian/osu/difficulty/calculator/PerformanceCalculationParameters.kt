@@ -33,4 +33,22 @@ open class PerformanceCalculationParameters(
      */
     @JvmField
     var countMiss: Int = 0,
-)
+
+    /**
+     * The amount of slider ends dropped.
+     */
+    @JvmField
+    var sliderEndsDropped: Int? = null,
+
+    /**
+     * The amount of slider ticks missed.
+     */
+    @JvmField
+    var sliderTicksMissed: Int? = null
+) {
+    /**
+     * Whether this score uses classic slider calculation.
+     */
+    val usingClassicSliderCalculation
+        get() = sliderEndsDropped == null || sliderTicksMissed == null
+}

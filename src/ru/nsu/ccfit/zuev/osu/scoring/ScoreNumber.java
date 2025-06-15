@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import com.reco1l.osu.Execution;
+import com.osudroid.utils.Execution;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.ScaleModifier;

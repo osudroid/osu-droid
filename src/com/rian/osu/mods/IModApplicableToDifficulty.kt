@@ -14,6 +14,11 @@ interface IModApplicableToDifficulty {
      *
      * @param mode The [GameMode] to apply for.
      * @param difficulty The [BeatmapDifficulty] to mutate.
+     * @param adjustmentMods [Mod]s that apply [IModFacilitatesAdjustment].
      */
-    fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty)
+    fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    )
 }

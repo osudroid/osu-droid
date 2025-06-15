@@ -44,5 +44,10 @@ internal class Island(epsilon: Double) {
         return abs(delta - other.delta) < deltaDifferenceEpsilon && deltaCount == other.deltaCount
     }
 
-    override fun hashCode() = super.hashCode()
+    override fun hashCode(): Int {
+        var result = delta
+        result = 31 * result + deltaCount
+
+        return result
+    }
 }

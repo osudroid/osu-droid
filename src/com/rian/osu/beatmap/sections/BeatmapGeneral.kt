@@ -68,5 +68,11 @@ data class BeatmapGeneral(
      * Whether sound samples will change rate when playing with rate-adjusting mods.
      */
     @JvmField
-    var samplesMatchPlaybackRate: Boolean = false
+    var samplesMatchPlaybackRate: Boolean = false,
+
+    /**
+     * Whether a warning about flashing colours should be shown at the beginning of the beatmap.
+     */
+    @JvmField
+    var epilepsyWarning: Boolean = false
 )

@@ -1,20 +1,21 @@
 package com.reco1l.osu.ui.entity
 
-import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.PlayerStatus.Ready
-import com.reco1l.ibancho.data.RoomBeatmap
-import com.reco1l.osu.async
-import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.beatmaplisting.BeatmapDownloader
-import com.reco1l.osu.beatmaplisting.BeatmapListing
-import com.reco1l.osu.multiplayer.RoomScene
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.PlayerStatus.Ready
+import com.osudroid.multiplayer.api.data.RoomBeatmap
+import com.osudroid.utils.async
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.beatmaplisting.BeatmapDownloader
+import com.osudroid.beatmaplisting.BeatmapListing
+import com.osudroid.multiplayer.RoomScene
+import com.reco1l.andengine.component.*
+import com.reco1l.framework.*
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
-import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapItem
@@ -48,8 +49,11 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
 
 
     init {
-        OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this)
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", RGBColor(1f, 1f, 1f)).applyAll(trackTitle, creatorInfo)
+        color4 = OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR)
+
+        val menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", Color4(1f, 1f, 1f))
+        trackTitle.color4 = menuItemDefaultTextColor
+        creatorInfo.color4 = menuItemDefaultTextColor
 
         alpha = 0.8f
         creatorInfo.apply {
@@ -159,7 +163,7 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
 
     companion object {
 
-        private val DEFAULT_COLOR = RGBColor(25 / 255f, 25 / 255f, 240 / 255f)
+        private val DEFAULT_COLOR = Color4(25 / 255f, 25 / 255f, 240 / 255f)
 
     }
 }

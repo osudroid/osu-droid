@@ -1,24 +1,10 @@
 package com.reco1l.framework.math
 
-data class Vec2(
+import kotlin.math.*
 
-    val x: Float,
-
-    val y: Float,
-
-) {
+data class Vec2(val x: Float, val y: Float) {
 
     constructor(value: Float = 0f) : this(value, value)
-
-
-    val total
-        get() = x + y
-
-    val vertical
-        get() = y
-
-    val horizontal
-        get() = x
 
 
     operator fun plus(other: Vec2) = Vec2(
@@ -31,9 +17,19 @@ data class Vec2(
         y - other.y
     )
 
+    operator fun times(other: Vec2) = Vec2(
+        x * other.x,
+        y * other.y
+    )
+
     operator fun times(scalar: Float) = Vec2(
         x * scalar,
-        y * scalar,
+        y * scalar
+    )
+
+    operator fun div(other: Vec2) = Vec2(
+        x / other.x,
+        y / other.y
     )
 
     operator fun div(scalar: Float) = Vec2(
@@ -46,12 +42,21 @@ data class Vec2(
         -y
     )
 
-    override fun toString() = "Vector2($x, $y)"
+
+    fun distance(other: Vec2) = hypot(x - other.x, y - other.y)
+
+
+    override fun equals(other: Any?) = this === other || other is Vec2
+        && x == other.x
+        && y == other.y
+
+    override fun hashCode() = javaClass.hashCode()
 
 
     companion object {
-        val Zero = Vec2()
-        val One = Vec2(1f, 1f)
-    }
 
+        val Zero = Vec2()
+        val One = Vec2(1f)
+
+    }
 }

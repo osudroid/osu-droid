@@ -15,7 +15,7 @@ class DroidAim(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
+    mods: Iterable<Mod>,
 
     /**
      * Whether to consider sliders in the calculation.
@@ -28,7 +28,7 @@ class DroidAim(
     private val sliderStrains = mutableListOf<Double>()
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 25.6
+    private val skillMultiplier = 26.5
     private val strainDecayBase = 0.15
 
     /**
@@ -46,7 +46,7 @@ class DroidAim(
         }
 
         return sliderStrains.fold(0.0) { total, strain ->
-            total + 1 / (1 + exp(-((strain / maxStrain) * 12 - 6)))
+            total + 1 / (1 + exp(-(strain / maxStrain * 12 - 6)))
         }
     }
 

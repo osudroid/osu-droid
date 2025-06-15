@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.data.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 

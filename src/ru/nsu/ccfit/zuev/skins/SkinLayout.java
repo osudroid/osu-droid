@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import org.json.JSONObject;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -27,11 +27,11 @@ public class SkinLayout {
         return layout;
     }
 
-    public void apply(@NonNull ExtendedSprite sprite) {
+    public void apply(@NonNull UISprite sprite) {
         apply(sprite, null);
     }
 
-    public void apply(@NonNull ExtendedSprite sprite, ExtendedSprite previousSprite) {
+    public void apply(@NonNull UISprite sprite, UISprite previousSprite) {
         if (scale != -1) {
             sprite.setScale(scale);
         }

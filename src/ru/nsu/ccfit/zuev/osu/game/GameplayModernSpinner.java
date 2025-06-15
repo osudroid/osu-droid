@@ -2,15 +2,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.Execution;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Modifiers;
+import com.osudroid.utils.Execution;
+import com.reco1l.andengine.sprite.UISprite;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -22,41 +23,39 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  */
 public class GameplayModernSpinner extends GameplaySpinner {
 
-    private final ExtendedSprite middle;
-    private final ExtendedSprite middle2;
-    private final ExtendedSprite bottom;
-    private final ExtendedSprite top;
-    private final ExtendedSprite glow;
+    private final UISprite middle;
+    private final UISprite middle2;
+    private final UISprite bottom;
+    private final UISprite top;
+    private final UISprite glow;
     private final ScoreNumber bonusScore;
-
-    private boolean spinnable;
 
     public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         Utils.trackToRealCoords(position);
 
-        middle = new ExtendedSprite();
+        middle = new UISprite();
         middle.setOrigin(Anchor.Center);
         middle.setPosition(position.x, position.y);
         middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
 
-        middle2 = new ExtendedSprite();
+        middle2 = new UISprite();
         middle2.setOrigin(Anchor.Center);
         middle2.setPosition(position.x, position.y);
         middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
 
-        bottom = new ExtendedSprite();
+        bottom = new UISprite();
         bottom.setOrigin(Anchor.Center);
         bottom.setPosition(position.x, position.y);
         bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
 
-        top = new ExtendedSprite();
+        top = new UISprite();
         top.setOrigin(Anchor.Center);
         top.setPosition(position.x, position.y);
         top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
 
-        glow = new ExtendedSprite();
+        glow = new UISprite();
         glow.setOrigin(Anchor.Center);
         glow.setPosition(position.x, position.y);
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
@@ -93,11 +92,20 @@ public class GameplayModernSpinner extends GameplaySpinner {
         glow.setScale(0.9f);
         glow.setColor(0f, 0.8f, 1f);
 
-        middle.setAlpha(0f);
-        middle.setScale(0.9f);
+        boolean isBackgroundVisible = !GameHelper.isTraceable() ||
+            (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote());
 
-        middle2.setAlpha(0f);
-        middle2.setScale(0.9f);
+        middle.setVisible(isBackgroundVisible);
+        if (middle.isVisible()) {
+            middle.setAlpha(0f);
+            middle.setScale(0.9f);
+        }
+
+        middle2.setVisible(isBackgroundVisible);
+        if (middle2.isVisible()) {
+            middle2.setAlpha(0f);
+            middle2.setScale(0.9f);
+        }
 
         bottom.setAlpha(0f);
         bottom.setScale(0.9f);
@@ -113,11 +121,12 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        top.registerEntityModifier(Modifiers.sequence(
+        top.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
             Modifiers.fadeIn(timePreempt, e -> {
                     spinnable = true;
+                    listener.onSpinnerStart(id);
             }),
-            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
+            Modifiers.delay(duration)
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
@@ -175,7 +184,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             degree = (rotations + dFill / 4f) * 360;
             top.setRotation(degree);
             //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutopilotMod() || GameHelper.isAuto()) {
+            if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
                 float pX = position.x + 50 * (float) Math.sin(degree);
                 float pY = position.y + 50 * (float) Math.cos(degree);
                 listener.updateAutoBasedPos(pX, pY);
@@ -197,8 +206,15 @@ public class GameplayModernSpinner extends GameplaySpinner {
         middle.setColor(1, 1 - percent, 1 - percent);
         top.setScale(0.9f + percent * 0.1f);
         bottom.setScale(0.9f + percent * 0.1f);
-        middle.setScale(0.9f + percent * 0.1f);
-        middle2.setScale(0.9f + percent * 0.1f);
+
+        if (middle.isVisible()) {
+            middle.setScale(0.9f + percent * 0.1f);
+        }
+
+        if (middle2.isVisible()) {
+            middle2.setScale(0.9f + percent * 0.1f);
+        }
+
         glow.setAlpha(percent * 0.8f);
         glow.setScale(0.9f + percent * 0.1f);
 

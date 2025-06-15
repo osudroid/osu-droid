@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -22,7 +22,7 @@ public class BreakAnimator extends GameObject {
     private final Sprite[] arrows = new Sprite[4];
     private float length = 0;
     private float time;
-    private ExtendedSprite passfail;
+    private UISprite passfail;
     private String ending;
     private Sprite mark = null;
     private boolean showMark = false;
@@ -82,7 +82,7 @@ public class BreakAnimator extends GameObject {
         time = 0;
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
 
-        passfail = new ExtendedSprite();
+        passfail = new UISprite();
         passfail.setOrigin(Anchor.Center);
         passfail.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         passfail.setTextureRegion(ResourceManager.getInstance().getTexture("section-" + ending));

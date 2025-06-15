@@ -25,45 +25,32 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
     protected open val difficultyAdjustmentMods = setOf(
-        ModDoubleTime(), ModHalfTime(), ModNightCore(),
-        ModRelax(), ModEasy(), ModReallyEasy(),
-        ModHardRock(), ModHidden(), ModFlashlight(),
-        ModDifficultyAdjust()
+        ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
+        ModMirror::class, ModHardRock::class, ModHidden::class, ModFlashlight::class,
+        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class
     )
 
     /**
-     * Retains [Mod]s that change star rating.
+     * Retains [Mod]s that change star rating within a collection of [Mod]s.
      *
-     * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
+     * @param mods The collection of [Mod]s to check.
+     * @return A set of [Mod]s that change star rating.
      */
-    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
-        parameters.mods.iterator().run {
-            for (mod in this) {
-                // ModDifficultyAdjust always changes difficulty.
-                if (mod is ModDifficultyAdjust) {
-                    continue
-                }
-
-                if (!difficultyAdjustmentMods.contains(mod)) {
-                    remove()
-                }
-            }
-        }
+    fun retainDifficultyAdjustmentMods(mods: Iterable<Mod>?) = mods?.toMutableSet()?.also {
+        it.retainAll { mod -> difficultyAdjustmentMods.any { it.isInstance(mod) } }
+    } ?: emptySet()
 
     /**
-     * Calculates the difficulty of a [Beatmap] with specific parameters.
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s.
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param mods The [Mod]s to apply to the [Beatmap].
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the difficulty of the [Beatmap].
      */
     @JvmOverloads
-    fun calculate(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null,
-        scope: CoroutineScope? = null
-    ) = calculate(createPlayableBeatmap(beatmap, parameters, scope), scope)
+    fun calculate(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
+        calculate(createPlayableBeatmap(beatmap, mods, scope), scope)
 
     /**
      * Calculates the difficulty of a [PlayableBeatmap].
@@ -88,25 +75,25 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     }
 
     /**
-     * Calculates the difficulty of a [Beatmap] with specific parameters and returns a set of
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s and returns a set of
      * [TimedDifficultyAttributes] representing the difficulty at every relevant time value in the [Beatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param mods The [Mod]s to apply to the [Beatmap].
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The set of [TimedDifficultyAttributes].
      */
     @JvmOverloads
     fun calculateTimed(
         beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null,
+        mods: Iterable<Mod>? = null,
         scope: CoroutineScope? = null
     ): Array<TimedDifficultyAttributes<TAttributes>> {
         if (beatmap.hitObjects.objects.isEmpty()) {
             return emptyArray()
         }
 
-        return calculateTimed(createPlayableBeatmap(beatmap, parameters, scope), scope)
+        return calculateTimed(createPlayableBeatmap(beatmap, mods, scope), scope)
     }
 
     /**
@@ -155,6 +142,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     }
 
     /**
+     * Retrieves a [Skill] of a specific type from an array of [Skill]s.
+     *
+     * @param predicate The predicate to filter the [Skill]s by, if any.
+     * @return The [Skill] of the specified type.
+     */
+    protected inline fun <reified T : Skill<TObject>> Array<Skill<TObject>>.find(predicate: (T) -> Boolean = { true }) =
+        firstOrNull { it is T && predicate(it) } as T?
+
+    /**
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
@@ -193,17 +189,17 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * Constructs a [PlayableBeatmap] from a [Beatmap] with specific parameters.
      *
      * @param beatmap The [Beatmap] to create a [PlayableBeatmap] from.
-     * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param mods The [Mod]s that should be applied to the [Beatmap].
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The [PlayableBeatmap].
      */
-    protected abstract fun createPlayableBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope?): TBeatmap
+    protected abstract fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?): TBeatmap
 
     companion object {
         /**
          * The epoch time of the last change to the difficulty calculator, in milliseconds.
          */
-        const val VERSION = 1729985821000
+        const val VERSION = 1746800175000
     }
 }
 
@@ -211,10 +207,8 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
  * An [IBeatmap] that is used for timed difficulty calculation.
  */
 private class ProgressiveCalculationBeatmap(
-    baseBeatmap: PlayableBeatmap
-) : PlayableBeatmap(
-    baseBeatmap, baseBeatmap.mode, baseBeatmap.mods, baseBeatmap.customSpeedMultiplier, baseBeatmap.oldStatistics
-) {
+    private val baseBeatmap: PlayableBeatmap
+) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods.values) {
     override var maxCombo = 0
 
     override val hitObjects = object : BeatmapHitObjects() {
@@ -244,4 +238,6 @@ private class ProgressiveCalculationBeatmap(
             return removed
         }
     }
+
+    override fun createHitWindow() = baseBeatmap.hitWindow
 }

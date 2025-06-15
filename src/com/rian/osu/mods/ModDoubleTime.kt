@@ -3,8 +3,16 @@ package com.rian.osu.mods
 /**
  * Represents the Double Time mod.
  */
-class ModDoubleTime : Mod(), IModApplicableToTrackRate {
-    override val droidString = "d"
+class ModDoubleTime : ModRateAdjust() {
 
-    override fun applyToRate(rate: Float, oldStatistics: Boolean) = rate * 1.5f
+    override var trackRateMultiplier = 1.5f
+
+    override val name = "Double Time"
+    override val acronym = "DT"
+    override val description = "Zoooooooooom..."
+    override val type = ModType.DifficultyIncrease
+    override val isRanked = true
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModNightCore::class, ModHalfTime::class)
+
+    override fun deepCopy() = ModDoubleTime()
 }

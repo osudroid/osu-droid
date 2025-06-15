@@ -27,8 +27,6 @@ public class BassAudioFunc {
     private ByteBuffer buffer = null;
     private int playFlag = BASS.BASS_STREAM_PRESCAN;
     private boolean isGaming = false;
-    private BroadcastReceiver receiver;
-    private LocalBroadcastManager broadcastManager;
 
     /**
      * The channel's frequency, in Hz.
@@ -257,27 +255,13 @@ public class BassAudioFunc {
         this.isGaming = isGaming;
     }
 
-    public void setReciverStuff(BroadcastReceiver receiver, IntentFilter filter, Context context) {
-        this.receiver = receiver;
-        if (broadcastManager == null) {
-            broadcastManager = LocalBroadcastManager.getInstance(context);
-            broadcastManager.registerReceiver(receiver, filter);
-        }
-    }
-
-    public void unregisterReceiverBM() {
-        if (broadcastManager != null) broadcastManager.unregisterReceiver(receiver);
-    }
-
     public void freeALL() {
         BASS.BASS_Free();
     }
 
     private void setEndSync() {
         BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, (handle, channel, data, user) -> {
-            if (!isGaming) {
-                broadcastManager.sendBroadcast(new Intent("Notify_next"));
-            } else {
+            if (isGaming) {
                 stop();
             }
         }, 0);

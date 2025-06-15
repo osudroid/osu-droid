@@ -6,72 +6,137 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
-import java.util.EnumSet
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+import kotlin.reflect.full.createInstance
+import org.json.JSONArray
 
 /**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    private val modMap = mutableMapOf<GameMod, Mod>().apply {
-        put(GameMod.MOD_AUTO, ModAuto())
-        put(GameMod.MOD_AUTOPILOT, ModAutopilot())
-        put(GameMod.MOD_DOUBLETIME, ModDoubleTime())
-        put(GameMod.MOD_EASY, ModEasy())
-        put(GameMod.MOD_FLASHLIGHT, ModFlashlight())
-        put(GameMod.MOD_HALFTIME, ModHalfTime())
-        put(GameMod.MOD_HARDROCK, ModHardRock())
-        put(GameMod.MOD_HIDDEN, ModHidden())
-        put(GameMod.MOD_NIGHTCORE, ModNightCore())
-        put(GameMod.MOD_NOFAIL, ModNoFail())
-        put(GameMod.MOD_PERFECT, ModPerfect())
-        put(GameMod.MOD_PRECISE, ModPrecise())
-        put(GameMod.MOD_REALLYEASY, ModReallyEasy())
-        put(GameMod.MOD_RELAX, ModRelax())
-        put(GameMod.MOD_SCOREV2, ModScoreV2())
-        put(GameMod.MOD_SUDDENDEATH, ModSuddenDeath())
-    }.toMap()
 
     /**
-     * Converts "legacy" [GameMod]s to new [Mod]s.
+     * Returns a list of all available [Mod]s.
+     */
+    val allModsInstances
+        get() = arrayOf(
+            ModApproachDifferent(),
+            ModAutoplay(),
+            ModAutopilot(),
+            ModCustomSpeed(),
+            ModDifficultyAdjust(),
+            ModDoubleTime(),
+            ModEasy(),
+            ModFlashlight(),
+            ModFreezeFrame(),
+            ModHalfTime(),
+            ModHardRock(),
+            ModHidden(),
+            ModMirror(),
+            ModMuted(),
+            ModNightCore(),
+            ModNoFail(),
+            ModPerfect(),
+            ModPrecise(),
+            ModRandom(),
+            ModReallyEasy(),
+            ModRelax(),
+            ModReplayV6(),
+            ModScoreV2(),
+            ModSmallCircle(),
+            ModSuddenDeath(),
+            ModSynesthesia(),
+            ModTraceable(),
+            ModWindDown(),
+            ModWindUp()
+        )
+
+    private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
+
+    /**
+     * Serializes a list of [Mod]s into a [JSONArray].
      *
-     * @param mods The [GameMod]s to convert.
-     * @param forceCS The circle size to enforce.
-     * @param forceAR The approach rate to enforce.
-     * @param forceOD The overall difficulty to enforce.
-     * @param forceHP The health drain to enforce.
-     * @return A [MutableList] containing the new [Mod]s.
+     * The serialized [Mod]s can be deserialized using [deserializeMods].
+     *
+     * @param mods The list of [Mod]s to serialize.
+     * @param includeNonUserPlayable Whether to serialize non-user-playable [Mod]s. Defaults to `true`.
+     * @param includeIrrelevantMods Whether to include [Mod]s that are not relevant to gameplay. Defaults to `false`.
+     * @return The serialized [Mod]s in a [JSONArray].
      */
     @JvmStatic
     @JvmOverloads
-    fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
-                          forceOD: Float? = null, forceHP: Float? = null) = mutableListOf<Mod>().apply {
-        mods.forEach {
-            val convertedMod = modMap[it] ?:
-            throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
+    fun serializeMods(
+        mods: Iterable<Mod>,
+        includeNonUserPlayable: Boolean = true,
+        includeIrrelevantMods: Boolean = false
+    ) = JSONArray().also {
+        for (mod in mods) {
+            if (!includeNonUserPlayable && !mod.isUserPlayable) {
+                continue
+            }
 
-            add(convertedMod)
-        }
+            if (!includeIrrelevantMods && !mod.isRelevant) {
+                continue
+            }
 
-        if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> v != null }) {
-            add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
+            it.put(mod.serialize())
         }
     }
 
     /**
-     * Calculates the rate for the track with the selected [Mod]s.
+     * Deserializes a list of [Mod]s from a [JSONArray] received from [serializeMods].
+     *
+     * @param json The [JSONArray] containing the serialized [Mod]s.
+     * @return The deserialized [Mod]s in a [ModHashMap].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun deserializeMods(json: JSONArray? = null) = ModHashMap().also {
+        if (json == null) {
+            return@also
+        }
+
+        for (i in 0 until json.length()) {
+            val obj = json.getJSONObject(i)
+            val acronym = obj.optString("acronym") ?: continue
+            val settings = obj.optJSONObject("settings")
+
+            val mod = allModsClassesByAcronym[acronym]?.createInstance() ?: continue
+
+            if (settings != null) {
+                mod.copySettings(settings)
+            }
+
+            it.put(mod)
+        }
+    }
+
+    /**
+     * Calculates the playback rate for the track with the selected [Mod]s at [time].
      *
      * @param mods The list of selected [Mod]s.
-     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
-     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
-     * **Never set this flag to `true` unless you know what you are doing.**
+     * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
      * @return The rate with [Mod]s.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateRateWithMods(mods: Iterable<Mod>, oldStatistics: Boolean = false) = mods.fold(1f) {
-        rate, mod -> (mod as? IModApplicableToTrackRate)?.applyToRate(rate, oldStatistics) ?: rate
+    fun calculateRateWithMods(mods: Iterable<Mod>, time: Double = 0.0) = mods.fold(1f) { rate, mod ->
+        (mod as? IModApplicableToTrackRate)?.applyToRate(time, rate) ?: rate
     }
+
+    /**
+     * Calculates the playback rate for the track with the selected [IModApplicableToTrackRate]s at [time].
+     *
+     * @param mods The list of selected [IModApplicableToTrackRate]s.
+     * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+     * @return The rate with [IModApplicableToTrackRate]s.
+     */
+    @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateRateWithTrackRateMods")
+    fun calculateRateWithMods(mods: Iterable<IModApplicableToTrackRate>, time: Double = 0.0) =
+        mods.fold(1f) { rate, mod ->
+            mod.applyToRate(time, rate)
+        }
 
     /**
      * Applies the selected [Mod]s to a [BeatmapDifficulty].
@@ -79,11 +144,7 @@ object ModUtils {
      * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.
      * @param mode The [GameMode] to apply the [Mod]s for.
      * @param mods The selected [Mod]s.
-     * @param customSpeedMultiplier The custom speed multiplier to apply.
-     * @param withRateChange Whether to apply rate changes.
-     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
-     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
-     * **Never set this flag to `true` unless you know what you are doing.**
+     * @param withRateChange Whether to apply rate changes to the [BeatmapDifficulty].
      */
     @JvmStatic
     @JvmOverloads
@@ -91,19 +152,20 @@ object ModUtils {
         difficulty: BeatmapDifficulty,
         mode: GameMode,
         mods: Iterable<Mod>,
-        customSpeedMultiplier: Float = 1f,
-        withRateChange: Boolean = false,
-        oldStatistics: Boolean = false
+        withRateChange: Boolean = false
     ) {
+        @Suppress("UNCHECKED_CAST")
+        val adjustmentMods = mods.filter { it is IModFacilitatesAdjustment } as Iterable<IModFacilitatesAdjustment>
+
         for (mod in mods) {
             if (mod is IModApplicableToDifficulty) {
-                mod.applyToDifficulty(mode, difficulty)
+                mod.applyToDifficulty(mode, difficulty, adjustmentMods)
             }
         }
 
         for (mod in mods) {
-            if (mod is IModApplicableToDifficultyWithSettings) {
-                mod.applyToDifficulty(mode, difficulty, mods, customSpeedMultiplier, oldStatistics)
+            if (mod is IModApplicableToDifficultyWithMods) {
+                mod.applyToDifficulty(mode, difficulty, mods)
             }
         }
 
@@ -112,14 +174,19 @@ object ModUtils {
         }
 
         // Apply rate adjustments
-        val totalSpeedMultiplier = calculateRateWithMods(mods, oldStatistics) * customSpeedMultiplier
+        val trackRate = calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
-        val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / totalSpeedMultiplier
-        difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
+        val preempt = BeatmapDifficulty.difficultyRange(
+            difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ) / trackRate
+
+        difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(
+            preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ).toFloat()
 
         val isPreciseMod = mods.any { it is ModPrecise }
         val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(difficulty.od) else DroidHitWindow(difficulty.od)
-        val greatWindow = hitWindow.greatWindow / totalSpeedMultiplier
+        val greatWindow = hitWindow.greatWindow / trackRate
 
         difficulty.od =
             if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)

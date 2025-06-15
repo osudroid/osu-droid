@@ -36,7 +36,7 @@
     </PreferenceCategory>
 
 
-    <PreferenceCategory android:title="@string/opt_category_metronome">
+    <PreferenceCategory android:title="@string/opt_category_effect">
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
@@ -44,8 +44,14 @@
             android:entryValues="@array/metronome_switch_values"
             android:key="metronomeswitch"
             android:summary="@string/opt_metronome_switch_summary"
-            android:title="@string/opt_metronome_switch_title"
-            app:layout="@layout/settings_preference_bottom" />
+            android:title="@string/opt_metronome_switch_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="shiftPitchInRateChange"
+            android:summary="@string/opt_shiftPitchInRateChange_summary"
+            android:title="@string/opt_shiftPitchInRateChange_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 

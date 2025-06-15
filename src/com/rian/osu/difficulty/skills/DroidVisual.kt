@@ -3,7 +3,6 @@ package com.rian.osu.difficulty.skills
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.DroidVisualEvaluator
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModHidden
 import kotlin.math.pow
 
 /**
@@ -13,7 +12,7 @@ class DroidVisual(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
+    mods: Iterable<Mod>,
 
     /**
      * Whether to consider sliders in the calculation.
@@ -25,13 +24,12 @@ class DroidVisual(
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 10
+    private val skillMultiplier = 11.2
     private val strainDecayBase = 0.1
-    private val isHidden = mods.any { it is ModHidden }
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
+        currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, mods, withSliders) * skillMultiplier
 
         currentRhythm = current.rhythmMultiplier
 

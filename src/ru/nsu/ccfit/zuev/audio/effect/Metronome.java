@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.timings.TimingControlPoint;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class Metronome {
 
@@ -57,5 +56,12 @@ public class Metronome {
         }
         // 每小节奇数拍hat
         hatSound.play();
+    }
+
+    public void setVolume(float volume) {
+        kickSound.setVolume(volume);
+        finishSound.setVolume(volume);
+        clapSound.setVolume(volume);
+        hatSound.setVolume(volume);
     }
 }

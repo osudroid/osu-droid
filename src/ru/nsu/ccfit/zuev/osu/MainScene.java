@@ -5,16 +5,21 @@ import android.graphics.PointF;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.acivev.VibratorManager;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.shape.RoundedBox;
-import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.BannerLoader;
-import com.reco1l.osu.BannerSprite;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.entity.MainMenu;
+import com.reco1l.andengine.shape.UIBox;
+import com.reco1l.andengine.sprite.UISprite;
+import com.osudroid.ui.BannerManager;
+import com.osudroid.ui.BannerManager.BannerSprite;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.ui.MainMenu;
 
-import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.osudroid.beatmaplisting.BeatmapListing;
+import com.reco1l.andengine.ui.UIConfirmDialog;
+import com.reco1l.andengine.ui.UIMessageDialog;
+import com.reco1l.andengine.ui.UITextButton;
+import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -119,7 +124,9 @@ public class MainScene implements IUpdateHandler {
     public void load(Context context) {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
+        VibratorManager.INSTANCE.init(context);
         scene = new Scene();
+        scene.setOnAreaTouchTraversalFrontToBack();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
 
@@ -174,7 +181,7 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        RoundedBox box = new RoundedBox() {
+        UIBox box = new UIBox() {
 
             {
                 Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
@@ -458,7 +465,7 @@ public class MainScene implements IUpdateHandler {
 
         ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
-        ExtendedSprite tournamentOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+        ExtendedSprite tournamentOverlay = new UISprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
         tournamentOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
         tournamentOverlay.setOrigin(Anchor.BottomCenter);
         scene.attachChild(tournamentOverlay);
@@ -475,7 +482,7 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(tournamentText);
 
         progressBar = new LinearSongProgress(scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
-        progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
+        progressBar.setProgressRectColor(new Color4(0.9f, 0.9f, 0.9f));
         progressBar.setProgressRectAlpha(0.8f);
 
         createOnlinePanel(scene);
@@ -490,7 +497,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        BannerSprite sprite = BannerLoader.loadBannerSprite();
+        BannerSprite sprite = BannerManager.loadBannerSprite();
         if (sprite != null) {
             sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             sprite.setOrigin(Anchor.BottomRight);
@@ -902,20 +909,14 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-
-        new MessageDialog()
-            .setTitle("Exit")
-            .setMessage(context.getString(com.osudroid.resources.R.string.dialog_exit_message))
-            .addButton("Yes", dialog -> {
-                dialog.dismiss();
-                exit();
-                return null;
-            })
-            .addButton("No", dialog -> {
-                dialog.dismiss();
-                return null;
-            })
-            .show();
+        UIConfirmDialog dialog = new UIConfirmDialog();
+        dialog.setTitle("Exit");
+        dialog.setText(context.getString(com.osudroid.resources.R.string.dialog_exit_message));
+        dialog.setOnConfirm(() -> {
+            exit();
+            return null;
+        });
+        dialog.show();
     }
 
     public void exit() {
@@ -991,23 +992,33 @@ public class MainScene implements IUpdateHandler {
 
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
-        if (replay.load(replayFile, false)) {
-            if (replay.replayVersion >= 3) {
-                //replay
-                ScoringScene scorescene = GlobalManager.getInstance().getScoring();
-                StatisticV2 stat = replay.getStat();
-                BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
-                if (beatmap != null) {
-                    GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
-                    GlobalManager.getInstance().getSongMenu().select();
-                    ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
-                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
-                    GlobalManager.getInstance().getSongService().play();
-                    scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
-                    GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
-                }
-            }
+
+        if (!replay.load(replayFile, false) || replay.replayVersion < 3) {
+            return;
         }
+
+        BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
+
+        if (beatmap == null) {
+            return;
+        }
+
+        GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
+        StatisticV2 stat = replay.getStat();
+
+        var difficulty = beatmap.getBeatmapDifficulty();
+
+        stat.migrateLegacyMods(difficulty);
+        stat.calculateModScoreMultiplier(difficulty);
+
+        GlobalManager.getInstance().getSongMenu().select();
+        ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
+        GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
+        GlobalManager.getInstance().getSongService().play();
+
+        ScoringScene scorescene = GlobalManager.getInstance().getScoring();
+        scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
+        GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
     }
 
     public void show() {

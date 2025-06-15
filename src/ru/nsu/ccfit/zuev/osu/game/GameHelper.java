@@ -4,6 +4,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.SliderPathType;
+import com.rian.osu.mods.*;
 import com.rian.osu.utils.PathApproximation;
 
 import java.math.BigDecimal;
@@ -14,23 +15,29 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
+    private static float originalTimePreempt = 0;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
-    private static boolean hidden = false;
-    private static boolean flashLight = false;
-    private static boolean hardrock = false;
-    private static boolean relaxMod = false;
-    private static boolean doubleTime = false;
-    private static boolean nightCore = false;
-    private static boolean halfTime = false;
-    private static boolean autopilotMod = false;
-    private static boolean suddenDeath = false;
-    private static boolean perfect = false;
-    private static boolean scoreV2;
-    private static boolean isEasy;
+    private static ModHidden hidden;
+    private static ModTraceable traceable;
+    private static ModFlashlight flashlight;
+    private static ModHardRock hardRock;
+    private static ModRelax relax;
+    private static ModDoubleTime doubleTime;
+    private static ModNightCore nightCore;
+    private static ModHalfTime halfTime;
+    private static ModAutopilot autopilot;
+    private static ModSuddenDeath suddenDeath;
+    private static ModPerfect perfect;
+    private static ModSynesthesia synesthesia;
+    private static ModScoreV2 scoreV2;
+    private static ModEasy easy;
+    private static ModMuted muted;
+    private static ModFreezeFrame freezeFrame;
+    private static ModApproachDifferent approachDifferent;
     private static boolean isKiai = false;
-    private static boolean auto = false;
-    private static boolean precise = false;
+    private static ModAutoplay autoplay;
+    private static ModPrecise precise;
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
@@ -50,6 +57,14 @@ public class GameHelper {
 
     public static void setOverallDifficulty(final float overallDifficulty) {
         GameHelper.overallDifficulty = overallDifficulty;
+    }
+
+    public static float getOriginalTimePreempt() {
+        return originalTimePreempt;
+    }
+
+    public static void setOriginalTimePreempt(final float originalTimePreempt) {
+        GameHelper.originalTimePreempt = originalTimePreempt;
     }
 
     /**
@@ -146,83 +161,183 @@ public class GameHelper {
         GameHelper.speedMultiplier = speedMultiplier;
     }
 
+    public static ModEasy getEasy() {
+        return easy;
+    }
+
     public static boolean isEasy() {
-        return isEasy;
+        return easy != null;
     }
 
-    public static void setEasy(boolean isEasy) {
-        GameHelper.isEasy = isEasy;
+    public static void setEasy(final ModEasy isEasy) {
+        GameHelper.easy = isEasy;
     }
 
-    public static boolean isHardrock() {
-        return hardrock;
+    public static ModHardRock getHardRock() {
+        return hardRock;
     }
 
-    public static void setHardrock(final boolean hardrock) {
-        GameHelper.hardrock = hardrock;
+    public static boolean isHardRock() {
+        return hardRock != null;
     }
 
-    public static boolean isHidden() {
+    public static void setHardRock(final ModHardRock hardRock) {
+        GameHelper.hardRock = hardRock;
+    }
+
+    public static ModHidden getHidden() {
         return hidden;
     }
 
-    public static void setHidden(final boolean hidden) {
+    public static boolean isHidden() {
+        return hidden != null;
+    }
+
+    public static void setHidden(final ModHidden hidden) {
         GameHelper.hidden = hidden;
     }
 
-    public static boolean isFlashLight() {
-        return flashLight;
+    public static ModTraceable getTraceable() {
+        return traceable;
     }
 
-    public static void setFlashLight(final boolean flashLight) {
-        GameHelper.flashLight = flashLight;
+    public static boolean isTraceable() {
+        return traceable != null;
     }
 
-    public static boolean isHalfTime() {
+    public static void setTraceable(final ModTraceable traceable) {
+        GameHelper.traceable = traceable;
+    }
+
+    public static ModFlashlight getFlashlight() {
+        return flashlight;
+    }
+
+    public static boolean isFlashlight() {
+        return flashlight != null;
+    }
+
+    public static void setFlashlight(final ModFlashlight flashlight) {
+        GameHelper.flashlight = flashlight;
+    }
+
+    public static ModHalfTime getHalfTime() {
         return halfTime;
     }
 
-    public static void setHalfTime(final boolean halfTime) {
+    public static boolean isHalfTime() {
+        return halfTime != null;
+    }
+
+    public static void setHalfTime(final ModHalfTime halfTime) {
         GameHelper.halfTime = halfTime;
     }
 
-    public static boolean isNightCore() {
+    public static ModNightCore getNightCore() {
         return nightCore;
     }
 
-    public static void setNightCore(final boolean nightCore) {
+    public static boolean isNightCore() {
+        return nightCore != null;
+    }
+
+    public static void setNightCore(final ModNightCore nightCore) {
         GameHelper.nightCore = nightCore;
     }
 
-    public static boolean isDoubleTime() {
+    public static ModDoubleTime getDoubleTime() {
         return doubleTime;
     }
 
-    public static void setDoubleTime(final boolean doubleTime) {
+    public static boolean isDoubleTime() {
+        return doubleTime != null;
+    }
+
+    public static void setDoubleTime(final ModDoubleTime doubleTime) {
         GameHelper.doubleTime = doubleTime;
     }
 
-    public static boolean isSuddenDeath() {
+    public static ModSuddenDeath getSuddenDeath() {
         return suddenDeath;
     }
 
-    public static void setSuddenDeath(final boolean suddenDeath) {
+    public static boolean isSuddenDeath() {
+        return suddenDeath != null;
+    }
+
+    public static void setSuddenDeath(final ModSuddenDeath suddenDeath) {
         GameHelper.suddenDeath = suddenDeath;
     }
 
-    public static boolean isPerfect() {
+    public static ModPerfect getPerfect() {
         return perfect;
     }
 
-    public static void setPerfect(final boolean perfect) {
+    public static boolean isPerfect() {
+        return perfect != null;
+    }
+
+    public static void setPerfect(final ModPerfect perfect) {
         GameHelper.perfect = perfect;
     }
 
-    public static boolean isScoreV2() {
+    public static ModSynesthesia getSynesthesia() {
+        return synesthesia;
+    }
+
+    public static boolean isSynesthesia() {
+        return synesthesia != null;
+    }
+
+    public static void setSynesthesia(final ModSynesthesia synesthesia) {
+        GameHelper.synesthesia = synesthesia;
+    }
+
+    public static ModMuted getMuted() {
+        return muted;
+    }
+
+    public static boolean isMuted() {
+        return muted != null;
+    }
+
+    public static void setMuted(final ModMuted muted) {
+        GameHelper.muted = muted;
+    }
+
+    public static ModFreezeFrame getFreezeFrame() {
+        return freezeFrame;
+    }
+
+    public static boolean isFreezeFrame() {
+        return freezeFrame != null;
+    }
+
+    public static void setFreezeFrame(final ModFreezeFrame freezeFrame) {
+        GameHelper.freezeFrame = freezeFrame;
+    }
+
+    public static ModApproachDifferent getApproachDifferent() {
+        return approachDifferent;
+    }
+
+    public static boolean isApproachDifferent() {
+        return approachDifferent != null;
+    }
+
+    public static void setApproachDifferent(final ModApproachDifferent approachDifferent) {
+        GameHelper.approachDifferent = approachDifferent;
+    }
+
+    public static ModScoreV2 getScoreV2() {
         return scoreV2;
     }
 
-    public static void setScoreV2(boolean scoreV2) {
+    public static boolean isScoreV2() {
+        return scoreV2 != null;
+    }
+
+    public static void setScoreV2(final ModScoreV2 scoreV2) {
         GameHelper.scoreV2 = scoreV2;
     }
 
@@ -250,35 +365,51 @@ public class GameHelper {
         GameHelper.beatLength = beatLength;
     }
 
-    public static boolean isRelaxMod() {
-        return relaxMod;
+    public static ModRelax getRelax() {
+        return relax;
     }
 
-    public static void setRelaxMod(boolean relaxMod) {
-        GameHelper.relaxMod = relaxMod;
+    public static boolean isRelax() {
+        return relax != null;
     }
 
-    public static boolean isAutopilotMod() {
-        return autopilotMod;
+    public static void setRelax(final ModRelax relax) {
+        GameHelper.relax = relax;
     }
 
-    public static void setAutopilotMod(boolean autopilotMod) {
-        GameHelper.autopilotMod = autopilotMod;
+    public static ModAutopilot getAutopilot() {
+        return autopilot;
     }
 
-    public static boolean isAuto() {
-        return auto;
+    public static boolean isAutopilot() {
+        return autopilot != null;
     }
 
-    public static void setAuto(boolean auto) {
-        GameHelper.auto = auto;
+    public static void setAutopilot(final ModAutopilot autopilot) {
+        GameHelper.autopilot = autopilot;
     }
 
-    public static boolean isPrecise() {
+    public static ModAutoplay getAutoplay() {
+        return autoplay;
+    }
+
+    public static boolean isAutoplay() {
+        return autoplay != null;
+    }
+
+    public static void setAutoplay(final ModAutoplay autoplay) {
+        GameHelper.autoplay = autoplay;
+    }
+
+    public static ModPrecise getPrecise() {
         return precise;
     }
 
-    public static void setPrecise(boolean precise) {
+    public static boolean isPrecise() {
+        return precise != null;
+    }
+
+    public static void setPrecise(final ModPrecise precise) {
         GameHelper.precise = precise;
     }
 

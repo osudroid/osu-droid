@@ -3,23 +3,16 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
-    <!--Difficulty algorithm-->
-    <string name="difficulty_algorithm_title">Difficulty algorithm</string>
-    <string name="difficulty_algorithm_summary">Choose the algorithm used to calculate difficulty and performance points</string>
+    <string name="opt_category_effect">Effect</string>
 
-    <string-array name="difficulty_algorithm_names">
-        <item>osu!droid</item>
-        <item>osu!standard</item>
-    </string-array>
-    <string-array name="difficulty_algorithm_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
+    <string name="opt_shiftPitchInRateChange_title">Shift pitch in rate-changing mods</string>
+    <string name="opt_shiftPitchInRateChange_summary">Shifts the pitch of the music when using rate-changing mods</string>
 
-    <string name="mp_room_max_players_title">Maximum Players</string>
-    <string name="mp_room_max_players_summary">Set the maximum number of players allowed in the room</string>
-
-    <string name="opt_snakingOutSliders_title">Use snaking out sliders</string>
-    <string name="opt_snakingOutSliders_summary">Enable sliders gradually snaking disappearing from one node</string>
+    <string name="mod_section_difficulty_reduction">Difficulty Reduction</string>
+    <string name="mod_section_difficulty_increase">Difficulty Increase</string>
+    <string name="mod_section_difficulty_automation">Automation</string>
+    <string name="mod_section_difficulty_conversion">Conversion</string>
+    <string name="mod_section_fun">Fun</string>
+    <string name="mod_section_system">System</string>
 
 </resources>

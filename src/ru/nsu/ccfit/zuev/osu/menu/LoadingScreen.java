@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
 
-import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -61,7 +61,7 @@ public class LoadingScreen implements IUpdateHandler {
         ToastLogger.setPercentage(-1);
         percentage = -1;
 
-        var circle = new ExtendedSprite();
+        var circle = new UISprite();
         circle.setOrigin(Anchor.Center);
         circle.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("loading"));

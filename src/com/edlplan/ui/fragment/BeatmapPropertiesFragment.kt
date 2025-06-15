@@ -11,8 +11,8 @@ import android.widget.EditText
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.osu.data.BeatmapOptions
-import com.reco1l.osu.data.DatabaseManager
+import com.osudroid.data.BeatmapOptions
+import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp

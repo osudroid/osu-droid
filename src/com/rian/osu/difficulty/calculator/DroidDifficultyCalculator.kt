@@ -23,7 +23,7 @@ import kotlinx.coroutines.ensureActive
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyMultiplier = 0.18
     override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
-        setOf(ModPrecise(), ModAutopilot(), ModScoreV2())
+        setOf(ModPrecise::class, ModScoreV2::class, ModTraceable::class, ModReplayV6::class)
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
@@ -34,9 +34,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
     ) = DroidDifficultyAttributes().apply {
-        mods = beatmap.mods?.toList() ?: mods
-        customSpeedMultiplier = beatmap.customSpeedMultiplier
-        clockRate = beatmap.overallSpeedMultiplier.toDouble()
+        mods = beatmap.mods.values.toSet()
+        clockRate = beatmap.speedMultiplier.toDouble()
 
         maxCombo = beatmap.maxCombo
         hitCircleCount = beatmap.hitObjects.circleCount
@@ -49,7 +48,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         populateFlashlightAttributes(skills)
         populateVisualAttributes(skills)
 
-        if (mods.any { it is ModRelax }) {
+        if (ModRelax::class in beatmap.mods) {
             aimDifficulty *= 0.9
             tapDifficulty = 0.0
             rhythmDifficulty = 0.0
@@ -57,7 +56,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             visualDifficulty = 0.0
         }
 
-        if (mods.any { it is ModAutopilot }) {
+        if (ModAutopilot::class in beatmap.mods) {
             aimDifficulty = 0.0
             flashlightDifficulty *= 0.3
             visualDifficulty *= 0.8
@@ -65,7 +64,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
         val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = flashlightDifficulty.pow(1.6) * 25
+        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(1.6) * 25 else 0.0
         val baseVisualPerformance = visualDifficulty.pow(1.6) * 22.5
 
         val basePerformance = (
@@ -81,9 +80,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val od = beatmap.difficulty.od
-        val isPrecise = mods.any { it is ModPrecise }
-        val greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble() / clockRate
+        val isPrecise = ModPrecise::class in beatmap.mods
+        // Weird cast of greatWindow, but necessary for difficulty calculation parity
+        val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
 
         overallDifficulty = (
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
@@ -92,28 +91,31 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
-        val mods = beatmap.mods?.toList() ?: emptyList()
+        val mods = beatmap.mods.values
+        val skills = mutableListOf<Skill<DroidDifficultyHitObject>>()
 
-        val aim = DroidAim(mods, true)
-        val aimNoSlider = DroidAim(mods, false)
-        // Tap and visual skills depend on rhythm skill, so we will put it first
-        val rhythm = DroidRhythm(mods)
-        val tapCheese = DroidTap(mods, true)
-        val tapNoCheese = DroidTap(mods, false)
-        val visual = DroidVisual(mods, true)
-        val visualNoSlider = DroidVisual(mods, false)
-
-        if (mods.any { it is ModFlashlight }) {
-            val flashlight = DroidFlashlight(mods, true)
-            val flashlightNoSlider = DroidFlashlight(mods, false)
-
-            return arrayOf(
-                aim, aimNoSlider, rhythm, tapCheese, tapNoCheese,
-                flashlight, flashlightNoSlider, visual, visualNoSlider
-            )
+        if (ModAutopilot::class !in beatmap.mods) {
+            skills.add(DroidAim(mods, true))
+            skills.add(DroidAim(mods, false))
         }
 
-        return arrayOf(aim, aimNoSlider, rhythm, tapCheese, tapNoCheese, visual, visualNoSlider)
+        if (ModRelax::class !in beatmap.mods) {
+            // Tap and visual skills depend on rhythm skill, so we put it first
+            skills.add(DroidRhythm(mods))
+
+            skills.add(DroidTap(mods, true))
+            skills.add(DroidTap(mods, false))
+
+            skills.add(DroidVisual(mods, true))
+            skills.add(DroidVisual(mods, false))
+        }
+
+        if (ModFlashlight::class in beatmap.mods) {
+            skills.add(DroidFlashlight(mods, true))
+            skills.add(DroidFlashlight(mods, false))
+        }
+
+        return skills.toTypedArray()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -122,7 +124,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             return emptyArray()
         }
 
-        val clockRate = beatmap.overallSpeedMultiplier.toDouble()
+        val clockRate = beatmap.speedMultiplier.toDouble()
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
@@ -132,7 +134,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             arr[i] = DroidDifficultyHitObject(
                 objects[i],
                 if (i > 0) objects[i - 1] else null,
-                if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
                 i - 1
@@ -142,19 +143,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         return arr as Array<DroidDifficultyHitObject>
     }
 
-    override fun createPlayableBeatmap(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?,
-        scope: CoroutineScope?
-    ) = beatmap.createDroidPlayableBeatmap(
-            parameters?.mods,
-            parameters?.customSpeedMultiplier ?: 1f,
-            parameters?.oldStatistics == true,
-            scope
-        )
+    override fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?) =
+        beatmap.createDroidPlayableBeatmap(mods, scope)
 
     private fun DroidDifficultyAttributes.populateAimAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
-        val aim = skills.first { it is DroidAim && it.withSliders } as DroidAim
+        val aim = skills.find<DroidAim> { it.withSliders } ?: return
+
         aimDifficulty = calculateRating(aim)
         aimDifficultStrainCount = aim.countDifficultStrains()
         aimDifficultSliderCount = aim.countDifficultSliders()
@@ -176,7 +170,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         difficultSliders.dropLastWhile { difficultSliders.size > ceil(0.15 * sliderCount) }
 
         if (aimDifficulty > 0) {
-            val aimNoSlider = skills.first { it is DroidAim && !it.withSliders } as DroidAim
+            val aimNoSlider = skills.find<DroidAim> { !it.withSliders }!!
 
             aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
         } else {
@@ -188,7 +182,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>
     ) {
-        val tap = skills.first { it is DroidTap && it.considerCheesability } as DroidTap
+        val tap = skills.find<DroidTap> { it.considerCheesability } ?: return
 
         tapDifficulty = calculateRating(tap)
         tapDifficultStrainCount = tap.countDifficultStrains()
@@ -226,7 +220,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
         }
 
-        val tapNoCheese = skills.first { it is DroidTap && !it.considerCheesability } as DroidTap
+        val tapNoCheese = skills.find<DroidTap> { !it.considerCheesability }!!
 
         // Re-filter with tap strain in mind.
         for (section in sectionBoundaries) {
@@ -271,19 +265,19 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     private fun DroidDifficultyAttributes.populateRhythmAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
-        val rhythm = skills.first { it is DroidRhythm } as DroidRhythm
+        val rhythm = skills.find<DroidRhythm>() ?: return
 
         rhythmDifficulty = calculateRating(rhythm)
     }
 
     private fun DroidDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
-        val flashlight = skills.firstOrNull { it is DroidFlashlight && it.withSliders } as? DroidFlashlight ?: return
+        val flashlight = skills.find<DroidFlashlight> { it.withSliders } ?: return
 
         flashlightDifficulty = calculateRating(flashlight)
         flashlightDifficultStrainCount = flashlight.countDifficultStrains()
 
         if (flashlightDifficulty > 0) {
-            val flashlightNoSlider = skills.first { it is DroidFlashlight && !it.withSliders } as DroidFlashlight
+            val flashlightNoSlider = skills.find<DroidFlashlight> { !it.withSliders }!!
 
             flashlightSliderFactor = calculateRating(flashlightNoSlider) / flashlightDifficulty
         } else {
@@ -292,13 +286,13 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     private fun DroidDifficultyAttributes.populateVisualAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
-        val visual = skills.first { it is DroidVisual && it.withSliders } as DroidVisual
+        val visual = skills.find<DroidVisual> { it.withSliders } ?: return
 
         visualDifficulty = calculateRating(visual)
         visualDifficultStrainCount = visual.countDifficultStrains()
 
         if (visualDifficulty > 0) {
-            val visualNoSlider = skills.first { it is DroidVisual && !it.withSliders } as DroidVisual
+            val visualNoSlider = skills.find<DroidVisual> { !it.withSliders }!!
 
             visualSliderFactor = calculateRating(visualNoSlider) / visualDifficulty
         } else {

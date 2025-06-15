@@ -702,15 +702,21 @@ public class Entity implements IEntity {
 		}
 
 		// BEGIN osu!droid modified
-		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
-			IModifier<IEntity> modifier = this.mEntityModifiers.get(i);
+		boolean result = false;
+
+		Iterator<IModifier<IEntity>> iterator = this.mEntityModifiers.iterator();
+
+		while (iterator.hasNext()) {
+			IModifier<IEntity> modifier = iterator.next();
 			if (pEntityModifierMatcher.matches(modifier)) {
 				modifier.onUnregister();
+				iterator.remove();
+				result = true;
 			}
 		}
-		// END osu!droid modified
 
-		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
+		return result;
+		// END osu!droid modified
 	}
 
 	@Override
@@ -975,11 +981,13 @@ public class Entity implements IEntity {
 	}
 
 	@Override
-	public final void onDraw(final GL10 pGL, final Camera pCamera) {
+	// BEGIN osu!droid modified: Make this method overrideable.
+	public /*final*/ void onDraw(final GL10 pGL, final Camera pCamera) {
 		if(this.mVisible) {
 			this.onManagedDraw(pGL, pCamera);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public final void onUpdate(final float pSecondsElapsed) {

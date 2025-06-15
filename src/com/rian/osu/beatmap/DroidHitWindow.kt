@@ -7,10 +7,8 @@ class DroidHitWindow @JvmOverloads constructor(
     /**
      * The overall difficulty of this [DroidHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float = 5f
+    overallDifficulty: Float? = 5f
 ) : HitWindow(overallDifficulty) {
-    constructor(overallDifficulty: Float?) : this(overallDifficulty ?: 5f)
-
     override val greatWindow
         get() = 75 + 5 * (5 - overallDifficulty)
 

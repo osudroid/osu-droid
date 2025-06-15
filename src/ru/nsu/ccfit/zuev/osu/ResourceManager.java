@@ -9,8 +9,9 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
-import com.reco1l.osu.skinning.IniReader;
-import com.reco1l.osu.skinning.SkinConverter;
+import com.osudroid.ui.skinning.IniReader;
+import com.osudroid.ui.skinning.SkinConverter;
+import com.reco1l.andengine.ExtendedEngine;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
@@ -146,12 +147,15 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
-        loadTexture("ranking_enabled", "ranking_enabled.png", false);
+        loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
+        loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
+
+        ExtendedEngine.getCurrent().onSkinChange();
     }
 
     public void loadCustomSkin(String folder) {
@@ -342,7 +346,8 @@ public class ResourceManager {
         }
 
         loadTexture("ranking_button", "ranking_button.png", false);
-        loadTexture("ranking_enabled", "ranking_enabled.png", false);
+        loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
+        loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("selection-approved", "selection-approved.png", false);
         loadTexture("selection-loved", "selection-loved.png", false);

@@ -18,6 +18,11 @@ interface IGameplayHitSampleInfo {
     var frequency: Float
 
     /**
+     * The volume at which this [IGameplayHitSampleInfo] is played. 1 is 100% volume.
+     */
+    var volume: Float
+
+    /**
      * Whether this [IGameplayHitSampleInfo] should loop its playback.
      */
     var isLooping: Boolean
