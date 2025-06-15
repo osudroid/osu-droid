@@ -268,7 +268,7 @@ public class StatisticV2 implements Serializable {
 
             if (GameHelper.isPrecise()) {
                 scorePortion = 0.3f * Math.sqrt((double) v1Score / v1MaxScore);
-                accuracyPortion = 0.7f * Math.pow(getAccuracy(), 2);
+                accuracyPortion = 0.7f * Math.pow(getAccuracy(), 4);
             } else {
                 scorePortion = 0.4f * Math.sqrt((double) v1Score / v1MaxScore);
                 accuracyPortion = 0.6f * Math.pow(getAccuracy(), 8);
