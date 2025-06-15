@@ -18,7 +18,7 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModEasy::class, ModMirror::class)
 
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.04f
 
     override fun applyToDifficulty(
         mode: GameMode,
