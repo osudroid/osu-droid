@@ -88,6 +88,7 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -95,7 +96,6 @@ import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
 import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -173,7 +173,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public int offsetRegs;
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
-    private int failcount = 0;
     private Color4 sliderBorderColor;
     private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
@@ -706,11 +705,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         lastBeatmapInfo = beatmapInfo;
 
         stat = new StatisticV2();
-        stat.setMod(ModMenu.getInstance().getMod());
-        stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
-                && !stat.getMod().contains(GameMod.MOD_RELAX)
-                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
-                && !stat.getMod().contains(GameMod.MOD_AUTO);
+        stat.setMod(lastMods);
+        stat.migrateLegacyMods(parsedBeatmap.getDifficulty());
+        stat.calculateModScoreMultiplier(parsedBeatmap.getDifficulty());
+        stat.canFail = !stat.getMod().contains(ModNoFail.class)
+                && !stat.getMod().contains(ModRelax.class)
+                && !stat.getMod().contains(ModAutopilot.class)
+                && !stat.getMod().contains(ModAutoplay.class);
 
         var rawDifficulty = parsedBeatmap.getDifficulty();
         float multiplier = 1 + Math.min(rawDifficulty.od, 10) / 10f + Math.min(rawDifficulty.hp, 10) / 10f;
@@ -791,7 +792,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
-        failcount = 0;
         mainCursorId = -1;
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
@@ -864,19 +864,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setMuted(lastMods.ofType(ModMuted.class));
         GameHelper.setFreezeFrame(lastMods.ofType(ModFreezeFrame.class));
         GameHelper.setApproachDifferent(lastMods.ofType(ModApproachDifferent.class));
-
-        // Set up counter texts
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-        counterTexts.clear();
-
-        hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
-
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            var fpsCounter = new FPSCounter(counterTextFont);
 
         int cursorCount = replaying && replay != null ? replay.cursorMoves.size() : CursorCount;
 
@@ -1328,10 +1315,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             boolean isDeath = Multiplayer.isMultiplayer
                 && stat.getHp() <= 0
-                && !stat.getMod().contains(GameMod.MOD_NOFAIL)
-                && !stat.getMod().contains(GameMod.MOD_RELAX)
-                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
-                && !stat.getMod().contains(GameMod.MOD_AUTO);
+                && !stat.getMod().contains(ModNoFail.class)
+                && !stat.getMod().contains(ModRelax.class)
+                && !stat.getMod().contains(ModAutopilot.class)
+                && !stat.getMod().contains(ModAutoplay.class);
 
             stat.isAlive = stat.isAlive
                     // Player is alive - they will only die if HP reaches 0.

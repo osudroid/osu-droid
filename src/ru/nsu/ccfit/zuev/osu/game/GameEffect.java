@@ -14,11 +14,10 @@ import com.reco1l.framework.Color4;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
-
-import javax.annotation.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;

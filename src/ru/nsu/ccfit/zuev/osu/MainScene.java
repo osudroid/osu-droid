@@ -465,7 +465,7 @@ public class MainScene implements IUpdateHandler {
 
         ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
-        ExtendedSprite tournamentOverlay = new UISprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+        var tournamentOverlay = new UISprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
         tournamentOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
         tournamentOverlay.setOrigin(Anchor.BottomCenter);
         scene.attachChild(tournamentOverlay);

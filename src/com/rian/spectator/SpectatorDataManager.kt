@@ -1,7 +1,7 @@
 package com.rian.spectator
 
 import android.util.Log
-import com.reco1l.ibancho.RoomAPI
+import com.osudroid.multiplayer.api.RoomAPI
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.Slider
 import ru.nsu.ccfit.zuev.osu.Config
@@ -31,8 +31,8 @@ class SpectatorDataManager(
     private var beginningEventIndex = 0
     private var endEventIndex = 0
 
-    private var beginningCursorMoveIndexes = IntArray(GameScene.getCursorCount())
-    private val endCursorMoveIndexes = IntArray(GameScene.getCursorCount())
+    private var beginningCursorMoveIndexes = IntArray(GameScene.CursorCount)
+    private val endCursorMoveIndexes = IntArray(GameScene.CursorCount)
 
     private val submissionTimer = Timer()
     private val submissionPeriod = 5000L
@@ -69,8 +69,8 @@ class SpectatorDataManager(
                             writeInt((movement.time shl 2) + movement.touchType.id)
 
                             if (movement.touchType != TouchType.UP) {
-                                writeFloat(movement.point.x * Config.getTextureQuality())
-                                writeFloat(movement.point.y * Config.getTextureQuality())
+                                writeFloat(movement.x * Config.getTextureQuality())
+                                writeFloat(movement.y * Config.getTextureQuality())
                             }
                         }
                     }
@@ -166,7 +166,7 @@ class SpectatorDataManager(
      * @param objectId The ID of the object.
      */
     fun addObjectData(objectId: Int) {
-        val obj = gameScene.beatmap.hitObjects.objects[objectId]
+        val obj = gameScene.playableBeatmap!!.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
         var time = obj.endTime
         val hitWindow = if (obj is Slider) obj.head.hitWindow else obj.hitWindow

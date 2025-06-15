@@ -20,7 +20,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
@@ -213,11 +212,9 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("sessionId", sessionId);
-        post.addParam("modstring", stat.getModString());
+        post.addParam("mods", stat.getMod().serializeMods().toString());
         post.addParam("hash", hash);
-        post.addParam("isAllowMoreThanThreeCursors", Config.isAllowMoreThanThreeCursors() ? "1" : "0");
         post.addParam("isSliderLock", Config.isRemoveSliderLock() ? "1" : "0");
-        post.addParam("isSliderAccuracy", stat.getMod().contains(GameMod.MOD_SCOREV2) ? "1" : "0");
 
         return sendRequest(post, endpoint + "verifyPlaySettings");
     }

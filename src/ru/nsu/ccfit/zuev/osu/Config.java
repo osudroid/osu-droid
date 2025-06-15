@@ -207,7 +207,6 @@ public class Config {
         showCursor = prefs.getBoolean("showcursor", false);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        allowMoreThanThreeCursors = prefs.getBoolean("allowMoreThanThreeCursors", true);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
@@ -484,14 +483,6 @@ public class Config {
 
     public static void setStayOnline(boolean stayOnline) {
         Config.stayOnline = stayOnline;
-    }
-
-    public static BeatmapLeaderboardScoringMode getBeatmapLeaderboardScoringMode() {
-        return BeatmapLeaderboardScoringMode.parse(Integer.parseInt(getString("beatmapLeaderboardScoringMode", "0")));
-    }
-
-    public static void setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode) {
-        setString("beatmapLeaderboardScoringMode", String.valueOf(beatmapLeaderboardScoringMode.ordinal()));
     }
 
     public static boolean getLoadAvatar() {

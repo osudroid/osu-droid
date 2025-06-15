@@ -482,10 +482,6 @@ public class StatisticV2 implements Serializable {
         builder.append(getUnstableRate());
         builder.append(' ');
         builder.append(Config.isRemoveSliderLock() ? '1' : '0');
-        builder.append(' ');
-        builder.append(mod.contains(GameMod.MOD_SCOREV2) ? '1' : '0');
-        builder.append(' ');
-        builder.append(Config.isAllowMoreThanThreeCursors() ? '1' : '0');
         return builder.toString();
     }
 
@@ -633,7 +629,7 @@ public class StatisticV2 implements Serializable {
         misses = 0;
         scoreMaxCombo = 0;
         currentCombo = 0;
-        totalScore = 0;
+        v1Score = 0;
         hp = 1;
         mark = null;
         bonusScore = 0;

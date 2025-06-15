@@ -386,8 +386,8 @@ public class Replay {
         }
 
         @NonNull
-        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
-            boolean isHardRock = ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK);
+        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay, ModHashMap mods) throws IOException {
+            boolean isHardRock = mods.contains(ModHardRock.class);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
             array.size = size;
