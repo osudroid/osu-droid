@@ -65,6 +65,9 @@ public class GameplaySlider extends GameObject {
     private int ticksGot;
     private int currentTickSpriteIndex;
 
+    private int trackingCursorId = -1;
+    private boolean isTracking;
+
     private final UISprite followCircle;
 
     // Temporarily used PointF to avoid allocations
@@ -183,6 +186,8 @@ public class GameplaySlider extends GameObject {
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
+        trackingCursorId = -1;
+        isTracking = false;
 
         reloadHitSounds();
 
@@ -763,14 +768,100 @@ public class GameplaySlider extends GameObject {
                 return true;
             }
 
-            var isPressed = listener.isMousePressed(this, i);
-            if (isPressed && inPosition) {
-                return true;
-            } else if (GameHelper.isAutopilot() && isPressed) {
+            if (listener.isMousePressed(this, i) && (GameHelper.isAutopilot() || inPosition)) {
                 return true;
             }
         }
+
         return false;
+    }
+
+    private void updateTracking(PointF position) {
+        if (autoPlay || replayObjectData != null) {
+            trackingCursorId = 0;
+            isTracking = true;
+        } else if (hasTrackingCursor()) {
+            // If the slider is being tracked, we only want to check if the tracking cursor is still tracking it.
+            if (listener.isMouseDown(trackingCursorId)) {
+                isTracking = isCursorTracking(position, trackingCursorId);
+            } else {
+                trackingCursorId = -1;
+                isTracking = false;
+            }
+        } else {
+            // Otherwise, we need to check if any cursor is tracking the slider.
+            for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
+                if (isCursorTracking(position, i)) {
+                    trackingCursorId = i;
+                    isTracking = true;
+                    break;
+                }
+            }
+        }
+
+        updateFollowCircleTrackingState();
+    }
+
+    private boolean isCursorTracking(PointF position, int id) {
+        float trackingDistanceThresholdSquared = getTrackingDistanceThresholdSquared(isTracking());
+        boolean inPosition = Utils.squaredDistance(position, listener.getMousePos(id)) <= trackingDistanceThresholdSquared;
+
+        return listener.isMouseDown(id) && (GameHelper.isAutopilot() || inPosition);
+    }
+
+    private boolean isTracking() {
+        return isTracking && replayObjectData == null ||
+                replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
+    }
+
+    private boolean hasTrackingCursor() {
+        return trackingCursorId != -1;
+    }
+
+    private void updateFollowCircleTrackingState() {
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
+        boolean isTracking = isTracking();
+
+        if (Config.isAnimateFollowCircle()) {
+            float remainTime = (float) (duration - elapsedSpanTime);
+
+            if (isTracking && !isInRadius) {
+                isInRadius = true;
+                isFollowCircleAnimating = true;
+                playSlidingSamples();
+
+                // If alpha doesn't equal 0 means that it has been into an animation before
+                float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
+
+                followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f));
+                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, e -> {
+                    isFollowCircleAnimating = false;
+                }, Easing.OutQuad));
+            } else if (!isTracking && isInRadius) {
+                isInRadius = false;
+                isFollowCircleAnimating = true;
+                stopSlidingSamples();
+
+                followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(Modifiers.scale(0.1f, followCircle.getScaleX(), scale * 2f));
+                followCircle.registerEntityModifier(Modifiers.alpha(0.1f, followCircle.getAlpha(), 0f, e -> {
+                    if (isOver) {
+                        Execution.updateThread(e::detachSelf);
+                    }
+                    isFollowCircleAnimating = false;
+                }));
+            }
+        } else {
+            if (isTracking && !isInRadius) {
+                playSlidingSamples();
+            } else if (!isTracking && isInRadius) {
+                stopSlidingSamples();
+            }
+
+            isInRadius = isTracking;
+            followCircle.setAlpha(isTracking ? 1 : 0);
+        }
     }
 
     private double hitOffsetToPreviousFrame() {
@@ -921,9 +1012,8 @@ public class GameplaySlider extends GameObject {
 
         // Ball position
         var ballPos = getPositionAt(bodyProgress, true, false);
-        boolean isTracking = isCursorInFollowArea(ballPos, isInRadius);
-        listener.onTrackingSliders(isTracking);
-        updateTracking(isTracking);
+        updateTracking(ballPos);
+        listener.onTrackingSliders(isTracking());
 
         judgeSliderTicks();
         updateSlidingSamplesVolume();
@@ -1006,7 +1096,7 @@ public class GameplaySlider extends GameObject {
         float distanceTrackingThresholdSquared = getTrackingDistanceThresholdSquared(true);
 
         // Check whether the cursor is within the follow area.
-        boolean isTracking = isCursorInFollowArea(ballPos, true);
+        updateTracking(ballPos);
 
         double currentTime = getGameplayPassedTimeMilliseconds();
         boolean allTicksInRange = false;
@@ -1014,7 +1104,7 @@ public class GameplaySlider extends GameObject {
         var nestedObjects = beatmapSlider.getNestedHitObjects();
 
         // Replays force their hit results per nested object, so we do not need to check for tracking here.
-        if (isTracking && replayObjectData == null) {
+        if (isTracking() && replayObjectData == null) {
             allTicksInRange = true;
 
             // Do not judge the slider end as it will be judged in onSpanFinish.
@@ -1074,81 +1164,6 @@ public class GameplaySlider extends GameObject {
             }
 
             currentNestedObjectIndex++;
-        }
-
-        // If all ticks were hit so far, enable tracking the full extent.
-        // If any ticks were missed, assume tracking would've broken at some point, and should only activate if the cursor is within the slider ball.
-        // For the second case, this may be the last chance we have to enable tracking before other objects get judged, otherwise the same would normally happen via Update().
-        updateTracking(allTicksInRange || isCursorInFollowArea(ballPos, false));
-    }
-
-    private boolean isCursorInFollowArea(PointF ballPosition, boolean isTracking) {
-        if (autoPlay) {
-            return true;
-        }
-
-        // Calculating if cursor in follow circle bounds
-        float trackingDistanceThresholdSquared = getTrackingDistanceThresholdSquared(isTracking);
-
-        for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
-            var isPressed = listener.isMouseDown(i);
-
-            if (GameHelper.isAutopilot() && isPressed) {
-                return true;
-            }
-
-            float distanceSquared = Utils.squaredDistance(listener.getMousePos(i), ballPosition);
-
-            if (isPressed && distanceSquared <= trackingDistanceThresholdSquared) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void updateTracking(boolean isTracking) {
-        float scale = beatmapSlider.getScreenSpaceGameplayScale();
-
-        if (Config.isAnimateFollowCircle()) {
-            float remainTime = (float) (duration - elapsedSpanTime);
-
-            if (isTracking && !isInRadius) {
-                isInRadius = true;
-                isFollowCircleAnimating = true;
-                playSlidingSamples();
-
-                // If alpha doesn't equal 0 means that it has been into an animation before
-                float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
-
-                followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f));
-                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, e -> {
-                    isFollowCircleAnimating = false;
-                }, Easing.OutQuad));
-            } else if (!isTracking && isInRadius) {
-                isInRadius = false;
-                isFollowCircleAnimating = true;
-                stopSlidingSamples();
-
-                followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.scale(0.1f, followCircle.getScaleX(), scale * 2f));
-                followCircle.registerEntityModifier(Modifiers.alpha(0.1f, followCircle.getAlpha(), 0f, e -> {
-                    if (isOver) {
-                        Execution.updateThread(e::detachSelf);
-                    }
-                    isFollowCircleAnimating = false;
-                }));
-            }
-        } else {
-            if (isTracking && !isInRadius) {
-                playSlidingSamples();
-            } else if (!isTracking && isInRadius) {
-                stopSlidingSamples();
-            }
-
-            isInRadius = isTracking;
-            followCircle.setAlpha(isTracking ? 1 : 0);
         }
     }
 
@@ -1311,10 +1326,6 @@ public class GameplaySlider extends GameObject {
             sliderSlideSample.setVolume(volume);
             sliderWhistleSample.setVolume(volume);
         }
-    }
-
-    private boolean isTracking() {
-        return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
     }
 
     private Color4 getSynesthesiaComboColor(HitObject hitObject) {
