@@ -12,11 +12,12 @@ import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
-import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -58,9 +59,6 @@ public class StatisticV2 implements Serializable {
 
     private int life = 1;
 
-    // Used to indicate that the score was done before version 1.6.8. Used in difficulty calculation.
-    private boolean isOldScore;
-
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
      * multiplayer.
@@ -83,23 +81,22 @@ public class StatisticV2 implements Serializable {
     private String beatmapMD5 = "";
 
     /**
-     * The currnt performance points.
+     * The current performance points.
      */
     private double pp = 0f;
 
 
     public StatisticV2() {}
 
-    public StatisticV2(final String[] params) {
+    public StatisticV2(final String[] params) throws JSONException {
         this(params, null);
     }
 
-    public StatisticV2(final String[] params, final BeatmapDifficulty originalDifficulty) {
+    public StatisticV2(final String[] params, final BeatmapDifficulty originalDifficulty) throws JSONException {
         playerName = "";
         if (params.length < 6) return;
 
-        mod = LegacyModConverter.convert(params[0]);
-        isOldScore = !params[0].contains("|");
+        mod = ModUtils.deserializeMods(params[0]);
         setForcedScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
@@ -434,10 +431,6 @@ public class StatisticV2 implements Serializable {
 
     public void setMod(final ModHashMap mod) {
         this.mod = mod;
-    }
-
-    public boolean isOldScore() {
-        return isOldScore;
     }
 
     public float getDiffModifier() {
