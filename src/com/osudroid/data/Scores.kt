@@ -100,6 +100,8 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     val time: Long,
 
+    // TODO: add slider tick and end hits as a part of client-side score statistics in the next migration (version 3)
+    // (population strategy is to do it when the player loads a replay, otherwise default to 0)
 ) {
 
     /**
