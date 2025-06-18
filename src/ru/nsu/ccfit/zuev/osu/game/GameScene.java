@@ -2013,11 +2013,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
                     break;
                 case GameObjectListener.SLIDER_END:
+                    stat.addSliderEndHit();
                     createBurstEffectSliderEnd(judgementPos, color);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
                     break;
                 default:
+                    stat.addSliderTickHit();
                     createBurstEffect(judgementPos, color);
             }
         }

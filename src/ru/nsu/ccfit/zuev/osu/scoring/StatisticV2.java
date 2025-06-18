@@ -30,11 +30,13 @@ public class StatisticV2 implements Serializable {
     private static final float scoreV2AccPortion = 0.3f;
     private static final float scoreV2ComboPortion = 0.7f;
 
-    int hit300 = 0, hit100 = 0, hit50 = 0;
-    int hit300k = 0, hit100k = 0;
-    int misses = 0;
-    int scoreMaxCombo = 0;
-    long time = 0;
+    private int hit300 = 0, hit100 = 0, hit50 = 0;
+    private int hit300k = 0, hit100k = 0;
+    private int misses = 0;
+    private int scoreMaxCombo = 0;
+    private int sliderTickHits = 0;
+    private int sliderEndHits = 0;
+    private long time = 0;
     private int currentCombo = 0;
     private int scoreHash = 0;
     private int totalScore;
@@ -382,6 +384,30 @@ public class StatisticV2 implements Serializable {
         this.misses = misses;
     }
 
+    public int getSliderTickHits() {
+        return sliderTickHits;
+    }
+
+    public void setSliderTickHits(int sliderTickHits) {
+        this.sliderTickHits = sliderTickHits;
+    }
+
+    public void addSliderTickHit() {
+        sliderTickHits++;
+    }
+
+    public int getSliderEndHits() {
+        return sliderEndHits;
+    }
+
+    public void setSliderEndHits(int sliderEndHits) {
+        this.sliderEndHits = sliderEndHits;
+    }
+
+    public void addSliderEndHit() {
+        sliderEndHits++;
+    }
+
     public boolean isPerfect() {
         return getAccuracy() == 1f;
     }
@@ -472,6 +498,10 @@ public class StatisticV2 implements Serializable {
         builder.append(getHit50());
         builder.append(' ');
         builder.append(getMisses());
+        builder.append(' ');
+        builder.append(getSliderTickHits());
+        builder.append(' ');
+        builder.append(getSliderEndHits());
         builder.append(' ');
         builder.append(getAccuracy());
         builder.append(' ');
@@ -628,6 +658,8 @@ public class StatisticV2 implements Serializable {
         hit300k = 0;
         hit100k = 0;
         misses = 0;
+        sliderTickHits = 0;
+        sliderEndHits = 0;
         scoreMaxCombo = 0;
         currentCombo = 0;
         totalScore = 0;
