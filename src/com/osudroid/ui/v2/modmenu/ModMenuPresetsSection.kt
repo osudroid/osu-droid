@@ -11,7 +11,6 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.utils.*
-import org.json.*
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuPresetsSection : ModMenuSection("Presets") {
@@ -60,7 +59,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
         for (preset in modPresets) {
 
-            preset.mods = ModUtils.deserializeMods(JSONArray(preset.serializedMods))
+            preset.mods = ModUtils.deserializeMods(preset.serializedMods)
             toggleContainer += ModPresetToggle(preset)
         }
     }

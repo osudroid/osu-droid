@@ -11,7 +11,6 @@ import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.util.Debug;
-import org.json.JSONArray;
 
 import java.io.EOFException;
 import java.io.File;
@@ -240,7 +239,7 @@ public class Replay {
 
                     if (version >= 7) {
                         var modJsonStr = (String) os.readObject();
-                        stat.setMod(ModUtils.deserializeMods(new JSONArray(modJsonStr)));
+                        stat.setMod(ModUtils.deserializeMods(modJsonStr));
                     } else {
                         //noinspection unchecked
                         var mod = (EnumSet<GameMod>) os.readObject();
