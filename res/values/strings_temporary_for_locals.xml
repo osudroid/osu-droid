@@ -15,4 +15,15 @@
     <string name="mod_section_fun">Fun</string>
     <string name="mod_section_system">System</string>
 
+    <!-- Config Backup -->
+    <string name="opt_category_config_backup">Backup</string>
+    <string name="opt_config_backup_title">Export options file</string>
+    <string name="opt_config_backup_summary">Exports non-sensitive options to \"osudroid.cfg\" in osu!droid\'s main directory</string>
+    <string name="opt_config_backup_restore_title">Import options file</string>
+    <string name="opt_config_backup_restore_summary">Imports non-sensitive options from \"osudroid.cfg\" in osu!droid\'s main directory</string>
+    <string name="config_backup_info_success">Successfully exported the options file</string>
+    <string name="config_backup_info_fail">Failed to export the options file</string>
+    <string name="config_backup_restore_info_success">Successfully imported the options file</string>
+    <string name="config_backup_restore_info_fail">Failed to import the options file</string>
+
 </resources>

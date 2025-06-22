@@ -74,4 +74,19 @@
 
     </PreferenceCategory>
 
+   <PreferenceCategory android:title="@string/opt_category_config_backup">
+
+        <Preference
+            android:key="backup"
+            android:summary="@string/opt_config_backup_summary"
+            android:title="@string/opt_config_backup_title"/>
+
+        <Preference
+            android:key="restore"
+            android:summary="@string/opt_config_backup_restore_summary"
+            android:title="@string/opt_config_backup_restore_title"
+            app:layout="@layout/settings_preference_bottom"/>
+
+    </PreferenceCategory>
+
 </androidx.preference.PreferenceScreen>

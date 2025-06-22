@@ -51,6 +51,7 @@ import com.rian.osu.mods.ModAutoplay
 import com.rian.osu.replay.ReplayImporter
 import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.ConfigBackup
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
@@ -256,6 +257,27 @@ class SettingsFragment : SettingsFragment() {
 
         findPreference<Preference>("update")!!.setOnPreferenceClickListener {
             UpdateManager.checkNewUpdates(false)
+            true
+        }
+
+        findPreference<Preference>("backup")!!.setOnPreferenceClickListener {
+            val success = ConfigBackup.exportPreferences()
+            if(success) {
+                ToastLogger.showText(/*com.osudroid.resources.*/R.string.config_backup_info_success, true)
+            }else{
+                ToastLogger.showText(/*com.osudroid.resources.*/R.string.config_backup_info_fail, true)
+            }
+            true
+        }
+
+        findPreference<Preference>("restore")!!.setOnPreferenceClickListener {
+            val success = ConfigBackup.importPreferences()
+            if(success) {
+                ToastLogger.showText(/*com.osudroid.resources.*/R.string.config_backup_restore_info_success, true)
+                dismiss()
+            }else{
+                ToastLogger.showText(/*com.osudroid.resources.*/R.string.config_backup_restore_info_fail, true)
+            }
             true
         }
 
