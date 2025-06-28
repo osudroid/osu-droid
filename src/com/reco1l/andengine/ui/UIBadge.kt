@@ -26,12 +26,6 @@ open class UIBadge : CompoundText(), ISizeVariable {
         background?.color = theme.accentColor * 0.15f
     }
 
-    override var onIconChange: (UIComponent) -> Unit = { icon ->
-        icon.anchor = Anchor.CenterLeft
-        icon.origin = Anchor.CenterLeft
-        onSizeVariantChanged()
-    }
-
     override var sizeVariant = Medium
         set(value) {
             if (field != value) {
@@ -49,7 +43,6 @@ open class UIBadge : CompoundText(), ISizeVariable {
     override fun onSizeVariantChanged() {
 
         val cornerRadius: Float
-        val iconSize: Float
 
         when (sizeVariant) {
             Small -> {
@@ -57,35 +50,22 @@ open class UIBadge : CompoundText(), ISizeVariable {
                 padding = Vec4(8f, 4f)
                 spacing = 4f
                 cornerRadius = 6f
-                iconSize = 20f
             }
             Medium -> {
                 font = ResourceManager.getInstance().getFont("smallFont")
                 padding = Vec4(12f, 8f)
                 spacing = 8f
                 cornerRadius = 12f
-                iconSize = 28f
             }
             Large -> {
                 font = ResourceManager.getInstance().getFont("font")
                 padding = Vec4(16f, 12f)
                 spacing = 12f
                 cornerRadius = 16f
-                iconSize = 36f
             }
         }
 
         (background as? UIBox)?.cornerRadius = cornerRadius
-
-        leadingIcon?.apply {
-            width = iconSize
-            height = iconSize
-        }
-
-        trailingIcon?.apply {
-            width = iconSize
-            height = iconSize
-        }
     }
 }
 
