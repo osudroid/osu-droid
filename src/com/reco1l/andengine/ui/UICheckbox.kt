@@ -13,10 +13,8 @@ class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValu
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         if (value) {
             background?.color = theme.accentColor * 0.5f
-            foreground?.color = theme.accentColor
         } else {
             background?.color = theme.accentColor * 0.25f
-            foreground?.color = theme.accentColor * 0.4f
         }
 
         checkSprite.color = theme.accentColor
@@ -42,10 +40,6 @@ class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValu
         width = 48f
         height = 48f
 
-        foreground = UIBox().apply {
-            paintStyle = PaintStyle.Outline
-            cornerRadius = 12f
-        }
         background = UIBox().apply {
             cornerRadius = 12f
         }
@@ -55,16 +49,13 @@ class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValu
         super.onValueChanged()
 
         background!!.clearModifiers(ModifierType.Color)
-        foreground!!.clearModifiers(ModifierType.Color)
         checkSprite.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
 
         if (value) {
             background!!.colorTo(Theme.current.accentColor * 0.5f, 0.1f)
-            foreground!!.colorTo(Theme.current.accentColor, 0.1f)
             checkSprite.scaleTo(1f, 0.2f, Easing.OutBounce)
         } else {
             background!!.colorTo(Theme.current.accentColor * 0.25f, 0.1f)
-            foreground!!.colorTo(Theme.current.accentColor * 0.4f, 0.1f)
             checkSprite.scaleTo(0f, 0.2f, Easing.OutBounce)
         }
 
