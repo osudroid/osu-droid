@@ -121,6 +121,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         textureRegion.isFlippedHorizontal = flippedHorizontal
 
         blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        invalidateBuffer(BufferInvalidationFlag.Data)
     }
 
 
