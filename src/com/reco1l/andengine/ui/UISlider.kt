@@ -12,17 +12,8 @@ import kotlin.math.*
 open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
 
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-
-        background?.apply {
-            color = theme.accentColor * 0.25f
-            foreground?.color = theme.accentColor * 0.4f
-        }
-
-        progressBar.apply {
-            color = theme.accentColor * 0.5f
-            foreground?.color = theme.accentColor
-        }
-
+        background?.color = theme.accentColor * 0.25f
+        progressBar.color = theme.accentColor * 0.5f
         thumb.color = theme.accentColor
     }
 
@@ -88,10 +79,6 @@ open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         cornerRadius = 12f
-        foreground = UIBox().apply {
-            paintStyle = PaintStyle.Outline
-            cornerRadius = 12f
-        }
         depthInfo = DepthInfo.Default
     }
 
@@ -102,11 +89,6 @@ open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
 
         background = UIBox().apply {
             cornerRadius = 12f
-
-            foreground = UIBox().apply {
-                cornerRadius = 12f
-                paintStyle = PaintStyle.Outline
-            }
         }
 
         attachChild(thumb)
