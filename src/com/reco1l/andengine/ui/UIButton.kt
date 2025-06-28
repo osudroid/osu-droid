@@ -184,36 +184,35 @@ open class UITextButton : UIButton() {
      * The compound text of the button.
      */
     val content = CompoundText().apply {
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
+        width = FillParent
+        height = FillParent
+        alignment = Anchor.Center
         spacing = 8f
     }
 
 
-    /**
-     * The text of the button.
-     */
     var text by content::text
 
-    /**
-     * The font of the button.
-     */
     var font by content::font
 
-    /**
-     * The leading icon.
-     */
     var leadingIcon by content::leadingIcon
 
-    /**
-     * The trailing icon.
-     */
     var trailingIcon by content::trailingIcon
 
-    /**
-     * The icon change callback.
-     */
+    var autoSizeTrailingIcon by content::autoSizeTrailingIcon
+
+    var autoSizeLeadingIcon by content::autoSizeLeadingIcon
+
     var onIconChange by content::onIconChange
+
+    var alignment by content::alignment
+
+
+    override fun onContentChanged() {
+        // We don't use direct reference of `content` because it may not be initialized yet when this method is called.
+        contentWidth = get<CompoundText>(0)?.contentWidth ?: 0f
+        contentHeight = get<CompoundText>(0)?.contentHeight ?: 0f
+    }
 
 
     init {
