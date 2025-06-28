@@ -13,13 +13,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.anddev.andengine.util.Debug;
 
 public class ConfigBackup {
-
-    private static final Set<String> EXCLUDE_KEYS = Set.of("installID", "onlineUsername", "onlinePassword");
 
     public static boolean exportPreferences() {
         try {
@@ -31,7 +28,7 @@ public class ConfigBackup {
             
             allPrefs.entrySet()
                 .stream()
-                .filter(entry -> !EXCLUDE_KEYS.contains(entry.getKey()))
+                .filter(entry -> !Config.SENSITIVE_KEYS.contains(entry.getKey()))
                 .forEach(entry -> {
                     try{
                         json.put(entry.getKey(), entry.getValue());
@@ -76,7 +73,7 @@ public class ConfigBackup {
             Iterator<String> keys = json.keys();
             while(keys.hasNext()) {
                 String key = keys.next();
-                if(EXCLUDE_KEYS.contains(key)) continue;
+                if(Config.SENSITIVE_KEYS.contains(key)) continue;
                 Object value = json.get(key);
             
                 switch(value.getClass().getSimpleName()) {
