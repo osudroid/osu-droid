@@ -214,7 +214,8 @@ public class GameplaySlider extends GameObject {
         circleColor = comboColor;
         currentNestedObjectIndex = 0;
 
-        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+        boolean applyIncreasedVisibilityToCirclePiece = !GameHelper.isTraceable() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSlider);
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -227,13 +228,14 @@ public class GameplaySlider extends GameObject {
         }
         headCirclePiece.setNumberText(comboNum);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
-        headCirclePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
+        headCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
         approachCircle.setColor(comboColor);
         approachCircle.setScale(scale * 3 * (float) (beatmapSlider.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
+        approachCircle.setVisible(!GameHelper.isHidden() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapSlider));
 
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
@@ -245,7 +247,7 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece.setScale(scale);
         tailCirclePiece.setCircleColor(initialTailColor);
         tailCirclePiece.setAlpha(0);
-        tailCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
+        tailCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
         if (Config.isSnakingInSliders()) {
             tailCirclePiece.setPosition(this.position.x, this.position.y);
@@ -272,7 +274,7 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
 
-        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
+        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
@@ -1229,7 +1231,8 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
+        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles() &&
+                GameHelper.getHidden().getFirstObject() != beatmapSlider) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 

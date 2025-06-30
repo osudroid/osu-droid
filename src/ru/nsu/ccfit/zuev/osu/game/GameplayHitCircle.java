@@ -82,19 +82,19 @@ public class GameplayHitCircle extends GameObject {
             comboNum %= 10;
         }
 
-        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote();
-
         circlePiece.setNumberText(comboNum);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
-        circlePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
+        circlePiece.setVisible(!GameHelper.isTraceable() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapCircle));
 
         approachCircle.setColor(comboColor);
         approachCircle.setScale(scale * 3 * (float) (beatmapCircle.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
+        approachCircle.setVisible(!GameHelper.isHidden() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapCircle));
 
-        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
+        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             circlePiece.registerEntityModifier(Modifiers.sequence(
