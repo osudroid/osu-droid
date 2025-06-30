@@ -9,7 +9,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      */
     @JvmField
     val defaultControlPoint: T
-) {
+) : Iterable<T> {
     /**
      * The control points in this manager.
      */
@@ -181,4 +181,6 @@ abstract class ControlPointManager<T : ControlPoint>(
 
         return l
     }
+
+    override fun iterator() = controlPoints.iterator()
 }
