@@ -21,7 +21,7 @@ class HUDPPCounter : HUDElement() {
     }
 
     fun setValue(value: Double) {
-        sprite.text = "${value.roundToInt()}${if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid) "dpp" else "pp"}"
+        sprite.text = "${(value.takeIf { !it.isNaN() } ?: 0.0).roundToInt()}${if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid) "dpp" else "pp"}"
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
