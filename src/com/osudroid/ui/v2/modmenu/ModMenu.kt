@@ -52,7 +52,7 @@ object ModMenu : UIScene() {
 
 
     private val modChangeQueue = LinkedList<Mod>()
-    private val modPresetsSection: ModMenuPresetsSection
+    private val modPresetsSection: ModMenuPresetsSection?
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
@@ -228,8 +228,12 @@ object ModMenu : UIScene() {
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
-                    modPresetsSection = ModMenuPresetsSection()
-                    +modPresetsSection
+                    if (Multiplayer.room != null) {
+                        modPresetsSection = ModMenuPresetsSection()
+                        +modPresetsSection
+                    } else {
+                        modPresetsSection = null
+                    }
 
                     val mods = ModUtils.allModsInstances
 
@@ -252,7 +256,7 @@ object ModMenu : UIScene() {
         // Customizations menu
         attachChild(customizationMenu)
 
-        modPresetsSection.loadPresets()
+        modPresetsSection?.loadPresets()
     }
 
 
@@ -498,7 +502,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
-        modPresetsSection.onModsChanged()
+        modPresetsSection?.onModsChanged()
     }
 
     fun addMod(mod: Mod) {
