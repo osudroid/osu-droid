@@ -2879,26 +2879,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 float dt = secElapsed * GameHelper.getSpeedMultiplier();
 
                 // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
-                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and 2 times
-                // the actual progressed time (meaning we allow up to 2 frames of error).
-                //
-                // See https://github.com/ppy/osu/issues/26879 for more information. The issue has been closed, but the
-                // BASS binary required for the fix is not available for Android at the time of this commit.
-                //
-                // The 2 frames of error threshold is chosen to allow gameplay time to still catch up to audio time in
-                // cases where gameplay is significantly behind such that it requires an offset greater than `dt` to
-                // catch up with audio time. Without this, gameplay time may consistently be behind audio time until the
-                // player restarts gameplay.
+                // actual progressed time. To prevent that situation from happening, we keep `dt` between thresholds.
+                // They serve as a buffer zone to allow audio and gameplay time to synchronize in cases where one is
+                // behind or ahead of the other.
+                // See https://github.com/ppy/osu/issues/26879 for more information.
+                float minDt = 0;
                 float maxDt = dt * 2;
 
                 if (songService.getStatus() == Status.PLAYING) {
+                    // Raise the minimum progressed time to still allow gameplay to progress in case audio time is
+                    // behind or BASS reports the wrong position, but not by much to still allow audio to catch up.
+                    // This allows for relatively smooth gameplay progression without the catch-up being too noticeable.
+                    minDt = dt / 2;
                     dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
                 }
 
-                dt = FMath.clamp(dt, 0, maxDt);
+                dt = FMath.clamp(dt, minDt, maxDt);
 
                 update(dt);
                 super.onManagedUpdate(dt);
