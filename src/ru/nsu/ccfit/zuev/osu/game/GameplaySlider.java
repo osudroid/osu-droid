@@ -1231,8 +1231,7 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles() &&
-                GameHelper.getHidden().getFirstObject() != beatmapSlider) {
+        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 
