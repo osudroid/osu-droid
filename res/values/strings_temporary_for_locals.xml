@@ -26,4 +26,6 @@
     <string name="config_backup_restore_info_success">Successfully imported the options file</string>
     <string name="config_backup_restore_info_fail">Failed to import the options file</string>
 
+    <string name="epilepsy_warning">This beatmap contains scenes with rapidly flashing colors.\nPlease take caution if you are affected by epilepsy.</string>
+
 </resources>

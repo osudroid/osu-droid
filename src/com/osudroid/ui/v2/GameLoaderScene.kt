@@ -15,10 +15,11 @@ import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.rian.osu.utils.*
+import kotlin.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import kotlin.math.*
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
 class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : UIScene() {
 
@@ -78,7 +79,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                     text {
                         font = ResourceManager.getInstance().getFont("smallFont")
-                        text = "This beatmap contains scenes with rapidly flashing colors.\nPlease take caution if you are affected by epilepsy."
+                        text = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.epilepsy_warning)
                     }
                 }
             }
@@ -213,7 +214,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     content.apply {
 
                         val offsetSlider = FormSlider(0f).apply {
-                            label = "Offset"
+                            label = StringTable.get(com.osudroid.resources.R.string.opt_category_offset)
                             control.min = -250f
                             control.max = 250f
                             valueFormatter = { "${it.roundToInt()}ms" }
@@ -255,7 +256,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     content.apply {
 
                         +IntPreferenceSlider("bgbrightness", 25).apply {
-                            label = "Background brightness"
+                            label = StringTable.get(com.osudroid.resources.R.string.opt_bgbrightness_title)
                             control.min = 0f
                             control.max = 100f
                             control.onStopDragging = {
@@ -274,15 +275,15 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                         }
 
                         +PreferenceCheckbox("enableStoryboard").apply {
-                            label = "Enable storyboard"
+                            label = StringTable.get(com.osudroid.resources.R.string.opt_enableStoryboard_title)
                         }
 
                         +PreferenceCheckbox("enableVideo").apply {
-                            label = "Enable background video"
+                            label = StringTable.get(com.osudroid.resources.R.string.opt_video_title)
                         }
 
                         +PreferenceCheckbox("showscoreboard").apply {
-                            label = "Show scoreboard"
+                            label = StringTable.get(com.osudroid.resources.R.string.opt_show_scoreboard_title)
                         }
                     }
                 }
