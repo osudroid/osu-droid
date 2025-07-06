@@ -13,6 +13,14 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
     override val description = "Who put ants in my beatmaps?"
     override val type = ModType.DifficultyIncrease
 
+    override fun isCompatibleWith(other: Mod): Boolean {
+        if (other is ModDifficultyAdjust) {
+            return other.cs != null
+        }
+
+        return super.isCompatibleWith(other)
+    }
+
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)
 
     override fun applyToDifficulty(

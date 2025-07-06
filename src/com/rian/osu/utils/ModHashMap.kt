@@ -23,6 +23,8 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Inserts the specified [Mod] into this [ModHashMap].
      *
+     * Do note that this method will remove any [Mod]s that are incompatible with the specified [Mod].
+     *
      * @param mod The [Mod] to insert.
      * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
      */
@@ -32,6 +34,8 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Inserts a new instance of the specified [Mod] type into this [ModHashMap].
      *
+     * Do note that this method will remove any [Mod]s that are incompatible with the specified [Mod].
+     *
      * @param mod The [Mod] type to insert.
      * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
      */
@@ -40,6 +44,8 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
     /**
      * Inserts a new instance of the specified [Mod] type into this [ModHashMap].
+     *
+     * Do note that this method will remove any [Mod]s that are incompatible with the specified [Mod].
      *
      * @param mod The [Mod] type to insert.
      * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
@@ -53,30 +59,13 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             throw IllegalArgumentException("The key class must correspond to the value class.")
         }
 
-        // Some mods become redundant when `ModDifficultyAdjust` is used. Ideally, this should be handled somewhere else,
-        // but for the time being it's done here for simplicity. This prevents potential abuse cases where score multipliers
-        // from non-affecting mods stack (i.e., forcing all difficulty statistics while using the Hard Rock mod).
-        if (value is ModDifficultyAdjust) {
-            if (value.cs != null) {
-                remove(ModSmallCircle::class)
-            }
-
-            if (value.cs != null && value.ar != null && value.od != null && value.hp != null) {
-                remove(ModEasy::class)
-                remove(ModHardRock::class)
-                remove(ModReallyEasy::class)
-            }
-        }
-
         // Check if there are any mods that are incompatible with the new mod.
         val iterator = iterator()
         while (iterator.hasNext()) {
             val (_, mod) = iterator.next()
 
-            value.incompatibleMods.fastForEach {
-                if (it.isInstance(mod)) {
-                    iterator.remove()
-                }
+            if (!value.isCompatibleWith(mod)) {
+                iterator.remove()
             }
         }
 
