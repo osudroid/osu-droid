@@ -91,7 +91,7 @@ sealed class Mod {
      * The mod specific settings.
      */
     @Suppress("UNCHECKED_CAST")
-    open val settings: List<ModSetting<Any?>>
+    val settings: List<ModSetting<Any?>>
         get() = settingsBacking ?: this::class.memberProperties.mapNotNull { property ->
             property as KProperty1<Mod, Any?>
             property.isAccessible = true
@@ -101,7 +101,7 @@ sealed class Mod {
     /**
      * Whether all [ModSetting]s in this [Mod] are set to their default values.
      */
-    open val usesDefaultSettings
+    val usesDefaultSettings
         get() = settings.all { it.isDefault }
 
     /**
