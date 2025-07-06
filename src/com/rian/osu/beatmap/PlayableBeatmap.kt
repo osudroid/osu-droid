@@ -41,7 +41,7 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      * The speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
-    val speedMultiplier = if (mods != null) ModUtils.calculateRateWithMods(mods) else 1f
+    val speedMultiplier = if (mods != null) ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY) else 1f
 
     /**
      * The [HitWindow] of this [PlayableBeatmap].
