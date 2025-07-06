@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.LinearLayout
@@ -65,9 +66,6 @@ import java.io.File
 import kotlin.math.max
 
 
-
-
-
 class SettingsFragment : SettingsFragment() {
 
 
@@ -83,42 +81,56 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri == null) {
-            return@registerForActivityResult
-        }
-
+    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         val loading = LoadingFragment()
         loading.show()
 
         async {
             val context = requireContext()
+            val decorView = requireActivity().window.decorView
+            var importedCount = 0
             var tempFile: File? = null
 
-            try {
-                tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
+            for (uri in uris) {
+                try {
+                    tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
 
-                context.contentResolver.openInputStream(uri)!!.use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyTo(output)
+                    context.contentResolver.openInputStream(uri)!!.use { input ->
+                        tempFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
                     }
-                }
 
-                ReplayImporter.import(tempFile)
+                    ReplayImporter.import(tempFile)
+                    importedCount++
+                } catch (e: Exception) {
+                    Log.e("SettingsFragment", "Failed to import replay from $uri", e)
 
-                mainThread {
-                    loading.dismiss()
-                    Snackbar.make(requireActivity().window.decorView, string.replay_import_success, 3000).show()
+                    mainThread {
+                        Snackbar.make(
+                            decorView,
+                            StringTable.format(
+                                R.string.replay_import_error,
+                                uri.path ?: uri.toString(),
+                                e.message ?: "Unknown error"
+                            ),
+                            2000
+                        )
+                    }
+                } finally {
+                    tempFile?.delete()
+                    tempFile = null
                 }
-            } catch (e: Exception) {
-                val str = StringTable.format(string.replay_import_failed, e.message)
+            }
 
-                mainThread {
-                    loading.dismiss()
-                    Snackbar.make(requireActivity().window.decorView, str, 3000).show()
-                }
-            } finally {
-                tempFile?.delete()
+            mainThread {
+                loading.dismiss()
+
+                Snackbar.make(
+                    decorView,
+                    StringTable.format(R.string.replay_import_result, importedCount, uris.size),
+                    3000
+                )
             }
         }
     }
