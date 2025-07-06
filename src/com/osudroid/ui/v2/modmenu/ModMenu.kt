@@ -366,6 +366,9 @@ object ModMenu : UIScene() {
             true
         )
 
+        // Ensure mods that can be enabled by the user are displayed.
+        updateModButtonEnabledState()
+
         // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
         parseBeatmap()
     }
