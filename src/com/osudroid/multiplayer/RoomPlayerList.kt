@@ -34,11 +34,6 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     }
 
     override fun detachSelf(): Boolean {
-
-        for (i in 0 until childCount) {
-            unregisterTouchArea(getChild(i) as ITouchArea)
-        }
-
         return detachChild(this)
     }
 
@@ -46,18 +41,11 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     override fun onManagedUpdate(secondsElapsed: Float) {
         if (!isValid) {
             isValid = true
-
-            for (i in childCount - 1 downTo 0) {
-                val child = getChild(i)
-
-                unregisterTouchArea(child as ITouchArea)
-                detachChild(child)
-            }
+            detachChildren()
 
             for (i in 0 until room.maxPlayers) {
                 val item = PlayerItem()
                 attachChild(item)
-                registerTouchArea(item)
 
                 itemHeight = item.height
 
