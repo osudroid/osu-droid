@@ -408,7 +408,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         attachmentMode = if (entity == null) AttachmentMode.None else mode ?: AttachmentMode.Child
 
         when (entity) {
-            is UIScene -> entity.registerTouchArea(this)
+            is Scene -> entity.registerTouchArea(this)
             is UIComponent -> entity.onChildAttached(this)
         }
 
