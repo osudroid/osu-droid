@@ -434,6 +434,12 @@ object ModMenu : UIScene() {
             }
         }
 
+        if (ModScoreV2::class in mods) {
+            addMod(ModScoreV2())
+        } else {
+            removeMod(ModScoreV2())
+        }
+
         updateModButtonEnabledState()
     }
 
