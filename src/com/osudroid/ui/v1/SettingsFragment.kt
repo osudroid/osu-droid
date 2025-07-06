@@ -250,6 +250,8 @@ class SettingsFragment : SettingsFragment() {
             GlobalManager.getInstance().mainScene.reloadOnlinePanel()
             GlobalManager.getInstance().mainScene.loadTimingPoints(false)
             GlobalManager.getInstance().songService.isGaming = false
+        } else if (Multiplayer.isConnected) {
+            RoomScene.chat.show()
         }
 
         GlobalManager.getInstance().songService.volume = Config.getBgmVolume()

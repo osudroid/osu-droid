@@ -282,6 +282,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
                 } else {
                     mainThread {
+                        chat.dismiss()
                         settingsFragment = SettingsFragment()
                         settingsFragment!!.show()
                     }
