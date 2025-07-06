@@ -377,6 +377,7 @@ object ModMenu : UIScene() {
     fun back(updatePlayerMods: Boolean) {
 
         if (Multiplayer.isConnected) {
+            RoomScene.chat.show()
             RoomScene.isWaitingForModsChange = true
 
             // The room mods are the same as the host mods
