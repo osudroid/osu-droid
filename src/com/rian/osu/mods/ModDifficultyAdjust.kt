@@ -88,11 +88,15 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val requiresConfiguration = true
 
     override fun isCompatibleWith(other: Mod): Boolean {
-        if (cs != null && ar != null && od != null && hp != null) {
-            return other is ModEasy || other is ModHardRock || other is ModSmallCircle || other is ModReallyEasy
+        if (!super.isCompatibleWith(other)) {
+            return false
         }
 
-        return super.isCompatibleWith(other)
+        if (cs != null && ar != null && od != null && hp != null) {
+            return other !is ModEasy && other !is ModHardRock && other !is ModSmallCircle && other !is ModReallyEasy
+        }
+
+        return true
     }
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
