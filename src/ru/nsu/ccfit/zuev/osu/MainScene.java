@@ -17,8 +17,6 @@ import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.andengine.ui.UIConfirmDialog;
-import com.reco1l.andengine.ui.UIMessageDialog;
-import com.reco1l.andengine.ui.UITextButton;
 import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
