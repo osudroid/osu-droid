@@ -181,6 +181,10 @@ class MainMenu(val main: MainScene) {
         }
     }
 
+    /**
+     * List of all buttons in the main menu.
+     */
+    val buttons = listOf(first, second, third)
 
     private var isSecondMenu = false
 
@@ -189,6 +193,12 @@ class MainMenu(val main: MainScene) {
         main.scene.attachChild(first, 1)
         main.scene.attachChild(second, 1)
         main.scene.attachChild(third, 1)
+    }
+
+    fun detachButtons() {
+        main.scene.detachChild(first)
+        main.scene.detachChild(second)
+        main.scene.detachChild(third)
     }
 
     fun showFirstMenu() {
