@@ -114,9 +114,6 @@ open class UIModal(
             }
 
             currentScene.attachChild(this)
-            if (currentScene is Scene) {
-                currentScene.registerTouchArea(this)
-            }
         }
     }
 

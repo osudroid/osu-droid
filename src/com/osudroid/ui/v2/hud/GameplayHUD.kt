@@ -69,7 +69,6 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // reference the parent of this container to set the engine's HUD.
         val parent = HUD()
         parent.attachChild(this)
-        parent.registerTouchArea(this)
         parent.camera = GlobalManager.getInstance().engine.camera
 
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
@@ -243,11 +242,8 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             elementSelector = HUDElementSelector(this)
 
             parent!!.attachChild(elementSelector)
-            parent!!.registerTouchArea(elementSelector)
-
         } else {
             parent!!.detachChild(elementSelector)
-            parent!!.unregisterTouchArea(elementSelector)
 
             elementSelector = null
         }
