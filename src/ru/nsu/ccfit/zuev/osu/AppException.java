@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -214,7 +215,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
 
-        if (!handleException(thread, ex) && mDefaultHandler != null) {
+        if (!handleException(ex) && mDefaultHandler != null) {
             //如果用户没有处理则让系统默认的异常处理器来处理
             mDefaultHandler.uncaughtException(thread, ex);
         }
@@ -227,7 +228,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      * @param ex
      * @return true:处理了该异常信息;否则返回false
      */
-    private boolean handleException(Thread thread, Throwable ex) {
+    private boolean handleException(Throwable ex) {
         if (ex == null) {
             return false;
         }
@@ -250,12 +251,11 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 AlertDialog alert = new AlertDialog.Builder(context)
                     .setTitle(com.osudroid.resources.R.string.crash)
                     .setMessage(Log.getStackTraceString(ex))
-                    .setPositiveButton("Quit game", (dialog, which) -> {
-                        if (mDefaultHandler != null) {
-                            mDefaultHandler.uncaughtException(thread, ex);
-                        } else {
-                            System.exit(1);
-                        }
+                    .setPositiveButton("Restart game", (dialog, which) -> {
+                        Intent intent = new Intent(context, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        context.startActivity(intent);
+                        Runtime.getRuntime().exit(0);
                     })
                     .setCancelable(false)
                     .show();
