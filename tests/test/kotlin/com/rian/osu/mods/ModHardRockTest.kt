@@ -75,4 +75,21 @@ class ModHardRockTest {
             Assert.assertEquals(213.28932f, tick.position.y, 1e-4f)
         }
     }
+
+    @Test
+    fun `Test compatibility with Difficulty Adjust mod`() {
+        val hardRock = ModHardRock()
+        val difficultyAdjust = ModDifficultyAdjust(cs = 4f)
+
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.ar = 9f
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.od = 7f
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.hp = 6f
+        Assert.assertFalse(hardRock.isCompatibleWith(difficultyAdjust))
+    }
 }
