@@ -196,4 +196,21 @@ class ModDifficultyAdjustTest {
             Assert.assertEquals(1f, getDelegate(copy::hp).defaultValue)
         }
     }
+
+    @Test
+    fun `Test compatibility with difficulty-adjusting mods`() {
+        // Theoretically, Small Circle should be here, but it is only dependent on the CS value
+        // and will be migrated into Difficulty Adjust anyway.
+        val difficultyAdjustingMods = listOf(
+            ModHardRock(),
+            ModEasy(),
+            ModReallyEasy()
+        )
+
+        val difficultyAdjust = ModDifficultyAdjust(cs = 4f, ar = 9f, od = 7f)
+        difficultyAdjustingMods.forEach { Assert.assertTrue(difficultyAdjust.isCompatibleWith(it)) }
+
+        difficultyAdjust.hp = 6f
+        difficultyAdjustingMods.forEach { Assert.assertFalse(it.isCompatibleWith(difficultyAdjust)) }
+    }
 }
