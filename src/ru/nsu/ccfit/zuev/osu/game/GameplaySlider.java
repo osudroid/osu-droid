@@ -1167,6 +1167,10 @@ public class GameplaySlider extends GameObject {
 
             currentNestedObjectIndex++;
         }
+
+        if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
+            startArrow.setAlpha(1);
+        }
     }
 
     private float getLateHitThreshold() {
