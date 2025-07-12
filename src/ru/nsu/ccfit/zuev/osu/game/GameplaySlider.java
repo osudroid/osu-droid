@@ -658,7 +658,7 @@ public class GameplaySlider extends GameObject {
                 var newColor =
                     getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
 
-                headCirclePiece.setColor(newColor);
+                headCirclePiece.setCircleColor(newColor);
             }
 
             ((GameScene) listener).onSliderReverse(
