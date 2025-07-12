@@ -32,16 +32,19 @@ sealed class Mod {
     abstract val type: ModType
 
     /**
-     * The suffix to append to the texture name of this [Mod].
+     * The suffix to append to [iconTextureName].
+     *
+     * This is a separate property to allow for custom icon texture names for certain [Mod]s
+     * that do not follow the default naming convention.
      */
-    protected open val textureNameSuffix
+    protected open val iconTextureNameSuffix
         get() = name.replace(" ", "").lowercase()
 
     /**
-     * The texture name of this [Mod].
+     * The texture name of the icon of this [Mod].
      */
-    val textureName
-        get() = "selection-mod-${textureNameSuffix}"
+    val iconTextureName
+        get() = "selection-mod-${iconTextureNameSuffix}"
 
     /**
      * Whether scores with this [Mod] active can be submitted online.
@@ -180,7 +183,7 @@ sealed class Mod {
 
         result = 31 * result + name.hashCode()
         result = 31 * result + acronym.hashCode()
-        result = 31 * result + textureNameSuffix.hashCode()
+        result = 31 * result + iconTextureNameSuffix.hashCode()
         result = 31 * result + isRelevant.hashCode()
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
