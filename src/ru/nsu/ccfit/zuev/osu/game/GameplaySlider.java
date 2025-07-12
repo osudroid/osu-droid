@@ -647,11 +647,7 @@ public class GameplaySlider extends GameObject {
 
                     tailCirclePiece.setColor(newColor);
                 }
-
-                if (remainingSpans > 1) {
-                    startArrow.setAlpha(1);
-                }
-            } else if (remainingSpans <= 2) {
+            } else if (remainingSpans <= 2 && startHit) {
                 startArrow.setAlpha(0);
                 headCirclePiece.setAlpha(0);
             } else if (GameHelper.isSynesthesia()) {
@@ -976,7 +972,6 @@ public class GameplaySlider extends GameObject {
 
         sliderSlideSample.update(dt);
         sliderWhistleSample.update(dt);
-        headCirclePiece.setAlpha(0f);
 
         float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
@@ -1170,6 +1165,8 @@ public class GameplaySlider extends GameObject {
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             startArrow.setAlpha(1);
+        } else {
+            headCirclePiece.setAlpha(0);
         }
     }
 
