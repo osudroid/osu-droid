@@ -218,6 +218,7 @@ public class GameplaySlider extends GameObject {
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSlider);
 
         // Start circle piece
+        headCirclePiece.showNumber();
         headCirclePiece.setScale(scale);
         headCirclePiece.setCircleColor(comboColor);
         headCirclePiece.setAlpha(0);
@@ -1164,6 +1165,7 @@ public class GameplaySlider extends GameObject {
         }
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
+            headCirclePiece.hideNumber();
             startArrow.setAlpha(1);
         } else {
             headCirclePiece.setAlpha(0);
