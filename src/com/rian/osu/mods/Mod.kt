@@ -27,7 +27,7 @@ sealed class Mod {
     abstract val description: String
 
     /**
-     * The type fo this [Mod].
+     * The type of this [Mod].
      */
     abstract val type: ModType
 
