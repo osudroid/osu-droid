@@ -928,7 +928,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(skipBtn);
         }
 
-        breakAnimator = new BreakAnimator(fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
+        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle);
 
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
