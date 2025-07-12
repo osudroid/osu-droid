@@ -15,7 +15,7 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (other is ModDifficultyAdjust) {
-            return other.cs != null && other.ar != null && other.od != null && other.hp != null
+            return other.cs == null || other.ar == null || other.od == null || other.hp == null
         }
 
         return super.isCompatibleWith(other)

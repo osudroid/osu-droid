@@ -15,7 +15,7 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (other is ModDifficultyAdjust) {
-            return other.cs != null
+            return other.cs == null
         }
 
         return super.isCompatibleWith(other)
