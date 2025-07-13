@@ -15,6 +15,8 @@
     <string name="mod_section_fun">Fun</string>
     <string name="mod_section_system">System</string>
 
+    <string name="hudEditor_back_for_menu">Press back to show HUD editor menu.</string>
+
     <!-- Config Backup -->
     <string name="opt_category_config_backup">Backup</string>
     <string name="opt_config_backup_title">Export options file</string>

@@ -120,6 +120,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -1078,7 +1079,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         blockAreaFragment.show(false);
 
         if (isHUDEditorMode) {
-            ToastLogger.showText("Press back to show HUD editor menu.", false);
+            ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
         }
     }
 
