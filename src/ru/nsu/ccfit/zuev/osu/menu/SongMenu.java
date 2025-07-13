@@ -189,6 +189,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public synchronized void load() {
         scene = new UIScene();
+        // This is needed for UIScene to behave on par with regular Scene, otherwise we would have weird scenarios such
+        // as entities in the back layer having touch priority despite being rendered behind the front layer.
+        scene.setOnAreaTouchTraversalBackToFront();
         camY = 0;
         velocityY = 0;
         selectedItem = null;
