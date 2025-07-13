@@ -294,7 +294,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         });
 
         scene.registerUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(true);
 
         scrollbar = new ScrollBar(scene);
 
