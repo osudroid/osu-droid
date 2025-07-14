@@ -466,6 +466,21 @@ open class UIScrollableContainer : UIContainer() {
 
     //endregion
 
+    override fun attachChild(pEntity: IEntity?, pIndex: Int): Boolean {
+        if (!mChildren.isNullOrEmpty()) {
+            throw IllegalStateException("UIScrollableContainer can only have one child entity.")
+        }
+        return super.attachChild(pEntity, pIndex)
+    }
+
+    override fun attachChild(pEntity: IEntity?) {
+        if (!mChildren.isNullOrEmpty()) {
+            throw IllegalStateException("UIScrollableContainer can only have one child entity.")
+        }
+        super.attachChild(pEntity)
+    }
+
+
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
