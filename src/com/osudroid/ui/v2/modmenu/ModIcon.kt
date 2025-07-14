@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.modmenu
 import com.osudroid.ui.v2.*
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
+import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
@@ -11,6 +12,7 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
 import com.rian.osu.mods.*
+import com.rian.osu.utils.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -20,6 +22,9 @@ import javax.microedition.khronos.opengles.*
  * The icon for a mod in the mod menu.
  */
 class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
+
+    constructor(acronym: String): this(ModUtils.allModsInstances.find { it.acronym.equals(acronym, ignoreCase = true) }!!)
+
 
     init {
         inheritAncestorsColor = false
@@ -76,6 +81,6 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
 
     companion object {
-        private val sharedSpriteVBO = UISprite.SpriteVBO()
+        private val sharedSpriteVBO = UISprite.SpriteVBO().asSharedDynamically()
     }
 }

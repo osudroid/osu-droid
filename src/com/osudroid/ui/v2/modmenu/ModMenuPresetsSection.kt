@@ -136,8 +136,9 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                 font = ResourceManager.getInstance().getFont("smallFont")
             }
 
-            +ModsIndicator(preset.mods, 21f).apply {
-                isExpanded = false
+            +ModsIndicator().apply {
+                iconSize = 21f
+                mods = preset.mods.serializeMods()
             }
         }
 
