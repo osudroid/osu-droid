@@ -3,7 +3,7 @@ package com.reco1l.andengine.ui
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.framework.*
+import com.reco1l.andengine.shape.*
 
 open class CircularProgressBar : UIContainer() {
 
@@ -25,33 +25,29 @@ open class CircularProgressBar : UIContainer() {
             }
         }
 
-
-    private val maskingCircle = circle {
-        anchor = Anchor.Center
-        origin = Anchor.Center
-        relativeSizeAxes = Axes.Both
-        width = 0.9f
-        height = 0.9f
-        color = Color4.Transparent
-        clearInfo = ClearInfo.ClearDepthBuffer
-        depthInfo = DepthInfo.Less
-    }
-
     private val trackCircle = circle {
         width = FillParent
         height = FillParent
-        color = Theme.current.accentColor
-        alpha = 0.3f
-        depthInfo = DepthInfo.Default
+        paintStyle = PaintStyle.Outline
+        lineWidth = 4f
+        applyTheme = {
+            color = Theme.current.accentColor
+            alpha = 0.3f
+        }
     }
 
     private val rotatingCircle = circle {
-        width = FillParent
-        height = FillParent
+        relativeSizeAxes = Axes.Both
+        width = 0.85f
+        height = 0.85f
+        anchor = Anchor.Center
+        origin = Anchor.Center
         rotationCenter = Anchor.Center
-        depthInfo = DepthInfo.Default
-        setPortion(0.25f)
-        color = Theme.current.accentColor
+        setPortion(0.1f)
+        applyTheme = {
+            color = Theme.current.accentColor
+            alpha = 0.3f
+        }
     }
 
 
