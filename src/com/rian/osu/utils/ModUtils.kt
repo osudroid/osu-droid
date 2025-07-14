@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
+import org.json.JSONException
 
 /**
  * A set of utilities to handle [Mod] combinations.
@@ -81,6 +82,17 @@ object ModUtils {
             it.put(mod.serialize())
         }
     }
+
+    /**
+     * Deserializes a list of [Mod]s from a JSON string received from [serializeMods].
+     *
+     * @param str The JSON string containing the serialized [Mod]s.
+     * @return The deserialized [Mod]s in a [ModHashMap].
+     * @throws JSONException If the string cannot be parsed as a valid JSON array.
+     */
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun deserializeMods(str: String) = deserializeMods(JSONArray(str))
 
     /**
      * Deserializes a list of [Mod]s from a [JSONArray] received from [serializeMods].

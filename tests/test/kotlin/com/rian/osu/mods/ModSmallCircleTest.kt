@@ -32,4 +32,15 @@ class ModSmallCircleTest {
             Assert.assertEquals(7f, gameplayCS, 0f)
         }
     }
+
+    @Test
+    fun `Test compatibility with Difficulty Adjust mod`() {
+        val smallCircle = ModSmallCircle()
+        val difficultyAdjust = ModDifficultyAdjust()
+
+        Assert.assertTrue(smallCircle.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.cs = 4f
+        Assert.assertFalse(smallCircle.isCompatibleWith(difficultyAdjust))
+    }
 }

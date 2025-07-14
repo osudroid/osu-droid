@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.*
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,7 @@ import org.json.JSONObject
 /**
  * Represents the Hidden mod.
  */
-class ModHidden : Mod(), IModApplicableToBeatmap {
+class ModHidden : ModWithVisibilityAdjustment() {
     override val name = "Hidden"
     override val acronym = "HD"
     override val description = "Play with no approach circles and fading circles/sliders."
@@ -34,6 +35,7 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         defaultValue = false
     )
 
+    override fun isFirstAdjustableObject(hitObject: HitObject) = hitObject !is Spinner
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = if (usesDefaultSettings) 1.06f else 1f
 
     override fun copySettings(settings: JSONObject) {
@@ -53,6 +55,8 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
     }
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
+        super.applyToBeatmap(beatmap, scope)
+
         fun applyFadeInAdjustment(hitObject: HitObject) {
             scope?.ensureActive()
 

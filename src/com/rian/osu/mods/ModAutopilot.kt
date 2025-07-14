@@ -10,7 +10,7 @@ class ModAutopilot : Mod() {
     override val acronym = "AP"
     override val description = "Automatic cursor movement - just follow the rhythm."
     override val type = ModType.Automation
-    override val textureNameSuffix = "relax2"
+    override val iconTextureNameSuffix = "relax2"
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModRelax::class, ModAutoplay::class, ModNoFail::class
     )

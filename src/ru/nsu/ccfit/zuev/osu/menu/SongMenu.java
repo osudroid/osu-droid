@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.framework.EasingKt;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.data.BeatmapInfo;
@@ -38,7 +39,6 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -83,7 +83,7 @@ import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
-    public Scene scene;
+    public UIScene scene;
     public Entity frontLayer = new Entity();
     SortOrder sortOrder = SortOrder.Title;
     private Engine engine;
@@ -188,7 +188,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public synchronized void load() {
-        scene = new Scene();
+        scene = new UIScene();
+        // This is needed for UIScene to behave on par with regular Scene, otherwise we would have weird scenarios such
+        // as entities in the back layer having touch priority despite being rendered behind the front layer.
+        scene.setOnAreaTouchTraversalBackToFront();
         camY = 0;
         velocityY = 0;
         selectedItem = null;
@@ -294,7 +297,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         });
 
         scene.registerUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(true);
 
         scrollbar = new ScrollBar(scene);
 
@@ -721,7 +723,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         updateScoringSwitcherStatus(true);
     }
 
-    public Scene getScene() {
+    public UIScene getScene() {
         return scene;
     }
     public SearchBarFragment getSearchBar() { return searchBar; }
@@ -1211,7 +1213,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     stat.setPlayerName(playerName);
                     scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedBeatmap);
                     engine.setScene(scoreScene.getScene());
-                } catch (OnlineManagerException e) {
+                } catch (Exception e) {
                     Debug.e("Cannot load play info: " + e.getMessage(), e);
                     engine.setScene(scene);
                 }

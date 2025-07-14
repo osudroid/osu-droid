@@ -113,10 +113,13 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
     override fun onManagedUpdate(deltaTimeSec: Float) {
         updateOutline()
 
+        // Ensure that the toolbar does not go out of the screen.
         if (outline.y - toolbar.height < 0f) {
-            toolbar.y = -(outline.y - toolbar.height)
+            toolbar.anchor = Anchor.BottomCenter
+            toolbar.origin = Anchor.TopCenter
         } else {
-            toolbar.y = 0f
+            toolbar.anchor = Anchor.TopCenter
+            toolbar.origin = Anchor.BottomCenter
         }
 
         // Show only the tips that are not at the origin.

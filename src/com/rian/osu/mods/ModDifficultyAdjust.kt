@@ -87,6 +87,18 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val type = ModType.Conversion
     override val requiresConfiguration = true
 
+    override fun isCompatibleWith(other: Mod): Boolean {
+        if (!super.isCompatibleWith(other)) {
+            return false
+        }
+
+        if (cs != null && ar != null && od != null && hp != null) {
+            return other !is ModEasy && other !is ModHardRock && other !is ModSmallCircle && other !is ModReallyEasy
+        }
+
+        return true
+    }
+
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
         // Graph: https://www.desmos.com/calculator/yrggkhrkzz
         var multiplier = 1f

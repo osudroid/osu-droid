@@ -92,8 +92,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
         glow.setScale(0.9f);
         glow.setColor(0f, 0.8f, 1f);
 
-        boolean isBackgroundVisible = !GameHelper.isTraceable() ||
-            (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote());
+        boolean isBackgroundVisible = (!GameHelper.isTraceable() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
         middle.setVisible(isBackgroundVisible);
         if (middle.isVisible()) {

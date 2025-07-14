@@ -52,7 +52,7 @@ object ModMenu : UIScene() {
 
 
     private val modChangeQueue = LinkedList<Mod>()
-    private val modPresetsSection: ModMenuPresetsSection
+    private val modPresetsSection: ModMenuPresetsSection?
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
@@ -228,8 +228,12 @@ object ModMenu : UIScene() {
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
-                    modPresetsSection = ModMenuPresetsSection()
-                    +modPresetsSection
+                    if (Multiplayer.room != null) {
+                        modPresetsSection = ModMenuPresetsSection()
+                        +modPresetsSection
+                    } else {
+                        modPresetsSection = null
+                    }
 
                     val mods = ModUtils.allModsInstances
 
@@ -252,7 +256,7 @@ object ModMenu : UIScene() {
         // Customizations menu
         attachChild(customizationMenu)
 
-        modPresetsSection.loadPresets()
+        modPresetsSection?.loadPresets()
     }
 
 
@@ -362,6 +366,9 @@ object ModMenu : UIScene() {
             true
         )
 
+        // Ensure mods that can be enabled by the user are displayed.
+        updateModButtonEnabledState()
+
         // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
         parseBeatmap()
     }
@@ -373,6 +380,7 @@ object ModMenu : UIScene() {
     fun back(updatePlayerMods: Boolean) {
 
         if (Multiplayer.isConnected) {
+            RoomScene.chat.show()
             RoomScene.isWaitingForModsChange = true
 
             // The room mods are the same as the host mods
@@ -428,6 +436,12 @@ object ModMenu : UIScene() {
                 removeMod(nightCore)
                 addMod(ModDoubleTime())
             }
+        }
+
+        if (ModScoreV2::class in mods) {
+            addMod(ModScoreV2())
+        } else {
+            removeMod(ModScoreV2())
         }
 
         updateModButtonEnabledState()
@@ -498,7 +512,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
-        modPresetsSection.onModsChanged()
+        modPresetsSection?.onModsChanged()
     }
 
     fun addMod(mod: Mod) {

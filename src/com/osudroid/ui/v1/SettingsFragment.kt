@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.LinearLayout
@@ -51,6 +52,7 @@ import com.rian.osu.mods.ModAutoplay
 import com.rian.osu.replay.ReplayImporter
 import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.ConfigBackup
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
@@ -62,9 +64,6 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
 import kotlin.math.max
-
-
-
 
 
 class SettingsFragment : SettingsFragment() {
@@ -82,42 +81,56 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri == null) {
-            return@registerForActivityResult
-        }
-
+    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         val loading = LoadingFragment()
         loading.show()
 
         async {
             val context = requireContext()
+            val decorView = requireActivity().window.decorView
+            var importedCount = 0
             var tempFile: File? = null
 
-            try {
-                tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
+            for (uri in uris) {
+                try {
+                    tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
 
-                context.contentResolver.openInputStream(uri)!!.use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyTo(output)
+                    context.contentResolver.openInputStream(uri)!!.use { input ->
+                        tempFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
                     }
-                }
 
-                ReplayImporter.import(tempFile)
+                    ReplayImporter.import(tempFile)
+                    importedCount++
+                } catch (e: Exception) {
+                    Log.e("SettingsFragment", "Failed to import replay from $uri", e)
 
-                mainThread {
-                    loading.dismiss()
-                    Snackbar.make(requireActivity().window.decorView, string.replay_import_success, 3000).show()
+                    mainThread {
+                        Snackbar.make(
+                            decorView,
+                            StringTable.format(
+                                R.string.replay_import_error,
+                                uri.path ?: uri.toString(),
+                                e.message ?: "Unknown error"
+                            ),
+                            2000
+                        )
+                    }
+                } finally {
+                    tempFile?.delete()
+                    tempFile = null
                 }
-            } catch (e: Exception) {
-                val str = StringTable.format(string.replay_import_failed, e.message)
+            }
 
-                mainThread {
-                    loading.dismiss()
-                    Snackbar.make(requireActivity().window.decorView, str, 3000).show()
-                }
-            } finally {
-                tempFile?.delete()
+            mainThread {
+                loading.dismiss()
+
+                Snackbar.make(
+                    decorView,
+                    StringTable.format(R.string.replay_import_result, importedCount, uris.size),
+                    3000
+                )
             }
         }
     }
@@ -237,6 +250,8 @@ class SettingsFragment : SettingsFragment() {
             GlobalManager.getInstance().mainScene.reloadOnlinePanel()
             GlobalManager.getInstance().mainScene.loadTimingPoints(false)
             GlobalManager.getInstance().songService.isGaming = false
+        } else if (Multiplayer.isConnected) {
+            RoomScene.chat.show()
         }
 
         GlobalManager.getInstance().songService.volume = Config.getBgmVolume()
@@ -256,6 +271,30 @@ class SettingsFragment : SettingsFragment() {
 
         findPreference<Preference>("update")!!.setOnPreferenceClickListener {
             UpdateManager.checkNewUpdates(false)
+            true
+        }
+
+        findPreference<Preference>("backup")!!.setOnPreferenceClickListener {
+            val success = ConfigBackup.exportPreferences()
+
+            ToastLogger.showText(
+                if (success) R.string.config_backup_info_success else R.string.config_backup_info_fail,
+                true
+            )
+
+            true
+        }
+
+        findPreference<Preference>("restore")!!.setOnPreferenceClickListener {
+            val success = ConfigBackup.importPreferences()
+
+            if (success) {
+                ToastLogger.showText(R.string.config_backup_restore_info_success, true)
+                dismiss()
+            } else {
+                ToastLogger.showText(R.string.config_backup_restore_info_fail, true)
+            }
+
             true
         }
 

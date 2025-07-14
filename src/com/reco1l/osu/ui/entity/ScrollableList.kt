@@ -1,6 +1,6 @@
 package com.reco1l.osu.ui.entity
 
-import org.anddev.andengine.entity.scene.Scene
+import com.reco1l.andengine.component.UIComponent
 import org.anddev.andengine.entity.shape.Shape
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.input.touch.detector.ScrollDetector
@@ -12,13 +12,13 @@ import kotlin.math.abs
 import kotlin.math.sign
 
 @Deprecated("Use ScrollableContainer instead.")
-abstract class ScrollableList : Scene(), IScrollDetectorListener
+abstract class ScrollableList : UIComponent(), IScrollDetectorListener
 {
 
     var isScroll = false
         private set
 
-    private val scrollDetector: SurfaceScrollDetector
+    private val scrollDetector = SurfaceScrollDetector(this)
 
     private var percentShow = -1f
     private var maxY = 100500f
@@ -32,10 +32,9 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
     protected var camY = -146f
     protected var itemHeight = 0f
 
-    init
-    {
-        isBackgroundEnabled = false
-        scrollDetector = SurfaceScrollDetector(this)
+    init {
+        width = FillParent
+        height = FillParent
     }
 
     fun handleScrolling(event: TouchEvent)

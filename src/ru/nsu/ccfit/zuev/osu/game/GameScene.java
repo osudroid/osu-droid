@@ -120,14 +120,15 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
-    public static final int CursorCount = 10;
+    public static final int CursorCount = 3;
     private final Engine engine;
-    private final Cursor[] cursors = new Cursor[CursorCount];
-    private final boolean[] cursorIIsDown = new boolean[CursorCount];
+    private Cursor[] cursors = new Cursor[CursorCount];
+    private boolean[] cursorIIsDown = new boolean[CursorCount];
     public String audioFilePath = null;
     private UIScene scene;
     private UIScene bgScene, mgScene, fgScene;
@@ -841,7 +842,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setFreezeFrame(lastMods.ofType(ModFreezeFrame.class));
         GameHelper.setApproachDifferent(lastMods.ofType(ModApproachDifferent.class));
 
-        for (int i = 0; i < CursorCount; i++) {
+        int cursorCount = replaying && replay != null ? replay.cursorMoves.size() : CursorCount;
+
+        cursors = new Cursor[cursorCount];
+        cursorIIsDown = new boolean[cursorCount];
+
+        for (int i = 0; i < cursorCount; i++) {
             cursors[i] = new Cursor();
             cursors[i].mouseDown = false;
             cursors[i].mousePressed = false;
@@ -891,8 +897,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            cursorSprites = new CursorEntity[CursorCount];
-            for (int i = 0; i < CursorCount; i++) {
+            cursorSprites = new CursorEntity[cursorCount];
+            for (int i = 0; i < cursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
                 cursorSprites[i].attachToScene(fgScene);
             }
@@ -923,7 +929,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(skipBtn);
         }
 
-        breakAnimator = new BreakAnimator(fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
+        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle);
 
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -1073,7 +1079,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         blockAreaFragment.show(false);
 
         if (isHUDEditorMode) {
-            ToastLogger.showText("Press back to show HUD editor menu.", false);
+            ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
         }
     }
 
@@ -1184,7 +1190,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < cursorSprites.length; i++) {
                 cursorSprites[i].update(dt);
 
                 if (replaying) {
@@ -1329,7 +1335,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (Config.isRemoveSliderLock()) {
             var downPressCursorCount = 0;
 
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < cursorIIsDown.length; i++) {
                 if (cursorIIsDown[i])
                     downPressCursorCount++;
                 cursorIIsDown[i] = false;
@@ -2008,11 +2014,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
                     break;
                 case GameObjectListener.SLIDER_END:
+                    stat.addSliderEndHit();
                     createBurstEffectSliderEnd(judgementPos, color);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
                     break;
                 default:
+                    stat.addSliderTickHit();
                     createBurstEffect(judgementPos, color);
             }
         }
@@ -2187,7 +2195,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var id = event.getPointerID();
-        if (id < 0 || id >= CursorCount) {
+        if (id < 0 || id >= getCursorsCount()) {
             return false;
         }
 
@@ -2261,7 +2269,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void removeAllCursors() {
         int time = GlobalManager.getInstance().getSongService().getPosition();
 
-        for (int i = 0; i < CursorCount; ++i) {
+        for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
 
             if (cursor.mouseDown) {
@@ -2672,7 +2680,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public int getCursorsCount() {
-        return CursorCount;
+        return cursors.length;
     }
 
 
@@ -2872,26 +2880,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 float dt = secElapsed * GameHelper.getSpeedMultiplier();
 
                 // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
-                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and 2 times
-                // the actual progressed time (meaning we allow up to 2 frames of error).
-                //
-                // See https://github.com/ppy/osu/issues/26879 for more information. The issue has been closed, but the
-                // BASS binary required for the fix is not available for Android at the time of this commit.
-                //
-                // The 2 frames of error threshold is chosen to allow gameplay time to still catch up to audio time in
-                // cases where gameplay is significantly behind such that it requires an offset greater than `dt` to
-                // catch up with audio time. Without this, gameplay time may consistently be behind audio time until the
-                // player restarts gameplay.
+                // actual progressed time. To prevent that situation from happening, we keep `dt` between thresholds.
+                // They serve as a buffer zone to allow audio and gameplay time to synchronize in cases where one is
+                // behind or ahead of the other.
+                // See https://github.com/ppy/osu/issues/26879 for more information.
+                float minDt = 0;
                 float maxDt = dt * 2;
 
                 if (songService.getStatus() == Status.PLAYING) {
+                    // Raise the minimum progressed time to still allow gameplay to progress in case audio time is
+                    // behind or BASS reports the wrong position, but not by much to still allow audio to catch up.
+                    // This allows for relatively smooth gameplay progression without the catch-up being too noticeable.
+                    minDt = dt / 2;
                     dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
                 }
 
-                dt = FMath.clamp(dt, 0, maxDt);
+                dt = FMath.clamp(dt, minDt, maxDt);
 
                 update(dt);
                 super.onManagedUpdate(dt);

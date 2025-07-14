@@ -20,23 +20,20 @@ public class BreakAnimator extends GameObject {
     private final Scene scene;
     private final StatisticV2 stat;
     private final Sprite[] arrows = new Sprite[4];
-    private float length = 0;
+    private final Rectangle dimRectangle;
+    private float length;
     private float time;
     private UISprite passfail;
     private String ending;
     private Sprite mark = null;
-    private boolean showMark = false;
     private boolean isbreak = false;
     private boolean over = false;
-    private Rectangle dimRectangle = null;
 
-    public BreakAnimator(final Scene scene,
-                         final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {
+    public BreakAnimator(final Scene scene, final StatisticV2 stat, Rectangle bgSprite) {
         length = 0;
-        this.showMark = showMark;
         this.scene = scene;
         this.stat = stat;
-        this.dimRectangle = bgSprtie;
+        this.dimRectangle = bgSprite;
 
         for (int i = 0; i < 4; i++) {
             arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
@@ -95,15 +92,13 @@ public class BreakAnimator extends GameObject {
             arrows[i].setIgnoreUpdate(true);
             scene.attachChild(arrows[i], 0);
         }
-        if (showMark) {
-            final TextureRegion zeroRect = ResourceManager.getInstance()
-                    .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
-            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
-                    Utils.toRes(5), ResourceManager.getInstance().getTexture(
-                    "ranking-" + stat.getMark() + "-small"));
-            mark.setScale(1.2f);
-            scene.attachChild(mark, 0);
-        }
+
+        final TextureRegion zeroRect = ResourceManager.getInstance()
+                .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
+        mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5,
+                ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small"));
+        mark.setScale(1.2f);
+        scene.attachChild(mark, 0);
     }
 
     private void setBgFade(float percent) {

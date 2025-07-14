@@ -362,7 +362,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * The input bindings of the entity. This is used to handle touch events.
      */
-    protected val inputBindings = arrayOfNulls<UIComponent>(10)
+    protected val inputBindings = arrayOfNulls<ITouchArea>(10)
 
     //endregion
 
@@ -414,7 +414,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         attachmentMode = if (entity == null) AttachmentMode.None else mode ?: AttachmentMode.Child
 
         when (entity) {
-            is UIScene -> entity.registerTouchArea(this)
+            is Scene -> entity.registerTouchArea(this)
             is UIComponent -> entity.onChildAttached(this)
         }
 
@@ -995,7 +995,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
         val inputBinding = inputBindings.getOrNull(event.pointerID)
 
-        if (inputBinding != null && inputBinding.parent == this) {
+        if (inputBinding is IEntity && inputBinding.parent == this) {
             inputBinding.onAreaTouched(event, localX - inputBinding.absoluteX, localY - inputBinding.absoluteY)
 
             if (event.isActionUp) {
@@ -1009,7 +1009,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
-                if (child is UIComponent && child.contains(localX, localY)) {
+                if (child is ITouchArea && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child
                         return true
