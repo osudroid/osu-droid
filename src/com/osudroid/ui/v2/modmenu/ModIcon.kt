@@ -27,7 +27,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
 
     private fun fetchTextureRegion(): TextureRegion? {
-        return ResourceManager.getInstance().getTexture(mod.textureName)?.takeUnless { it is BlankTextureRegion }
+        return ResourceManager.getInstance().getTexture(mod.iconTextureName)?.takeUnless { it is BlankTextureRegion }
     }
 
 
@@ -66,7 +66,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
         background = null
 
-        attachChild(OsuSkinnableSprite(mod.textureName).apply {
+        attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
             width = FillParent
             height = FillParent
         })

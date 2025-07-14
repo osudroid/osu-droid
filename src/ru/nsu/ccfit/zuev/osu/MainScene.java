@@ -6,6 +6,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.acivev.VibratorManager;
+import com.edlplan.framework.easing.Easing;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.UIBox;
@@ -17,8 +18,6 @@ import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.andengine.ui.UIConfirmDialog;
-import com.reco1l.andengine.ui.UIMessageDialog;
-import com.reco1l.andengine.ui.UITextButton;
 import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
@@ -53,8 +52,6 @@ import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
-import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
-import org.anddev.andengine.util.modifier.ease.EaseElasticOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.util.Arrays;
@@ -439,9 +436,6 @@ public class MainScene implements IUpdateHandler {
         menuBarX = menu.getFirst().getX();
 
         scene.attachChild(lastBackground, 0);
-
-        menu.attachButtons();
-
         scene.attachChild(logo);
         scene.attachChild(logoOverlay);
         scene.attachChild(music_nowplay);
@@ -502,7 +496,6 @@ public class MainScene implements IUpdateHandler {
             sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             sprite.setOrigin(Anchor.BottomRight);
             scene.attachChild(sprite);
-            scene.registerTouchArea(sprite);
         }
     }
 
@@ -627,18 +620,23 @@ public class MainScene implements IUpdateHandler {
             for (Rectangle rectangle : spectrum) {
                 rectangle.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2, (float) Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
-            menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
-                    new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
-                    new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            menu.getThird().registerEntityModifier(new ParallelEntityModifier(
-                    new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            scene.registerTouchArea(menu.getFirst());
-            scene.registerTouchArea(menu.getSecond());
-            scene.registerTouchArea(menu.getThird());
+
+            menu.attachButtons();
+            menu.showFirstMenu();
+
+            for (var button : menu.getButtons()) {
+                button.clearEntityModifiers();
+                button.setX(menuBarX - 100);
+                button.setAlpha(0f);
+
+                button.beginParallel((modifier) -> {
+                    modifier.moveToX(menuBarX, 0.5f, Easing.OutElastic);
+                    modifier.fadeTo(0.9f, 0.5f, Easing.OutCubic);
+                    //noinspection DataFlowIssue
+                    return null;
+                });
+            }
+
             isMenuShowed = true;
         }
 
@@ -646,19 +644,22 @@ public class MainScene implements IUpdateHandler {
             if (showPassTime > 10000f) {
 
                 menu.showFirstMenu();
-                scene.unregisterTouchArea(menu.getFirst());
-                scene.unregisterTouchArea(menu.getSecond());
-                scene.unregisterTouchArea(menu.getThird());
 
-                menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
-                        new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
-                menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
-                        new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
-                menu.getThird().registerEntityModifier(new ParallelEntityModifier(
-                        new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                for (var button : menu.getButtons()) {
+                    // Do not allow the button to be pressed while it is disappearing.
+                    scene.unregisterTouchArea(button);
+
+                    button.clearEntityModifiers();
+                    button.setX(menuBarX);
+                    button.setAlpha(0.9f);
+
+                    button.beginParallel((modifier) -> {
+                        modifier.moveToX(menuBarX - 50, 1f, Easing.OutExpo);
+                        modifier.fadeOut(1f, Easing.OutExpo);
+                        //noinspection DataFlowIssue
+                        return null;
+                    }).then(IEntity::detachSelf);
+                }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
@@ -930,13 +931,7 @@ public class MainScene implements IUpdateHandler {
             wakeLock.release();
         }
 
-        scene.unregisterTouchArea(menu.getFirst());
-        scene.unregisterTouchArea(menu.getSecond());
-        scene.unregisterTouchArea(menu.getThird());
-
-        menu.getFirst().setAlpha(0);
-        menu.getSecond().setAlpha(0);
-        menu.getThird().setAlpha(0);
+        Execution.updateThread(menu::detachButtons);
 
         //ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
         //Allow customize Seeya Sounds from Skins

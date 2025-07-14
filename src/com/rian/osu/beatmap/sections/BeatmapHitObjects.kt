@@ -7,7 +7,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 /**
  * Contains information about hit objects of a beatmap.
  */
-open class BeatmapHitObjects {
+open class BeatmapHitObjects : Iterable<HitObject> {
     /**
      * All objects in this beatmap.
      */
@@ -138,4 +138,6 @@ open class BeatmapHitObjects {
 
         return l
     }
+
+    override fun iterator() = objects.iterator()
 }

@@ -49,7 +49,7 @@ class ModCustomizationMenu : UIModal(
     }
 
     fun onModRemoved(mod: Mod) {
-        modSettings.detachChild { it is ModSettingsSection && it.mod == mod }
+        modSettings.detachChild { it is ModSettingsSection && it.mod::class == mod::class }
     }
 
     fun isEmpty(): Boolean {

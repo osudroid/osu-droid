@@ -57,16 +57,20 @@ open class UIScene : Scene(), IShape {
 
     override fun onAttached() {
 
-        fun IEntity.propagateThemeChange() {
+        fun IEntity.propagateSkinChanges() {
 
             if (this is UIComponent) {
                 onThemeChanged(Theme.current)
             }
 
-            forEach { it.propagateThemeChange() }
+            if (this is ISkinnable) {
+                onSkinChanged()
+            }
+
+            forEach { it.propagateSkinChanges() }
         }
 
-        propagateThemeChange()
+        propagateSkinChanges()
     }
 
     //endregion

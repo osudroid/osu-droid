@@ -13,6 +13,14 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
     override val description = "Everything just got easier..."
     override val type = ModType.DifficultyReduction
 
+    override fun isCompatibleWith(other: Mod): Boolean {
+        if (other is ModDifficultyAdjust) {
+            return other.cs == null || other.ar == null || other.od == null || other.hp == null
+        }
+
+        return super.isCompatibleWith(other)
+    }
+
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =

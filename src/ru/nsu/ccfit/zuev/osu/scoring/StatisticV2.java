@@ -12,11 +12,12 @@ import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
-import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -28,11 +29,13 @@ public class StatisticV2 implements Serializable {
     private static final Random random = new Random();
     private static final int scoreV2MaxScore = 1000000;
 
-    int hit300 = 0, hit100 = 0, hit50 = 0;
-    int hit300k = 0, hit100k = 0;
-    int misses = 0;
-    int scoreMaxCombo = 0;
-    long time = 0;
+    private int hit300 = 0, hit100 = 0, hit50 = 0;
+    private int hit300k = 0, hit100k = 0;
+    private int misses = 0;
+    private int scoreMaxCombo = 0;
+    private int sliderTickHits = 0;
+    private int sliderEndHits = 0;
+    private long time = 0;
     private int currentCombo = 0;
     private int scoreHash = 0;
     private float hp = 1;
@@ -54,9 +57,6 @@ public class StatisticV2 implements Serializable {
     private double unstableRate;
 
     private int life = 1;
-
-    // Used to indicate that the score was done before version 1.6.8. Used in difficulty calculation.
-    private boolean isOldScore;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -80,23 +80,22 @@ public class StatisticV2 implements Serializable {
     private String beatmapMD5 = "";
 
     /**
-     * The currnt performance points.
+     * The current performance points.
      */
     private double pp = 0f;
 
 
     public StatisticV2() {}
 
-    public StatisticV2(final String[] params) {
+    public StatisticV2(final String[] params) throws JSONException {
         this(params, null);
     }
 
-    public StatisticV2(final String[] params, final BeatmapDifficulty originalDifficulty) {
+    public StatisticV2(final String[] params, final BeatmapDifficulty originalDifficulty) throws JSONException {
         playerName = "";
         if (params.length < 6) return;
 
-        mod = LegacyModConverter.convert(params[0]);
-        isOldScore = !params[0].contains("|");
+        mod = ModUtils.deserializeMods(params[0]);
         setForcedScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
@@ -384,6 +383,30 @@ public class StatisticV2 implements Serializable {
         this.misses = misses;
     }
 
+    public int getSliderTickHits() {
+        return sliderTickHits;
+    }
+
+    public void setSliderTickHits(int sliderTickHits) {
+        this.sliderTickHits = sliderTickHits;
+    }
+
+    public void addSliderTickHit() {
+        sliderTickHits++;
+    }
+
+    public int getSliderEndHits() {
+        return sliderEndHits;
+    }
+
+    public void setSliderEndHits(int sliderEndHits) {
+        this.sliderEndHits = sliderEndHits;
+    }
+
+    public void addSliderEndHit() {
+        sliderEndHits++;
+    }
+
     public boolean isPerfect() {
         return getAccuracy() == 1f;
     }
@@ -410,10 +433,6 @@ public class StatisticV2 implements Serializable {
 
     public void setMod(final ModHashMap mod) {
         this.mod = mod;
-    }
-
-    public boolean isOldScore() {
-        return isOldScore;
     }
 
     public float getDiffModifier() {
@@ -480,6 +499,12 @@ public class StatisticV2 implements Serializable {
         builder.append(getMisses());
         builder.append(' ');
         builder.append(getUnstableRate());
+        builder.append(' ');
+        builder.append(getSliderTickHits());
+        builder.append(' ');
+        builder.append(getSliderEndHits());
+        builder.append(' ');
+        builder.append(getAccuracy());
         builder.append(' ');
         builder.append(Config.isRemoveSliderLock() ? '1' : '0');
         return builder.toString();
@@ -627,6 +652,8 @@ public class StatisticV2 implements Serializable {
         hit300k = 0;
         hit100k = 0;
         misses = 0;
+        sliderTickHits = 0;
+        sliderEndHits = 0;
         scoreMaxCombo = 0;
         currentCombo = 0;
         v1Score = 0;

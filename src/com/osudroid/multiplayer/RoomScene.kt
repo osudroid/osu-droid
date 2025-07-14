@@ -283,6 +283,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
                 } else {
                     mainThread {
+                        chat.dismiss()
                         settingsFragment = SettingsFragment()
                         settingsFragment!!.show()
                     }
@@ -395,6 +396,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
                     if (!moved) {
                         ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        chat.dismiss()
                         ModMenu.show()
                     }
                     return true

@@ -27,21 +27,24 @@ sealed class Mod {
     abstract val description: String
 
     /**
-     * The type fo this [Mod].
+     * The type of this [Mod].
      */
     abstract val type: ModType
 
     /**
-     * The suffix to append to the texture name of this [Mod].
+     * The suffix to append to [iconTextureName].
+     *
+     * This is a separate property to allow for custom icon texture names for certain [Mod]s
+     * that do not follow the default naming convention.
      */
-    protected open val textureNameSuffix
+    protected open val iconTextureNameSuffix
         get() = name.replace(" ", "").lowercase()
 
     /**
-     * The texture name of this [Mod].
+     * The texture name of the icon of this [Mod].
      */
-    val textureName
-        get() = "selection-mod-${textureNameSuffix}"
+    val iconTextureName
+        get() = "selection-mod-${iconTextureNameSuffix}"
 
     /**
      * Whether scores with this [Mod] active can be submitted online.
@@ -81,7 +84,11 @@ sealed class Mod {
     open val isValidForMultiplayerAsFreeMod = true
 
     /**
-     * The [Mod]s this [Mod] cannot be enabled with.
+     * The [Mod]s this [Mod] cannot be enabled with. This is merely a static list of [KClass]es that this [Mod] is
+     * incompatible with, regardless of the actual instance of the [Mod].
+     *
+     * Some [Mod]s may have additional compatibility requirements that are captured in [isCompatibleWith].
+     * When checking for [Mod] compatibility, always use [isCompatibleWith].
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
 
@@ -91,7 +98,7 @@ sealed class Mod {
      * The mod specific settings.
      */
     @Suppress("UNCHECKED_CAST")
-    open val settings: List<ModSetting<Any?>>
+    val settings: List<ModSetting<Any?>>
         get() = settingsBacking ?: this::class.memberProperties.mapNotNull { property ->
             property as KProperty1<Mod, Any?>
             property.isAccessible = true
@@ -101,8 +108,21 @@ sealed class Mod {
     /**
      * Whether all [ModSetting]s in this [Mod] are set to their default values.
      */
-    open val usesDefaultSettings
+    val usesDefaultSettings
         get() = settings.all { it.isDefault }
+
+    /**
+     * Determines whether this [Mod] is compatible with another [Mod].
+     *
+     * This extends [incompatibleMods] by allowing for dynamic checks against the actual instance of the [Mod] (i.e.,
+     * its specific settings).
+     *
+     * @param other The [Mod] to check compatibility with.
+     * @return `true` if this [Mod] is compatible with [other], `false` otherwise.
+     */
+    open fun isCompatibleWith(other: Mod) =
+        incompatibleMods.none { it.isInstance(other) } &&
+        other.incompatibleMods.none { it.isInstance(this) }
 
     /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
@@ -163,7 +183,7 @@ sealed class Mod {
 
         result = 31 * result + name.hashCode()
         result = 31 * result + acronym.hashCode()
-        result = 31 * result + textureNameSuffix.hashCode()
+        result = 31 * result + iconTextureNameSuffix.hashCode()
         result = 31 * result + isRelevant.hashCode()
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()

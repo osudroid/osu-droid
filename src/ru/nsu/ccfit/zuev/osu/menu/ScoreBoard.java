@@ -19,7 +19,6 @@ import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import ru.nsu.ccfit.zuev.osu.*;
@@ -356,7 +355,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var modString = "";
 
                     try {
-                        modString = ModUtils.deserializeMods(new JSONArray(score.getMods())).toDisplayModString();
+                        modString = ModUtils.deserializeMods(score.getMods()).toDisplayModString();
                     } catch (final JSONException e) {
                         Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
                     }

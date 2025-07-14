@@ -30,6 +30,15 @@ Version 1.8.4
 - Add mod preset <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
   - Can be used to save and quickly switch between different mod configurations.
 - Add ability to customize redesigned user interfaces' theme via `skin.json` <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+  - For now, only accent color is supported. More customization options will be added in the future.
+  - To change the accent color, add the following to `skin.json`:
+    ```json
+    {
+      "Theme": {
+        "accentColor": "#c2caff"
+      }
+    }
+    ```
 - Add Wind Down mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Slows the game down as gameplay progresses.
   - Initial and final speed can be configured in the mod menu.
@@ -64,6 +73,14 @@ Version 1.8.4
 - Add "only fade approach circles" setting to Hidden mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This setting only fades the approach circles of hit objects and nothing else.
   - Enabling this setting will set the mod's score multiplier to 1x and mark scores as unranked.
+- Add support for importing and exporting game settings <span style="font-size: 0.75em">by [kairusds](https://github.com/kairusds)</span>
+  - Useful if you want to move game installation across devices or share settings with others.
+  - Excludes sensitive information such as account credentials.
+- Add support for importing multiple replay files at once <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This expands the existing replay import functionality to allow importing multiple replays at once.
+  - Current caveats:
+    - Like the previous replay import functionality, the operation cannot be canceled once started.
+    - Replays that fail to import will only be shown briefly and not anywhere else.
 
 # Changes
 
@@ -111,6 +128,10 @@ Version 1.8.4
     - `com.miui.voiceassist`
 - Ensure that HUD editor only uses Autoplay mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Reduce maximum cursor count in gameplay from 10 to 3 <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Only allow slider tracking state to be retained by the cursor that activated the tracking state <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This prevents a slider's tracking state from being dependent on all cursor, which is not expected.
+- Replace "restart game" button with "quit game" upon game crash <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This prevented crash analytics from working.
 
 # Bug Fixes
 
@@ -123,12 +144,20 @@ Version 1.8.4
 - Fix gameplay loading screen being scaled incorrectly when playfield size settings are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix Autoplay mod being persisted after quitting from HUD editor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix modern spinners not finishing when a spinner's duration is not positive <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash due to real-time pp evaluating to not-a-number <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Not a foolproof solution as the source of the not-a-number value is still unknown, but is enough to prevent crashes from happening.
+- Fix Hidden and Traceable mods not ignoring spinners when "Show first approach circle" setting is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix rank in break time only showing when letterbox effect is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix reverse arrow in a slider's head only showing after the slider's first span finishes <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider head disappearing before it is judged <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Removals
 
 - Remove force AR scaling against speed modify <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This brings force AR's behavior in line with forced difficulty statistics.
   - Scores set before this version will retain the scaling.
+- Remove "allow force difficulty statistics" setting in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - With the mod rework, the setting is now a part of free mods setting.
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>

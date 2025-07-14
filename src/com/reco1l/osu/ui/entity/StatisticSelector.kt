@@ -68,7 +68,6 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
         }
 
         attachChild(item)
-        registerTouchArea(item)
 
         itemHeight = 100f
     }
@@ -147,9 +146,5 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
     override fun contains(pX: Float, pY: Float): Boolean {
         return pX in 570f..570f + 140f
-    }
-
-    override fun onAreaTouched(event: TouchEvent?, x: Float, y: Float): Boolean {
-        return super.onSceneTouchEvent(event)
     }
 }

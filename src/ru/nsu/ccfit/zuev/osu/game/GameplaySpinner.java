@@ -128,9 +128,8 @@ public class GameplaySpinner extends GameObject {
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        // Technically, this is not right, as the configuration exclusivity should only apply to the first circle
-        // or slider. However, this is also the case for the Hidden mod, so we will leave it as is for the time being.
-        background.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote()));
+        background.setVisible(!GameHelper.isTraceable() ||
+                (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
         if (background.isVisible()) {
             background.setAlpha(0);

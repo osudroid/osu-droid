@@ -8,7 +8,7 @@ class ModScoreV2 : Mod() {
     override val acronym = "V2"
     override val description = "A different scoring mode from what you have known."
     override val type = ModType.Conversion
-    override val isValidForMultiplayerAsFreeMod = false
+    override val isValidForMultiplayer = false
 
     override fun deepCopy() = ModScoreV2()
 }

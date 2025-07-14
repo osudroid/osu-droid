@@ -70,4 +70,12 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
         number.setTextureScale(value)
     }
 
+    fun showNumber() {
+        number.alpha = 1f
+    }
+
+    fun hideNumber() {
+        number.alpha = 0f
+    }
+
 }

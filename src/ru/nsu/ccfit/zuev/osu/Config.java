@@ -16,6 +16,7 @@ import com.edlplan.framework.math.FMath;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.osudroid.multiplayer.Multiplayer;
@@ -96,6 +97,13 @@ public class Config {
     private static Color4[] comboColors;
     private static Context context;
 
+    public static final Set<String> SENSITIVE_KEYS = Set.of(
+        "installID",
+        "onlineUsername",
+        "onlinePassword",
+        "starRatingVersion",
+        "version"
+    );
 
     /**
      * The shared preferences of the application.

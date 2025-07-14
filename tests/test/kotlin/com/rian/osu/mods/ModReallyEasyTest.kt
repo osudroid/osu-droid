@@ -78,5 +78,22 @@ class ModReallyEasyTest {
         }
     }
 
+    @Test
+    fun `Test compatibility with Difficulty Adjust mod`() {
+        val reallyEasy = ModReallyEasy()
+        val difficultyAdjust = ModDifficultyAdjust(cs = 4f)
+
+        Assert.assertTrue(reallyEasy.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.ar = 9f
+        Assert.assertTrue(reallyEasy.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.od = 7f
+        Assert.assertTrue(reallyEasy.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.hp = 6f
+        Assert.assertFalse(reallyEasy.isCompatibleWith(difficultyAdjust))
+    }
+
     private fun createBeatmapDifficulty() = BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f)
 }

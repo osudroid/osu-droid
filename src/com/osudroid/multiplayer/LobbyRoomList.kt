@@ -11,6 +11,7 @@ import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.PromptDialog
 import com.reco1l.osu.ui.entity.ScrollableList
 import com.reco1l.toolkt.kotlin.async
+import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text
 import org.anddev.andengine.input.touch.TouchEvent
@@ -25,15 +26,9 @@ class LobbyRoomList : ScrollableList() {
 
 
     fun setList(rooms: List<Room>) {
-
-        for (i in 0 until childCount) {
-            unregisterTouchArea(getChild(i) as Sprite)
-        }
-
         detachChildren()
-        rooms.iterator().forEach {
-            addItem(it)
-        }
+
+        rooms.fastForEach { addItem(it) }
     }
 
 
@@ -188,18 +183,7 @@ class LobbyRoomList : ScrollableList() {
         }
 
         attachChild(sprite)
-        registerTouchArea(sprite)
 
         itemHeight = sprite.height
-    }
-
-
-    override fun detachChildren() {
-
-        for (i in 0 until childCount) {
-            unregisterTouchArea(getChild(i) as Sprite)
-        }
-
-        super.detachChildren()
     }
 }
