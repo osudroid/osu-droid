@@ -276,6 +276,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         duration = 0f
 
+        parent = null
         onFinished = null
         finalValues = null
         initialValues = null
