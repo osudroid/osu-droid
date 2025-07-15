@@ -127,7 +127,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
             return
         }
         clearEntityModifiers()
-        moveToX(-SELECTOR_WIDTH, 0.2f).then { elementList.isVisible = false }
+        moveToX(-SELECTOR_WIDTH, 0.2f).after { elementList.isVisible = false }
     }
 
 

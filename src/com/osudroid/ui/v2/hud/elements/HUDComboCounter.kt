@@ -69,7 +69,7 @@ class HUDComboCounter : HUDElement() {
         popOutCount.setScale(1.56f)
 
         popOutCount.scaleTo(1f, BIG_POP_OUT_DURATION)
-        popOutCount.fadeOut(BIG_POP_OUT_DURATION).then(updateDisplayedCount)
+        popOutCount.fadeOut(BIG_POP_OUT_DURATION).after(updateDisplayedCount)
 
         displayedCountTextSprite.setScale(1f)
 

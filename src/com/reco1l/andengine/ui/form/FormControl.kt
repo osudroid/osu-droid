@@ -174,7 +174,7 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
                 } else if (isVisible && value == defaultValue) {
                     clearEntityModifiers()
                     translateToX(-10f, 0.1f)
-                    fadeTo(0f, 0.1f).then {
+                    fadeTo(0f, 0.1f).after {
                         isVisible = false
                     }
                 }
