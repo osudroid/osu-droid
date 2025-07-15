@@ -85,8 +85,22 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     private var elapsedSec = -1f
 
 
-    private val parentEntity: IModifierChain?
-        get() = (parent as? IEntity ?: (parent as? UniversalModifier)?.parentEntity) as? IModifierChain
+    //region Hierarchy
+
+    private inline fun searchFirstParent(predicate: (IModifierChain) -> Boolean): IModifierChain? {
+        var current: IModifierChain? = parent
+
+        while (current != null) {
+            if (predicate(current)) {
+                return current
+            }
+            current = (current as? UniversalModifier)?.parent
+        }
+
+        return null
+    }
+
+    //endregion
 
 
     private fun clearNestedModifiers() {
@@ -211,7 +225,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     override fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
         if (!type.isCompoundModifier) {
-            throw IllegalStateException("Cannot apply modifier to a non-compound modifier.")
+            return searchFirstParent { it is UniversalModifier && it.type.isCompoundModifier || it is IEntity }
+                ?.appendModifier(block)
+                ?: throw IllegalStateException("The modifier is not attached to a valid entity or a modifier chain that contains a compound modifier.")
         }
 
         val modifier = pool?.acquire() ?: UniversalModifier()
@@ -257,11 +273,35 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             return this
         }
 
-        return (parentEntity ?: throw IllegalStateException("The modifier is not attached to a valid entity or modifier chain."))
-            .appendModifier {
-                type = Sequence
-                delay(this@UniversalModifier.duration)
+        var delay = duration
+        var current: IModifierChain? = this
+
+        while (current != null) {
+            current = parent
+
+            when (current) {
+                is IEntity -> break
+                is UniversalModifier -> {
+
+                    // Sequence found in the hierarchy, we just return it.
+                    if (current.type == Sequence) {
+                        return current
+                    }
+
+                    // If the current modifier is a parallel modifier, we take its duration as the delay.
+                    if (current.type == Parallel) {
+                        delay = current.duration
+                        break
+                    }
+
+                }
             }
+        }
+
+        return current?.appendModifier {
+            type = Sequence
+            delay(delay)
+        } ?: throw IllegalStateException("The modifier is not attached to a valid entity or a modifier chain that contains a sequence modifier.")
     }
 
     /**
