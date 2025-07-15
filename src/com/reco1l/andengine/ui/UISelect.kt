@@ -293,7 +293,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
         if (isExpanded) {
             menu.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
             menu.scaleTo(0.9f, 0.2f)
-            menu.fadeTo(0f, 0.2f).then {
+            menu.fadeTo(0f, 0.2f).after {
                 updateThread {
                     menuWrapper.detachSelf()
                 }

@@ -107,7 +107,7 @@ object BannerManager {
 
                     val banner = banners[currentBannerIndex]
 
-                    fadeOut(0.5f).then {
+                    fadeOut(0.5f).after {
                         textureRegion = banner.image
                         fadeIn(0.5f)
                     }

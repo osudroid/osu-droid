@@ -8,7 +8,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
@@ -146,7 +145,7 @@ open class UIModal(
             isVisible = true
 
             clearModifiers(ModifierType.Parallel)
-            createShowAnimation()().then {
+            createShowAnimation()().after {
                 onShown()
             }
         }
@@ -160,7 +159,7 @@ open class UIModal(
             onHide()
 
             clearModifiers(ModifierType.Parallel)
-            createHideAnimation()().then {
+            createHideAnimation()().after {
                 isVisible = false
                 onHidden()
             }

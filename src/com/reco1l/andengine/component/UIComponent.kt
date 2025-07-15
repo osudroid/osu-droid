@@ -935,6 +935,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
         val modifier = modifierPool.acquire() ?: UniversalModifier(modifierPool)
         modifier.setToDefault()
+        modifier.parent = this
         modifier.block()
 
         registerEntityModifier(modifier)

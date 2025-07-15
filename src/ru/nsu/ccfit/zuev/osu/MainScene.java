@@ -660,7 +660,7 @@ public class MainScene implements IUpdateHandler {
                         modifier.fadeOut(1f, Easing.OutExpo);
                         //noinspection DataFlowIssue
                         return null;
-                    }).then(IEntity::detachSelf);
+                    }).after(IEntity::detachSelf);
                 }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,

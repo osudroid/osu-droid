@@ -165,7 +165,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
 
                     dimBox.clearModifiers(ModifierType.Alpha)
-                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).then {
+                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).after {
 
                         gameScene.hud.apply {
                             alpha = 0f

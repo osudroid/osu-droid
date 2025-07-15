@@ -23,6 +23,11 @@ import kotlin.math.*
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain {
 
     /**
+     * The parent chain of this modifier.
+     */
+    var parent: IModifierChain? = null
+
+    /**
      * The type of the modifier.
      * @see ModifierType
      */
@@ -78,6 +83,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     private var easing = Easing.None
     private var duration = 0f
     private var elapsedSec = -1f
+
+
+    private val parentEntity: IModifierChain?
+        get() = (parent as? IEntity ?: (parent as? UniversalModifier)?.parentEntity) as? IModifierChain
 
 
     private fun clearNestedModifiers() {
@@ -207,6 +216,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         val modifier = pool?.acquire() ?: UniversalModifier()
         modifier.setToDefault()
+        modifier.parent = this
         modifier.block()
 
         modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
@@ -233,11 +243,26 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Sets the callback to be called when the modifier finishes.
      */
-    fun then(block: OnModifierFinished): UniversalModifier {
+    fun after(block: OnModifierFinished): UniversalModifier {
         onFinished = block
         return this
     }
 
+    /**
+     * Creates a new sequence [UniversalModifier] with a delay equal to the current modifier's duration.
+     */
+    fun then(): UniversalModifier {
+
+        if (type == Sequence) {
+            return this
+        }
+
+        return (parentEntity ?: throw IllegalStateException("The modifier is not attached to a valid entity or modifier chain."))
+            .appendModifier {
+                type = Sequence
+                delay(this@UniversalModifier.duration)
+            }
+    }
 
     /**
      * Sets the modifier to its default state.
@@ -251,6 +276,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         duration = 0f
 
+        parent = null
         onFinished = null
         finalValues = null
         initialValues = null
