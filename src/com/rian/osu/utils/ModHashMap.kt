@@ -256,14 +256,22 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
     /**
      * Converts this [ModHashMap] to a string representation that can be used to display [Mod]s to the user.
+     *
+     * @param includeNonUserPlayable Whether to include non-user-playable [Mod]s in the string representation.
+     * @return The string representation of the [Mod]s in this [ModHashMap].
      */
-    fun toDisplayModString(): String {
+    @JvmOverloads
+    fun toDisplayModString(includeNonUserPlayable: Boolean = true): String {
         if (isEmpty()) {
             return "-"
         }
 
         return buildString {
             modStringOrder.fastForEach {
+                if (!includeNonUserPlayable && !it.isUserPlayable) {
+                    return@fastForEach
+                }
+
                 if (it in this@ModHashMap) {
                     append(this@ModHashMap[it::class]!!.toString() + ",")
                 }
