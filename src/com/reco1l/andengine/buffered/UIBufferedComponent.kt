@@ -108,9 +108,13 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {
+        val wasDepthTest = GLHelper.isEnableDepthTest()
+
         super.doDraw(gl, camera)
         onDeclarePointers(gl)
         onDrawBuffer(gl)
+
+        GLHelper.setDepthTest(gl, wasDepthTest)
     }
 
     override fun beginDraw(gl: GL10) {
