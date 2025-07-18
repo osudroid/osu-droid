@@ -4,6 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
+import com.rian.osu.mods.ModReplayV6
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -26,6 +27,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 }
 
                 val newMods = LegacyModConverter.convert(oldMods, difficulty)
+                newMods.put(ModReplayV6())
 
                 db.execSQL("UPDATE ScoreInfo SET mods = ? WHERE id = ?", arrayOf<Any>(newMods.serializeMods().toString(), id))
             }
