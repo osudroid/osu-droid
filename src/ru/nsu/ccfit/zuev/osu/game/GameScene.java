@@ -510,7 +510,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Ensure that only relevant mods are applied.
         mods.values().removeIf(m -> !m.isRelevant());
 
-        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        var playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        this.playableBeatmap = playableBeatmap;
 
         rateAdjustingMods.clear();
 
@@ -1095,6 +1096,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         elapsedTime += dt;
         previousFrameTime = SystemClock.uptimeMillis();
 
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         if (Multiplayer.isMultiplayer)
         {
             long mSecElapsed = (long) (dt / GameHelper.getSpeedMultiplier() * 1000);
@@ -1517,7 +1524,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             expiredObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
-            playableBeatmap = null;
+            this.playableBeatmap = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
             sliderPaths = null;
