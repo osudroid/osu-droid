@@ -162,7 +162,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      */
     @JvmOverloads
     fun serializeMods(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
-        ModUtils.serializeMods(values, includeNonUserPlayable)
+        ModUtils.serializeMods(values, includeNonUserPlayable, includeIrrelevantMods)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
