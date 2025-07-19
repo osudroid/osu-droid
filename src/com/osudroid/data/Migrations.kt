@@ -5,9 +5,36 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModReplayV6
+import java.io.File
 
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
+/**
+ * Base class for migrations. Backups the database file before performing the migration.
+ *
+ * @param startVersion The version of the database before the migration.
+ * @param endVersion The version of the database after the migration.
+ */
+abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration(startVersion, endVersion) {
+    final override fun migrate(db: SupportSQLiteDatabase) {
+        val dbFile = File(DatabaseManager.databasePath)
+
+        if (dbFile.exists()) {
+            val backupFile = File(dbFile.parent, "${dbFile.nameWithoutExtension}_version$startVersion.db")
+            dbFile.copyTo(backupFile, true)
+        }
+
+        performMigration(db)
+    }
+
+    /**
+     * Performs the actual migration logic.
+     *
+     * @param db The database to migrate.
+     */
+    protected abstract fun performMigration(db: SupportSQLiteDatabase)
+}
+
+val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
+    override fun performMigration(db: SupportSQLiteDatabase) {
         db.query("SELECT id, mods, beatmapMD5 from ScoreInfo").use { cursor ->
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(0)
