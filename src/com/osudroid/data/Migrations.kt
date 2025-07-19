@@ -29,7 +29,10 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 val newMods = LegacyModConverter.convert(oldMods, difficulty)
                 newMods.put(ModReplayV6())
 
-                db.execSQL("UPDATE ScoreInfo SET mods = ? WHERE id = ?", arrayOf<Any>(newMods.serializeMods().toString(), id))
+                db.execSQL(
+                    "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
+                    arrayOf<Any>(newMods.serializeMods(includeIrrelevantMods = true).toString(), id)
+                )
             }
         }
 
