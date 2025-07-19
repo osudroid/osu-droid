@@ -40,6 +40,10 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import java.util.BitSet;
 
 public class GameplaySlider extends GameObject {
+    private static final String sliderStartCircleTexture = "sliderstartcircle";
+    private static final String sliderStartCircleOverlayTexture = "sliderstartcircleoverlay";
+    private static final String sliderEndCircleTexture = "sliderendcircle";
+    private static final String sliderEndCircleOverlayTexture = "sliderendcircleoverlay";
 
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
@@ -132,8 +136,8 @@ public class GameplaySlider extends GameObject {
 
     public GameplaySlider() {
 
-        headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
-        tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
+        headCirclePiece = new NumberedCirclePiece(sliderStartCircleTexture, sliderStartCircleOverlayTexture);
+        tailCirclePiece = new CirclePiece(sliderEndCircleTexture, sliderEndCircleOverlayTexture);
 
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
@@ -218,6 +222,8 @@ public class GameplaySlider extends GameObject {
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSlider);
 
         // Start circle piece
+        headCirclePiece.setCircleTextureRegion(sliderStartCircleTexture);
+        headCirclePiece.setOverlayTextureRegion(sliderStartCircleOverlayTexture);
         headCirclePiece.showNumber();
         headCirclePiece.setScale(scale);
         headCirclePiece.setCircleColor(comboColor);
@@ -1165,7 +1171,11 @@ public class GameplaySlider extends GameObject {
         }
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
+            // Change the head circle to the end circle piece.
             headCirclePiece.hideNumber();
+            headCirclePiece.setCircleTextureRegion(sliderEndCircleTexture);
+            headCirclePiece.setOverlayTextureRegion(sliderEndCircleOverlayTexture);
+
             startArrow.setAlpha(1);
         } else {
             headCirclePiece.setAlpha(0);
