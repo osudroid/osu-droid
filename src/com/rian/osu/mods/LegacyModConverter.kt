@@ -5,6 +5,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.NullableFloatModSetting
 import com.rian.osu.utils.ModHashMap
+import com.rian.util.toFloatWithCommaSeparator
 import kotlin.collections.forEach
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -128,15 +129,15 @@ object LegacyModConverter {
 
         for (s in str.split('|')) {
             when {
-                s.startsWith('x') && s.length == 5 -> it.put(ModCustomSpeed(s.substring(1).toFloat()))
+                s.startsWith('x') && s.length == 5 -> it.put(ModCustomSpeed(s.substring(1).toFloatWithCommaSeparator()))
 
-                s.startsWith("CS") -> customCS = s.substring(2).toFloat()
-                s.startsWith("AR") -> customAR = s.substring(2).toFloat()
-                s.startsWith("OD") -> customOD = s.substring(2).toFloat()
-                s.startsWith("HP") -> customHP = s.substring(2).toFloat()
+                s.startsWith("CS") -> customCS = s.substring(2).toFloatWithCommaSeparator()
+                s.startsWith("AR") -> customAR = s.substring(2).toFloatWithCommaSeparator()
+                s.startsWith("OD") -> customOD = s.substring(2).toFloatWithCommaSeparator()
+                s.startsWith("HP") -> customHP = s.substring(2).toFloatWithCommaSeparator()
 
                 s.startsWith("FLD") -> {
-                    val followDelay = s.substring(3).toFloat()
+                    val followDelay = s.substring(3).toFloatWithCommaSeparator()
                     val flashlight = it.ofType<ModFlashlight>() ?: ModFlashlight().also { m -> it.put(m) }
 
                     flashlight.followDelay = followDelay
