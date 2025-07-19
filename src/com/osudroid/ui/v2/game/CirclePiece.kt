@@ -47,6 +47,14 @@ open class CirclePiece(
     fun setCircleColor(color: Color4) {
         circle.color = color
     }
+
+    fun setCircleTextureRegion(circleTexture: String) {
+        circle.textureRegion = ResourceManager.getInstance().getTexture(circleTexture)
+    }
+
+    fun setOverlayTextureRegion(overlayTexture: String) {
+        overlay.textureRegion = ResourceManager.getInstance().getTexture(overlayTexture)
+    }
 }
 
 class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : CirclePiece(circleTexture, overlayTexture) {
