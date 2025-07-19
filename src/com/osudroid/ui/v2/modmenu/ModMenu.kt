@@ -457,7 +457,7 @@ object ModMenu : UIScene() {
 
     fun queueModChange(mod: Mod) = synchronized(modChangeQueue) {
         // Adding to first place in case it is already queued.
-        if (modChangeQueue.isEmpty() || modChangeQueue.first != mod) {
+        if (modChangeQueue.isEmpty() || modChangeQueue.first() != mod) {
             if (modChangeQueue.isNotEmpty()) {
                 modChangeQueue.remove(mod)
             }
