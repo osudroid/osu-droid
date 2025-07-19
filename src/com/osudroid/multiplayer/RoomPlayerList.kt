@@ -33,10 +33,6 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         isValid = false
     }
 
-    override fun detachSelf(): Boolean {
-        return detachChild(this)
-    }
-
 
     override fun onManagedUpdate(secondsElapsed: Float) {
         if (!isValid) {
