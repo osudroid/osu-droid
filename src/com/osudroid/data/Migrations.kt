@@ -18,7 +18,11 @@ abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration
         val dbFile = File(DatabaseManager.databasePath)
 
         if (dbFile.exists()) {
-            val backupFile = File(dbFile.parent, "${dbFile.nameWithoutExtension}_version$startVersion.db")
+            val backupFile = File(
+                dbFile.parent,
+                "${dbFile.nameWithoutExtension}_version${startVersion}_${System.currentTimeMillis()}.db"
+            )
+
             dbFile.copyTo(backupFile, true)
         }
 
