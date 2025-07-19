@@ -22,6 +22,38 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.1
+===============
+
+# Changes
+
+- Backup database before migration <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This allows reverting to the previous version in case of a migration bug or failure.
+
+# Bug Fixes
+
+- Fix migrated scores not having Replay V6 mod applied <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix non-user selectable mods displaying in leaderboard and multiplayer player list <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix forced difficulty statistics failing to migrate <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix mod display potentially being empty when non-user playable mods are present <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - An example of this is when Replay V6 mod is the only mod applied to a score.
+- Fix mod presets not visible in singleplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay progressing at a faster/slower rate before the music starts when Wind Up/Down mod is used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when a combo color in skin.json is not a valid hex color <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when a color in the `Color` section of skin.json is not a valid hex color <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash due to repeated attempt of creating mod preset storage <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when pressing a main menu button while it is animating <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider head circle post-judgement visibility not meeting expectations <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Upon judgement, the slider head circle should change its texture to the end circle. This was not the case.
+- Fix failing migration due to comma-separated decimals in legacy mod format <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when opening a score with an unmigrated mod format <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This should not happen, but there was a recorded crash with this error, so there the fix goes...
+- Fix cryptic mod display string in multiplayer room and room listing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix player list bugging out when joining a room for the second time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix player list bugging out when finishing a beatmap for the second time in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when enabling real-time pp counter due to invalid bounds <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Attempt to fix a crash when quitting game due to invalidated beatmap reference <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4
 =============
 
