@@ -190,9 +190,17 @@ class MainMenu(val main: MainScene) {
 
 
     fun attachButtons() {
-        main.scene.attachChild(first, 1)
-        main.scene.attachChild(second, 1)
-        main.scene.attachChild(third, 1)
+        if (!first.hasParent()) {
+            main.scene.attachChild(first, 1)
+        }
+
+        if (!second.hasParent()) {
+            main.scene.attachChild(second, 1)
+        }
+
+        if (!third.hasParent()) {
+            main.scene.attachChild(third, 1)
+        }
     }
 
     fun detachButtons() {
