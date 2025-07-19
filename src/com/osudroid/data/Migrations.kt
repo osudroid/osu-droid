@@ -5,6 +5,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModReplayV6
+import com.rian.osu.utils.ModUtils
 import java.io.File
 
 /**
@@ -57,13 +58,22 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
                     BeatmapDifficulty(cursor.getFloat(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3))
                 }
 
-                val newMods = LegacyModConverter.convert(oldMods, difficulty)
-                newMods.put(ModReplayV6())
+                try {
+                    // Check if the mods are already in the new format. In that case, we don't need to migrate them.
+                    // Realistically, this should never happen since migrations are done in a transaction, but there are
+                    // crash reports where the CREATE TABLE statement below for ModPreset was executed more than once
+                    // (hence the addition of the IF NOT EXISTS clause to that statement).
+                    ModUtils.deserializeMods(oldMods)
+                } catch (_: Exception) {
+                    // If the mods are not deserializable, we assume they are legacy mods, so we migrate them.
+                    val newMods = LegacyModConverter.convert(oldMods, difficulty)
+                    newMods.put(ModReplayV6())
 
-                db.execSQL(
-                    "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
-                    arrayOf<Any>(newMods.serializeMods().toString(), id)
-                )
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
+                        arrayOf<Any>(newMods.serializeMods().toString(), id)
+                    )
+                }
             }
         }
 
