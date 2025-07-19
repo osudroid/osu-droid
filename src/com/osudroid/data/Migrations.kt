@@ -58,7 +58,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
 
                 db.execSQL(
                     "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
-                    arrayOf<Any>(newMods.serializeMods(includeIrrelevantMods = true).toString(), id)
+                    arrayOf<Any>(newMods.serializeMods().toString(), id)
                 )
             }
         }

@@ -3,11 +3,14 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.mods.settings.NullableFloatModSetting
 import com.rian.osu.utils.ModHashMap
 import kotlin.collections.forEach
 import kotlin.collections.set
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty0
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.jvm.isAccessible
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -142,7 +145,20 @@ object LegacyModConverter {
         }
 
         if (customCS != null || customAR != null || customOD != null || customHP != null) {
-            it.put(ModDifficultyAdjust(customCS, customAR, customOD, customHP))
+            val difficultyAdjust = ModDifficultyAdjust(customCS, customAR, customOD, customHP)
+
+            // Set the default values to null since they are still unknown at this point.
+            fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
+                property.isAccessible = true
+                return property.getDelegate() as NullableFloatModSetting
+            }
+
+            getDelegate(difficultyAdjust::cs).defaultValue = null
+            getDelegate(difficultyAdjust::ar).defaultValue = null
+            getDelegate(difficultyAdjust::od).defaultValue = null
+            getDelegate(difficultyAdjust::hp).defaultValue = null
+
+            it.put(difficultyAdjust)
         }
     }
 }
