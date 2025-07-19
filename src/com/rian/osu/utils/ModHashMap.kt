@@ -261,25 +261,21 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * @return The string representation of the [Mod]s in this [ModHashMap].
      */
     @JvmOverloads
-    fun toDisplayModString(includeNonUserPlayable: Boolean = true): String {
-        if (isEmpty()) {
-            return "-"
+    fun toDisplayModString(includeNonUserPlayable: Boolean = true) = buildString {
+        modStringOrder.fastForEach {
+            if (!includeNonUserPlayable && !it.isUserPlayable) {
+                return@fastForEach
+            }
+
+            if (it in this@ModHashMap) {
+                append(this@ModHashMap[it::class]!!.toString() + ",")
+            }
         }
 
-        return buildString {
-            modStringOrder.fastForEach {
-                if (!includeNonUserPlayable && !it.isUserPlayable) {
-                    return@fastForEach
-                }
-
-                if (it in this@ModHashMap) {
-                    append(this@ModHashMap[it::class]!!.toString() + ",")
-                }
-            }
-
-            if (isNotEmpty()) {
-                deleteCharAt(length - 1)
-            }
+        if (isEmpty()) {
+            append('-')
+        } else {
+            deleteCharAt(length - 1)
         }
     }
 
