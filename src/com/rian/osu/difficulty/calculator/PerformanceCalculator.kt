@@ -133,6 +133,9 @@ abstract class PerformanceCalculator<
             }
         }
 
-        missCount.coerceIn(totalHits.toDouble(), countMiss.toDouble())
+        missCount = max(countMiss.toDouble(), missCount)
+        missCount = min(totalHits.toDouble(), missCount)
+
+        missCount
     }
 }
