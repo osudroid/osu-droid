@@ -172,7 +172,9 @@ public class SkinJsonReader extends SkinReader {
         JSONArray names = data.names();
         if (names == null) return;
         for (int i = 0; i < names.length(); i++) {
-            skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
+            try {
+                skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
+            } catch (NumberFormatException ignored) {}
         }
     }
 
