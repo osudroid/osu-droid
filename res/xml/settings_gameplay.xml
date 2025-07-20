@@ -72,6 +72,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/opt_category_playfield">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="displayPlayfieldBorder"
+            android:title="@string/opt_display_playfield_border_title"
+            android:summary="@string/opt_display_playfield_border_summary"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/opt_category_hud">
 
         <CheckBoxPreference

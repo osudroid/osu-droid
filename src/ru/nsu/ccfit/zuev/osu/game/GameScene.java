@@ -28,6 +28,8 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.andengine.shape.PaintStyle;
+import com.reco1l.andengine.shape.UIBox;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
@@ -804,6 +806,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
+
+        if (Config.isDisplayPlayfieldBorder()) {
+            var playfieldBorder = new UIBox() {
+                {
+                    setAnchor(Anchor.Center);
+                    setOrigin(Anchor.Center);
+                    setPaintStyle(PaintStyle.Outline);
+                    setLineWidth(5f);
+                    setColor(1f, 1f, 1f, 1f);
+                    setSize(Constants.MAP_ACTUAL_WIDTH, Constants.MAP_ACTUAL_HEIGHT);
+                }
+            };
+
+            scene.attachChild(playfieldBorder, 0);
+        }
 
         stat = new StatisticV2();
         stat.setMod(lastMods);
