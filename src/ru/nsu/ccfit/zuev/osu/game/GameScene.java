@@ -34,6 +34,7 @@ import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UIVideoSprite;
 import com.reco1l.andengine.UIScene;
+import com.osudroid.resources.R;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -120,7 +121,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 

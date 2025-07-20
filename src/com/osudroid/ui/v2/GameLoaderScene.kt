@@ -79,7 +79,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                     text {
                         font = ResourceManager.getInstance().getFont("smallFont")
-                        text = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.epilepsy_warning)
+                        text = StringTable.get(com.osudroid.resources.R.string.epilepsy_warning)
                     }
                 }
             }
