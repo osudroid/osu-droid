@@ -74,6 +74,21 @@
 
     <PreferenceCategory android:title="@string/opt_category_playfield">
 
+        <SeekBarPreference
+            android:defaultValue="100"
+            android:key="playfieldSize"
+            android:max="100"
+            android:summary="@string/opt_setplayfield_summary"
+            android:title="@string/opt_setplayfield_title"
+            app:min="50"
+            app:showSeekBarValue="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="shrinkPlayfieldDownwards"
+            android:summary="@string/opt_shrink_playfield_downwards_summary"
+            android:title="@string/opt_shrink_playfield_downwards_title" />
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="displayPlayfieldBorder"
