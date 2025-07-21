@@ -319,6 +319,11 @@ object ModMenu : UIScene() {
                     selectedBeatmap.mostCommonBPM.roundToInt(),
                     (selectedBeatmap.mostCommonBPM * rate).roundToInt()
                 )
+
+                scoreMultiplierBadge.updateStatisticBadge(
+                    "1.00x",
+                    "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
+                )
             }
 
             ensureActive()
