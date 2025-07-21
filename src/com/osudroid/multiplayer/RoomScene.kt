@@ -612,6 +612,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
             updateThread {
                 ModMenu.back()
+                ModMenu.clear()
 
                 playerList?.detachSelf()
                 playerList = null
@@ -702,6 +703,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         attachChild(playerList, 1)
 
         clearChildScene()
+
+        ModMenu.clear()
         ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange = true
