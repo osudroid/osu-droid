@@ -81,7 +81,8 @@ public class Config {
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
         dimHitObjects,
-        forceMaxRefreshRate;
+        forceMaxRefreshRate,
+        shiftPitchInRateChange;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -223,6 +224,7 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
+        shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -758,7 +760,7 @@ public class Config {
     }
 
     public static boolean isShiftPitchInRateChange() {
-        return getBoolean("shiftPitchInRateChange", false);
+        return shiftPitchInRateChange;
     }
 
     public static boolean isDisplayPlayfieldBorder() {

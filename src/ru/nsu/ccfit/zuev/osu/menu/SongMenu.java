@@ -1465,9 +1465,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var modMenu = ModMenu.INSTANCE;
-        float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values(), Double.POSITIVE_INFINITY);
-        boolean adjustPitch = modMenu.getEnabledMods().contains(ModNightCore.class);
+        var enabledMods = ModMenu.INSTANCE.getEnabledMods();
+        float speed = ModUtils.calculateRateWithMods(enabledMods.values(), Double.POSITIVE_INFINITY);
+        boolean adjustPitch = Config.isShiftPitchInRateChange() || enabledMods.contains(ModNightCore.class);
 
         songService.setSpeed(speed);
         songService.setAdjustPitch(adjustPitch);
