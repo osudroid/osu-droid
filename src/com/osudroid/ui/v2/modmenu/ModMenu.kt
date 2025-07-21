@@ -494,9 +494,7 @@ object ModMenu : UIScene() {
         scoreMultiplierBadge.updateStatisticBadge(
             "1.00x",
             if (difficulty != null) {
-                "%.2fx".format(enabledMods.values.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                })
+                "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods, difficulty))
             } else {
                 "1.00x"
             }

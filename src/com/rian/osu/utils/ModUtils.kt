@@ -151,6 +151,43 @@ object ModUtils {
         }
 
     /**
+     * Calculates the score multiplier for the selected [Mod]s and [BeatmapDifficulty].
+     *
+     * @param mods The selected [Mod]s.
+     * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
+     * @return The score multiplier.
+     */
+    @JvmStatic
+    fun calculateScoreMultiplier(mods: ModHashMap, difficulty: BeatmapDifficulty) =
+        calculateScoreMultiplier(mods.values, difficulty)
+
+    /**
+     * Calculates the score multiplier for the selected [Mod]s and [BeatmapDifficulty].
+     *
+     * @param mods The selected [Mod]s.
+     * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
+     * @return The score multiplier.
+     */
+    @JvmStatic
+    fun calculateScoreMultiplier(mods: Iterable<Mod>, difficulty: BeatmapDifficulty): Float {
+        // Rate-adjusting mods combine their track rate multipliers together, then bunched together.
+        var totalRateAdjustTrackRateMultiplier = 1f
+        var scoreMultiplier = 1f
+
+        for (mod in mods) {
+            if (mod is ModRateAdjust) {
+                totalRateAdjustTrackRateMultiplier *= mod.trackRateMultiplier
+            } else {
+                scoreMultiplier *= mod.calculateScoreMultiplier(difficulty)
+            }
+        }
+
+        scoreMultiplier *= ModCustomSpeed(totalRateAdjustTrackRateMultiplier).calculateScoreMultiplier(difficulty)
+
+        return scoreMultiplier
+    }
+
+    /**
      * Applies the selected [Mod]s to a [BeatmapDifficulty].
      *
      * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.

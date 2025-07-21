@@ -610,11 +610,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public void calculateModScoreMultiplier(final BeatmapDifficulty originalDifficulty) {
-        modScoreMultiplier = 1;
-
-        for (var m : mod.values()) {
-            modScoreMultiplier *= m.calculateScoreMultiplier(originalDifficulty);
-        }
+        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod, originalDifficulty);
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
