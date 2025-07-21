@@ -22,6 +22,34 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.2
+===============
+
+# Additions
+
+- Add playfield border setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - When playfield size is under 100%, this will show a border around the gameplay space (worded "playfield" since it is
+    easier for players to understand).
+  - The reason behind this is the massive amount of questions pertaining gameplay space being clipped (essentially,
+    anything that is outside that space will not be rendered) starting from version 1.8.4. This should provide the
+    expected area where hit objects will be rendered.
+
+# Changes
+
+- Adjust music pitch in song selection menu when shift pitch in rate change setting is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Use slider tick and end misses from score information for a more accurate pp calculation when available <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Put rank and `section-pass/fail` elements during break in HUD instead of gameplay area
+  - These should not be affected by the playfield size setting.
+
+# Bug Fixes
+
+- Fix wrong score multiplier calculation when multiple constant rate-changing mods (Custom Speed, Half Time, Double Time
+  , and Night Core) are stacked together <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Scores that are affected by this bug will have their score multiplier recalculated. Depending on how many scores you
+    have, this may take a while.
+- Fix Replay V6 mod not being applied to pre-version 1.8.4 scores during version 1.8.4 update <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This fix will be applied along with the score multiplier recalculation.
+
 Version 1.8.4.1
 ===============
 
