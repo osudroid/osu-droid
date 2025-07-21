@@ -4,8 +4,8 @@ import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.mods.LegacyModConverter
-import com.rian.osu.mods.ModReplayV6
+import com.rian.osu.mods.*
+import com.rian.osu.utils.ModHashMap
 import java.io.IOException
 import org.junit.Assert
 import org.junit.Rule
@@ -16,7 +16,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MigrationTest {
     private val testDb = "migration-test"
-    private val allMigrations = arrayOf(MIGRATION_1_2)
 
     @get:Rule
     val helper = MigrationTestHelper(
@@ -35,7 +34,7 @@ class MigrationTest {
             InstrumentationRegistry.getInstrumentation().targetContext,
             DroidDatabase::class.java,
             testDb
-        ).addMigrations(*allMigrations).build().apply {
+        ).addMigrations(*ALL_MIGRATIONS).build().apply {
             openHelper.writableDatabase.close()
         }
     }
@@ -104,6 +103,60 @@ class MigrationTest {
                         modMap.put(ModReplayV6())
 
                         Assert.assertEquals(mods, modMap.serializeMods().toString())
+                    }
+
+                    else -> throw IllegalStateException("Unknown score ID: $id")
+                }
+            }
+        }
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun `Test migration from version 2 to 3`() {
+        @Suppress("VariableInitializerIsRedundant")
+        var db = helper.createDatabase(testDb, 2).apply {
+            val scores = mutableListOf<String>()
+
+            fun addScore(mods: ModHashMap) {
+                scores.add("('md5', '', '', '${mods.serializeMods()}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0)")
+            }
+
+            // A score without stacked ModRateAdjust mods.
+            addScore(ModHashMap().apply {
+                put(ModDoubleTime())
+            })
+
+            // A score with stacked ModRateAdjust mods.
+            addScore(ModHashMap().apply {
+                put(ModDoubleTime())
+                put(ModCustomSpeed(0.85f))
+            })
+
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                        "hit300k, hit300, hit100k, hit100, hit50, misses, time) VALUES " +
+                        scores.joinToString(",")
+            )
+        }
+
+        db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
+
+        db.query("SELECT id, score FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+
+                // Check if the scores are migrated correctly.
+                when (id) {
+                    1L -> {
+                        // No stacked ModRateAdjust mods, score should remain unchanged.
+                        Assert.assertEquals(1000, score)
+                    }
+
+                    2L -> {
+                        // Stacked ModRateAdjust mods, score should be recalculated.
+                        Assert.assertEquals(1962, score)
                     }
 
                     else -> throw IllegalStateException("Unknown score ID: $id")
