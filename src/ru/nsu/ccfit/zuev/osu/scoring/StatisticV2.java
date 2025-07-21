@@ -10,8 +10,10 @@ import com.osudroid.multiplayer.api.data.RoomTeam;
 import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
+import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
+import com.rian.osu.mods.IModRequiresOriginalBeatmap;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
@@ -118,7 +120,6 @@ public class StatisticV2 implements Serializable {
 
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
-            calculateModScoreMultiplier(originalDifficulty);
         }
     }
 
@@ -614,8 +615,14 @@ public class StatisticV2 implements Serializable {
         );
     }
 
-    public void calculateModScoreMultiplier(final BeatmapDifficulty originalDifficulty) {
-        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod, originalDifficulty);
+    public void calculateModScoreMultiplier(final Beatmap beatmap) {
+        for (var m : mod.values()) {
+            if (m instanceof IModRequiresOriginalBeatmap requiresOriginalBeatmap) {
+                requiresOriginalBeatmap.applyFromBeatmap(beatmap);
+            }
+        }
+
+        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod);
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {

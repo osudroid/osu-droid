@@ -155,7 +155,6 @@ data class ScoreInfo @JvmOverloads constructor(
 
         if (difficulty != null) {
             it.migrateLegacyMods(difficulty)
-            it.calculateModScoreMultiplier(difficulty)
         }
 
     }

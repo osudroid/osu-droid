@@ -1,6 +1,5 @@
 package com.rian.osu.mods
 
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.*
 import kotlin.math.round
 import org.json.JSONObject
@@ -17,6 +16,8 @@ class ModFlashlight : Mod() {
     override val isRanked
         get() = followDelay == DEFAULT_FOLLOW_DELAY
 
+    override val scoreMultiplier = 1.12f
+
     /**
      * The amount of seconds until the flashlight reaches the cursor.
      */
@@ -29,8 +30,6 @@ class ModFlashlight : Mod() {
         step = DEFAULT_FOLLOW_DELAY,
         precision = 2
     )
-
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
 
     override fun copySettings(settings: JSONObject) {
         super.copySettings(settings)

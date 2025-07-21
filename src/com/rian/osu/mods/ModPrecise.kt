@@ -5,7 +5,6 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
  * Represents the Precise mod.
@@ -16,8 +15,7 @@ class ModPrecise : Mod(), IModApplicableToHitObject {
     override val description = "Ultimate rhythm gamer timing."
     override val type = ModType.DifficultyIncrease
     override val isRanked = true
-
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
+    override val scoreMultiplier = 1.06f
 
     override fun applyToHitObject(
         mode: GameMode,

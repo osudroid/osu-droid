@@ -488,16 +488,9 @@ object ModMenu : UIScene() {
             background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
         }
 
-        val beatmap = GlobalManager.getInstance().selectedBeatmap
-        val difficulty = beatmap?.getBeatmapDifficulty()
-
         scoreMultiplierBadge.updateStatisticBadge(
             "1.00x",
-            if (difficulty != null) {
-                "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods, difficulty))
-            } else {
-                "1.00x"
-            }
+            "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
         )
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()

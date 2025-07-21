@@ -113,8 +113,6 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
 val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
     override fun performMigration(db: SupportSQLiteDatabase) {
         // Fix score multiplier calculation for stacked ModRateAdjust mods.
-        val difficulty = BeatmapDifficulty()
-
         // Score cutoff time - this was when the score multiplier bug was introduced in release (version 1.8.4).
         // Scores before this time are not affected by the bug and do not need to be recalculated.
         val oldScoreCutoffTime = 1752863880000L
@@ -141,10 +139,10 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                     if (rateAdjustingMods.size >= 2) {
                         // Stacked ModRateAdjust mods - recalculate score.
                         val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
-                            acc * mod.calculateScoreMultiplier(difficulty)
+                            acc * mod.scoreMultiplier
                         }
 
-                        val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods, difficulty)
+                        val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods)
 
                         score = (score * newScoreMultiplier / oldScoreMultiplier).toInt()
                     }
