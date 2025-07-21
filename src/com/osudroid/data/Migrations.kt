@@ -4,6 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
+import com.rian.osu.mods.ModRateAdjust
 import com.rian.osu.mods.ModReplayV6
 import com.rian.osu.utils.ModUtils
 import java.io.File
@@ -38,6 +39,14 @@ abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration
     protected abstract fun performMigration(db: SupportSQLiteDatabase)
 }
 
+/**
+ * Migration from version 1 to 2.
+ *
+ * Contains the following changes:
+ * - Migrates legacy mods format in the `ScoreInfo` table to the new format.
+ * - Adds the epilepsyWarning column to the `BeatmapInfo` table.
+ * - Creates the `ModPreset` table.
+ */
 val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
     override fun performMigration(db: SupportSQLiteDatabase) {
         db.query("SELECT id, mods, beatmapMD5 from ScoreInfo").use { cursor ->
@@ -88,3 +97,62 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
         )
     }
 }
+
+/**
+ * Migration from version 2 to 3.
+ *
+ * Contains the following changes:
+ * - Adds slider tick and end hits statistics to `ScoreInfo`
+ * - Fixes wrong score multiplier calculation in stacked ModRateAdjust mods (see
+ * [this](https://github.com/osudroid/osu-droid/commit/0032b1cff542002856f8e4108a0acb4e4aae38ed) commit for more
+ * information)
+ */
+val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
+    override fun performMigration(db: SupportSQLiteDatabase) {
+        // Fix score multiplier calculation for stacked ModRateAdjust mods.
+        val difficulty = BeatmapDifficulty()
+
+        db.query("SELECT id, score, mods FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+                val mods = ModUtils.deserializeMods(it.getString(2))
+
+                // Old scores (denoted by the presence of ModReplayV6) are not affected by this migration.
+                if (ModReplayV6::class in mods) {
+                    continue
+                }
+
+                val rateAdjustingMods = mutableListOf<ModRateAdjust>()
+
+                for (mod in mods.values) {
+                    if (mod is ModRateAdjust) {
+                        rateAdjustingMods.add(mod)
+                    }
+                }
+
+                // If there are no stacked ModRateAdjust mods, we can skip the score multiplier recalculation.
+                if (rateAdjustingMods.size < 2) {
+                    continue
+                }
+
+                val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
+                    acc * mod.calculateScoreMultiplier(difficulty)
+                }
+
+                val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods, difficulty)
+
+                db.execSQL(
+                    "UPDATE ScoreInfo SET score = ? WHERE id = ?",
+                    arrayOf<Any>((score * (newScoreMultiplier / oldScoreMultiplier)).toInt(), id)
+                )
+            }
+        }
+
+        // Add new columns for slider tick and end hits statistics (both are nullable integer columns).
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderTickHits INTEGER")
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderEndHits INTEGER")
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
