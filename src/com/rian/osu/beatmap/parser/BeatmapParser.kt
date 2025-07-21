@@ -166,6 +166,14 @@ class BeatmapParser : Closeable {
                 // [SectionName]
                 if (line.startsWith("[") && line.endsWith("]")) {
                     currentSection = BeatmapSection.parse(line.substring(1, line.length - 1))
+
+                    // HitObjects are always in the last section (since it is dependent on other things such as
+                    // difficulty, control points, etc.)
+                    // We can stop here if we do not need to parse them.
+                    if (currentSection == BeatmapSection.HitObjects && !withHitObjects) {
+                        break
+                    }
+
                     continue
                 }
 
@@ -196,9 +204,7 @@ class BeatmapParser : Closeable {
                             BeatmapColorParser.parse(beatmap, line, scope)
 
                         BeatmapSection.HitObjects ->
-                            if (withHitObjects) {
-                                BeatmapHitObjectsParser.parse(beatmap, line, scope)
-                            }
+                            BeatmapHitObjectsParser.parse(beatmap, line, scope)
 
                         else -> continue
                     }
