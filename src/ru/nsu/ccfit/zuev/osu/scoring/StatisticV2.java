@@ -113,6 +113,9 @@ public class StatisticV2 implements Serializable {
             playerName = params[12];
         }
 
+        sliderTickHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
+        sliderEndHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
             calculateModScoreMultiplier(originalDifficulty);
@@ -606,8 +609,8 @@ public class StatisticV2 implements Serializable {
             hit50,
             misses,
             time,
-            sliderTickHits,
-            sliderEndHits
+            sliderTickHits >= 0 ? sliderTickHits : null,
+            sliderEndHits >= 0 ? sliderEndHits : null
         );
     }
 

@@ -150,8 +150,8 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
-        it.sliderTickHits = sliderTickHits ?: 0
-        it.sliderEndHits = sliderEndHits ?: 0
+        it.sliderTickHits = sliderTickHits ?: -1
+        it.sliderEndHits = sliderEndHits ?: -1
 
         if (difficulty != null) {
             it.migrateLegacyMods(difficulty)
