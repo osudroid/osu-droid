@@ -31,9 +31,9 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
     override val scoreMultiplier: Float
         get() =
             Interpolation.linear(
-            calculateScoreMultiplierAt(initialRate),
-            calculateScoreMultiplierAt(finalRate),
-            FINAL_RATE_PROGRESS.toFloat()
+                calculateScoreMultiplierAt(initialRate),
+                calculateScoreMultiplierAt(finalRate),
+                FINAL_RATE_PROGRESS.toFloat()
             )
 
     override fun copySettings(settings: JSONObject) {
@@ -67,9 +67,7 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
     override val extraInformation
         get() = "%.2fx - %.2fx".format(initialRate, finalRate)
 
-    private fun calculateScoreMultiplierAt(rate: Float) =
-        if (rate > 1) 1 + (rate - 1) * 0.24f
-        else 0.3f.pow((1 - rate) * 4)
+    private fun calculateScoreMultiplierAt(rate: Float) = ModRateAdjustHelper(rate).scoreMultiplier
 
     companion object {
         /**
