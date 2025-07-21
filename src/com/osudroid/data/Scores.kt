@@ -102,8 +102,15 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     val time: Long,
 
-    // TODO: add slider tick and end hits as a part of client-side score statistics in the next migration (version 3)
-    // (population strategy is to do it when the player loads a replay, otherwise default to 0)
+    /**
+     * The amount of slider ticks that were hit.
+     */
+    var sliderTickHits: Int?,
+
+    /**
+     * The amount of slider ends that were hit.
+     */
+    var sliderEndHits: Int?
 ) {
 
     /**
@@ -143,6 +150,8 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
+        it.sliderTickHits = sliderTickHits ?: 0
+        it.sliderEndHits = sliderEndHits ?: 0
 
         if (difficulty != null) {
             it.migrateLegacyMods(difficulty)
@@ -174,6 +183,8 @@ fun ScoreInfo(json: JSONObject) =
         hit50 = json.getInt("h50"),
         misses = json.getInt("misses"),
         time = json.getLong("time"),
+        sliderTickHits = json.optInt("sliderTickHits", -1).takeIf { it >= 0 },
+        sliderEndHits = json.optInt("sliderEndHits", -1).takeIf { it >= 0 }
     )
 
 @Dao
