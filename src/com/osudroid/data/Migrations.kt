@@ -103,7 +103,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
  *
  * Contains the following changes:
  * - Adds slider tick and end hits statistics to `ScoreInfo`
- * - Fixes wrong score multiplier calculation in stacked ModRateAdjust mods (see
+ * - Fixes wrong score multiplier calculation in stacked ModRateAdjust mods after version 1.8.4 release (see
  * [this](https://github.com/osudroid/osu-droid/commit/0032b1cff542002856f8e4108a0acb4e4aae38ed) commit for more
  * information)
  */
@@ -112,7 +112,9 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
         // Fix score multiplier calculation for stacked ModRateAdjust mods.
         val difficulty = BeatmapDifficulty()
 
-        db.query("SELECT id, score, mods FROM ScoreInfo").use {
+        // Score date cutoff - this was when the bug was introduced in release (version 1.8.4).
+        // Scores before this time are not affected by the bug and do not need to be recalculated.
+        db.query("SELECT id, score, mods FROM ScoreInfo WHERE time >= 1752863880000").use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 val score = it.getInt(1)

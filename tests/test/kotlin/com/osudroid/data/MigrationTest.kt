@@ -118,8 +118,8 @@ class MigrationTest {
         var db = helper.createDatabase(testDb, 2).apply {
             val scores = mutableListOf<String>()
 
-            fun addScore(mods: ModHashMap) {
-                scores.add("('md5', '', '', '${mods.serializeMods()}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0)")
+            fun addScore(mods: ModHashMap, time: Long = 1752863880000L) {
+                scores.add("('md5', '', '', '${mods.serializeMods()}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, $time)")
             }
 
             // A score without stacked ModRateAdjust mods.
@@ -127,7 +127,13 @@ class MigrationTest {
                 put(ModDoubleTime())
             })
 
-            // A score with stacked ModRateAdjust mods.
+            // A score with stacked ModRateAdjust mods, but before the score date cutoff, so it should not be migrated.
+            addScore(ModHashMap().apply {
+                put(ModDoubleTime())
+                put(ModCustomSpeed(0.85f))
+            }, 0L)
+
+            // A score with stacked ModRateAdjust mods that should be migrated.
             addScore(ModHashMap().apply {
                 put(ModDoubleTime())
                 put(ModCustomSpeed(0.85f))
@@ -155,6 +161,11 @@ class MigrationTest {
                     }
 
                     2L -> {
+                        // Stacked ModRateAdjust mods before score date cutoff, score should remain unchanged.
+                        Assert.assertEquals(1000, score)
+                    }
+
+                    3L -> {
                         // Stacked ModRateAdjust mods, score should be recalculated.
                         Assert.assertEquals(1962, score)
                     }
