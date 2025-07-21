@@ -29,9 +29,11 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.math.Precision;
+import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModDifficultyAdjust;
 import com.rian.osu.mods.ModNightCore;
 import com.rian.osu.mods.ModPrecise;
+import com.rian.osu.mods.ModReplayV6;
 import com.rian.osu.utils.LRUCache;
 import com.rian.osu.utils.ModUtils;
 
@@ -55,6 +57,7 @@ import java.util.*;
 import java.util.concurrent.CancellationException;
 
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
@@ -1221,7 +1224,35 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatisticV2(difficulty);
+        var score = DatabaseManager.getScoreInfoTable().getScore(id);
+
+        if (score == null) {
+            ToastLogger.showText("Could not open score", true);
+            return;
+        }
+
+        StatisticV2 stat;
+
+        try {
+            stat = score.toStatisticV2(difficulty);
+        } catch (JSONException e1) {
+            // When this happens, the mods are likely in the old format (that somehow was not converted during
+            // migration). Convert them.
+            var convertedMods = LegacyModConverter.convert(score.getMods());
+
+            // Scores that are using the legacy mods format are guaranteed to use these mods.
+            convertedMods.put(new ModReplayV6());
+
+            score.setMods(convertedMods.serializeMods().toString());
+            DatabaseManager.getScoreInfoTable().updateScore(score);
+
+            try {
+                stat = score.toStatisticV2(difficulty);
+            } catch (JSONException e2) {
+                ToastLogger.showText("Could not open score", true);
+                return;
+            }
+        }
 
         scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
         engine.setScene(scoreScene.getScene());

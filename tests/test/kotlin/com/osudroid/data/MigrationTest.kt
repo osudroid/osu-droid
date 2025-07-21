@@ -5,7 +5,9 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
+import com.rian.osu.mods.ModReplayV6
 import java.io.IOException
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +43,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 1 to 2`() {
+        @Suppress("VariableInitializerIsRedundant")
         var db = helper.createDatabase(testDb, 1).apply {
             // Insert a fake beatmap.
             execSQL(
@@ -82,9 +85,27 @@ class MigrationTest {
 
                 // Check if the mods are migrated correctly.
                 when (id) {
-                    1L -> assert(mods == LegacyModConverter.convert("rhd|x1.10").serializeMods().toString())
-                    2L -> assert(mods == LegacyModConverter.convert("m").serializeMods().toString())
-                    3L -> assert(mods == LegacyModConverter.convert("m", difficulty).serializeMods().toString())
+                    1L -> {
+                        val modMap = LegacyModConverter.convert("rhd|x1.10", difficulty)
+                        modMap.put(ModReplayV6())
+
+                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                    }
+
+                    2L -> {
+                        val modMap = LegacyModConverter.convert("m")
+                        modMap.put(ModReplayV6())
+
+                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                    }
+
+                    3L -> {
+                        val modMap = LegacyModConverter.convert("m", difficulty)
+                        modMap.put(ModReplayV6())
+
+                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                    }
+
                     else -> throw IllegalStateException("Unknown score ID: $id")
                 }
             }

@@ -102,7 +102,7 @@ open class UICard(
             triangle?.rotateTo(180f, 0.1f)
 
             content.clearModifiers(ModifierType.SizeY)
-            content.sizeToY(0f, 0.1f).then {
+            content.sizeToY(0f, 0.1f).after {
                 it.isVisible = false
                 onContentChanged()
             }

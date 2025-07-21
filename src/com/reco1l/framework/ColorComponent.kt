@@ -19,6 +19,7 @@ data class Color4(private val hex: Long) {
         ((alpha * 255f + 0.5f).toInt() shl 24) or ((red * 255f + 0.5f).toInt() shl 16) or ((green * 255f + 0.5f).toInt() shl 8) or (blue * 255f + 0.5f).toInt()
     )
 
+    @Throws(NumberFormatException::class)
     constructor(value: String, composition: HexComposition = HexComposition.RRGGBB) : this(when (composition) {
         HexComposition.AARRGGBB -> value.removePrefix("#").toLong(16).toInt()
         HexComposition.RRGGBBAA -> value.removePrefix("#").toLong(16).shl(8).toInt()

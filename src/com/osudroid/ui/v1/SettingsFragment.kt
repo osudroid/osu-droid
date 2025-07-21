@@ -110,7 +110,7 @@ class SettingsFragment : SettingsFragment() {
                         Snackbar.make(
                             decorView,
                             StringTable.format(
-                                R.string.replay_import_error,
+                                string.replay_import_error,
                                 uri.path ?: uri.toString(),
                                 e.message ?: "Unknown error"
                             ),
@@ -128,7 +128,7 @@ class SettingsFragment : SettingsFragment() {
 
                 Snackbar.make(
                     decorView,
-                    StringTable.format(R.string.replay_import_result, importedCount, uris.size),
+                    StringTable.format(string.replay_import_result, importedCount, uris.size),
                     3000
                 )
             }
@@ -278,7 +278,7 @@ class SettingsFragment : SettingsFragment() {
             val success = ConfigBackup.exportPreferences()
 
             ToastLogger.showText(
-                if (success) R.string.config_backup_info_success else R.string.config_backup_info_fail,
+                if (success) string.config_backup_info_success else string.config_backup_info_fail,
                 true
             )
 
@@ -289,10 +289,10 @@ class SettingsFragment : SettingsFragment() {
             val success = ConfigBackup.importPreferences()
 
             if (success) {
-                ToastLogger.showText(R.string.config_backup_restore_info_success, true)
+                ToastLogger.showText(string.config_backup_restore_info_success, true)
                 dismiss()
             } else {
-                ToastLogger.showText(R.string.config_backup_restore_info_fail, true)
+                ToastLogger.showText(string.config_backup_restore_info_fail, true)
             }
 
             true

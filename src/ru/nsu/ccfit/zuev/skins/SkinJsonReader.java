@@ -104,7 +104,15 @@ public class SkinJsonReader extends SkinReader {
         } else {
             for (int i = 0; i < array.length(); i++) {
                 String hex = array.optString(i, skin.DEFAULT_COLOR_HEX);
-                skin.comboColor.add(new Color4(hex, HexComposition.RRGGBB));
+
+                try {
+                    skin.comboColor.add(new Color4(hex, HexComposition.RRGGBB));
+                } catch (NumberFormatException ignored) {}
+            }
+
+            // If no valid colors were found, use the default color
+            if (skin.comboColor.isEmpty()) {
+                skin.comboColor.add(new Color4(skin.DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
             }
         }
     }
@@ -164,7 +172,9 @@ public class SkinJsonReader extends SkinReader {
         JSONArray names = data.names();
         if (names == null) return;
         for (int i = 0; i < names.length(); i++) {
-            skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
+            try {
+                skin.colorData.put(names.optString(i), new Color4(data.optString(names.optString(i)), HexComposition.RRGGBB));
+            } catch (NumberFormatException ignored) {}
         }
     }
 

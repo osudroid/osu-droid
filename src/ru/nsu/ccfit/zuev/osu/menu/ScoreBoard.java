@@ -77,112 +77,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mScrollDetector = new SurfaceScrollDetector(this);
     }
 
-    public static String convertModString(StringBuilder sb, String s) {
-        // Account for SC being removed.
-        // Too dirty of a solution, but no other clean way :/
-        var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
-        var cs = beatmapInfo.getCircleSize();
-        var hasLegacySC = false;
-
-        sb.setLength(0);
-        String[] mods = s.split("\\|", 2);
-        for (int i = 0; i < mods[0].length(); i++) {
-            switch (mods[0].charAt(i)) {
-                case 'a':
-                    sb.append("Auto,");
-                    break;
-                case 'x':
-                    sb.append("Relax,");
-                    break;
-                case 'p':
-                    sb.append("AP,");
-                    break;
-                case 'e':
-                    sb.append("EZ,");
-                    --cs;
-                    break;
-                case 'n':
-                    sb.append("NF,");
-                    break;
-                case 'r':
-                    sb.append("HR,");
-                    ++cs;
-                    break;
-                case 'h':
-                    sb.append("HD,");
-                    break;
-                case 'i':
-                    sb.append("FL,");
-                    break;
-                case 'd':
-                    sb.append("DT,");
-                    break;
-                case 'c':
-                    sb.append("NC,");
-                    break;
-                case 't':
-                    sb.append("HT,");
-                    break;
-                case 's':
-                    sb.append("PR,");
-                    break;
-                case 'l':
-                    sb.append("REZ,");
-                    --cs;
-                    break;
-                // Note: This is SmallCircles which is not available anymore, replaced with custom CS.
-                case 'm':
-                    hasLegacySC = true;
-                    cs += 4;
-                    break;
-                case 'u':
-                    sb.append("SD,");
-                    break;
-                case 'f':
-                    sb.append("PF,");
-                    break;
-                case 'b':
-                    sb.append("TC,");
-                    break;
-                case 'v':
-                    sb.append("ScoreV2,");
-                    break;
-            }
-        }
-
-        if (hasLegacySC) {
-            sb.append(String.format("CS%.1f,", cs));
-        }
-
-        if (mods.length > 1) {
-            convertExtraModString(sb, mods[1]);
-        }
-
-        if (sb.length() == 0) {
-            return "None";
-        }
-
-        return sb.toString().substring(0, sb.length() - 1);
-    }
-
-    private static void convertExtraModString(StringBuilder sb, String s) {
-        var split = s.split("\\|");
-
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < split.length; i++) {
-            var str = split[i];
-
-            if (str.isEmpty())
-                continue;
-
-            if (str.charAt(0) == 'x' && str.length() == 5) {
-                sb.append(str.substring(1)).append("x,");
-            } else if (str.startsWith("AR") || str.startsWith("OD") || str.startsWith("CS") || str.startsWith("HP")) {
-                sb.append(str).append(',');
-            }
-        }
-    }
-
     private String formatScore(StringBuilder sb, int score) {
         sb.setLength(0);
         sb.append(Math.abs(score));
@@ -287,7 +181,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     }
 
                     sb.setLength(0);
-                    var modString = convertModString(sb, mods);
+
+                    var modString = "";
+
+                    try {
+                        modString = ModUtils.deserializeMods(mods).toDisplayModString(false);
+                    } catch (final JSONException e) {
+                        Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
+                    }
+
                     var currentTotal = isPPScoringMode ? pp : score;
                     var diffTotal = Math.round(currentTotal) - Math.round(nextTotal);
 
@@ -374,7 +276,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var modString = "";
 
                     try {
-                        modString = ModUtils.deserializeMods(score.getMods()).toDisplayModString();
+                        modString = ModUtils.deserializeMods(score.getMods()).toDisplayModString(false);
                     } catch (final JSONException e) {
                         Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
                     }

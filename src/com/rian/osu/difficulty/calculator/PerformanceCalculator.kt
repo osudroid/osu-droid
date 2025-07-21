@@ -131,10 +131,11 @@ abstract class PerformanceCalculator<
                 // Combine regular misses with tick misses, since tick misses break combo as well.
                 missCount = min(missCount, sliderTicksMissed!! + countMiss.toDouble())
             }
-        } else {
-            missCount = countMiss.toDouble()
         }
 
-        missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
+        missCount = max(countMiss.toDouble(), missCount)
+        missCount = min(totalHits.toDouble(), missCount)
+
+        missCount
     }
 }

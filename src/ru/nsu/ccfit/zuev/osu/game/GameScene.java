@@ -28,12 +28,15 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.andengine.shape.PaintStyle;
+import com.reco1l.andengine.shape.UIBox;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UIVideoSprite;
 import com.reco1l.andengine.UIScene;
+import com.osudroid.resources.R;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -120,7 +123,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -510,7 +512,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Ensure that only relevant mods are applied.
         mods.values().removeIf(m -> !m.isRelevant());
 
-        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        var playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        this.playableBeatmap = playableBeatmap;
 
         rateAdjustingMods.clear();
 
@@ -804,6 +807,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
 
+        if (Config.isDisplayPlayfieldBorder()) {
+            var playfieldBorder = new UIBox() {
+                {
+                    setAnchor(Anchor.Center);
+                    setOrigin(Anchor.Center);
+                    setPaintStyle(PaintStyle.Outline);
+                    setLineWidth(5f);
+                    setColor(1f, 1f, 1f, 1f);
+                    setSize(Constants.MAP_ACTUAL_WIDTH, Constants.MAP_ACTUAL_HEIGHT);
+                }
+            };
+
+            scene.attachChild(playfieldBorder, 0);
+        }
+
         stat = new StatisticV2();
         stat.setMod(lastMods);
         stat.migrateLegacyMods(parsedBeatmap.getDifficulty());
@@ -1095,6 +1113,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         elapsedTime += dt;
         previousFrameTime = SystemClock.uptimeMillis();
 
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         if (Multiplayer.isMultiplayer)
         {
             long mSecElapsed = (long) (dt / GameHelper.getSpeedMultiplier() * 1000);
@@ -1126,10 +1150,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
-
-                if (musicStarted) {
-                    GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
-                }
+                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
             }
         }
 
@@ -1520,7 +1541,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             expiredObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
-            playableBeatmap = null;
+            this.playableBeatmap = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
             sliderPaths = null;

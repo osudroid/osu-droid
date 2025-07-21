@@ -9,9 +9,11 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Update
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
+import org.json.JSONException
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -48,7 +50,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The mods used.
      */
-    val mods: String,
+    var mods: String,
 
     /**
      * The total score.
@@ -124,6 +126,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
 
     @JvmOverloads
+    @Throws(JSONException::class)
     fun toStatisticV2(difficulty: BeatmapDifficulty? = null) = StatisticV2().also {
 
         it.playerName = playerName
@@ -190,6 +193,9 @@ interface IScoreInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScores(scores: List<ScoreInfo>)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun updateScore(score: ScoreInfo)
 
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int

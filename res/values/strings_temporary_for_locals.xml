@@ -3,34 +3,7 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
-    <string name="opt_category_effect">Effect</string>
-
-    <string name="opt_shiftPitchInRateChange_title">Shift pitch in rate-changing mods</string>
-    <string name="opt_shiftPitchInRateChange_summary">Shifts the pitch of the music when using rate-changing mods</string>
-
-    <string name="mod_section_difficulty_reduction">Difficulty Reduction</string>
-    <string name="mod_section_difficulty_increase">Difficulty Increase</string>
-    <string name="mod_section_difficulty_automation">Automation</string>
-    <string name="mod_section_difficulty_conversion">Conversion</string>
-    <string name="mod_section_fun">Fun</string>
-    <string name="mod_section_system">System</string>
-
-    <string name="hudEditor_back_for_menu">Press back to show HUD editor menu.</string>
-
-    <!-- Config Backup -->
-    <string name="opt_category_config_backup">Backup</string>
-    <string name="opt_config_backup_title">Export options file</string>
-    <string name="opt_config_backup_summary">Exports non-sensitive options to \"osudroid.cfg\" in osu!droid\'s main directory</string>
-    <string name="opt_config_backup_restore_title">Import options file</string>
-    <string name="opt_config_backup_restore_summary">Imports non-sensitive options from \"osudroid.cfg\" in osu!droid\'s main directory</string>
-    <string name="config_backup_info_success">Successfully exported the options file</string>
-    <string name="config_backup_info_fail">Failed to export the options file</string>
-    <string name="config_backup_restore_info_success">Successfully imported the options file</string>
-    <string name="config_backup_restore_info_fail">Failed to import the options file</string>
-
-    <string name="epilepsy_warning">This beatmap contains scenes with rapidly flashing colors.\nPlease take caution if you are affected by epilepsy.</string>
-
-    <string name="replay_import_result">Imported %d out of %d replay(s)!</string>
-    <string name="replay_import_error">Unable to import %s: %s</string>
+    <string name="opt_display_playfield_border_title">Display playfield border</string>
+    <string name="opt_display_playfield_border_summary">Displays a border around the playfield</string>
 
 </resources>

@@ -26,7 +26,7 @@ class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(M
                 }
             }
 
-        }.substringBeforeLast(',') else toString()
+        }.substringBeforeLast(',') else toDisplayModString()
     }
 
 

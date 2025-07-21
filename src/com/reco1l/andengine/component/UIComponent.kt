@@ -278,7 +278,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         set(value) {
             if (field != value) {
                 if (value?.parent != null) {
-                    Log.e("ExtendedEntity", "The background entity is already attached to another entity.")
+                    Log.e("UIComponent", "The background entity is already attached to another entity.")
                     return
                 }
                 field?.detachSelf()
@@ -295,7 +295,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         set(value) {
             if (field != value) {
                 if (value?.parent != null) {
-                    Log.e("ExtendedEntity", "The foreground entity is already attached to another entity.")
+                    Log.e("UIComponent", "The foreground entity is already attached to another entity.")
                     return
                 }
                 field?.detachSelf()
@@ -941,6 +941,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
         val modifier = modifierPool.acquire() ?: UniversalModifier(modifierPool)
         modifier.setToDefault()
+        modifier.parent = this
         modifier.block()
 
         registerEntityModifier(modifier)
@@ -1017,7 +1018,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                 }
             }
         } catch (e: IndexOutOfBoundsException) {
-            Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
+            Log.e("UIComponent", "A child entity was removed during touch event propagation.", e)
         }
 
         return false

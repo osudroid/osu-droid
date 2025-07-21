@@ -79,7 +79,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                     text {
                         font = ResourceManager.getInstance().getFont("smallFont")
-                        text = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.epilepsy_warning)
+                        text = StringTable.get(com.osudroid.resources.R.string.epilepsy_warning)
                     }
                 }
             }
@@ -163,7 +163,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
 
                     dimBox.clearModifiers(ModifierType.Alpha)
-                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).then {
+                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).after {
 
                         gameScene.hud.apply {
                             alpha = 0f

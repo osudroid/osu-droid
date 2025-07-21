@@ -761,6 +761,10 @@ public class Config {
         return getBoolean("shiftPitchInRateChange", false);
     }
 
+    public static boolean isDisplayPlayfieldBorder() {
+        return getBoolean("displayPlayfieldBorder", false);
+    }
+
 
     // Shared Preferences
     // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.

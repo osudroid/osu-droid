@@ -36,7 +36,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.8.4'
+    def baseline = '1.8.4.1'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -197,7 +197,7 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:1.0.14'
+    implementation 'com.github.osudroid:language-pack:1.0.19'
 
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.24'
