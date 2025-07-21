@@ -3,6 +3,7 @@ package com.rian.osu.beatmap.sections
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 
 /**
  * Contains information about hit objects of a beatmap.
@@ -33,6 +34,12 @@ open class BeatmapHitObjects : Iterable<HitObject> {
         private set
 
     /**
+     * The amount of slider ticks in this beatmap.
+     */
+    var sliderTickCount = 0
+        private set
+
+    /**
      * Adds hit objects to this beatmap.
      *
      * @param objects The hit objects to add.
@@ -52,7 +59,12 @@ open class BeatmapHitObjects : Iterable<HitObject> {
 
         when (obj) {
             is HitCircle -> ++circleCount
-            is Slider -> ++sliderCount
+
+            is Slider -> {
+                ++sliderCount
+                sliderTickCount += obj.nestedHitObjects.count { it is SliderTick }
+            }
+
             else -> ++spinnerCount
         }
     }
@@ -69,7 +81,12 @@ open class BeatmapHitObjects : Iterable<HitObject> {
         if (removed) {
             when (obj) {
                 is HitCircle -> --circleCount
-                is Slider -> --sliderCount
+
+                is Slider -> {
+                    --sliderCount
+                    sliderTickCount -= obj.nestedHitObjects.count { it is SliderTick }
+                }
+
                 else -> --spinnerCount
             }
         }
@@ -113,7 +130,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
      * @param startTime The start time of the hit object.
      */
     private fun findInsertionIndex(startTime: Double): Int {
-        if (objects.size == 0 || startTime < objects[0].startTime) {
+        if (objects.isEmpty() || startTime < objects[0].startTime) {
             return 0
         }
 
