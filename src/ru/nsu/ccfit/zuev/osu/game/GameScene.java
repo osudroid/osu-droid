@@ -950,8 +950,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(skipBtn);
         }
 
-        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle);
-
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             comboBurst.attachAll(bgScene);
@@ -1068,6 +1066,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             hud.attachChild(fpsCounter);
         }
+
+        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle, hud);
 
         if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
