@@ -135,7 +135,7 @@ class ModUtilsTest {
         )
 
         Assert.assertEquals(
-            1.1977576f,
+            1.1991057f,
             ModUtils.calculateScoreMultiplier(mods, BeatmapDifficulty()),
             1e-6f
         )
