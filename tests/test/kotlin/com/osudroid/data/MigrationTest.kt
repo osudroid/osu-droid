@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
 import com.rian.osu.utils.ModHashMap
+import com.rian.osu.utils.ModUtils
 import java.io.IOException
 import org.junit.Assert
 import org.junit.Rule
@@ -122,18 +123,19 @@ class MigrationTest {
                 scores.add("('md5', '', '', '${mods.serializeMods()}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, $time)")
             }
 
-            // A score without stacked ModRateAdjust mods.
+            // A score without stacked ModRateAdjust mods and no ModReplayV6 added.
             addScore(ModHashMap().apply {
                 put(ModDoubleTime())
             })
 
-            // A score with stacked ModRateAdjust mods, but before the score date cutoff, so it should not be migrated.
+            // A score with stacked ModRateAdjust mods, but before the score date cutoff, so only it should only have
+            // ModReplayV6 added.
             addScore(ModHashMap().apply {
                 put(ModDoubleTime())
                 put(ModCustomSpeed(0.85f))
             }, 0L)
 
-            // A score with stacked ModRateAdjust mods that should be migrated.
+            // A score with stacked ModRateAdjust mods that should have its score migrated and no ModReplayV6 added.
             addScore(ModHashMap().apply {
                 put(ModDoubleTime())
                 put(ModCustomSpeed(0.85f))
@@ -148,26 +150,32 @@ class MigrationTest {
 
         db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
 
-        db.query("SELECT id, score FROM ScoreInfo").use {
+        db.query("SELECT id, score, mods FROM ScoreInfo").use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 val score = it.getInt(1)
+                val mods = ModUtils.deserializeMods(it.getString(2))
 
                 // Check if the scores are migrated correctly.
                 when (id) {
                     1L -> {
                         // No stacked ModRateAdjust mods, score should remain unchanged.
                         Assert.assertEquals(1000, score)
+                        Assert.assertEquals(1, mods.size)
                     }
 
                     2L -> {
                         // Stacked ModRateAdjust mods before score date cutoff, score should remain unchanged.
+                        // Only ModReplayV6 should be added.
                         Assert.assertEquals(1000, score)
+                        Assert.assertEquals(3, mods.size)
+                        Assert.assertTrue(ModReplayV6::class in mods)
                     }
 
                     3L -> {
                         // Stacked ModRateAdjust mods, score should be recalculated.
                         Assert.assertEquals(1962, score)
+                        Assert.assertEquals(2, mods.size)
                     }
 
                     else -> throw IllegalStateException("Unknown score ID: $id")

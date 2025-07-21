@@ -103,7 +103,10 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
  *
  * Contains the following changes:
  * - Adds slider tick and end hits statistics to `ScoreInfo`
- * - Fixes wrong score multiplier calculation in stacked ModRateAdjust mods after version 1.8.4 release (see
+ * - Fixes an issue where [ModReplayV6] was not applied to scores before version 1.8.4 (see
+ * [this](https://github.com/osudroid/osu-droid/commit/4c84a089fa71ecec274b2a62ccb59f52767748d9) commit for more
+ * information)
+ * - Fixes wrong score multiplier calculation in stacked [ModRateAdjust] mods after version 1.8.4 (see
  * [this](https://github.com/osudroid/osu-droid/commit/0032b1cff542002856f8e4108a0acb4e4aae38ed) commit for more
  * information)
  */
@@ -112,41 +115,44 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
         // Fix score multiplier calculation for stacked ModRateAdjust mods.
         val difficulty = BeatmapDifficulty()
 
-        // Score date cutoff - this was when the bug was introduced in release (version 1.8.4).
+        // Score cutoff time - this was when the score multiplier bug was introduced in release (version 1.8.4).
         // Scores before this time are not affected by the bug and do not need to be recalculated.
-        db.query("SELECT id, score, mods FROM ScoreInfo WHERE time >= 1752863880000").use {
+        val oldScoreCutoffTime = 1752863880000L
+
+        db.query("SELECT id, score, time, mods FROM ScoreInfo").use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
-                val score = it.getInt(1)
-                val mods = ModUtils.deserializeMods(it.getString(2))
+                var score = it.getInt(1)
+                val time = it.getLong(2)
+                val mods = ModUtils.deserializeMods(it.getString(3))
 
-                // Old scores (denoted by the presence of ModReplayV6) are not affected by this migration.
+                // Scores with ModReplayV6 are not affected the bug, so we do not need to migrate them.
                 if (ModReplayV6::class in mods) {
                     continue
                 }
 
-                val rateAdjustingMods = mutableListOf<ModRateAdjust>()
+                if (time < oldScoreCutoffTime) {
+                    // These scores should have ModReplayV6 applied to them, so we add it.
+                    mods.put(ModReplayV6())
+                } else {
+                    // These scores may be affected by the score multiplier bug, so we need to recalculate the score.
+                    val rateAdjustingMods = mods.values.filterIsInstance<ModRateAdjust>()
 
-                for (mod in mods.values) {
-                    if (mod is ModRateAdjust) {
-                        rateAdjustingMods.add(mod)
+                    if (rateAdjustingMods.size >= 2) {
+                        // Stacked ModRateAdjust mods - recalculate score.
+                        val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
+                            acc * mod.calculateScoreMultiplier(difficulty)
+                        }
+
+                        val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods, difficulty)
+
+                        score = (score * newScoreMultiplier / oldScoreMultiplier).toInt()
                     }
                 }
 
-                // If there are no stacked ModRateAdjust mods, we can skip the score multiplier recalculation.
-                if (rateAdjustingMods.size < 2) {
-                    continue
-                }
-
-                val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                }
-
-                val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods, difficulty)
-
                 db.execSQL(
-                    "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                    arrayOf<Any>((score * (newScoreMultiplier / oldScoreMultiplier)).toInt(), id)
+                    "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
+                    arrayOf<Any>(score, mods.serializeMods().toString(), id)
                 )
             }
         }
