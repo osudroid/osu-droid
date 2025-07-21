@@ -53,9 +53,9 @@ public class StatisticV2 implements Serializable {
     private int beatmapNoteCount = 0;
     private int beatmapMaxCombo = 0;
     private int bonusScore = 0;
-    private int positiveTotalOffsetSum;
+    private int positiveHitOffsetCount;
     private double positiveHitOffsetSum;
-    private int negativeTotalOffsetSum;
+    private int negativeHitOffsetCount;
     private double negativeHitOffsetSum;
     private double unstableRate;
 
@@ -527,33 +527,31 @@ public class StatisticV2 implements Serializable {
         // Update hit offset
         if (accuracy >= 0) {
             positiveHitOffsetSum += msAccuracy;
-            positiveTotalOffsetSum++;
+            positiveHitOffsetCount++;
         } else {
             negativeHitOffsetSum += msAccuracy;
-            negativeTotalOffsetSum++;
+            negativeHitOffsetCount++;
         }
 
         // Update unstable rate
         // Reference: https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
-        int totalOffsetSum = positiveTotalOffsetSum + negativeTotalOffsetSum;
+        int hitOffsetCount = positiveHitOffsetCount + negativeHitOffsetCount;
         double hitOffsetSum = positiveHitOffsetSum + negativeHitOffsetSum;
 
-        if (totalOffsetSum > 1) {
-            double avgOffset = hitOffsetSum / totalOffsetSum;
-
+        if (hitOffsetCount > 1) {
             unstableRate = 10 * Math.sqrt(
-                ((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) +
-                    (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum
+                ((hitOffsetCount - 1) * Math.pow(unstableRate / 10, 2) +
+                    (msAccuracy - hitOffsetSum / hitOffsetCount) * (msAccuracy - (hitOffsetSum - msAccuracy) / (hitOffsetCount - 1))) / hitOffsetCount
             );
         }
     }
 
     public double getNegativeHitError() {
-        return negativeTotalOffsetSum == 0 ? 0 : negativeHitOffsetSum / negativeTotalOffsetSum;
+        return negativeHitOffsetCount == 0 ? 0 : negativeHitOffsetSum / negativeHitOffsetCount;
     }
 
     public double getPositiveHitError() {
-        return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
+        return positiveHitOffsetCount == 0 ? 0 : positiveHitOffsetSum / positiveHitOffsetCount;
     }
 
     /**
@@ -667,9 +665,9 @@ public class StatisticV2 implements Serializable {
         hp = 1;
         mark = null;
         bonusScore = 0;
-        positiveTotalOffsetSum = 0;
+        positiveHitOffsetCount = 0;
         positiveHitOffsetSum = 0;
-        negativeTotalOffsetSum = 0;
+        negativeHitOffsetCount = 0;
         negativeHitOffsetSum = 0;
         unstableRate = 0;
         pp = 0;
