@@ -174,7 +174,7 @@ class MigrationTest {
 
                     3L -> {
                         // Stacked ModRateAdjust mods, score should be recalculated.
-                        Assert.assertEquals(1962, score)
+                        Assert.assertEquals(1960, score)
                         Assert.assertEquals(2, mods.size)
                     }
 

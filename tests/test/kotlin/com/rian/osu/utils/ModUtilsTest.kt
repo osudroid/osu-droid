@@ -134,6 +134,6 @@ class ModUtilsTest {
             ModPrecise()
         )
 
-        Assert.assertEquals(1.1991057f, ModUtils.calculateScoreMultiplier(mods), 1e-6f)
+        Assert.assertEquals(1.1977575f, ModUtils.calculateScoreMultiplier(mods), 1e-6f)
     }
 }

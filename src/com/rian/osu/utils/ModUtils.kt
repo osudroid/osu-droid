@@ -180,7 +180,7 @@ object ModUtils {
             }
         }
 
-        scoreMultiplier *= ModCustomSpeed(totalRateAdjustTrackRateMultiplier).scoreMultiplier
+        scoreMultiplier *= ModRateAdjustHelper(totalRateAdjustTrackRateMultiplier).scoreMultiplier
 
         return scoreMultiplier
     }
