@@ -2874,23 +2874,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getDroidPPAt(int objectId) {
-        if (droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
+        if (playableBeatmap == null || droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = droidTimedDifficultyAttributes[objectId];
 
-        return BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes, stat).total;
+        return BeatmapDifficultyCalculator.calculateDroidPerformance(playableBeatmap, timedAttributes.attributes, stat).total;
     }
 
     private double getStandardPPAt(int objectId) {
-        if (standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
+        if (playableBeatmap == null || standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
-        return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
+        return BeatmapDifficultyCalculator.calculateStandardPerformance(playableBeatmap, timedAttributes.attributes, stat).total;
     }
 
     private UIScene createMainScene() {

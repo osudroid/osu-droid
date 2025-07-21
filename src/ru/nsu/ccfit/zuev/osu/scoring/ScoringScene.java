@@ -459,11 +459,11 @@ public class ScoringScene {
 
                     performanceAttributes = switch (Config.getDifficultyAlgorithm()) {
                         case droid -> BeatmapDifficultyCalculator.calculateDroidPerformance(
-                            (DroidDifficultyAttributes) difficultyAttributes, stat
+                            beatmapData, (DroidDifficultyAttributes) difficultyAttributes, stat
                         );
 
                         case standard -> BeatmapDifficultyCalculator.calculateStandardPerformance(
-                            (StandardDifficultyAttributes) difficultyAttributes, stat
+                            beatmapData, (StandardDifficultyAttributes) difficultyAttributes, stat
                         );
                     };
                 }
