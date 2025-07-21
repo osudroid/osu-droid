@@ -65,6 +65,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
+import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.*;
 import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
@@ -337,6 +338,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float playfieldSize = Config.getPlayfieldSize();
+
+        if (Config.isDisplayPlayfieldBorder() && playfieldSize < 1f) {
+            var sceneBorder = new UIBox() {
+                {
+                    setAnchor(Anchor.Center);
+                    setOrigin(Anchor.Center);
+                    setPaintStyle(PaintStyle.Outline);
+                    setLineWidth(5f);
+                    setColor(1f, 1f, 1f);
+                    setAlpha(Interpolation.linear(0.2f, 0.8f, brightness));
+                    setSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                }
+            };
+
+            scene.attachChild(sceneBorder, 0);
+        }
 
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null
                 ? ResourceManager.getInstance().getTexture("menu-background")
@@ -806,21 +824,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
-
-        if (Config.isDisplayPlayfieldBorder()) {
-            var playfieldBorder = new UIBox() {
-                {
-                    setAnchor(Anchor.Center);
-                    setOrigin(Anchor.Center);
-                    setPaintStyle(PaintStyle.Outline);
-                    setLineWidth(5f);
-                    setColor(1f, 1f, 1f, 1f);
-                    setSize(Constants.MAP_ACTUAL_WIDTH, Constants.MAP_ACTUAL_HEIGHT);
-                }
-            };
-
-            scene.attachChild(playfieldBorder, 0);
-        }
 
         stat = new StatisticV2();
         stat.setMod(lastMods);
