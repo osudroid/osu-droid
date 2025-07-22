@@ -78,6 +78,8 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
         }
+
+        updateVisuals()
     }
 
     override fun onFocus() {
@@ -260,10 +262,14 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         }
     }
 
-    override fun onValueChanged() {
-        super.onValueChanged()
+    private fun updateVisuals() {
         textEntity.text = value
         caretPosition = min(caretPosition, value.length)
+    }
+
+    override fun onValueChanged() {
+        super.onValueChanged()
+        updateVisuals()
     }
 
     override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean = synchronized(value) {
