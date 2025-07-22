@@ -268,6 +268,10 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
     override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean = synchronized(value) {
 
+        if (!isFocused) {
+            return false
+        }
+
         if (keyCode == KEYCODE_BACK && isFocused) {
             if (event.action == ACTION_UP) {
                 blur()
