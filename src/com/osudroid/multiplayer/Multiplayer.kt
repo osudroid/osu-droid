@@ -1,13 +1,14 @@
 package com.osudroid.multiplayer
 
+import android.net.*
 import android.text.format.DateFormat
 import android.util.Log
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
-import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
-import com.reco1l.toolkt.kotlin.fromDate
+import com.reco1l.andengine.*
+import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.menu.*
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
@@ -95,6 +97,51 @@ object Multiplayer {
     init {
         LOG_FILE.writeText("[${"yyyy/MM/dd hh:mm:ss".fromDate()}] Client ${MainActivity.versionName} started.")
     }
+
+
+    //region Connection
+
+    @JvmStatic
+    fun connectFromLink(link: Uri) {
+
+        if (isConnected) {
+            return
+        }
+
+        GlobalManager.getInstance().songService.isGaming = true
+        isMultiplayer = true
+
+        async {
+
+            try {
+                LoadingScreen().show()
+
+                GlobalManager.getInstance().mainActivity.checkNewSkins()
+                GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
+
+                RoomScene.load()
+
+                val roomID = link.pathSegments[0].toLong()
+                val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
+
+                RoomAPI.connectToRoom(
+                    roomId = roomID,
+                    userId = OnlineManager.getInstance().userId,
+                    username = OnlineManager.getInstance().username,
+                    roomPassword = password
+                )
+
+            } catch (e: Exception) {
+                ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
+                Log.e("LobbyScene", "Failed to connect to room.", e)
+
+                ExtendedEngine.Current.scene = LobbyScene()
+            }
+
+        }
+    }
+
+    //endregion
 
 
     // Leaderboard

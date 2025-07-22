@@ -6,4 +6,29 @@
     <string name="opt_display_playfield_border_title">Display playfield border</string>
     <string name="opt_display_playfield_border_summary">Displays a border around the playfield</string>
 
+    <string name="multiplayer_lobby_back">Back</string>
+    <string name="multiplayer_lobby_create_room">Create room</string>
+    <string name="multiplayer_lobby_create_room_accept">Create</string>
+    <string name="multiplayer_lobby_create_room_cancel">Cancel</string>
+    <string name="multiplayer_lobby_create_room_name_default">%s\'s room</string>
+    <string name="multiplayer_lobby_refresh">Refresh</string>
+    <string name="multiplayer_lobby_no_rooms">No rooms available, create a new one!</string>
+    <string name="multiplayer_lobby_no_results">No results found for the current search.</string>
+    <string name="multiplayer_lobby_room_name">Room name</string>
+    <string name="multiplayer_lobby_room_password">Room password</string>
+    <string name="multiplayer_lobby_room_capacity">Room capacity</string>
+    <string name="multiplayer_lobby_join_room">Join room</string>
+    <string name="multiplayer_lobby_join_room_accept">Join</string>
+    <string name="multiplayer_lobby_join_room_cancel">Cancel</string>
+    <string name="multiplayer_room_head_to_head">Head to head</string>
+    <string name="multiplayer_room_team_versus">Team versus</string>
+    <string name="multiplayer_room_players">Players</string>
+    <string name="multiplayer_room_score_v1">Score V1</string>
+    <string name="multiplayer_room_score_v2">Score V2</string>
+    <string name="multiplayer_room_highest_accuracy">Highest accuracy</string>
+    <string name="multiplayer_room_maximum_combo">Maximum combo</string>
+    <string name="multiplayer_room_no_players">No players</string>
+    <string name="multiplayer_room_free_mods">Free mods</string>
+
+
 </resources>

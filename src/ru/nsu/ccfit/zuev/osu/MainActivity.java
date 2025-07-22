@@ -297,7 +297,6 @@ public class MainActivity extends BaseGameActivity implements
 
         // Initializing this class because they contain fragments in its constructors that should be initialized in
         // main thread because of the Looper.
-        LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
         Execution.async(() -> {
@@ -340,7 +339,7 @@ public class MainActivity extends BaseGameActivity implements
                 }, 0, 100, TimeUnit.MILLISECONDS);
 
                 if (roomInviteLink != null) {
-                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    Multiplayer.connectFromLink(roomInviteLink);
                 } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
@@ -804,8 +803,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
 
                 if (Multiplayer.isMultiplayer) {
-                    if (currentScene == LobbyScene.INSTANCE) {
-                        LobbyScene.INSTANCE.back();
+                    if (currentScene instanceof LobbyScene lobbyScene) {
+                        lobbyScene.back();
                         return true;
                     }
 

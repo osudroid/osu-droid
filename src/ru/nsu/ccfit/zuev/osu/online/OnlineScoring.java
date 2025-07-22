@@ -72,7 +72,6 @@ public class OnlineScoring {
         if (secondPanel != null)
             secondPanel.setInfo();
 
-        LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 
@@ -83,7 +82,6 @@ public class OnlineScoring {
         if (secondPanel != null)
             secondPanel.setAvatar(texname);
 
-        LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 

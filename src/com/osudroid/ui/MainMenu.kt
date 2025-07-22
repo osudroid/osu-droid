@@ -141,8 +141,7 @@ class MainMenu(val main: MainScene) {
                     GlobalManager.getInstance().songMenu.reload()
 
                     RoomScene.load()
-                    LobbyScene.load()
-                    LobbyScene.show()
+                    GlobalManager.getInstance().engine.scene = LobbyScene()
                 }
                 return true
             }
