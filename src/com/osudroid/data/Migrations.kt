@@ -11,6 +11,8 @@ import com.rian.osu.mods.ModReplayV6
 import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 import java.io.File
+import kotlin.system.exitProcess
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 
 /**
  * Base class for migrations. Backups the database file before performing the migration.
@@ -19,15 +21,7 @@ import java.io.File
  * @param endVersion The version of the database after the migration.
  */
 abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration(startVersion, endVersion) {
-    private var migrationPerformed = false
-
     final override fun migrate(db: SupportSQLiteDatabase) {
-        // Room may attempt to migrate multiple times even when the migration fails. In that case, we should not
-        // perform the migration again, else it will cause a continuous loop of migration attempts.
-        if (migrationPerformed) {
-            return
-        }
-
         try {
             val dbFile = File(DatabaseManager.databasePath)
 
@@ -42,11 +36,13 @@ abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration
 
             performMigration(db)
         } catch (e: Exception) {
-            Log.e("Migration", "Failed to perform migration from version $startVersion to $endVersion", e)
+            val message = "Failed to perform database migration from version $startVersion to $endVersion"
+
+            ToastLogger.showText("$message, exiting", true)
+            Log.e("Migration", message, e)
             FirebaseCrashlytics.getInstance().recordException(e)
-            throw e
-        } finally {
-            migrationPerformed = true
+
+            exitProcess(1)
         }
     }
 
