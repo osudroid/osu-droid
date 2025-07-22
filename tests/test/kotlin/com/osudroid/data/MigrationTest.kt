@@ -123,6 +123,13 @@ class MigrationTest {
                 scores.add("('md5', '', '', '${mods.serializeMods()}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, $time)")
             }
 
+            fun addScore(mods: String) {
+                scores.add("('md5', '', '', '${mods}', 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0)")
+            }
+
+            // A score with an unmigrated mod. Only the mods should be migrated and nothing else.
+            addScore("dm|")
+
             // A score without stacked ModRateAdjust mods and no ModReplayV6 added.
             addScore(ModHashMap().apply {
                 put(ModDoubleTime())
@@ -159,12 +166,22 @@ class MigrationTest {
                 // Check if the scores are migrated correctly.
                 when (id) {
                     1L -> {
+                        // Score with an unmigrated mod, should only be migrated with ModReplayV6 added and nothing else.
+                        Assert.assertEquals(3, mods.size)
+                        Assert.assertTrue(ModDoubleTime::class in mods)
+                        Assert.assertTrue(ModSmallCircle::class in mods)
+                        Assert.assertTrue(ModReplayV6::class in mods)
+
+                        Assert.assertEquals(1000, score)
+                    }
+
+                    2L -> {
                         // No stacked ModRateAdjust mods, score should remain unchanged.
                         Assert.assertEquals(1000, score)
                         Assert.assertEquals(1, mods.size)
                     }
 
-                    2L -> {
+                    3L -> {
                         // Stacked ModRateAdjust mods before score date cutoff, score should remain unchanged.
                         // Only ModReplayV6 should be added.
                         Assert.assertEquals(1000, score)
@@ -172,7 +189,7 @@ class MigrationTest {
                         Assert.assertTrue(ModReplayV6::class in mods)
                     }
 
-                    3L -> {
+                    4L -> {
                         // Stacked ModRateAdjust mods, score should be recalculated.
                         Assert.assertEquals(1960, score)
                         Assert.assertEquals(2, mods.size)

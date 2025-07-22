@@ -6,6 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModRateAdjust
 import com.rian.osu.mods.ModReplayV6
+import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 import java.io.File
 
@@ -55,6 +56,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
                 val oldMods = cursor.getString(1)
                 val beatmapMD5 = cursor.getString(2)
 
+                @Suppress("DuplicatedCode")
                 val difficulty = db.query(
                     "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
                     arrayOf(beatmapMD5)
@@ -103,6 +105,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
  *
  * Contains the following changes:
  * - Adds slider tick and end hits statistics to `ScoreInfo`
+ * - Detects if mods were not migrated properly in the previous migration and migrates them.
  * - Fixes an issue where [ModReplayV6] was not applied to scores before version 1.8.4 (see
  * [this](https://github.com/osudroid/osu-droid/commit/4c84a089fa71ecec274b2a62ccb59f52767748d9) commit for more
  * information)
@@ -117,12 +120,44 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
         // Scores before this time are not affected by the bug and do not need to be recalculated.
         val oldScoreCutoffTime = 1752863880000L
 
-        db.query("SELECT id, score, time, mods FROM ScoreInfo").use {
+        db.query("SELECT id, score, time, mods, beatmapMD5 FROM ScoreInfo").use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 var score = it.getInt(1)
                 val time = it.getLong(2)
-                val mods = ModUtils.deserializeMods(it.getString(3))
+                val modString = it.getString(3)
+                val beatmapMD5 = it.getString(4)
+
+                var mods: ModHashMap
+
+                try {
+                    // Check if the mods are already in the new format. In that case, we don't need to migrate them.
+                    // Realistically, this should never happen since migrations are done in a transaction, but there are
+                    // crash reports where the mods were not migrated in the last migration.
+                    mods = ModUtils.deserializeMods(modString)
+                } catch (_: Exception) {
+                    // If the mods are not deserializable, we assume they are legacy mods, so we migrate them.
+                    @Suppress("DuplicatedCode")
+                    val difficulty = db.query(
+                        "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
+                        arrayOf(beatmapMD5)
+                    ).use { cursor ->
+                        if (cursor.count == 0) {
+                            return@use null
+                        }
+
+                        cursor.moveToFirst()
+                        BeatmapDifficulty(cursor.getFloat(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3))
+                    }
+
+                    mods = LegacyModConverter.convert(modString, difficulty)
+                    mods.put(ModReplayV6())
+
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
+                        arrayOf<Any>(mods.serializeMods().toString(), id)
+                    )
+                }
 
                 // Scores with ModReplayV6 are not affected the bug, so we do not need to migrate them.
                 if (ModReplayV6::class in mods) {
