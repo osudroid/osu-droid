@@ -1,7 +1,9 @@
 package com.osudroid.data
 
+import android.util.Log
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModRateAdjust
@@ -17,19 +19,35 @@ import java.io.File
  * @param endVersion The version of the database after the migration.
  */
 abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration(startVersion, endVersion) {
+    private var migrationPerformed = false
+
     final override fun migrate(db: SupportSQLiteDatabase) {
-        val dbFile = File(DatabaseManager.databasePath)
-
-        if (dbFile.exists()) {
-            val backupFile = File(
-                dbFile.parent,
-                "${dbFile.nameWithoutExtension}_version${startVersion}_${System.currentTimeMillis()}.db"
-            )
-
-            dbFile.copyTo(backupFile, true)
+        // Room may attempt to migrate multiple times even when the migration fails. In that case, we should not
+        // perform the migration again, else it will cause a continuous loop of migration attempts.
+        if (migrationPerformed) {
+            return
         }
 
-        performMigration(db)
+        try {
+            val dbFile = File(DatabaseManager.databasePath)
+
+            if (dbFile.exists()) {
+                val backupFile = File(
+                    dbFile.parent,
+                    "${dbFile.nameWithoutExtension}_version${startVersion}_${System.currentTimeMillis()}.db"
+                )
+
+                dbFile.copyTo(backupFile, true)
+            }
+
+            performMigration(db)
+        } catch (e: Exception) {
+            Log.e("Migration", "Failed to perform migration from version $startVersion to $endVersion", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
+            throw e
+        } finally {
+            migrationPerformed = true
+        }
     }
 
     /**
@@ -105,7 +123,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
  *
  * Contains the following changes:
  * - Adds slider tick and end hits statistics to `ScoreInfo`
- * - Detects if mods were not migrated properly in the previous migration and migrates them.
+ * - Detects if mods were not migrated properly in version 1 to 2 migration and migrates them.
  * - Fixes an issue where [ModReplayV6] was not applied to scores before version 1.8.4 (see
  * [this](https://github.com/osudroid/osu-droid/commit/4c84a089fa71ecec274b2a62ccb59f52767748d9) commit for more
  * information)
