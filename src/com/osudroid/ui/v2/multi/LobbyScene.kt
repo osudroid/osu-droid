@@ -204,47 +204,48 @@ class LobbyScene : UIScene() {
             Log.w("LobbyScene", "Already fetching room list, skipping request.")
             return
         }
-
         isFetching = true
 
-        messageContainer.apply {
-            detachChildren()
+        fetchScope.launch {
 
-            +CircularProgressBar().apply {
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                size = Vec2(48f, 48f)
-            }
-        }
+            messageContainer.apply {
+                detachChildren()
 
-        switchContainers(messageContainer)
-        roomContainer.detachChildren()
-
-        val list = LobbyAPI.getRooms(search, SecurityUtils.signRequest(search ?: ""))
-
-        updateThread {
-
-            list.forEach {
-                roomContainer.attachChild(RoomButton(this, it))
-            }
-
-            if (list.isEmpty()) {
-                messageContainer.apply {
-                    detachChildren()
-
-                    text {
-                        font = ResourceManager.getInstance().getFont("smallFont")
-                        applyTheme = { color = it.accentColor }
-                        setText(if (search.isNullOrEmpty()) R.string.multiplayer_lobby_no_rooms else R.string.multiplayer_lobby_no_results)
-                    }
+                +CircularProgressBar().apply {
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    size = Vec2(48f, 48f)
                 }
-            } else {
-                switchContainers(roomContainer)
             }
 
-            isFetching = false
-        }
+            switchContainers(messageContainer)
+            roomContainer.detachChildren()
 
+            val list = LobbyAPI.getRooms(search, SecurityUtils.signRequest(search ?: ""))
+
+            updateThread {
+
+                list.forEach {
+                    roomContainer.attachChild(RoomButton(this@LobbyScene, it))
+                }
+
+                if (list.isEmpty()) {
+                    messageContainer.apply {
+                        detachChildren()
+
+                        text {
+                            font = ResourceManager.getInstance().getFont("smallFont")
+                            applyTheme = { color = it.accentColor }
+                            setText(if (search.isNullOrEmpty()) R.string.multiplayer_lobby_no_rooms else R.string.multiplayer_lobby_no_results)
+                        }
+                    }
+                } else {
+                    switchContainers(roomContainer)
+                }
+
+                isFetching = false
+            }
+        }
     }
 
 
