@@ -449,7 +449,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private void applyBackground(Shape background, float brigthness) {
+    private void applyBackground(Shape background, float brightness) {
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
@@ -458,8 +458,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         dimRectangle.setSize(background.getWidth(), background.getHeight());
-        dimRectangle.setColor(0f, 0f, 0f, 1f - brigthness);
+        dimRectangle.setColor(0f, 0f, 0f, 1f - brightness);
         background.attachChild(dimRectangle);
+
+        if (breakAnimator != null) {
+            breakAnimator.setDimRectangle(dimRectangle);
+        }
 
         var factor = Config.isKeepBackgroundAspectRatio()
                 ? Config.getRES_HEIGHT() / background.getHeight()
@@ -1067,7 +1071,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             hud.attachChild(fpsCounter);
         }
 
-        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle, hud);
+        breakAnimator = new BreakAnimator(fgScene, stat, hud);
 
         if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();

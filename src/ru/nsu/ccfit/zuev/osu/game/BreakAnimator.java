@@ -21,7 +21,7 @@ public class BreakAnimator extends GameObject {
     private final Scene scene;
     private final StatisticV2 stat;
     private final Sprite[] arrows = new Sprite[4];
-    private final Rectangle dimRectangle;
+    private Rectangle dimRectangle;
     private final GameplayHUD hud;
     private float length;
     private float time;
@@ -31,11 +31,10 @@ public class BreakAnimator extends GameObject {
     private boolean isbreak = false;
     private boolean over = false;
 
-    public BreakAnimator(final Scene scene, final StatisticV2 stat, Rectangle bgSprite, GameplayHUD hud) {
+    public BreakAnimator(final Scene scene, final StatisticV2 stat, GameplayHUD hud) {
         length = 0;
         this.scene = scene;
         this.stat = stat;
-        this.dimRectangle = bgSprite;
         this.hud = hud;
 
         for (int i = 0; i < 4; i++) {
@@ -60,6 +59,10 @@ public class BreakAnimator extends GameObject {
                         - Utils.toRes(64),
                 Config.getRES_HEIGHT() - arrows[1].getHeight());
 
+    }
+
+    public void setDimRectangle(Rectangle dimRectangle) {
+        this.dimRectangle = dimRectangle;
     }
 
     public boolean isBreak() {
