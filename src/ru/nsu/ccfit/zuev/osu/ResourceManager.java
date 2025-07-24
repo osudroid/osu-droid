@@ -562,18 +562,25 @@ public class ResourceManager {
         return region;
     }
 
-    public TextureRegion loadHighQualityFile(final String resname,
-                                             final File file) {
+    public TextureRegion loadHighQualityFile(String resname, File file) {
         TextureRegion region;
 
-        final QualityFileBitmapSource source = new QualityFileBitmapSource(file);
+        QualityFileBitmapSource source = new QualityFileBitmapSource(file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
+
+        BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
         region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
+
+        // Unload the old texture if it exists to free up memory.
+        TextureRegion oldTextureRegion = textures.get(resname);
+        if (oldTextureRegion != null) {
+            engine.getTextureManager().unloadTexture(oldTextureRegion.getTexture());
+        }
         textures.put(resname, region);
+
         return region;
     }
 
