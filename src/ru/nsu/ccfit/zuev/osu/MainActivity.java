@@ -34,7 +34,6 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
@@ -52,7 +51,7 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
-import com.osudroid.multiplayer.LobbyScene;
+import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;

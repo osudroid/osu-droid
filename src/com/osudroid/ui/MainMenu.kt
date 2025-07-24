@@ -7,7 +7,7 @@ import com.reco1l.andengine.sprite.UISprite
 import com.osudroid.utils.async
 import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
-import com.osudroid.multiplayer.LobbyScene
+import com.osudroid.ui.v2.multi.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
