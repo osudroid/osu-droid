@@ -3,7 +3,6 @@ package com.osudroid.data
 import android.util.Log
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModRateAdjust
@@ -40,7 +39,6 @@ abstract class BackedUpMigration(startVersion: Int, endVersion: Int) : Migration
 
             ToastLogger.showText("$message, exiting", true)
             Log.e("Migration", message, e)
-            FirebaseCrashlytics.getInstance().recordException(e)
 
             exitProcess(1)
         }

@@ -22,8 +22,6 @@ import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -219,7 +217,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             //如果用户没有处理则让系统默认的异常处理器来处理
             mDefaultHandler.uncaughtException(thread, ex);
         }
-        FirebaseCrashlytics.getInstance().recordException(ex);
     }
 
     /**
