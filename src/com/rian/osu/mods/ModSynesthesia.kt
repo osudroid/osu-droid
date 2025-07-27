@@ -1,7 +1,6 @@
 package com.rian.osu.mods
 
 import com.reco1l.framework.*
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
  * Represents the Synesthesia mod.
@@ -11,8 +10,8 @@ class ModSynesthesia : Mod() {
     override val acronym = "SY"
     override val description = "Colors hit objects based on the rhythm."
     override val type = ModType.Fun
+    override val scoreMultiplier = 0.8f
 
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.8f
     override fun deepCopy() = ModSynesthesia()
 
     companion object {

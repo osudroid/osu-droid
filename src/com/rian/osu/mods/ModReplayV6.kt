@@ -26,6 +26,7 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
     override val description = "Applies the old object stacking behavior to a beatmap."
     override val type = ModType.System
 
+    override val isRanked = true
     override val isUserPlayable = false
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {

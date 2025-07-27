@@ -1,7 +1,7 @@
 package com.rian.osu.mods
 
 import androidx.annotation.*
-import ru.nsu.ccfit.zuev.osuplus.*
+import com.osudroid.resources.R
 
 /**
  * Available types of [Mod]s.

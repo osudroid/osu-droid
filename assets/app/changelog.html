@@ -22,6 +22,81 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.3
+===============
+
+# Bug Fixes
+
+- Fix an issue where mods may not be migrated properly in version 1.8.4 <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix an issue where database migration would repeat when failing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+Version 1.8.4.2
+===============
+
+# Additions
+
+- Add playfield border setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - When playfield size is under 100%, this will show a border around the gameplay space (worded "playfield" since it is
+    easier for players to understand).
+  - The reason behind this is the massive amount of questions pertaining gameplay space being clipped (essentially,
+    anything that is outside that space will not be rendered) starting from version 1.8.4. This should provide the
+    expected area where hit objects will be rendered.
+
+# Changes
+
+- Adjust music pitch in song selection menu when shift pitch in rate change setting is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Move playfield size and shrink downwards settings to a `Playfield` category under `Gameplay` section <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Use slider tick and end misses from score information for a more accurate pp calculation when available <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Put rank and `section-pass/fail` elements during break in HUD instead of gameplay area
+  - These should not be affected by the playfield size setting.
+
+# Bug Fixes
+
+- Fix wrong score multiplier calculation when multiple constant rate-changing mods (Custom Speed, Half Time, Double Time
+  , and Night Core) are stacked together <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Scores that are affected by this bug will have their score multiplier recalculated. Depending on how many scores you
+    have, this may take a while.
+- Fix Replay V6 mod not being applied to pre-version 1.8.4 scores during version 1.8.4 update <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This fix will be applied along with the score multiplier recalculation.
+- Fix score multiplier in mod selection menu not being updated when the beatmap is changed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix community-contributed localizations from version 1.8.4 not being used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix some mods from singleplayer being preserved in multiplayer and vice versa if free mod is allowed in the room <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix wrong unstable rate calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Someone did not know how to calculate an average...
+- Fix beatmap offset not being carried from pre-configured offset (in song selection menu) in game loading scene <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+Version 1.8.4.1
+===============
+
+# Changes
+
+- Backup database before migration <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This allows reverting to the previous version in case of a migration bug or failure.
+
+# Bug Fixes
+
+- Fix migrated scores not having Replay V6 mod applied <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix non-user selectable mods displaying in leaderboard and multiplayer player list <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix forced difficulty statistics failing to migrate <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix mod display potentially being empty when non-user playable mods are present <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - An example of this is when Replay V6 mod is the only mod applied to a score.
+- Fix mod presets not visible in singleplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay progressing at a faster/slower rate before the music starts when Wind Up/Down mod is used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when a combo color in skin.json is not a valid hex color <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when a color in the `Color` section of skin.json is not a valid hex color <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash due to repeated attempt of creating mod preset storage <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when pressing a main menu button while it is animating <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider head circle post-judgement visibility not meeting expectations <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Upon judgement, the slider head circle should change its texture to the end circle. This was not the case.
+- Fix failing migration due to comma-separated decimals in legacy mod format <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when opening a score with an unmigrated mod format <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This should not happen, but there was a recorded crash with this error, so there the fix goes...
+- Fix cryptic mod display string in multiplayer room and room listing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix player list bugging out when joining a room for the second time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix player list bugging out when finishing a beatmap for the second time in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when enabling real-time pp counter due to invalid bounds <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Attempt to fix a crash when quitting game due to invalidated beatmap reference <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4
 =============
 
@@ -130,8 +205,7 @@ Version 1.8.4
 - Reduce maximum cursor count in gameplay from 10 to 3 <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Only allow slider tracking state to be retained by the cursor that activated the tracking state <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This prevents a slider's tracking state from being dependent on all cursor, which is not expected.
-- Replace "restart game" button with "quit game" upon game crash <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This prevented crash analytics from working.
+- Update Translations.
 
 # Bug Fixes
 

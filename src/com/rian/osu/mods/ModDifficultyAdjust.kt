@@ -87,6 +87,32 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val type = ModType.Conversion
     override val requiresConfiguration = true
 
+    override val scoreMultiplier: Float
+        get() {
+            // Graph: https://www.desmos.com/calculator/yrggkhrkzz
+            var multiplier = 1f
+            val cs = getDelegate(::cs)
+            val od = getDelegate(::od)
+
+            if (cs.value != null && cs.defaultValue != null) {
+                val diff = cs.value!! - cs.defaultValue!!
+
+                multiplier *=
+                    if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
+                    else 2 / (1 + exp(-0.5f * diff))
+            }
+
+            if (od.value != null && od.defaultValue != null) {
+                val diff = od.value!! - od.defaultValue!!
+
+                multiplier *=
+                    if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
+                    else 2 / (1 + exp(-0.25f * diff))
+            }
+
+            return multiplier
+        }
+
     override fun isCompatibleWith(other: Mod): Boolean {
         if (!super.isCompatibleWith(other)) {
             return false
@@ -97,29 +123,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
         return true
-    }
-
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
-        // Graph: https://www.desmos.com/calculator/yrggkhrkzz
-        var multiplier = 1f
-
-        if (cs != null) {
-            val diff = cs!! - difficulty.difficultyCS
-
-            multiplier *=
-                if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
-                else 2 / (1 + exp(-0.5f * diff))
-        }
-
-        if (od != null) {
-            val diff = od!! - difficulty.od
-
-            multiplier *=
-                if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
-                else 2 / (1 + exp(-0.25f * diff))
-        }
-
-        return multiplier
     }
 
     override fun copySettings(settings: JSONObject) {
@@ -165,7 +168,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
             // Special case for force AR in replay version 6 and older, where the AR value is kept constant with respect
             // to game time. This makes the player perceive the AR as is under all speed multipliers.
-            if (ar != null && mods.any { it is ModReplayV6 }) {
+            if (ar != null && mods.any { m -> m is ModReplayV6 }) {
                 val preempt = BeatmapDifficulty.difficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
                 val trackRate = ModUtils.calculateRateWithMods(mods)
 
@@ -218,6 +221,11 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 
+    private fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
+        property.isAccessible = true
+        return property.getDelegate() as NullableFloatModSetting
+    }
+
     override val extraInformation: String
         get() {
             val settings = mutableListOf<String>()
@@ -242,11 +250,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
     override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp).also {
-        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
-            property.isAccessible = true
-            return property.getDelegate() as NullableFloatModSetting
-        }
-
         fun setDefault(original: NullableFloatModSetting, copy: NullableFloatModSetting) {
             copy.defaultValue = original.defaultValue
         }

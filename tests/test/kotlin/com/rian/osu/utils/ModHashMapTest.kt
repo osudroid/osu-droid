@@ -6,6 +6,7 @@ import com.rian.osu.mods.ModDoubleTime
 import com.rian.osu.mods.ModHardRock
 import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModReallyEasy
+import com.rian.osu.mods.ModReplayV6
 import org.junit.Assert
 import org.junit.Test
 
@@ -58,13 +59,26 @@ class ModHashMapTest {
     }
 
     @Test
-    fun `Test display mod string conversion`() {
+    fun `Test display mod string conversion with non-user playable`() {
         ModHashMap().apply {
             put(ModHidden())
             put(ModHardRock())
             put(ModDoubleTime())
+            put(ModReplayV6())
 
-            Assert.assertEquals(toDisplayModString(), "HR,HD,DT")
+            Assert.assertEquals(toDisplayModString(), "HR,HD,DT,RV6")
+        }
+    }
+
+    @Test
+    fun `Test display mod string conversion without non-user playable`() {
+        ModHashMap().apply {
+            put(ModHidden())
+            put(ModHardRock())
+            put(ModDoubleTime())
+            put(ModReplayV6())
+
+            Assert.assertEquals(toDisplayModString(false), "HR,HD,DT")
         }
     }
 }

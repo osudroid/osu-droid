@@ -28,12 +28,15 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.andengine.shape.PaintStyle;
+import com.reco1l.andengine.shape.UIBox;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UIVideoSprite;
 import com.reco1l.andengine.UIScene;
+import com.osudroid.resources.R;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -62,6 +65,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
+import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.*;
 import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
@@ -122,7 +126,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -337,6 +340,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float playfieldSize = Config.getPlayfieldSize();
+
+        if (Config.isDisplayPlayfieldBorder() && playfieldSize < 1f) {
+            var sceneBorder = new UIBox() {
+                {
+                    setAnchor(Anchor.Center);
+                    setOrigin(Anchor.Center);
+                    setPaintStyle(PaintStyle.Outline);
+                    setLineWidth(5f);
+                    setColor(1f, 1f, 1f);
+                    setAlpha(Interpolation.linear(0.2f, 0.8f, brightness));
+                    setSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                }
+            };
+
+            scene.attachChild(sceneBorder, 0);
+        }
 
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null
                 ? ResourceManager.getInstance().getTexture("menu-background")
@@ -431,7 +451,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private void applyBackground(Shape background, float brigthness) {
+    private void applyBackground(Shape background, float brightness) {
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
@@ -440,8 +460,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         dimRectangle.setSize(background.getWidth(), background.getHeight());
-        dimRectangle.setColor(0f, 0f, 0f, 1f - brigthness);
+        dimRectangle.setColor(0f, 0f, 0f, 1f - brightness);
         background.attachChild(dimRectangle);
+
+        if (breakAnimator != null) {
+            breakAnimator.setDimRectangle(dimRectangle);
+        }
 
         var factor = Config.isKeepBackgroundAspectRatio()
                 ? Config.getRES_HEIGHT() / background.getHeight()
@@ -512,7 +536,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Ensure that only relevant mods are applied.
         mods.values().removeIf(m -> !m.isRelevant());
 
-        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        var playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+        this.playableBeatmap = playableBeatmap;
 
         rateAdjustingMods.clear();
 
@@ -708,7 +733,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stat = new StatisticV2();
         stat.setMod(lastMods);
         stat.migrateLegacyMods(parsedBeatmap.getDifficulty());
-        stat.calculateModScoreMultiplier(parsedBeatmap.getDifficulty());
+        stat.calculateModScoreMultiplier(parsedBeatmap);
         stat.canFail = !stat.getMod().contains(ModNoFail.class)
                 && !stat.getMod().contains(ModRelax.class)
                 && !stat.getMod().contains(ModAutopilot.class)
@@ -953,8 +978,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(skipBtn);
         }
 
-        breakAnimator = new BreakAnimator(fgScene, stat, dimRectangle);
-
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             comboBurst.attachAll(bgScene);
@@ -1072,6 +1095,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             hud.attachChild(fpsCounter);
         }
 
+        breakAnimator = new BreakAnimator(fgScene, stat, hud);
+
         if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
         } else {
@@ -1119,6 +1144,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         elapsedTime += dt;
         previousFrameTime = SystemClock.uptimeMillis();
 
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         if (Multiplayer.isMultiplayer)
         {
             long mSecElapsed = (long) (dt / GameHelper.getSpeedMultiplier() * 1000);
@@ -1150,10 +1181,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
-
-                if (musicStarted) {
-                    GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
-                }
+                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
             }
         }
 
@@ -1525,7 +1553,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             );
         }
 
-        if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
+        if (shouldBePunished || (!isGameOver && objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
 
             // Reset the game to continue the HUD editor session.
             if (startedFromHUDEditor && isHUDEditorMode) {
@@ -1547,7 +1575,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             expiredObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
-            playableBeatmap = null;
+            this.playableBeatmap = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
             sliderPaths = null;
@@ -2909,23 +2937,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getDroidPPAt(int objectId) {
-        if (droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
+        if (playableBeatmap == null || droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = droidTimedDifficultyAttributes[objectId];
 
-        return BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes, stat).total;
+        return BeatmapDifficultyCalculator.calculateDroidPerformance(playableBeatmap, timedAttributes.attributes, stat).total;
     }
 
     private double getStandardPPAt(int objectId) {
-        if (standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
+        if (playableBeatmap == null || standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
-        return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
+        return BeatmapDifficultyCalculator.calculateStandardPerformance(playableBeatmap, timedAttributes.attributes, stat).total;
     }
 
     private UIScene createMainScene() {

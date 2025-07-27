@@ -1,6 +1,6 @@
 package com.reco1l.andengine.shape
 
-import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*

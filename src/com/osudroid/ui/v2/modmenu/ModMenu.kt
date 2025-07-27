@@ -52,7 +52,7 @@ object ModMenu : UIScene() {
 
 
     private val modChangeQueue = LinkedList<Mod>()
-    private val modPresetsSection: ModMenuPresetsSection?
+    private val modPresetsSection: ModMenuPresetsSection
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
@@ -228,12 +228,8 @@ object ModMenu : UIScene() {
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
-                    if (Multiplayer.room != null) {
-                        modPresetsSection = ModMenuPresetsSection()
-                        +modPresetsSection
-                    } else {
-                        modPresetsSection = null
-                    }
+                    modPresetsSection = ModMenuPresetsSection()
+                    +modPresetsSection
 
                     val mods = ModUtils.allModsInstances
 
@@ -256,7 +252,7 @@ object ModMenu : UIScene() {
         // Customizations menu
         attachChild(customizationMenu)
 
-        modPresetsSection?.loadPresets()
+        modPresetsSection.loadPresets()
     }
 
 
@@ -323,6 +319,11 @@ object ModMenu : UIScene() {
                     selectedBeatmap.mostCommonBPM.roundToInt(),
                     (selectedBeatmap.mostCommonBPM * rate).roundToInt()
                 )
+
+                scoreMultiplierBadge.updateStatisticBadge(
+                    "1.00x",
+                    "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
+                )
             }
 
             ensureActive()
@@ -365,6 +366,9 @@ object ModMenu : UIScene() {
             true,
             true
         )
+
+        // Do not show mod presets in multiplayer.
+        modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
         // Ensure mods that can be enabled by the user are displayed.
         updateModButtonEnabledState()
@@ -458,7 +462,7 @@ object ModMenu : UIScene() {
 
     fun queueModChange(mod: Mod) = synchronized(modChangeQueue) {
         // Adding to first place in case it is already queued.
-        if (modChangeQueue.isEmpty() || modChangeQueue.first != mod) {
+        if (modChangeQueue.isEmpty() || modChangeQueue.first() != mod) {
             if (modChangeQueue.isNotEmpty()) {
                 modChangeQueue.remove(mod)
             }
@@ -489,18 +493,9 @@ object ModMenu : UIScene() {
             background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
         }
 
-        val beatmap = GlobalManager.getInstance().selectedBeatmap
-        val difficulty = beatmap?.getBeatmapDifficulty()
-
         scoreMultiplierBadge.updateStatisticBadge(
             "1.00x",
-            if (difficulty != null) {
-                "%.2fx".format(enabledMods.values.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                })
-            } else {
-                "1.00x"
-            }
+            "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
         )
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
@@ -512,7 +507,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
-        modPresetsSection?.onModsChanged()
+        modPresetsSection.onModsChanged()
     }
 
     fun addMod(mod: Mod) {

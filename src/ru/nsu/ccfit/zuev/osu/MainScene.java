@@ -658,7 +658,7 @@ public class MainScene implements IUpdateHandler {
                         modifier.fadeOut(1f, Easing.OutExpo);
                         //noinspection DataFlowIssue
                         return null;
-                    }).then(IEntity::detachSelf);
+                    }).after(IEntity::detachSelf);
                 }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
@@ -1000,11 +1000,7 @@ public class MainScene implements IUpdateHandler {
 
         GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
         StatisticV2 stat = replay.getStat();
-
-        var difficulty = beatmap.getBeatmapDifficulty();
-
-        stat.migrateLegacyMods(difficulty);
-        stat.calculateModScoreMultiplier(difficulty);
+        stat.migrateLegacyMods(beatmap.getBeatmapDifficulty());
 
         GlobalManager.getInstance().getSongMenu().select();
         ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());

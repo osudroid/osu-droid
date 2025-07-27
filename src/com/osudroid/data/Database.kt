@@ -64,6 +64,13 @@ object DatabaseManager {
     val modPresetTable
         get() = database.getModPresetTable()
 
+    /**
+     * The path to the database file.
+     */
+    @JvmStatic
+    val databasePath: String
+        get() = "${Config.getCorePath()}databases/room-tournament-${BuildConfig.BUILD_TYPE}.db"
+
     private lateinit var database: DroidDatabase
 
 
@@ -71,8 +78,8 @@ object DatabaseManager {
     fun load(context: Context) {
 
         // Be careful when changing the database name, it may cause data loss.
-        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room-tournament-${BuildConfig.BUILD_TYPE}.db")
-            .addMigrations(MIGRATION_1_2)
+        database = Room.databaseBuilder(context, DroidDatabase::class.java, databasePath)
+            .addMigrations(*ALL_MIGRATIONS)
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
@@ -201,6 +208,8 @@ object DatabaseManager {
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                    sliderTickHits = null,
+                                    sliderEndHits = null
                                 )
 
                                 pendingScores--
@@ -230,7 +239,7 @@ object DatabaseManager {
 }
 
 @Database(
-    version = 2,
+    version = 3,
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,

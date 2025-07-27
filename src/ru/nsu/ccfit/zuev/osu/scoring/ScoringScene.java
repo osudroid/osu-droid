@@ -459,11 +459,11 @@ public class ScoringScene {
 
                     performanceAttributes = switch (Config.getDifficultyAlgorithm()) {
                         case droid -> BeatmapDifficultyCalculator.calculateDroidPerformance(
-                            (DroidDifficultyAttributes) difficultyAttributes, stat
+                            beatmapData, (DroidDifficultyAttributes) difficultyAttributes, stat
                         );
 
                         case standard -> BeatmapDifficultyCalculator.calculateStandardPerformance(
-                            (StandardDifficultyAttributes) difficultyAttributes, stat
+                            beatmapData, (StandardDifficultyAttributes) difficultyAttributes, stat
                         );
                     };
                 }
@@ -478,7 +478,13 @@ public class ScoringScene {
                     );
                 };
 
-                ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+                ppinfo.append(String.format(
+                    Locale.ENGLISH,
+                    "%.2f★ | %.2f/%.2f" + (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "dpp" : "pp"),
+                    difficultyAttributes.starRating,
+                    performanceAttributes.total,
+                    maxPerformanceAttributes.total
+                ));
             }
 
             if (stat.getUnstableRate() > 0) {

@@ -2,6 +2,7 @@ package com.rian.osu.beatmap.parser
 
 import android.util.Log
 import com.osudroid.resources.R.*
+import com.reco1l.toolkt.kotlin.fastForEach
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
@@ -166,6 +167,14 @@ class BeatmapParser : Closeable {
                 // [SectionName]
                 if (line.startsWith("[") && line.endsWith("]")) {
                     currentSection = BeatmapSection.parse(line.substring(1, line.length - 1))
+
+                    // HitObjects are always in the last section (since it is dependent on other things such as
+                    // difficulty, control points, etc.)
+                    // We can stop here if we do not need to parse them.
+                    if (currentSection == BeatmapSection.HitObjects && !withHitObjects) {
+                        break
+                    }
+
                     continue
                 }
 
@@ -196,9 +205,7 @@ class BeatmapParser : Closeable {
                             BeatmapColorParser.parse(beatmap, line, scope)
 
                         BeatmapSection.HitObjects ->
-                            if (withHitObjects) {
-                                BeatmapHitObjectsParser.parse(beatmap, line, scope)
-                            }
+                            BeatmapHitObjectsParser.parse(beatmap, line, scope)
 
                         else -> continue
                     }
@@ -215,19 +222,20 @@ class BeatmapParser : Closeable {
             return null
         }
 
-        return beatmap.apply {
-            hitObjects.objects.forEach {
-                scope?.ensureActive()
+        val processor = BeatmapProcessor(beatmap, scope)
 
-                it.applyDefaults(controlPoints, difficulty, mode, scope)
-                it.applySamples(controlPoints, scope)
-            }
+        processor.preProcess()
 
-            BeatmapProcessor(this, scope).also {
-                it.preProcess()
-                it.postProcess()
-            }
+        beatmap.hitObjects.objects.fastForEach {
+            scope?.ensureActive()
+
+            it.applyDefaults(beatmap.controlPoints, beatmap.difficulty, mode, scope)
+            it.applySamples(beatmap.controlPoints, scope)
         }
+
+        processor.postProcess()
+
+        return beatmap
     }
 
     override fun close() {

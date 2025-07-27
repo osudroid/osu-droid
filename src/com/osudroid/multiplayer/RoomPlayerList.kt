@@ -33,10 +33,6 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         isValid = false
     }
 
-    override fun detachSelf(): Boolean {
-        return detachChild(this)
-    }
-
 
     override fun onManagedUpdate(secondsElapsed: Float) {
         if (!isValid) {
@@ -113,7 +109,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             playerStatusRect.isVisible = true
             playerInfoText.isVisible = true
-            playerInfoText.text = "${player!!.name}\n${player!!.mods.toDisplayModString()}"
+            playerInfoText.text = "${player!!.name}\n${player!!.mods.toDisplayModString(false)}"
 
             if (room!!.teamMode == TeamMode.TeamVersus) {
                 when (player!!.team) {

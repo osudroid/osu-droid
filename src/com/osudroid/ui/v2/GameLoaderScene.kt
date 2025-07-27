@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
-class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : UIScene() {
+class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : UIScene() {
 
     private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
@@ -29,6 +29,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
     private val dimBox: UIBox
     private val mainContainer: UIContainer
 
+    private var beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
 
     init {
 
@@ -79,7 +80,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                     text {
                         font = ResourceManager.getInstance().getFont("smallFont")
-                        text = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.epilepsy_warning)
+                        text = StringTable.get(com.osudroid.resources.R.string.epilepsy_warning)
                     }
                 }
             }
@@ -143,6 +144,9 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
             }
 
             if (!isRestart) {
+                beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
+                    ?: BeatmapOptions(beatmapInfo.setDirectory)
+
                 +QuickSettingsLayout()
             }
         }
@@ -158,6 +162,10 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
+                    if (beatmapOptions != null) {
+                        DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
+                    }
+
                     // This is used instead of getBackgroundBrightness to directly obtain the
                     // updated value from the brightness slider.
                     val backgroundBrightness = Config.getInt("bgbrightness", 25)
@@ -165,7 +173,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
 
                     dimBox.clearModifiers(ModifierType.Alpha)
-                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).then {
+                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).after {
 
                         gameScene.hud.apply {
                             alpha = 0f
@@ -212,12 +220,22 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                     title = "Beatmap"
 
                     content.apply {
-
-                        val offsetSlider = FormSlider(0f).apply {
+                        val offsetSlider = FormSlider().apply {
                             label = StringTable.get(com.osudroid.resources.R.string.opt_category_offset)
                             control.min = -250f
                             control.max = 250f
+                            value = beatmapOptions?.offset?.toFloat() ?: 0f
+                            defaultValue = beatmapOptions?.offset?.toFloat() ?: 0f
                             valueFormatter = { "${it.roundToInt()}ms" }
+
+                            onValueChanged = {
+                                if (beatmapOptions == null) {
+                                    beatmapOptions = BeatmapOptions(beatmapInfo.setDirectory)
+                                    DatabaseManager.beatmapOptionsTable.insert(beatmapOptions!!)
+                                }
+
+                                beatmapOptions!!.offset = it.roundToInt()
+                            }
                         }
                         +offsetSlider
 

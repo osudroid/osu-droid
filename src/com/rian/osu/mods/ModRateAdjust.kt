@@ -1,9 +1,7 @@
 package com.rian.osu.mods
 
 import com.reco1l.toolkt.*
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.*
-import kotlin.math.pow
 
 /**
  * Represents a [Mod] that adjusts the track's playback rate.
@@ -29,9 +27,8 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
 
     final override val isValidForMultiplayerAsFreeMod = false
 
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) =
-        if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
-        else 0.3f.pow((1 - trackRateMultiplier) * 4)
+    override val scoreMultiplier: Float
+        get() = ModRateAdjustHelper(trackRateMultiplier).scoreMultiplier
 
     final override fun applyToRate(time: Double, rate: Float) = rate * trackRateMultiplier
 }

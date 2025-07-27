@@ -1,7 +1,5 @@
 package com.rian.osu.mods
 
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
-
 /**
  * Represents the No Fail mod.
  */
@@ -12,11 +10,11 @@ class ModNoFail : Mod() {
     override val type = ModType.DifficultyReduction
     override val isRanked = true
     override val isUserPlayable = false
+    override val scoreMultiplier = 0.5f
+
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModPerfect::class, ModSuddenDeath::class, ModAutopilot::class, ModRelax::class
     )
-
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 
     override fun deepCopy() = ModNoFail()
 }
