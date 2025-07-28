@@ -13,6 +13,14 @@ class HUDAccuracyCounter : HUDElement() {
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
     private val format = DecimalFormat("0.00%", DecimalFormatSymbols(Locale.US))
 
+    private var value = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                sprite.text = format.format(value)
+            }
+        }
+
     init {
         sprite.text = "100.00%"
         attachChild(sprite)
@@ -20,7 +28,7 @@ class HUDAccuracyCounter : HUDElement() {
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
-        sprite.text = format.format(gameScene.stat.accuracy)
+        value = gameScene.stat.accuracy
     }
 
 }

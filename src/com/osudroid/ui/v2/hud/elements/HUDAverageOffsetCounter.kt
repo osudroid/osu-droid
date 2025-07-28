@@ -15,12 +15,19 @@ class HUDAverageOffsetCounter : HUDElement() {
         text = "Avg offset: 0ms"
     }
 
+    private var value = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                text.text = "Avg offset: ${(value * 1000).roundToInt()}ms"
+            }
+        }
+
     init {
         attachChild(text)
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
-        val avgOffset = if (game.offsetRegs > 0) game.offsetSum / game.offsetRegs else 0f
-        text.text = "Avg offset: ${(avgOffset * 1000).roundToInt()}ms"
+        value = if (game.offsetRegs > 0) game.offsetSum / game.offsetRegs else 0f
     }
 }
