@@ -18,6 +18,6 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
         val timingPoint = beatmap.controlPoints.timing.controlPointAt(gameScene.elapsedTime * 1000.0)
         val bpm = timingPoint.bpm * GameHelper.getSpeedMultiplier()
 
-        valueText.text = "%d".format(bpm.roundToInt())
+        valueText.text = bpm.roundToInt().toString()
     }
 }
