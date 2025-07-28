@@ -118,8 +118,12 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             return false
         }
 
+        if (other is ModSmallCircle && cs != null) {
+            return false
+        }
+
         if (cs != null && ar != null && od != null && hp != null) {
-            return other !is ModEasy && other !is ModHardRock && other !is ModSmallCircle && other !is ModReallyEasy
+            return other !is ModEasy && other !is ModHardRock && other !is ModReallyEasy
         }
 
         return true
