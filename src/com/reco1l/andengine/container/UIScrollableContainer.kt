@@ -9,6 +9,7 @@ import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.math.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.*
 import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.input.touch.TouchEvent.*
 import javax.microedition.khronos.opengles.*
@@ -308,15 +309,29 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         updateIndicators(deltaTimeSec)
-        updateChildrenPosition()
-    }
-    
-    protected open fun updateChildrenPosition() {
-        mChildren?.fastForEach { child ->
-            child.setPosition(-scrollX, -scrollY)
-        }
     }
 
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+
+        firstChild?.also { child ->
+            if (child.x != -scrollX || child.y != -scrollY) {
+                child.setPosition(-scrollX, -scrollY)
+                onScrollChanged()
+            }
+        }
+
+        super.onManagedDraw(gl, camera)
+    }
+
+
+    /**
+     * Called when the scroll position has changed.
+     */
+    protected open fun onScrollChanged() {}
+
+    /**
+     * Called to update the scroll indicators based on the current scroll position.
+     */
     protected open fun updateIndicators(deltaTimeSec: Float) {
 
         val verticalIndicator = verticalIndicator
@@ -465,6 +480,21 @@ open class UIScrollableContainer : UIContainer() {
     }
 
     //endregion
+
+    override fun attachChild(pEntity: IEntity?, pIndex: Int): Boolean {
+        if (!mChildren.isNullOrEmpty()) {
+            throw IllegalStateException("UIScrollableContainer can only have one child entity.")
+        }
+        return super.attachChild(pEntity, pIndex)
+    }
+
+    override fun attachChild(pEntity: IEntity?) {
+        if (!mChildren.isNullOrEmpty()) {
+            throw IllegalStateException("UIScrollableContainer can only have one child entity.")
+        }
+        super.attachChild(pEntity)
+    }
+
 
     companion object {
 
