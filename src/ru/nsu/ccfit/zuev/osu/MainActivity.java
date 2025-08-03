@@ -48,7 +48,6 @@ import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
-import com.osudroid.data.BeatmapInfo;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
 import com.osudroid.multiplayer.LobbyScene;
@@ -143,6 +142,7 @@ public class MainActivity extends BaseGameActivity implements
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
+        wakeLock.acquire();
 
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
@@ -624,12 +624,12 @@ public class MainActivity extends BaseGameActivity implements
             return;
         }
         activityVisible = true;
+        wakeLock.acquire();
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
         }
         if (GlobalManager.getInstance().getMainScene() != null && songService != null) {
-            if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
             GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
             GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
             GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
@@ -654,19 +654,11 @@ public class MainActivity extends BaseGameActivity implements
                 Multiplayer.log("Player left the match.");
             } else GlobalManager.getInstance().getGameScene().pause();
         }
-        if (GlobalManager.getInstance().getMainScene() != null) {
-            BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
-            if (songService != null && beatmapInfo != null && !songService.isGaming()) {
-                if (wakeLock == null) {
-                    PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
-                }
-                wakeLock.acquire();
-            } else {
-                if (songService != null) {
-                    songService.pause();
-                }
-            }
+
+        wakeLock.release();
+
+        if (songService != null) {
+            songService.pause();
         }
     }
 
