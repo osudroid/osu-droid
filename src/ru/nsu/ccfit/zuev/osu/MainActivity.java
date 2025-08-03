@@ -657,8 +657,6 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
             if (songService != null && beatmapInfo != null && !songService.isGaming()) {
-                songService.showNotification();
-
                 if (wakeLock == null) {
                     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
                     wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");

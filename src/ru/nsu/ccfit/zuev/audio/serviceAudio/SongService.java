@@ -202,17 +202,6 @@ public class SongService extends Service {
         return 0f;
     }
 
-    public void showNotification() {
-        if (this.isGaming) {
-            Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");
-            return;
-        }
-
-        if (audioFunc != null) {
-            audioFunc.onGamePause();
-        }
-    }
-
     public boolean checkFileExist(String path) {
         if (path == null) return false;
         if (path.trim().isEmpty()) return false;
