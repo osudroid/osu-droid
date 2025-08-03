@@ -620,21 +620,27 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onResume() {
         super.onResume();
-        if (this.mEngine == null) {
+
+        if (mEngine == null) {
             return;
         }
+
         activityVisible = true;
         wakeLock.acquire();
-        if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
+
+        var gameScene = GlobalManager.getInstance().getGameScene();
+        var mainScene = GlobalManager.getInstance().getMainScene();
+
+        if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
+            mEngine.getTextureManager().reloadTextures();
         }
-        if (GlobalManager.getInstance().getMainScene() != null && songService != null) {
-            GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
-            GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
-            GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
-            GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
-            GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
+
+        if (mainScene != null && songService != null) {
+            mainScene.loadBeatmapInfo();
+            mainScene.loadTimingPoints(false);
+            mainScene.progressBar.setTime(songService.getLength());
+            mainScene.progressBar.setPassedTime(songService.getPosition());
+            mainScene.musicControl(MainScene.MusicOption.SYNC);
         }
     }
 
@@ -642,17 +648,21 @@ public class MainActivity extends BaseGameActivity implements
     public void onPause() {
         super.onPause();
         activityVisible = false;
-        if (this.mEngine == null) {
+
+        if (mEngine == null) {
             return;
         }
-        if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
 
+        var gameScene = GlobalManager.getInstance().getGameScene();
+
+        if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
-                GlobalManager.getInstance().getGameScene().quit();
+                gameScene.quit();
                 Multiplayer.log("Player left the match.");
-            } else GlobalManager.getInstance().getGameScene().pause();
+            } else {
+                gameScene.pause();
+            }
         }
 
         wakeLock.release();
