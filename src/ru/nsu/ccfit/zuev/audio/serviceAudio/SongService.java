@@ -114,7 +114,7 @@ public class SongService extends Service {
 
     public void seekTo(int time) {
         if (audioFunc == null) return;
-        System.out.println(audioFunc.jump(time));
+        Log.i("BASS", "Seeking to " + time + " ms: " + (audioFunc.jump(time) ? "Success" : "Failed"));
     }
 
     public boolean isGaming() {
