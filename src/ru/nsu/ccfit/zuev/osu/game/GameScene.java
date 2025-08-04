@@ -2935,10 +2935,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 dt = FMath.clamp(dt, minDt, maxDt);
 
-                if (dt > 0) {
-                    update(dt);
-                }
-
+                update(dt);
                 super.onManagedUpdate(dt);
             }
         };
