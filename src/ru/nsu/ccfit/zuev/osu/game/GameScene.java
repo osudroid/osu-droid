@@ -2915,7 +2915,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     // behind or BASS reports the wrong position, but not by much to still allow audio to catch up.
                     // This allows for relatively smooth gameplay progression without the catch-up being too noticeable.
                     minDt = dt / 2;
-                    dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
+
+                    float audioElapsedTime = songService.getPosition() / 1000f;
+                    float gameElapsedTime = elapsedTime - totalOffset;
+
+                    // In some cases, the audio can be behind the gameplay time so far it would cause gameplay to
+                    // completely desynchronize. In that case, we do not let gameplay progress at all until the audio
+                    // catches up.
+                    if (gameElapsedTime - audioElapsedTime <= 0.1f) {
+                        dt = audioElapsedTime - gameElapsedTime;
+                    } else {
+                        minDt = 0;
+                        dt = 0;
+                    }
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
@@ -2923,7 +2935,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 dt = FMath.clamp(dt, minDt, maxDt);
 
-                update(dt);
+                if (dt > 0) {
+                    update(dt);
+                }
+
                 super.onManagedUpdate(dt);
             }
         };
