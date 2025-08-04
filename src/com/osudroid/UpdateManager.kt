@@ -27,7 +27,7 @@ object UpdateManager: IFileRequestObserver
     fun onActivityStart() = mainThread {
 
         val activity = GlobalManager.getInstance().mainActivity
-        val version = Config.getLong("version", activity.versionCode)
+        val version = Config.getLong("version", 0)
 
         // Ignoring debug because otherwise every compiled build will show the dialog.
         if (!BuildConfig.DEBUG && version < activity.versionCode) {
