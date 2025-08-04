@@ -25,11 +25,6 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar_bottom" />
 
-        <CheckBoxPreference
-            android:key="room_allowMoreThanThreeCursors"
-            android:title="Allow more than three cursors in gameplay"
-            android:summary="Allow players to put more than three active cursors at once during gameplay" />
-
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/mp_room_category_variables">
