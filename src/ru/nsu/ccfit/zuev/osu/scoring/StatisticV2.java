@@ -265,6 +265,20 @@ public class StatisticV2 implements Serializable {
                 // Undo the ScoreV1 addition above.
                 v1Score = Math.max(0, v1Score - amount);
             }
+
+            double scorePortion;
+            double accuracyPortion;
+
+            if (GameHelper.isPrecise()) {
+                scorePortion = 0.3f * Math.sqrt((double) v1Score / v1MaxScore);
+                accuracyPortion = 0.7f * Math.pow(getAccuracy(), 4);
+            } else {
+                scorePortion = 0.4f * Math.sqrt((double) v1Score / v1MaxScore);
+                accuracyPortion = 0.6f * Math.pow(getAccuracy(), 8);
+            }
+
+            float progress = getNotesHit() / (float) beatmapNoteCount;
+            v2Score = (int) (scoreV2MaxScore * (scorePortion + accuracyPortion * progress)) + bonusScore;
         }
 
         scoreHash = SecurityUtils.getHigh16Bits(v1Score);
