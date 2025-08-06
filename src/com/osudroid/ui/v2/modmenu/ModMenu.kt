@@ -425,7 +425,7 @@ object ModMenu : UIScene() {
                 continue
             }
 
-            if (!isFreeMod || mod.isValidForMultiplayerAsFreeMod) {
+            if (!isFreeMod || !mod.isValidForMultiplayerAsFreeMod) {
                 addMod(mod)
             }
         }
