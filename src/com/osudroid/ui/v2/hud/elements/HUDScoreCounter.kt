@@ -13,6 +13,14 @@ class HUDScoreCounter : HUDElement() {
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
     private val format = DecimalFormat("00000000", DecimalFormatSymbols(Locale.US))
 
+    private var value = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                sprite.text = format.format(value)
+            }
+        }
+
     init {
         sprite.spacing = -OsuSkin.get().scoreOverlap
         sprite.text = format.format(0)
@@ -22,7 +30,7 @@ class HUDScoreCounter : HUDElement() {
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
-        sprite.text = format.format(game.stat.totalScoreWithMultiplier)
+        value = game.stat.totalScoreWithMultiplier
     }
 
 }

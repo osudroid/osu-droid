@@ -229,5 +229,28 @@ open class MessageDialog : BaseFragment() {
     }
 }
 
+/**
+ * A dialog that displays a message to the user with buttons arranged horizontally.
+ */
+open class HorizontalMessageDialog : MessageDialog() {
+    override fun onLoadView() {
+        super.onLoadView()
+        findViewById<LinearLayout>(R.id.button_layout)?.apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = CENTER
+
+            for (i in 0 until childCount) {
+                val button = getChildAt(i) as? Button
+                button?.apply {
+                    minWidth = 0
+                    val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    params.marginEnd = 8.dp
+                    params.marginStart = 8.dp
+                    layoutParams = params
+                }
+            }
+        }
+    }
+}
 
 

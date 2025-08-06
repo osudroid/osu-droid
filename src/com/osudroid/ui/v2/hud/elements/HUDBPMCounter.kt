@@ -8,6 +8,14 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
 
     override val name = "BPM counter"
 
+    private var value = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                valueText.text = value.toString()
+            }
+        }
+
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         val beatmap = gameScene.playableBeatmap
 
@@ -18,6 +26,6 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
         val timingPoint = beatmap.controlPoints.timing.controlPointAt(gameScene.elapsedTime * 1000.0)
         val bpm = timingPoint.bpm * GameHelper.getSpeedMultiplier()
 
-        valueText.text = "%d".format(bpm.roundToInt())
+        value = bpm.roundToInt()
     }
 }

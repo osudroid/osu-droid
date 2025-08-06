@@ -22,6 +22,38 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.5
+===============
+
+# Additions
+
+- Add a way to view changelog even after update is pushed <span style="font-size: 0.75em">by [Acivev](https://github.com/acivev)</span>
+  - Changelog can be accessed by pressing the version number in the bottom left corner of the main menu.
+
+# Bug Fixes
+
+- Fix gameplay potentially not progressing at all <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix update dialog never showing up after a game update <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+Version 1.8.4.4
+===============
+
+# Changes
+
+- Prevent gameplay from progressing if audio is far behind gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - In some cases, audio can be behind gameplay so far it would cause gameplay to completely desynchronize.
+
+# Bug Fixes
+
+- Fix an issue where replays made before version 1.8.4 displays an unranked sprite at the start of gameplay despite only
+  using ranked mods <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix pp being displayed as dpp in ranking screen <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay potentially entering ranking screen when failing at the very last second <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix audio continuing to play when putting the game in background from the main menu <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix an issue where putting the game in background would prevent the device from going to sleep <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix an issue where skipping in gameplay may play earlier than expected <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider paths not being recomputed when replaying the same beatmap with different mods <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4.3
 ===============
 
@@ -124,7 +156,7 @@ Version 1.8.4
   - Mod icon is skinnable with `selection-mod-windup`.
 - Add Mirror mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Flips hit objects vertically or horizontally.
-  - Can be configured in the mod menu. 
+  - Can be configured in the mod menu.
   - Mod icon is skinnable with `selection-mod-mirror`.
 - Add Synesthesia mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Colors hit objects based on their rhythm.
@@ -172,7 +204,7 @@ Version 1.8.4
   - As a part of the mod storage system rework, forced difficulty statistics are now considered an actual mod.
   - Mod icon is skinnable with `selection-mod-difficultyadjust`.
 - Redesign gameplay loading screen <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-  - Now displays epilepsy warning. 
+  - Now displays epilepsy warning.
   - Now includes settings that were removed from the current mod menu, plus additional ones such as beatmap-specific
     offset.
 - Unify hit object scaling equation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>

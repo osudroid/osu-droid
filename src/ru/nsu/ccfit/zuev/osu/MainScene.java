@@ -1,9 +1,11 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PointF;
-import android.os.PowerManager;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
@@ -19,7 +21,7 @@ import com.osudroid.ui.MainMenu;
 import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.andengine.ui.UIConfirmDialog;
 import com.reco1l.framework.Color4;
-import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.osu.ui.HorizontalMessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
@@ -54,6 +56,8 @@ import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.TimerTask;
@@ -192,7 +196,7 @@ public class MainScene implements IUpdateHandler {
 
             public boolean onAreaTouched(TouchEvent event, float localX, float localY) {
                 if (event.isActionUp()) {
-                    new MessageDialog()
+                    new HorizontalMessageDialog()
                         .setTitle("About")
                         .setMessage(
                                 "<h1>osu!droid Tournament Client</h1>\n" +
@@ -208,6 +212,39 @@ public class MainScene implements IUpdateHandler {
                                 "<a href=\"https://discord.gg/nyD92cE\">Join the official Discord server ↗</a>\n",
                             true
                         )
+                        .addButton("Changelog", dialog -> {
+                            dialog.dismiss();
+
+                            try {
+                                var changelogFile = new File(context.getCacheDir(), "changelog.html");
+
+                                // Copy the changelog file to cache directory using Java's try-with-resources
+                                try (var inputStream = context.getAssets().open("app/changelog.html");
+                                     var outputStream = new FileOutputStream(changelogFile)) {
+                                    byte[] buffer = new byte[1024];
+                                    int length;
+                                    while ((length = inputStream.read(buffer)) > 0) {
+                                        outputStream.write(buffer, 0, length);
+                                    }
+                                }
+
+                                var changelogUri = FileProvider.getUriForFile(
+                                        context,
+                                        BuildConfig.APPLICATION_ID + ".fileProvider",
+                                        changelogFile
+                                );
+
+                                var intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(changelogUri, "text/html");
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                                context.startActivity(intent);
+                            } catch (Exception e) {
+                                android.util.Log.e("MainScene", "Failed to load changelog", e);
+                            }
+
+                            return null;
+                        })
                         .addButton("Close", dialog -> {
                             dialog.dismiss();
                             return null;
@@ -925,11 +962,6 @@ public class MainScene implements IUpdateHandler {
             return;
         }
         isOnExitAnim = true;
-
-        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
 
         Execution.updateThread(menu::detachButtons);
 

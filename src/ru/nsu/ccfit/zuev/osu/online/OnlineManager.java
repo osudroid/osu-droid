@@ -30,7 +30,7 @@ public class OnlineManager {
     public static final String endpoint = "https://" + hostname + "/api/droid/";
     public static final String updateEndpoint = endpoint + "update";
     public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
-    private static final String onlineVersion = "44";
+    private static final String onlineVersion = "45";
 
     public static final OkHttpClient client = new OkHttpClient();
 
@@ -173,6 +173,7 @@ public class OnlineManager {
         post.addParam("sessionId", sessionId);
         post.addParam("hash", beatmap.getMD5());
         post.addParam("data", scoreData);
+        post.addParam("version", onlineVersion);
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
