@@ -63,7 +63,6 @@ public class BassAudioFunc {
         setSpeed(speed);
         setAdjustPitch(adjustPitch);
 
-        // Use smaller buffer length on focus for smaller latency.
         BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, 0.1f);
 
         return true;
