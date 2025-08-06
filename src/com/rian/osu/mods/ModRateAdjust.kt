@@ -14,13 +14,16 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
     open var trackRateMultiplier by FloatModSetting(
         name = "Track rate multiplier",
         valueFormatter = { "${it.roundBy(2)}x" },
-        defaultValue = trackRateMultiplier,
+        defaultValue = 1f,
         minValue = 0.5f,
         maxValue = 2f,
         step = 0.05f,
         precision = 2
     )
 
+    init {
+        this.trackRateMultiplier = trackRateMultiplier
+    }
 
     final override val isRelevant
         get() = trackRateMultiplier != 1f
