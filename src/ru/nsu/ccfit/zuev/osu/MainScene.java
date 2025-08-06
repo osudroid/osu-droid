@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
-import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
@@ -965,11 +964,6 @@ public class MainScene implements IUpdateHandler {
             return;
         }
         isOnExitAnim = true;
-
-        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
 
         Execution.updateThread(menu::detachButtons);
 

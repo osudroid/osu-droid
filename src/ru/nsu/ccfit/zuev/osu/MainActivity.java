@@ -6,7 +6,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -22,7 +21,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -97,7 +95,6 @@ public class MainActivity extends BaseGameActivity implements
     public static String versionName;
     public static SongService songService;
     public ServiceConnection connection;
-    private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -138,11 +135,6 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
-
-        final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                "osudroid:osu");
-        wakeLock.acquire();
 
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
@@ -536,10 +528,6 @@ public class MainActivity extends BaseGameActivity implements
         return analytics;
     }
 
-    public PowerManager.WakeLock getWakeLock() {
-        return wakeLock;
-    }
-
     public static boolean isActivityVisible() {
         return activityVisible;
     }
@@ -626,7 +614,6 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         activityVisible = true;
-        wakeLock.acquire();
 
         var gameScene = GlobalManager.getInstance().getGameScene();
         var mainScene = GlobalManager.getInstance().getMainScene();
@@ -664,8 +651,6 @@ public class MainActivity extends BaseGameActivity implements
                 gameScene.pause();
             }
         }
-
-        wakeLock.release();
 
         if (songService != null) {
             songService.pause();
