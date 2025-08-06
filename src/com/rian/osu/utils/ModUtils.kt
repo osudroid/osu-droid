@@ -18,8 +18,8 @@ object ModUtils {
     /**
      * Returns a list of all available [Mod]s.
      */
-    val allModsInstances
-        get() = arrayOf(
+    val allModsInstances by lazy {
+        arrayOf(
             ModApproachDifferent(),
             ModAutoplay(),
             ModAutopilot(),
@@ -50,6 +50,7 @@ object ModUtils {
             ModWindDown(),
             ModWindUp()
         )
+    }
 
     private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
 

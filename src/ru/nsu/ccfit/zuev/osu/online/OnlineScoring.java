@@ -5,7 +5,6 @@ import android.net.Uri;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.osudroid.data.BeatmapInfo;
-import com.osudroid.multiplayer.LobbyScene;
 import com.osudroid.multiplayer.RoomScene;
 import com.osudroid.utils.Execution;
 import com.rian.osu.ui.SendingPanel;
@@ -72,7 +71,6 @@ public class OnlineScoring {
         if (secondPanel != null)
             secondPanel.setInfo();
 
-        LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 
@@ -83,7 +81,6 @@ public class OnlineScoring {
         if (secondPanel != null)
             secondPanel.setAvatar(texname);
 
-        LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 
