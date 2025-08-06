@@ -1185,7 +1185,7 @@ public class GameplaySlider extends GameObject {
     private float getLateHitThreshold() {
         var hitWindow = beatmapSlider.getHead().hitWindow;
 
-        return hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, (float) duration) : 0;
+        return (float) (hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, duration) : duration);
     }
 
     private double getGameplayPassedTimeMilliseconds() {
