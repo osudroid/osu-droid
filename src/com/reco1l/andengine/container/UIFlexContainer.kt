@@ -4,7 +4,7 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
 
-class UIFlexContainer : UIContainer() {
+open class UIFlexContainer : UIContainer() {
 
     /**
      * The gap between the children of the container.
