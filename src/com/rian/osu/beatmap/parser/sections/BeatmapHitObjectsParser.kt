@@ -267,7 +267,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         val s = str.split(COLON_PROPERTY_REGEX)
 
         bankInfo.normal = SampleBank.parse(parseInt(s[0]))
-        bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.Normal } ?: bankInfo.normal
+        bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.None } ?: bankInfo.normal
 
         if (banksOnly) {
             return
