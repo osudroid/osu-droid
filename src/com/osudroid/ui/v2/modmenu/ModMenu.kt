@@ -360,7 +360,7 @@ object ModMenu : UIScene() {
 
     //region Visibility
 
-    fun show() {
+    override fun show() {
         GlobalManager.getInstance().engine.scene.setChildScene(
             this,
             false,

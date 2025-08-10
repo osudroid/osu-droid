@@ -85,15 +85,19 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
                 }
             }
 
-            trailingIcon = UITriangle()
-            trailingIcon!!.apply {
-                width = 14f
-                height = 8f
-                color = Color4.White
-                alpha = 0.25f
-                rotationCenter = Anchor.Center
-                rotation = 180f
+            trailingIcon = UIContainer().apply {
                 padding = Vec4(12f, 0f)
+
+                triangle {
+                    width = 14f
+                    height = 8f
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    color = Color4.White
+                    alpha = 0.25f
+                    rotationCenter = Anchor.Center
+                    rotation = 180f
+                }
             }
         }
 

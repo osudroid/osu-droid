@@ -1,48 +1,76 @@
 package com.osudroid.ui.v2
 
-import com.edlplan.framework.easing.*
 import com.osudroid.ui.v2.modmenu.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.framework.*
+import com.reco1l.toolkt.data.*
 import com.rian.osu.utils.*
-import org.anddev.andengine.input.touch.*
+import org.json.JSONArray
 
-class ModsIndicator(val mods: ModHashMap, val iconSize: Float = 42f) : UILinearContainer() {
+class ModsIndicator : UILinearContainer() {
 
     /**
-     * Indicator for the mods.
+     * Whether to show mods that are not playable. Defined by [Mod.isUserPlayable].
      */
-    var isExpanded = true
+    var showNonPlayableMods: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+
+                // Reapply mods to update visibility
+                val previousMods = mods
+                mods = null
+                mods = previousMods
+            }
+        }
+
+    /**
+     * The list of mods to display.
+     */
+    var mods: JSONArray? = null
+        set(value) {
+            if (field != value) {
+                field = value
+
+                detachChildren()
+                value?.forEach { json ->
+
+                    val modAcronym = json.optString("acronym", json.optString("a"))
+                    val mod = ModUtils.allModsInstances.find { it.acronym.equals(modAcronym, ignoreCase = true) }!!
+
+                    if (!showNonPlayableMods && !mod.isUserPlayable) {
+                        // Skip mods that are not selectable by the user
+                        return@forEach
+                    }
+
+                    // Mods that come from the server have a abbreviated structure.
+                    +ModIcon(mod).apply {
+                        width = iconSize
+                        height = iconSize
+                    }
+                }
+            }
+        }
+
+    /**
+     * The size of the mod icons in this indicator.
+     */
+    var iconSize = 42f
+        set(value) {
+            if (field != value) {
+                field = value
+
+                forEach { icon -> icon as UIComponent
+                    icon.width = value
+                    icon.height = value
+                }
+            }
+        }
 
 
     init {
         orientation = Orientation.Horizontal
-        spacing = 10f
-
-        for (mod in mods.values) {
-            +ModIcon(mod).apply {
-                width = iconSize
-                height = iconSize
-            }
-        }
+        spacing = -5f
     }
 
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        spacing = if (isExpanded) {
-            Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.06f), 10f, spacing, 0f, 0.06f, Easing.OutBounce)
-        } else {
-            Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.06f), -5f, spacing, 0f, 0.06f, Easing.OutBounce)
-        }
-
-        super.onManagedUpdate(deltaTimeSec)
-    }
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (event.isActionUp) {
-            isExpanded = !isExpanded
-        }
-        return true
-    }
 }
