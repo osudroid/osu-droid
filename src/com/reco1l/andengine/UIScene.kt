@@ -55,6 +55,11 @@ open class UIScene : Scene(), IShape {
         childScene?.onAttached()
     }
 
+    override fun clearChildScene() {
+        childScene?.onDetached()
+        super.clearChildScene()
+    }
+
     override fun onAttached() {
 
         fun IEntity.propagateSkinChanges() {
@@ -176,4 +181,8 @@ open class UIScene : Scene(), IShape {
     }
 
     //endregion
+
+    open fun show() {
+        ExtendedEngine.Current.scene = this
+    }
 }

@@ -24,6 +24,13 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
      */
     abstract val control: C
 
+    /**
+     * The key that is used to identify the control.
+     */
+    var key
+        get() = control.key
+        set(value) { control.key = value }
+
 
     /**
      * The text that is displayed as the value of the control.

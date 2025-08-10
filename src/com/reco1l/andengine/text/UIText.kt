@@ -117,6 +117,11 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         invalidateBuffer(BufferInvalidationFlag.Data)
     }
 
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        invalidateBuffer(BufferInvalidationFlag.Data)
+    }
+
     override fun onCreateBuffer(): CompoundBuffer {
         val currentLength = currentLength
         val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
@@ -309,7 +314,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 /**
  * A compound text entity that can be displayed with leading and trailing icons.
  */
-open class CompoundText : UILinearContainer() {
+open class CompoundText : UIContainer() {
 
     /**
      * The text entity.
@@ -321,21 +326,14 @@ open class CompoundText : UILinearContainer() {
     }
 
 
+    var spacing = 0f
+
     //region Shortcuts
 
-    /**
-     * The text to be displayed.
-     */
     var text by textEntity::text
 
-    /**
-     * The text font.
-     */
     var font by textEntity::font
 
-    /**
-     * The text alignment.
-     */
     var alignment by textEntity::alignment
 
     //endregion
@@ -374,21 +372,72 @@ open class CompoundText : UILinearContainer() {
             }
         }
 
+
+    /**
+     * Which leading icon's size axes should match the text size.
+     */
+    var autoSizeLeadingIcon = Axes.Both
+
+    /**
+     * Which trailing icon's size axes should match the text size.
+     */
+    var autoSizeTrailingIcon = Axes.Both
+
+
     /**
      * Called when one of the icons changes.
      */
     open var onIconChange: (UIComponent) -> Unit = { icon ->
-        icon.width = 28f
-        icon.height = 28f
-        icon.anchor = Anchor.CenterLeft
-        icon.origin = Anchor.CenterLeft
+        val anchor = if (icon === leadingIcon) Anchor.CenterLeft else Anchor.CenterRight
+        icon.anchor = anchor
+        icon.origin = anchor
     }
 
     //endregion
+
+    override fun onContentChanged() {
+        contentWidth = textEntity.contentWidth + (leadingIcon?.let { it.width + spacing } ?: 0f) + (trailingIcon?.let { it.width + spacing } ?: 0f)
+        contentHeight = textEntity.height
+    }
 
 
     init {
         +textEntity
     }
 
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        val leadingIcon = leadingIcon
+        val trailingIcon = trailingIcon
+
+        val iconSize = textEntity.height
+
+        if (leadingIcon != null) {
+            if (autoSizeLeadingIcon.isHorizontal) {
+                leadingIcon.width = iconSize
+            }
+            if (autoSizeLeadingIcon.isVertical) {
+                leadingIcon.height = iconSize
+            }
+        }
+
+        if (trailingIcon != null) {
+            if (autoSizeTrailingIcon.isHorizontal) {
+                trailingIcon.width = iconSize
+            }
+            if (autoSizeTrailingIcon.isVertical) {
+                trailingIcon.height = iconSize
+            }
+        }
+
+
+        val leadingIconSize = leadingIcon?.let { it.width + spacing } ?: 0f
+        val trailingIconSize = trailingIcon?.let { it.width + spacing } ?: 0f
+
+        textEntity.x = leadingIconSize
+        textEntity.width = width - leadingIconSize - trailingIconSize
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
 }

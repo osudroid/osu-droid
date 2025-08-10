@@ -62,9 +62,11 @@ public class Entity implements IEntity {
 
 	private IEntity mParent;
 
+	// BEGIN osu!droid modified: Make these fields protected
 	protected SmartList<IEntity> mChildren;
-	private EntityModifierList mEntityModifiers;
-	private UpdateHandlerList mUpdateHandlers;
+	protected EntityModifierList mEntityModifiers;
+	protected UpdateHandlerList mUpdateHandlers;
+	// END osu!droid modified
 
 	protected float mRed = 1f;
 	protected float mGreen = 1f;

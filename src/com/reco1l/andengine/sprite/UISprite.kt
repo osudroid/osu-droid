@@ -121,6 +121,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         textureRegion.isFlippedHorizontal = flippedHorizontal
 
         blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        invalidateBuffer(BufferInvalidationFlag.Data)
     }
 
 
@@ -141,6 +142,13 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
     override fun beginDraw(gl: GL10) {
         super.beginDraw(gl)
+
+        if (textureRegion == null) {
+            GLHelper.disableTextures(gl)
+            GLHelper.disableTexCoordArray(gl)
+            return
+        }
+
         GLHelper.enableTextures(gl)
         GLHelper.enableTexCoordArray(gl)
     }

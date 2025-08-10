@@ -9,6 +9,11 @@ import com.reco1l.andengine.ui.form.*
 abstract class UIControl<T : Any>(initialValue: T) : UIContainer() {
 
     /**
+     * The key of the control, used for identification in [FormContainer] during submission.
+     */
+    var key: String? = null
+
+    /**
      * The value of the control.
      */
     var value = initialValue

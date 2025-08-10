@@ -2,9 +2,11 @@ package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.rian.osu.mods.*
 import kotlin.reflect.full.createInstance
@@ -41,6 +43,7 @@ class ModMenuToggle(val mod: Mod): UIButton() {
             text {
                 text = mod.name
                 font = ResourceManager.getInstance().getFont("smallFont")
+                buffer = sharedTextCB
             }
 
             text {
@@ -49,6 +52,7 @@ class ModMenuToggle(val mod: Mod): UIButton() {
                 text = mod.description
                 clipToBounds = true
                 alpha = 0.75f
+                buffer = sharedTextCB
             }
         }
 
@@ -80,6 +84,7 @@ class ModMenuToggle(val mod: Mod): UIButton() {
     companion object {
 
         private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
+        private val sharedTextCB = CompoundBuffer(UIText.TextTextureBuffer(256), UIText.TextVertexBuffer(256)).asSharedDynamically()
 
     }
 
