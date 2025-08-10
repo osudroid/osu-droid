@@ -1,12 +1,5 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
 
@@ -33,50 +26,7 @@ public class BassAudioFunc {
      */
     private float frequency;
 
-    /**
-     * Whether the game is currently on focus.
-     */
-    private boolean onFocus;
-
-    /**
-     * The playback buffer length that is used when the game is on focus, in seconds.
-     * <br>
-     * This is pretty low to achieve the smallest latency possible without introducing CPU overhead.
-     */
-    private final float onFocusBufferLength = 0.1f;
-
-    /**
-     * The playback buffer length that is used when the game is not on focus, in seconds.
-     * <br>
-     * This is a lot higher than the value used in {@link #onFocusBufferLength} to reduce CPU usage.
-     */
-    private final float offFocusBufferLength = 0.5f;
-
     public BassAudioFunc() {
-    }
-
-    public void onGameResume() {
-        onFocus = true;
-
-        // Use a lower update period to minimize latency. This results in higher CPU usage, but it is necessary
-        // to provide a smooth gameplay experience.
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
-
-        if (channel != 0) {
-            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocusBufferLength);
-        }
-    }
-
-    public void onGamePause() {
-        onFocus = false;
-
-        // Use a higher update period to reduce CPU usage. Minimum latency is not required here,
-        // only smooth audio playback without stutters.
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 100);
-
-        if (channel != 0) {
-            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, offFocusBufferLength);
-        }
     }
 
     public boolean pause() {
@@ -113,8 +63,7 @@ public class BassAudioFunc {
         setSpeed(speed);
         setAdjustPitch(adjustPitch);
 
-        // Use smaller buffer length on focus for smaller latency.
-        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
+        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, 0.1f);
 
         return true;
     }

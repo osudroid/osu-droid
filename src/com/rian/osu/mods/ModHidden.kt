@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -22,6 +21,9 @@ class ModHidden : ModWithVisibilityAdjustment() {
     override val isRanked
         get() = usesDefaultSettings
 
+    override val scoreMultiplier: Float
+        get() = if (usesDefaultSettings) 1.06f else 1f
+
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModTraceable::class)
 
     /**
@@ -36,7 +38,6 @@ class ModHidden : ModWithVisibilityAdjustment() {
     )
 
     override fun isFirstAdjustableObject(hitObject: HitObject) = hitObject !is Spinner
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = if (usesDefaultSettings) 1.06f else 1f
 
     override fun copySettings(settings: JSONObject) {
         super.copySettings(settings)

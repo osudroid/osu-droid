@@ -1,6 +1,5 @@
 package com.rian.osu.mods
 
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.settings.*
 import org.json.JSONObject
 import kotlin.reflect.*
@@ -84,6 +83,14 @@ sealed class Mod {
     open val isValidForMultiplayerAsFreeMod = true
 
     /**
+     * The score multiplier for this [Mod].
+     *
+     * Note that some [Mod]s may require additional configuration to have a score multiplier (i.e., [ModDifficultyAdjust]
+     * needs [IModRequiresOriginalBeatmap.applyFromBeatmap] to be called first).
+     */
+    open val scoreMultiplier = 1f
+
+    /**
      * The [Mod]s this [Mod] cannot be enabled with. This is merely a static list of [KClass]es that this [Mod] is
      * incompatible with, regardless of the actual instance of the [Mod].
      *
@@ -123,14 +130,6 @@ sealed class Mod {
     open fun isCompatibleWith(other: Mod) =
         incompatibleMods.none { it.isInstance(other) } &&
         other.incompatibleMods.none { it.isInstance(this) }
-
-    /**
-     * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
-     *
-     * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
-     * @return The score multiplier for this [Mod] with the given [BeatmapDifficulty].
-     */
-    open fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1f
 
     /**
      * Serializes this [Mod] into a [JSONObject].

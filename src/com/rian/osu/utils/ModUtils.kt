@@ -126,6 +126,55 @@ object ModUtils {
     /**
      * Calculates the playback rate for the track with the selected [Mod]s at [time].
      *
+     * This is a faster version that uses [Collection.indices] rather than [Iterable.iterator].
+     *
+     * @param mods The list of selected [Mod]s.
+     * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+     * @return The rate with [Mod]s.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateRateWithMods(mods: List<Mod>, time: Double = 0.0): Float {
+        var rate = 1f
+
+        for (i in mods.indices) {
+            val mod = mods[i]
+
+            if (mod is IModApplicableToTrackRate) {
+                rate = mod.applyToRate(time, rate)
+            }
+        }
+
+        return rate
+    }
+
+    /**
+     * Calculates the playback rate for the track with the selected [IModApplicableToTrackRate]s at [time].
+     *
+     * This is a faster version that uses [Collection.indices] rather than [Iterable.iterator].
+     *
+     * @param mods The list of selected [IModApplicableToTrackRate]s.
+     * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+     * @return The rate with [IModApplicableToTrackRate]s.
+     */
+    @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateRateWithTrackRateMods")
+    fun calculateRateWithMods(mods: List<IModApplicableToTrackRate>, time: Double = 0.0): Float {
+        var rate = 1f
+
+        for (i in mods.indices) {
+            val mod = mods[i]
+
+            rate = mod.applyToRate(time, rate)
+        }
+
+        return rate
+    }
+
+    /**
+     * Calculates the playback rate for the track with the selected [Mod]s at [time].
+     *
      * @param mods The list of selected [Mod]s.
      * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
      * @return The rate with [Mod]s.
@@ -150,6 +199,41 @@ object ModUtils {
         mods.fold(1f) { rate, mod ->
             mod.applyToRate(time, rate)
         }
+
+    /**
+     * Calculates the score multiplier for the selected [Mod]s.
+     *
+     * @param mods The selected [Mod]s.
+     * @return The score multiplier.
+     */
+    @JvmStatic
+    fun calculateScoreMultiplier(mods: ModHashMap) =
+        calculateScoreMultiplier(mods.values)
+
+    /**
+     * Calculates the score multiplier for the selected [Mod]s.
+     *
+     * @param mods The selected [Mod]s.
+     * @return The score multiplier.
+     */
+    @JvmStatic
+    fun calculateScoreMultiplier(mods: Iterable<Mod>): Float {
+        // Rate-adjusting mods combine their track rate multipliers together, then bunched together.
+        var totalRateAdjustTrackRateMultiplier = 1f
+        var scoreMultiplier = 1f
+
+        for (mod in mods) {
+            if (mod is ModRateAdjust) {
+                totalRateAdjustTrackRateMultiplier *= mod.trackRateMultiplier
+            } else {
+                scoreMultiplier *= mod.scoreMultiplier
+            }
+        }
+
+        scoreMultiplier *= ModRateAdjustHelper(totalRateAdjustTrackRateMultiplier).scoreMultiplier
+
+        return scoreMultiplier
+    }
 
     /**
      * Applies the selected [Mod]s to a [BeatmapDifficulty].

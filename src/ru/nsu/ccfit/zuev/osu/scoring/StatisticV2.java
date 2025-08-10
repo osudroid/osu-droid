@@ -10,8 +10,10 @@ import com.osudroid.multiplayer.api.data.RoomTeam;
 import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
+import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
+import com.rian.osu.mods.IModRequiresOriginalBeatmap;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
@@ -51,9 +53,9 @@ public class StatisticV2 implements Serializable {
     private int beatmapNoteCount = 0;
     private int beatmapMaxCombo = 0;
     private int bonusScore = 0;
-    private int positiveTotalOffsetSum;
+    private int positiveHitOffsetCount;
     private double positiveHitOffsetSum;
-    private int negativeTotalOffsetSum;
+    private int negativeHitOffsetCount;
     private double negativeHitOffsetSum;
     private double unstableRate;
 
@@ -113,9 +115,11 @@ public class StatisticV2 implements Serializable {
             playerName = params[12];
         }
 
+        sliderTickHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
+        sliderEndHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
-            calculateModScoreMultiplier(originalDifficulty);
         }
     }
 
@@ -523,33 +527,31 @@ public class StatisticV2 implements Serializable {
         // Update hit offset
         if (accuracy >= 0) {
             positiveHitOffsetSum += msAccuracy;
-            positiveTotalOffsetSum++;
+            positiveHitOffsetCount++;
         } else {
             negativeHitOffsetSum += msAccuracy;
-            negativeTotalOffsetSum++;
+            negativeHitOffsetCount++;
         }
 
         // Update unstable rate
         // Reference: https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
-        int totalOffsetSum = positiveTotalOffsetSum + negativeTotalOffsetSum;
+        int hitOffsetCount = positiveHitOffsetCount + negativeHitOffsetCount;
         double hitOffsetSum = positiveHitOffsetSum + negativeHitOffsetSum;
 
-        if (totalOffsetSum > 1) {
-            double avgOffset = hitOffsetSum / totalOffsetSum;
-
+        if (hitOffsetCount > 1) {
             unstableRate = 10 * Math.sqrt(
-                ((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) +
-                    (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum
+                ((hitOffsetCount - 1) * Math.pow(unstableRate / 10, 2) +
+                    (msAccuracy - hitOffsetSum / hitOffsetCount) * (msAccuracy - (hitOffsetSum - msAccuracy) / (hitOffsetCount - 1))) / hitOffsetCount
             );
         }
     }
 
     public double getNegativeHitError() {
-        return negativeTotalOffsetSum == 0 ? 0 : negativeHitOffsetSum / negativeTotalOffsetSum;
+        return negativeHitOffsetCount == 0 ? 0 : negativeHitOffsetSum / negativeHitOffsetCount;
     }
 
     public double getPositiveHitError() {
-        return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
+        return positiveHitOffsetCount == 0 ? 0 : positiveHitOffsetSum / positiveHitOffsetCount;
     }
 
     /**
@@ -605,16 +607,20 @@ public class StatisticV2 implements Serializable {
             hit100,
             hit50,
             misses,
-            time
+            time,
+            sliderTickHits >= 0 ? sliderTickHits : null,
+            sliderEndHits >= 0 ? sliderEndHits : null
         );
     }
 
-    public void calculateModScoreMultiplier(final BeatmapDifficulty originalDifficulty) {
-        modScoreMultiplier = 1;
-
+    public void calculateModScoreMultiplier(final Beatmap beatmap) {
         for (var m : mod.values()) {
-            modScoreMultiplier *= m.calculateScoreMultiplier(originalDifficulty);
+            if (m instanceof IModRequiresOriginalBeatmap requiresOriginalBeatmap) {
+                requiresOriginalBeatmap.applyFromBeatmap(beatmap);
+            }
         }
+
+        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod);
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
@@ -659,9 +665,9 @@ public class StatisticV2 implements Serializable {
         hp = 1;
         mark = null;
         bonusScore = 0;
-        positiveTotalOffsetSum = 0;
+        positiveHitOffsetCount = 0;
         positiveHitOffsetSum = 0;
-        negativeTotalOffsetSum = 0;
+        negativeHitOffsetCount = 0;
         negativeHitOffsetSum = 0;
         unstableRate = 0;
         pp = 0;

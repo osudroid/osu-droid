@@ -9,6 +9,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.rian.osu.mods.*
+import kotlin.reflect.full.createInstance
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuToggle(val mod: Mod): UIButton() {
@@ -60,7 +61,9 @@ class ModMenuToggle(val mod: Mod): UIButton() {
                 ModMenu.removeMod(mod)
                 ResourceManager.getInstance().getSound("check-off")?.play()
             } else {
-                ModMenu.addMod(mod)
+                // Create a new instance in case the mod depends on some state that breaks mod compatibility
+                // when the same instance is used in multiple places (i.e., Difficulty Adjust with Hard Rock).
+                ModMenu.addMod(mod::class.createInstance())
                 ResourceManager.getInstance().getSound("check-on")?.play()
             }
         }

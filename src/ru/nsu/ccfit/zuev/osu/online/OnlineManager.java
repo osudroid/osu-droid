@@ -34,7 +34,7 @@ public class OnlineManager {
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
-    private static final String onlineVersion = "49";
+    private static final String onlineVersion = "52";
 
     public static final OkHttpClient client = new OkHttpClient();
 
@@ -194,6 +194,7 @@ public class OnlineManager {
         post.addParam("filename", beatmap.getFullBeatmapName().trim());
         post.addParam("hash", beatmap.getMD5());
         post.addParam("data", scoreData);
+        post.addParam("version", onlineVersion);
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);

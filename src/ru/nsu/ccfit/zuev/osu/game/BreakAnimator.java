@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.multiplayer.Multiplayer;
@@ -20,7 +21,8 @@ public class BreakAnimator extends GameObject {
     private final Scene scene;
     private final StatisticV2 stat;
     private final Sprite[] arrows = new Sprite[4];
-    private final Rectangle dimRectangle;
+    private Rectangle dimRectangle;
+    private final GameplayHUD hud;
     private float length;
     private float time;
     private UISprite passfail;
@@ -29,11 +31,11 @@ public class BreakAnimator extends GameObject {
     private boolean isbreak = false;
     private boolean over = false;
 
-    public BreakAnimator(final Scene scene, final StatisticV2 stat, Rectangle bgSprite) {
+    public BreakAnimator(final Scene scene, final StatisticV2 stat, GameplayHUD hud) {
         length = 0;
         this.scene = scene;
         this.stat = stat;
-        this.dimRectangle = bgSprite;
+        this.hud = hud;
 
         for (int i = 0; i < 4; i++) {
             arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
@@ -57,6 +59,10 @@ public class BreakAnimator extends GameObject {
                         - Utils.toRes(64),
                 Config.getRES_HEIGHT() - arrows[1].getHeight());
 
+    }
+
+    public void setDimRectangle(Rectangle dimRectangle) {
+        this.dimRectangle = dimRectangle;
     }
 
     public boolean isBreak() {
@@ -84,7 +90,7 @@ public class BreakAnimator extends GameObject {
         passfail.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         passfail.setTextureRegion(ResourceManager.getInstance().getTexture("section-" + ending));
 
-        scene.attachChild(passfail, 0);
+        hud.attachChild(passfail, 0);
         passfail.setVisible(false);
 
         for (int i = 0; i < 4; i++) {
@@ -98,7 +104,7 @@ public class BreakAnimator extends GameObject {
         mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5,
                 ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small"));
         mark.setScale(1.2f);
-        scene.attachChild(mark, 0);
+        hud.attachChild(mark, 0);
     }
 
     private void setBgFade(float percent) {

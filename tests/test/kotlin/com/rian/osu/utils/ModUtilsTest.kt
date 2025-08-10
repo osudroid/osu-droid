@@ -124,4 +124,16 @@ class ModUtilsTest {
 
         test(BeatmapDifficulty(od = 10f), BeatmapDifficulty(od = 10f), GameMode.Droid, ModPrecise())
     }
+
+    @Test
+    fun `Test score multiplier calculation with multiple ModRateAdjust mods`() {
+        val mods = listOf(
+            ModHidden(),
+            ModDoubleTime(),
+            ModCustomSpeed(0.85f),
+            ModPrecise()
+        )
+
+        Assert.assertEquals(1.1977575f, ModUtils.calculateScoreMultiplier(mods), 1e-6f)
+    }
 }

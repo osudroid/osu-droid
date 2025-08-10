@@ -14,6 +14,7 @@ import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
+import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.ui.OsuColors
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.ui.UITextButton
@@ -319,6 +320,11 @@ object ModMenu : UIScene() {
                     selectedBeatmap.mostCommonBPM.roundToInt(),
                     (selectedBeatmap.mostCommonBPM * rate).roundToInt()
                 )
+
+                scoreMultiplierBadge.updateStatisticBadge(
+                    "1.00x",
+                    "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
+                )
             }
 
             ensureActive()
@@ -419,7 +425,7 @@ object ModMenu : UIScene() {
                 continue
             }
 
-            if (!isFreeMod || mod.isValidForMultiplayerAsFreeMod) {
+            if (!isFreeMod || !mod.isValidForMultiplayerAsFreeMod) {
                 addMod(mod)
             }
         }
@@ -452,7 +458,17 @@ object ModMenu : UIScene() {
 
     fun clear() {
         cancelCalculationJob()
-        enabledMods.toList().fastForEach { removeMod(it.second) }
+
+        val room = Multiplayer.room
+
+        enabledMods.toList().fastForEach {
+            // We do not want to remove mods that are used for win conditions in multiplayer.
+            if (room != null && room.winCondition == WinCondition.ScoreV2 && it.second is ModScoreV2) {
+                return@fastForEach
+            }
+
+            removeMod(it.second)
+        }
     }
 
     fun queueModChange(mod: Mod) = synchronized(modChangeQueue) {
@@ -488,18 +504,9 @@ object ModMenu : UIScene() {
             background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
         }
 
-        val beatmap = GlobalManager.getInstance().selectedBeatmap
-        val difficulty = beatmap?.getBeatmapDifficulty()
-
         scoreMultiplierBadge.updateStatisticBadge(
             "1.00x",
-            if (difficulty != null) {
-                "%.2fx".format(enabledMods.values.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                })
-            } else {
-                "1.00x"
-            }
+            "%.2fx".format(ModUtils.calculateScoreMultiplier(enabledMods))
         )
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()

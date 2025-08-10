@@ -28,20 +28,27 @@ object CircleSizeCalculator {
     private const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
 
     /**
+     * The offset used to convert between osu!droid and osu!standard circle sizes.
+     *
+     * `6.8556344386` was derived by converting the old osu!droid gameplay scale unit into osu!pixels (by dividing it
+     * with ([Config.RES_HEIGHT] / 480)) and then fitting the function to the osu!standard scale function. The height in
+     * the old osu!droid gameplay scale function was set to 576, which was chosen after sampling the top 100 most used
+     * devices by players from Firebase. This is done to ensure that the new scale is as close to the old scale as
+     * possible for most players.
+     *
+     * The fitting of both functions can be found under the following [graph](https://www.desmos.com/calculator/rjfxqc3yic).
+     * Note that `6.855634` is used here instead of `6.8556344386` due to single precision floating point limitation.
+     */
+    private const val DROID_STANDARD_CS_OFFSET = 6.855634f
+
+    /**
      * Converts osu!droid circle size to osu!droid scale.
      *
      * @param cs The circle size to convert.
      * @return The calculated osu!droid scale.
      */
     @JvmStatic
-    fun droidCSToDroidScale(cs: Float) =
-        // 6.8556344386 was derived by converting the old osu!droid gameplay scale unit into osu!pixels (by dividing it
-        // with (height / 480)) and then fitting the function to the osu!standard scale function. The height in the old
-        // osu!droid gameplay scale function was set to 576, which was chosen after sampling the top 100 most used
-        // devices by players from Firebase. This is done to ensure that the new scale is as close to the old scale as
-        // possible for most players.
-        // The fitting of both functions can be found under the following graph: https://www.desmos.com/calculator/rjfxqc3yic
-        max(1e-3f, standardCSToStandardScale(cs - 6.8556344386f, true))
+    fun droidCSToDroidScale(cs: Float) = max(1e-3f, standardCSToStandardScale(cs - DROID_STANDARD_CS_OFFSET, true))
 
     /**
      * Converts osu!droid circle size to osu!droid difficulty scale before replay version 7.
@@ -70,7 +77,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid circle size.
      */
     @JvmStatic
-    fun droidScaleToDroidCS(scale: Float) = standardScaleToStandardCS(max(1e-3f, scale), true) + 6.8556344386f
+    fun droidScaleToDroidCS(scale: Float) =standardScaleToStandardCS(max(1e-3f, scale), true) + DROID_STANDARD_CS_OFFSET
 
     /**
      * Converts osu!droid difficulty scale before replay version 7 to osu!droid circle size.

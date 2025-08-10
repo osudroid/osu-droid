@@ -114,7 +114,7 @@ public class SongService extends Service {
 
     public void seekTo(int time) {
         if (audioFunc == null) return;
-        System.out.println(audioFunc.jump(time));
+        Log.i("BASS", "Seeking to " + time + " ms: " + (audioFunc.jump(time) ? "Success" : "Failed"));
     }
 
     public boolean isGaming() {
@@ -200,17 +200,6 @@ public class SongService extends Service {
             return audioFunc.getFrequency();
         }
         return 0f;
-    }
-
-    public void showNotification() {
-        if (this.isGaming) {
-            Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");
-            return;
-        }
-
-        if (audioFunc != null) {
-            audioFunc.onGamePause();
-        }
     }
 
     public boolean checkFileExist(String path) {
