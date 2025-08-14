@@ -1186,6 +1186,7 @@ public class GameplaySlider extends GameObject {
 
             startArrow.setAlpha(1);
         } else {
+            headCirclePiece.clearEntityModifiers();
             headCirclePiece.setAlpha(0);
         }
     }
