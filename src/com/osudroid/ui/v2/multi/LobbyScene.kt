@@ -25,7 +25,7 @@ class LobbyScene : UIScene() {
     private var shouldFetch = true
     private var lastTimeUpdateMillis: Long = 0L
 
-    private var search: String? = null
+    private var searchQuery: String? = null
         set(value) {
             if (field != value) {
                 field = value
@@ -111,7 +111,7 @@ class LobbyScene : UIScene() {
 
                         override fun onValueChanged() {
                             super.onValueChanged()
-                            search = value
+                            searchQuery = value
                         }
 
                     }
@@ -221,7 +221,7 @@ class LobbyScene : UIScene() {
             switchContainers(messageContainer)
             roomContainer.detachChildren()
 
-            val list = LobbyAPI.getRooms(search, SecurityUtils.signRequest(search ?: ""))
+            val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
 
             updateThread {
 
@@ -236,7 +236,7 @@ class LobbyScene : UIScene() {
                         text {
                             font = ResourceManager.getInstance().getFont("smallFont")
                             applyTheme = { color = it.accentColor }
-                            setText(if (search.isNullOrEmpty()) R.string.multiplayer_lobby_no_rooms else R.string.multiplayer_lobby_no_results)
+                            setText(if (searchQuery.isNullOrEmpty()) R.string.multiplayer_lobby_no_rooms else R.string.multiplayer_lobby_no_results)
                         }
                     }
                 } else {

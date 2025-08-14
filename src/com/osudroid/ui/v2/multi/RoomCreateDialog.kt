@@ -31,7 +31,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                     LoadingScreen().show()
 
                     val name = data.getString("name") ?: StringTable.format(R.string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)
-                    val password = data.optString("password")?.takeUnless(String::isBlank)
+                    val password = data.optString("password").takeUnless(String::isBlank)
                     val capacity = data.getDouble("capacity").toInt()
 
                     val beatmap = GlobalManager.getInstance().selectedBeatmap?.let {
