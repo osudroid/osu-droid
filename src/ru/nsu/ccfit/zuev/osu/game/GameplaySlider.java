@@ -914,18 +914,19 @@ public class GameplaySlider extends GameObject {
         // If the slider head is not judged yet
         if (!startHit) {
             float frameOffset = (float) hitOffsetToPreviousFrame() / 1000;
+            double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
 
             if (!autoPlay && canBeHit(dt, frameOffset) && isHit()) {
                 // At this point, the object's state is already in the next update tick.
                 // However, hit judgements require the object's state to be in the previous tick.
                 // Therefore, we subtract dt to get the object's state in the previous tick.
-                onSliderHeadHit(elapsedSpanTime - dt + frameOffset);
-            } else if (!autoPlay && elapsedSpanTime > getLateHitThreshold()) {
+                onSliderHeadHit(elapsedTime - dt + frameOffset);
+            } else if (!autoPlay && completedSpanCount * spanDuration + elapsedSpanTime > getLateHitThreshold()) {
                 // If it's too late, mark this hit missing.
-                onSliderHeadHit(elapsedSpanTime);
+                onSliderHeadHit(elapsedTime);
             } else if (autoPlay && elapsedSpanTime >= 0) {
                 onSliderHeadHit(0);
-            } else if (replayObjectData != null && elapsedSpanTime + dt / 2 > replayObjectData.accuracy / 1000d) {
+            } else if (replayObjectData != null && elapsedTime + dt / 2 > replayObjectData.accuracy / 1000d) {
                 onSliderHeadHit(replayObjectData.accuracy / 1000d);
             }
         }
