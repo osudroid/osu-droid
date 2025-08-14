@@ -782,6 +782,13 @@ public class GameplaySlider extends GameObject {
     }
 
     private void updateTracking(PointF position) {
+        if (!startHit) {
+            // Do not allow tracking to happen when the slider head is not yet judged.
+            isTracking = false;
+            trackingCursorId = -1;
+            return;
+        }
+
         if (autoPlay || replayObjectData != null) {
             trackingCursorId = 0;
             isTracking = true;
