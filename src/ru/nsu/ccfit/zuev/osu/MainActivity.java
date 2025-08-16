@@ -48,7 +48,7 @@ import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
-import com.osudroid.multiplayer.LobbyScene;
+import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
@@ -250,6 +250,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
         ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
         ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
+        ResourceManager.getInstance().loadHighQualityAsset("unlock", "unlock.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
@@ -290,7 +291,6 @@ public class MainActivity extends BaseGameActivity implements
 
         // Initializing this class because they contain fragments in its constructors that should be initialized in
         // main thread because of the Looper.
-        LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
         Execution.async(() -> {
@@ -333,7 +333,7 @@ public class MainActivity extends BaseGameActivity implements
                 }, 0, 100, TimeUnit.MILLISECONDS);
 
                 if (roomInviteLink != null) {
-                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    Multiplayer.connectFromLink(roomInviteLink);
                 } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
@@ -790,8 +790,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
 
                 if (Multiplayer.isMultiplayer) {
-                    if (currentScene == LobbyScene.INSTANCE) {
-                        LobbyScene.INSTANCE.back();
+                    if (currentScene instanceof LobbyScene lobbyScene) {
+                        lobbyScene.back();
                         return true;
                     }
 
