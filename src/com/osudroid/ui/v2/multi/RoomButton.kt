@@ -117,7 +117,8 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
             text {
                 origin = Anchor.TopRight
                 anchor = Anchor.TopRight
-                font = ResourceManager.getInstance().getFont("xs")
+                font = ResourceManager.getInstance().getFont("smallFont")
+                setScale(0.85f)
                 setText(when (room.status) {
                     RoomStatus.ChangingBeatmap -> R.string.multiplayer_room_status_changing_beatmap
                     RoomStatus.Playing -> R.string.multiplayer_room_status_playing
