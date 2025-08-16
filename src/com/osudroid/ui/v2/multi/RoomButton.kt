@@ -91,12 +91,12 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                         setText(R.string.multiplayer_room_free_mods)
                     }
                 }
+            }
 
-                if (room.mods.isNotEmpty()) {
-                    +ModsIndicator().apply {
-                        mods = room.mods.json
-                        iconSize = 24f
-                    }
+            if (room.mods.isNotEmpty()) {
+                +ModsIndicator().apply {
+                    mods = room.mods.json
+                    iconSize = 24f
                 }
             }
         }
