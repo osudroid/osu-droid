@@ -30,18 +30,32 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
         // Override the default background
         applyTheme = {}
 
-        linearContainer {
-            orientation = Orientation.Vertical
-            spacing = 8f
-            inheritAncestorsColor = false
+        container {
+            width = FillParent
 
             linearContainer {
                 orientation = Orientation.Vertical
+                spacing = 8f
+                inheritAncestorsColor = false
 
-                text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    text = room.name
-                    applyTheme = { color = it.accentColor }
+                linearContainer {
+                    spacing = 4f
+
+                    sprite {
+                        origin = Anchor.CenterLeft
+                        anchor = Anchor.CenterLeft
+                        textureRegion = ResourceManager.getInstance().getTexture(if (room.isLocked) "lock" else "unlock")
+                        size = Vec2(20f)
+                        applyTheme = { color = it.accentColor }
+                    }
+
+                    text {
+                        origin = Anchor.CenterLeft
+                        anchor = Anchor.CenterLeft
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        text = room.name
+                        applyTheme = { color = it.accentColor }
+                    }
                 }
 
                 text {
@@ -52,71 +66,53 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                         alpha = 0.95f
                     }
                 }
-            }
 
-            linearContainer {
-                spacing = 8f
+                linearContainer {
+                    spacing = 8f
 
-                badge {
-                    sizeVariant = SizeVariant.Small
-                    setText(when (room.teamMode) {
-                        TeamMode.HeadToHead -> R.string.multiplayer_room_head_to_head
-                        TeamMode.TeamVersus -> R.string.multiplayer_room_team_versus
-                    })
-                }
-
-                badge {
-                    sizeVariant = SizeVariant.Small
-                    setText(when (room.winCondition) {
-                        WinCondition.ScoreV1 -> R.string.multiplayer_room_score_v1
-                        WinCondition.ScoreV2 -> R.string.multiplayer_room_score_v2
-                        WinCondition.HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
-                        WinCondition.MaximumCombo -> R.string.multiplayer_room_maximum_combo
-                    })
-                }
-
-                labeledBadge {
-                    sizeVariant = SizeVariant.Small
-                    label = StringTable.get(R.string.multiplayer_room_players)
-                    value = "${room.players.size}/${room.maxPlayers}"
-                }
-
-                if (room.gameplaySettings.isFreeMod) {
                     badge {
                         sizeVariant = SizeVariant.Small
-                        applyTheme = {
-                            color = it.accentColor * 0.1f
-                            background?.color = it.accentColor
+                        setText(when (room.teamMode) {
+                            TeamMode.HeadToHead -> R.string.multiplayer_room_head_to_head
+                            TeamMode.TeamVersus -> R.string.multiplayer_room_team_versus
+                        })
+                    }
+
+                    badge {
+                        sizeVariant = SizeVariant.Small
+                        setText(when (room.winCondition) {
+                            WinCondition.ScoreV1 -> R.string.multiplayer_room_score_v1
+                            WinCondition.ScoreV2 -> R.string.multiplayer_room_score_v2
+                            WinCondition.HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
+                            WinCondition.MaximumCombo -> R.string.multiplayer_room_maximum_combo
+                        })
+                    }
+
+                    labeledBadge {
+                        sizeVariant = SizeVariant.Small
+                        label = StringTable.get(R.string.multiplayer_room_players)
+                        value = "${room.players.size}/${room.maxPlayers}"
+                    }
+
+                    if (room.gameplaySettings.isFreeMod) {
+                        badge {
+                            sizeVariant = SizeVariant.Small
+                            applyTheme = {
+                                color = it.accentColor * 0.1f
+                                background?.color = it.accentColor
+                            }
+                            setText(R.string.multiplayer_room_free_mods)
                         }
-                        setText(R.string.multiplayer_room_free_mods)
+                    }
+                }
+
+                if (room.mods.isNotEmpty()) {
+                    +ModsIndicator().apply {
+                        mods = room.mods.json
+                        iconSize = 24f
                     }
                 }
             }
-
-            if (room.mods.isNotEmpty()) {
-                +ModsIndicator().apply {
-                    mods = room.mods.json
-                    iconSize = 24f
-                }
-            }
-        }
-
-        linearContainer {
-            width = FillParent
-
-            if (room.isLocked) {
-                sprite {
-                    textureRegion = ResourceManager.getInstance().getTexture("lock")
-                    size = Vec2(24f, 24f)
-                    anchor = Anchor.TopRight
-                    origin = Anchor.TopRight
-                }
-            }
-        }
-
-        container {
-            width = FillParent
-            height = FillParent
 
             text {
                 anchor = Anchor.BottomRight
