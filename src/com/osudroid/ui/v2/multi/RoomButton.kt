@@ -114,6 +114,23 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
             }
         }
 
+        container {
+            width = FillParent
+            height = FillParent
+
+            text {
+                anchor = Anchor.BottomRight
+                origin = Anchor.BottomRight
+
+                font = ResourceManager.getInstance().getFont("xs")
+                setText(when (room.status) {
+                    RoomStatus.ChangingBeatmap -> R.string.multiplayer_room_status_changing_beatmap
+                    RoomStatus.Playing -> R.string.multiplayer_room_status_playing
+                    else -> R.string.multiplayer_room_status_idle
+                })
+                applyTheme = { color = it.accentColor }
+            }
+        }
 
         onActionUp = {
             if (room.isLocked) {

@@ -25,6 +25,9 @@
     <string name="multiplayer_room_players">Players</string>
     <string name="multiplayer_room_score_v1">Score V1</string>
     <string name="multiplayer_room_score_v2">Score V2</string>
+    <string name="multiplayer_room_status_idle">Idle</string>
+    <string name="multiplayer_room_status_changing_beatmap">Changing beatmap</string>
+    <string name="multiplayer_room_status_playing">Playing</string>
     <string name="multiplayer_room_highest_accuracy">Highest accuracy</string>
     <string name="multiplayer_room_maximum_combo">Maximum combo</string>
     <string name="multiplayer_room_no_players">No players</string>
