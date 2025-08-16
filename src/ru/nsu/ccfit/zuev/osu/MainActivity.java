@@ -250,6 +250,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
         ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
         ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
+        ResourceManager.getInstance().loadHighQualityAsset("unlock", "unlock.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
