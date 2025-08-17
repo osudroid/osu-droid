@@ -91,7 +91,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                     labeledBadge {
                         sizeVariant = SizeVariant.Small
                         label = StringTable.get(R.string.multiplayer_room_players)
-                        value = "${room.players.size}/${room.maxPlayers}"
+                        value = "${room.playerCount}/${room.maxPlayers}"
                     }
 
                     if (room.gameplaySettings.isFreeMod) {
