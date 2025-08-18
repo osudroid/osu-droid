@@ -595,7 +595,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
-                (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class)));
+                (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class) || mods.contains(ModOldNightCore.class)));
 
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
@@ -877,7 +877,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameHelper.setHardRock(lastMods.ofType(ModHardRock.class));
         GameHelper.setDoubleTime(lastMods.ofType(ModDoubleTime.class));
-        GameHelper.setNightCore(lastMods.ofType(ModNightCore.class));
+        GameHelper.setNightCore(lastMods.contains(ModNightCore.class) ? lastMods.ofType(ModNightCore.class) : lastMods.ofType(ModOldNightCore.class));
         GameHelper.setHalfTime(lastMods.ofType(ModHalfTime.class));
         GameHelper.setHidden(lastMods.ofType(ModHidden.class));
         GameHelper.setTraceable(lastMods.ofType(ModTraceable.class));
