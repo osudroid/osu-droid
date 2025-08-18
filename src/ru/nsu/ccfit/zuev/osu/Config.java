@@ -11,7 +11,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
@@ -145,7 +144,7 @@ public class Config {
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
 
         try {
-            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
+            offset = prefs.getInt("offset", 0);
             backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
