@@ -10,7 +10,7 @@ package com.rian.osu.mods
  * represented by this mod.
  */
 class ModOldNightCore : ModNightCore() {
-    init { trackRateMultiplier = 1.39f }
+    init { trackRateMultiplier = 44.1f * 1.5f / 48 }
 
     // Force the score multiplier to be 1.12x, as it was the value used in the old versions (due to 1.5x rate).
     override val scoreMultiplier = 1.12f
