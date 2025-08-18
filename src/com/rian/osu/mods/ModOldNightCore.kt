@@ -1,7 +1,5 @@
 package com.rian.osu.mods
 
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
-
 /**
  * Represents the "old" [ModNightCore].
  *
