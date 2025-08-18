@@ -210,6 +210,7 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     private fun onValueChange(value: String?) {
 
         val wasBlocking = shouldDisableDependents()
+        val previousValue = this.value
 
         this.value = value
         persistString(value)
@@ -223,8 +224,10 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             notifyDependencyChange(isBlocking)
         }
 
-        onPreferenceChangeListener?.onPreferenceChange(this, value)
-        notifyChanged()
+        if (previousValue != value) {
+            onPreferenceChangeListener?.onPreferenceChange(this, value)
+            notifyChanged()
+        }
     }
 
 
