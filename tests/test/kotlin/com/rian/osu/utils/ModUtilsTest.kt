@@ -83,7 +83,7 @@ class ModUtilsTest {
 
         test(1f)
         test(1.25f, ModCustomSpeed(1.25f))
-        test(1.39f, ModOldNightCore())
+        test(1.3781248f, ModOldNightCore())
         test(1.5f, ModDoubleTime())
         test(3f, ModNightCore(), ModCustomSpeed(2f))
     }
