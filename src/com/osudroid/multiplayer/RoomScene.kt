@@ -30,8 +30,10 @@ import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.*
+import com.osudroid.ui.v2.multi.*
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.runSafe
@@ -629,7 +631,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         runSafe { RoomAPI.disconnect() }
         clear()
-        LobbyScene.show()
+        ExtendedEngine.Current.scene = LobbyScene()
     }
 
     fun show() {

@@ -27,10 +27,12 @@ object UpdateManager: IFileRequestObserver
     fun onActivityStart() = mainThread {
 
         val activity = GlobalManager.getInstance().mainActivity
-        val version = Config.getLong("version", 0)
+
+        // -1 indicates the first run of the game.
+        val version = Config.getLong("version", -1)
 
         // Ignoring debug because otherwise every compiled build will show the dialog.
-        if (!BuildConfig.DEBUG && version < activity.versionCode) {
+        if (!BuildConfig.DEBUG && version != -1L && version < activity.versionCode) {
 
             MessageDialog()
                 .setTitle(StringTable.get(R.string.update_info_updated))
@@ -54,10 +56,9 @@ object UpdateManager: IFileRequestObserver
                 }
                 .addButton("No", clickListener = MessageDialog::dismiss)
                 .show()
-
-            Config.setLong("version", activity.versionCode)
         }
 
+        Config.setLong("version", activity.versionCode)
         checkNewUpdates(true)
     }
 

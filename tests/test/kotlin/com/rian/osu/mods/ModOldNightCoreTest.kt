@@ -8,6 +8,6 @@ class ModOldNightCoreTest {
     fun `Test track rate multiplier`() {
         val mod = ModOldNightCore()
 
-        assertEquals(1.39f, mod.trackRateMultiplier)
+        assertEquals(1.3781248f, mod.trackRateMultiplier)
     }
 }

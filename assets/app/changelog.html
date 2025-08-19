@@ -22,6 +22,40 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.7
+===============
+
+# Bug Fixes
+
+- Fix multiplayer room player count always showing a full room in multiplayer lobby <span style="font-size: 0.75em">by [Acivev](https://github.com/acivev)</span>
+- Fix textures being unloaded from game engine when it is still used by UI components <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when attempting to change top skin directory for the second time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+Version 1.8.4.6
+===============
+
+# Changes
+
+- Allow device screen to dim when the game is in foreground <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Redesign multiplayer lobby UI <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Reduce playfield size by 5% <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This brings playfield size inline with what osu!pixels represent (that is, 80% of 640x480 resolution, which is 512x384).
+  - This change will make hitobjects smaller, but by such a small fraction that it would not be noticeable to players.
+- Update Translations.
+
+# Bug Fixes
+
+- Various corrections to game engine <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fix ScoreV2 mod being clearable in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix free mods being added to players when free mod is active if the host selects them <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix Custom Speed mod track rate multiplier defaulting to the selected track rate instead of 1 when selected from a mod preset <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix mods retaining state from the previous time they were selected <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix hit sample addition bank defaulting to normal bank if it is not specified <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider tracking activating when the slider head is not yet judged <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider late hit check and hit offset bugging out when the slider's span is shorter than the late hit threshold <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider head circle potentially not disappearing when the slider is tapped too early <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix update dialog showing up when running the game for the first time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4.5
 ===============
 

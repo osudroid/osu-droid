@@ -6,7 +6,7 @@ import com.rian.osu.utils.ModUtils
 import org.json.JSONArray
 import org.json.JSONException
 
-class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(ModUtils.deserializeMods(json)) {
+class RoomMods @JvmOverloads constructor(val json: JSONArray? = null) : ModHashMap(ModUtils.deserializeMods(json)) {
 
     @Throws(JSONException::class)
     constructor(str: String) : this(JSONArray(str))

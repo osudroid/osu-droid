@@ -31,6 +31,16 @@
             android:title="@string/opt_offset_title"
             app:min="-500"
             app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="gameAudioSynchronizationThreshold"
+            android:min="0"
+            android:max="100"
+            android:title="@string/opt_gameAudioSynchronizationThreshold_title"
+            android:summary="@string/opt_gameAudioSynchronizationThreshold_summary"
+            app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar_bottom" />
 
     </PreferenceCategory>

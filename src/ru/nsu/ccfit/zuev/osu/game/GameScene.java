@@ -597,7 +597,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
-                (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class)));
+                (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class) || mods.contains(ModOldNightCore.class)));
 
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
@@ -901,7 +901,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameHelper.setHardRock(lastMods.ofType(ModHardRock.class));
         GameHelper.setDoubleTime(lastMods.ofType(ModDoubleTime.class));
-        GameHelper.setNightCore(lastMods.ofType(ModNightCore.class));
+        GameHelper.setNightCore(lastMods.contains(ModNightCore.class) ? lastMods.ofType(ModNightCore.class) : lastMods.ofType(ModOldNightCore.class));
         GameHelper.setHalfTime(lastMods.ofType(ModHalfTime.class));
         GameHelper.setHidden(lastMods.ofType(ModHidden.class));
         GameHelper.setTraceable(lastMods.ofType(ModTraceable.class));
@@ -2974,12 +2974,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                     float audioElapsedTime = songService.getPosition() / 1000f;
                     float gameElapsedTime = elapsedTime - totalOffset;
+                    float timeDifference = gameElapsedTime - audioElapsedTime;
 
                     // In some cases, the audio can be behind the gameplay time so far it would cause gameplay to
                     // completely desynchronize. In that case, we do not let gameplay progress at all until the audio
                     // catches up.
-                    if (gameElapsedTime - audioElapsedTime <= 0.1f) {
-                        dt = audioElapsedTime - gameElapsedTime;
+                    if (timeDifference <= 0.1f) {
+                        int minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime();
+                        // Sync gameplay with audio if the difference is too large.
+                        if (timeDifference >=  minimumSynchronizationTime/ 1000f) {
+                            if (minimumSynchronizationTime > 0) {
+                                Log.i("GameScene",
+                                        "Synchronizing gameplay time with audio time at " +
+                                        audioElapsedTime +
+                                        "s audio time and " +
+                                        gameElapsedTime +
+                                        "s gameplay time. Difference: " + timeDifference + "s");
+                            }
+                            dt = -timeDifference;
+                        }
                     } else {
                         minDt = 0;
                         dt = 0;

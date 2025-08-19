@@ -11,8 +11,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import com.edlplan.framework.math.FMath;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +82,8 @@ public class Config {
     private static int RES_WIDTH,
         RES_HEIGHT,
         spinnerStyle,
-        metronomeSwitch;
+        metronomeSwitch,
+        minimumGameplaySynchronizationTime;
 
     private static float soundVolume,
         bgmVolume,
@@ -142,7 +141,7 @@ public class Config {
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
 
         try {
-            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
+            offset = prefs.getInt("offset", 0);
             backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
@@ -741,6 +740,9 @@ public class Config {
         return getBoolean("displayPlayfieldBorder", false);
     }
 
+    public static int getMinimumGameplaySynchronizationTime() {
+        return minimumGameplaySynchronizationTime;
+    }
 
     // Shared Preferences
     // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.

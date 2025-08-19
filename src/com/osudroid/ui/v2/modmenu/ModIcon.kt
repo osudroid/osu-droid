@@ -23,12 +23,13 @@ import javax.microedition.khronos.opengles.*
  */
 class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
+    private var shouldUpdateTexture = true
+
     constructor(acronym: String): this(ModUtils.allModsInstances.find { it.acronym.equals(acronym, ignoreCase = true) }!!)
 
 
     init {
         inheritAncestorsColor = false
-        onSkinChanged()
     }
 
 
@@ -49,34 +50,42 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
         super.onManagedDraw(gl, camera)
     }
 
-    override fun onSkinChanged() = updateThread {
-        detachChildren()
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (shouldUpdateTexture) {
+            detachChildren()
 
-        val texture = fetchTextureRegion()
+            val texture = fetchTextureRegion()
 
-        if (texture == null) {
-            background = UIBox().apply {
-                applyTheme = { color = it.accentColor * 0.1f }
+            if (texture != null) {
+                background = null
+
+                attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
+                    width = FillParent
+                    height = FillParent
+                    buffer = sharedSpriteVBO
+                })
+            } else {
+                background = UIBox().apply {
+                    applyTheme = { color = it.accentColor * 0.1f }
+                }
+
+                attachChild(UIText().apply {
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    text = mod.acronym
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    applyTheme = { color = it.accentColor }
+                })
             }
 
-            attachChild(UIText().apply {
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                text = mod.acronym
-                font = ResourceManager.getInstance().getFont("smallFont")
-                applyTheme = { color = it.accentColor }
-            })
-
-            return@updateThread
+            shouldUpdateTexture = false
         }
 
-        background = null
+        super.onManagedUpdate(deltaTimeSec)
+    }
 
-        attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
-            width = FillParent
-            height = FillParent
-            buffer = sharedSpriteVBO
-        })
+    override fun onSkinChanged() {
+        shouldUpdateTexture = true
     }
 
 
