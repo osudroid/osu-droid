@@ -33,5 +33,7 @@
     <string name="multiplayer_room_no_players">No players</string>
     <string name="multiplayer_room_free_mods">Free mods</string>
 
+    <string name="opt_gameAudioSynchronizationThreshold_title">Minimum Synchronization Limit</string>
+    <string name="opt_gameAudioSynchronizationThreshold_summary">Configure the minimum time difference (in milliseconds) between gameplay and audio for gameplay to attempt to synchronize with audio. A lower limit increases the frequency of the syncing attempt</string>
 
 </resources>

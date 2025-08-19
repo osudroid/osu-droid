@@ -86,7 +86,8 @@ public class Config {
     private static int RES_WIDTH,
         RES_HEIGHT,
         spinnerStyle,
-        metronomeSwitch;
+        metronomeSwitch,
+        minimumGameplaySynchronizationTime;
 
     private static float soundVolume,
         bgmVolume,
@@ -766,6 +767,9 @@ public class Config {
         return getBoolean("displayPlayfieldBorder", false);
     }
 
+    public static int getMinimumGameplaySynchronizationTime() {
+        return minimumGameplaySynchronizationTime;
+    }
 
     // Shared Preferences
     // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.
