@@ -947,13 +947,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomMatchAbort() {
         val global = GlobalManager.getInstance()
+        val scene = global.engine.scene
         val gameScene = global.gameScene
 
-        if (global.engine.scene != gameScene.scene) {
-            return
+        if (scene is GameLoaderScene) {
+            show()
         }
 
-        gameScene.quit()
+        if (scene == gameScene.scene) {
+            gameScene.quit()
+        }
+
         ToastLogger.showText("Match was aborted by the room host.", true)
     }
 
