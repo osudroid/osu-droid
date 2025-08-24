@@ -34,7 +34,7 @@
             app:layout="@layout/settings_preference_seekbar" />
 
         <SeekBarPreference
-            android:defaultValue="0"
+            android:defaultValue="20"
             android:key="gameAudioSynchronizationThreshold"
             android:min="0"
             android:max="100"
