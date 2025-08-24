@@ -610,26 +610,16 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onResume() {
         super.onResume();
+        activityVisible = true;
 
         if (mEngine == null) {
             return;
         }
 
-        activityVisible = true;
-
         var gameScene = GlobalManager.getInstance().getGameScene();
-        var mainScene = GlobalManager.getInstance().getMainScene();
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             mEngine.getTextureManager().reloadTextures();
-        }
-
-        if (mainScene != null && songService != null) {
-            mainScene.loadBeatmapInfo();
-            mainScene.loadTimingPoints(false);
-            mainScene.progressBar.setTime(songService.getLength());
-            mainScene.progressBar.setPassedTime(songService.getPosition());
-            mainScene.musicControl(MainScene.MusicOption.SYNC);
         }
     }
 
