@@ -234,7 +234,7 @@ object Multiplayer {
 
             val gameScene = GlobalManager.getInstance().gameScene
 
-            if (gameScene != null && GlobalManager.getInstance().engine.scene == gameScene.scene) {
+            if (gameScene != null && GlobalManager.getInstance().engine.scene != gameScene.scene) {
                 RoomScene.back()
             }
         }
