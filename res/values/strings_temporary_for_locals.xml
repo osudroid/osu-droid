@@ -34,6 +34,6 @@
     <string name="multiplayer_room_free_mods">Free mods</string>
 
     <string name="opt_gameAudioSynchronizationThreshold_title">Minimum Synchronization Limit</string>
-    <string name="opt_gameAudioSynchronizationThreshold_summary">Configure the minimum time difference (in milliseconds) between gameplay and audio for gameplay to attempt to synchronize with audio. A lower limit increases the frequency of the syncing attempt</string>
+    <string name="opt_gameAudioSynchronizationThreshold_summary">The minimum time difference (in milliseconds) between gameplay and audio for gameplay to attempt to synchronize with audio.\n\nA lower limit increases the frequency of the syncing attempt. If constant offset is preferred, use a higher limit.</string>
 
 </resources>

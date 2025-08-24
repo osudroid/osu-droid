@@ -22,13 +22,50 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+Version 1.8.4.9
+===============
+
+# Additions
+
+- Add option to modify gameplay syncing threshold <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This setting can be found under `Audio` → `Offset` section in settings menu.
+  - This setting allows players to configure the minimum time difference (in milliseconds) between gameplay and audio
+    for gameplay to attempt to synchronize with audio. Useful for those who prefer a constant offset over constant
+    syncing attempts.
+  - A lower limit increases the frequency of the syncing attempt. If constant offset is preferred, use a higher limit.
+
+# Changes
+
+- Slightly reduce NightCore track rate multiplier for replays set before version 1.6.8 to match actual value <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - The effect of this change should not be noticeable and will only result in very miniscule star rating and
+    performance points differences for affected scores.
+- Do not display multiplayer lobby if the player fails to reconnect to the server during a multiplayer gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This brings the disconnection behavior similar to when the player is kicked by the room host.
+  - It also allows the player to continue playing regardless of the failure, especially since solo score submission is
+    still supported in multiplayer (provided that they did not fail).
+
+# Bug Fixes
+
+- Fix pitch adjust not working for replays with NightCore mod set before version 1.6.8 <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix global offset being capped at ±250ms despite setting allowing ±500ms <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix mods not displaying in multiplayer result screen <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when changing mods under free mod in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix selected beatmap being changed unexpectedly when tabbing out and in from the game <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay UI components still displaying when the player disconnects unexpectedly from multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+Version 1.8.4.8
+===============
+
+# Bug Fixes
+
+- Fix textures being unloaded from game engine when it is still used by UI components <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4.7
 ===============
 
 # Bug Fixes
 
 - Fix multiplayer room player count always showing a full room in multiplayer lobby <span style="font-size: 0.75em">by [Acivev](https://github.com/acivev)</span>
-- Fix textures being unloaded from game engine when it is still used by UI components <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix a crash when attempting to change top skin directory for the second time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 Version 1.8.4.6

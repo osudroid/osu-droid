@@ -407,7 +407,7 @@ object ModMenu : UIScene() {
 
     fun setMods(mods: RoomMods, isFreeMod: Boolean) {
         if (isFreeMod) {
-            for (mod in enabledMods.values) {
+            for ((_, mod) in enabledMods.toList()) {
                 if (mod.isValidForMultiplayerAsFreeMod) {
                     continue
                 }

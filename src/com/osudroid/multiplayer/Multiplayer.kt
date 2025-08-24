@@ -231,7 +231,12 @@ object Multiplayer {
             isReconnecting = false
 
             ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
-            RoomScene.back()
+
+            val gameScene = GlobalManager.getInstance().gameScene
+
+            if (gameScene != null && GlobalManager.getInstance().engine.scene != gameScene.scene) {
+                RoomScene.back()
+            }
         }
 
         isWaitingAttemptResponse = false
