@@ -642,6 +642,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             }
         }
 
+        GlobalManager.getInstance().engine.camera.hud = null
+
         if (!isConnected) {
             back()
             return
