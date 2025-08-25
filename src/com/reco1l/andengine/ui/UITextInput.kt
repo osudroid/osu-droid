@@ -69,6 +69,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     init {
         height = 48f
         padding = Vec4(12f, 0f)
+        caretPosition = value.length
 
         +textEntity
         +caret
