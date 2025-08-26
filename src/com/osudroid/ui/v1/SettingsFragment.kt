@@ -423,7 +423,7 @@ class SettingsFragment : SettingsFragment() {
 
     private fun handleInputSectionPreferences() {
         findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
-            BlockAreaFragment().show(true)
+            BlockAreaEditorFragment().show()
             true
         }
 

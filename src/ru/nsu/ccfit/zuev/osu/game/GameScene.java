@@ -41,7 +41,6 @@ import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDPPCounter;
-import com.osudroid.ui.v1.BlockAreaFragment;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
 
@@ -303,9 +302,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     /**Last score data chunk sent to server, used to determine if the data was changed.*/
     private ScoreBoardItem lastScoreSent = null;
-
-    /**The block area manager fragment used to manage the block area.*/
-    private BlockAreaFragment blockAreaFragment;
 
 
     public GameScene(final Engine engine) {
@@ -1098,9 +1094,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.setScene(scene);
         engine.getCamera().setHUD(hud.getParent());
 
-        blockAreaFragment = new BlockAreaFragment();
-        blockAreaFragment.show(false);
-
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
         }
@@ -1563,11 +1556,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
             resetPlayfieldSizeScale();
 
-            if (blockAreaFragment != null) {
-                blockAreaFragment.dismiss();
-                blockAreaFragment = null;
-            }
-
             if (scoringScene != null && !startedFromHUDEditor) {
                 if (replaying)
                     scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayPath, null, lastBeatmapInfo);
@@ -1783,12 +1771,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void quit() {
-
-        if (blockAreaFragment != null) {
-            blockAreaFragment.dismiss();
-            blockAreaFragment = null;
-        }
-
         // Handle input back in update thread
         var touchOptions = new TouchOptions();
         touchOptions.setRunOnUpdateThread(true);
@@ -2355,10 +2337,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             removeAllCursors();
         }
 
-        if (blockAreaFragment != null) {
-            blockAreaFragment.dismiss();
-        }
-
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
@@ -2387,11 +2365,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
             quit();
             return;
-        }
-
-        if (blockAreaFragment != null) {
-            blockAreaFragment.dismiss();
-            blockAreaFragment = null;
         }
 
         stopLoopingSamples();
@@ -2513,11 +2486,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (!paused) {
             return;
         }
-
-        if (blockAreaFragment == null) {
-            blockAreaFragment = new BlockAreaFragment();
-        }
-        blockAreaFragment.show();
 
         scene.setIgnoreUpdate(false);
         hud.getParent().getChildScene().back();
