@@ -61,7 +61,6 @@ public class OsuDroidReplayPack {
             replayData.put("misses", scoreInfo.getMisses());
             replayData.put("accuracy", scoreInfo.getAccuracy());
             replayData.put("time", scoreInfo.getTime());
-            replayData.put("beatmapMD5", scoreInfo.getSliderEndHits());
 
             var sliderTickHits = scoreInfo.getSliderTickHits();
             var sliderEndHits = scoreInfo.getSliderEndHits();
