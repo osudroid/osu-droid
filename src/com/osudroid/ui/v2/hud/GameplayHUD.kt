@@ -130,7 +130,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             .addButton(StringTable.get(string.hudEditor_modal_reset)) {
                 it.dismiss()
                 updateThread {
-                    setSkinData(HUDSkinData.Companion.Default)
+                    setSkinData(HUDSkinData.Default)
                     ToastLogger.showText(string.hudEditor_reset, true)
                 }
             }
@@ -160,7 +160,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             json = SkinJsonReader.getReader().currentData
         }
 
-        json.put("HUD", HUDSkinData.Companion.writeToJSON(data))
+        json.put("HUD", HUDSkinData.writeToJSON(data))
         jsonFile.writeText(json.toString(4))
 
         SkinJsonReader.getReader().currentData = json
@@ -189,7 +189,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // applying default layout.
         layoutData.elements.forEach { data -> addElement(data) }
 
-        if (layoutData == HUDSkinData.Companion.Default) {
+        if (layoutData == HUDSkinData.Default) {
             applyDefaultLayout()
         }
     }

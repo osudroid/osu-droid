@@ -40,12 +40,12 @@ object DifficultyCalculationManager {
     @JvmStatic
     fun checkForOutdatedStarRatings(): CompletableFuture<Unit> = stopCalculation().thenApply {
         preferences.apply {
-            if (getLong("starRatingVersion", 0) >= DifficultyCalculator.Companion.VERSION) {
+            if (getLong("starRatingVersion", 0) >= DifficultyCalculator.VERSION) {
                 return@apply
             }
 
             DatabaseManager.beatmapInfoTable.resetStarRatings()
-            edit().putLong("starRatingVersion", DifficultyCalculator.Companion.VERSION).apply()
+            edit().putLong("starRatingVersion", DifficultyCalculator.VERSION).apply()
         }
     }
 
