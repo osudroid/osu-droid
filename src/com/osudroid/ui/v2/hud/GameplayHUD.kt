@@ -8,6 +8,7 @@ import com.reco1l.andengine.container.UIContainer
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.ExtendedEngine
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
@@ -67,7 +68,19 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // The engine expects the HUD to be an instance of AndEngine's HUD class.
         // Since we need Container features, we set an HUD instance as the parent, and we just need to
         // reference the parent of this container to set the engine's HUD.
-        val parent = HUD()
+        val parent = object : HUD() {
+            override fun onManagedUpdate(pSecondsElapsed: Float) {
+                val engine = ExtendedEngine.Current
+
+                if (engine.scene != GlobalManager.getInstance().gameScene?.scene) {
+                    engine.camera.hud = null
+                    return
+                }
+
+                super.onManagedUpdate(pSecondsElapsed)
+            }
+        }
+
         parent.attachChild(this)
         parent.camera = GlobalManager.getInstance().engine.camera
 

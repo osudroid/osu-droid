@@ -820,7 +820,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         GameLoaderScene scene = new GameLoaderScene(this, beatmapToUse, modsToUse, isRestart);
-        engine.getCamera().setHUD(null);
         engine.setScene(scene);
 
         ResourceManager.getInstance().getSound("failsound").stop();
@@ -1568,7 +1567,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             scene = createMainScene();
-            engine.getCamera().setHUD(null);
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             timingControlPoints.clear();
@@ -1833,7 +1831,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         onExit();
         resetPlayfieldSizeScale();
         scene = createMainScene();
-        engine.getCamera().setHUD(null);
 
         if (Multiplayer.isMultiplayer)
         {
