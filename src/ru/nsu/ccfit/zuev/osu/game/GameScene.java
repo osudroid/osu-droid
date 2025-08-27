@@ -4,6 +4,7 @@ import static kotlinx.coroutines.JobKt.ensureActive;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import kotlin.Unit;
@@ -239,6 +240,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * Whether the game started in HUD editor mode.
      */
     public boolean startedFromHUDEditor = false;
+
+    /**
+     * Areas where input from the player is blocked.
+     */
+    private final ArrayList<Scene.ITouchArea> blockAreas = new ArrayList<>();
 
 
     // Timing
@@ -1001,6 +1007,36 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(flashlightSprite, 0);
         }
 
+        // Since block areas are saved in device pixels, we need to map them to scaled pixels.
+        final var displayMetrics = new DisplayMetrics();
+        GlobalManager.getInstance().getMainActivity().getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+
+        final float ratio = (float) Config.getRES_WIDTH() / displayMetrics.widthPixels;
+        blockAreas.clear();
+
+        for (final var area : DatabaseManager.getBlockAreaTable().getAll()) {
+            var areaBox = new UIBox() {
+                {
+                    setCornerRadius(2f);
+                    setColor(30f / 255f, 30f / 255f, 41f / 255f);
+                    setAlpha(0.15f);
+
+                    setPosition(
+                        Interpolation.linear(0f, area.getX(), ratio),
+                        Interpolation.linear(0f, area.getY(), ratio)
+                    );
+
+                    setSize(
+                        Interpolation.linear(0f, area.getWidth(), ratio),
+                        Interpolation.linear(0f, area.getHeight(), ratio)
+                    );
+                }
+            };
+
+            blockAreas.add(areaBox);
+            scene.attachChild(areaBox, 0);
+        }
+
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
@@ -1742,6 +1778,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 effectControlPoints.clear();
             }
             breakPeriods.clear();
+            blockAreas.clear();
             playableBeatmap = null;
             cursorSprites = null;
             lastMods = null;
@@ -2202,6 +2239,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var id = event.getPointerID();
         if (id < 0 || id >= getCursorsCount()) {
             return false;
+        }
+
+        if (event.isActionDown()) {
+            for (int i = 0, size = blockAreas.size(); i < size; ++i) {
+                if (blockAreas.get(i).contains(event.getX(), event.getY())) {
+                    return false;
+                }
+            }
         }
 
         var cursor = cursors[id];
