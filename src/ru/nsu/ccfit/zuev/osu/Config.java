@@ -266,8 +266,8 @@ public class Config {
         Activity activity = (Activity) context;
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        int width = displayMetrics.widthPixels;
-        int height = displayMetrics.heightPixels;
+        int width = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        int height = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
 
         // Tries to emulate the original behavior, the game was designed for 1280x720
         // resolution, so we try to approximate the scale factor.
