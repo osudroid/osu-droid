@@ -18,6 +18,7 @@ import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osuplus.*
 import kotlin.coroutines.cancellation.CancellationException
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
 class LobbyScene : UIScene() {
 
@@ -206,7 +207,28 @@ class LobbyScene : UIScene() {
         }
         isFetching = true
 
-        fetchScope.launch {
+        fetchScope.launch(CoroutineExceptionHandler { _, throwable ->
+            Log.e("LobbyScene", "Error fetching multiplayer rooms", throwable)
+
+            ToastLogger.showText(
+                StringTable.format(R.string.multiplayer_lobby_fetch_error_toast, throwable.message),
+                true
+            )
+
+            updateThread {
+                messageContainer.apply {
+                    detachChildren()
+
+                    text {
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        applyTheme = { color = it.accentColor }
+                        setText(R.string.multiplayer_lobby_fetch_error)
+                    }
+                }
+            }
+
+            isFetching = false
+        }) {
 
             messageContainer.apply {
                 detachChildren()

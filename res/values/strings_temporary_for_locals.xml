@@ -14,6 +14,8 @@
     <string name="multiplayer_lobby_refresh">Refresh</string>
     <string name="multiplayer_lobby_no_rooms">No rooms available, create a new one!</string>
     <string name="multiplayer_lobby_no_results">No results found for the current search.</string>
+    <string name="multiplayer_lobby_fetch_error_toast">Failed to obtain rooms: %s</string>
+    <string name="multiplayer_lobby_fetch_error">Failed to obtain rooms</string>
     <string name="multiplayer_lobby_room_name">Room name</string>
     <string name="multiplayer_lobby_room_password">Room password</string>
     <string name="multiplayer_lobby_room_capacity">Room capacity</string>
