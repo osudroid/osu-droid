@@ -2290,6 +2290,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.addPress(eventTime, gamePoint, id);
             }
 
+            cursorIIsDown[id] = true;
         } else if (event.isActionMove()) {
 
             if (sprite != null) {
