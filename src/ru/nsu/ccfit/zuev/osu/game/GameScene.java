@@ -128,7 +128,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
-    public static final int CursorCount = 3;
+    public static final int CursorCount = 10;
     private final Engine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     private boolean[] cursorIIsDown = new boolean[CursorCount];
@@ -2245,6 +2245,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (event.isActionDown()) {
+            final int maximumActiveCursorCount = 3;
+            int activeCursorCount = 0;
+
+            for (int i = 0; i < cursors.length; ++i) {
+                if (activeCursorCount >= maximumActiveCursorCount) {
+                    break;
+                }
+
+                if (cursors[i].mouseDown) {
+                    ++activeCursorCount;
+                }
+            }
+
+            if (activeCursorCount >= maximumActiveCursorCount) {
+                return false;
+            }
+
             for (int i = 0, size = blockAreas.size(); i < size; ++i) {
                 if (blockAreas.get(i).contains(event.getX(), event.getY())) {
                     return false;
