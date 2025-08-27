@@ -2264,7 +2264,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             for (int i = 0, size = blockAreas.size(); i < size; ++i) {
                 if (blockAreas.get(i).contains(event.getX(), event.getY())) {
-                    return false;
+                    return true;
                 }
             }
         }
@@ -2308,7 +2308,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             cursorIIsDown[id] = true;
-        } else if (event.isActionMove()) {
+        } else if (cursor.mouseDown && event.isActionMove()) {
 
             if (sprite != null) {
                 sprite.setShowing(true);
@@ -2319,7 +2319,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.addMove(eventTime, gamePoint, id);
             }
 
-        } else if (event.isActionUp()) {
+        } else if (cursor.mouseDown && event.isActionUp()) {
 
             if (sprite != null) {
                 sprite.setShowing(false);
