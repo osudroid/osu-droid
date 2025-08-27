@@ -1007,34 +1007,37 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(flashlightSprite, 0);
         }
 
-        // Since block areas are saved in device pixels, we need to map them to scaled pixels.
-        final var displayMetrics = new DisplayMetrics();
-        GlobalManager.getInstance().getMainActivity().getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
-
-        final float ratio = (float) Config.getRES_WIDTH() / displayMetrics.widthPixels;
         blockAreas.clear();
 
-        for (final var area : DatabaseManager.getBlockAreaTable().getAll()) {
-            var areaBox = new UIBox() {
-                {
-                    setCornerRadius(2f);
-                    setColor(30f / 255f, 30f / 255f, 41f / 255f);
-                    setAlpha(0.15f);
+        if (!replaying && !GameHelper.isAutoplay()) {
+            // Since block areas are saved in device pixels, we need to map them to scaled pixels.
+            final var displayMetrics = new DisplayMetrics();
+            GlobalManager.getInstance().getMainActivity().getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-                    setPosition(
-                        Interpolation.linear(0f, area.getX(), ratio),
-                        Interpolation.linear(0f, area.getY(), ratio)
-                    );
+            final float ratio = (float) Config.getRES_WIDTH() / displayMetrics.widthPixels;
 
-                    setSize(
-                        Interpolation.linear(0f, area.getWidth(), ratio),
-                        Interpolation.linear(0f, area.getHeight(), ratio)
-                    );
-                }
-            };
+            for (final var area : DatabaseManager.getBlockAreaTable().getAll()) {
+                var areaBox = new UIBox() {
+                    {
+                        setCornerRadius(2f);
+                        setColor(30f / 255f, 30f / 255f, 41f / 255f);
+                        setAlpha(0.15f);
 
-            blockAreas.add(areaBox);
-            scene.attachChild(areaBox, 0);
+                        setPosition(
+                            Interpolation.linear(0f, area.getX(), ratio),
+                            Interpolation.linear(0f, area.getY(), ratio)
+                        );
+
+                        setSize(
+                            Interpolation.linear(0f, area.getWidth(), ratio),
+                            Interpolation.linear(0f, area.getHeight(), ratio)
+                        );
+                    }
+                };
+
+                blockAreas.add(areaBox);
+                scene.attachChild(areaBox, 0);
+            }
         }
 
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
