@@ -22,6 +22,37 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
+[insert version here]
+===============
+
+# Changes
+
+- Prevent screen from dimming during gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Dimming during gameplay can cause distractions and unexpected behavior (e.g., when watching a replay or a beatmap
+    with the Autoplay mod).
+- Hide input block areas when watching a replay or using the Autoplay mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - The player cannot interact with hitobjects in these modes, so the input block areas are unnecessary.
+
+# Bug Fixes
+
+- Fix text input caret position not being in the expected position when an initial value is provided <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This effect can be seen in the multiplayer room creation dialog, where the caret position for room name is at the
+    start instead of the end.
+- Fix exported replay JSON erroneously overriding beatmap MD5 hash <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This caused exported replays to be unusable when importing them back to the game.
+- Fix game potentially starting in a weird width/height setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Players who are affected by this bug may see the game starting at the left corner of their screen with a stretched
+    aspect ratio.
+- Fix input block area preventing input on the entire screen when an active input is in an area <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This meant that whenever a player touched an input block area, they would not be able to interact with anything else
+    on the screen until they released the touch. They would see input drops whenever this happens.
+- Fix cursor count limitation being affected by inputs in input block area <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - If the player has an input in an input block area, it would count towards the 3 cursor limit, meaning they would
+    only be able to put 2 more fingers on the screen. They would see input drops whenever this happens.
+- Fix cursor down state for remove slider lock setting not being updated when a press occurs <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This caused the setting to not work as expected.
+- Fix a crash when the game fails to load multiplayer room list in multiplayer lobby <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.4.9
 ===============
 
