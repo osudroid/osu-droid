@@ -284,40 +284,28 @@ public class BeatmapSetItem {
     }
 
     private boolean visibleBeatmap(BeatmapInfo beatmapInfo, String key, String opt, String value) {
-        switch (key) {
-            case "ar":
-                return calOpt(beatmapInfo.getApproachRate(), Float.parseFloat(value), opt);
-            case "od":
-                return calOpt(beatmapInfo.getOverallDifficulty(), Float.parseFloat(value), opt);
-            case "cs":
-                return calOpt(beatmapInfo.getCircleSize(), Float.parseFloat(value), opt);
-            case "hp":
-                return calOpt(beatmapInfo.getHpDrainRate(), Float.parseFloat(value), opt);
-            case "droidstar":
-                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.droid), Float.parseFloat(value), opt);
-            case "standardstar":
-            case "star":
-                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.standard), Float.parseFloat(value), opt);
-            default:
-                return false;
-        }
+        return switch (key) {
+            case "ar" -> calOpt(beatmapInfo.getApproachRate(), Float.parseFloat(value), opt);
+            case "od" -> calOpt(beatmapInfo.getOverallDifficulty(), Float.parseFloat(value), opt);
+            case "cs" -> calOpt(beatmapInfo.getCircleSize(), Float.parseFloat(value), opt);
+            case "hp" -> calOpt(beatmapInfo.getHpDrainRate(), Float.parseFloat(value), opt);
+            case "droidstar" ->
+                calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.droid), Float.parseFloat(value), opt);
+            case "standardstar", "star" ->
+                calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.standard), Float.parseFloat(value), opt);
+            default -> false;
+        };
     }
 
     private boolean calOpt(float val1, float val2, String opt) {
-        switch (opt) {
-            case "=":
-                return val1 == val2;
-            case "<":
-                return val1 < val2;
-            case ">":
-                return val1 > val2;
-            case "<=":
-                return val1 <= val2;
-            case ">=":
-                return val1 >= val2;
-            default:
-                return false;
-        }
+        return switch (opt) {
+            case "=" -> val1 == val2;
+            case "<" -> val1 < val2;
+            case ">" -> val1 > val2;
+            case "<=" -> val1 <= val2;
+            case ">=" -> val1 >= val2;
+            default -> false;
+        };
     }
 
     public void delete() {
