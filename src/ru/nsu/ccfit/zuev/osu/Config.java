@@ -54,6 +54,7 @@ public class Config {
         animateFollowCircle,
         animateComboText,
         snakingInSliders,
+        snakingOutSliders,
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
@@ -143,6 +144,7 @@ public class Config {
         animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
         animateComboText = prefs.getBoolean("animateComboText", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
+        snakingOutSliders = prefs.getBoolean("snakingOutSliders", true);
 
         try {
             offset = prefs.getInt("offset", 0);
@@ -462,7 +464,7 @@ public class Config {
     }
 
     public static boolean isSnakingOutSliders() {
-        return getBoolean("snakingOutSliders", true);
+        return snakingOutSliders;
     }
 
     public static boolean isPlayMusicPreview() {
