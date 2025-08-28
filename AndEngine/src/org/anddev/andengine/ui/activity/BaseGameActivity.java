@@ -232,6 +232,23 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		this.setContentView(this.mRenderSurfaceView, this.createSurfaceViewLayoutParams());
 	}
 
+    // BEGIN osu!droid modified: Method to reapply wake lock outside of onResume/onPause
+    /**
+     * Reapplies {@link WakeLock} based on {@link EngineOptions#getWakeLockOptions()} if this
+     * {@link BaseGameActivity} is not paused and has window focus.
+     */
+    public void reapplyWakeLock() {
+        if (this.mEngine == null) {
+            return;
+        }
+
+        if (!this.mPaused && this.mHasWindowFocused) {
+            this.releaseWakeLock();
+            this.acquireWakeLock(this.mEngine.getEngineOptions().getWakeLockOptions());
+        }
+    }
+    // END osu!droid modified
+
 	private void acquireWakeLock(final WakeLockOptions pWakeLockOptions) {
 		if(pWakeLockOptions == WakeLockOptions.SCREEN_ON) {
 			ActivityUtils.keepScreenOn(this);
