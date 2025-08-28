@@ -76,6 +76,7 @@ import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
+import org.anddev.andengine.engine.options.WakeLockOptions;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
@@ -1129,6 +1130,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         touchOptions.setRunOnUpdateThread(false);
         engine.getTouchController().applyTouchOptions(touchOptions);
 
+        // Disable screen dimming
+        engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_BRIGHT);
+        GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
+
         engine.setScene(scene);
         engine.getCamera().setHUD(hud.getParent());
 
@@ -1626,6 +1631,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             touchOptions.setRunOnUpdateThread(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
+            // Enable screen dimming
+            engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
+            GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
+
             if (video != null) {
                 video.release();
                 video = null;
@@ -1813,6 +1822,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var touchOptions = new TouchOptions();
         touchOptions.setRunOnUpdateThread(true);
         engine.getTouchController().applyTouchOptions(touchOptions);
+
+        // Enable screen dimming
+        engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
+        GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
 
         if (storyboardSprite != null) {
             storyboardSprite.detachSelf();
