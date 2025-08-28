@@ -160,6 +160,10 @@ public class BeatmapSetItem {
     }
 
     public void select() {
+        select(true);
+    }
+
+    public void select(boolean reloadBG) {
         if (!listener.get().isSelectAllowed() || scene == null) {
             return;
         }
@@ -170,7 +174,7 @@ public class BeatmapSetItem {
         initBeatmaps();
         percentAppeared = 0;
 
-        selectBeatmap(beatmapItems[0], true);
+        selectBeatmap(beatmapItems[0], reloadBG);
         beatmapItems[0].setSelectedColor();
     }
 

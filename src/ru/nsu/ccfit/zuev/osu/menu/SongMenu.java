@@ -767,7 +767,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         if (selectedItem != null && !selectedItem.isVisible()) {
             selectedItem = null;
-            selectedBeatmap = null;
         }
     }
 
@@ -1604,7 +1603,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 if (item == null || !item.isVisible()) continue;
                 int beatmapId = item.tryGetCorrespondingBeatmapId(beatmapFilename);
                 if (beatmapId >= 0) {
-                    item.select();
+                    item.select(false);
                     if (beatmapId != 0) {
                         item.selectBeatmap(item.getBeatmapSpritesById(beatmapId), false);
                     }
