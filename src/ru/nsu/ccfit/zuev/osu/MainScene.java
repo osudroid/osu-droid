@@ -120,7 +120,7 @@ public class MainScene implements IUpdateHandler {
     private float menuBarX = 0;
 
     private MainMenu menu;
-
+    private UIConfirmDialog exitDialog;
 
     public void load(Context context) {
         this.context = context;
@@ -949,14 +949,22 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        UIConfirmDialog dialog = new UIConfirmDialog();
-        dialog.setTitle("Exit");
-        dialog.setText(context.getString(com.osudroid.resources.R.string.dialog_exit_message));
-        dialog.setOnConfirm(() -> {
+        if (exitDialog != null || isOnExitAnim) {
+            return;
+        }
+
+        exitDialog = new UIConfirmDialog();
+        exitDialog.setTitle("Exit");
+        exitDialog.setText(context.getString(com.osudroid.resources.R.string.dialog_exit_message));
+        exitDialog.setOnConfirm(() -> {
             exit();
             return null;
         });
-        dialog.show();
+        exitDialog.setOnCancel(() -> {
+            exitDialog = null;
+            return null;
+        });
+        exitDialog.show();
     }
 
     public void exit() {
