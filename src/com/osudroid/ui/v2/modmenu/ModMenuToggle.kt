@@ -68,10 +68,10 @@ class ModMenuToggle(val mod: Mod): UIButton() {
             }
         }
 
-        updateEnabledState()
+        updateVisibility()
     }
 
-    fun updateEnabledState() {
+    fun updateVisibility() {
         isVisible = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
             mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
                     (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))

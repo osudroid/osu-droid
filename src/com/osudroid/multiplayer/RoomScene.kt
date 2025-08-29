@@ -823,7 +823,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         updateThread {
             ModMenu.back(false)
-            ModMenu.updateModButtonEnabledState()
+            ModMenu.updateModButtonVisibility()
         }
 
         playerList!!.invalidate()
@@ -864,7 +864,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             ModMenu.back(false)
 
             if (wasFreeMod != settings.isFreeMod) {
-                ModMenu.updateModButtonEnabledState()
+                ModMenu.updateModButtonVisibility()
             }
         }
 

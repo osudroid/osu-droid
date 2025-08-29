@@ -372,7 +372,7 @@ object ModMenu : UIScene() {
         modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
         // Ensure mods that can be enabled by the user are displayed.
-        updateModButtonEnabledState()
+        updateModButtonVisibility()
 
         // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
         parseBeatmap()
@@ -449,11 +449,11 @@ object ModMenu : UIScene() {
             removeMod(ModScoreV2())
         }
 
-        updateModButtonEnabledState()
+        updateModButtonVisibility()
     }
 
-    fun updateModButtonEnabledState() {
-        modToggles.fastForEach { it.updateEnabledState() }
+    fun updateModButtonVisibility() {
+        modToggles.fastForEach { it.updateVisibility() }
     }
 
     fun clear() {
