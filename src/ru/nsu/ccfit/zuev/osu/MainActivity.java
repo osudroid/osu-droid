@@ -800,6 +800,13 @@ public class MainActivity extends BaseGameActivity implements
                     }
 
                     GlobalManager.getInstance().getEngine().setScene(songMenu.getScene());
+
+                    var selectedBeatmap = songMenu.getSelectedBeatmap();
+
+                    if (selectedBeatmap != null) {
+                        songMenu.playMusic(selectedBeatmap.getAudioPath(), selectedBeatmap.getPreviewTime());
+                    }
+
                     return true;
                 }
 
