@@ -295,7 +295,7 @@ object ModMenu : UIScene() {
                 return@scope
             }
 
-            modToggles.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+            enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
                 ensureActive()
                 mod.applyFromBeatmap(beatmap)
             }
