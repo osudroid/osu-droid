@@ -76,6 +76,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
 
         init {
             width = FillParent
+            alignment = Anchor.CenterLeft
             content.textEntity.clipToBounds = true
             onActionUp = {
                 if (isExpanded) {
@@ -205,6 +206,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
 
                 init {
                     width = FillParent
+                    alignment = Anchor.CenterLeft
                     text = option.text
                     color = option.color
                     leadingIcon = option.leadingIcon
