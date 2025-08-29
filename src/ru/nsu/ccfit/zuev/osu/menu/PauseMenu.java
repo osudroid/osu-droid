@@ -9,6 +9,7 @@ import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -27,8 +28,14 @@ public class PauseMenu implements IOnMenuItemClickListener {
     private final boolean fail;
     private boolean replaySaved;
 
-    public PauseMenu(final Engine engine, final GameScene game,
-                     final boolean fail) {
+    // MenuScene handles touch events differently from what is used across the game.
+    // Normally, an item should only be selected on touch down, but MenuScene also selects it on touch move with no way
+    // of canceling it.
+    // Rationale of addressing it here instead of directly in MenuScene is to avoid engine changes whenever possible.
+    private boolean itemSelected;
+    private float initialSelectX, initialSelectY;
+
+    public PauseMenu(final Engine engine, final GameScene game, final boolean fail) {
         this.game = game;
         this.fail = fail;
         replaySaved = false;
@@ -39,6 +46,20 @@ public class PauseMenu implements IOnMenuItemClickListener {
 
                 // Intercept touch event to prevent it from being passed to the game scene during pause.
                 return true;
+            }
+
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, ITouchArea pTouchArea, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    itemSelected = true;
+                    initialSelectX = pTouchAreaLocalX;
+                    initialSelectY = pTouchAreaLocalY;
+                } else if (pSceneTouchEvent.isActionMove() && itemSelected &&
+                        MathUtils.distance(initialSelectX, initialSelectY, pTouchAreaLocalX, pTouchAreaLocalY) > 50) {
+                    itemSelected = false;
+                }
+
+                return super.onAreaTouched(pSceneTouchEvent, pTouchArea, pTouchAreaLocalX, pTouchAreaLocalY);
             }
 
             @Override
@@ -94,6 +115,9 @@ public class PauseMenu implements IOnMenuItemClickListener {
     public boolean onMenuItemClicked(final MenuScene pMenuScene,
                                      final IMenuItem pMenuItem, final float pMenuItemLocalX,
                                      final float pMenuItemLocalY) {
+        if (!itemSelected) {
+            return false;
+        }
 
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
