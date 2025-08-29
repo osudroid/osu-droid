@@ -491,8 +491,8 @@ object ModMenu : UIScene() {
     }
 
     private fun onModsChanged() = synchronized(modChangeQueue) {
-
-        val isRanked = enabledMods.isEmpty() || enabledMods.none { !it.value.isRanked }
+        val enabledMods = enabledMods.values.toList()
+        val isRanked = enabledMods.isEmpty() || enabledMods.none { !it.isRanked }
 
         rankedBadge.apply {
             text = if (isRanked) "Ranked" else "Unranked"
@@ -502,6 +502,11 @@ object ModMenu : UIScene() {
 
             background!!.clearEntityModifiers()
             background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
+        }
+
+        modToggles.fastForEach {
+            it.hasIncompatibility =
+                if (!it.isSelected) enabledMods.any { m -> !it.mod.isCompatibleWith(m) } else false
         }
 
         scoreMultiplierBadge.updateStatisticBadge(
