@@ -3066,7 +3066,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (timeDifference <= 0.1f) {
                         int minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime();
                         // Sync gameplay with audio if the difference is too large.
-                        if (timeDifference >=  minimumSynchronizationTime/ 1000f) {
+                        if (timeDifference >=  minimumSynchronizationTime / 1000f) {
                             if (minimumSynchronizationTime > 0) {
                                 Log.i("GameScene",
                                         "Synchronizing gameplay time with audio time at " +

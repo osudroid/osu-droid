@@ -227,6 +227,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
+        minimumGameplaySynchronizationTime = prefs.getInt("gameAudioSynchronizationThreshold", 20);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
