@@ -27,7 +27,7 @@ public class BreakAnimator extends GameObject {
     private float time;
     private UISprite passfail;
     private String ending;
-    private Sprite mark = null;
+    private UISprite mark = null;
     private boolean isbreak = false;
     private boolean over = false;
 
@@ -101,8 +101,9 @@ public class BreakAnimator extends GameObject {
 
         final TextureRegion zeroRect = ResourceManager.getInstance()
                 .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
-        mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5,
-                ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small"));
+
+        mark = new UISprite(getRankingTexture());
+        mark.setPosition(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5);
         mark.setScale(1.2f);
         hud.attachChild(mark, 0);
     }
@@ -119,6 +120,9 @@ public class BreakAnimator extends GameObject {
         }
     }
 
+    private TextureRegion getRankingTexture() {
+        return ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small");
+    }
 
     @Override
     public void update(final float dt) {
@@ -156,6 +160,8 @@ public class BreakAnimator extends GameObject {
             } else if (time >= 0.5f && time - dt < 0.5f)
                 setBgFade(1);
         }
+
+        mark.setTextureRegion(getRankingTexture());
 
         if (time >= length) {
             isbreak = false;
