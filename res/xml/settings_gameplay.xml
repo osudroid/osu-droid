@@ -83,11 +83,21 @@
             app:min="50"
             app:showSeekBarValue="true" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="shrinkPlayfieldDownwards"
-            android:summary="@string/opt_shrink_playfield_downwards_summary"
-            android:title="@string/opt_shrink_playfield_downwards_title" />
+        <SeekBarPreference
+            android:defaultValue="50"
+            android:key="playfieldHorizontalPosition"
+            android:max="100"
+            android:title="@string/opt_playfieldHorizontalPosition_title"
+            android:summary="@string/opt_playfieldHorizontalPosition_summary"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="50"
+            android:key="playfieldVerticalPosition"
+            android:max="100"
+            android:title="@string/opt_playfieldVerticalPosition_title"
+            android:summary="@string/opt_playfieldVerticalPosition_summary"
+            app:showSeekBarValue="true" />
 
         <CheckBoxPreference
             android:defaultValue="false"

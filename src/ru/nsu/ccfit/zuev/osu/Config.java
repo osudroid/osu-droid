@@ -57,7 +57,6 @@ public class Config {
         snakingOutSliders,
         playMusicPreview,
         showCursor,
-        shrinkPlayfieldDownwards,
         enableExtension,
         loadAvatar,
         stayOnline,
@@ -95,6 +94,8 @@ public class Config {
         offset,
         backgroundBrightness,
         playfieldSize,
+        playfieldHorizontalPosition,
+        playfieldVerticalPosition,
         cursorSize;
 
     private static Map<String, String> skins;
@@ -139,8 +140,9 @@ public class Config {
 
         measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
+        playfieldHorizontalPosition = prefs.getInt("playfieldHorizontalPosition", 50) / 100f;
+        playfieldVerticalPosition = prefs.getInt("playfieldVerticalPosition", 50) / 100f;
 
-        shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
         animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
         animateComboText = prefs.getBoolean("animateComboText", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
@@ -652,12 +654,12 @@ public class Config {
         Config.playfieldSize = playfieldSize;
     }
 
-    public static boolean isShrinkPlayfieldDownwards() {
-        return shrinkPlayfieldDownwards;
+    public static float getPlayfieldHorizontalPosition() {
+        return playfieldHorizontalPosition;
     }
 
-    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards) {
-        Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
+    public static float getPlayfieldVerticalPosition() {
+        return playfieldVerticalPosition;
     }
 
     public static boolean isHideReplayMarquee() {

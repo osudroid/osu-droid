@@ -3102,11 +3102,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         float playfieldSize = Config.getPlayfieldSize();
+        float playfieldHorizontalPosition = Config.getPlayfieldHorizontalPosition();
+        float playfieldVerticalPosition = Config.getPlayfieldVerticalPosition();
 
         camera.setZoomFactorDirect(playfieldSize);
-        if (Config.isShrinkPlayfieldDownwards()) {
-            camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f * playfieldSize);
-        }
+
+        camera.setCenterDirect(
+            Config.getRES_WIDTH() * Interpolation.linear(
+                Interpolation.linear(0f, 0.5f, playfieldSize),
+                Interpolation.linear(1f, 0.5f, playfieldSize),
+                1 - playfieldHorizontalPosition
+            ),
+            Config.getRES_HEIGHT() * Interpolation.linear(
+                Interpolation.linear(0f, 0.5f, playfieldSize),
+                Interpolation.linear(1f, 0.5f, playfieldSize),
+                1 - playfieldVerticalPosition
+            )
+        );
     }
 
     private void resetPlayfieldSizeScale() {
@@ -3115,8 +3127,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         camera.setZoomFactorDirect(1f);
-        if (Config.isShrinkPlayfieldDownwards()) {
-            camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
-        }
+        camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
     }
 }

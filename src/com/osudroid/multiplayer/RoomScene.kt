@@ -637,9 +637,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         (GlobalManager.getInstance().camera as SmoothCamera).apply {
             setZoomFactorDirect(1f)
-            if (Config.isShrinkPlayfieldDownwards()) {
-                setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f)
-            }
+            setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f)
         }
 
         if (!isConnected) {
