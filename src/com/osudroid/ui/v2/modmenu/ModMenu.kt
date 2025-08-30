@@ -453,7 +453,10 @@ object ModMenu : UIScene() {
     }
 
     fun updateModButtonVisibility() {
-        modToggles.fastForEach { it.updateVisibility() }
+        modToggles.fastForEach {
+            it.updateVisibility()
+            it.applyCompatibilityState()
+        }
     }
 
     fun clear() {

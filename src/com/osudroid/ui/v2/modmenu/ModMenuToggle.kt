@@ -22,10 +22,7 @@ class ModMenuToggle(val mod: Mod): UIButton() {
         set(value) {
             if (field != value) {
                 field = value
-
-                // Intentionally not using isEnabled here, otherwise the button will not be clickable.
-                clearModifiers(ModifierType.Alpha)
-                fadeTo(if (value) 0.5f else 1f, 0.2f)
+                applyCompatibilityState()
             }
         }
 
@@ -94,6 +91,11 @@ class ModMenuToggle(val mod: Mod): UIButton() {
         }
     }
 
+    fun applyCompatibilityState() {
+        // Intentionally not using isEnabled here, otherwise the button will not be clickable.
+        clearModifiers(ModifierType.Alpha)
+        fadeTo(if (hasIncompatibility) 0.5f else 1f, 0.2f)
+    }
 
     companion object {
 
