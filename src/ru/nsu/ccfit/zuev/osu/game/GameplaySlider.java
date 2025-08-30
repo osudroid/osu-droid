@@ -444,6 +444,16 @@ public class GameplaySlider extends GameObject {
         }
 
         if (percentage >= 1) {
+            PointF previousPoint = getAbsolutePathPosition(path.anchorCount - 2);
+
+            if (updateBallAngle) {
+                ballAngle = MathUtils.radToDeg(Utils.direction(previousPoint.x, previousPoint.y, pathEndPosition.x, pathEndPosition.y));
+            }
+
+            if (updateEndArrowRotation) {
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
+            }
+
             tmpPoint.set(pathEndPosition);
             return tmpPoint;
         }
