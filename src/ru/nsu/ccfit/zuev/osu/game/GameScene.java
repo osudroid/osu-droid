@@ -137,6 +137,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private UIScene scene;
     private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
+    private UIBox sceneBorder;
+    private Shape beatmapBackground;
     private Beatmap parsedBeatmap;
     private DroidPlayableBeatmap playableBeatmap;
     private BeatmapInfo lastBeatmapInfo;
@@ -185,13 +187,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
 
+    @Nullable
+    private Job storyboardLoadingJob;
     private StoryboardSprite storyboardSprite;
-
     private ProxySprite storyboardOverlayProxy;
 
     public HitWindow hitWindow;
 
-    private Job loadingJob;
+    private Job gameLoadingJob;
     private ModHashMap lastMods;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
@@ -217,12 +220,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * Whether the game is ready to start.
      */
     public boolean isReadyToStart = false;
-
-    /**
-     * The current background loading job.
-     */
-    @Nullable
-    private Job backgroundLoadingJob;
 
 
     // UI
@@ -280,6 +277,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     // Video support
 
+    /**
+     * The current video loading {@link Job}.
+     */
+    @Nullable
+    private Job videoLoadingJob;
+
     /**The video sprite*/
     private UIVideoSprite video;
 
@@ -330,33 +333,26 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         oldScene = oscene;
     }
 
-    private void loadBackground(BeatmapInfo beatmapInfo) {
-        dimRectangle = null;
-        videoStarted = false;
-        videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
+    private void loadBackground() {
+        if (dimRectangle != null) {
+            dimRectangle.detachSelf();
+            dimRectangle = null;
+        }
 
-        var previousVideo = video;
-        video = null;
+        if (sceneBorder != null) {
+            sceneBorder.detachSelf();
+            sceneBorder = null;
+        }
 
-        // This is used instead of getBackgroundBrightness to directly obtain the
-        // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
-        float playfieldSize = Config.getPlayfieldSize();
+        if (storyboardSprite != null) {
+            storyboardSprite.detachSelf();
+            storyboardSprite = null;
+        }
 
-        if (Config.isDisplayPlayfieldBorder() && playfieldSize < 1f) {
-            var sceneBorder = new UIBox() {
-                {
-                    setAnchor(Anchor.Center);
-                    setOrigin(Anchor.Center);
-                    setPaintStyle(PaintStyle.Outline);
-                    setLineWidth(5f);
-                    setColor(1f, 1f, 1f);
-                    setAlpha(Interpolation.linear(0.2f, 0.8f, brightness));
-                    setSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                }
-            };
-
-            scene.attachChild(sceneBorder, 0);
+        if (video != null) {
+            video.release();
+            video.detachSelf();
+            video = null;
         }
 
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null
@@ -372,87 +368,147 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
             ComponentsKt.setColor4(rectangle, backgroundColor);
 
-            applyBackground(rectangle, brightness);
+            beatmapBackground = rectangle;
         } else {
-            applyBackground(new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion), brightness);
-        }
-
-        // Storyboard and video are loaded asynchronously.
-        boolean isStoryboardEnabled = Config.getBoolean("enableStoryboard", false);
-        boolean isVideoEnabled = Config.getBoolean("enableVideo", false) && playableBeatmap.getEvents().videoFilename != null;
-
-        if (brightness > 0.02f && (isStoryboardEnabled || isVideoEnabled)) {
-
-            if (backgroundLoadingJob != null) {
-                backgroundLoadingJob.cancel(new CancellationException("Background loading job cancelled"));
-                backgroundLoadingJob = null;
-            }
-
-            backgroundLoadingJob = Execution.async(scope -> {
-
-                boolean videoLoaded = false;
-
-                if (isVideoEnabled) {
-
-                    if (previousVideo != null) {
-                        previousVideo.release();
-                    }
-
-                    try {
-                        video = new UIVideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
-                        video.setAlpha(0f);
-
-                        ensureActive(scope.getCoroutineContext());
-                        applyBackground(video, brightness);
-
-                        videoLoaded = true;
-                    } catch (Exception e) {
-                        video = null;
-                        Log.e("GameScene", "Error while loading video background.", e);
-                    }
-                }
-
-                if (isStoryboardEnabled) {
-
-                    StoryboardSprite storyboardSprite = this.storyboardSprite;
-                    this.storyboardSprite = null;
-
-                    if (storyboardSprite != null) {
-                        storyboardSprite.detachSelf();
-                    } else {
-                        storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                        ensureActive(scope.getCoroutineContext());
-                    }
-                    scene.attachChild(storyboardSprite, 0);
-
-                    ProxySprite storyboardOverlayProxy = this.storyboardOverlayProxy;
-                    this.storyboardOverlayProxy = null;
-
-                    if (storyboardOverlayProxy != null) {
-                        storyboardOverlayProxy.detachSelf();
-                    } else {
-                        storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT()));
-                        ensureActive(scope.getCoroutineContext());
-                    }
-
-                    storyboardSprite.setTransparentBackground(videoLoaded);
-                    storyboardSprite.setBrightness(brightness);
-                    storyboardSprite.loadStoryboard(beatmapInfo.getPath());
-                    ensureActive(scope.getCoroutineContext());
-
-                    scene.attachChild(storyboardOverlayProxy, scene.getChildIndex(fgScene));
-
-                    this.storyboardSprite = storyboardSprite;
-                    this.storyboardOverlayProxy = storyboardOverlayProxy;
-                }
-
-                ensureActive(scope.getCoroutineContext());
-                backgroundLoadingJob = null;
-            });
+            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion);
         }
     }
 
-    private void applyBackground(Shape background, float brightness) {
+    public void loadStoryboard(BeatmapInfo beatmapInfo) {
+        if (storyboardSprite != null) {
+            return;
+        }
+
+        // This is used instead of getBackgroundBrightness to directly obtain the
+        // updated value from the brightness slider.
+        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
+
+        if (!isStoryboardEnabled) {
+            cancelStoryboardLoading();
+            return;
+        }
+
+        if (storyboardLoadingJob != null && !storyboardLoadingJob.isCompleted()) {
+            return;
+        }
+
+        storyboardLoadingJob = Execution.async(scope -> {
+            StoryboardSprite storyboardSprite = this.storyboardSprite;
+            this.storyboardSprite = null;
+
+            if (storyboardSprite != null) {
+                storyboardSprite.detachSelf();
+            } else {
+                storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                ensureActive(scope.getCoroutineContext());
+            }
+
+            ProxySprite storyboardOverlayProxy = this.storyboardOverlayProxy;
+            this.storyboardOverlayProxy = null;
+
+            if (storyboardOverlayProxy != null) {
+                storyboardOverlayProxy.detachSelf();
+            } else {
+                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT()));
+                ensureActive(scope.getCoroutineContext());
+            }
+
+            storyboardSprite.setTransparentBackground(video != null);
+            storyboardSprite.loadStoryboard(beatmapInfo.getPath());
+            ensureActive(scope.getCoroutineContext());
+
+            this.storyboardSprite = storyboardSprite;
+            this.storyboardOverlayProxy = storyboardOverlayProxy;
+
+            // The storyboard may only load after gameplay is started, in which case we must apply it immediately.
+            Execution.updateThread(this::applyBackground);
+
+            storyboardLoadingJob = null;
+        });
+    }
+
+    private void cancelStoryboardLoading() {
+        if (storyboardLoadingJob != null) {
+            storyboardLoadingJob.cancel(new CancellationException("Storyboard loading job cancelled"));
+            storyboardLoadingJob = null;
+        }
+    }
+
+    public void loadVideo(BeatmapInfo beatmapInfo) {
+        if (video != null) {
+            return;
+        }
+
+        // This is used instead of getBackgroundBrightness to directly obtain the
+        // updated value from the brightness slider.
+        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        var videoFilename = playableBeatmap.getEvents().videoFilename;
+        boolean isVideoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
+
+        if (!isVideoEnabled) {
+            cancelVideoLoading();
+            return;
+        }
+
+        if (videoLoadingJob != null && !videoLoadingJob.isCompleted()) {
+            return;
+        }
+
+        videoLoadingJob = Execution.async(scope -> {
+            try {
+                var video = new UIVideoSprite(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename, engine);
+                video.setAlpha(0f);
+
+                ensureActive(scope.getCoroutineContext());
+
+                this.video = video;
+
+                // The video may only load after gameplay is started, in which case we must apply it immediately.
+                Execution.updateThread(this::applyBackground);
+            } catch (Exception e) {
+                video = null;
+                Log.e("GameScene", "Error while loading video background.", e);
+            }
+
+            videoLoadingJob = null;
+        });
+    }
+
+    private void cancelVideoLoading() {
+        if (videoLoadingJob != null) {
+            videoLoadingJob.cancel(new CancellationException("Video loading job cancelled"));
+            videoLoadingJob = null;
+        }
+    }
+
+    private void applyBackground() {
+        // This is used instead of getBackgroundBrightness to directly obtain the
+        // updated value from the brightness slider.
+        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+
+        boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
+        var videoFilename = playableBeatmap.getEvents().videoFilename;
+        boolean isVideoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
+        float playfieldSize = Config.getPlayfieldSize();
+
+        if (sceneBorder == null && Config.isDisplayPlayfieldBorder() && playfieldSize < 1f) {
+            sceneBorder = new UIBox() {
+                {
+                    setAnchor(Anchor.Center);
+                    setOrigin(Anchor.Center);
+                    setPaintStyle(PaintStyle.Outline);
+                    setLineWidth(5f);
+                    setColor(1f, 1f, 1f);
+                    setAlpha(Interpolation.linear(0.2f, 0.8f, brightness));
+                    setSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                }
+            };
+
+            scene.attachChild(sceneBorder, 0);
+        }
+
+        var background = isVideoEnabled && video != null ? video : beatmapBackground;
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
@@ -475,6 +531,29 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         background.setScale(factor);
         background.setPosition((Config.getRES_WIDTH() - background.getWidth()) / 2f, (Config.getRES_HEIGHT() - background.getHeight()) / 2f);
         scene.setBackground(new EntityBackground(background));
+
+        if (storyboardSprite != null) {
+            if (isStoryboardEnabled) {
+                storyboardSprite.setTransparentBackground(isVideoEnabled && video != null);
+                storyboardSprite.setBrightness(brightness);
+
+                if (!storyboardSprite.hasParent()) {
+                    scene.attachChild(storyboardSprite, 0);
+                }
+            } else {
+                storyboardSprite.detachSelf();
+            }
+        }
+
+        if (storyboardOverlayProxy != null) {
+            if (isStoryboardEnabled) {
+                if (!storyboardOverlayProxy.hasParent()) {
+                    scene.attachChild(storyboardOverlayProxy, scene.getChildIndex(fgScene));
+                }
+            } else {
+                storyboardOverlayProxy.detachSelf();
+            }
+        }
     }
 
     private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final ModHashMap mods, @Nullable CoroutineScope scope) {
@@ -539,6 +618,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
         this.playableBeatmap = playableBeatmap;
+
+        // Load backgrounds early to minimize waiting time.
+        loadBackground();
+        loadStoryboard(beatmapInfo);
+        loadVideo(beatmapInfo);
 
         rateAdjustingMods.clear();
 
@@ -610,6 +694,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         expiredObjects = new LinkedList<>();
         lastObjectId = -1;
         hitWindow = playableBeatmap.getHitWindow();
+        videoStarted = false;
+        videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
         firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
@@ -627,9 +713,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Ensure the video has time to start.
-        if (video != null) {
-            elapsedTime = Math.min(videoOffset, elapsedTime);
-        }
+        // Even when video is not activated, apply offset anyway to ensure that everyone in multiplayer starts at the
+        // same time regardless of the setting.
+        elapsedTime = Math.min(elapsedTime, videoOffset);
 
         // Ensure user-defined offset has time to be applied.
         elapsedTime = Math.min(elapsedTime, firstObjectStartTime - objectTimePreempt - totalOffset);
@@ -827,7 +913,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         cancelLoading()
                 .thenCompose((ignored) -> DifficultyCalculationManager.stopCalculation())
-                .thenRun(() -> loadingJob = Execution.async((scope) -> {
+                .thenRun(() -> gameLoadingJob = Execution.async((scope) -> {
                     boolean succeeded = false;
 
                     try {
@@ -841,7 +927,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             quit();
                         }
 
-                        loadingJob = null;
+                        gameLoadingJob = null;
                     }
                 }));
     }
@@ -852,7 +938,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return CompletableFuture.completedFuture(Unit.INSTANCE);
         }
 
-        return Execution.stopAsync(loadingJob).thenCompose((ignored) -> Execution.stopAsync(backgroundLoadingJob));
+        return Execution.stopAsync(gameLoadingJob)
+                .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
+                .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob));
     }
 
     private void prepareScene() {
@@ -1123,7 +1211,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             RoomScene.INSTANCE.getChat().dismiss();
 
         applyPlayfieldSizeScale();
-        loadBackground(lastBeatmapInfo);
+        applyBackground();
 
         // Handle input in its own thread
         var touchOptions = new TouchOptions();
@@ -1195,10 +1283,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
-        if (Config.isEnableStoryboard()) {
-            if (storyboardSprite != null) {
-                storyboardSprite.updateTime(mSecPassed);
-            }
+        if (storyboardSprite != null && storyboardSprite.hasParent()) {
+            storyboardSprite.updateTime(mSecPassed);
         }
 
         if (replaying) {
@@ -1597,6 +1683,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.save(replayPath);
             }
             resetPlayfieldSizeScale();
+            cancelStoryboardLoading();
+            cancelVideoLoading();
 
             if (scoringScene != null && !startedFromHUDEditor) {
                 if (replaying)
@@ -1798,6 +1886,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             sliderRenderPaths = null;
         });
 
+        cancelStoryboardLoading();
+        cancelVideoLoading();
+
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = elapsedTime * 1000;
         var songMenu = GlobalManager.getInstance().getSongMenu();
@@ -1839,6 +1930,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.release();
             video = null;
             videoStarted = false;
+        }
+
+        if (sceneBorder != null) {
+            sceneBorder.detachSelf();
+            sceneBorder = null;
         }
 
         onExit();

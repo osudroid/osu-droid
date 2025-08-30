@@ -284,6 +284,11 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             onValueChanged = {
                                 Config.setBackgroundBrightness(it / 100f)
 
+                                // Storyboard and video should not be enabled if the background brightness is too low,
+                                // so we trigger a reload when changing brightness.
+                                gameScene.loadStoryboard(beatmapInfo)
+                                gameScene.loadVideo(beatmapInfo)
+
                                 if (!isStarting) {
                                     dimBox.alpha = 1f - it / 100f
                                 }
@@ -292,10 +297,16 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
                         +PreferenceCheckbox("enableStoryboard").apply {
                             label = StringTable.get(com.osudroid.resources.R.string.opt_enableStoryboard_title)
+                            onValueChanged = {
+                                gameScene.loadStoryboard(beatmapInfo)
+                            }
                         }
 
                         +PreferenceCheckbox("enableVideo").apply {
                             label = StringTable.get(com.osudroid.resources.R.string.opt_video_title)
+                            onValueChanged = {
+                                gameScene.loadVideo(beatmapInfo)
+                            }
                         }
 
                         +PreferenceCheckbox("showscoreboard").apply {
