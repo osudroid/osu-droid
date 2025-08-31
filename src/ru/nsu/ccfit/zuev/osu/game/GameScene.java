@@ -3037,24 +3037,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private UIScene createMainScene() {
         return new UIScene() {
+            private boolean isInterpolating;
+
             @Override
             protected void onManagedUpdate(float secElapsed) {
                 var songService = GlobalManager.getInstance().getSongService();
-                float dt = secElapsed * GameHelper.getSpeedMultiplier();
-
-                // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
-                // actual progressed time. To prevent that situation from happening, we keep `dt` between thresholds.
-                // They serve as a buffer zone to allow audio and gameplay time to synchronize in cases where one is
-                // behind or ahead of the other.
-                // See https://github.com/ppy/osu/issues/26879 for more information.
-                float minDt = 0;
-                float maxDt = dt * 2;
+                float speedMultiplier = GameHelper.getSpeedMultiplier();
+                float dt = secElapsed * speedMultiplier;
 
                 if (songService.getStatus() == Status.PLAYING) {
-                    // Raise the minimum progressed time to still allow gameplay to progress in case audio time is
-                    // behind or BASS reports the wrong position, but not by much to still allow audio to catch up.
-                    // This allows for relatively smooth gameplay progression without the catch-up being too noticeable.
-                    minDt = dt / 2;
+                    // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
+                    // actual progressed time. To prevent that situation from happening, we keep `dt` between thresholds.
+                    // They serve as a buffer zone to allow audio and gameplay time to synchronize in cases where one is
+                    // behind or ahead of the other.
+                    // See https://github.com/ppy/osu/issues/26879 for more information.
+                    float minDt = dt / 2;
+                    float maxDt = dt * 2;
 
                     float audioElapsedTime = songService.getPosition() / 1000f;
                     float gameElapsedTime = elapsedTime - totalOffset;
@@ -3077,16 +3075,34 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             }
                             dt = -timeDifference;
                         }
+
+                        dt = FMath.clamp(dt, minDt, maxDt);
                     } else {
-                        minDt = 0;
                         dt = 0;
                     }
                 } else if (!musicStarted) {
-                    // Cap elapsed time at the music start time to prevent objects from progressing too far.
-                    dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
-                }
+                    float prevElapsedTime = elapsedTime;
+                    float realElapsedTime = elapsedTime + dt;
+                    float targetElapsedTime = Math.min(realElapsedTime, totalOffset);
+                    float newElapsedTime;
 
-                dt = FMath.clamp(dt, minDt, maxDt);
+                    if (isInterpolating) {
+                        newElapsedTime = Interpolation.dampContinuously(realElapsedTime, targetElapsedTime, 0.08f, dt);
+
+                        // If the difference is more than ~2 frames at 60 FPS, snap to the target time.
+                        if (Math.abs(targetElapsedTime - elapsedTime) > 1000f / 60f * 2) {
+                            newElapsedTime = targetElapsedTime;
+                            isInterpolating = false;
+                        }
+                    } else {
+                        newElapsedTime = targetElapsedTime;
+
+                        // Only interpolate on second frame onwards.
+                        isInterpolating = true;
+                    }
+
+                    dt = newElapsedTime - prevElapsedTime;
+                }
 
                 update(dt);
                 super.onManagedUpdate(dt);
