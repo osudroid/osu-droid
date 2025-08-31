@@ -3061,10 +3061,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     // In some cases, the audio can be behind the gameplay time so far it would cause gameplay to
                     // completely desynchronize. In that case, we do not let gameplay progress at all until the audio
                     // catches up.
-                    if (timeDifference <= 0.1f) {
-                        int minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime();
+                    if (timeDifference <= 0.1f * speedMultiplier) {
+                        float minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime() * speedMultiplier / 1000;
                         // Sync gameplay with audio if the difference is too large.
-                        if (timeDifference >=  minimumSynchronizationTime / 1000f) {
+                        if (timeDifference >= minimumSynchronizationTime) {
                             if (minimumSynchronizationTime > 0) {
                                 Log.i("GameScene",
                                         "Synchronizing gameplay time with audio time at " +
