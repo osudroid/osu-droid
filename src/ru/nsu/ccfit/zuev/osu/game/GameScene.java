@@ -3081,7 +3081,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         dt = 0;
                     }
                 } else if (!musicStarted) {
-                    float prevElapsedTime = elapsedTime;
                     float realElapsedTime = elapsedTime + dt;
                     float targetElapsedTime = Math.min(realElapsedTime, totalOffset);
                     float newElapsedTime;
@@ -3101,7 +3100,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         isInterpolating = true;
                     }
 
-                    dt = newElapsedTime - prevElapsedTime;
+                    dt = newElapsedTime - elapsedTime;
                 }
 
                 update(dt);
