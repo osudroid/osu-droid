@@ -3,7 +3,6 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.math.Interpolation
 import kotlin.math.max
-import kotlin.math.pow
 import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
 
