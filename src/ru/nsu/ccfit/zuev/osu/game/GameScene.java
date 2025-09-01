@@ -283,6 +283,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     @Nullable
     private Job videoLoadingJob;
 
+    /**
+     * Whether video is enabled.
+     */
+    private boolean videoEnabled;
+
     /**The video sprite*/
     private UIVideoSprite video;
 
@@ -414,7 +419,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ensureActive(scope.getCoroutineContext());
             }
 
-            storyboardSprite.setTransparentBackground(video != null);
+            storyboardSprite.setTransparentBackground(videoEnabled && video != null);
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
             ensureActive(scope.getCoroutineContext());
 
@@ -444,9 +449,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
         var videoFilename = playableBeatmap.getEvents().videoFilename;
-        boolean isVideoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
+        videoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
 
-        if (!isVideoEnabled) {
+        if (!videoEnabled) {
             cancelVideoLoading();
             return;
         }
@@ -488,8 +493,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
 
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
-        var videoFilename = playableBeatmap.getEvents().videoFilename;
-        boolean isVideoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
         float playfieldSize = Config.getPlayfieldSize();
 
         if (sceneBorder == null && Config.isDisplayPlayfieldBorder() && playfieldSize < 1f) {
@@ -508,7 +511,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             scene.attachChild(sceneBorder, 0);
         }
 
-        var background = isVideoEnabled && video != null ? video : beatmapBackground;
+        var background = videoEnabled && video != null ? video : beatmapBackground;
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
@@ -534,7 +537,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (storyboardSprite != null) {
             if (isStoryboardEnabled) {
-                storyboardSprite.setTransparentBackground(isVideoEnabled && video != null);
+                storyboardSprite.setTransparentBackground(videoEnabled && video != null);
                 storyboardSprite.setBrightness(brightness);
 
                 if (!storyboardSprite.hasParent()) {
@@ -1501,7 +1504,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             tryHitActiveObjects(dt);
         }
 
-        if (video != null && elapsedTime >= videoOffset)
+        if (videoEnabled && video != null && elapsedTime >= videoOffset)
         {
             if (!videoStarted) {
                 video.play();
@@ -1847,7 +1850,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             songService.seekTo(musicSeekTime);
 
-            if (video != null) {
+            if (videoEnabled && video != null) {
                 video.seekTo(videoSeekTime);
             }
 
@@ -2619,7 +2622,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
-                    if (video != null) {
+                    if (videoEnabled && video != null) {
                         // In some devices this can throw an exception, unfortunately there's no
                         // documentation that explains how to avoid that scenario. Thanks Google.
                         try {
@@ -2631,7 +2634,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                     songService.setFrequencyForcefully(decreasedFrequency);
                 } else {
-                    if (video != null) {
+                    if (videoEnabled && video != null) {
                         video.pause();
                     }
 
