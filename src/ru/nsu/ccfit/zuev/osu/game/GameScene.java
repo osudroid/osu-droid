@@ -643,13 +643,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             breakPeriods.add(new BreakPeriod(period.startTime / 1000f, period.endTime / 1000f));
         }
 
-        totalOffset = Config.getOffset();
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapInfo.getSetDirectory());
-        if (props != null) {
-            totalOffset += props.getOffset();
-        }
-        totalOffset /= 1000;
-
         try {
             var musicFile = new File(beatmapInfo.getAudioPath());
 
@@ -700,8 +693,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
-        float objectTimePreempt = (float) firstObject.timePreempt / 1000;
-        float skipTargetTime = firstObjectStartTime - Math.max(2f, objectTimePreempt);
+        float firstObjectTimePreempt = (float) firstObject.timePreempt / 1000;
+        float skipTargetTime = firstObjectStartTime - Math.max(2f, firstObjectTimePreempt);
 
         elapsedTime = Math.min(0, skipTargetTime);
         skipTime = skipTargetTime - 1;
@@ -716,10 +709,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Even when video is not activated, apply offset anyway to ensure that everyone in multiplayer starts at the
         // same time regardless of the setting.
         elapsedTime = Math.min(elapsedTime, videoOffset);
-
-        // Ensure user-defined offset has time to be applied.
-        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - objectTimePreempt - totalOffset);
-        initialElapsedTime = elapsedTime;
 
         sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
         if (playableBeatmap.getColors().getSliderBorderColor() != null) {
@@ -1204,8 +1193,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    // This is used by the multiplayer system, is called once all players in the room completes beatmap loading.
+    /**
+     * Starts gameplay. This is used by the game loader once all necessary preprocessing is done.
+     */
     public void start() {
+        totalOffset = Config.getOffset();
+
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(lastBeatmapInfo.getSetDirectory());
+        if (props != null) {
+            totalOffset += props.getOffset();
+        }
+
+        totalOffset /= 1000;
+
+        // Ensure user-defined offset has time to be applied.
+        var firstObjectTimePreempt = (float) playableBeatmap.getHitObjects().objects.get(0).timePreempt / 1000;
+        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - totalOffset);
+        initialElapsedTime = elapsedTime;
 
         if (skipTime <= 1)
             RoomScene.INSTANCE.getChat().dismiss();
