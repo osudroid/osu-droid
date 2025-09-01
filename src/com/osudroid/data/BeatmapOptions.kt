@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 
 @Entity
 data class BeatmapOptions(
@@ -42,6 +43,9 @@ data class BeatmapOptions(
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(options: BeatmapOptions)
+
+    @Upsert
+    fun upsert(options: BeatmapOptions)
 
     @Query("DELETE FROM BeatmapOptions")
     fun deleteAll()

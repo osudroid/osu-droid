@@ -29,7 +29,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private val dimBox: UIBox
     private val mainContainer: UIContainer
 
-    private var beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
+    private var beatmapOptions: BeatmapOptions? = null
 
     init {
 
@@ -160,10 +160,6 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
-                    if (beatmapOptions != null) {
-                        DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
-                    }
-
                     // This is used instead of getBackgroundBrightness to directly obtain the
                     // updated value from the brightness slider.
                     val backgroundBrightness = Config.getInt("bgbrightness", 25)
@@ -227,13 +223,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             valueFormatter = { "${it.roundToInt()}ms" }
 
                             onValueChanged = {
-                                if (beatmapOptions == null) {
-                                    beatmapOptions = BeatmapOptions(beatmapInfo.setDirectory)
-                                    DatabaseManager.beatmapOptionsTable.insert(beatmapOptions!!)
-                                }
-
                                 beatmapOptions!!.offset = it.roundToInt()
-                                DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
+                                DatabaseManager.beatmapOptionsTable.upsert(beatmapOptions!!)
                             }
                         }
                         +offsetSlider
