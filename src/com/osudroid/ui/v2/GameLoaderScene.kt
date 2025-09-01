@@ -233,6 +233,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                                 }
 
                                 beatmapOptions!!.offset = it.roundToInt()
+                                DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
                             }
                         }
                         +offsetSlider
