@@ -232,6 +232,7 @@ class SettingsFragment : SettingsFragment() {
 
         Section.General -> handleGeneralSectionPreferences()
         Section.Gameplay -> handleGameplaySectionPreferences()
+        Section.Audio -> handleAudioSectionPreferences()
         Section.Library -> handleLibrarySectionPreferences()
         Section.Advanced -> handleAdvancedSectionPreferences()
         Section.Input -> handleInputSectionPreferences()
@@ -254,7 +255,6 @@ class SettingsFragment : SettingsFragment() {
             RoomScene.chat.show()
         }
 
-        GlobalManager.getInstance().songService.volume = Config.getBgmVolume()
         super.dismiss()
     }
 
@@ -364,6 +364,18 @@ class SettingsFragment : SettingsFragment() {
                     global.gameScene.setOldScene(global.mainScene.scene)
                     global.gameScene.startGame(global.selectedBeatmap, null, modMap, true)
                 }
+                true
+            }
+        }
+    }
+
+
+    private fun handleAudioSectionPreferences() {
+        findPreference<SeekBarPreference>("bgmvolume")!!.apply {
+            updatesContinuously = true
+
+            setOnPreferenceChangeListener { _, newValue ->
+                GlobalManager.getInstance().songService.volume = (newValue as Int) / 100f
                 true
             }
         }
