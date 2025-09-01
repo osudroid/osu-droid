@@ -3097,7 +3097,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         newElapsedTime = targetElapsedTime;
 
                         // Only interpolate on second frame onwards.
-                        isInterpolating = true;
+                        if (previousFrameTime > 0) {
+                            isInterpolating = true;
+                        }
                     }
 
                     dt = newElapsedTime - elapsedTime;
