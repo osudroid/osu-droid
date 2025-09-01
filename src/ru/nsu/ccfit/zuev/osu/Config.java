@@ -658,8 +658,16 @@ public class Config {
         return playfieldHorizontalPosition;
     }
 
+    public static void setPlayfieldHorizontalPosition(float playfieldHorizontalPosition) {
+        Config.playfieldHorizontalPosition = playfieldHorizontalPosition;
+    }
+
     public static float getPlayfieldVerticalPosition() {
         return playfieldVerticalPosition;
+    }
+
+    public static void setPlayfieldVerticalPosition(float playfieldVerticalPosition) {
+        Config.playfieldVerticalPosition = playfieldVerticalPosition;
     }
 
     public static boolean isHideReplayMarquee() {

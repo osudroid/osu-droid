@@ -12,7 +12,9 @@ import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 import android.util.Log
 import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,10 +22,12 @@ import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
+import androidx.core.view.updateLayoutParams
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.SeekBarPreference
 import com.acivev.VibratorManager
+import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
@@ -39,6 +43,7 @@ import com.osudroid.data.DatabaseManager
 import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
+import com.reco1l.framework.asTimeInterpolator
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference
@@ -64,6 +69,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 
 class SettingsFragment : SettingsFragment() {
@@ -367,6 +373,38 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+
+        val playfieldAreaDisplay = PlayfieldAreaDisplay()
+
+        findPreference<SeekBarPreference>("playfieldSize")!!.apply {
+            updatesContinuously = true
+
+            setOnPreferenceChangeListener { _, newValue ->
+                Config.setPlayfieldSize((newValue as Int) / 100f)
+                playfieldAreaDisplay.update()
+                true
+            }
+        }
+
+        findPreference<SeekBarPreference>("playfieldHorizontalPosition")!!.apply {
+            updatesContinuously = true
+
+            setOnPreferenceChangeListener { _, newValue ->
+                Config.setPlayfieldHorizontalPosition((newValue as Int) / 100f)
+                playfieldAreaDisplay.update()
+                true
+            }
+        }
+
+        findPreference<SeekBarPreference>("playfieldVerticalPosition")!!.apply {
+            updatesContinuously = true
+
+            setOnPreferenceChangeListener { _, newValue ->
+                Config.setPlayfieldVerticalPosition((newValue as Int) / 100f)
+                playfieldAreaDisplay.update()
+                true
+            }
+        }
     }
 
 
@@ -604,6 +642,60 @@ class SettingsFragment : SettingsFragment() {
         Room(R.xml.multiplayer_room_settings),
         Player(R.xml.multiplayer_player_settings)
 
+    }
+
+
+    private inner class PlayfieldAreaDisplay {
+        private val view = LayoutInflater.from(context).inflate(R.layout.playfield_area_display, null, false)!!
+        private val display = view.findViewById<View>(R.id.display)!!
+
+        private var previousPlayfieldSize = Config.getPlayfieldSize()
+
+        init {
+            updateMeasurements()
+            requireView().findViewById<FrameLayout>(R.id.root_container)!!.addView(view)
+        }
+
+        fun update() {
+            val newPlayfieldSize = Config.getPlayfieldSize()
+
+            // We do not need to update states or show anything if the playfield size is 100%, since it will fill the
+            // entire screen anyway, making position settings irrelevant.
+            if (previousPlayfieldSize == 1f && newPlayfieldSize == 1f) {
+                return
+            }
+
+            previousPlayfieldSize = newPlayfieldSize
+            updateMeasurements()
+
+            display.apply {
+                clearAnimation()
+
+                animate()
+                    .alpha(0.3f)
+                    .setDuration(400)
+                    .setInterpolator(Easing.OutQuint.asTimeInterpolator())
+                    .withEndAction {
+                        animate()
+                            .alpha(0f)
+                            .setDuration(500)
+                    }
+            }
+        }
+
+        private fun updateMeasurements() {
+            val playfieldSize = Config.getPlayfieldSize()
+            val width = (playfieldSize * root!!.width).roundToInt()
+            val height = (playfieldSize * root!!.height).roundToInt()
+
+            view.x = (root!!.width - width) * Config.getPlayfieldHorizontalPosition()
+            view.y = (root!!.height - height) * Config.getPlayfieldVerticalPosition()
+
+            display.updateLayoutParams {
+                this.width = width
+                this.height = height
+            }
+        }
     }
 
 
