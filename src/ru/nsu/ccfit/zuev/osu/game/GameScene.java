@@ -2341,6 +2341,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
+        float offset = previousFrameTime > 0
+                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                : 0;
+        int eventTime = (int) (elapsedTime * 1000 + offset);
+
         if (replaying || isGameOver) {
             return false;
         }
@@ -2386,11 +2391,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (sprite != null) {
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
-
-        float offset = previousFrameTime > 0
-                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
-                : 0;
-        int eventTime = (int) (elapsedTime * 1000 + offset);
 
         if (event.isActionDown()) {
 
