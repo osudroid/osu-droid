@@ -379,6 +379,19 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+
+        findPreference<SeekBarPreference>("soundvolume")!!.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                // Set the configuration now as the sound below depends on this value.
+                Config.setSoundVolume((newValue as Int) / 100f)
+
+                // Use the sound when the osu! cookie is clicked since it is guaranteed to be available and not
+                // skinnable (which means the player cannot silence it via skins).
+                ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false)?.play()
+
+                true
+            }
+        }
     }
 
 
