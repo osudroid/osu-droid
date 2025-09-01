@@ -42,6 +42,17 @@
 - Replace shrink playfield downwards setting with adjustable horizontal/vertical position <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This gives players a better control over playfield positioning.
   - To replicate the shrink downwards behavior, set horizontal position to 50% and vertical position to 100%.
+- Briefly display playfield area when playfield-related settings are changed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - When changing the size or position of the playfield, a transparent box will be shown briefly to indicate the
+    playfield area.
+  - This box will not be shown if the playfield size is 100% (since it will cover the entire screen anyway, so the
+    position settings do not matter).
+- Update music volume directly when changing it in settings <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - No more going back to the main menu to hear the change!
+- Play osu! cookie hit sound when sound effect volume is changed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Allows the player to gauge the loudness of sound effects without having to manually trigger one.
+  - The osu! cookie hit sound is chosen specifically since it is not skinnable (which means the player cannot silence it
+    via skins).
 
 # Bug Fixes
 
@@ -77,6 +88,9 @@
 - Fix inconsistent beatmap start time in multiplayer due to unaccounted video start time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Alleviate slower time progression in gameplay right before the music starts <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Players would notice this as the approach circle would progress at a slower rate when this happens.
+- Fix beatmap offset final value not being applied in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix beatmap offset not being updated when changed from beatmap offset slider in gameplay loading screen <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay progressing too slow or fast at first frame when time ramping mods are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 Version 1.8.4.9
 ===============
