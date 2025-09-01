@@ -628,7 +628,7 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private enum class Section(@XmlRes val xml: Int) {
+    private enum class Section(@param:XmlRes val xml: Int) {
 
         General(R.xml.settings_general),
         Gameplay(R.xml.settings_gameplay),
