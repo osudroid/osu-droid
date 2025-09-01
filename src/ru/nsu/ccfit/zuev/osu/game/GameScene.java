@@ -666,7 +666,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
-        GameHelper.setSpeedMultiplier(playableBeatmap.speedMultiplier);
+        GameHelper.setSpeedMultiplier(ModUtils.calculateRateWithMods(mods.values(), Double.NEGATIVE_INFINITY));
 
         GameHelper.setOriginalTimePreempt((float) BeatmapDifficulty.difficultyRange(
             playableBeatmap.getDifficulty().getAr(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
