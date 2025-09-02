@@ -5,6 +5,7 @@ import android.view.KeyEvent.*
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.*
 import androidx.core.view.*
+import com.osudroid.utils.mainThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
@@ -103,7 +104,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     }
 
     @Suppress("DEPRECATION")
-    private fun setKeyboardVisibility(value: Boolean) {
+    private fun setKeyboardVisibility(value: Boolean) = mainThread {
 
         val imm = ExtendedEngine.Current.context.getSystemService<InputMethodManager>()
             ?: throw NullPointerException("InputMethodManager is null")
@@ -113,7 +114,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
         // Tricky prevention from opening the keyboard while it should be closed and vice versa.
         if (value == (keyboardHeight > 0) || !value == (keyboardHeight == 0)) {
-            return
+            return@mainThread
         }
 
         imm.toggleSoftInput(if (value) InputMethodManager.SHOW_FORCED else InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
