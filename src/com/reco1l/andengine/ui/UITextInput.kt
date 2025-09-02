@@ -177,7 +177,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         val dummyCharWidth = font!!.getStringWidth("0")
 
         letterPositions = IntArray(value.length + 1) { i ->
-            if (i > 0) font!!.getStringWidth(value.substring(0, i) + "0") - dummyCharWidth else 0
+            if (i > 0) font!!.getStringWidth(value.take(i) + "0") - dummyCharWidth else 0
         }
 
         return super.onProcessValue(value)
@@ -213,7 +213,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         val currentText = value
         val currentCaretPosition = caretPosition
         val newText =
-            currentText.substring(0, currentCaretPosition) + char + currentText.substring(currentCaretPosition)
+            currentText.take(currentCaretPosition) + char + currentText.substring(currentCaretPosition)
 
         if (newText.isNotEmpty() && !isTextValid(newText)) {
             notifyInputError()
@@ -233,7 +233,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         val currentCaretPosition = caretPosition
 
         val newText =
-            if (position > 0) currentText.substring(0, position - 1) + currentText.substring(position)
+            if (position > 0) currentText.take(position - 1) + currentText.substring(position)
             else currentText.substring(1)
 
         if (newText.isNotEmpty() && !isTextValid(newText)) {
