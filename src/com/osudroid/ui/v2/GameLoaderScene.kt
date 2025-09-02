@@ -29,7 +29,11 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private val dimBox: UIBox
     private val mainContainer: UIContainer
 
-    private var beatmapOptions: BeatmapOptions? = null
+    private val beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
+        ?: BeatmapOptions(beatmapInfo.setDirectory)
+
+    private var fadeTimeout = if (isRestart) 500L else 2000L
+    private var minimumTimeout = if (isRestart) 500L else 2000L
 
     init {
 
@@ -96,12 +100,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 text {
                     font = ResourceManager.getInstance().getFont("bigFont")
                     text = beatmapInfo.titleText
-
-                    if (!isRestart) {
-                        width = 700f
-                        clipToBounds = true
-                    }
-
+                    width = 700f
+                    clipToBounds = true
                     autoScrollSpeed = 30f
                     applyTheme = { color = it.accentColor }
                 }
@@ -110,12 +110,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = beatmapInfo.version
-
-                    if (!isRestart) {
-                        width = 700f
-                        clipToBounds = true
-                    }
-
+                    width = 700f
+                    clipToBounds = true
                     applyTheme = { color = it.accentColor }
                 }
 
@@ -141,12 +137,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 y = -60f
             }
 
-            if (!isRestart) {
-                beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
-                    ?: BeatmapOptions(beatmapInfo.setDirectory)
-
-                +QuickSettingsLayout()
-            }
+            +QuickSettingsLayout()
         }
     }
 
@@ -157,7 +148,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             if (gameScene.isReadyToStart) {
 
                 // Multiplayer will skip the minimum timeout if it's ready to start.
-                if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
+                if (System.currentTimeMillis() - lastTimeTouched > minimumTimeout || Multiplayer.isMultiplayer) {
                     isStarting = true
 
                     // This is used instead of getBackgroundBrightness to directly obtain the
@@ -218,13 +209,13 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             label = StringTable.get(com.osudroid.resources.R.string.opt_category_offset)
                             control.min = -250f
                             control.max = 250f
-                            value = beatmapOptions?.offset?.toFloat() ?: 0f
-                            defaultValue = beatmapOptions?.offset?.toFloat() ?: 0f
+                            value = beatmapOptions.offset.toFloat()
+                            defaultValue = beatmapOptions.offset.toFloat()
                             valueFormatter = { "${it.roundToInt()}ms" }
 
                             onValueChanged = {
-                                beatmapOptions!!.offset = it.roundToInt()
-                                DatabaseManager.beatmapOptionsTable.upsert(beatmapOptions!!)
+                                beatmapOptions.offset = it.roundToInt()
+                                DatabaseManager.beatmapOptionsTable.upsert(beatmapOptions)
                             }
                         }
                         +offsetSlider
@@ -312,6 +303,14 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             alpha = 1f
             lastTimeTouched = System.currentTimeMillis()
+
+            // When the player is restarting, and they touch the layout, assume they want to change settings.
+            // In that case, show this loading scene longer.
+            if (isRestart) {
+                fadeTimeout = 1000L
+                minimumTimeout = 1000L
+            }
+
             return super.onAreaTouched(event, localX, localY)
         }
 
@@ -319,7 +318,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
             val elapsed = System.currentTimeMillis() - lastTimeTouched
 
-            if (alpha > 0.5f && elapsed > FADE_TIMEOUT) {
+            if (alpha > 0.5f && elapsed > fadeTimeout) {
                 alpha -= deltaTimeSec * 1.5f
             }
 
@@ -327,11 +326,4 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         }
 
     }
-
-
-    companion object {
-        private const val FADE_TIMEOUT = 2000L
-        private const val MINIMUM_TIMEOUT = 2000L
-    }
-
 }
