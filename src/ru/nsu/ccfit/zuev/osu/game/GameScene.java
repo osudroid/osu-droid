@@ -1136,7 +1136,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             hud.attachChild(replayText, 0);
         }
 
-        if (lastMods.contains(ModAutoplay.class) || replaying) {
+        if (GameHelper.isAutoplay() || replaying) {
             var metadata = playableBeatmap.getMetadata();
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
