@@ -351,8 +351,10 @@ class SettingsFragment : SettingsFragment() {
             }
 
             setOnPreferenceClickListener {
+                val global = GlobalManager.getInstance()
+                val selectedBeatmap = global.selectedBeatmap
 
-                if (LibraryManager.getSizeOfBeatmaps() == 0) {
+                if (LibraryManager.getSizeOfBeatmaps() == 0 || selectedBeatmap == null) {
                     ToastLogger.showText("Cannot enter HUD editor with empty beatmap library!", true)
                 } else {
                     dismiss()
@@ -361,10 +363,8 @@ class SettingsFragment : SettingsFragment() {
                         put(ModAutoplay::class)
                     }
 
-                    val global = GlobalManager.getInstance()
-
                     global.gameScene.setOldScene(global.mainScene.scene)
-                    global.gameScene.startGame(global.selectedBeatmap, null, modMap, true)
+                    global.gameScene.startGame(selectedBeatmap, null, modMap, true)
                 }
                 true
             }
