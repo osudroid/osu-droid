@@ -212,11 +212,6 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     }
 
     private fun applyDefaultLayout() {
-        // When the HUD is hidden, nothing needs to be adjusted.
-        if (Config.isHideInGameUI()) {
-            return
-        }
-
         // The default layout is hardcoded to keep the original layout before the HUD editor was
         // implemented, as it used cross-references between elements that are not possible to be
         // set in the editor.
