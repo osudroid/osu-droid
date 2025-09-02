@@ -484,8 +484,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 clickShortConfirmSound.play();
                             }
 
-                            if (searchBar == null) loadFilterFragment();
-
+                            searchBar.loadConfig(context);
                             searchBar.showMenu(SongMenu.this);
                         }
                     }
@@ -702,11 +701,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void loadFilterFragment() {
         searchBar = new SearchBarFragment();
         searchBar.loadConfig(context);
-    }
-
-    public void unloadFilterFragment() {
-        scene.clearChildScene();
-        searchBar = null;
     }
 
     public void toggleScoringSwitcher() {

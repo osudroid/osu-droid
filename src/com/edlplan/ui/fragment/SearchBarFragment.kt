@@ -120,7 +120,6 @@ class SearchBarFragment : BaseFragment(), IFilterMenu {
 
     override fun dismiss() {
         playEndAnim { super.dismiss() }
-        getGlobal().songMenu.unloadFilterFragment()
         saveState(savedFolder, savedFavOnly, savedFilter)
     }
 
