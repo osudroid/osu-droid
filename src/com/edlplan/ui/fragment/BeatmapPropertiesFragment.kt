@@ -1,12 +1,10 @@
 package com.edlplan.ui.fragment
 
 import android.animation.Animator
-import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.EditText
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
@@ -49,7 +47,7 @@ class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
         offset!!.setText(beatmapOptions!!.offset.toString())
         isFav!!.isChecked = beatmapOptions!!.isFavorite
 
-        isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        isFav!!.setOnCheckedChangeListener { _, isChecked ->
             beatmapOptions!!.isFavorite = isChecked
             saveProp()
         }
@@ -84,8 +82,8 @@ class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
                     }
                     beatmapOptions!!.offset = o
                     saveProp()
-                } catch (e: NumberFormatException) {
-                    if (s.length == 0) {
+                } catch (_: NumberFormatException) {
+                    if (s.isEmpty()) {
                         beatmapOptions!!.offset = 0
                         saveProp()
                     }
@@ -102,14 +100,14 @@ class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
         }
 
 
-        findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
+        findViewById<View>(R.id.manageFavButton)!!.setOnClickListener {
             val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap ?: return@setOnClickListener
             val dialog = CollectionsManagerFragment()
 
             dialog.showToAddToFolder(selectedBeatmap.setDirectory)
         }
 
-        findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
+        findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener {
 
             MessageDialog().apply {
 
@@ -166,10 +164,6 @@ class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
 
     override fun dismiss() {
         playEndAnim { super.dismiss() }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
     }
 
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
