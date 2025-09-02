@@ -25,6 +25,11 @@
 [insert version here]
 ===============
 
+# Additions
+
+- Add back button to gameplay loading screen in singleplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Does the same as the device back button, but more convenient to use.
+
 # Changes
 
 - Prevent screen from dimming during gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
@@ -53,6 +58,9 @@
   - Allows the player to gauge the loudness of sound effects without having to manually trigger one.
   - The osu! cookie hit sound is chosen specifically since it is not skinnable (which means the player cannot silence it
     via skins).
+- Allow player to change settings from settings layout when restarting gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - To still satisfy players who only want a quick restart, a shorter delay is used instead of the usual one (when
+    gameplay is not restarted).
 
 # Bug Fixes
 
@@ -93,6 +101,9 @@
 - Fix gameplay progressing too slow or fast at first frame when time ramping mods are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix skin not being reloaded after importing configuration file <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix default HUD layout not being reset properly when hide in-game UI setting is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential race condition crash when switching beatmap sorting mode too fast <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential race condition crash when searching beatmaps too fast <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a crash when opening the HUD editor without any beatmap selected <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 Version 1.8.4.9
 ===============
