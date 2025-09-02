@@ -794,19 +794,8 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
                         return true;
                     }
-                } else if (currentScene instanceof GameLoaderScene) {
-                    if (gameScene != null) {
-                        gameScene.cancelLoading();
-                    }
-
-                    GlobalManager.getInstance().getEngine().setScene(songMenu.getScene());
-
-                    var selectedBeatmap = songMenu.getSelectedBeatmap();
-
-                    if (selectedBeatmap != null) {
-                        songMenu.playMusic(selectedBeatmap.getAudioPath(), selectedBeatmap.getPreviewTime());
-                    }
-
+                } else if (currentScene instanceof GameLoaderScene loaderScene) {
+                    loaderScene.cancel();
                     return true;
                 }
 

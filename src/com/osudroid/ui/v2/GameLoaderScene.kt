@@ -36,7 +36,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private var minimumTimeout = if (isRestart) 500L else 2000L
 
     init {
-
+        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
 
         // Background
         sprite {
@@ -128,16 +128,61 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 }
             }
 
-            +CircularProgressBar().apply {
-                width = 32f
-                height = 32f
+            linearContainer {
+                orientation = Orientation.Vertical
                 anchor = Anchor.BottomLeft
                 origin = Anchor.BottomLeft
                 x = 60f
-                y = -60f
+                y = if (Multiplayer.isMultiplayer) -60f else -30f
+                spacing = 30f
+
+                +CircularProgressBar().apply {
+                    width = 32f
+                    height = 32f
+                }
+
+                if (!Multiplayer.isMultiplayer) {
+                    +UITextButton().apply {
+                        text = "Back"
+
+                        leadingIcon = UISprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                            width = 28f
+                            height = 28f
+                        }
+
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            cancel()
+                        }
+
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    }
+                }
             }
 
             +QuickSettingsLayout()
+        }
+    }
+
+    /**
+     * Cancels loading and goes back to the song menu.
+     */
+    fun cancel() {
+        if (Multiplayer.isMultiplayer) {
+            return
+        }
+
+        gameScene.cancelLoading()
+
+        val global = GlobalManager.getInstance()
+        val songMenu = global.songMenu
+        val selectedBeatmap = songMenu.selectedBeatmap
+
+        global.engine.scene = songMenu.scene
+
+        if (selectedBeatmap != null) {
+            songMenu.playMusic(selectedBeatmap.audioPath, selectedBeatmap.previewTime)
         }
     }
 
