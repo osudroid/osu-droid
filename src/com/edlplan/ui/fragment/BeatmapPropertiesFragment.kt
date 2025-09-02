@@ -103,8 +103,10 @@ class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
 
 
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
+            val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap ?: return@setOnClickListener
             val dialog = CollectionsManagerFragment()
-            dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.setDirectory)
+
+            dialog.showToAddToFolder(selectedBeatmap.setDirectory)
         }
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
