@@ -1907,7 +1907,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 songMenu.startMusicVolumeAnimation(0.3f);
             }
         } else {
-            songMenu.playMusic(lastBeatmapInfo.getAudioPath(), lastBeatmapInfo.getPreviewTime());
+            var selectedBeatmap = GlobalManager.getInstance().getSelectedBeatmap();
+
+            if (selectedBeatmap != null) {
+                songMenu.playMusic(selectedBeatmap.getAudioPath(), selectedBeatmap.getPreviewTime());
+            }
         }
 
         if (replaying) {
