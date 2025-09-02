@@ -122,7 +122,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
             }
         }
 
-        var repositionedObjects = HitObjectGenerationUtils.repositionHitObjects(positionInfos, scope)
+        val repositionedObjects = HitObjectGenerationUtils.repositionHitObjects(positionInfos, scope)
 
         for (i in repositionedObjects.indices) {
             scope?.ensureActive()

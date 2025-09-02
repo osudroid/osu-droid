@@ -228,7 +228,7 @@ object HitObjectGenerationUtils {
             computeModifiedPosition(current, previous, workingObjects.getOrNull(i - 2))
 
             // Move hit objects back into the playfield if they are outside of it.
-            var shift = when (hitObject) {
+            val shift = when (hitObject) {
                 is HitCircle -> clampHitCircleToPlayfield(current)
                 is Slider -> clampSliderToPlayfield(current)
                 else -> Vector2(0)
@@ -551,7 +551,7 @@ object HitObjectGenerationUtils {
         }
 
         var count = 0
-        var sum = Vector2(0)
+        val sum = Vector2(0)
         var i = 0
 
         while (i < slider.distance) {

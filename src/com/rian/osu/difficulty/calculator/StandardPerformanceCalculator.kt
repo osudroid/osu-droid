@@ -113,19 +113,15 @@ class StandardPerformanceCalculator(
             }
 
             if (aimDifficultSliderCount > 0) {
-                val estimateImproperlyFollowedDifficultSliders: Double
-
-                if (usingClassicSliderCalculation) {
+                val estimateImproperlyFollowedDifficultSliders = if (usingClassicSliderCalculation) {
                     // When the score is considered classic (regardless if it was made on old client or not),
                     // we consider all missing combo to be dropped difficult sliders.
-                    estimateImproperlyFollowedDifficultSliders =
-                        min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                    min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
                 } else {
                     // We add tick misses here since they too mean that the player didn't follow the slider
                     // properly. However, we aren't adding misses here because missing slider heads has a harsh
                     // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
-                    estimateImproperlyFollowedDifficultSliders =
-                        (sliderEndsDropped!! + sliderTicksMissed!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                    (sliderEndsDropped!! + sliderTicksMissed!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
                 }
 
                 aimValue *=
