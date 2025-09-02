@@ -3,6 +3,7 @@ package com.osudroid.ui.v1
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -25,6 +26,7 @@ import androidx.core.view.get
 import androidx.core.view.updateLayoutParams
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
 import com.acivev.VibratorManager
 import com.edlplan.framework.easing.Easing
@@ -70,6 +72,7 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
 
 
 class SettingsFragment : SettingsFragment() {
@@ -261,6 +264,7 @@ class SettingsFragment : SettingsFragment() {
             RoomScene.chat.show()
         }
 
+        GlobalManager.getInstance().songService.volume = Config.getBgmVolume()
         super.dismiss()
     }
 
@@ -292,11 +296,20 @@ class SettingsFragment : SettingsFragment() {
         }
 
         findPreference<Preference>("restore")!!.setOnPreferenceClickListener {
+            val context = it.context
             val success = ConfigBackup.importPreferences()
 
             if (success) {
-                ToastLogger.showText(string.config_backup_restore_info_success, true)
-                dismiss()
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+
+                GlobalManager.getInstance().songService.volume = prefs.getInt("bgmvolume", 100) / 100f
+
+                loadSkin(context, prefs.getString("skinPath", "")!!).invokeOnCompletion {
+                    mainThread {
+                        ToastLogger.showText(string.config_backup_restore_info_success, true)
+                        dismiss()
+                    }
+                }
             } else {
                 ToastLogger.showText(string.config_backup_restore_info_fail, true)
             }
@@ -325,24 +338,7 @@ class SettingsFragment : SettingsFragment() {
             options = skins
 
             setOnPreferenceChangeListener { _, newValue ->
-
-                val loading = LoadingFragment()
-                loading.show()
-
-                async {
-                    BeatmapSkinManager.getInstance().clearSkin()
-                    // Setting the skin now so that any setting that relies on skins (i.e., the HUD editor) receives
-                    // the correct skin path.
-                    Config.setSkinPath(newValue.toString())
-                    ResourceManager.getInstance().loadSkin(newValue.toString())
-                    GlobalManager.getInstance().engine.textureManager.reloadTextures()
-
-                    mainThread {
-                        loading.dismiss()
-                        context.startActivity(Intent(context, MainActivity::class.java))
-                        Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
-                    }
-                }
+                loadSkin(context, newValue.toString())
                 true
             }
         }
@@ -623,6 +619,27 @@ class SettingsFragment : SettingsFragment() {
             setOnPreferenceChangeListener { _, newValue ->
                 RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
                 true
+            }
+        }
+    }
+
+
+    private fun loadSkin(context: Context, path: String): Job {
+        val loading = LoadingFragment()
+        loading.show()
+
+        return async {
+            BeatmapSkinManager.getInstance().clearSkin()
+            // Setting the skin now so that any setting that relies on skins (i.e., the HUD editor) receives
+            // the correct skin path.
+            Config.setSkinPath(path)
+            ResourceManager.getInstance().loadSkin(path)
+            GlobalManager.getInstance().engine.textureManager.reloadTextures()
+
+            mainThread {
+                loading.dismiss()
+                context.startActivity(Intent(context, MainActivity::class.java))
+                Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }
     }
