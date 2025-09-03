@@ -66,6 +66,9 @@ public class MenuItemBackground extends Sprite {
             return false;
         }
 
+        // Since this entity is "scrolling", the local Y coordinate may stay the same as the position of the card also
+        // moves. Using local coordinates here would cause scrolling cancellation below to not work as expected since
+        // the disposition stays the same regardless of scrolling distance.
         float[] coords = convertLocalToSceneCoordinates(pTouchAreaLocalX, pTouchAreaLocalY, tmp);
         float x = coords[0];
         float y = coords[1];
