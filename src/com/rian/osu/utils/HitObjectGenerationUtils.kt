@@ -211,7 +211,11 @@ object HitObjectGenerationUtils {
         positionInfos: List<HitObjectPositionInfo>,
         scope: CoroutineScope? = null
     ): List<HitObject> {
-        val workingObjects = positionInfos.map { WorkingObject(it) }
+        val workingObjects = positionInfos.map {
+            scope?.ensureActive()
+            WorkingObject(it)
+        }
+
         var previous: WorkingObject? = null
 
         for (i in workingObjects.indices) {
