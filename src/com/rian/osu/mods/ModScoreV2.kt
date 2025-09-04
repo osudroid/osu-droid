@@ -10,5 +10,8 @@ class ModScoreV2 : Mod() {
     override val type = ModType.Conversion
     override val isValidForMultiplayer = false
 
+    // Required so that non-host players keep the mod when they clear mods in multiplayer.
+    override val isValidForMultiplayerAsFreeMod = false
+
     override fun deepCopy() = ModScoreV2()
 }
