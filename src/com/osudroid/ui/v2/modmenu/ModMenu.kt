@@ -463,14 +463,25 @@ object ModMenu : UIScene() {
         cancelCalculationJob()
 
         val room = Multiplayer.room
+        val isHost = Multiplayer.isRoomHost
 
         enabledMods.toList().fastForEach {
-            // We do not want to remove mods that are used for win conditions in multiplayer.
-            if (room != null && room.winCondition == WinCondition.ScoreV2 && it.second is ModScoreV2) {
-                return@fastForEach
+            val mod = it.second
+
+            if (room != null) {
+                // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
+                // since only the host can change those mods.
+                if (!isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
+                    return@fastForEach
+                }
+
+                // We do not want to remove mods that are used for win conditions in multiplayer.
+                if (room.winCondition == WinCondition.ScoreV2 && mod is ModScoreV2) {
+                    return@fastForEach
+                }
             }
 
-            removeMod(it.second)
+            removeMod(mod)
         }
     }
 
