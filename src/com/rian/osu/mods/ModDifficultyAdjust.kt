@@ -30,7 +30,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     var cs by NullableFloatModSetting(
         name = "Circle size",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = cs,
+        defaultValue = null,
         minValue = 0f,
         maxValue = 15f,
         step = 0.1f,
@@ -44,7 +44,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     var ar by NullableFloatModSetting(
         name = "Approach rate",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = ar,
+        defaultValue = null,
         minValue = 0f,
         maxValue = 12.5f,
         step = 0.1f,
@@ -58,7 +58,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     var od by NullableFloatModSetting(
         name = "Overall difficulty",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = od,
+        defaultValue = null,
         minValue = 0f,
         maxValue = 11f,
         step = 0.1f,
@@ -72,7 +72,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     var hp by NullableFloatModSetting(
         name = "Health drain",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = hp,
+        defaultValue = null,
         minValue = 0f,
         maxValue = 11f,
         step = 0.1f,
@@ -80,6 +80,18 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         orderPosition = 3
     )
 
+    init {
+        // We set the default values here so that resetting the settings would reset them to null.
+        updateDefaultValue(::cs, cs)
+        updateDefaultValue(::ar, ar)
+        updateDefaultValue(::od, od)
+        updateDefaultValue(::hp, hp)
+
+        this.cs = cs
+        this.ar = ar
+        this.od = od
+        this.hp = hp
+    }
 
     override val name = "Difficulty Adjust"
     override val acronym = "DA"
@@ -203,7 +215,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         updateDefaultValue(::hp, difficulty.hp)
     }
 
-    private fun updateDefaultValue(property: KProperty0<*>, value: Float) {
+    private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
         property.isAccessible = true
 
         val delegate = property.getDelegate() as NullableFloatModSetting
