@@ -567,7 +567,7 @@ object ModMenu : UIScene() {
 
         modToggles.find { it.mod::class == mod::class }?.apply {
             isSelected = false
-            mod.settings.fastForEach { it.value = it.defaultValue }
+            mod.settings.fastForEach { it.reset() }
         }
 
         customizationMenu.onModRemoved(mod)
