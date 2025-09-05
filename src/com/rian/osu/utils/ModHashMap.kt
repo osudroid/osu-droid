@@ -91,10 +91,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Checks if this [ModHashMap] contains a [Mod].
      *
+     * Unlike other [contains] methods, this checks for both the type and the instance of the [Mod].
+     *
      * @param value The [Mod] to check for.
      * @return `true` if this [ModHashMap] contains the [Mod], `false` otherwise.
      */
-    operator fun contains(value: Mod) = value::class in this
+    operator fun contains(value: Mod) = value::class in this && this[value::class] == value
 
     /**
      * Gets a [Mod] of the specified type from this [ModHashMap].
@@ -126,11 +128,11 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Removes a [Mod] from this [ModHashMap].
      *
-     * @param key The [Mod] to remove.
+     * @param mod The [Mod] to remove.
      * @return The removed [Mod] instance, or `null` if the [Mod] does not exist in this [ModHashMap].
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Mod> remove(key: T) = remove(key::class.java) as? T
+    fun <T : Mod> remove(mod: T) = if (this[mod::class] == mod) remove(mod::class.java) as? T else null
 
     /**
      * Removes a [Mod] of the specified type from this [ModHashMap].
@@ -267,7 +269,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
                 return@fastForEach
             }
 
-            if (it in this@ModHashMap) {
+            if (it::class in this@ModHashMap) {
                 append(this@ModHashMap[it::class]!!.toString() + ",")
             }
         }

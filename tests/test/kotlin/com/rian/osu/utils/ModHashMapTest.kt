@@ -81,4 +81,34 @@ class ModHashMapTest {
             Assert.assertEquals(toDisplayModString(false), "HR,HD,DT")
         }
     }
+
+    @Test
+    fun `Test same type mod contains`() {
+        val firstMod = ModCustomSpeed(1.25f)
+        val secondMod = ModCustomSpeed(1.2f)
+
+        ModHashMap().apply {
+            put(firstMod)
+
+            Assert.assertTrue(firstMod::class in this)
+            Assert.assertTrue(firstMod in this)
+
+            Assert.assertTrue(secondMod::class in this)
+            Assert.assertFalse(secondMod in this)
+        }
+    }
+
+    @Test
+    fun `Test same type mod removal`() {
+        val firstMod = ModCustomSpeed(1.25f)
+        val secondMod = ModCustomSpeed(1.2f)
+
+        ModHashMap().apply {
+            put(firstMod)
+
+            Assert.assertTrue(firstMod in this)
+            Assert.assertNull(remove(secondMod))
+            Assert.assertNotNull(remove(firstMod))
+        }
+    }
 }
