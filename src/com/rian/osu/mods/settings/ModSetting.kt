@@ -2,6 +2,7 @@
 
 package com.rian.osu.mods.settings
 
+import com.rian.osu.mods.Mod
 import kotlin.properties.*
 import kotlin.reflect.*
 
@@ -40,6 +41,11 @@ open class ModSetting<V>(
     val initialValue = defaultValue
 
     /**
+     * The initial default value.
+     */
+    val initialDefaultValue = defaultValue
+
+    /**
      * The value itself.
      */
     open var value = defaultValue
@@ -49,6 +55,14 @@ open class ModSetting<V>(
      */
     val isDefault
         get() = value == defaultValue
+
+    /**
+     * Resets this [ModSetting] to its initial state.
+     */
+    fun reset() {
+        defaultValue = initialDefaultValue
+        value = initialValue
+    }
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): V {
         return value
