@@ -213,4 +213,10 @@ class ModDifficultyAdjustTest {
         difficultyAdjust.hp = 6f
         difficultyAdjustingMods.forEach { Assert.assertFalse(it.isCompatibleWith(difficultyAdjust)) }
     }
+
+    @Test
+    fun `Test default settings`() {
+        Assert.assertTrue(ModDifficultyAdjust().usesDefaultSettings)
+        Assert.assertFalse(ModDifficultyAdjust(cs = 4f).usesDefaultSettings)
+    }
 }

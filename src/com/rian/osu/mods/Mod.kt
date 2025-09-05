@@ -115,7 +115,7 @@ sealed class Mod {
     /**
      * Whether all [ModSetting]s in this [Mod] are set to their default values.
      */
-    val usesDefaultSettings
+    open val usesDefaultSettings
         get() = settings.all { it.isDefault }
 
     /**

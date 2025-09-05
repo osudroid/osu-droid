@@ -99,6 +99,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val type = ModType.Conversion
     override val requiresConfiguration = true
 
+    // This mod has a different default than others as the default value of settings change based on the beatmap.
+    override val usesDefaultSettings
+        get() = settings.all { it.value == it.initialDefaultValue }
+
     override val scoreMultiplier: Float
         get() {
             // Graph: https://www.desmos.com/calculator/yrggkhrkzz
