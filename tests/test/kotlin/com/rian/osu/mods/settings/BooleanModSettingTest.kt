@@ -1,6 +1,5 @@
-package com.rian.osu.mods
+package com.rian.osu.mods.settings
 
-import com.rian.osu.mods.settings.*
 import org.junit.Assert
 import org.junit.Test
 
