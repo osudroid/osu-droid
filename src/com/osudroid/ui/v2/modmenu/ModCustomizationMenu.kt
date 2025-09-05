@@ -11,6 +11,7 @@ import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import com.rian.osu.mods.settings.*
+import kotlin.reflect.KClass
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class ModCustomizationMenu : UIModal(
@@ -34,27 +35,32 @@ class ModCustomizationMenu : UIModal(
 
 ) {
 
-    private val modSettings: UILinearContainer = card[0]!!
+    private val modSettings = mutableMapOf<KClass<out Mod>, ModSettingsSection>()
+    private val modSettingsContainer: UILinearContainer = card[0]!!
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
 
 
     //region Mods
 
     fun onModAdded(mod: Mod) {
-        val settings = mod.settings
-
-        if (settings.isNotEmpty()) {
-            modSettings.attachChild(ModSettingsSection(mod, settings))
+        if (mod.settings.isEmpty()) {
+            return
         }
+
+        val section = ModSettingsSection(mod)
+
+        modSettings[mod::class]?.detachSelf()
+        modSettings[mod::class] = section
+
+        modSettingsContainer += section
     }
 
     fun onModRemoved(mod: Mod) {
-        modSettings.detachChild { it is ModSettingsSection && it.mod::class == mod::class }
+        modSettings[mod::class]?.detachSelf()
+        modSettings.remove(mod::class)
     }
 
-    fun isEmpty(): Boolean {
-        return modSettings.findChild { it is ModSettingsSection } == null
-    }
+    fun isEmpty() = modSettings.isEmpty()
 
     //endregion
 
@@ -99,7 +105,7 @@ class ModCustomizationMenu : UIModal(
     //endregion
 
 
-    private inner class ModSettingsSection(val mod: Mod, settings: List<ModSetting<*>>) : UILinearContainer() {
+    private inner class ModSettingsSection(val mod: Mod) : UILinearContainer() {
 
         init {
             orientation = Orientation.Vertical
@@ -136,7 +142,7 @@ class ModCustomizationMenu : UIModal(
                 }
             }
 
-            settings.fastForEach { +ModSettingComponent(mod, it) }
+            mod.settings.fastForEach { +ModSettingComponent(mod, it) }
         }
     }
 }
