@@ -25,7 +25,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContaine
             +nameInput
 
             +ModsIndicator().apply {
-                mods = ModMenu.enabledMods.serializeMods()
+                mods = ModMenu.enabledMods.serializeMods(includeIrrelevantMods = true)
                 padding = Vec4(24f, 24f, 24f, 12f)
             }
         }
