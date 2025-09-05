@@ -352,8 +352,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             // When the player is restarting, and they touch the layout, assume they want to change settings.
             // In that case, show this loading scene longer.
             if (isRestart) {
-                fadeTimeout = 1000L
-                minimumTimeout = 1000L
+                fadeTimeout = 1500L
+                minimumTimeout = 1500L
             }
 
             return super.onAreaTouched(event, localX, localY)
