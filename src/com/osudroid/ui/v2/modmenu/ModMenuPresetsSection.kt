@@ -66,18 +66,15 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
 
     fun onModsChanged() {
+        val enabledMods = ModMenu.enabledMods
+
+        addButton.isEnabled = enabledMods.isNotEmpty()
+
         toggleContainer.callOnChildren { toggle ->
             if (toggle is ModPresetToggle) {
-                toggle.isSelected = toggle.preset.mods == ModMenu.enabledMods
+                toggle.isSelected = toggle.preset.mods == enabledMods
             }
         }
-    }
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        addButton.isEnabled = ModMenu.enabledMods.isNotEmpty()
-
-        super.onManagedUpdate(deltaTimeSec)
     }
 
 
