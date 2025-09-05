@@ -542,7 +542,11 @@ object ModMenu : UIScene() {
         modToggles.fastForEach { button ->
 
             val wasSelected = button.isSelected
-            button.isSelected = button.mod in enabledMods
+            button.isSelected = button.mod::class in enabledMods
+
+            if (button.mod::class == mod::class) {
+                button.mod = mod
+            }
 
             // Handle incompatible mods with the selected mod.
             if (wasSelected && !button.isSelected) {
