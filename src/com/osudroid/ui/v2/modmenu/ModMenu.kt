@@ -36,6 +36,7 @@ import ru.nsu.ccfit.zuev.osu.helper.*
 import java.util.LinkedList
 import java.util.concurrent.CancellationException
 import kotlin.math.*
+import kotlin.reflect.KClass
 
 object ModMenu : UIScene() {
 
@@ -473,7 +474,7 @@ object ModMenu : UIScene() {
                 return@fastForEach
             }
 
-            removeMod(mod)
+            removeMod(mod::class)
         }
     }
 
@@ -558,20 +559,23 @@ object ModMenu : UIScene() {
         queueModChange(mod)
     }
 
-    fun removeMod(mod: Mod) {
+    fun removeMod(mod: Mod) = removeMod(mod::class)
 
-        if (mod !in enabledMods) {
+    fun removeMod(modClass: KClass<out Mod>) {
+
+        if (modClass !in enabledMods) {
             return
         }
-        enabledMods.remove(mod)
 
-        modToggles.find { it.mod::class == mod::class }?.apply {
-            isSelected = false
-            mod.settings.fastForEach { it.reset() }
-        }
+        val toggle = modToggles.find { it.mod::class == modClass } ?: return
 
-        customizationMenu.onModRemoved(mod)
-        queueModChange(mod)
+        enabledMods.remove(modClass)
+
+        toggle.isSelected = false
+        toggle.mod.settings.fastForEach { it.reset() }
+
+        customizationMenu.onModRemoved(toggle.mod)
+        queueModChange(toggle.mod)
     }
 
     //endregion
