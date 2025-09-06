@@ -273,9 +273,18 @@ public class Replay {
                         if (len > 0) {
                             data.tickSet = new BitSet();
                             byte[] bytes = new byte[len];
-                            if (os.read(bytes) > 0) {
-                                System.out.println("Read " + len + " bytes");
+                            int remainingLen = len;
+
+                            while (remainingLen > 0) {
+                                int readBytes = os.read(bytes, len - remainingLen, remainingLen);
+
+                                if (readBytes < 0) {
+                                    throw new EOFException("EOF reached when reading tickset with " + remainingLen + " bytes left to read");
+                                }
+
+                                remainingLen -= readBytes;
                             }
+
                             for (int j = 0; j < len * 8; j++) {
                                 data.tickSet.set(j, (bytes[len - j / 8 - 1] & 1 << (j % 8)) != 0);
                             }
