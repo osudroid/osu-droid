@@ -17,7 +17,7 @@ class HUDBackButton : HUDElement() {
 
     override val shouldBeShown = true
 
-    private val requiredPressTimeMs = Config.getInt("back_button_press_time", 300).toFloat()
+    private val requiredPressTimeMs = Config.getBackButtonPressTime().toFloat()
 
     private val arrow = UISprite().apply {
         textureRegion = ResourceManager.getInstance().getTexture("back-arrow")

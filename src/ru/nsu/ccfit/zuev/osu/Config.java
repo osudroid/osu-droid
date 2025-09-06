@@ -87,7 +87,8 @@ public class Config {
         RES_HEIGHT,
         spinnerStyle,
         metronomeSwitch,
-        minimumGameplaySynchronizationTime;
+        minimumGameplaySynchronizationTime,
+        backButtonPressTime;
 
     private static float soundVolume,
         bgmVolume,
@@ -230,6 +231,7 @@ public class Config {
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
         minimumGameplaySynchronizationTime = prefs.getInt("gameAudioSynchronizationThreshold", 20);
+        backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -782,6 +784,10 @@ public class Config {
 
     public static int getMinimumGameplaySynchronizationTime() {
         return minimumGameplaySynchronizationTime;
+    }
+
+    public static int getBackButtonPressTime() {
+        return backButtonPressTime;
     }
 
     // Shared Preferences
