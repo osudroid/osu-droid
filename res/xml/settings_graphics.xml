@@ -8,7 +8,8 @@
             android:defaultValue="false"
             android:key="showcursor"
             android:summary="@string/opt_showcursor_summary"
-            android:title="@string/opt_showcursor_title" />
+            android:title="@string/opt_showcursor_title"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <SeekBarPreference
             android:defaultValue="50"
@@ -17,7 +18,8 @@
             android:summary="@string/opt_cursor_size_summary"
             android:title="@string/opt_cursor_size"
             app:min="25"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -34,55 +36,64 @@
             android:defaultValue="true"
             android:key="dimHitObjects"
             android:summary="@string/opt_dim_hit_objects_summary"
-            android:title="@string/opt_dim_hit_objects_title" />
+            android:title="@string/opt_dim_hit_objects_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="comboburst"
             android:summary="@string/opt_combo_burst_summary"
-            android:title="@string/opt_combo_burst_title" />
+            android:title="@string/opt_combo_burst_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="images"
             android:summary="@string/opt_largeimages_summary"
-            android:title="@string/opt_largeimages_title" />
+            android:title="@string/opt_largeimages_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="animateFollowCircle"
             android:summary="@string/opt_animate_follow_circle_summary"
-            android:title="@string/opt_animate_follow_circle_title" />
+            android:title="@string/opt_animate_follow_circle_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="animateComboText"
             android:summary="@string/opt_animate_combo_text_summary"
-            android:title="@string/opt_animate_combo_text_title" />
+            android:title="@string/opt_animate_combo_text_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="snakingInSliders"
             android:summary="@string/opt_snakingInSliders_summary"
-            android:title="@string/opt_snakingInSliders_title" />
+            android:title="@string/opt_snakingInSliders_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="snakingOutSliders"
             android:summary="@string/opt_snakingOutSliders_summary"
-            android:title="@string/opt_snakingOutSliders_title" />
+            android:title="@string/opt_snakingOutSliders_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="noChangeDimInBreaks"
             android:summary="@string/opt_noChangeDimInBreaks_summary"
-            android:title="@string/opt_noChangeDimInBreaks_title" />
+            android:title="@string/opt_noChangeDimInBreaks_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="bursts"
             android:summary="@string/opt_bursts_summary"
-            android:title="@string/opt_bursts_title" />
+            android:title="@string/opt_bursts_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"

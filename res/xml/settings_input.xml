@@ -8,7 +8,7 @@
             android:key="block_areas"
             android:title="@string/block_area_preference_title"
             android:summary="@string/block_area_preference_summary"
-            app:layout="@layout/settings_preference_bottom" />
+            app:layout="@layout/settings_preference" />
 
         <SeekBarPreference
             android:defaultValue="300"
@@ -17,44 +17,50 @@
             android:title="@string/opt_backButtonPressTime_title"
             app:min="0"
             android:max="300"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="removeSliderLock"
             android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
             android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-            app:layout="@layout/settings_preference_checkbox_bottom"/>
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Vibration">
 
         <CheckBoxPreference
-                android:defaultValue="false"
-                android:key="vibrationCircle"
-                android:summary=""
-                android:title="Circle"/>
+            android:defaultValue="false"
+            android:key="vibrationCircle"
+            android:summary=""
+            android:title="Circle"
+            app:layout="@layout/settings_preference_checkbox" />
+
         <CheckBoxPreference
-                android:defaultValue="false"
-                android:key="vibrationSlider"
-                android:summary=""
-                android:title="Slider"/>
+            android:defaultValue="false"
+            android:key="vibrationSlider"
+            android:summary=""
+            android:title="Slider"
+            app:layout="@layout/settings_preference_checkbox" />
+
         <CheckBoxPreference
-                android:defaultValue="false"
-                android:key="vibrationSpinner"
-                android:summary=""
-                android:title="Spinner"/>
+            android:defaultValue="false"
+            android:key="vibrationSpinner"
+            android:summary=""
+            android:title="Spinner"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <SeekBarPreference
-                android:defaultValue="127"
-                android:key="seekBarVibrateIntensity"
-                android:title="@string/opt_seekBarVibrateIntensity_title"
-                android:summary="@string/opt_seekBarVibrateIntensity_summary"
-                android:min="1"
-                android:max="255"
-                app:showSeekBarValue="true"
-                app:layout="@layout/settings_preference_seekbar_bottom"/>
+            android:defaultValue="127"
+            android:key="seekBarVibrateIntensity"
+            android:title="@string/opt_seekBarVibrateIntensity_title"
+            android:summary="@string/opt_seekBarVibrateIntensity_summary"
+            android:min="1"
+            android:max="255"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom" />
 
     </PreferenceCategory>
 

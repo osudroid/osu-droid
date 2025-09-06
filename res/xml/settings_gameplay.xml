@@ -15,7 +15,7 @@
             android:key="hud_editor"
             android:summary="@string/opt_hudEditor_summary"
             android:title="@string/opt_hudEditor_title"
-            app:layout="@layout/settings_preference"/>
+            app:layout="@layout/settings_preference" />
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
@@ -52,17 +52,20 @@
             android:key="bgbrightness"
             android:summary="@string/opt_bgbrightness_summary"
             android:title="@string/opt_bgbrightness_title"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="keepBackgroundAspectRatio"
             android:summary="@string/opt_keep_background_aspect_ratio_summary"
-            android:title="@string/opt_keep_background_aspect_ratio_title" />
+            android:title="@string/opt_keep_background_aspect_ratio_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:key="enableStoryboard"
-            android:title="@string/opt_enableStoryboard_title" />
+            android:title="@string/opt_enableStoryboard_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:key="enableVideo"
@@ -81,7 +84,8 @@
             android:summary="@string/opt_setplayfield_summary"
             android:title="@string/opt_setplayfield_title"
             app:min="50"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <SeekBarPreference
             android:defaultValue="50"
@@ -89,7 +93,8 @@
             android:max="100"
             android:title="@string/opt_playfieldHorizontalPosition_title"
             android:summary="@string/opt_playfieldHorizontalPosition_summary"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <SeekBarPreference
             android:defaultValue="50"
@@ -97,7 +102,8 @@
             android:max="100"
             android:title="@string/opt_playfieldVerticalPosition_title"
             android:summary="@string/opt_playfieldVerticalPosition_summary"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -114,13 +120,15 @@
             android:defaultValue="false"
             android:key="hideInGameUI"
             android:summary="@string/opt_hide_ingame_ui_summary"
-            android:title="@string/opt_hide_ingame_ui_title" />
+            android:title="@string/opt_hide_ingame_ui_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="hideReplayMarquee"
             android:summary="@string/opt_hide_replay_marquee_summary"
-            android:title="@string/opt_hide_replay_marquee_title" />
+            android:title="@string/opt_hide_replay_marquee_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -133,7 +141,8 @@
             android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
-            android:title="@string/opt_display_score_statistics_title" />
+            android:title="@string/opt_display_score_statistics_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 
@@ -142,7 +151,8 @@
         <CheckBoxPreference
             android:key="useCustomColors"
             android:summary="@string/opt_combo_colors_summary"
-            android:title="@string/opt_combo_colors_title" />
+            android:title="@string/opt_combo_colors_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             alphaSlider="false"

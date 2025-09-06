@@ -10,7 +10,8 @@
             android:defaultValue="false"
             android:key="stayOnline"
             android:summary="@string/opt_stayonline_summary"
-            android:title="@string/opt_stayonline_title" />
+            android:title="@string/opt_stayonline_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -79,7 +80,8 @@
         <Preference
             android:key="backup"
             android:summary="@string/opt_config_backup_summary"
-            android:title="@string/opt_config_backup_title"/>
+            android:title="@string/opt_config_backup_title"
+            app:layout="@layout/settings_preference" />
 
         <Preference
             android:key="restore"

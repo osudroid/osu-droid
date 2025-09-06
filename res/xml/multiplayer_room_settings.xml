@@ -8,7 +8,8 @@
         <com.reco1l.osu.ui.InputPreference
             android:key="room_name"
             android:summary="@string/mp_room_name_summary"
-            android:title="@string/mp_room_name_title" />
+            android:title="@string/mp_room_name_title"
+            app:layout="@layout/settings_preference_input" />
 
         <com.reco1l.osu.ui.InputPreference
             android:key="room_password"
@@ -32,7 +33,8 @@
         <CheckBoxPreference
             android:key="room_free_mods"
             android:summary="@string/mp_room_free_mods_summary"
-            android:title="@string/mp_room_free_mods_title" />
+            android:title="@string/mp_room_free_mods_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/mp_team_versus_names"

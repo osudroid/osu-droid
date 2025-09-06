@@ -9,7 +9,8 @@
             android:key="bgmvolume"
             android:summary="@string/opt_bgm_volume_summary"
             android:title="@string/opt_bgm_volume_title"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
 
         <SeekBarPreference
             android:defaultValue="100"
@@ -71,7 +72,8 @@
             android:defaultValue="true"
             android:key="beatmapSounds"
             android:summary="@string/opt_sound_summary"
-            android:title="@string/opt_sound_title" />
+            android:title="@string/opt_sound_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"

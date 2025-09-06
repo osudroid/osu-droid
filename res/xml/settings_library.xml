@@ -8,25 +8,29 @@
             android:defaultValue="true"
             android:key="deleteosz"
             android:summary="@string/opt_deleteosz_summary"
-            android:title="@string/opt_deleteosz_title" />
+            android:title="@string/opt_deleteosz_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="scandownload"
             android:summary="@string/opt_scandownload_summary"
-            android:title="@string/opt_scandownload_title" />
+            android:title="@string/opt_scandownload_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="deleteUnimportedBeatmaps"
             android:summary="@string/opt_deleteUnimportedBeatmaps_summary"
-            android:title="@string/opt_deleteUnimportedBeatmaps_title" />
+            android:title="@string/opt_deleteUnimportedBeatmaps_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="deleteUnsupportedVideos"
             android:summary="@string/opt_delete_unsupported_videos_summary"
-            android:title="@string/opt_delete_unsupported_videos_title" />
+            android:title="@string/opt_delete_unsupported_videos_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <Preference
             android:key="importReplay"
