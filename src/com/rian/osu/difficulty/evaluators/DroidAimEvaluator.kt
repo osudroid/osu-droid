@@ -153,8 +153,11 @@ object DroidAimEvaluator {
             currentVelocity = (current.lazyJumpDistance + last.travelDistance) / current.strainTime
 
             // Scale with ratio of difference compared to half the max distance.
-            val distanceRatio =
-                sin(Math.PI / 2 * abs(prevVelocity - currentVelocity) / max(prevVelocity, currentVelocity)).pow(2.0)
+            val distanceRatio = DifficultyCalculationUtils.smoothstep(
+                abs(prevVelocity - currentVelocity) / max(prevVelocity, currentVelocity),
+                0.0,
+                1.0
+            )
 
             // Reward for % distance up to 125 / strainTime for overlaps where velocity is still changing.
             val overlapVelocityBuff =
