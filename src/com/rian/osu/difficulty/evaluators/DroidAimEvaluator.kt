@@ -178,6 +178,9 @@ object DroidAimEvaluator {
         // Add in acute angle bonus or wide angle bonus, whichever is larger.
         strain += max(acuteAngleBonus * ACUTE_ANGLE_MULTIPLIER, wideAngleBonus * WIDE_ANGLE_MULTIPLIER)
 
+        // Apply high circle size bonus.
+        strain *= current.smallCircleBonus
+
         // Add in additional slider velocity bonus.
         if (withSliders) {
             strain += (1 + sliderBonus * SLIDER_MULTIPLIER).pow(1.25) - 1
