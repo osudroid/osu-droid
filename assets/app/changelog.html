@@ -64,6 +64,37 @@ Version 1.8.5
 - Raise back button second press activation leniency in multiplayer based on back button press time setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This makes it easier to activate the HUD-provided back button when the setting is set to a high value.
 
+## osu!droid Star Rating and Performance Points Changes
+
+A newspost containing more details about these changes will be published after they are applied to global ranking.
+
+- Reduce rhythm difficulty of doubletappable objects <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - A group of objects has an increased doubletapability if all objects in the group can be hit at the same time and
+    award a perfect hit.
+- Remove high circle size bonus from slider aim difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Slider aim has a different size restriction from normal aim due to follow circle radius.
+- Apply reduced high circle size bonus to flow aim difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Flow aim difficulty does not scale as hard as snap aim with increased circle size.
+- Remove wide angle and wiggle bonuses rhythm requirements <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Previously, these bonuses required a rhythm difference of 1/4 beat or more.
+- Reduce wiggle bonus on relatively stacked objects <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - There are cases objects are stacked to the point where the player does not need to move their finger as much to hit
+    them. In such cases, awarding the full wiggle bonus is not justified.
+- Decouple velocity change bonus from wide angle bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - These bonuses are now applied separately, so they can both be awarded at the same time.
+- Reduce Relax Ok hit multiplier <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Reduces penalty of getting an Ok (100) hit with the Relax mod.
+- Use worst case instead of on average scenario when estimating tap deviation/unstable rate <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - The worst case scenario assumes that all imperfect hits occurred in most difficult sections of the beatmap. Because
+    one cannot be sure where the imperfect hits occurred, this is a safer assumption to make to prevent overweighted
+    scores.
+- Punish high tap deviation/unstable rate based on tapping difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - After a certain tap deviation/unstable rate, it is more likely that the player mashes through difficult sections of
+    the beatmap rather than just being inconsistent. This change penalizes the player for such cases.
+- Raise global multiplier for performance points <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - These changes result in a general loss across the board, so raising this multiplier helps to keep things where they
+    were before.
+
 # Bug Fixes
 
 - Fix text input caret position not being in the expected position when an initial value is provided <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
@@ -114,6 +145,7 @@ Version 1.8.5
 - Fix default Custom Speed and Difficulty Adjust mods not being saved in mod presets <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix slider head hit in replay using non-replay hit receptor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix potential incomplete reading of slider replay data <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix potential division by zero when calculating top weighted strains of a beatmap in difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
