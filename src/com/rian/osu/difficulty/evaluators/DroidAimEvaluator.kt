@@ -173,12 +173,10 @@ object DroidAimEvaluator {
         }
 
         strain += wiggleBonus * WIGGLE_MULTIPLIER
+        strain += velocityChangeBonus * VELOCITY_CHANGE_MULTIPLIER
 
-        // Add in acute angle bonus or wide angle bonus + velocity change bonus, whichever is larger.
-        strain += max(
-            acuteAngleBonus * ACUTE_ANGLE_MULTIPLIER,
-            wideAngleBonus * WIDE_ANGLE_MULTIPLIER + velocityChangeBonus * VELOCITY_CHANGE_MULTIPLIER
-        )
+        // Add in acute angle bonus or wide angle bonus, whichever is larger.
+        strain += max(acuteAngleBonus * ACUTE_ANGLE_MULTIPLIER, wideAngleBonus * WIDE_ANGLE_MULTIPLIER)
 
         // Add in additional slider velocity bonus.
         if (withSliders) {
