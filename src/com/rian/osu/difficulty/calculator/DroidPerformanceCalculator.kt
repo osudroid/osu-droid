@@ -6,6 +6,7 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
 import com.rian.osu.math.ErrorFunction
+import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.*
 import com.rian.osu.replay.SliderCheesePenalty
 import kotlin.math.*
@@ -164,6 +165,8 @@ class DroidPerformanceCalculator(
         // We make the punishment harsher punishment for such scenario.
         tapValue *= vibroFactor.pow(6) +
             (1 - vibroFactor.pow(6)) / (1 + exp((tapDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM)))
+
+        tapValue *= calculateTapHighDeviationNerf()
 
         // Scale the tap value with three-fingered penalty.
         tapValue /= tapPenalty
@@ -458,7 +461,34 @@ class DroidPerformanceCalculator(
         return@run deviation
     }
 
-        Double.POSITIVE_INFINITY
+    /**
+     * Calculates a multiplier for tap to account for improper tapping based on the deviation and tap difficulty.
+     *
+     * [Graph](https://www.desmos.com/calculator/z5l9ebrwpi)
+     */
+    private fun calculateTapHighDeviationNerf(): Double {
+        if (tapDeviation == Double.POSITIVE_INFINITY) {
+            return 0.0
+        }
+
+        val tapValue = (5 * max(1.0, difficultyAttributes.tapDifficulty / 0.0675) - 4).pow(3) / 100000
+
+        // Decide a point where the PP value achieved compared to the tap deviation is assumed to be tapped
+        // improperly. Any PP above this point is considered "excess" tap difficulty. This is used to cause
+        // PP above the cutoff to scale logarithmically towards the original tap value thus nerfing the value.
+        val excessTapDifficultyCutoff = 100 + 250 * (25 / tapDeviation).pow(6.5)
+
+        if (tapValue <= excessTapDifficultyCutoff) {
+            return 1.0
+        }
+
+        val scale = 50
+        val adjustedTapValue = scale * (ln((tapValue - excessTapDifficultyCutoff) / scale + 1) + excessTapDifficultyCutoff / scale)
+
+        // 250 UR and less are considered tapped correctly to ensure that normal scores will be punished as little as possible.
+        val t = 1 - Interpolation.reverseLinear(tapDeviation, 25.0, 30.0)
+
+        return Interpolation.linear(adjustedTapValue, tapValue, t) / tapValue
     }
 
     private fun getConvertedHitWindow(): HitWindow {
