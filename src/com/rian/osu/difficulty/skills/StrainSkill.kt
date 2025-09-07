@@ -79,6 +79,10 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         // This is what the top strain is if all strain values were identical.
         val consistentTopStrain = difficulty / 10
 
+        if (consistentTopStrain == 0.0) {
+            return objectStrains.size.toDouble()
+        }
+
         // Use a weighted sum of all strains.
         return objectStrains.fold(0.0) { acc, strain ->
             acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
