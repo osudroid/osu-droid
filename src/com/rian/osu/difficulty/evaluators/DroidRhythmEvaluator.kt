@@ -13,7 +13,7 @@ object DroidRhythmEvaluator {
     private const val HISTORY_TIME_MAX = 5 * 1000 // 5 seconds of calculateRhythmBonus max.
     private const val HISTORY_OBJECTS_MAX = 32
     private const val RHYTHM_OVERALL_MULTIPLIER = 0.95
-    private const val RHYTHM_RATIO_MULTIPLIER = 12.0
+    private const val RHYTHM_RATIO_MULTIPLIER = 15.0
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
@@ -83,18 +83,20 @@ object DroidRhythmEvaluator {
 
             // Calculate how much current delta difference deserves a rhythm bonus
             // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
-            val deltaDifferenceRatio = min(prevDelta, currentDelta) / max(prevDelta, currentDelta)
+            val deltaDifference = max(prevDelta, currentDelta) / min(prevDelta, currentDelta)
 
-            val currentRatio = 1 + RHYTHM_RATIO_MULTIPLIER * min(0.5, sin(Math.PI / deltaDifferenceRatio).pow(2))
+            // Take only the fractional part of the value since we are only interested in punishing multiples
+            val deltaDifferenceFraction = deltaDifference - truncate(deltaDifference)
+
+            val currentRatio = 1 + RHYTHM_RATIO_MULTIPLIER * min(0.5, DifficultyCalculationUtils.smoothstepBellCurve(deltaDifferenceFraction))
 
             // Reduce ratio bonus if delta difference is too big
-            val fraction = max(prevDelta / currentDelta, currentDelta / prevDelta)
-            val fractionMultiplier = (2 - fraction / 8).coerceIn(0.0, 1.0)
+            val differenceMultiplier = (2 - deltaDifference / 8).coerceIn(0.0, 1.0)
 
             val windowPenalty =
                 ((abs(prevDelta - currentDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon).coerceIn(0.0, 1.0)
 
-            var effectiveRatio = windowPenalty * currentRatio * fractionMultiplier
+            var effectiveRatio = windowPenalty * currentRatio * differenceMultiplier
 
             if (firstDeltaSwitch) {
                 if (abs(prevDelta - currentDelta) < deltaDifferenceEpsilon) {

@@ -24,10 +24,13 @@ class DroidRhythm(
     private val useSliderAccuracy = mods.any { it is ModScoreV2 }
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
-        current.rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current, useSliderAccuracy)
+        val rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current, useSliderAccuracy)
+        val doubletapness = 1 - current.doubletapness
+
+        current.rhythmMultiplier = rhythmMultiplier * doubletapness
 
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += current.rhythmMultiplier - 1
+        currentStrain += (rhythmMultiplier - 1) * doubletapness
 
         return currentStrain
     }
