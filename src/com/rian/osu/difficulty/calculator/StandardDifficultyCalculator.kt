@@ -135,7 +135,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         aimDifficulty = calculateRating(aim)
         aimDifficultSliderCount = aim.countDifficultSliders()
-        aimDifficultStrainCount = aim.countDifficultStrains()
+        aimDifficultStrainCount = aim.countTopWeightedStrains()
 
         if (aimDifficulty > 0) {
             val aimNoSlider = skills.find<StandardAim> { !it.withSliders }!!
@@ -151,7 +151,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         speedDifficulty = calculateRating(speed)
         speedNoteCount = speed.relevantNoteCount()
-        speedDifficultStrainCount = speed.countDifficultStrains()
+        speedDifficultStrainCount = speed.countTopWeightedStrains()
     }
 
     private fun StandardDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {

@@ -71,7 +71,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      *
      * The result is scaled by clock rate as it affects the total number of strains.
      */
-    fun countDifficultStrains(): Double {
+    fun countTopWeightedStrains(): Double {
         if (difficulty == 0.0) {
             return 0.0
         }

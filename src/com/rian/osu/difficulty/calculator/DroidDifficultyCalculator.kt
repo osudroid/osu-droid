@@ -150,7 +150,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val aim = skills.find<DroidAim> { it.withSliders } ?: return
 
         aimDifficulty = calculateRating(aim)
-        aimDifficultStrainCount = aim.countDifficultStrains()
+        aimDifficultStrainCount = aim.countTopWeightedStrains()
         aimDifficultSliderCount = aim.countDifficultSliders()
 
         val velocitySum = aim.sliderVelocities.sumOf { s -> s.difficultyRating }
@@ -185,7 +185,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val tap = skills.find<DroidTap> { it.considerCheesability } ?: return
 
         tapDifficulty = calculateRating(tap)
-        tapDifficultStrainCount = tap.countDifficultStrains()
+        tapDifficultStrainCount = tap.countTopWeightedStrains()
         speedNoteCount = tap.relevantNoteCount()
         averageSpeedDeltaTime = tap.relevantDeltaTime()
 
@@ -274,7 +274,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val flashlight = skills.find<DroidFlashlight> { it.withSliders } ?: return
 
         flashlightDifficulty = calculateRating(flashlight)
-        flashlightDifficultStrainCount = flashlight.countDifficultStrains()
+        flashlightDifficultStrainCount = flashlight.countTopWeightedStrains()
 
         if (flashlightDifficulty > 0) {
             val flashlightNoSlider = skills.find<DroidFlashlight> { !it.withSliders }!!
@@ -289,7 +289,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val visual = skills.find<DroidVisual> { it.withSliders } ?: return
 
         visualDifficulty = calculateRating(visual)
-        visualDifficultStrainCount = visual.countDifficultStrains()
+        visualDifficultStrainCount = visual.countTopWeightedStrains()
 
         if (visualDifficulty > 0) {
             val visualNoSlider = skills.find<DroidVisual> { !it.withSliders }!!
