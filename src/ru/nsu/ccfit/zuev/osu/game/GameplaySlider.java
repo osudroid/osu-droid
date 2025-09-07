@@ -1378,7 +1378,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private Color4 getSynesthesiaComboColor(double time) {
-        return new Color4(ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time)));
+        return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
     }
 
     @Override
