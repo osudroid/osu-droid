@@ -418,32 +418,45 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
-        // compute the deviation on circles.
-        if (relevantCountGreat > 0) {
-            // The probability that a player hits a circle is unknown, but we can estimate it to be
-            // the number of greats on circles divided by the number of circles, and then add one
-            // to the number of circles as a bias correction.
-            val greatProbabilityCircle =
-                relevantCountGreat / (speedNoteCount - relevantCountMiss - relevantCountMeh + 1)
+        // The sample proportion of successful hits.
+        val n = max(1.0, relevantCountGreat + relevantCountOk)
 
-            // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
-            // Begin with the normal distribution first.
-            var deviationOnCircles = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityCircle))
+        // 99% critical value for the normal distribution (one-tailed).
+        val z = 2.32634787404
 
-            deviationOnCircles *=
-                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnCircles).pow(2)) /
-                        (deviationOnCircles * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnCircles))))
+        // Proportion of greats hit on circles, ignoring misses and 50s.
+        val p = relevantCountGreat / n
 
-            // Then compute the variance for 50s.
-            val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
+        // We can be 99% confident that the population proportion is at least this value.
+        val pLowerBound = (n * p + z * z / 2) / (n + z * z) - z / (n + z * z) * sqrt(n * p * (1 - p) + z * z / 4)
+        var deviation: Double
 
-            // Find the total deviation.
-            return@run sqrt(
-                ((relevantCountGreat + relevantCountOk) * deviationOnCircles.pow(2) + relevantCountMeh * mehVariance) /
-                    (relevantCountGreat + relevantCountOk + relevantCountMeh)
-            )
+        // Tested max precision for the deviation calculation.
+        if (pLowerBound > 0.01) {
+            // Compute the deviation assuming greats and oks are normally distributed.
+            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(pLowerBound))
+
+            // Subtract the deviation provided by tails that land outside the ok hit window from the deviation computed above.
+            // This is equivalent to calculating the deviation of a normal distribution truncated at +-okHitWindow.
+            val okHitWindowTailAmount = sqrt(2 / Math.PI) * okWindow *
+                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviation)))
+
+            deviation *= sqrt(1 - okHitWindowTailAmount)
+        } else {
+            // A tested limit value for the case of a score only containing oks.
+            deviation = okWindow / sqrt(3.0)
         }
+
+        // Compute and add the variance for mehs, assuming that they are uniformly distributed.
+        val mehVariance = (mehWindow.pow(2) + okWindow * mehWindow + okWindow.pow(2)) / 3
+
+        // Find the total deviation.
+        deviation = sqrt(
+            ((relevantCountGreat + relevantCountOk) * deviation.pow(2) + relevantCountMeh * mehVariance) / (relevantCountGreat + relevantCountOk + relevantCountMeh)
+        )
+
+        return@run deviation
+    }
 
         Double.POSITIVE_INFINITY
     }
