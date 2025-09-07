@@ -406,14 +406,17 @@ class DroidPerformanceCalculator(
         // Assume a fixed ratio of non-300s hit in speed notes based on speed note count ratio and OD.
         // Graph: https://www.desmos.com/calculator/31argjcxqc
         val speedNoteRatio = speedNoteCount / totalHits
-
-        val nonGreatCount = countOk + countMeh + countMiss
         val nonGreatRatio = 1 - (exp(sqrt(greatWindow)) + 1.0).pow(1 - speedNoteRatio) / exp(sqrt(greatWindow))
 
-        val relevantCountGreat = max(0.0, speedNoteCount - nonGreatCount * nonGreatRatio)
-        val relevantCountOk = max(0.0, countOk * nonGreatRatio)
-        val relevantCountMeh = max(0.0, countMeh * nonGreatRatio)
-        val relevantCountMiss = max(0.0, countMiss * nonGreatRatio)
+        // Assume worst case - all non-300s happened in speed notes.
+        val relevantCountMiss = min(countMiss * nonGreatRatio, speedNoteCount)
+        val relevantCountMeh = min(countMeh * nonGreatRatio, speedNoteCount - relevantCountMiss)
+        val relevantCountOk = min(countOk * nonGreatRatio, speedNoteCount - relevantCountMiss - relevantCountMeh)
+        val relevantCountGreat = max(0.0, speedNoteCount - relevantCountMiss - relevantCountMeh - relevantCountOk)
+
+        if (relevantCountGreat + relevantCountOk + relevantCountMeh <= 0) {
+            return@run Double.POSITIVE_INFINITY
+        }
 
         // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
         // compute the deviation on circles.
