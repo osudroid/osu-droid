@@ -7,7 +7,6 @@ import com.rian.osu.mods.settings.NullableFloatModSetting
 import com.rian.osu.utils.ModHashMap
 import com.rian.util.toFloatWithCommaSeparator
 import kotlin.collections.forEach
-import kotlin.collections.set
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty0
 import kotlin.reflect.full.createInstance
@@ -21,50 +20,50 @@ object LegacyModConverter {
     /**
      * All [Mod]s that can be stored in the legacy mods format by their respective [GameMod].
      */
-    val gameModMap: Map<GameMod, KClass<out Mod>> = mutableMapOf<GameMod, KClass<out Mod>>().also {
-        it[GameMod.MOD_AUTO] = ModAutoplay::class
-        it[GameMod.MOD_AUTOPILOT] = ModAutopilot::class
-        it[GameMod.MOD_DOUBLETIME] = ModDoubleTime::class
-        it[GameMod.MOD_EASY] = ModEasy::class
-        it[GameMod.MOD_FLASHLIGHT] = ModFlashlight::class
-        it[GameMod.MOD_HALFTIME] = ModHalfTime::class
-        it[GameMod.MOD_HARDROCK] = ModHardRock::class
-        it[GameMod.MOD_HIDDEN] = ModHidden::class
-        it[GameMod.MOD_TRACEABLE] = ModTraceable::class
-        it[GameMod.MOD_NIGHTCORE] = ModNightCore::class
-        it[GameMod.MOD_NOFAIL] = ModNoFail::class
-        it[GameMod.MOD_PERFECT] = ModPerfect::class
-        it[GameMod.MOD_PRECISE] = ModPrecise::class
-        it[GameMod.MOD_REALLYEASY] = ModReallyEasy::class
-        it[GameMod.MOD_RELAX] = ModRelax::class
-        it[GameMod.MOD_SCOREV2] = ModScoreV2::class
-        it[GameMod.MOD_SMALLCIRCLE] = ModSmallCircle::class
-        it[GameMod.MOD_SUDDENDEATH] = ModSuddenDeath::class
-    }
+    val gameModMap: Map<GameMod, KClass<out Mod>> = mutableMapOf(
+        GameMod.MOD_AUTO to ModAutoplay::class,
+        GameMod.MOD_AUTOPILOT to ModAutopilot::class,
+        GameMod.MOD_DOUBLETIME to ModDoubleTime::class,
+        GameMod.MOD_EASY to ModEasy::class,
+        GameMod.MOD_FLASHLIGHT to ModFlashlight::class,
+        GameMod.MOD_HALFTIME to ModHalfTime::class,
+        GameMod.MOD_HARDROCK to ModHardRock::class,
+        GameMod.MOD_HIDDEN to ModHidden::class,
+        GameMod.MOD_TRACEABLE to ModTraceable::class,
+        GameMod.MOD_NIGHTCORE to ModNightCore::class,
+        GameMod.MOD_NOFAIL to ModNoFail::class,
+        GameMod.MOD_PERFECT to ModPerfect::class,
+        GameMod.MOD_PRECISE to ModPrecise::class,
+        GameMod.MOD_REALLYEASY to ModReallyEasy::class,
+        GameMod.MOD_RELAX to ModRelax::class,
+        GameMod.MOD_SCOREV2 to ModScoreV2::class,
+        GameMod.MOD_SMALLCIRCLE to ModSmallCircle::class,
+        GameMod.MOD_SUDDENDEATH to ModSuddenDeath::class
+    )
 
     /**
      * All [Mod]s that can be stored in the legacy mods format by their respective encode character.
      */
-    val legacyStorableMods: Map<Char, KClass<out Mod>> = mutableMapOf<Char, KClass<out Mod>>().also {
-        it['a'] = ModAutoplay::class
-        it['b'] = ModTraceable::class
-        it['c'] = ModNightCore::class
-        it['d'] = ModDoubleTime::class
-        it['e'] = ModEasy::class
-        it['f'] = ModPerfect::class
-        it['h'] = ModHidden::class
-        it['i'] = ModFlashlight::class
-        it['l'] = ModReallyEasy::class
-        it['m'] = ModSmallCircle::class
-        it['n'] = ModNoFail::class
-        it['p'] = ModAutopilot::class
-        it['r'] = ModHardRock::class
-        it['s'] = ModPrecise::class
-        it['t'] = ModHalfTime::class
-        it['u'] = ModSuddenDeath::class
-        it['v'] = ModScoreV2::class
-        it['x'] = ModRelax::class
-    }
+    val legacyStorableMods: Map<Char, KClass<out Mod>> = mutableMapOf(
+        'a' to ModAutoplay::class,
+        'b' to ModTraceable::class,
+        'c' to ModNightCore::class,
+        'd' to ModDoubleTime::class,
+        'e' to ModEasy::class,
+        'f' to ModPerfect::class,
+        'h' to ModHidden::class,
+        'i' to ModFlashlight::class,
+        'l' to ModReallyEasy::class,
+        'm' to ModSmallCircle::class,
+        'n' to ModNoFail::class,
+        'p' to ModAutopilot::class,
+        'r' to ModHardRock::class,
+        's' to ModPrecise::class,
+        't' to ModHalfTime::class,
+        'u' to ModSuddenDeath::class,
+        'v' to ModScoreV2::class,
+        'x' to ModRelax::class
+    )
 
     /**
      * Converts legacy [GameMod]s to new [Mod]s.
