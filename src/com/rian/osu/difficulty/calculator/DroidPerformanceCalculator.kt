@@ -44,15 +44,14 @@ class DroidPerformanceCalculator(
             if (mods.any { m -> m is ModRelax }) {
                 // Graph: https://www.desmos.com/calculator/bc9eybdthb
                 // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-                val okMultiplier = max(
+                val okMultiplier = 0.75 * max(
                     0.0,
-                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(1.8)
-                    else 1.0
+                    if (overallDifficulty > 0) 1 - overallDifficulty / 13.33 else 1.0
                 )
+
                 val mehMultiplier = max(
                     0.0,
-                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5)
-                    else 1.0
+                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5) else 1.0
                 )
 
                 // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
