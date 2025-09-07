@@ -34,6 +34,18 @@ object DifficultyCalculationUtils {
 
     /**
      * Calculates an S-shaped [logistic function](https://en.wikipedia.org/wiki/Logistic_function)
+     * with exponent at [exponent].
+     *
+     * @param exponent The exponent to calculate the function for.
+     * @param maxValue Maximum value returnable by the function.
+     * @returns The output of the logistic function calculated at [exponent].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun logistic(exponent: Double, maxValue: Double = 1.0) = maxValue / (1 + exp(exponent))
+
+    /**
+     * Calculates an S-shaped [logistic function](https://en.wikipedia.org/wiki/Logistic_function)
      * with offset at [x].
      *
      * @param x The value to calculate the function for.
@@ -77,5 +89,21 @@ object DifficultyCalculationUtils {
         return t * t * t * (t * (t * 6 - 15) + 10)
     }
 
+    /**
+     * Calculates a [smoothstep bell curve](https://en.wikipedia.org/wiki/Smoothstep) function that returns 1 for
+     * when [x] is equal to [mean], and smoothly reducing its value to 0 over [width].
+     *
+     * @param x The value to calculate the function for.
+     * @param mean The value of [x] for which the return value will be the highest (=1).
+     * @param width The range `[mean - width, mean + width]` where the function will change values.
+     * @return The output of the smoothstep bell curve function calculated at [x].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun smoothstepBellCurve(x: Double, mean: Double = 0.5, width: Double = 0.5): Double {
+        var xAdj = x - mean
+        xAdj = if (xAdj > 0) width - xAdj else width + xAdj
 
+        return smoothstep(xAdj, 0.0, width)
+    }
 }
