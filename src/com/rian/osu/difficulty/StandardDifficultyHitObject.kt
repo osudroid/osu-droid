@@ -2,7 +2,7 @@ package com.rian.osu.difficulty
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
-import kotlin.math.min
+import kotlin.math.max
 
 /**
  * Represents a [HitObject] with additional information for osu!standard difficulty calculation.
@@ -36,19 +36,5 @@ class StandardDifficultyHitObject(
     index: Int
 ) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Standard
-
-    override val scalingFactor: Float
-        get() {
-            // We will scale distances by this factor, so we can assume a uniform CircleSize among beatmaps.
-            val radius = obj.difficultyRadius.toFloat()
-            var scalingFactor = NORMALIZED_RADIUS / radius
-
-            // High circle size (small CS) bonus
-            if (radius < 30) {
-                scalingFactor *= 1 + min(30 - radius, 5.0f) / 50
-            }
-
-            return scalingFactor
-        }
-
+    override val smallCircleBonus = max(1.0, 1 + (30 - obj.difficultyRadius) / 40)
 }

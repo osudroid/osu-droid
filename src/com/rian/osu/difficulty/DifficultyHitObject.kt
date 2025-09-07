@@ -150,8 +150,12 @@ abstract class DifficultyHitObject(
     @JvmField
     val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200f) * 2 / clockRate
 
+    /**
+     * Selective bonus for beatmaps with higher circle size.
+     */
+    abstract val smallCircleBonus: Double
+
     protected abstract val mode: GameMode
-    protected abstract val scalingFactor: Float
 
     protected open val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
     private val assumedSliderRadius = NORMALIZED_RADIUS * 1.8f
@@ -260,6 +264,13 @@ abstract class DifficultyHitObject(
         // is a spinner or there is no object before the current object.
         if (lastObj == null || obj is Spinner || lastObj is Spinner) {
             return
+        }
+
+        // We will scale distances by this factor, so we can assume a uniform circle size among beatmaps.
+        var scalingFactor = NORMALIZED_RADIUS / obj.difficultyRadius.toFloat()
+
+        if (mode == GameMode.Standard && obj.difficultyRadius < 30) {
+            scalingFactor *= 1 + min(30 - obj.difficultyRadius.toFloat(), 5f) / 50
         }
 
         val lastCursorPosition =
