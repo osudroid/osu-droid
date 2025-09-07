@@ -505,6 +505,6 @@ class DroidPerformanceCalculator(
     }
 
     companion object {
-        const val FINAL_MULTIPLIER = 1.24
+        const val FINAL_MULTIPLIER = 1.25
     }
 }
