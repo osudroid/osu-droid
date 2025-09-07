@@ -14,7 +14,7 @@ import kotlin.math.*
  */
 object DroidAimEvaluator {
     private const val WIDE_ANGLE_MULTIPLIER = 1.5
-    private const val ACUTE_ANGLE_MULTIPLIER = 2.6
+    private const val ACUTE_ANGLE_MULTIPLIER = 2.55
     private const val SLIDER_MULTIPLIER = 1.35
     private const val VELOCITY_CHANGE_MULTIPLIER = 0.75
     private const val WIGGLE_MULTIPLIER = 1.02
@@ -96,31 +96,33 @@ object DroidAimEvaluator {
         // Start strain with regular velocity.
         var strain = currentVelocity
 
-        if (
-        // If rhythms are the same.
-            max(current.strainTime, last.strainTime) < 1.25 * min(current.strainTime, last.strainTime) &&
-            current.angle != null && last.angle != null
-        ) {
+        if (current.angle != null && last.angle != null) {
             val currentAngle = current.angle!!
             val lastAngle = last.angle!!
 
             // Rewarding angles, take the smaller velocity as base.
             val angleBonus = min(currentVelocity, prevVelocity)
+
+            // If rhythms are the same.
+            if (max(current.strainTime, last.strainTime) < 1.25 * min(current.strainTime, last.strainTime)) {
+                acuteAngleBonus = calculateAcuteAngleBonus(currentAngle)
+
+                acuteAngleBonus *= 0.08 + 0.92 * (1 - min(acuteAngleBonus, calculateAcuteAngleBonus(lastAngle).pow(3)))
+
+                // Apply acute angle bonus for BPM above 300 1/2 and distance more than one diameter
+                acuteAngleBonus *=
+                    angleBonus *
+                    DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 400.0) *
+                    DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, diameter.toDouble(), diameter * 2.0)
+            }
+
             wideAngleBonus = calculateWideAngleBonus(currentAngle)
-            acuteAngleBonus = calculateAcuteAngleBonus(currentAngle)
 
             // Penalize angle repetition.
             wideAngleBonus *= 1 - min(wideAngleBonus, calculateWideAngleBonus(lastAngle).pow(3))
-            acuteAngleBonus *= 0.08 + 0.92 * (1 - min(acuteAngleBonus, calculateAcuteAngleBonus(lastAngle).pow(3)))
 
             // Apply full wide angle bonus for distance more than one diameter.
             wideAngleBonus *= angleBonus * DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, 0.0, diameter.toDouble())
-
-            // Apply acute angle bonus for BPM above 300 1/2 and distance more than one diameter
-            acuteAngleBonus *=
-                angleBonus *
-                DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 400.0) *
-                DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, diameter.toDouble(), diameter * 2.0)
 
             // Apply wiggle bonus for jumps that are [radius, 3*diameter] in distance, with < 110 angle
             // https://www.desmos.com/calculator/dp0v0nvowc
