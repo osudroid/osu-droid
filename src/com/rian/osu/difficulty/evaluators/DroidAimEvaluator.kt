@@ -208,7 +208,8 @@ object DroidAimEvaluator {
             travelDistance + current.minimumJumpDistance
         ) / SINGLE_SPACING_THRESHOLD).pow(3.5)
 
-        return 200 * speedBonus * shortDistancePenalty / current.strainTime
+        // Apply reduced small circle bonus for flow aim difficulty since it does not scale as hard as snap aim.
+        return 200 * speedBonus * sqrt(current.smallCircleBonus) * shortDistancePenalty / current.strainTime
     }
 
     /**
