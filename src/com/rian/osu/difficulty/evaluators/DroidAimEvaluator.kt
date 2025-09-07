@@ -58,6 +58,7 @@ object DroidAimEvaluator {
 
         val last = current.previous(0)!!
         val lastLast = current.previous(1)!!
+        val last2 = current.previous(2)
 
         val radius = DifficultyHitObject.NORMALIZED_RADIUS
         val diameter = DifficultyHitObject.NORMALIZED_DIAMETER
@@ -133,6 +134,17 @@ object DroidAimEvaluator {
                 DifficultyCalculationUtils.smootherstep(last.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
                 Interpolation.reverseLinear(last.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
                 DifficultyCalculationUtils.smootherstep(lastAngle, 110.0.toRadians(), 60.0.toRadians())
+
+            if (last2 != null) {
+                // If objects just go back and forth through a middle point - don't give as much wide bonus.
+                // Use previous(2) and previous(0) because angles calculation is done prevprev-prev-curr, so any
+                // object's angle's center point is always the previous object.
+                val distance = last2.obj.difficultyStackedPosition.getDistance(last.obj.difficultyStackedPosition)
+
+                if (distance < 1) {
+                    wideAngleBonus *= 1 - 0.35 * (1 - distance)
+                }
+            }
         }
 
         if (max(prevVelocity, currentVelocity) != 0.0) {
