@@ -365,7 +365,6 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     // have the ability to calculate slider durations in this context.
     val lastTime = data.hitObjects.objects.lastOrNull()?.endTime ?: timingPoints.lastOrNull()?.time ?: 0.0
 
-
     timingPoints.fastForEachIndexed { i, t ->
         scope?.ensureActive()
 
@@ -396,7 +395,6 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
 
     if (bpmOverall == 0f) {
         bpmOverall = 60f
-        bpmOverallDuration = 0.0
     }
 
     var droidStarRating: Float? = null
@@ -477,8 +475,11 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(beatmapInfo: BeatmapInfo)
 
-    @Query("UPDATE BeatmapInfo SET droidStarRating = null, standardStarRating = null")
-    fun resetStarRatings()
+    @Query("UPDATE BeatmapInfo SET droidStarRating = null")
+    fun resetDroidStarRatings()
+
+    @Query("UPDATE BeatmapInfo SET standardStarRating = null")
+    fun resetStandardStarRatings()
 
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
     fun deleteBeatmapSet(directory: String)

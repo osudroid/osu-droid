@@ -4,13 +4,14 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import com.osudroid.ui.v1.LoadingBadgeFragment
 import com.osudroid.utils.async
-import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.stopAsync
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.parser.BeatmapParser
-import com.rian.osu.difficulty.calculator.DifficultyCalculator
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator
+import com.rian.osu.difficulty.calculator.DroidDifficultyCalculator
+import com.rian.osu.difficulty.calculator.StandardDifficultyCalculator
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -40,12 +41,23 @@ object DifficultyCalculationManager {
     @JvmStatic
     fun checkForOutdatedStarRatings(): CompletableFuture<Unit> = stopCalculation().thenApply {
         preferences.apply {
-            if (getLong("starRatingVersion", 0) >= DifficultyCalculator.VERSION) {
-                return@apply
+            val editor = edit()
+
+            // Before per-star rating versioning, the version was stored in this key.
+            // If both star ratings have been updated after this, this key is no longer needed and can be removed.
+            val oldStarRatingVersion = getLong("starRatingVersion", 0)
+
+            if (getLong("droidStarRatingVersion", oldStarRatingVersion) < DroidDifficultyCalculator.VERSION) {
+                DatabaseManager.beatmapInfoTable.resetDroidStarRatings()
+                editor.putLong("droidStarRatingVersion", DroidDifficultyCalculator.VERSION)
             }
 
-            DatabaseManager.beatmapInfoTable.resetStarRatings()
-            edit().putLong("starRatingVersion", DifficultyCalculator.VERSION).apply()
+            if (getLong("standardStarRatingVersion", oldStarRatingVersion) < StandardDifficultyCalculator.VERSION) {
+                DatabaseManager.beatmapInfoTable.resetStandardStarRatings()
+                editor.putLong("standardStarRatingVersion", StandardDifficultyCalculator.VERSION)
+            }
+
+            editor.apply()
         }
     }
 
@@ -57,8 +69,8 @@ object DifficultyCalculationManager {
         }
 
         val totalBeatmaps = LibraryManager.getLibrary().sumOf { it.beatmaps.size }
-
         val pendingBeatmaps = LibraryManager.getLibrary().flatMap { set -> set.beatmaps.filter { it.needsDifficultyCalculation } }
+
         if (pendingBeatmaps.isEmpty()) {
             return
         }
@@ -91,22 +103,32 @@ object DifficultyCalculationManager {
                             val beatmapInfo = chunk[i]
 
                             try {
-                                val msStartTime = System.currentTimeMillis()
+                                // The beatmap may already be calculated when the player selects the beatmap in song select.
+                                if (beatmapInfo.needsDifficultyCalculation) {
+                                    val msStartTime = System.currentTimeMillis()
 
-                                BeatmapParser(beatmapInfo.path, this).use { parser ->
+                                    val beatmap = BeatmapParser(beatmapInfo.path, this).use { parser ->
+                                        parser.parse(true)!!
+                                    }
 
-                                    val data = parser.parse(true)!!
-                                    val newInfo =
-                                        BeatmapInfo(data, beatmapInfo.dateImported, true, this)
-                                    beatmapInfo.apply(newInfo)
-                                    DatabaseManager.beatmapInfoTable.update(newInfo)
-                                }
+                                    if (beatmapInfo.droidStarRating == null) {
+                                        val attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap, scope = this)
+                                        beatmapInfo.droidStarRating = attributes.starRating.toFloat()
+                                    }
 
-                                if (BuildConfig.DEBUG) {
-                                    Log.i(
-                                        "DifficultyCalculation",
-                                        "Calculated difficulty for ${beatmapInfo.path}, took ${System.currentTimeMillis() - msStartTime}ms."
-                                    )
+                                    if (beatmapInfo.standardStarRating == null) {
+                                        val attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap, scope = this)
+                                        beatmapInfo.standardStarRating = attributes.starRating.toFloat()
+                                    }
+
+                                    DatabaseManager.beatmapInfoTable.update(beatmapInfo)
+
+                                    if (BuildConfig.DEBUG) {
+                                        Log.i(
+                                            "DifficultyCalculation",
+                                            "Calculated difficulty for ${beatmapInfo.path}, took ${System.currentTimeMillis() - msStartTime}ms."
+                                        )
+                                    }
                                 }
 
                                 calculated++

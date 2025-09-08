@@ -159,4 +159,11 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         flashlightDifficulty = calculateRating(flashlight)
     }
+
+    companion object {
+        /**
+         * The epoch time of the last change to difficulty calculation, in milliseconds.
+         */
+        const val VERSION = 1746800175000
+    }
 }

@@ -302,4 +302,11 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)
+
+    companion object {
+        /**
+         * The epoch time of the last change to difficulty calculation, in milliseconds.
+         */
+        const val VERSION = 1746800175000
+    }
 }
