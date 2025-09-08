@@ -2454,7 +2454,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void removeAllCursors() {
-        int time = GlobalManager.getInstance().getSongService().getPosition();
+        float offset = previousFrameTime > 0
+                ? (System.currentTimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                : 0;
+        int time = (int) (elapsedTime * 1000 + offset);
 
         for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
