@@ -112,11 +112,11 @@ public class BassAudioFunc {
         };
     }
 
-    public int getPosition() {
+    public double getPosition() {
         if (channel != 0) {
             long pos = BASS.BASS_ChannelGetPosition(channel, BASS.BASS_POS_BYTE);
             if (pos != -1) {
-                return (int) (BASS.BASS_ChannelBytes2Seconds(channel, pos) * 1000);
+                return BASS.BASS_ChannelBytes2Seconds(channel, pos) * 1000;
             }
         }
         return 0;

@@ -144,6 +144,10 @@ public class SongService extends Service {
     }
 
     public int getPosition() {
+        return (int) getPositionPrecise();
+    }
+
+    public double getPositionPrecise() {
         if (audioFunc != null) {
             return audioFunc.getPosition();
         }
