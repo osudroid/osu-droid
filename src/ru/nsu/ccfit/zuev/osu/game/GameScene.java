@@ -2926,8 +2926,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return id;
     }
 
-    private void calculateAllSliderPaths(final CoroutineScope scope) {
-        ensureActive(scope.getCoroutineContext());
+    private void calculateAllSliderPaths(@Nullable final CoroutineScope scope) {
+        if (scope != null) {
+            ensureActive(scope.getCoroutineContext());
+        }
+
         var playableBeatmap = this.playableBeatmap;
 
         if (playableBeatmap == null || playableBeatmap.getHitObjects().getSliderCount() == 0) {
@@ -2939,7 +2942,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         sliderIndex = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
-            ensureActive(scope.getCoroutineContext());
+            if (scope != null) {
+                ensureActive(scope.getCoroutineContext());
+            }
 
             if (!(obj instanceof Slider slider)) {
                 continue;
