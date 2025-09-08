@@ -1896,21 +1896,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         cancelStoryboardLoading();
         cancelVideoLoading();
 
-        // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = elapsedTime * 1000;
+        var selectedBeatmap = GlobalManager.getInstance().getSelectedBeatmap();
+        var songService = GlobalManager.getInstance().getSongService();
         var songMenu = GlobalManager.getInstance().getSongMenu();
-        if (totalLength - mSecPassed > 10000 && mSecPassed / totalLength < 0.98f) {
-            var songService = GlobalManager.getInstance().getSongService();
 
-            if (songService != null) {
-                songService.play();
+        if (songService != null && selectedBeatmap != null) {
+            // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
+            boolean continuePreview = mSecPassed < totalLength - 10000 && mSecPassed / totalLength < 0.98f;
+            int previewTime = continuePreview ? songService.getPosition() : selectedBeatmap.getPreviewTime();
+
+            songMenu.playMusic(selectedBeatmap.getAudioPath(), previewTime);
+
+            if (continuePreview) {
                 songMenu.startMusicVolumeAnimation(0.3f);
-            }
-        } else {
-            var selectedBeatmap = GlobalManager.getInstance().getSelectedBeatmap();
-
-            if (selectedBeatmap != null) {
-                songMenu.playMusic(selectedBeatmap.getAudioPath(), selectedBeatmap.getPreviewTime());
             }
         }
 
