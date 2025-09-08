@@ -2926,8 +2926,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void calculateAllSliderPaths(final CoroutineScope scope) {
         ensureActive(scope.getCoroutineContext());
+        var playableBeatmap = this.playableBeatmap;
 
-        if (playableBeatmap.getHitObjects().getSliderCount() == 0) {
+        if (playableBeatmap == null || playableBeatmap.getHitObjects().getSliderCount() == 0) {
             return;
         }
 
