@@ -37,7 +37,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return A set of [Mod]s that change star rating.
      */
     fun retainDifficultyAdjustmentMods(mods: Iterable<Mod>?) = mods?.toMutableSet()?.also {
-        it.retainAll { mod -> difficultyAdjustmentMods.any { it.isInstance(mod) } }
+        it.retainAll { mod -> difficultyAdjustmentMods.any { m -> m.isInstance(mod) } }
     } ?: emptySet()
 
     /**
@@ -194,13 +194,6 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return The [PlayableBeatmap].
      */
     protected abstract fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?): TBeatmap
-
-    companion object {
-        /**
-         * The epoch time of the last change to the difficulty calculator, in milliseconds.
-         */
-        const val VERSION = 1746800175000
-    }
 }
 
 /**
