@@ -130,13 +130,12 @@ class SendingPanel(
         )
 
         // Obtain the maximum height of all columns
-        val columnMaxHeight = max(
+        val columnMaxHeight = maxOf(
             mapRankColumn.height,
-            max(overallRankColumn.height,
-                max(accuracyColumn.height,
-                    max(scoreColumn.height, ppColumn.height)
-                )
-            )
+            overallRankColumn.height,
+            accuracyColumn.height,
+            scoreColumn.height,
+            ppColumn.height
         )
 
         // Update the height of all columns to the maximum height
