@@ -1,5 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import static kotlinx.coroutines.JobKt.ensureActive;
+
+import androidx.annotation.Nullable;
+
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -10,6 +14,7 @@ import com.rian.osu.utils.PathApproximation;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import kotlinx.coroutines.CoroutineScope;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -72,7 +77,7 @@ public class GameHelper {
      * @param sliderPath The {@link SliderPath} to convert.
      * @return The converted {@link LinePath}.
      */
-    public static LinePath convertSliderPath(final SliderPath sliderPath) {
+    public static LinePath convertSliderPath(final SliderPath sliderPath, @Nullable final CoroutineScope scope) {
         var renderPath = new LinePath();
 
         if (sliderPath.anchorCount == 0) {
@@ -85,8 +90,8 @@ public class GameHelper {
 
         // Invert the scale to convert from osu!pixels to screen pixels.
         var invertedScale = new Vec2(
-        (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
-        (float) Constants.MAP_HEIGHT / Constants.MAP_ACTUAL_HEIGHT
+            (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
+            (float) Constants.MAP_HEIGHT / Constants.MAP_ACTUAL_HEIGHT
         );
 
         // Additional consideration for Catmull sliders that form "bulbs" around points with identical positions.
@@ -96,6 +101,10 @@ public class GameHelper {
         Vec2 lastStart = null;
 
         for (int i = 0; i < sliderPath.anchorCount; ++i) {
+            if (scope != null) {
+                ensureActive(scope.getCoroutineContext());
+            }
+
             var x = sliderPath.getX(i);
             var y = sliderPath.getY(i);
             var vec = new Vec2(x, y);
@@ -129,7 +138,7 @@ public class GameHelper {
      *
      * @return The converted {@link SliderPath}.
      */
-    public static SliderPath convertSliderPath(final Slider slider) {
+    public static SliderPath convertSliderPath(final Slider slider, @Nullable final CoroutineScope scope) {
         var calculatedPath = slider.getPath().getCalculatedPath();
         var cumulativeLength = slider.getPath().getCumulativeLength();
         var path = new SliderPath(slider.getPath().getPathType(), calculatedPath.size());
@@ -138,6 +147,10 @@ public class GameHelper {
         float heightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
 
         for (int i = 0; i < calculatedPath.size(); i++) {
+            if (scope != null) {
+                ensureActive(scope.getCoroutineContext());
+            }
+
             var p = calculatedPath.get(i);
 
             path.set(i, p.x * widthScale, p.y * heightScale, cumulativeLength.get(i).floatValue());

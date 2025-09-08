@@ -2925,6 +2925,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void calculateAllSliderPaths(final CoroutineScope scope) {
+        ensureActive(scope.getCoroutineContext());
+
         if (playableBeatmap.getHitObjects().getSliderCount() == 0) {
             return;
         }
@@ -2940,8 +2942,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 continue;
             }
 
-            sliderPaths[sliderIndex] = GameHelper.convertSliderPath(slider);
-            sliderRenderPaths[sliderIndex] = GameHelper.convertSliderPath(sliderPaths[sliderIndex]);
+            sliderPaths[sliderIndex] = GameHelper.convertSliderPath(slider, scope);
+            sliderRenderPaths[sliderIndex] = GameHelper.convertSliderPath(sliderPaths[sliderIndex], scope);
             ++sliderIndex;
         }
 
