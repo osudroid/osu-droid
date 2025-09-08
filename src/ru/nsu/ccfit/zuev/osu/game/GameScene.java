@@ -441,7 +441,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void loadVideo(BeatmapInfo beatmapInfo) {
-        if (video != null) {
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null || video != null) {
             return;
         }
 
