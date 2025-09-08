@@ -215,17 +215,17 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // The default layout is hardcoded to keep the original layout before the HUD editor was
         // implemented, as it used cross-references between elements that are not possible to be
         // set in the editor.
-        val scoreCounter = getFirstOf<HUDScoreCounter>()!!
-        val accuracyCounter = getFirstOf<HUDAccuracyCounter>()!!
-        val pieSongProgress = getFirstOf<HUDPieSongProgress>()!!
+        val scoreCounter = getFirstOf<HUDScoreCounter>()
+        val accuracyCounter = getFirstOf<HUDAccuracyCounter>()
+        val pieSongProgress = getFirstOf<HUDPieSongProgress>()
 
-        accuracyCounter.y += scoreCounter.y + scoreCounter.height
+        accuracyCounter?.y += (scoreCounter?.y ?: 0f) + (scoreCounter?.height ?: 0f)
 
-        pieSongProgress.y = accuracyCounter.y + accuracyCounter.transformedHeight / 2f
-        pieSongProgress.x = accuracyCounter.x - accuracyCounter.transformedWidth - 18f
+        pieSongProgress?.y = (accuracyCounter?.y ?: 0f) + (accuracyCounter?.transformedHeight ?: 0f) / 2f
+        pieSongProgress?.x = (accuracyCounter?.x ?: 0f) - (accuracyCounter?.transformedWidth ?: 0f) - 18f
 
-        accuracyCounter.restoreData = accuracyCounter.getSkinData()
-        pieSongProgress.restoreData = pieSongProgress.getSkinData()
+        accuracyCounter?.restoreData = accuracyCounter.getSkinData()
+        pieSongProgress?.restoreData = pieSongProgress.getSkinData()
     }
 
     //endregion
