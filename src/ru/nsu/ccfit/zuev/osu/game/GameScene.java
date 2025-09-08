@@ -3099,7 +3099,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float newElapsedTime;
 
                     if (isInterpolating) {
-                        newElapsedTime = Interpolation.dampContinuously(realElapsedTime, targetElapsedTime, 0.08f, dt);
+                        newElapsedTime = Interpolation.dampContinuously(realElapsedTime, targetElapsedTime, 0.08f, secElapsed);
 
                         // If the difference is more than ~2 frames at 60 FPS, snap to the target time.
                         if (Math.abs(targetElapsedTime - elapsedTime) > 1f / 60f * 2f * speedMultiplier) {
