@@ -26,7 +26,7 @@ public class ColorSkinData extends SkinData<Color4> {
             currentHex = defaultHex;
             setCurrentValue(getDefaultValue());
         } else {
-            currentHex = hex;
+            currentHex = hex.trim();
             setCurrentValue(new Color4(hex, HexComposition.RRGGBB));
         }
     }
