@@ -3064,7 +3064,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float minDt = dt / 2;
                     float maxDt = dt * 2;
 
-                    float audioElapsedTime = songService.getPosition() / 1000f;
+                    float audioElapsedTime = (float) songService.getPositionPrecise() / 1000;
                     float gameElapsedTime = elapsedTime - totalOffset;
                     float timeDifference = gameElapsedTime - audioElapsedTime;
 
