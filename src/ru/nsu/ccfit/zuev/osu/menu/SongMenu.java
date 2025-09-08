@@ -1068,7 +1068,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     case standard -> BeatmapDifficultyCalculator.calculateStandardDifficulty(data, mods, scope);
                 };
 
-                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
+                setStarsDisplay((float) attributes.starRating);
             }
         });
     }
@@ -1573,7 +1573,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String str = beatmapDifficultyText.getText();
         String[] strs = str.split("Stars: ");
         if (strs.length == 2) {
-            beatmapDifficultyText.setText(strs[0] + "Stars: " + star);
+            beatmapDifficultyText.setText(strs[0] + "Stars: " + GameHelper.Round(star, 2));
         }
     }
 

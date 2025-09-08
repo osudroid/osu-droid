@@ -31,7 +31,6 @@ import com.rian.osu.utils.ModUtils
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
-import ru.nsu.ccfit.zuev.osu.game.*
 import ru.nsu.ccfit.zuev.osu.helper.*
 import java.util.LinkedList
 import java.util.concurrent.CancellationException
@@ -352,7 +351,7 @@ object ModMenu : UIScene() {
             }
 
             songMenu.changeDimensionInfo(selectedBeatmap)
-            songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            songMenu.setStarsDisplay(attributes.starRating.toFloat())
         }
     }
 
