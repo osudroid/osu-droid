@@ -9,7 +9,7 @@
             android:key="showcursor"
             android:summary="@string/opt_showcursor_summary"
             android:title="@string/opt_showcursor_title"
-            app:layout="@layout/settings_preference_seekbar" />
+            app:layout="@layout/settings_preference_checkbox" />
 
         <SeekBarPreference
             android:defaultValue="50"
