@@ -3125,7 +3125,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         }
                     }
 
-                    dt = newElapsedTime - elapsedTime;
+                    dt = Math.max(0, newElapsedTime - elapsedTime);
                 }
 
                 update(dt);
