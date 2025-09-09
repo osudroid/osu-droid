@@ -2,14 +2,15 @@ package com.rian.osu.utils
 
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
 
 /**
- * A [HashMap] of [Mod]s with additional functionalities.
+ * A [ConcurrentHashMap] of [Mod]s with additional functionalities.
  */
-open class ModHashMap : HashMap<Class<out Mod>, Mod> {
+open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     constructor() : super()
     constructor(map: Map<out Class<out Mod>, Mod>) : super(map)
     constructor(mods: Collection<Mod>) : this(mods as Iterable<Mod>)
