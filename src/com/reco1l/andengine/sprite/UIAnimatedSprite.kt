@@ -124,7 +124,7 @@ open class UIAnimatedSprite(frames: Array<TextureRegion?>) : UISprite() {
                 }
             }
 
-            frameIndex = min(frames.size - 1, (elapsedSec / frameTime).toInt())
+            frameIndex = (elapsedSec / frameTime).toInt().coerceIn(0, max(0, frames.size - 1))
         }
 
         super.onManagedUpdate(deltaTimeSec)
