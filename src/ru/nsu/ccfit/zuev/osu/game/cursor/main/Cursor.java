@@ -5,6 +5,7 @@ import android.graphics.PointF;
 public class Cursor {
     public PointF mousePos = new PointF(0, 0);
     public PointF trackPos = new PointF(0, 0);
+    public boolean mouseBlocked = false;
     public boolean mouseDown = false;
     public boolean mouseOldDown = false;
     public boolean mousePressed = false;

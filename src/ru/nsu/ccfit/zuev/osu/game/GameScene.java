@@ -239,11 +239,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      */
     public boolean startedFromHUDEditor = false;
 
-    /**
-     * Areas where input from the player is blocked.
-     */
-    private final ArrayList<Scene.ITouchArea> blockAreas = new ArrayList<>();
-
 
     // Timing
 
@@ -1089,7 +1084,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(flashlightSprite, 0);
         }
 
-        blockAreas.clear();
+        // HUD should be to the last so we ensure everything is initialized and ready to be used by
+        // the HUD elements in their constructors.
+        hud = new GameplayHUD();
 
         if (!replaying && !GameHelper.isAutoplay()) {
             // Since block areas are saved in device pixels, we need to map them to scaled pixels.
@@ -1099,6 +1096,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             final float ratio = (float) Config.getRES_WIDTH() / displayMetrics.widthPixels;
 
             for (final var area : DatabaseManager.getBlockAreaTable().getAll()) {
+                // Attach the block area to the HUD so that it does not get scaled with the playfield.
                 var areaBox = new UIBox() {
                     {
                         setCornerRadius(2f);
@@ -1115,16 +1113,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             Interpolation.linear(0f, area.getHeight(), ratio)
                         );
                     }
+
+                    @Override
+                    public boolean onAreaTouched(TouchEvent event, float localX, float localY) {
+                        if (event.isActionDown()) {
+                            int id = event.getPointerID();
+
+                            if (id >= 0 && id < getCursorsCount()) {
+                                cursors[id].mouseBlocked = true;
+                            }
+                        }
+
+                        return false;
+                    }
                 };
 
-                blockAreas.add(areaBox);
-                scene.attachChild(areaBox, 0);
+                hud.attachChild(areaBox);
             }
         }
 
-        // HUD should be to the last so we ensure everything is initialized and ready to be used by
-        // the HUD elements in their constructors.
-        hud = new GameplayHUD();
         hud.setEditMode(isHUDEditorMode);
         hud.setSkinData(OsuSkin.get().getHUDSkinData());
 
@@ -1885,7 +1892,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 effectControlPoints.clear();
             }
             breakPeriods.clear();
-            blockAreas.clear();
             playableBeatmap = null;
             cursorSprites = null;
             lastMods = null;
@@ -2367,7 +2373,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
+        var cursor = cursors[id];
+
         if (event.isActionDown()) {
+            if (cursor.mouseBlocked) {
+                cursor.mouseBlocked = false;
+                return true;
+            }
+
             final int maximumActiveCursorCount = 3;
             int activeCursorCount = 0;
 
@@ -2384,15 +2397,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (activeCursorCount >= maximumActiveCursorCount) {
                 return false;
             }
-
-            for (int i = 0, size = blockAreas.size(); i < size; ++i) {
-                if (blockAreas.get(i).contains(event.getX(), event.getY())) {
-                    return true;
-                }
-            }
         }
 
-        var cursor = cursors[id];
         var sprite = !GameHelper.isAutoplay() && !GameHelper.isAutopilot() && cursorSprites != null
                 ? cursorSprites[id]
                 : null;
