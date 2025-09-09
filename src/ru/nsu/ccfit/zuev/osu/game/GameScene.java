@@ -2008,8 +2008,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         boolean writeReplay = objectId != -1 && replay != null && !replaying;
         if (score == 0) {
             if (stat.getCombo() > 30) {
-                ResourceManager.getInstance().getCustomSound("combobreak", 1)
-                        .play();
+                var sound = ResourceManager.getInstance().getCustomSound("combobreak", 1);
+                if (sound != null) {
+                    sound.play();
+                }
             }
             comboWasMissed = true;
             stat.registerHit(0, false, false, incrementCombo);
@@ -2167,8 +2169,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (score == -1) {
             if (stat.getCombo() > 30) {
-                ResourceManager.getInstance().getCustomSound("combobreak", 1)
-                        .play();
+                var sound = ResourceManager.getInstance().getCustomSound("combobreak", 1);
+                if (sound != null) {
+                    sound.play();
+                }
             }
             if (GameHelper.isSuddenDeath()) {
                 stat.changeHp(-1.0f);
