@@ -355,6 +355,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video = null;
         }
 
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null
                 ? ResourceManager.getInstance().getTexture("menu-background")
                 : ResourceManager.getInstance().getTextureIfLoaded("::background");
@@ -934,6 +940,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
 
         stat = new StatisticV2();
         stat.setMod(lastMods);
@@ -1209,6 +1220,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * Starts gameplay. This is used by the game loader once all necessary preprocessing is done.
      */
     public void start() {
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         totalOffset = Config.getOffset();
 
         var props = DatabaseManager.getBeatmapOptionsTable().getOptions(lastBeatmapInfo.getSetDirectory());
@@ -1247,7 +1264,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public Color4 getComboColor(HitObject hitObject) {
-        if (GameHelper.isSynesthesia()) {
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap != null && GameHelper.isSynesthesia()) {
             return ModSynesthesia.getColorFor(playableBeatmap.getControlPoints().getClosestBeatDivisor(hitObject.startTime));
         }
 
@@ -2069,6 +2088,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onCircleHit(int id, final float acc, final PointF pos,
                             final boolean endCombo, byte forcedScore, Color4 color) {
+        var playableBeatmap = this.playableBeatmap;
+
+        if (playableBeatmap == null) {
+            return;
+        }
+
         if (GameHelper.isAutoplay()) {
             autoCursor.click();
             hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
@@ -3045,6 +3070,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getDroidPPAt(int objectId) {
+        var playableBeatmap = this.playableBeatmap;
+
         if (playableBeatmap == null || droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
@@ -3055,6 +3082,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getStandardPPAt(int objectId) {
+        var playableBeatmap = this.playableBeatmap;
+
         if (playableBeatmap == null || standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
