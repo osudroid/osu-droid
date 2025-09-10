@@ -31,6 +31,10 @@ open class UICard(
         get() = titleBar.firstOf<UIText>()?.text ?: ""
         set(value) { titleBar.firstOf<UIText>()?.text = value }
 
+    /**
+     * A function that is called when this [UICard] is collapsed or expanded.
+     */
+    var onExpandStatusChange: ((isExpanded: Boolean) -> Unit)? = null
 
     private val titleBar = object : UIContainer() {
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -109,6 +113,8 @@ open class UICard(
                 it.isVisible = false
                 onContentChanged()
             }
+
+            onExpandStatusChange?.invoke(false)
         }
     }
 
@@ -127,6 +133,8 @@ open class UICard(
             content.clearModifiers(ModifierType.SizeY)
             content.isVisible = true
             content.sizeToY(content.contentHeight, if (immediate) 0f else 0.1f)
+
+            onExpandStatusChange?.invoke(true)
         }
     }
 
