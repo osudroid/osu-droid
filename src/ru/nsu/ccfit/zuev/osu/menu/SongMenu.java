@@ -693,7 +693,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             };
             scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("ranking_disabled"));
             scoringSwitcher.setPosition(10, 10);
-            scene.registerTouchArea(panel.rect);
+            if (!Multiplayer.isMultiplayer) {
+                scene.registerTouchArea(panel.rect);
+            }
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
         }
