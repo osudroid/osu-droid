@@ -25,7 +25,9 @@ object AccessibilityDetector {
     private var alert: MessageDialog? = null
 
     private val excludedServices = setOf(
+        // Android system application
         "com.android.systemui",
+        // MIUI system application
         "com.miui.voiceassist",
     )
 
