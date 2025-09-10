@@ -291,6 +291,14 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             StepButton(5)
                         }
                     }
+
+                    onExpandStatusChange = {
+                        beatmapCardCollapsed = !it
+                    }
+
+                    if (beatmapCardCollapsed) {
+                        collapse(true)
+                    }
                 }
 
                 collapsibleCard {
@@ -341,6 +349,14 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             label = StringTable.get(com.osudroid.resources.R.string.opt_show_scoreboard_title)
                         }
                     }
+
+                    onExpandStatusChange = {
+                        settingsCardCollapsed = !it
+                    }
+
+                    if (settingsCardCollapsed) {
+                        collapse(true)
+                    }
                 }
             }
         }
@@ -370,5 +386,10 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             super.onManagedUpdate(deltaTimeSec)
         }
 
+    }
+
+    companion object {
+        private var beatmapCardCollapsed = false
+        private var settingsCardCollapsed = false
     }
 }
