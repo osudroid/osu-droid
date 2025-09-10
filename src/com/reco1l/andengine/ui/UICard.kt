@@ -94,15 +94,18 @@ open class UICard(
 
     /**
      * Collapses the card content.
+     *
+     * @param immediate Whether to collapse immediately (without animation).
      */
-    fun collapse() {
+    @JvmOverloads
+    fun collapse(immediate: Boolean = false) {
         if (content.isVisible) {
             val triangle = titleBar.firstOf<UITriangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
-            triangle?.rotateTo(180f, 0.1f)
+            triangle?.rotateTo(180f, if (immediate) 0f else 0.1f)
 
             content.clearModifiers(ModifierType.SizeY)
-            content.sizeToY(0f, 0.1f).after {
+            content.sizeToY(0f, if (immediate) 0f else 0.1f).after {
                 it.isVisible = false
                 onContentChanged()
             }
@@ -111,16 +114,19 @@ open class UICard(
 
     /**
      * Expands the card content.
+     *
+     * @param immediate Whether to expand immediately (without animation).
      */
-    fun expand() {
+    @JvmOverloads
+    fun expand(immediate: Boolean = false) {
         if (!content.isVisible) {
             val triangle = titleBar.firstOf<UITriangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
-            triangle?.rotateTo(0f, 0.1f)
+            triangle?.rotateTo(0f, if (immediate) 0f else 0.1f)
 
             content.clearModifiers(ModifierType.SizeY)
             content.isVisible = true
-            content.sizeToY(content.contentHeight, 0.1f)
+            content.sizeToY(content.contentHeight, if (immediate) 0f else 0.1f)
         }
     }
 
