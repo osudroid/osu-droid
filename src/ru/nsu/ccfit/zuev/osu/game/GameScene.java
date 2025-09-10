@@ -2986,6 +2986,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             sliderPaths[sliderIndex] = GameHelper.convertSliderPath(slider, scope);
+
+            if (scope != null) {
+                ensureActive(scope.getCoroutineContext());
+            }
+
             sliderRenderPaths[sliderIndex] = GameHelper.convertSliderPath(sliderPaths[sliderIndex], scope);
             ++sliderIndex;
         }
