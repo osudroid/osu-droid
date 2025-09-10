@@ -29,6 +29,8 @@ object AccessibilityDetector {
         "com.android.systemui",
         // MIUI system application
         "com.miui.voiceassist",
+        // Commonly used quick gesture application in Motorola devices
+        "com.motorola.actions",
     )
 
 
