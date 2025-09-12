@@ -41,11 +41,6 @@ open class ModSetting<V>(
     val initialValue = defaultValue
 
     /**
-     * The initial default value.
-     */
-    val initialDefaultValue = defaultValue
-
-    /**
      * The value itself.
      */
     open var value = defaultValue
@@ -60,7 +55,7 @@ open class ModSetting<V>(
      * Resets this [ModSetting] to its initial state.
      */
     fun reset() {
-        defaultValue = initialDefaultValue
+        defaultValue = initialValue
         value = initialValue
     }
 

@@ -101,7 +101,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     // This mod has a different default than others as the default value of settings change based on the beatmap.
     override val usesDefaultSettings
-        get() = settings.all { it.value == it.initialDefaultValue }
+        get() = settings.all { it.value == it.initialValue }
 
     override val scoreMultiplier: Float
         get() {
