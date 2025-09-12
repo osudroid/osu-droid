@@ -822,6 +822,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         updateThread {
             ModMenu.back(false)
             ModMenu.updateModButtonVisibility()
+            ModMenu.updateCustomizationMenuEnabledStates()
         }
 
         playerList!!.invalidate()
