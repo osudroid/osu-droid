@@ -17,7 +17,8 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
             val setting = setting as RangeConstrainedModSetting<V>
 
             // Assigning the min, max and step values to the slider may unexpectedly change the value of the setting
-            // due to their boundaries. As such, we do not want to trigger onValueChanged() here.
+            // due to their boundaries. Since the base update call will update the value of the control, we do not want
+            // to trigger its onValueChanged() here (avoid calling it repetitively).
             val valueChanged = control.onValueChanged
             control.onValueChanged = null
 
