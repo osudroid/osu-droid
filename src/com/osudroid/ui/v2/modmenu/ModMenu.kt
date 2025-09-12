@@ -370,8 +370,9 @@ object ModMenu : UIScene() {
         // Do not show mod presets in multiplayer.
         modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
-        // Ensure mods that can be enabled by the user are displayed.
+        // Ensure mods and customizations that can be enabled by the user are displayed and enabled.
         updateModButtonVisibility()
+        updateCustomizationMenuEnabledStates()
 
         // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
         parseBeatmap()
@@ -456,6 +457,10 @@ object ModMenu : UIScene() {
             it.updateVisibility()
             it.applyCompatibilityState()
         }
+    }
+
+    fun updateCustomizationMenuEnabledStates() {
+        customizationMenu.updateComponentEnabledStates()
     }
 
     fun clear() {
