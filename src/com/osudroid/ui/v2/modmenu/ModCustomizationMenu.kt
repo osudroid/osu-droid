@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
+import com.osudroid.multiplayer.Multiplayer
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -70,6 +71,19 @@ class ModCustomizationMenu : UIModal(
         modSettingComponents.fastForEach { it.update() }
     }
 
+    fun updateComponentEnabledStates() {
+        val room = Multiplayer.room
+        val isHost = Multiplayer.isRoomHost
+
+        modSettingComponents.fastForEach {
+            it.isEnabled = if (room != null) {
+                it.mod.isValidForMultiplayer && (isHost || (room.gameplaySettings.isFreeMod && it.mod.isValidForMultiplayerAsFreeMod))
+            } else {
+                true
+            }
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun ModSettingComponent(mod: Mod, setting: ModSetting<*>): ModSettingComponent<*, *> {
 
@@ -99,6 +113,13 @@ class ModCustomizationMenu : UIModal(
 
         modSettingComponents.add(component)
         component.update()
+
+        component.isEnabled =
+            if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
+                mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+                    (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
+            } else true
+
         return component
     }
 
