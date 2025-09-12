@@ -11,6 +11,11 @@ import com.rian.osu.mods.settings.ModSetting
  */
 interface IModSettingComponent<V : Any?> {
     /**
+     * The [Mod] that this [IModSettingComponent] belongs to.
+     */
+    val mod: Mod
+
+    /**
      * The [ModSetting] that is controlled by this [IModSettingComponent].
      */
     val setting: ModSetting<V>
@@ -28,8 +33,8 @@ interface IModSettingComponent<V : Any?> {
  * @param TControlValue The type of the value in the [FormControl] that is used to display this [ModSettingComponent].
  */
 sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
-    val mod: Mod,
-    override val setting: ModSetting<TSettingValue>
+    final override val mod: Mod,
+    final override val setting: ModSetting<TSettingValue>
 ) : UIContainer(), IModSettingComponent<TSettingValue> {
     /**
      * The [FormControl] that is used to display this [ModSettingComponent].
