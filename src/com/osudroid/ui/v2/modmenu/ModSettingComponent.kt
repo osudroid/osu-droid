@@ -21,6 +21,13 @@ interface IModSettingComponent<V : Any?> {
     val setting: ModSetting<V>
 
     /**
+     * Whether this [IModSettingComponent] is enabled.
+     *
+     * If `false`, the user won't be able to interact with this [IModSettingComponent].
+     */
+    var isEnabled: Boolean
+
+    /**
      * Updates this [IModSettingComponent] to reflect the current state of the [ModSetting].
      */
     fun update()
@@ -53,6 +60,12 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
             ModMenu.queueModChange(mod)
         }
     }
+
+    final override var isEnabled
+        get() = control.isEnabled
+        set(value) {
+            control.isEnabled = value
+        }
 
     init {
         width = FillParent
