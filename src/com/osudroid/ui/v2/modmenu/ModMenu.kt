@@ -551,6 +551,7 @@ object ModMenu : UIScene() {
             // Handle incompatible mods with the selected mod.
             if (wasSelected && !button.isSelected) {
                 customizationMenu.onModRemoved(button.mod)
+                button.mod = button.mod::class.createInstance()
             }
         }
 
@@ -571,10 +572,11 @@ object ModMenu : UIScene() {
         enabledMods.remove(modClass)
 
         toggle.isSelected = false
-        toggle.mod.settings.fastForEach { it.reset() }
 
         customizationMenu.onModRemoved(toggle.mod)
         queueModChange(toggle.mod)
+
+        toggle.mod = modClass.createInstance()
     }
 
     //endregion
