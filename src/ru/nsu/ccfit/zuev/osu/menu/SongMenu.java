@@ -923,7 +923,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         boolean isPreciseMod = mods.contains(ModPrecise.class);
         float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
 
-        var difficulty = beatmapInfo.getBeatmapDifficulty();
+        var difficulty = beatmapInfo.getBeatmapDifficulty().clone();
 
         ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values(), true);
 
@@ -940,7 +940,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // depending on the height of the running device, but for the sake of comparison across
         // players, we assume the height of the device to be fixed.
         difficulty.difficultyCS = GameHelper.Round(difficulty.difficultyCS, 2);
-        difficulty.setAr(GameHelper.Round(difficulty.getAr(), 2));
+        difficulty.setAR(GameHelper.Round(difficulty.getAR(), 2));
         difficulty.od = GameHelper.Round(difficulty.od, 2);
         difficulty.hp = GameHelper.Round(difficulty.hp, 2);
 
@@ -961,7 +961,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         } else if (
             (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS < difficulty.difficultyCS) ||
-            (!Precision.almostEquals(originalAR, difficulty.getAr()) && originalAR < difficulty.getAr()) ||
+            (!Precision.almostEquals(originalAR, difficulty.getAR()) && originalAR < difficulty.getAR()) ||
             (!Precision.almostEquals(originalOD, difficulty.od) && originalOD < difficulty.od) ||
             (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP < difficulty.hp)
         ) {
@@ -972,7 +972,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         } else if (
             (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS > difficulty.difficultyCS) ||
-            (!Precision.almostEquals(originalAR, difficulty.getAr()) && originalAR > difficulty.getAr()) ||
+            (!Precision.almostEquals(originalAR, difficulty.getAR()) && originalAR > difficulty.getAR()) ||
             (!Precision.almostEquals(originalOD, difficulty.od) && originalOD > difficulty.od) ||
             (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP > difficulty.hp)
         ) {
@@ -1007,7 +1007,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String[] strs = str.split("Stars: ");
 
         beatmapDifficultyText.setText(
-            "AR: " + difficulty.getAr() + " " +
+            "AR: " + difficulty.getAR() + " " +
             "OD: " + difficulty.od + " " +
             "CS: " + difficulty.difficultyCS + " " +
             "HP: " + difficulty.hp + " " +

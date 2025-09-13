@@ -57,6 +57,8 @@ class BeatmapDifficulty @JvmOverloads constructor(
     /**
      * The approach rate of this beatmap.
      */
+    @get:JvmName("getAR")
+    @set:JvmName("setAR")
     var ar = ar ?: Float.NaN
         get() = field.takeUnless { it.isNaN() } ?: od
 
