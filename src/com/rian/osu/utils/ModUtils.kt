@@ -7,6 +7,8 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
 import kotlin.reflect.full.createInstance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import org.json.JSONArray
 import org.json.JSONException
 
@@ -249,18 +251,23 @@ object ModUtils {
         difficulty: BeatmapDifficulty,
         mode: GameMode,
         mods: Iterable<Mod>,
-        withRateChange: Boolean = false
+        withRateChange: Boolean = false,
+        scope: CoroutineScope? = null
     ) {
         @Suppress("UNCHECKED_CAST")
         val adjustmentMods = mods.filter { it is IModFacilitatesAdjustment } as Iterable<IModFacilitatesAdjustment>
 
         for (mod in mods) {
+            scope?.ensureActive()
+
             if (mod is IModApplicableToDifficulty) {
                 mod.applyToDifficulty(mode, difficulty, adjustmentMods)
             }
         }
 
         for (mod in mods) {
+            scope?.ensureActive()
+
             if (mod is IModApplicableToDifficultyWithMods) {
                 mod.applyToDifficulty(mode, difficulty, mods)
             }
