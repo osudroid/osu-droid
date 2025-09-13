@@ -343,7 +343,80 @@ data class BeatmapInfo(
         sliderCount = b.sliderCount
         spinnerCount = b.spinnerCount
         maxCombo = b.maxCombo
+    }
 
+    @JvmOverloads
+    fun apply(beatmap: Beatmap, scope: CoroutineScope? = null) {
+        md5 = beatmap.md5
+        audioFilename = beatmap.general.audioFilename
+        backgroundFilename = beatmap.events.backgroundFilename
+        title = beatmap.metadata.title
+        titleUnicode = beatmap.metadata.titleUnicode
+        artist = beatmap.metadata.artist
+        artistUnicode = beatmap.metadata.artistUnicode
+        creator = beatmap.metadata.creator
+        version = beatmap.metadata.version
+        tags = beatmap.metadata.tags
+        source = beatmap.metadata.source
+        approachRate = beatmap.difficulty.ar
+        overallDifficulty = beatmap.difficulty.od
+        circleSize = beatmap.difficulty.gameplayCS
+        hpDrainRate = beatmap.difficulty.hp
+        length = beatmap.duration.toLong()
+        previewTime = beatmap.general.previewTime
+        hitCircleCount = beatmap.hitObjects.circleCount
+        sliderCount = beatmap.hitObjects.sliderCount
+        spinnerCount = beatmap.hitObjects.spinnerCount
+        maxCombo = beatmap.maxCombo
+        epilepsyWarning = beatmap.general.epilepsyWarning
+
+        var bpmMin = Float.MAX_VALUE
+        var bpmMax = 0f
+        var bpmOverall = 0f
+        var bpmOverallDuration = 0.0
+
+        val timingPoints = beatmap.controlPoints.timing.controlPoints
+
+        // The last playable time in the beatmap - the last timing point extends to this time.
+        // Note: This is more accurate and may present different results because osu!stable didn't
+        // have the ability to calculate slider durations in this context.
+        val lastTime = beatmap.hitObjects.objects.lastOrNull()?.endTime ?: timingPoints.lastOrNull()?.time ?: 0.0
+
+        timingPoints.fastForEachIndexed { i, t ->
+            scope?.ensureActive()
+
+            val bpm = t.bpm.toFloat()
+
+            bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
+            bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
+
+            if (t.time > lastTime) {
+                if (bpmOverall == 0f) {
+                    bpmOverall = bpm
+                    bpmOverallDuration = 0.0
+                }
+
+                return@fastForEachIndexed
+            }
+
+            // osu!stable forced the first control point to start at 0.
+            val currentTime = if (i == 0) 0.0 else t.time
+            val nextTime = if (i == timingPoints.size - 1) lastTime else timingPoints[i + 1].time
+            val duration = nextTime - currentTime
+
+            if (bpmOverall == 0f || bpmOverallDuration < duration) {
+                bpmOverall = bpm
+                bpmOverallDuration = duration
+            }
+        }
+
+        if (bpmOverall == 0f) {
+            bpmOverall = 60f
+        }
+
+        this.bpmMin = bpmMin
+        this.bpmMax = bpmMax
+        this.mostCommonBPM = bpmOverall
     }
 }
 
@@ -352,51 +425,6 @@ data class BeatmapInfo(
  */
 @JvmOverloads
 fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean, scope: CoroutineScope? = null): BeatmapInfo {
-
-    var bpmMin = Float.MAX_VALUE
-    var bpmMax = 0f
-    var bpmOverall = 0f
-    var bpmOverallDuration = 0.0
-
-    val timingPoints = data.controlPoints.timing.controlPoints
-
-    // The last playable time in the beatmap - the last timing point extends to this time.
-    // Note: This is more accurate and may present different results because osu!stable didn't
-    // have the ability to calculate slider durations in this context.
-    val lastTime = data.hitObjects.objects.lastOrNull()?.endTime ?: timingPoints.lastOrNull()?.time ?: 0.0
-
-    timingPoints.fastForEachIndexed { i, t ->
-        scope?.ensureActive()
-
-        val bpm = t.bpm.toFloat()
-
-        bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
-        bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
-
-        if (t.time > lastTime) {
-            if (bpmOverall == 0f) {
-                bpmOverall = bpm
-                bpmOverallDuration = 0.0
-            }
-
-            return@fastForEachIndexed
-        }
-
-        // osu!stable forced the first control point to start at 0.
-        val currentTime = if (i == 0) 0.0 else t.time
-        val nextTime = if (i == timingPoints.size - 1) lastTime else timingPoints[i + 1].time
-        val duration = nextTime - currentTime
-
-        if (bpmOverall == 0f || bpmOverallDuration < duration) {
-            bpmOverall = bpm
-            bpmOverallDuration = duration
-        }
-    }
-
-    if (bpmOverall == 0f) {
-        bpmOverall = 60f
-    }
-
     var droidStarRating: Float? = null
     var standardStarRating: Float? = null
 
@@ -419,7 +447,7 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
         }
     }
 
-    return BeatmapInfo(
+    val beatmapInfo = BeatmapInfo(
 
         md5 = data.md5,
         id = data.metadata.beatmapId.toLong(),
@@ -454,9 +482,10 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
         hpDrainRate = data.difficulty.hp,
         droidStarRating = droidStarRating,
         standardStarRating = standardStarRating,
-        bpmMin = bpmMin,
-        bpmMax = bpmMax,
-        mostCommonBPM = bpmOverall,
+        // These will be calculated in the apply call below
+        bpmMin = 0f,
+        bpmMax = 0f,
+        mostCommonBPM = 0f,
         length = data.duration.toLong(),
         previewTime = data.general.previewTime,
         hitCircleCount = data.hitObjects.circleCount,
@@ -465,6 +494,10 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
         maxCombo = data.maxCombo,
         epilepsyWarning = data.general.epilepsyWarning
     )
+
+    beatmapInfo.apply(data, scope)
+
+    return beatmapInfo
 }
 
 @Dao interface IBeatmapInfoDAO {
