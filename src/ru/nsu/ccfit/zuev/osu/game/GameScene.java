@@ -968,8 +968,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         difficultyScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
 
         stat.setDiffModifier(difficultyScoreMultiplier);
-        stat.setBeatmapNoteCount(lastBeatmapInfo.getTotalHitObjectCount());
-        stat.setBeatmapMaxCombo(lastBeatmapInfo.getMaxCombo());
+        stat.setBeatmapNoteCount(objects.size());
+        stat.setBeatmapMaxCombo(parsedBeatmap.getMaxCombo());
 
         GameHelper.setHardRock(lastMods.ofType(ModHardRock.class));
         GameHelper.setDoubleTime(lastMods.ofType(ModDoubleTime.class));
