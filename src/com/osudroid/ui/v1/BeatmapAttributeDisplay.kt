@@ -17,7 +17,6 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.Mod
@@ -25,8 +24,6 @@ import com.rian.osu.mods.ModPrecise
 import com.rian.osu.utils.CircleSizeCalculator
 import com.rian.osu.utils.ModUtils
 import kotlin.math.roundToInt
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
@@ -45,30 +42,20 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
 
         attachChild(modal)
 
-        val mode = when (Config.getDifficultyAlgorithm()) {
-            DifficultyAlgorithm.droid -> GameMode.Droid
-            DifficultyAlgorithm.standard -> GameMode.Standard
-        }
-
         val nonRateAdjustedDifficulty = difficulty.clone()
         val rateAdjustedDifficulty = difficulty.clone()
 
-        ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, mode, mods, false)
-        ModUtils.applyModsToBeatmapDifficulty(rateAdjustedDifficulty, mode, mods, true)
+        ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, GameMode.Droid, mods, false)
+        ModUtils.applyModsToBeatmapDifficulty(rateAdjustedDifficulty, GameMode.Droid, mods, true)
 
         // CS
-
-        val objectScale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidScale(rateAdjustedDifficulty.difficultyCS)
-            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(rateAdjustedDifficulty.difficultyCS, true)
-        }
 
         addAttribute(
             "CS (Circle Size)",
             "Affects the size of hit circles and sliders.",
             difficulty.difficultyCS,
             rateAdjustedDifficulty.difficultyCS,
-            Metric("Hit circle radius", (HitObject.OBJECT_RADIUS * objectScale).roundBy(1).toString())
+            Metric("Hit circle radius", (HitObject.OBJECT_RADIUS * CircleSizeCalculator.droidCSToDroidScale(rateAdjustedDifficulty.difficultyCS)).roundBy(1).toString())
         )
 
         // AR
@@ -92,13 +79,10 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
         // For OD, we want to display rate-affected hit window values in a different way, because they are not
         // accurately represented by the OD value itself.
         val rate = ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
-        val hitWindow = when (mode) {
-            GameMode.Droid ->
-                if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(nonRateAdjustedDifficulty.od)
-                else DroidHitWindow(nonRateAdjustedDifficulty.od)
 
-            GameMode.Standard -> StandardHitWindow(nonRateAdjustedDifficulty.od)
-        }
+        val hitWindow =
+            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(nonRateAdjustedDifficulty.od)
+            else DroidHitWindow(nonRateAdjustedDifficulty.od)
 
         addAttribute(
             "OD (Overall Difficulty)",
