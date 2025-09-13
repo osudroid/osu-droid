@@ -25,8 +25,6 @@ import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;
-import com.rian.osu.beatmap.DroidHitWindow;
-import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.math.Precision;
@@ -967,22 +965,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
 
         var difficulty = beatmapInfo.getBeatmapDifficulty().clone();
-
         ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values(), true);
 
-        if (isPreciseMod) {
-            // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
-            // map the hit window back to the original hit window for the user to understand the difficulty
-            // increase of the mod.
-            float greatWindow = new PreciseDroidHitWindow(difficulty.od).getGreatWindow();
-            difficulty.od = DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow);
-        }
-
         // Round to 2 decimal places.
-        // Using difficulty circle size is quite inaccurate here as the real circle size changes
-        // depending on the height of the running device, but for the sake of comparison across
-        // players, we assume the height of the device to be fixed.
-        difficulty.difficultyCS = GameHelper.Round(difficulty.difficultyCS, 2);
+        difficulty.gameplayCS = GameHelper.Round(difficulty.gameplayCS, 2);
         difficulty.setAR(GameHelper.Round(difficulty.getAR(), 2));
         difficulty.od = GameHelper.Round(difficulty.od, 2);
         difficulty.hp = GameHelper.Round(difficulty.hp, 2);
@@ -1003,7 +989,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 beatmapDifficultyText.setColor(1, 180 / 255f, 0);
             }
         } else if (
-            (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS < difficulty.difficultyCS) ||
+            (!Precision.almostEquals(originalCS, difficulty.gameplayCS) && originalCS < difficulty.gameplayCS) ||
             (!Precision.almostEquals(originalAR, difficulty.getAR()) && originalAR < difficulty.getAR()) ||
             (!Precision.almostEquals(originalOD, difficulty.od) && originalOD < difficulty.od) ||
             (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP < difficulty.hp)
@@ -1014,7 +1000,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
         } else if (
-            (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS > difficulty.difficultyCS) ||
+            (!Precision.almostEquals(originalCS, difficulty.gameplayCS) && originalCS > difficulty.gameplayCS) ||
             (!Precision.almostEquals(originalAR, difficulty.getAR()) && originalAR > difficulty.getAR()) ||
             (!Precision.almostEquals(originalOD, difficulty.od) && originalOD > difficulty.od) ||
             (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP > difficulty.hp)
@@ -1024,6 +1010,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             } else {
                 beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
             }
+        } else if (isPreciseMod) {
+            beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
 
         if (totalSpeedMultiplier > 1) {
