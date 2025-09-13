@@ -56,6 +56,7 @@ object OsuColors {
         return Color.BLACK.toColor4()
     }
 
+    val green = Color4(0xFF88B300)
     val red = Color4(0xFFED1121)
     val blue = Color4(0xFF66CCFF)
 
