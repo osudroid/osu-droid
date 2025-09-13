@@ -111,6 +111,8 @@ object DifficultyCalculationManager {
                                         parser.parse(true)!!
                                     }
 
+                                    beatmapInfo.apply(beatmap, this)
+
                                     if (beatmapInfo.droidStarRating == null) {
                                         val attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap, scope = this)
                                         beatmapInfo.droidStarRating = attributes.starRating.toFloat()
