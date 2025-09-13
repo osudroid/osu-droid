@@ -24,7 +24,6 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.parser.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
-import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
 import com.rian.osu.utils.ModUtils
@@ -305,7 +304,7 @@ object ModMenu : UIScene() {
             val difficulty = beatmap.difficulty.clone()
             val rate = ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
-            ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
+            ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true, this@scope)
 
             ensureActive()
 
@@ -328,27 +327,30 @@ object ModMenu : UIScene() {
 
             ensureActive()
 
-            val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
+            val attributes = when (difficultyAlgorithm) {
                 droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
                 standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
             }
 
             ensureActive()
-            starRatingBadge.clearEntityModifiers()
-            ensureActive()
-            starRatingBadge.background!!.clearEntityModifiers()
-            ensureActive()
 
-            starRatingBadge.valueEntity.text = "%.2f".format(attributes.starRating)
-            starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
+            updateThread {
+                starRatingBadge.clearEntityModifiers()
+                starRatingBadge.background!!.clearEntityModifiers()
 
-            if (attributes.starRating >= 6.5) {
-                starRatingBadge.colorTo(Color4(0xFFFFD966), 0.1f)
-                starRatingBadge.fadeTo(1f, 0.1f)
-            } else {
-                starRatingBadge.colorTo(Color4.Black, 0.1f)
-                starRatingBadge.fadeTo(0.75f, 0.1f)
+                starRatingBadge.valueEntity.text = "%.2f".format(attributes.starRating)
+                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
+
+                if (attributes.starRating >= 6.5) {
+                    starRatingBadge.colorTo(Color4(0xFFFFD966), 0.1f)
+                    starRatingBadge.fadeTo(1f, 0.1f)
+                } else {
+                    starRatingBadge.colorTo(Color4.Black, 0.1f)
+                    starRatingBadge.fadeTo(0.75f, 0.1f)
+                }
             }
+
+            ensureActive()
 
             songMenu.changeDimensionInfo(selectedBeatmap)
             songMenu.setStarsDisplay(attributes.starRating.toFloat())
