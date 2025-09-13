@@ -10,6 +10,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.osudroid.ui.v1.BeatmapAttributeDisplay;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.framework.EasingKt;
@@ -41,6 +42,7 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
+import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -126,7 +128,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapHitObjectsText,
             beatmapDifficultyText;
 
-    private UISprite currentPressedButton;
+    private Scene.ITouchArea currentPressedButton;
     private UISprite scoringSwitcher = null;
     private SearchBarFragment searchBar = null;
     private GroupType groupType = GroupType.MapSet;
@@ -327,8 +329,49 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer.attachChild(beatmapHitObjectsText);
 
         beatmapDifficultyText = new ChangeableText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024) {
+            private boolean moved = false;
+            private float dx = 0, dy = 0;
+
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    if (currentPressedButton == null) {
+                        currentPressedButton = this;
+                        moved = false;
+                        dx = pTouchAreaLocalX;
+                        dy = pTouchAreaLocalY;
+                    }
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionUp()) {
+                    if (currentPressedButton == this) {
+                        currentPressedButton = null;
+                        var selectedBeatmap = SongMenu.this.selectedBeatmap;
+
+                        if (selectedBeatmap != null && !moved) {
+                            var mods = ModMenu.INSTANCE.getEnabledMods();
+                            new BeatmapAttributeDisplay(selectedBeatmap.getBeatmapDifficulty(), mods.values()).show();
+                        }
+                    }
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50) && currentPressedButton == this) {
+                    currentPressedButton = null;
+                    moved = true;
+                }
+
+                return false;
+            }
+        };
+
         frontLayer.attachChild(beatmapDifficultyText);
+        scene.registerTouchArea(beatmapDifficultyText);
 
         var clickShortSound = ResourceManager.getInstance().getSound("click-short");
         var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
