@@ -265,13 +265,9 @@ object ModMenu : UIScene() {
     private fun parseBeatmap() {
         cancelCalculationJob()
 
-        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap ?: return
 
         calculationJob = async scope@{
-
-            if (selectedBeatmap == null) {
-                return@scope
-            }
 
             val difficultyAlgorithm = Config.getDifficultyAlgorithm()
             val gameMode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
