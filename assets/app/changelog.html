@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>1.8.5 Changelog</title>
+  <title>Changelog</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-dark.min.css"/>
   <style>
     .markdown-body {
@@ -22,171 +22,27 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
-Version 2025.910.0
-===============
-
-# Changes
-
-- Starting from this version, osu!droid will switch to a date based versioning scheme. Version numbers are now in YYYY.MDD.X format, where:
-  - `YYYY` = year
-  - `M` = month
-  - `DD` = day
-  - `X` = sub-version (for multiple releases on the same date)
-  - This change provides clearer release timelines and better reflects our development cycle.
-- Allow profile card in song select to be touched in solo play <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Brings up the same modal as the profile card in the main menu.
-- Preserve collapse/expand status of settings cards in game loading screen <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Update Portuguese translations <span style="font-size: 0.75em">by [kiritinhokirigaya](https://github.com/kiritinhokirigaya)</span>
-- Update Korean translations <span style="font-size: 0.75em">by [AGPumBoy](https://github.com/AGPumBoy)</span>
-- Update Russian translations <span style="font-size: 0.75em">by [und3rlife](https://github.com/und3rlife)</span>
-
-# Bug Fixes
-
-- Prevent gameplay from seeking backwards when music has not started <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Should fix a crash that happens right after starting gameplay in some beatmaps when an animated skin is used.
-- Fix input block area being scaled by playfield <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix potential crash when playing `combobreak` hitsound <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-Version 1.8.5.1
-===============
-
-# Bug Fixes
-
-- Optimistically remove whitespaces from start and end of a hex color from skin.json <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - There is a recorded crash about this, and while this is optimistic, it is better than forcing players to fix their
-    skin.json.
-- Fix wrong configuration layout for show cursor setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This was supposed to be a checkbox, not a seekbar...
-- Fix a crash when applying gameplay HUD default layout while disabling in-game UI <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix gameplay potentially seeking backwards when music has not started <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-Version 1.8.5
-=============
+[insert version here]
+==================
 
 # Additions
 
-- Add back button to gameplay loading screen in singleplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Does the same as the device back button, but more convenient to use.
+- Add beatmap attribute display <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Can be displayed by pressing the text with difficulty values (CS, AR, OD, HP, star rating) in song select.
 
 # Changes
 
-- Prevent screen from dimming during gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Dimming during gameplay can cause distractions and unexpected behavior (e.g., when watching a replay or a beatmap
-    with the Autoplay mod).
-- Hide input block areas when watching a replay or using the Autoplay mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - The player cannot interact with hitobjects in these modes, so the input block areas are unnecessary.
-- Only snake out sliders if the slider head is hit properly <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Technically, this is a bug fix, but it brings the behavior in line with osu!lazer's snaking out sliders setting.
-- Fade mods that are incompatible with one or more currently selected mods in mod menu <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Mark Freeze Frame mod as a difficulty adjusting mod for osu!droid star rating <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - The Freeze Frame mod now affects osu!droid star rating and performance points!
-- Improve storyboard and video loading speed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - They may still be loading when gameplay starts, but the loading starts earlier now.
-- Replace shrink playfield downwards setting with adjustable horizontal/vertical position <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This gives players a better control over playfield positioning.
-  - To replicate the shrink downwards behavior, set horizontal position to 50% and vertical position to 100%.
-- Briefly display playfield area when playfield-related settings are changed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - When changing the size or position of the playfield, a transparent box will be shown briefly to indicate the
-    playfield area.
-  - This box will not be shown if the playfield size is 100% (since it will cover the entire screen anyway, so the
-    position settings do not matter).
-- Update music volume directly when changing it in settings <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - No more going back to the main menu to hear the change!
-- Play osu! cookie hit sound when sound effect volume is changed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Allows the player to gauge the loudness of sound effects without having to manually trigger one.
-  - The osu! cookie hit sound is chosen specifically since it is not skinnable (which means the player cannot silence it
-    via skins).
-- Allow player to change settings from settings layout when restarting gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - To still satisfy players who only want a quick restart, a shorter delay is used instead of the usual one (when
-    gameplay is not restarted).
-- Raise back button second press activation leniency in multiplayer based on back button press time setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This makes it easier to activate the HUD-provided back button when the setting is set to a high value.
-
-## osu!droid Star Rating and Performance Points Changes
-
-A newspost containing more details about these changes will be published after they are applied to global ranking.
-
-- Reduce rhythm difficulty of doubletappable objects <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - A group of objects has an increased doubletapability if all objects in the group can be hit at the same time and
-    award a perfect hit.
-- Remove high circle size bonus from slider aim difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Slider aim has a different size restriction from normal aim due to follow circle radius.
-- Apply reduced high circle size bonus to flow aim difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Flow aim difficulty does not scale as hard as snap aim with increased circle size.
-- Remove wide angle and wiggle bonuses rhythm requirements <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Previously, these bonuses required a rhythm difference of 1/4 beat or more.
-- Reduce wiggle bonus on relatively stacked objects <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - There are cases objects are stacked to the point where the player does not need to move their finger as much to hit
-    them. In such cases, awarding the full wiggle bonus is not justified.
-- Decouple velocity change bonus from wide angle bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - These bonuses are now applied separately, so they can both be awarded at the same time.
-- Reduce Relax Ok hit multiplier <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Reduces penalty of getting an Ok (100) hit with the Relax mod.
-- Use worst case instead of on average scenario when estimating tap deviation/unstable rate <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - The worst case scenario assumes that all imperfect hits occurred in most difficult sections of the beatmap. Because
-    one cannot be sure where the imperfect hits occurred, this is a safer assumption to make to prevent overweighted
-    scores.
-- Punish high tap deviation/unstable rate based on tapping difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - After a certain tap deviation/unstable rate, it is more likely that the player mashes through difficult sections of
-    the beatmap rather than just being inconsistent. This change penalizes the player for such cases.
-- Raise global multiplier for performance points <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - These changes result in a general loss across the board, so raising this multiplier helps to keep things where they
-    were before.
+- Do not update OD value when using Precise mod in song select <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - It's the hit window that is different, not the OD, so attempting to "pair" OD like this is conceptually wrong.
 
 # Bug Fixes
 
-- Fix text input caret position not being in the expected position when an initial value is provided <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This effect can be seen in the multiplayer room creation dialog, where the caret position for room name is at the
-    start instead of the end.
-- Fix exported replay JSON erroneously overriding beatmap MD5 hash <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This caused exported replays to be unusable when importing them back to the game.
-- Fix game potentially starting in a weird width/height setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Players who are affected by this bug may see the game starting at the left corner of their screen with a stretched
-    aspect ratio.
-- Fix input block area preventing input on the entire screen when an active input is in an area <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This meant that whenever a player touched an input block area, they would not be able to interact with anything else
-    on the screen until they released the touch. They would see input drops whenever this happens.
-- Fix cursor count limitation being affected by inputs in input block area <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - If the player has an input in an input block area, it would count towards the 3 cursor limit, meaning they would
-    only be able to put 2 more fingers on the screen. They would see input drops whenever this happens.
-- Fix cursor down state for remove slider lock setting not being updated when a press occurs <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This caused the setting to not work as expected.
-- Fix a crash when the game fails to load multiplayer room list in multiplayer lobby <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Prevent game exit dialog from showing up more than once <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a potential crash when loading a score while filtering beatmaps in song selection menu <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix menu item in gameplay pause menu being selected when dragging a finger instead of pressing with no way of canceling <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix music not playing when exiting from game loading scene via device back button <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix select dropdown menu text and options being centered <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - An example of this bug can be seen in Approach Different mod animation style customization, where the text is centered.
-- Fix Difficulty Adjust mod default values not being applied as intended <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix back button in song selection menu potentially being broken after filtering beatmaps <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix minimum synchronization limit setting not being read at all <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix minimum synchronization limit not considering speed multiplier <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix wrong rank potentially being displayed in break period due to object hit window leniency <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix video start time not being considered in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix inconsistent beatmap start time in multiplayer due to unaccounted video start time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Alleviate slower time progression in gameplay right before the music starts <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Players would notice this as the approach circle would progress at a slower rate when this happens.
-- Fix beatmap offset final value not being applied in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix beatmap offset not being updated when changed from beatmap offset slider in gameplay loading screen <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix gameplay progressing too slow or fast at first frame when time ramping mods are used <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix skin not being reloaded after importing configuration file <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix default HUD layout not being reset properly when hide in-game UI setting is enabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a potential race condition crash when switching beatmap sorting mode too fast <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a potential race condition crash when searching beatmaps too fast <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a crash when opening the HUD editor without any beatmap selected <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a potential crash when typing in some text boxes (e.g., multiplayer lobby search, Random mod seed) <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix a potential crash when adding a beatmap to favorites <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix song selection menu scrolling potentially not unselecting beatmapset even if the player scrolls far enough <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix non-host players being able to clear host-only mods in multiplayer when free mod is active <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix mod specific settings from mod preset not being copied over if the mod is already active before selecting the mod preset <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix default Custom Speed and Difficulty Adjust mods not being saved in mod presets <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix slider head hit in replay using non-replay hit receptor <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix potential incomplete reading of slider replay data <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix potential division by zero when calculating top weighted strains of a beatmap in difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix music playback continuation after quitting gameplay potentially not applying the expected speed or pitch <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix music playback continuation after quitting gameplay potentially not considering the preview music setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix cursor release (finger lift) potentially being registered in incorrect time when pausing gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix potential crash when canceling gameplay loading while slider paths are being loaded <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix non-host players being able to change required mods' settings in free mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix score overflow when playing a beatmap with information that has not been fully populated <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Full population happens in background difficulty calculation. This bug happens when a player plays a beatmap with
+    the ScoreV2 mod enabled and with the beatmap not being calculated yet.
+
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
