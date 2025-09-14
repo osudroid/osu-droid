@@ -124,7 +124,7 @@ class SettingsFragment : SettingsFragment() {
                                 e.message ?: "Unknown error"
                             ),
                             2000
-                        )
+                        ).show()
                     }
                 } finally {
                     tempFile?.delete()
@@ -139,7 +139,7 @@ class SettingsFragment : SettingsFragment() {
                     decorView,
                     StringTable.format(string.replay_import_result, importedCount, uris.size),
                     3000
-                )
+                ).show()
             }
         }
     }
