@@ -123,7 +123,7 @@ class SettingsFragment : SettingsFragment() {
                                 uri.path ?: uri.toString(),
                                 e.message ?: "Unknown error"
                             ),
-                            2000
+                            3000
                         ).show()
                     }
                 } finally {
@@ -138,7 +138,7 @@ class SettingsFragment : SettingsFragment() {
                 Snackbar.make(
                     decorView,
                     StringTable.format(string.replay_import_result, importedCount, uris.size),
-                    3000
+                    5000
                 ).show()
             }
         }
