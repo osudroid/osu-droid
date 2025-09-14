@@ -55,7 +55,14 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
             "Affects the size of hit circles and sliders.",
             difficulty.difficultyCS,
             rateAdjustedDifficulty.difficultyCS,
-            Metric("Hit circle radius", (HitObject.OBJECT_RADIUS * CircleSizeCalculator.droidCSToDroidScale(rateAdjustedDifficulty.difficultyCS)).roundBy(1).toString())
+            arrayOf(
+                Metric(
+                    "Hit circle radius",
+                    (HitObject.OBJECT_RADIUS * CircleSizeCalculator.droidCSToDroidScale(rateAdjustedDifficulty.difficultyCS))
+                        .roundBy(1)
+                        .toString()
+                )
+            )
         )
 
         // AR
@@ -72,16 +79,17 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
             "Affects how early objects appear on screen relative to their hit time.",
             difficulty.ar,
             rateAdjustedDifficulty.ar,
-            Metric("Approach time", "${approachTime.roundBy(2)}ms")
+            arrayOf(Metric("Approach time", "${approachTime.roundBy(2)}ms"))
         )
 
         // OD
         // For OD, we want to display rate-affected hit window values in a different way, because they are not
         // accurately represented by the OD value itself.
+        val isPrecise = mods.any { it is ModPrecise }
         val rate = ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
         val hitWindow =
-            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(nonRateAdjustedDifficulty.od)
+            if (isPrecise) PreciseDroidHitWindow(nonRateAdjustedDifficulty.od)
             else DroidHitWindow(nonRateAdjustedDifficulty.od)
 
         addAttribute(
@@ -89,11 +97,14 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
             "Affects timing requirements for hit circles and spin speed requirements for spinners.",
             difficulty.od,
             rateAdjustedDifficulty.od,
-            Metric("GREAT hit window", "±${(hitWindow.greatWindow / rate).roundBy(2)}ms", OsuColors.blue),
-            Metric("OK hit window", "±${(hitWindow.okWindow / rate).roundBy(2)}ms", OsuColors.green),
-            Metric("MEH hit window", "±${(hitWindow.mehWindow / rate).roundBy(2)}ms", OsuColors.yellow),
-            Metric("MISS hit window", "±${(HitWindow.MISS_WINDOW / rate).roundBy(2)}ms", OsuColors.red),
-            Metric("RPM required to clear spinners", (2 + 12 * nonRateAdjustedDifficulty.od).roundToInt().toString())
+            arrayOf(
+                Metric("GREAT hit window", "±${(hitWindow.greatWindow / rate).roundBy(2)}ms", OsuColors.blue),
+                Metric("OK hit window", "±${(hitWindow.okWindow / rate).roundBy(2)}ms", OsuColors.green),
+                Metric("MEH hit window", "±${(hitWindow.mehWindow / rate).roundBy(2)}ms", OsuColors.yellow),
+                Metric("MISS hit window", "±${(HitWindow.MISS_WINDOW / rate).roundBy(2)}ms", OsuColors.red),
+                Metric("RPM required to clear spinners", (2 + 12 * nonRateAdjustedDifficulty.od).roundToInt().toString())
+            ),
+            if (isPrecise) arrayOf("Hit windows are being adjusted by the Precise mod.") else emptyArray()
         )
 
         // HP
@@ -113,7 +124,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
     }
 
     private fun addAttribute(name: String, description: String, originalValue: Float, adjustedValue: Float,
-                             vararg metrics: Metric) {
+                             metrics: Array<Metric> = emptyArray(), additionalInfo: Array<String> = emptyArray()) {
         modalCard += UILinearContainer().apply {
             orientation = Orientation.Vertical
             spacing = 10f
@@ -147,11 +158,25 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
                 }
             }
 
-            if (originalValue != adjustedValue) {
-                +UIText().apply {
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    text = "This value is being adjusted by mods (${originalValue.roundBy(2)} ➜ ${adjustedValue.roundBy(2)})."
-                    applyTheme = { color = it.accentColor * 0.6f }
+            if (originalValue != adjustedValue || additionalInfo.isNotEmpty()) {
+                +UILinearContainer().apply {
+                    orientation = Orientation.Vertical
+
+                    if (originalValue != adjustedValue) {
+                        +UIText().apply {
+                            font = ResourceManager.getInstance().getFont("smallFont")
+                            text = "This value is being adjusted by mods (${originalValue.roundBy(2)} ➜ ${adjustedValue.roundBy(2)})."
+                            applyTheme = { color = it.accentColor * 0.6f }
+                        }
+                    }
+
+                    additionalInfo.fastForEach { info ->
+                        +UIText().apply {
+                            font = ResourceManager.getInstance().getFont("smallFont")
+                            text = info
+                            applyTheme = { color = it.accentColor * 0.6f }
+                        }
+                    }
                 }
             }
         }
