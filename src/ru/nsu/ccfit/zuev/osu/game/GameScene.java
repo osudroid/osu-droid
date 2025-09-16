@@ -75,7 +75,6 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.engine.options.WakeLockOptions;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.IEntity;
@@ -1252,11 +1251,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyPlayfieldSizeScale();
         applyBackground();
 
-        // Handle input in its own thread
-        var touchOptions = new TouchOptions();
-        touchOptions.setRunOnUpdateThread(false);
-        engine.getTouchController().applyTouchOptions(touchOptions);
-
         // Disable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_BRIGHT);
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
@@ -1755,11 +1749,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Resume difficulty calculation.
             DifficultyCalculationManager.calculateDifficulties();
 
-            // Handle input back in update thread
-            var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
-            engine.getTouchController().applyTouchOptions(touchOptions);
-
             // Enable screen dimming
             engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
             GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
@@ -1952,11 +1941,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void quit() {
-        // Handle input back in update thread
-        var touchOptions = new TouchOptions();
-        touchOptions.setRunOnUpdateThread(true);
-        engine.getTouchController().applyTouchOptions(touchOptions);
-
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
