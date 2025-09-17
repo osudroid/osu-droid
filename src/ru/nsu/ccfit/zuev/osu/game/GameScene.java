@@ -1405,25 +1405,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // If no cursor is valid, check for the earliest pressed cursor.
                 if (mainCursorId < 0) {
                     int index = -1;
-                    CursorEvent latestDownEvent = null;
+                    CursorEvent earliestDownEvent = null;
 
                     for (int i = 0; i < cursors.length; ++i) {
                         var c = cursors[i];
-                        var latestCursorDownEvent = c.getLatestEvent(TouchEvent.ACTION_DOWN);
+                        var earliestCursorDownEvent = c.getEarliestEvent(TouchEvent.ACTION_DOWN);
 
-                        if (latestCursorDownEvent == null) {
+                        if (earliestCursorDownEvent == null) {
                             continue;
                         }
 
-                        if (latestDownEvent == null || latestDownEvent.time > latestCursorDownEvent.time) {
-                            latestDownEvent = latestCursorDownEvent;
+                        if (earliestDownEvent == null || earliestDownEvent.time > earliestCursorDownEvent.time) {
+                            earliestDownEvent = earliestCursorDownEvent;
                             index = i;
                         }
                     }
 
-                    if (latestDownEvent != null) {
+                    if (earliestDownEvent != null) {
                         mainCursorId = index;
-                        flashlightSprite.onMouseMove(latestDownEvent.position.x, latestDownEvent.position.y);
                     }
                 }
 

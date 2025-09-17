@@ -28,6 +28,34 @@ public class Cursor {
     public final ArrayList<CursorEvent> events = new ArrayList<>(25);
 
     /**
+     * Obtains the earliest {@link CursorEvent} of this {@link Cursor}.
+     *
+     * @param actions The actions to filter by. If none are provided, no filtering is done.
+     * @return The earliest {@link CursorEvent}, or {@code null} if there are no {@link CursorEvent}s.
+     */
+    @Nullable
+    public CursorEvent getEarliestEvent(int ...actions) {
+        if (actions.length == 0) {
+            return events.isEmpty() ? null : events.get(0);
+        }
+
+        int size = events.size();
+
+        for (int i = 0; i < size; i++) {
+            var event = events.get(i);
+
+            //noinspection ForLoopReplaceableByForEach
+            for (int j = 0; j < actions.length; j++) {
+                if (event.action == actions[j]) {
+                    return event;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Obtains the latest {@link CursorEvent} of this {@link Cursor}.
      *
      * @param actions The actions to filter by. If none are provided, no filtering is done.
