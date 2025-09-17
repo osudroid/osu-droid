@@ -1040,7 +1040,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapDifficultyText.setText(
             "AR: " + difficulty.getAR() + " " +
             "OD: " + difficulty.od + " " +
-            "CS: " + difficulty.difficultyCS + " " +
+            "CS: " + difficulty.gameplayCS + " " +
             "HP: " + difficulty.hp + " " +
             "Stars: " + (strs.length == 2 ? strs[1] : GameHelper.Round(beatmapInfo.getStarRating(), 2))
         );
