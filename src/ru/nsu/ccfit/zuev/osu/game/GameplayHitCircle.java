@@ -265,7 +265,7 @@ public class GameplayHitCircle extends GameObject {
     public void tryHit(final float dt) {
         var hitWindow = beatmapCircle.hitWindow;
 
-        if (startHit || hitWindow == null) {
+        if (startHit || autoPlay || hitWindow == null) {
             return;
         }
 

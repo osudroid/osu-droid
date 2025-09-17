@@ -1348,7 +1348,7 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (startHit) {
+        if (startHit || autoPlay) {
             return;
         }
 
