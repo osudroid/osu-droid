@@ -2,8 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import androidx.annotation.Nullable;
-
+import com.osudroid.game.Cursor;
 import com.reco1l.framework.Color4;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 
@@ -28,14 +27,7 @@ public interface GameObjectListener {
 
     void removeObject(GameObject object);
 
-    @Nullable
-    PointF getMousePos(int index);
-
-    boolean isMouseDown(int index);
-
-    boolean isMousePressed(GameObject object, int index);
-
-    double downFrameOffset(int index);
+    Cursor getCursor(int index);
 
     int getCursorsCount();
 
