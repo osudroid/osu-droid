@@ -79,6 +79,17 @@ class ModReallyEasyTest {
     }
 
     @Test
+    fun `Test AR adjustment with Custom Speed and other rate adjusting mods of same rate`() {
+        fun test(expected: Float, mods: List<Mod>) = createBeatmapDifficulty().run {
+            ModReallyEasy().applyToDifficulty(GameMode.Droid, this, mods)
+            Assert.assertEquals(expected, ar, 1e-2f)
+        }
+
+        test(8f, listOf(ModCustomSpeed(trackRateMultiplier = 1.5f)))
+        test(8f, listOf(ModDoubleTime()))
+    }
+
+    @Test
     fun `Test compatibility with Difficulty Adjust mod`() {
         val reallyEasy = ModReallyEasy()
         val difficultyAdjust = ModDifficultyAdjust(cs = 4f)

@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
+import com.rian.osu.utils.ModUtils
 
 /**
  * Represents the Really Easy mod.
@@ -32,11 +33,10 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
                     ar -= 0.5f
                 }
 
-                val customSpeedMultiplier =
-                    (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
+                val speedMultiplier = ModUtils.calculateRateWithMods(mods)
 
                 ar -= 0.5f
-                ar -= customSpeedMultiplier - 1
+                ar -= speedMultiplier - 1
             }
 
             if (difficultyAdjustMod?.cs == null) {
