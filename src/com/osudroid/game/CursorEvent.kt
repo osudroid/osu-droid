@@ -1,6 +1,7 @@
 package com.osudroid.game
 
 import android.graphics.PointF
+import android.os.SystemClock
 import androidx.core.util.Pools.SynchronizedPool
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -14,10 +15,16 @@ class CursorEvent {
     private constructor()
 
     /**
-     * The time at which the [CursorEvent] occurred, in the [System.currentTimeMillis] time base.
+     * The time at which the [CursorEvent] occurred, in the [SystemClock.uptimeMillis] time base.
      */
     @JvmField
-    var time = 0L
+    var systemTime = 0L
+
+    /**
+     * The time at which the [CursorEvent] occurred, in the gameplay time base (milliseconds since the start of the track).
+     */
+    @JvmField
+    var trackTime = 0f
 
     /**
      * The action of the [CursorEvent], which can be one of [TouchEvent.ACTION_DOWN], [TouchEvent.ACTION_MOVE], or [TouchEvent.ACTION_UP].
@@ -68,8 +75,21 @@ class CursorEvent {
         pool.release(this)
     }
 
+    /**
+     * Copies this [CursorEvent] to a new instance.
+     */
+    fun copy() = obtain().also {
+        systemTime = it.systemTime
+        trackTime = it.trackTime
+        action = it.action
+        offset = it.offset
+        position.set(it.position)
+        trackPosition.set(it.trackPosition)
+    }
+
     private fun apply(event: TouchEvent) {
-        time = event.motionEvent.eventTime
+        systemTime = event.motionEvent.eventTime
+        trackTime = 0f
         action = event.action
         offset = 0.0
 
@@ -109,6 +129,7 @@ class CursorEvent {
         /**
          * Obtains an instance of [CursorEvent] from the pool or creates a new one if the pool is empty.
          *
+         * @param event The [TouchEvent] to apply to the [CursorEvent].
          * @return An instance of [CursorEvent].
          */
         @JvmStatic
