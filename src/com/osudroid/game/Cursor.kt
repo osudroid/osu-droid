@@ -1,5 +1,7 @@
 package com.osudroid.game
 
+import android.os.SystemClock
+
 import org.anddev.andengine.input.touch.TouchEvent
 
 /**
@@ -20,7 +22,7 @@ class Cursor {
         get() = latestEvent?.isActionDown == true || latestEvent?.isActionMove == true
 
     /**
-     * A list of [CursorEvent]s of this [Cursor] that are [TouchEvent.ACTION_DOWN] events.
+     * [TouchEvent.ACTION_DOWN] [CursorEvent]s of this [Cursor] that have not been processed yet.
      */
     @JvmField
     val downEvents = ArrayList<CursorEvent>(25)
@@ -32,13 +34,13 @@ class Cursor {
     var latestProcessedDownEventIndex = 0
 
     /**
-     * A list of [CursorEvent]s of this [Cursor] that has not been processed yet.
+     * [CursorEvent]s of this [Cursor] that have not been processed yet.
      */
     @JvmField
     val events = ArrayList<CursorEvent>(25)
 
     /**
-     * The index of the latest processed [CursorEvent] in [.events].
+     * The index of the latest processed [CursorEvent] in [events].
      */
     @JvmField
     var latestProcessedEventIndex = 0
@@ -141,7 +143,7 @@ class Cursor {
      * Obtains the closest [CursorEvent] before the specified system time.
      *
      * @param systemTime The system time to search for.
-     * @return The closest [CursorEvent] before the specified system time, or [latestEvent] if there are no events.
+     * @return The closest [CursorEvent] before [systemTime], or [latestEvent] if there are no events.
      */
     fun getClosestEventBefore(systemTime: Long): CursorEvent? {
         val size = events.size
@@ -171,18 +173,22 @@ class Cursor {
 
     /**
      * Resets this [Cursor] for the next update tick.
+     *
+     * @param frameTime The time of the current frame, in the [SystemClock.uptimeMillis] time base.
+     * @param trackElapsedTimeMs The elapsed time of the track in milliseconds.
      */
-    fun reset(previousFrameTime: Long, elapsedTimeMs: Float) {
+    fun reset(frameTime: Long, trackElapsedTimeMs: Float) {
         val size = events.size
 
         if (size == 0 && latestEvent != null) {
-            // Update the state of the latest event to the current update tick.
-            latestEvent!!.systemTime = previousFrameTime
-            latestEvent!!.trackTime = elapsedTimeMs
+            // When there are no new events, update the state of the latest event to the current update tick.
+            // This allows any input in the next update tick that rely on this event to function properly.
+            latestEvent!!.systemTime = frameTime
+            latestEvent!!.trackTime = trackElapsedTimeMs
             latestEvent!!.offset = 0.0
         }
 
-        // Do not release the last event in the list because it may be used in latestEvent.
+        // The last event in the list is used as the latest event, so we don't release it.
         for (i in 0..<size - 1) {
             events[i].release()
         }
