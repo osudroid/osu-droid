@@ -2385,7 +2385,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     break;
                 }
 
-                if (cursors[i].mouseDown) {
+                if (cursors[i].isMouseDown()) {
                     ++activeCursorCount;
                 }
             }
@@ -2418,13 +2418,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
-            cursor.mouseDown = true;
             cursor.addEvent(cursorEvent);
 
             if (replay != null) {
                 replay.addPress(eventTime, cursorEvent.trackPosition, id);
             }
-        } else if (cursor.mouseDown && event.isActionMove()) {
+        } else if (cursor.isMouseDown() && event.isActionMove()) {
 
             if (sprite != null) {
                 sprite.setShowing(true);
@@ -2436,12 +2435,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.addMove(eventTime, cursorEvent.trackPosition, id);
             }
 
-        } else if (cursor.mouseDown && event.isActionUp()) {
+        } else if (cursor.isMouseDown() && event.isActionUp()) {
 
             if (sprite != null) {
                 sprite.setShowing(false);
             }
-            cursor.mouseDown = false;
+
             cursor.addEvent(cursorEvent);
 
             if (replay != null) {
@@ -2463,11 +2462,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
-            var latestNonUpEvent = cursor.getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
 
-            if (latestNonUpEvent != null) {
-                cursor.mouseDown = false;
-
+            if (cursor.isMouseDown()) {
                 var upEvent = CursorEvent.obtain();
 
                 upEvent.systemTime = currentTime;

@@ -15,8 +15,9 @@ class Cursor {
     /**
      * Whether this [Cursor] is currently pressed down.
      */
-    @JvmField
-    var mouseDown = false
+    @get:JvmName("isMouseDown")
+    val mouseDown
+        get() = latestEvent?.isActionDown == true || latestEvent?.isActionMove == true
 
     /**
      * A list of [CursorEvent]s of this [Cursor] that are [TouchEvent.ACTION_DOWN] events.
