@@ -263,18 +263,23 @@ public class GameplaySpinner extends GameObject {
         PointF mouse = null;
 
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            var cursor = listener.getCursor(i);
+            var latestEvent = cursor.getLatestEvent();
+
             if (mouse == null) {
                 if (autoPlay) {
                     mouse = position;
-                } else if (listener.isMouseDown(i)) {
-                    mouse = listener.getMousePos(i);
                 } else {
-                    continue;
+                    if (latestEvent != null && !latestEvent.isActionUp()) {
+                        mouse = latestEvent.position;
+                    } else {
+                        continue;
+                    }
                 }
                 currMouse.set(mouse.x - position.x, mouse.y - position.y);
             }
 
-            if (oldMouse == null || listener.isMousePressed(this, i)) {
+            if (oldMouse == null || (latestEvent != null && latestEvent.isActionDown())) {
                 if (oldMouse == null) {
                     oldMouse = new PointF();
                 }
