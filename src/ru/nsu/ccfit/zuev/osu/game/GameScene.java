@@ -21,6 +21,7 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
@@ -112,7 +113,6 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -1332,8 +1332,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ) {
                     var event = CursorEvent.obtain();
 
-                    event.time = movement.getTime();
-                    event.position.set(movement.getX(), movement.getY());;
+                    event.systemTime = movement.getTime();
+                    event.trackTime = movement.getTime();
+                    event.offset = 0;
+                    event.position.set(movement.getX(), movement.getY());
 
                     if (movement.getTouchType() == TouchType.DOWN) {
                         event.action = TouchEvent.ACTION_DOWN;
@@ -1345,7 +1347,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     } else {
                         event.action = TouchEvent.ACTION_UP;
                     }
-                    cursors[i].events.add(event);
+                    cursors[i].addEvent(event);
                     replay.cursorIndex[i]++;
                     cIndex++;
                 }
@@ -1357,14 +1359,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                     var event = CursorEvent.obtain();
 
-                    event.time = (long) (elapsedTime * 1000);
+                    // We don't exactly need systemTime to be accurate here since it's not used for anything important
+                    // in replays.
+                    event.systemTime = (long) mSecPassed;
+                    event.trackTime = (long) mSecPassed;
+                    event.offset = 0;
                     event.action = TouchEvent.ACTION_MOVE;
                     event.position.set(
                         lastMovement.getX() * t + movement.getX() * (1 - t),
                         lastMovement.getY() * t + movement.getY() * (1 - t)
                     );
 
-                    cursors[i].events.add(event);
+                    cursors[i].addEvent(event);
                 }
             }
         }
@@ -1415,7 +1421,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             continue;
                         }
 
-                        if (earliestDownEvent == null || earliestDownEvent.time > earliestCursorDownEvent.time) {
+                        if (earliestDownEvent == null || earliestDownEvent.systemTime > earliestCursorDownEvent.systemTime) {
                             earliestDownEvent = earliestCursorDownEvent;
                             index = i;
                         }
@@ -1798,7 +1804,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             skipBtn = null;
         } else if (skipBtn != null) {
             for (int i = 0; i < cursors.length; ++i) {
-                var latestDownEvent = cursors[i].getLatestEvent(TouchEvent.ACTION_DOWN);
+                var latestDownEvent = cursors[i].getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
 
                 if (latestDownEvent != null && Utils.squaredDistance(latestDownEvent.position.x, latestDownEvent.position.y,
                         Config.getRES_WIDTH(), Config.getRES_HEIGHT()) < 250 * 250) {
@@ -1821,10 +1827,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return;
                 }
             }
-        }
-
-        for (int i = 0; i < cursors.length; ++i) {
-            cursors[i].events.clear();
         }
     }
 
@@ -2343,58 +2345,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         activeObjects.add(object);
     }
 
-
-    @Nullable
-    public PointF getMousePos(final int index) {
-        var cursor = cursors[index];
-        var latestNonUpEvent = cursor.getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
-
-        if (latestNonUpEvent == null) {
-            return null;
-        }
-
-        return latestNonUpEvent.position;
-    }
-
-
-    public boolean isMouseDown(final int index) {
-        return cursors[index].mouseDown;
-    }
-
-
-    public boolean isMousePressed(final GameObject object, final int index) {
-        // EnumSet.contains() internally uses an iterator, and it can be expensive to use everytime we want to use this method.
-        if (GameHelper.isAutoplay()) {
-            return false;
-        }
-        if (Config.isRemoveSliderLock()){
-            if(activeObjects.isEmpty()
-                || Math.abs(object.getHitTime() - lastActiveObjectHitTime) > 0.001f) {
-                return false;
-            }
-        }
-        else if (activeObjects.isEmpty()
-            || Math.abs(object.getHitTime()
-            - activeObjects.peek().getHitTime()) > 0.001f) {
-            return false;
-        }
-        return cursors[index].getLatestEvent(TouchEvent.ACTION_DOWN) != null;
+    public void removeObject(final GameObject object) {
+        expiredObjects.add(object);
     }
 
     @Override
-    public double downFrameOffset(int index) {
-        var cursor = cursors[index];
-        var latestDownEvent = cursor.getLatestEvent(TouchEvent.ACTION_DOWN);
-
-        if (latestDownEvent == null) {
-            return 0;
-        }
-
-        return latestDownEvent.offset;
-    }
-
-    public void removeObject(final GameObject object) {
-        expiredObjects.add(object);
+    public Cursor getCursor(int index) {
+        return cursors[index];
     }
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
@@ -2444,6 +2401,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var cursorEvent = CursorEvent.obtain(event);
 
+        cursorEvent.trackTime = elapsedTime * 1000;
+        cursorEvent.offset = offset;
+
         if (sprite != null) {
             sprite.setPosition(cursorEvent.position.x, cursorEvent.position.y);
         }
@@ -2459,8 +2419,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             cursor.mouseDown = true;
-            cursorEvent.offset = offset;
-            cursor.events.add(cursorEvent);
+            cursor.addEvent(cursorEvent);
 
             if (replay != null) {
                 replay.addPress(eventTime, cursorEvent.trackPosition, id);
@@ -2471,7 +2430,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(true);
             }
 
-            cursor.events.add(cursorEvent);
+            cursor.addEvent(cursorEvent);
 
             if (replay != null) {
                 replay.addMove(eventTime, cursorEvent.trackPosition, id);
@@ -2483,7 +2442,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(false);
             }
             cursor.mouseDown = false;
-            cursor.events.add(cursorEvent);
+            cursor.addEvent(cursorEvent);
 
             if (replay != null) {
                 replay.addUp(eventTime, id);
@@ -2496,10 +2455,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void removeAllCursors() {
+        long currentTime = System.currentTimeMillis();
         float offset = previousFrameTime > 0
-                ? (System.currentTimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                ? (currentTime - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        int time = (int) (elapsedTime * 1000 + offset);
+        float time = elapsedTime * 1000 + offset;
 
         for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
@@ -2509,13 +2469,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 cursor.mouseDown = false;
 
                 var upEvent = CursorEvent.obtain();
-                upEvent.time = time;
+
+                upEvent.systemTime = currentTime;
+                upEvent.trackTime = time;
                 upEvent.action = TouchEvent.ACTION_UP;
 
-                cursor.events.add(upEvent);
+                cursor.addEvent(upEvent);
 
                 if (replay != null) {
-                    replay.addUp(time, i);
+                    replay.addUp((int) time, i);
                 }
             }
 
@@ -3188,6 +3150,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 update(dt);
+
+                //noinspection ForLoopReplaceableByForEach
+                for (int i = 0; i < cursors.length; ++i) {
+                    cursors[i].reset(previousFrameTime, elapsedTime * 1000);
+                }
+
                 super.onManagedUpdate(dt);
             }
         };
