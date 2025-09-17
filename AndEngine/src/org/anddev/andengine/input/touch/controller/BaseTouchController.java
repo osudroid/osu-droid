@@ -89,6 +89,27 @@ public abstract class BaseTouchController implements ITouchController  {
 		return handled;
 	}
 
+    // BEGIN osu!droid modified - added method to fire historical touch event
+    protected boolean fireTouchEvent(final long pEventTime, final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
+        final boolean handled;
+        final MotionEvent historicalMotionEvent = MotionEvent.obtain(pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(), pX, pY, pMotionEvent.getMetaState());
+        final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, historicalMotionEvent);
+
+        if(this.mRunOnUpdateThread) {
+            final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
+            touchEventRunnablePoolItem.set(touchEvent);
+            this.mTouchEventRunnablePoolUpdateHandler.postPoolItem(touchEventRunnablePoolItem);
+
+            handled = true;
+        } else {
+            handled = this.mTouchEventCallback.onTouchEvent(touchEvent);
+            touchEvent.recycle();
+        }
+
+        return handled;
+    }
+    // END osu!droid modified
+
 	// ===========================================================
 	// Methods
 	// ===========================================================
