@@ -343,6 +343,12 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
+        if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) {
+            post.addParam("type", "pp");
+        } else {
+            post.addParam("type", "score");
+        }
+
         ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
 
         if (response == null || response.size() < 2) {
