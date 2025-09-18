@@ -91,4 +91,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Language">
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="system"
+            android:entries="@array/placeholder_array"
+            android:entryValues="@array/placeholder_array"
+            android:key="appLanguage"
+            android:summary="@string/opt_language_summary"
+            android:title="@string/opt_language_title"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
 </androidx.preference.PreferenceScreen>

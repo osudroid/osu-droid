@@ -20,7 +20,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.XmlRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.updateLayoutParams
@@ -33,18 +35,18 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
-import com.osudroid.resources.R.string
+import com.osudroid.UpdateManager
+import com.osudroid.data.DatabaseManager
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.multiplayer.RoomScene
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomTeam
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
-import com.osudroid.UpdateManager
+import com.osudroid.resources.R.string
 import com.osudroid.utils.async
-import com.osudroid.data.DatabaseManager
 import com.osudroid.utils.mainThread
-import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.reco1l.framework.asTimeInterpolator
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
@@ -58,6 +60,10 @@ import com.reco1l.toolkt.android.topMargin
 import com.rian.osu.mods.ModAutoplay
 import com.rian.osu.replay.ReplayImporter
 import com.rian.osu.utils.ModHashMap
+import java.io.File
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ConfigBackup
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -69,10 +75,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
-import java.io.File
-import kotlin.math.max
-import kotlin.math.roundToInt
-import kotlinx.coroutines.Job
 
 
 class SettingsFragment : SettingsFragment() {
@@ -324,6 +326,50 @@ class SettingsFragment : SettingsFragment() {
                 RoomScene.switchDifficultyAlgorithm()
             }
             true
+        }
+
+        findPreference<SelectPreference>("appLanguage")!!.apply {
+            options = mutableListOf(
+                Option("System Default", "system"),
+                Option("English", "en"),
+                // German
+                Option("Deutsch", "de"),
+                // Spanish
+                Option("Español", "es"),
+                // French
+                Option("Français", "fr"),
+                // Indonesian
+                Option("Bahasa Indonesia", "id"),
+                // Italian
+                Option("Italiano", "it"),
+                // Japanese
+                Option("日本語", "ja"),
+                // Korean
+                Option("한국어", "ko"),
+                // Netherlands
+                Option("Nederlands", "nl"),
+                // Portuguese
+                Option("Português (Brasil)", "pt-rBR"),
+                // Russian
+                Option("Русский", "ru"),
+                // Thai
+                Option("ไทย", "th"),
+                // Vietnamese
+                Option("Tiếng Việt", "vi"),
+                // Chinese
+                Option("中文 (简体)", "zh"),
+            )
+
+            setOnPreferenceChangeListener { _, newValue ->
+                val locale = LocaleListCompat.forLanguageTags(newValue as String)
+                AppCompatDelegate.setApplicationLocales(locale)
+
+                val intent = Intent(context, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                context.startActivity(intent)
+
+                true
+            }
         }
     }
 
