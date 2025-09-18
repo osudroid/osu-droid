@@ -110,7 +110,7 @@ class Cursor {
     /**
      * Obtains the closest [CursorEvent] before the specified system time.
      *
-     * @param systemTime The system time to search for.
+     * @param systemTime The system time to search for, in the [SystemClock.uptimeMillis] time base.
      * @return The closest [CursorEvent] before [systemTime], or [latestEvent] if there are no events.
      */
     fun getClosestEventBefore(systemTime: Long): CursorEvent? {
