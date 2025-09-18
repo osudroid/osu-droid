@@ -77,6 +77,7 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
+import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.engine.options.WakeLockOptions;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.IEntity;
@@ -1240,6 +1241,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyPlayfieldSizeScale();
         applyBackground();
 
+        // Enable historical event processing for more frequent ACTION_MOVE reports.
+        var touchOptions = new TouchOptions();
+        touchOptions.setRunOnUpdateThread(true);
+        touchOptions.setProcessHistoricalEvents(true);
+        engine.getTouchController().applyTouchOptions(touchOptions);
+
         // Disable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_BRIGHT);
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
@@ -1747,6 +1754,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Resume difficulty calculation.
             DifficultyCalculationManager.calculateDifficulties();
 
+            // Disable historical event processing for more efficient ACTION_MOVE reports. Frequent reports are not
+            // relevant outside gameplay.
+            var touchOptions = new TouchOptions();
+            touchOptions.setRunOnUpdateThread(true);
+            touchOptions.setProcessHistoricalEvents(false);
+            engine.getTouchController().applyTouchOptions(touchOptions);
+
             // Enable screen dimming
             engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
             GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
@@ -1915,6 +1929,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void quit() {
+        // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
+        // not that relevant outside gameplay.
+        var touchOptions = new TouchOptions();
+        touchOptions.setRunOnUpdateThread(true);
+        touchOptions.setProcessHistoricalEvents(false);
+        engine.getTouchController().applyTouchOptions(touchOptions);
+
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();

@@ -1,5 +1,6 @@
 package org.anddev.andengine.extension.input.touch.controller;
 
+import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.controller.BaseTouchController;
 
@@ -20,6 +21,10 @@ public class MultiTouchController extends BaseTouchController {
 	// ===========================================================
 	// Fields
 	// ===========================================================
+
+    // BEGIN osu!droid modified - Option to disable historical events processing.
+    private boolean mProcessHistoricalEvents;
+    // END osu!droid modified
 
 	// ===========================================================
 	// Constructors
@@ -61,6 +66,13 @@ public class MultiTouchController extends BaseTouchController {
 		}
 	}
 
+    @Override
+    public void applyTouchOptions(TouchOptions pTouchOptions) {
+        super.applyTouchOptions(pTouchOptions);
+
+        this.mProcessHistoricalEvents = pTouchOptions.isProcessHistoricalEvents();
+    }
+
 	// ===========================================================
 	// Methods
 	// ===========================================================
@@ -69,15 +81,18 @@ public class MultiTouchController extends BaseTouchController {
 		boolean handled = false;
         // BEGIN osu!droid modified - process historical coordinates in time order
         // See: https://developer.android.com/reference/android/view/MotionEvent#batching
-        final int historySize = pMotionEvent.getHistorySize();
         final int pointerCount = pMotionEvent.getPointerCount();
-        for (int h = 0; h < historySize; h++) {
-            final long time = pMotionEvent.getHistoricalEventTime(h);
 
-            for (int p = 0; p < pointerCount; p++) {
-                final int pointerID = pMotionEvent.getPointerId(p);
-                final boolean handledInner = this.fireTouchEvent(time, pMotionEvent.getHistoricalX(p, h), pMotionEvent.getHistoricalY(p, h), MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
-                handled = handled || handledInner;
+        if (this.mProcessHistoricalEvents) {
+            final int historySize = pMotionEvent.getHistorySize();
+            for (int h = 0; h < historySize; h++) {
+                final long time = pMotionEvent.getHistoricalEventTime(h);
+
+                for (int p = 0; p < pointerCount; p++) {
+                    final int pointerID = pMotionEvent.getPointerId(p);
+                    final boolean handledInner = this.fireTouchEvent(time, pMotionEvent.getHistoricalX(p, h), pMotionEvent.getHistoricalY(p, h), MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
+                    handled = handled || handledInner;
+                }
             }
         }
 
