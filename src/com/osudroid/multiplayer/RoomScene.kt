@@ -1,6 +1,7 @@
 package com.osudroid.multiplayer
 
 import com.osudroid.BuildSettings
+import com.osudroid.beatmaplisting.*
 import com.reco1l.andengine.sprite.*
 import com.osudroid.multiplayer.api.IPlayerEventListener
 import com.osudroid.multiplayer.api.IRoomEventListener
@@ -13,49 +14,39 @@ import com.osudroid.multiplayer.api.data.RoomGameplaySettings
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.multiplayer.api.data.RoomTeam
-import com.osudroid.multiplayer.api.data.RoomTeam.Blue
-import com.osudroid.multiplayer.api.data.RoomTeam.Red
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.TeamMode.HeadToHead
 import com.osudroid.multiplayer.api.data.TeamMode.TeamVersus
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.api.data.WinCondition.*
-import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.Multiplayer.isConnected
 import com.osudroid.multiplayer.Multiplayer.isRoomHost
 import com.osudroid.multiplayer.Multiplayer.player
-import com.osudroid.multiplayer.Multiplayer.room
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
-import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.multi.*
 import com.osudroid.ui.v2.modmenu.ModMenu
-import com.osudroid.utils.updateThread
+import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.framework.*
+import com.reco1l.andengine.component.UIComponent.Companion.FillParent
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.text.*
+import com.reco1l.andengine.ui.*
+import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
-import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.scene.background.SpriteBackground
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.TextButton
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
-import ru.nsu.ccfit.zuev.skins.OsuSkin
-import java.text.SimpleDateFormat
-import java.util.*
+import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
+import ru.nsu.ccfit.zuev.osuplus.*
 
-object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
+class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
 
     /**
      * Indicates that the host can change beatmap (it should be false while a change request was done)
@@ -108,472 +99,487 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     }
 
 
-    private var backButton: UIAnimatedSprite? = null
-
-    private var readyButton: TextButton? = null
-
-    private var secondaryButton: TextButton? = null
-
-    private var beatmapInfoButton: BeatmapButton? = null
-
-    private var modsButton: UISprite? = null
-
-    private var playerList: RoomPlayerList? = null
-
-    private var settingsFragment: SettingsFragment? = null
-
-    private val userCard = OnlinePanel()
-
-    private val roomTitleText = ChangeableText(20f, 20f, ResourceManager.getInstance().getFont("bigFont"), "", 100)
-
-    private val roomStatusText = ChangeableText(0f, 0f, ResourceManager.getInstance().getFont("smallFont"), "", 250)
-
-    private val roomInformationText = ChangeableText(0f, 0f, ResourceManager.getInstance().getFont("smallFont"), "", 200)
-
-
-    private val beatmapInfoText = ChangeableText(10f, 10f, ResourceManager.getInstance().getFont("smallFont"), "", 150)
-
-    private var beatmapInfoRectangle: Rectangle? = null
+    private lateinit var backgroundSprite: UISprite
+    private lateinit var beatmapInfoLayout: BeatmapInfoLayout
+    private lateinit var beatmapInfoAlert: UIText
+    private lateinit var modsButton: UITextButton
+    private lateinit var startButton: UITextButton
+    private lateinit var statusButton: UITextButton
+    private lateinit var nameText: UIText
+    private lateinit var teamModeBadge: UIBadge
+    private lateinit var freeModsBadge: UIBadge
+    private lateinit var winConditionBadge: UIBadge
+    private lateinit var playersBadge: UILabeledBadge
+    private lateinit var modsIndicator: ModsIndicator
+    private lateinit var playersContainer: UILinearContainer
+    private lateinit var changeBeatmapButton: UITextButton
+    private lateinit var downloadBeatmapButton: UITextButton
 
 
     init {
+        ResourceManager.getInstance().loadHighQualityAsset("mods", "mods.png")
+        ResourceManager.getInstance().loadHighQualityAsset("logout", "logout.png")
+        ResourceManager.getInstance().loadHighQualityAsset("swap", "swap.png")
+        ResourceManager.getInstance().loadHighQualityAsset("clock", "clock.png")
+        ResourceManager.getInstance().loadHighQualityAsset("bpm", "bpm.png")
+        ResourceManager.getInstance().loadHighQualityAsset("star", "star.png")
+        ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png")
+        ResourceManager.getInstance().loadHighQualityAsset("download", "download.png")
+
         RoomAPI.playerEventListener = this
         RoomAPI.roomEventListener = this
         chat = RoomChat()
-    }
 
+        flexContainer {
+            width = FillParent
+            height = FillParent
+            direction = FlexDirection.Column
 
-    fun load() {
-        detachChildren()
-        clearTouchAreas()
+            container {
+                width = FillParent
+                padding = Vec4(80f, 0f)
+                flexRules { grow = 1f }
 
-        isBackgroundEnabled = true
+                background = UISprite().apply {
+                    scaleType = ScaleType.Crop
+                    textureRegion = ResourceManager.getInstance().getTexture("menu-background")
+                    backgroundSprite = this
 
-        val dimRectangle = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
-        dimRectangle.setColor(0f, 0f, 0f, 0.5f)
-        attachChild(dimRectangle, 0)
+                    if (!Config.isSafeBeatmapBg()) {
+                        textureRegion = ResourceManager.getInstance().getTexture("::background") ?: textureRegion
+                    }
 
-        val topBarRectangle = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f)
-        topBarRectangle.setColor(0f, 0f, 0f, 0.3f)
-        attachChild(topBarRectangle)
-
-        attachChild(roomTitleText)
-
-        roomStatusText.setPosition(20f, roomTitleText.y + roomTitleText.height)
-        roomStatusText.setColor(0.8f, 0.8f, 0.8f)
-        attachChild(roomStatusText)
-
-        beatmapInfoButton = BeatmapButton().also {
-
-            it.setPosition(Config.getRES_WIDTH() - it.width + 20f, 130f + 40f)
-
-            registerTouchArea(it)
-            attachChild(it)
-        }
-
-        chatPreviewText.setPosition(beatmapInfoButton!!.x + 20f, 130f + 10f)
-        attachChild(chatPreviewText)
-
-        roomInformationText.setPosition(beatmapInfoButton!!.x + 20f, beatmapInfoButton!!.y + beatmapInfoButton!!.height + 10f)
-        attachChild(roomInformationText)
-
-        beatmapInfoRectangle = Rectangle(0f, 0f, beatmapInfoButton!!.width * 0.75f, 0f).also { beatmapInfoRectangle ->
-            beatmapInfoRectangle.setColor(0f, 0f, 0f, 0.9f)
-            beatmapInfoRectangle.isVisible = false
-
-            beatmapInfoText.detachSelf()
-            beatmapInfoRectangle.attachChild(beatmapInfoText)
-
-            attachChild(beatmapInfoRectangle)
-        }
-        beatmapInfoText.color4 = OsuSkin.get().getColor("MenuItemDefaultTextColor", Color4(1f, 1f, 1f))
-
-
-        readyButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Ready") {
-
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-                if (!event.isActionUp || isWaitingForStatusChange) {
-                    return false
+                    foreground = UIBox().apply {
+                        applyTheme = {
+                            color = it.accentColor * 0.1f
+                            alpha = 0.9f
+                        }
+                    }
                 }
 
-                ResourceManager.getInstance().getSound("menuclick")?.play()
-                isWaitingForStatusChange = true
+                linearContainer {
+                    orientation = Orientation.Vertical
+                    width = FillParent
+                    height = FillParent
 
-                when (player!!.status) {
+                    linearContainer {
+                        orientation = Orientation.Vertical
+                        spacing = 8f
+                        padding = Vec4(0f, 18f)
 
-                    NotReady -> {
-                        if (room!!.beatmap == null) {
-                            ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
-                            isWaitingForStatusChange = false
-                            return true
+                        nameText = text {
+                            text = room.name
+                            applyTheme = { color = it.accentColor }
                         }
 
-                        if (room!!.teamMode == TeamVersus && player!!.team == null) {
-                            ToastLogger.showText("You must select a team first!", true)
-                            isWaitingForStatusChange = false
-                            return true
+                        linearContainer {
+                            spacing = 8f
+
+                            teamModeBadge = badge {
+                                sizeVariant = SizeVariant.Small
+                            }
+
+                            winConditionBadge = badge {
+                                sizeVariant = SizeVariant.Small
+                            }
+
+                            playersBadge = labeledBadge {
+                                sizeVariant = SizeVariant.Small
+                                label = StringTable.get(R.string.multiplayer_room_players)
+                                value = "0/${room.maxPlayers}"
+                            }
+
+                            freeModsBadge = badge {
+                                sizeVariant = SizeVariant.Small
+                                applyTheme = {
+                                    color = it.accentColor * 0.1f
+                                    background?.color = it.accentColor
+                                }
+                                setText(R.string.multiplayer_room_free_mods)
+                                isVisible = false
+                            }
+
+                            +ModsIndicator().apply {
+                                iconSize = 24f
+                                modsIndicator = this
+                            }
                         }
-
-                        RoomAPI.setPlayerStatus(Ready)
                     }
 
-                    Ready -> invalidateStatus()
+                    flexContainer {
+                        width = FillParent
+                        height = FillParent
+                        gap = 24f
+                        padding = Vec4(0f, 12f)
 
-                    MissingBeatmap -> {
-                        ToastLogger.showText("Beatmap is missing, cannot ready.", true)
-                        isWaitingForStatusChange = false
-                    }
+                        fun UIFlexContainer.Section(title: Int, block: UILinearContainer.() -> Unit) {
+                            linearContainer {
+                                orientation = Orientation.Vertical
+                                height = FillParent
+                                spacing = 8f
 
-                    else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
-                }
-                return true
-            }
-        }.also { readyButton ->
+                                flexRules {
+                                    grow = 1f
+                                    basis = 0f
+                                }
 
-            readyButton.width = 400f
-            readyButton.setColor(0.2f, 0.9f, 0.2f)
-            readyButton.setPosition(Config.getRES_WIDTH() - readyButton.width - 20f, Config.getRES_HEIGHT() - readyButton.height - 20f)
+                                text {
+                                    text = StringTable.get(title).uppercase()
+                                    applyTheme = { color = it.accentColor * 0.7f }
+                                }
 
-            registerTouchArea(readyButton)
-            attachChild(readyButton)
-        }
-
-        // It'll only be shown if the player is the room host, if host status is set to READY, this button will start
-        // the game otherwise it'll the options button.
-        secondaryButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Options") {
-
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-                if (!event.isActionUp || isWaitingForStatusChange) {
-                    return false
-                }
-
-                if (player!!.status == Ready) {
-
-                    if (!isRoomHost) {
-                        return false
-                    }
-
-                    if (room!!.beatmap == null) {
-                        ToastLogger.showText("You must select a beatmap first.", true)
-                        return true
-                    }
-
-                    if (!BuildSettings.MOCK_MULTIPLAYER) {
-                        if (room!!.teamMode == TeamVersus) {
-                            val team = room!!.teamMap
-
-                            if (team[Red].isNullOrEmpty() || team[Blue].isNullOrEmpty()) {
-                                ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
-                                return true
+                                block()
                             }
                         }
 
-                        val players = room!!.activePlayers.filter { it.status != MissingBeatmap }
+                        Section(R.string.multiplayer_room_players) {
 
-                        if (players.size <= 1) {
-                            ToastLogger.showText("At least 2 players need to have the beatmap!", true)
-                            return true
+                            scrollableContainer {
+                                width = FillParent
+                                height = FillParent
+                                scrollAxes = Axes.Y
+                                clipToBounds = true
+
+                                linearContainer {
+                                    orientation = Orientation.Vertical
+                                    width = FillParent
+                                    spacing = 4f
+                                    playersContainer = this
+                                }
+                            }
+                        }
+
+                        Section(R.string.multiplayer_room_beatmap) {
+
+                            +BeatmapInfoLayout().apply {
+                                padding = Vec4(16f)
+                                background = UIBox().apply {
+                                    cornerRadius = 12f
+                                    applyTheme = {
+                                        color = it.accentColor * 0.1f
+                                        alpha = 0.5f
+                                    }
+                                }
+                                isVisible = false
+                                beatmapInfoLayout = this
+                            }
+
+                            beatmapInfoAlert = text {
+                                width = FillParent
+                                padding = Vec4(16f)
+                                alignment = Anchor.Center
+                                background = UIBox().apply {
+                                    cornerRadius = 12f
+                                    applyTheme = {
+                                        color = it.accentColor * 0.1f
+                                        alpha = 0.5f
+                                    }
+                                }
+                            }
+
+                            linearContainer {
+                                width = FillParent
+                                spacing = 8f
+
+                                changeBeatmapButton = textButton {
+                                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("swap"))
+                                    alignment = Anchor.CenterLeft
+                                    setText(R.string.multiplayer_room_change_beatmap)
+                                    onActionUp = {
+                                        if (isRoomHost) {
+                                            if (LibraryManager.getLibrary().isEmpty()) {
+                                                GlobalManager.getInstance().songService.pause()
+                                                BeatmapListing().show()
+                                            }
+
+                                            GlobalManager.getInstance().songMenu.reload()
+                                            GlobalManager.getInstance().songMenu.show()
+                                            GlobalManager.getInstance().songMenu.select()
+
+                                            // We notify all clients that the host is changing beatmap
+                                            RoomAPI.changeBeatmap()
+                                        }
+                                    }
+                                }
+
+                                downloadBeatmapButton = textButton {
+                                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
+                                    alignment = Anchor.CenterLeft
+                                    isVisible = false
+                                }
+                            }
+
                         }
                     }
-
-                    ResourceManager.getInstance().getSound("menuhit")?.play()
-                    RoomAPI.notifyMatchPlay()
-                    return true
-
-                } else {
-                    mainThread {
-                        chat.dismiss()
-                        settingsFragment = SettingsFragment()
-                        settingsFragment!!.show()
-                    }
-                }
-                return false
-            }
-        }.also { secondaryButton ->
-
-            secondaryButton.width = 400f
-            secondaryButton.setColor(0.2f, 0.2f, 0.2f)
-            secondaryButton.setPosition(Config.getRES_WIDTH() - secondaryButton.width - 20f, readyButton!!.y - secondaryButton.height - 20f)
-
-            registerTouchArea(secondaryButton)
-            attachChild(secondaryButton)
-        }
-
-
-        val isNewLayout = OsuSkin.get().isUseNewLayout
-        val layoutBackButton = OsuSkin.get().getLayout("BackButton")
-        val layoutMods = OsuSkin.get().getLayout("ModsButton")
-
-        backButton = object : UIAnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
-
-            var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
-            var moved = false
-            var dx = 0f
-            var dy = 0f
-
-
-            init {
-                // Preserve original size.
-                size = size
-            }
-
-
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-                if (event.isActionDown) {
-
-                    if (scaleWhenHold) {
-                        setScale(1.25f)
-                    }
-
-                    moved = false
-                    dx = localX
-                    dy = localY
-
-                    ResourceManager.getInstance().getSound("menuback")?.play()
-                    return true
                 }
 
-                if (event.isActionUp) {
-                    setScale(1f)
+                linearContainer {
+                    origin = Anchor.BottomLeft
+                    anchor = Anchor.BottomLeft
+                    spacing = 8f
+                    padding = Vec4(0f, 12f)
 
-                    if (!moved) {
-                        mainThread {
-                            leaveDialog.show()
+                    textButton {
+                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
+                        setText(R.string.multiplayer_room_leave)
+                        onActionUp = { back() }
+                    }
+
+                    modsButton = textButton {
+                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
+                        setText(R.string.multiplayer_room_mods)
+                        onActionUp = { ModMenu.show() }
+                    }
+                }
+
+                linearContainer {
+                    width = 300f
+                    orientation = Orientation.Vertical
+                    origin = Anchor.BottomRight
+                    anchor = Anchor.BottomRight
+                    spacing = 8f
+                    padding = Vec4(0f, 12f)
+
+                    textButton {
+                        width = FillParent
+                        setText(R.string.multiplayer_room_start_game)
+                        isSelected = true
+                        onActionUp = callback@{
+
+                            if (isWaitingForStatusChange || !isRoomHost || player!!.status != Ready) {
+                                return@callback
+                            }
+
+                            if (room.beatmap == null) {
+                                ToastLogger.showText(R.string.multiplayer_room_must_select_beatmap, true)
+                                return@callback
+                            }
+
+                            if (!BuildSettings.MOCK_MULTIPLAYER) {
+                                if (room.teamMode == TeamVersus) {
+                                    val teams = room.teamMap
+
+                                    if (teams.values.any { it.isEmpty() }) {
+                                        ToastLogger.showText(R.string.multiplayer_room_at_least_one_player_per_team, true)
+                                        return@callback
+                                    }
+                                }
+
+                                val players = room.activePlayers.filter { it.status != MissingBeatmap }
+
+                                if (players.size <= 1) {
+                                    ToastLogger.showText(R.string.multiplayer_room_at_least_two_players_beatmap, true)
+                                    return@callback
+                                }
+                            }
+
+                            ResourceManager.getInstance().getSound("menuhit")?.play()
+                            RoomAPI.notifyMatchPlay()
                         }
+                        startButton = this
                     }
-                    return true
+
+                    textButton {
+                        width = FillParent
+                        setText(R.string.multiplayer_room_not_ready)
+                        onActionUp = callback@{
+
+                            if (isWaitingForStatusChange) {
+                                return@callback
+                            }
+
+                            ResourceManager.getInstance().getSound("menuclick")?.play()
+                            isWaitingForStatusChange = true
+
+                            when (player!!.status) {
+
+                                NotReady -> {
+                                    if (room.beatmap == null) {
+                                        ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
+                                        isWaitingForStatusChange = false
+                                    }
+
+                                    if (room.teamMode == TeamVersus && player!!.team == null) {
+                                        ToastLogger.showText("You must select a team first!", true)
+                                        isWaitingForStatusChange = false
+                                    }
+
+                                    RoomAPI.setPlayerStatus(Ready)
+                                }
+
+                                Ready -> invalidateStatus()
+
+                                MissingBeatmap -> {
+                                    ToastLogger.showText("Beatmap is missing, cannot ready.", true)
+                                    isWaitingForStatusChange = false
+                                }
+
+                                else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
+                            }
+                        }
+                        statusButton = this
+                    }
                 }
 
-                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50) {
-                    setScale(1f)
-                    moved = true
-                }
-                return false
-            }
-        }.also {
-            if (isNewLayout && layoutBackButton != null) {
-                layoutBackButton.apply(it)
-            } else {
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.transformedHeight)
             }
 
-            registerTouchArea(it)
-            attachChild(it)
+            +com.osudroid.ui.v2.multi.RoomChat()
         }
 
-        modsButton = object : UISprite() {
-
-            var moved = false
-            var dx = 0f
-            var dy = 0f
-
-
-            init {
-                textureRegion = ResourceManager.getInstance().getTextureIfLoaded("selection-mods")
-                size = size
-            }
-
-
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-                if (!isRoomHost && !room!!.gameplaySettings.isFreeMod || isWaitingForModsChange || isWaitingForStatusChange || player!!.status == Ready) {
-                    return true
-                }
-
-                if (event.isActionDown) {
-                    moved = false
-                    dx = localX
-                    dy = localY
-
-                    textureRegion = ResourceManager.getInstance().getTextureIfLoaded("selection-mods-over")
-                    return true
-                }
-
-                if (event.isActionUp) {
-                    textureRegion = ResourceManager.getInstance().getTextureIfLoaded("selection-mods")
-
-                    if (!moved) {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        chat.dismiss()
-                        ModMenu.show()
-                    }
-                    return true
-                }
-
-                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50) {
-
-                    if (!moved) {
-                        ResourceManager.getInstance().getSound("click-short")?.play()
-                    }
-
-                    textureRegion = ResourceManager.getInstance().getTextureIfLoaded("selection-mods")
-                    moved = true
-                }
-                return false
-            }
-        }.also { modsButton ->
-
-            modsButton.isVisible = false
-            modsButton.setScale(1.5f)
-
-            if (isNewLayout && layoutMods != null) {
-                layoutMods.apply(modsButton, backButton)
-            } else {
-                modsButton.setPosition(backButton!!.x + backButton!!.transformedWidth, Config.getRES_HEIGHT() - modsButton.transformedHeight)
-            }
-
-            registerTouchArea(modsButton)
-            attachChild(modsButton)
-        }
-
-        userCard.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
-        attachChild(userCard)
-
-        sortChildren()
+        Multiplayer.roomScene = this
     }
-
-    override fun onSceneTouchEvent(event: TouchEvent): Boolean {
-
-        beatmapInfoButton?.also {
-            beatmapInfoRectangle?.isVisible = GlobalManager.getInstance().selectedBeatmap != null
-                && !event.isActionUp
-                && event.x in it.x..it.x + it.width
-                && event.y in it.y..it.y + it.height
-        }
-
-        return super.onSceneTouchEvent(event)
-    }
-
 
     // Update events
 
-    @JvmStatic
-    fun updateOnlinePanel() = updateThread {
-        userCard.setInfo()
-        userCard.setAvatar()
-    }
-
     private fun updateBackground(path: String?) {
+        val textureRegion = ResourceManager.getInstance().loadBackground(path)
 
-        val texture = if (path != null && !Config.isSafeBeatmapBg()) {
-            ResourceManager.getInstance().loadBackground(path)
+        if (textureRegion != null) {
+            backgroundSprite.textureRegion = textureRegion
         } else {
-            ResourceManager.getInstance().getTexture("menu-background")
+            backgroundSprite.textureRegion = ResourceManager.getInstance().getTexture("menu-background")
         }
-
-        val height = texture.height * Config.getRES_WIDTH() / texture.width.toFloat()
-        val width = Config.getRES_WIDTH().toFloat()
-
-        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture))
     }
 
     private fun updateInformation() {
 
         updateButtons()
 
-        roomTitleText.text = room!!.name
-        roomStatusText.text = buildString {
+        playersBadge.value = "${room.activePlayers.size}/${room.maxPlayers}"
 
-            append(room!!.activePlayers.size).append(" / ").append(room!!.maxPlayers).append(" players")
-            append(" - ")
-            append(room!!.readyPlayers.size).append(" ready")
+        winConditionBadge.setText(when (room.winCondition) {
+            ScoreV1 -> R.string.multiplayer_room_score_v1
+            ScoreV2 -> R.string.multiplayer_room_score_v2
+            HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
+            MaximumCombo -> R.string.multiplayer_room_maximum_combo
+        })
 
-            if (room!!.teamMode == TeamVersus) {
-                val team = room!!.teamMap
+        teamModeBadge.setText(when (room.teamMode) {
+            HeadToHead -> R.string.multiplayer_room_head_to_head
+            TeamVersus -> R.string.multiplayer_room_team_versus
+        })
 
-                append(" - ")
-                append("Red Team: ").append(team[Red]?.size ?: 0).append(" vs Blue Team: ").append(team[Blue]?.size ?: 0)
+        freeModsBadge.isVisible = room.gameplaySettings.isFreeMod
+
+        nameText.text = room.name
+        modsIndicator.mods = room.mods.json
+    }
+
+    private fun updatePlayerList() {
+        updateThread {
+            playersContainer.apply {
+                detachChildren()
+
+                room.players.filterNotNull().forEach {
+                    +RoomPlayerButton(room, it)
+                }
             }
         }
-
-        roomInformationText.text = """
-            Mods: ${room!!.modsToReadableString()}
-            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled"}
-            Team mode: ${if (room!!.teamMode == HeadToHead) "Head-to-head" else "Team VS"}
-            Win condition: ${when (room!!.winCondition) {
-                ScoreV1 -> "Score V1"
-                HighestAccuracy -> "Accuracy"
-                MaximumCombo -> "Max combo"
-                ScoreV2 -> "Score V2"
-            }}
-        """.trimIndent()
     }
 
     private fun updateButtons() {
 
-        if (player!!.status == Ready) {
+        statusButton.apply {
+            setText(when (player!!.status) {
+                NotReady -> R.string.multiplayer_room_ready
+                Ready -> R.string.multiplayer_room_not_ready
+                else -> R.string.multiplayer_room_unable_status
+            })
 
-            readyButton!!.setText("Not ready")
-            readyButton!!.setColor(0.9f, 0.2f, 0.2f)
-
-            modsButton!!.isVisible = false
-            secondaryButton!!.isVisible = isRoomHost
-
-            if (isRoomHost) {
-
-                room!!.activePlayers.run {
-                    val playersReady = filter { it.status == Ready }
-
-                    secondaryButton!!.setText(when (playersReady.size) {
-                        size -> "Start Game!"
-                        else -> "Force Start Game! (${playersReady.size}/${size})"
-                    })
-                }
-
-                secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
+            isEnabled = when (player!!.status) {
+                Ready, NotReady -> true
+                else -> false
             }
+
+            isSelected = player!!.status == NotReady
+        }
+
+        val playersReady = room.activePlayers.filter { it.status == Ready }
+
+        startButton.apply {
+            isVisible = isRoomHost && player!!.status == Ready
+
+            // isVisible does only hide the button, but we also need to disable it.
+            isEnabled = isVisible
+
+            text = when (playersReady.size) {
+                room.activePlayers.size -> StringTable.get(R.string.multiplayer_room_start_game)
+                else -> StringTable.format(R.string.multiplayer_room_force_start_game, playersReady.size, room.activePlayers.size)
+            }
+        }
+
+        modsButton.isEnabled = isRoomHost || room.gameplaySettings.isFreeMod
+
+        changeBeatmapButton.apply {
+            isEnabled = isRoomHost
+            isVisible = isRoomHost
+        }
+    }
+
+
+    private fun updateBeatmap(roomBeatmap: RoomBeatmap?) {
+
+        if (roomBeatmap == null) {
+            beatmapInfoLayout.isVisible = false
+            beatmapInfoAlert.isVisible = true
+            downloadBeatmapButton.apply {
+                isVisible = false
+                onActionUp = null
+            }
+
+            beatmapInfoAlert.setText(
+                if (isRoomHost) {
+                    R.string.multiplayer_room_no_beatmap_selected
+                } else {
+                    R.string.multiplayer_room_changing_beatmap
+                }
+            )
             return
         }
 
-        readyButton!!.setText("Ready")
-        readyButton!!.setColor(0.2f, 0.9f, 0.2f)
+        beatmapInfoLayout.isVisible = true
+        beatmapInfoAlert.isVisible = false
 
-        secondaryButton!!.isVisible = true
-        secondaryButton!!.setText("Options")
-        secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
+        val beatmapInfo = GlobalManager.getInstance().selectedBeatmap
+        beatmapInfoLayout.setBeatmapInfo(beatmapInfo)
 
-        modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
-    }
+        downloadBeatmapButton.apply {
 
-    private fun updateBeatmapInfo() {
+            if (beatmapInfo == null) {
+                isVisible = true
 
-        beatmapInfoRectangle!!.isVisible = GlobalManager.getInstance().selectedBeatmap?.let { beatmapInfo ->
+                if (roomBeatmap.parentSetID == null) {
+                    isEnabled = false
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download_off"))
+                    setText(R.string.multiplayer_room_not_available_beatmap)
+                    return@apply
+                }
 
-            beatmapInfoText.text = """
-                Length: ${
-                    SimpleDateFormat(if (beatmapInfo.length > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
-                        it.timeZone = TimeZone.getTimeZone("GMT+0")
-                        it.format(beatmapInfo.length)
+                isEnabled = true
+                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
+                setText(R.string.multiplayer_room_download_beatmap)
+                onActionUp = {
+                    val url = BeatmapListing.mirror.download.request(roomBeatmap.parentSetID!!).toString()
+
+                    async {
+                        try {
+                            BeatmapDownloader.download(url, "${roomBeatmap.parentSetID} ${roomBeatmap.artist} - ${roomBeatmap.title}")
+                        } catch (e: Exception) {
+                            ToastLogger.showText("Unable to download beatmap: ${e.message}", true)
+                            e.printStackTrace()
+                        }
                     }
-                } 
-                BPM: ${
-                    if (beatmapInfo.bpmMin == beatmapInfo.bpmMax) {
-                        "%.1f".format(beatmapInfo.bpmMin)
-                    } else {
-                        "%.1f-%.1f".format(beatmapInfo.bpmMin, beatmapInfo.bpmMax)
-                    }
-                } 
-                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${beatmapInfo.getStarRating()}
-            """.trimIndent()
+                }
 
-            true
-        } ?: false
-
-        beatmapInfoRectangle!!.also { rect ->
-
-            rect.width = beatmapInfoText.width + 20
-            rect.height = beatmapInfoText.height + 20
-
-            beatmapInfoButton!!.let { rect.setPosition(it.x + it.width - rect.width - 20, it.y + it.height) }
+            } else {
+                isVisible = false
+                onActionUp = null
+            }
         }
     }
 
-    fun switchDifficultyAlgorithm() {
-        beatmapInfoButton!!.updateBeatmap(room!!.beatmap)
-        updateBeatmapInfo()
+    fun updateBeatmapInfo() {
+        beatmapInfoLayout.setBeatmapInfo(GlobalManager.getInstance().selectedBeatmap)
     }
 
 
@@ -582,7 +588,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     fun invalidateStatus() {
 
         // Status shouldn't be changed during reconnection because it's done by server, this function can be called by
-        // any of the updating functions. Changing status during reconnection can break the reconnection call hierarchy.
+        // any of the updating functions.
         if (Multiplayer.isReconnecting) {
             return
         }
@@ -591,7 +597,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         var newStatus = NotReady
 
-        if (room!!.beatmap != null && GlobalManager.getInstance().selectedBeatmap == null) {
+        if (room.beatmap != null && GlobalManager.getInstance().selectedBeatmap == null) {
             newStatus = MissingBeatmap
         }
 
@@ -602,38 +608,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         }
     }
 
-    fun clear() {
-        room = null
-        player = null
-
-        mainThread {
-            chat.clear()
-            chat.dismiss()
-
-            playerList?.menu?.dismiss()
-
-            updateThread {
-                ModMenu.back()
-                ModMenu.clear()
-
-                playerList?.detachSelf()
-                playerList = null
-            }
-        }
-    }
-
-
     // Navigation
 
     override fun back() {
         Multiplayer.isReconnecting = false
 
         runSafe { RoomAPI.disconnect() }
-        clear()
+
+        Multiplayer.room = null
+        player = null
+
+        mainThread {
+            chat.clear()
+            chat.dismiss()
+        }
+
         ExtendedEngine.Current.scene = LobbyScene()
     }
 
-    fun show() {
+    override fun show() {
 
         (GlobalManager.getInstance().camera as SmoothCamera).apply {
             setZoomFactorDirect(1f)
@@ -648,11 +641,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         GlobalManager.getInstance().engine.scene = this
 
         if (!isWaitingForBeatmapChange) {
-            onRoomBeatmapChange(room!!.beatmap)
+            onRoomBeatmapChange(room.beatmap)
         }
 
         invalidateStatus()
-        chat.show()
+        //chat.show()
     }
 
 
@@ -666,7 +659,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         if (uid != null) {
 
-            val player = room!!.playersMap[uid] ?: run {
+            val player = room.playersMap[uid] ?: run {
 
                 Multiplayer.log("WARNING: Unable to find user by ID on chat message")
                 return
@@ -686,21 +679,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomConnect(newRoom: Room) {
 
-        if (room != newRoom) {
+        if (Multiplayer.room != newRoom) {
             chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#459FFF")
         }
 
-        room = newRoom
-
-        isWaitingForModsChange = false
-        isWaitingForBeatmapChange = false
-        isWaitingForStatusChange = false
-
+        Multiplayer.room = newRoom
         player = newRoom.playersMap[OnlineManager.getInstance().userId]!!
-
-        playerList?.detachSelf()
-        playerList = RoomPlayerList(newRoom)
-        attachChild(playerList, 1)
 
         clearChildScene()
 
@@ -712,10 +696,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
 
         if (Multiplayer.isReconnecting) {
-            onRoomBeatmapChange(room!!.beatmap)
+            onRoomBeatmapChange(room.beatmap)
 
             Multiplayer.onReconnectAttempt(true)
 
@@ -767,25 +751,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     // Room changes
 
     override fun onRoomNameChange(name: String) {
-        room!!.name = name
+        room.name = name
         updateInformation()
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
-        room!!.maxPlayers = maxPlayers
-        room!!.players = room!!.players.copyOf(maxPlayers)
+        room.maxPlayers = maxPlayers
+        room.players = room.players.copyOf(maxPlayers)
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) {
 
-        room!!.beatmap = beatmap
+        room.beatmap = beatmap
 
         GlobalManager.getInstance().selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap?.md5)
 
-        beatmapInfoButton!!.updateBeatmap(beatmap)
+        beatmapInfoLayout.setBeatmapInfo(GlobalManager.getInstance().selectedBeatmap)
 
         if (GlobalManager.getInstance().engine.scene != this) {
             isWaitingForBeatmapChange = false
@@ -800,7 +784,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         invalidateStatus()
 
         updateBackground(GlobalManager.getInstance().selectedBeatmap?.backgroundPath)
-        updateBeatmapInfo()
+        updateBeatmap(beatmap)
 
         isWaitingForBeatmapChange = false
 
@@ -815,9 +799,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomHostChange(uid: Long) {
 
-        room!!.host = uid
+        room.host = uid
 
-        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#459FFF")
+        chat.onSystemChatMessage("Player ${room.playersMap[uid]?.name} is now the room host.", "#459FFF")
 
         updateThread {
             ModMenu.back(false)
@@ -825,7 +809,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             ModMenu.updateCustomizationMenuEnabledStates()
         }
 
-        playerList!!.invalidate()
+        updatePlayerList()
+        updateButtons()
     }
 
 
@@ -833,13 +818,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomModsChange(mods: RoomMods) {
 
-        if (mods != room!!.mods) {
+        if (mods != room.mods) {
             invalidateStatus()
         }
 
-        room!!.mods = mods
+        room.mods = mods
 
-        ModMenu.setMods(mods, room!!.gameplaySettings.isFreeMod)
+        ModMenu.setMods(mods, room.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange = true
 
@@ -849,15 +834,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     }
 
     override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
-        val wasFreeMod = room!!.gameplaySettings.isFreeMod
+        val wasFreeMod = room.gameplaySettings.isFreeMod
 
-        room!!.gameplaySettings = settings
+        room.gameplaySettings = settings
 
         updateInformation()
 
         isWaitingForModsChange = true
 
-        modsButton!!.isVisible = isRoomHost || settings.isFreeMod
+        modsButton.isVisible = isRoomHost || settings.isFreeMod
 
         updateThread {
             ModMenu.back(false)
@@ -873,9 +858,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     /**This method is used purely to update UI in other clients*/
     override fun onPlayerModsChange(uid: Long, mods: RoomMods) {
 
-        room!!.playersMap[uid]!!.mods = mods
+        room.playersMap[uid]!!.mods = mods
 
-        playerList!!.invalidate()
+        updatePlayerList()
 
         if (uid == player!!.id) {
             isWaitingForModsChange = false
@@ -884,10 +869,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomTeamModeChange(mode: TeamMode) {
 
-        room!!.teamMode = mode
+        room.teamMode = mode
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
 
         isWaitingForStatusChange = true
         invalidateStatus()
@@ -895,7 +880,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomWinConditionChange(winCondition: WinCondition) {
 
-        room!!.winCondition = winCondition
+        room.winCondition = winCondition
 
         updateInformation()
 
@@ -903,7 +888,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             isWaitingForModsChange = true
 
             // If win condition is Score V2 we add the mod.
-            val roomMods = room!!.mods.apply {
+            val roomMods = room.mods.apply {
 
                 if (winCondition == ScoreV2)
                     put(ModScoreV2::class)
@@ -914,7 +899,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             RoomAPI.setRoomMods(roomMods.serializeMods())
         }
 
-        playerList!!.invalidate()
+        updatePlayerList()
         invalidateStatus()
     }
 
@@ -935,12 +920,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             global.songMenu.stopMusic()
             global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
 
-            mainThread {
-                playerList!!.menu.dismiss()
-            }
         }
 
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onRoomMatchStart() {
@@ -949,7 +931,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             GlobalManager.getInstance().gameScene.isReadyToStart = true
         }
 
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onRoomMatchSkip() {
@@ -978,24 +960,24 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     override fun onPlayerJoin(player: RoomPlayer) {
 
         // We send the message if the player wasn't in the room, sometimes this event can be called by a reconnection.
-        if (room!!.addPlayer(player)) {
+        if (room.addPlayer(player)) {
             chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#459FFF")
         }
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onPlayerLeft(uid: Long) {
 
-        val player = room!!.removePlayer(uid)
+        val player = room.removePlayer(uid)
 
         if (player != null) {
             chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#459FFF")
         }
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onPlayerKick(uid: Long) {
@@ -1023,33 +1005,33 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             return
         }
 
-        val player = room!!.removePlayer(uid)
+        val player = room.removePlayer(uid)
 
         if (player != null) {
             chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FFBFBF")
         }
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus) {
 
-        room!!.playersMap[uid]!!.status = status
+        room.playersMap[uid]!!.status = status
 
         if (uid == player!!.id) {
             isWaitingForStatusChange = false
         }
 
         updateInformation()
-        playerList!!.invalidate()
+        updatePlayerList()
     }
 
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?) {
 
-        room!!.playersMap[uid]!!.team = team
+        room.playersMap[uid]!!.team = team
 
-        playerList!!.invalidate()
+        updatePlayerList()
         updateInformation()
     }
 

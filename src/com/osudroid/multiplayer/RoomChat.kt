@@ -127,11 +127,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
 
-        RoomScene.chatPreviewText.tag.color4 = Color4(tagColor ?: "#FFFFFF")
-        RoomScene.chatPreviewText.content.color4 = Color4(contentColor ?: "#FFFFFF")
+        Multiplayer.roomScene?.chatPreviewText?.tag?.color4 = Color4(tagColor ?: "#FFFFFF")
+        Multiplayer.roomScene?.chatPreviewText?.content?.color4 = Color4(contentColor ?: "#FFFFFF")
 
-        RoomScene.chatPreviewText.setTagText(tag ?: "")
-        RoomScene.chatPreviewText.setContentText(content)
+        Multiplayer.roomScene?.chatPreviewText?.setTagText(tag ?: "")
+        Multiplayer.roomScene?.chatPreviewText?.setContentText(content)
     }
 
     private fun hideKeyboard() {
@@ -285,7 +285,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
             return
         }
 
-        mainThread { RoomScene.leaveDialog.show() }
+        mainThread { Multiplayer.roomScene?.leaveDialog?.show() }
     }
 
 }

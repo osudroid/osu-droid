@@ -108,8 +108,9 @@ object BeatmapDownloader : IFileRequestObserver {
         } finally {
             mainThread(fragment::dismiss)
 
-            if (Multiplayer.isConnected)
-                RoomScene.onRoomBeatmapChange(Multiplayer.room!!.beatmap)
+            if (Multiplayer.isConnected) {
+                Multiplayer.roomScene?.onRoomBeatmapChange(Multiplayer.room!!.beatmap)
+            }
 
             isDownloading = false
         }

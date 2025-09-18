@@ -81,7 +81,10 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
             moved = true
         }
 
-        if (moved || !event.isActionUp || Multiplayer.player!!.status == Ready || RoomScene.isWaitingForBeatmapChange || RoomScene.isWaitingForStatusChange) {
+        if (moved || !event.isActionUp
+            || Multiplayer.player!!.status == Ready
+            || Multiplayer.roomScene?.isWaitingForBeatmapChange == true
+            || Multiplayer.roomScene?.isWaitingForStatusChange == true) {
             return true
         }
 

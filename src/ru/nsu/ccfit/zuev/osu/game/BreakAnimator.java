@@ -149,8 +149,9 @@ public class BreakAnimator extends GameObject {
                 sp.setIgnoreUpdate(false);
             }
 
-            if (Multiplayer.isMultiplayer)
-                RoomScene.INSTANCE.getChat().dismiss();
+            if (Multiplayer.isMultiplayer) {
+                Multiplayer.roomScene.getChat().dismiss();
+            }
         }
         if (length > 1) {
             if (time < 0.5f) {
