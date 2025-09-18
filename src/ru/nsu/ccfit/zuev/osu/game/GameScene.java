@@ -1247,7 +1247,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         initialElapsedTime = elapsedTime;
 
         if (skipTime <= 1)
-            RoomScene.INSTANCE.getChat().dismiss();
+            Multiplayer.roomScene.getChat().dismiss();
 
         applyPlayfieldSizeScale();
         applyBackground();
@@ -1447,7 +1447,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
 
                     if (Multiplayer.isConnected())
-                        RoomScene.INSTANCE.getChat().show();
+                        Multiplayer.roomScene.getChat().show();
 
                     hud.onBreakStateChange(true);
                     breakPeriods.poll();
@@ -1457,7 +1457,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (breakAnimator.isOver()) {
 
                 // Ensure the chat is dismissed if it's still shown
-                RoomScene.INSTANCE.getChat().dismiss();
+                Multiplayer.roomScene.getChat().dismiss();
 
                 gameStarted = true;
                 hud.onBreakStateChange(false);
@@ -1738,7 +1738,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (Multiplayer.isConnected())
                     {
                         Multiplayer.log("Match ended, moving to results scene.");
-                        RoomScene.INSTANCE.getChat().show();
+                        Multiplayer.roomScene.getChat().show();
 
                         Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
@@ -1776,7 +1776,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (elapsedTime > skipTime - 1f && skipBtn != null) {
-            RoomScene.INSTANCE.getChat().dismiss();
+            Multiplayer.roomScene.getChat().dismiss();
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
@@ -1854,7 +1854,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void skip(boolean force)
     {
-        RoomScene.INSTANCE.getChat().dismiss();
+        Multiplayer.roomScene.getChat().dismiss();
 
         if (elapsedTime > skipTime - 1f && !force) {
             return;
@@ -1986,7 +1986,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (Multiplayer.isMultiplayer)
         {
-            RoomScene.INSTANCE.show();
+            Multiplayer.roomScene.show();
             return;
         }
         ResourceManager.getInstance().getSound("failsound").stop();

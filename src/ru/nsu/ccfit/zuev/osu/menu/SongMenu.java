@@ -1302,7 +1302,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 resetMultiplayerRoomBeatmap();
             }
 
-            RoomScene.INSTANCE.show();
+            Multiplayer.roomScene.show();
             return;
         }
 
@@ -1317,7 +1317,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        RoomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
 
         if (!Multiplayer.isConnected()) {
             return;
@@ -1345,7 +1345,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        RoomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
 
         if (!Multiplayer.isConnected()) {
             return;

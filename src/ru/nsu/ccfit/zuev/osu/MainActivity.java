@@ -288,11 +288,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
-
-        // Initializing this class because they contain fragments in its constructors that should be initialized in
-        // main thread because of the Looper.
-        RoomScene.INSTANCE.init();
-
         Execution.async(() -> {
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -673,9 +668,9 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             if (Multiplayer.isConnected()
-                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    && (getEngine().getScene() == Multiplayer.roomScene
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
+                Execution.async(() -> Execution.runSafe(Multiplayer.roomScene::invalidateStatus));
             }
         }
 
@@ -785,13 +780,13 @@ public class MainActivity extends BaseGameActivity implements
                         return true;
                     }
 
-                    if (currentScene == RoomScene.INSTANCE) {
+                    if (currentScene == Multiplayer.roomScene) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
+                        if (Multiplayer.roomScene.hasChildScene() && Multiplayer.roomScene.getChildScene() == ModMenu.INSTANCE) {
                             ModMenu.INSTANCE.back();
                             return true;
                         }
-                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
                 } else if (currentScene instanceof GameLoaderScene loaderScene) {

@@ -3,6 +3,55 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_display_playfield_border_title">Display playfield border</string>
+    <string name="opt_display_playfield_border_summary">Displays a border around the playfield</string>
+
+    <string name="multiplayer_lobby_back">Back</string>
+    <string name="multiplayer_lobby_create_room">Create room</string>
+    <string name="multiplayer_lobby_create_room_accept">Create</string>
+    <string name="multiplayer_lobby_create_room_cancel">Cancel</string>
+    <string name="multiplayer_lobby_create_room_name_default">%s\'s room</string>
+    <string name="multiplayer_lobby_refresh">Refresh</string>
+    <string name="multiplayer_lobby_no_rooms">No rooms available, create a new one!</string>
+    <string name="multiplayer_lobby_no_results">No results found for the current search.</string>
+    <string name="multiplayer_lobby_fetch_error_toast">Failed to obtain rooms: %s</string>
+    <string name="multiplayer_lobby_fetch_error">Failed to obtain rooms</string>
+    <string name="multiplayer_lobby_room_name">Room name</string>
+    <string name="multiplayer_lobby_room_password">Room password</string>
+    <string name="multiplayer_lobby_room_capacity">Room capacity</string>
+    <string name="multiplayer_lobby_join_room">Join room</string>
+    <string name="multiplayer_lobby_join_room_accept">Join</string>
+    <string name="multiplayer_lobby_join_room_cancel">Cancel</string>
+    <string name="multiplayer_room_head_to_head">Head to head</string>
+    <string name="multiplayer_room_team_versus">Team versus</string>
+    <string name="multiplayer_room_players">Players</string>
+    <string name="multiplayer_room_beatmap">Beatmap</string>
+    <string name="multiplayer_room_change_beatmap">Change beatmap</string>
+    <string name="multiplayer_room_score_v1">Score V1</string>
+    <string name="multiplayer_room_score_v2">Score V2</string>
+    <string name="multiplayer_room_status_idle">Idle</string>
+    <string name="multiplayer_room_status_changing_beatmap">Changing beatmap</string>
+    <string name="multiplayer_room_status_playing">Playing</string>
+    <string name="multiplayer_room_highest_accuracy">Highest accuracy</string>
+    <string name="multiplayer_room_maximum_combo">Maximum combo</string>
+    <string name="multiplayer_room_no_players">No players</string>
+    <string name="multiplayer_room_free_mods">Free mods</string>
+    <string name="multiplayer_room_mods">Mods</string>
+    <string name="multiplayer_room_leave">Leave</string>
+    <string name="multiplayer_room_ready">Ready</string>
+    <string name="multiplayer_room_not_ready">Not ready</string>
+    <string name="multiplayer_room_unable_status">Cannot set ready!</string>
+    <string name="multiplayer_room_no_beatmap_selected">No beatmap selected.</string>
+    <string name="multiplayer_room_changing_beatmap">Room is changing beatmap...</string>
+    <string name="multiplayer_room_download_beatmap">Download</string>
+    <string name="multiplayer_room_not_available_beatmap">Not available</string>
+    <string name="multiplayer_room_start_game">Start game!</string>
+    <string name="multiplayer_room_force_start_game">Force start game! (%d/%d)</string>
+    <string name="multiplayer_room_must_select_beatmap">You must select a beatmap first.</string>
+    <string name="multiplayer_room_at_least_one_player_per_team">At least 1 player per team is needed to start a match!</string>
+    <string name="multiplayer_room_at_least_two_players_beatmap">At least 2 players need to have the beatmap!</string>
+    <string name="opt_gameAudioSynchronizationThreshold_title">Minimum Synchronization Limit</string>
+    <string name="opt_gameAudioSynchronizationThreshold_summary">The minimum time difference (in milliseconds) between gameplay and audio for gameplay to attempt to synchronize with audio.\n\nA lower limit increases the frequency of the syncing attempt. If constant offset is preferred, use a higher limit.</string>
     <string name="opt_language_title">Language</string>
     <string name="opt_language_summary">Change the language of the game. Requires a restart.</string>
 

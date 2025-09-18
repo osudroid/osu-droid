@@ -139,8 +139,6 @@ class MainMenu(val main: MainScene) {
                     GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
                     GlobalManager.getInstance().songMenu.reload()
-
-                    RoomScene.load()
                     GlobalManager.getInstance().engine.scene = LobbyScene()
                 }
                 return true
