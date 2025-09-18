@@ -1346,26 +1346,6 @@ public class GameplaySlider extends GameObject {
         return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
     }
 
-    @Override
-    public void tryHit(final float dt) {
-        if (startHit || autoPlay) {
-            return;
-        }
-
-        var hittingCursor = getHittingCursor(listener, beatmapSlider, completedSpanCount * spanDuration + elapsedSpanTime);
-
-        if (hittingCursor != null) {
-            double cursorOffset = Config.isFixFrameOffset() ? hittingCursor.offset : 0;
-            onSliderHeadHit((hittingCursor.trackTime - beatmapSlider.startTime + cursorOffset) / 1000);
-        }
-
-        if (elapsedSpanTime < 0 && startHit) {
-            approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
-        }
-    }
-
-
     /**
      * Gets the absolute position of a point on the path taking into account the slider's position.
      */

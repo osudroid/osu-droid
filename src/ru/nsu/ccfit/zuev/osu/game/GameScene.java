@@ -1525,7 +1525,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         updatePassiveObjects(dt);
         updateActiveObjects(dt);
-        tryHitActiveObjects(dt);
 
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.moveToObject(activeObjects.peek(), elapsedTime, this);
@@ -1792,17 +1791,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return;
                 }
             }
-        }
-    }
-
-    private void tryHitActiveObjects(float deltaTime) {
-        // When replaying, judgements are processed when updating the objects' state.
-        if (replaying) {
-            return;
-        }
-
-        for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            activeObjects.get(i).tryHit(deltaTime);
         }
     }
 

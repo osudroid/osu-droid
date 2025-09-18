@@ -52,8 +52,6 @@ public abstract class GameObject {
         this.id = id;
     }
 
-    public void tryHit(float dt) {}
-
     public PointF getPosition() {
         return position;
     }

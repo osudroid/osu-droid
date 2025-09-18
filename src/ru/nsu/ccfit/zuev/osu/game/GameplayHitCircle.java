@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.edlplan.framework.easing.Easing;
-import com.osudroid.game.CursorEvent;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -214,7 +213,17 @@ public class GameplayHitCircle extends GameObject {
             var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
 
             if (hittingCursor != null) {
-                registerHit(hittingCursor);
+                double cursorOffset = Config.isFixFrameOffset() ? hittingCursor.offset : 0;
+                double hitOffset = (hittingCursor.trackTime - beatmapCircle.startTime + cursorOffset) / 1000;
+                listener.registerAccuracy(hitOffset);
+                startHit = true;
+                passedTime = -1;
+                // Remove circle and register hit in update thread
+                listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
+                if (Math.abs(hitOffset) <= mehWindow) {
+                    playHitSamples();
+                }
+                removeFromScene();
                 return;
             }
         }
@@ -259,40 +268,5 @@ public class GameplayHitCircle extends GameObject {
                 listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }
-    } // update(float dt)
-
-    @Override
-    public void tryHit(final float dt) {
-        var hitWindow = beatmapCircle.hitWindow;
-
-        if (startHit || autoPlay || hitWindow == null) {
-            return;
-        }
-
-        var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
-
-        if (hittingCursor != null) {
-            registerHit(hittingCursor);
-        }
-    }
-
-    private void registerHit(CursorEvent hittingCursor) {
-        var hitWindow = beatmapCircle.hitWindow;
-
-        if (startHit || hitWindow == null) {
-            return;
-        }
-
-        double cursorOffset = Config.isFixFrameOffset() ? hittingCursor.offset : 0;
-        double hitOffset = (hittingCursor.trackTime - beatmapCircle.startTime + cursorOffset) / 1000;
-        listener.registerAccuracy(hitOffset);
-        startHit = true;
-        passedTime = -1;
-        // Remove circle and register hit in update thread
-        listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
-        if (Math.abs(hitOffset) <= hitWindow.getMehWindow() / 1000) {
-            playHitSamples();
-        }
-        removeFromScene();
     }
 }
