@@ -329,6 +329,11 @@ class SettingsFragment : SettingsFragment() {
         }
 
         findPreference<SelectPreference>("appLanguage")!!.apply {
+            if (Multiplayer.isMultiplayer) {
+                isEnabled = false
+                return
+            }
+
             options = mutableListOf(
                 Option("System Default", "system"),
                 Option("English", "en"),
