@@ -27,6 +27,12 @@ class CursorEvent {
     var trackTime = 0f
 
     /**
+     * The offset of the [CursorEvent] from the last frame, in milliseconds.
+     */
+    @JvmField
+    var offset = 0.0
+
+    /**
      * The action of the [CursorEvent], which can be one of [TouchEvent.ACTION_DOWN], [TouchEvent.ACTION_MOVE], or [TouchEvent.ACTION_UP].
      */
     @JvmField
@@ -51,10 +57,11 @@ class CursorEvent {
         get() = action == TouchEvent.ACTION_UP
 
     /**
-     * The offset of the [CursorEvent] from the last frame, in milliseconds.
+     * The time at which this [CursorEvent] occurred, accounting for [Config.isFixFrameOffset], in the gameplay time
+     * base (milliseconds since the start of the track).
      */
-    @JvmField
-    var offset = 0.0
+    val hitTime
+        get() = trackTime + if (Config.isFixFrameOffset()) offset else 0.0
 
     /**
      * The position of the cursor in screen space.

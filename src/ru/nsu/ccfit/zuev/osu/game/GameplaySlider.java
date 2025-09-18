@@ -896,8 +896,7 @@ public class GameplaySlider extends GameObject {
                         var hittingCursor = getHittingCursor(listener, beatmapSlider, elapsedTime);
 
                         if (hittingCursor != null) {
-                            double cursorOffset = Config.isFixFrameOffset() ? hittingCursor.offset : 0;
-                            onSliderHeadHit((hittingCursor.trackTime - beatmapSlider.startTime + cursorOffset) / 1000);
+                            onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
                         }
                     } else {
                         // If it's too late, mark this hit missing.

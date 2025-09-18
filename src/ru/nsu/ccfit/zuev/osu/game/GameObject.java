@@ -175,7 +175,7 @@ public abstract class GameObject {
             return false;
         }
 
-        return (cursorEvent.trackTime + cursorEvent.offset) / 1000 >= hitTime - objectHittableRange;
+        return cursorEvent.getHitTime() / 1000 >= hitTime - objectHittableRange;
     }
 
     /**

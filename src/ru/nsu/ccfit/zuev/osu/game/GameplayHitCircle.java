@@ -213,8 +213,7 @@ public class GameplayHitCircle extends GameObject {
             var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
 
             if (hittingCursor != null) {
-                double cursorOffset = Config.isFixFrameOffset() ? hittingCursor.offset : 0;
-                double hitOffset = (hittingCursor.trackTime - beatmapCircle.startTime + cursorOffset) / 1000;
+                double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
                 listener.registerAccuracy(hitOffset);
                 startHit = true;
                 passedTime = -1;
