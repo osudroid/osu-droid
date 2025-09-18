@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.multi
 
+import com.osudroid.resources.R.string
 import com.osudroid.multiplayer.api.*
 import com.osudroid.multiplayer.api.data.*
 import com.reco1l.andengine.*
@@ -12,7 +13,6 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.osu.menu.*
 import ru.nsu.ccfit.zuev.osu.online.*
-import ru.nsu.ccfit.zuev.osuplus.*
 
 class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>(UIScrollableContainer().apply {
     scrollAxes = Axes.Y
@@ -30,7 +30,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                 async {
                     LoadingScreen().show()
 
-                    val name = data.getString("name") ?: StringTable.format(R.string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)
+                    val name = data.getString("name") ?: StringTable.format(string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)
                     val password = data.optString("password").takeUnless(String::isBlank)
                     val capacity = data.getDouble("capacity").toInt()
 
@@ -74,22 +74,22 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                 }
             }
 
-            +FormInput(StringTable.format(R.string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)).apply {
+            +FormInput(StringTable.format(string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)).apply {
                 key = "name"
                 width = FillParent
-                label = StringTable.get(R.string.multiplayer_lobby_room_name)
+                label = StringTable.get(string.multiplayer_lobby_room_name)
             }
 
             +FormInput().apply {
                 key = "password"
                 width = FillParent
-                label = StringTable.get(R.string.multiplayer_lobby_room_password)
+                label = StringTable.get(string.multiplayer_lobby_room_password)
             }
 
             +FormSlider(8f).apply {
                 key = "capacity"
                 width = FillParent
-                label = StringTable.get(R.string.multiplayer_lobby_room_capacity)
+                label = StringTable.get(string.multiplayer_lobby_room_capacity)
                 control.max = 16f
                 control.min = 2f
                 control.step = 1f
@@ -100,10 +100,10 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
 
         innerContent.attachChild(form)
 
-        title = StringTable.get(R.string.multiplayer_lobby_create_room)
+        title = StringTable.get(string.multiplayer_lobby_create_room)
 
         addButton(UITextButton().apply {
-            setText(R.string.multiplayer_lobby_create_room_accept)
+            setText(string.multiplayer_lobby_create_room_accept)
             isSelected = true
             onActionUp = {
                 form.submit()
@@ -111,7 +111,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
         })
 
         addButton(UITextButton().apply {
-            setText(R.string.multiplayer_lobby_create_room_cancel)
+            setText(string.multiplayer_lobby_create_room_cancel)
             onActionUp = { hide() }
         })
     }

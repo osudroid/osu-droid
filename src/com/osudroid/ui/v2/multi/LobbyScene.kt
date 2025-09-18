@@ -6,6 +6,7 @@ import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R.string
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
@@ -16,7 +17,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osuplus.*
 import kotlin.coroutines.cancellation.CancellationException
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
@@ -78,13 +78,13 @@ class LobbyScene : UIScene() {
 
                     textButton {
                         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("back-arrow"))
-                        setText(R.string.multiplayer_lobby_back)
+                        setText(string.multiplayer_lobby_back)
                         onActionUp = { back() }
                     }
 
                     textButton {
                         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("plus"))
-                        setText(R.string.multiplayer_lobby_create_room)
+                        setText(string.multiplayer_lobby_create_room)
                         onActionUp = {
                             RoomCreateDialog(this@LobbyScene).show()
                         }
@@ -92,7 +92,7 @@ class LobbyScene : UIScene() {
 
                     refreshButton = textButton {
                         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("refresh"))
-                        setText(R.string.multiplayer_lobby_refresh)
+                        setText(string.multiplayer_lobby_refresh)
                         onActionUp = { shouldFetch = true }
                     }
                 }
@@ -211,7 +211,7 @@ class LobbyScene : UIScene() {
             Log.e("LobbyScene", "Error fetching multiplayer rooms", throwable)
 
             ToastLogger.showText(
-                StringTable.format(R.string.multiplayer_lobby_fetch_error_toast, throwable.message),
+                StringTable.format(string.multiplayer_lobby_fetch_error_toast, throwable.message),
                 true
             )
 
@@ -222,7 +222,7 @@ class LobbyScene : UIScene() {
                     text {
                         font = ResourceManager.getInstance().getFont("smallFont")
                         applyTheme = { color = it.accentColor }
-                        setText(R.string.multiplayer_lobby_fetch_error)
+                        setText(string.multiplayer_lobby_fetch_error)
                     }
                 }
             }
@@ -258,7 +258,7 @@ class LobbyScene : UIScene() {
                         text {
                             font = ResourceManager.getInstance().getFont("smallFont")
                             applyTheme = { color = it.accentColor }
-                            setText(if (searchQuery.isNullOrEmpty()) R.string.multiplayer_lobby_no_rooms else R.string.multiplayer_lobby_no_results)
+                            setText(if (searchQuery.isNullOrEmpty()) string.multiplayer_lobby_no_rooms else string.multiplayer_lobby_no_results)
                         }
                     }
                 } else {

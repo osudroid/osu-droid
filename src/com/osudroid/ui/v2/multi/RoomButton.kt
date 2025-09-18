@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.multi
 
+import com.osudroid.resources.R.string
 import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.*
 import com.osudroid.multiplayer.api.data.*
@@ -16,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.osu.menu.*
 import ru.nsu.ccfit.zuev.osu.online.*
-import ru.nsu.ccfit.zuev.osuplus.*
 
 class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
@@ -60,7 +60,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
                 text {
                     font = ResourceManager.getInstance().getFont("xs")
-                    text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(R.string.multiplayer_room_no_players)
+                    text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
                     applyTheme = {
                         color = it.accentColor
                         alpha = 0.95f
@@ -73,24 +73,24 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                     badge {
                         sizeVariant = SizeVariant.Small
                         setText(when (room.teamMode) {
-                            TeamMode.HeadToHead -> R.string.multiplayer_room_head_to_head
-                            TeamMode.TeamVersus -> R.string.multiplayer_room_team_versus
+                            TeamMode.HeadToHead -> string.multiplayer_room_head_to_head
+                            TeamMode.TeamVersus -> string.multiplayer_room_team_versus
                         })
                     }
 
                     badge {
                         sizeVariant = SizeVariant.Small
                         setText(when (room.winCondition) {
-                            WinCondition.ScoreV1 -> R.string.multiplayer_room_score_v1
-                            WinCondition.ScoreV2 -> R.string.multiplayer_room_score_v2
-                            WinCondition.HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
-                            WinCondition.MaximumCombo -> R.string.multiplayer_room_maximum_combo
+                            WinCondition.ScoreV1 -> string.multiplayer_room_score_v1
+                            WinCondition.ScoreV2 -> string.multiplayer_room_score_v2
+                            WinCondition.HighestAccuracy -> string.multiplayer_room_highest_accuracy
+                            WinCondition.MaximumCombo -> string.multiplayer_room_maximum_combo
                         })
                     }
 
                     labeledBadge {
                         sizeVariant = SizeVariant.Small
-                        label = StringTable.get(R.string.multiplayer_room_players)
+                        label = StringTable.get(string.multiplayer_room_players)
                         value = "${room.playerCount}/${room.maxPlayers}"
                     }
 
@@ -101,7 +101,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                                 color = it.accentColor * 0.1f
                                 background?.color = it.accentColor
                             }
-                            setText(R.string.multiplayer_room_free_mods)
+                            setText(string.multiplayer_room_free_mods)
                         }
                     }
                 }
@@ -120,9 +120,9 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                 font = ResourceManager.getInstance().getFont("smallFont")
                 setScale(0.85f)
                 setText(when (room.status) {
-                    RoomStatus.ChangingBeatmap -> R.string.multiplayer_room_status_changing_beatmap
-                    RoomStatus.Playing -> R.string.multiplayer_room_status_playing
-                    else -> R.string.multiplayer_room_status_idle
+                    RoomStatus.ChangingBeatmap -> string.multiplayer_room_status_changing_beatmap
+                    RoomStatus.Playing -> string.multiplayer_room_status_playing
+                    else -> string.multiplayer_room_status_idle
                 })
                 applyTheme = { color = it.accentColor }
             }
@@ -140,7 +140,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                     +FormInput().apply {
                         key = "password"
                         width = FillParent
-                        label = StringTable.get(R.string.multiplayer_lobby_room_password)
+                        label = StringTable.get(string.multiplayer_lobby_room_password)
                     }
 
                     onSubmit = {
@@ -148,16 +148,16 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                     }
                 }) {
                     init {
-                        title = StringTable.get(R.string.multiplayer_lobby_join_room)
+                        title = StringTable.get(string.multiplayer_lobby_join_room)
 
                         addButton(UITextButton().apply {
-                            setText(R.string.multiplayer_lobby_join_room_accept)
+                            setText(string.multiplayer_lobby_join_room_accept)
                             isSelected = true
                             onActionUp = { form.submit() }
                         })
 
                         addButton(UITextButton().apply {
-                            setText(R.string.multiplayer_lobby_join_room_cancel)
+                            setText(string.multiplayer_lobby_join_room_cancel)
                             onActionUp = { hide() }
                         })
                     }
