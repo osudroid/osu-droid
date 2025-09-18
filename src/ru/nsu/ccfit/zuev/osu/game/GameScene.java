@@ -1399,35 +1399,30 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (GameHelper.isFlashlight()) {
             if (!GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
                 // Check if the main cursor is still valid.
-                if (mainCursorId >= 0) {
-                    var cursor = cursors[mainCursorId];
-                    var latestUpEvent = cursor.getLatestEvent(TouchEvent.ACTION_UP);
-
-                    if (latestUpEvent != null) {
-                        mainCursorId = -1;
-                    }
+                if (mainCursorId >= 0 && !cursors[mainCursorId].isMouseDown()) {
+                    mainCursorId = -1;
                 }
 
-                // If no cursor is valid, check for the earliest pressed cursor.
+                // If no cursor is valid, check for the latest pressed cursor.
                 if (mainCursorId < 0) {
                     int index = -1;
-                    CursorEvent earliestDownEvent = null;
+                    CursorEvent latestDownEvent = null;
 
                     for (int i = 0; i < cursors.length; ++i) {
                         var c = cursors[i];
-                        var earliestCursorDownEvent = c.getEarliestEvent(TouchEvent.ACTION_DOWN);
+                        var latestCursorDownEvent = c.getLatestEvent(TouchEvent.ACTION_DOWN);
 
-                        if (earliestCursorDownEvent == null) {
+                        if (latestCursorDownEvent == null) {
                             continue;
                         }
 
-                        if (earliestDownEvent == null || earliestDownEvent.systemTime > earliestCursorDownEvent.systemTime) {
-                            earliestDownEvent = earliestCursorDownEvent;
+                        if (latestDownEvent == null || latestDownEvent.systemTime < latestCursorDownEvent.systemTime) {
+                            latestDownEvent = latestCursorDownEvent;
                             index = i;
                         }
                     }
 
-                    if (earliestDownEvent != null) {
+                    if (latestDownEvent != null) {
                         mainCursorId = index;
                     }
                 }

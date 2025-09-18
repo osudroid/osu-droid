@@ -72,38 +72,6 @@ class Cursor {
     }
 
     /**
-     * Obtains the earliest [CursorEvent] of this [Cursor].
-     *
-     * @param actions The actions to filter by. If none are provided, no filtering is done.
-     * @return The earliest [CursorEvent], or [latestEvent] or `null` if there are no [CursorEvent]s.
-     */
-    fun getEarliestEvent(vararg actions: Int): CursorEvent? {
-        if (actions.isEmpty()) {
-            return if (events.isEmpty()) latestEvent else events[0]
-        }
-
-        for (i in events.indices) {
-            val event = events[i]
-
-            for (j in actions.indices) {
-                if (event.action == actions[j]) {
-                    return event
-                }
-            }
-        }
-
-        if (latestEvent != null) {
-            for (i in actions.indices) {
-                if (latestEvent!!.action == actions[i]) {
-                    return latestEvent
-                }
-            }
-        }
-
-        return null
-    }
-
-    /**
      * Obtains the latest [CursorEvent] of this [Cursor].
      *
      * @param actions The actions to filter by. If none are provided, no filtering is done.
