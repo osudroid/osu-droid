@@ -15,6 +15,7 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
+import com.osudroid.ui.v2.songselect.*
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
@@ -282,10 +283,8 @@ object ModMenu : UIScene() {
                 beatmap = parsedBeatmap
             }
 
-            val songMenu = GlobalManager.getInstance().songMenu
-
             if (beatmap == null) {
-                songMenu.setStarsDisplay(0f)
+                SongSelect.setStarRatingDisplay(0.0)
                 return@scope
             }
 
@@ -348,8 +347,8 @@ object ModMenu : UIScene() {
 
             ensureActive()
 
-            songMenu.changeDimensionInfo(selectedBeatmap)
-            songMenu.setStarsDisplay(attributes.starRating.toFloat())
+            SongSelect.setDifficultyStatistics(selectedBeatmap)
+            SongSelect.setStarRatingDisplay(attributes.starRating)
         }
     }
 
@@ -358,11 +357,11 @@ object ModMenu : UIScene() {
     //region Visibility
 
     override fun show() {
-        GlobalManager.getInstance().engine.scene.setChildScene(
-            this,
-            false,
-            true,
-            true
+        SongSelect.setChildScene(
+            childScene = this,
+            modalDraw = false,
+            modalUpdate = true,
+            modalTouch = true
         )
 
         // Do not show mod presets in multiplayer.
@@ -526,13 +525,14 @@ object ModMenu : UIScene() {
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 
         if (modChangeQueue.any { it is IModApplicableToTrackRate }) {
-            GlobalManager.getInstance().songMenu.updateMusicEffects()
+            SongSelect.updateMusicEffects()
         }
         modChangeQueue.clear()
 
         parseBeatmap()
 
         modPresetsSection.onModsChanged()
+        SongSelect.onModsChanged()
     }
 
     fun addMod(mod: Mod) {

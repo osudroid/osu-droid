@@ -10,6 +10,8 @@ import com.osudroid.utils.mainThread
 import com.osudroid.ui.v2.multi.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
+import com.osudroid.ui.v2.songselect.*
+import com.reco1l.andengine.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -82,10 +84,7 @@ class MainMenu(val main: MainScene) {
                         BeatmapListing().show()
                     } else {
                         main.musicControl(MainScene.MusicOption.PLAY)
-
-                        GlobalManager.getInstance().songMenu.reload()
-                        GlobalManager.getInstance().songMenu.show()
-                        GlobalManager.getInstance().songMenu.select()
+                        ExtendedEngine.Current.scene = SongSelect
                     }
                 }
 

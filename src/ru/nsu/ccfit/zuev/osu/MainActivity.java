@@ -41,6 +41,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.songselect.SongSelect;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
@@ -263,6 +264,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
         ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png");
         ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png");
+        ResourceManager.getInstance().loadHighQualityAsset("star-xs", "star.png");
 
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
@@ -273,6 +275,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
+        ResourceManager.getInstance().loadFont("xxs", null, 12, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
         ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
@@ -340,6 +343,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
 
                 GlobalManager.getInstance().getMainScene().loadBannerSprite();
+
+                SongSelect.INSTANCE.loadBeatmaps();
             });
         });
     }
