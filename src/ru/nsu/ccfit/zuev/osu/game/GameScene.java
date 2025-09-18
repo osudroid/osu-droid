@@ -178,7 +178,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ComboBurst comboBurst;
     private int failcount = 0;
     private Color4 sliderBorderColor;
-    private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
@@ -751,8 +750,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ensureActive(scope.getCoroutineContext());
         }
 
-        lastActiveObjectHitTime = 0;
-
         timingControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().timing.controlPoints);
         effectControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().effect.controlPoints);
 
@@ -1077,8 +1074,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             timeOffset += 0.25f;
         }
 
-        boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
-        if (hasUnrankedMod || Config.isRemoveSliderLock()) {
+        if (SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext()) {
             unrankedSprite = new UISprite(ResourceManager.getInstance().getTexture("play-unranked"));
             unrankedSprite.setAnchor(Anchor.TopCenter);
             unrankedSprite.setOrigin(Anchor.Center);
@@ -1528,37 +1524,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         updatePassiveObjects(dt);
-        if (Config.isRemoveSliderLock()) {
-            updateLastActiveObjectHitTime();
-        }
         updateActiveObjects(dt);
+        tryHitActiveObjects(dt);
 
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.moveToObject(activeObjects.peek(), elapsedTime, this);
-        }
-
-        if (Config.isRemoveSliderLock()) {
-            var downPressCursorCount = 0;
-
-            for (int i = 0; i < cursors.length; i++) {
-                var events = cursors[i].events;
-                int size = events.size();
-
-                for (int j = 0; j < size; ++j) {
-                    var event = events.get(j);
-
-                    if (event.isActionDown()) {
-                        downPressCursorCount++;
-                    }
-                }
-            }
-
-            for (int i = 0; i < downPressCursorCount - 1; i++) {
-                updateLastActiveObjectHitTime();
-                tryHitActiveObjects(dt);
-            }
-        } else {
-            tryHitActiveObjects(dt);
         }
 
         if (videoEnabled && video != null && elapsedTime >= videoOffset)
@@ -1821,16 +1791,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     skip();
                     return;
                 }
-            }
-        }
-    }
-
-    private void updateLastActiveObjectHitTime() {
-        for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            var obj = activeObjects.get(i);
-            if (!obj.isStartHit()) {
-                lastActiveObjectHitTime = obj.getHitTime();
-                break;
             }
         }
     }

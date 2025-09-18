@@ -52,10 +52,6 @@ public abstract class GameObject {
         this.id = id;
     }
 
-    public boolean isStartHit(){
-        return startHit;
-    }
-
     public void tryHit(float dt) {}
 
     public PointF getPosition() {

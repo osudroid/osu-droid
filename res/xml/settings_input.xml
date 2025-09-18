@@ -18,14 +18,7 @@
             app:min="0"
             android:max="300"
             app:showSeekBarValue="true"
-            app:layout="@layout/settings_preference_seekbar" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="removeSliderLock"
-            android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
-            android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_seekbar_bottom" />
 
     </PreferenceCategory>
 

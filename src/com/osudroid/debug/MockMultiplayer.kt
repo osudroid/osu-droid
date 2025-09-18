@@ -23,7 +23,7 @@ fun MockRoom() = Room(
     isLocked = false,
     maxPlayers = 8,
     mods = RoomMods(),
-    gameplaySettings = RoomGameplaySettings(isFreeMod = true, isRemoveSliderLock = false),
+    gameplaySettings = RoomGameplaySettings(isFreeMod = true),
     teamMode = TeamMode.HeadToHead,
     winCondition = WinCondition.ScoreV1,
     playerCount = 0,
@@ -65,7 +65,6 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
             "roomGameplaySettingsChanged" -> "roomGameplaySettingsChanged" to arrayOf((args[0] as JSONObject).apply {
                 Multiplayer.room!!.gameplaySettings.also {
                     if (!has("isFreeMod")) put("isFreeMod", it.isFreeMod)
-                    if (!has("isRemoveSliderLock")) put("isRemoveSliderLock", it.isRemoveSliderLock)
                 }
             })
 
@@ -109,7 +108,6 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
 
             putObject("gameplaySettings") {
                 put("isFreeMod", true)
-                put("isRemoveSliderLock", false)
             }
 
             putArray("players") {
