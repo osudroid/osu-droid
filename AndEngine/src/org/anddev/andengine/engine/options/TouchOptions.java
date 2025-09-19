@@ -18,6 +18,10 @@ public class TouchOptions {
 
 	private boolean mRunOnUpdateThread;
 
+    // BEGIN osu!droid modified - Option to disable historical events processing.
+    private boolean mProcessHistoricalEvents;
+    // END osu!droid modified
+
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -45,6 +49,28 @@ public class TouchOptions {
 	public boolean isRunOnUpdateThread() {
 		return this.mRunOnUpdateThread;
 	}
+
+    // BEGIN osu!droid modified - Option to disable historical events processing.
+    public TouchOptions enableProcessHistoricalEvents() {
+        return this.setProcessHistoricalEvents(true);
+    }
+
+    public TouchOptions disableProcessHistoricalEvents() {
+        return this.setProcessHistoricalEvents(false);
+    }
+
+    public TouchOptions setProcessHistoricalEvents(final boolean pProcessHistoricalEvents) {
+        this.mProcessHistoricalEvents = pProcessHistoricalEvents;
+        return this;
+    }
+
+    /**
+     * <u><b>Default:</b></u> <code>false</code>
+     */
+    public boolean isProcessHistoricalEvents() {
+        return this.mProcessHistoricalEvents;
+    }
+    // END osu!droid modified
 
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces

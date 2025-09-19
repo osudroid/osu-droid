@@ -14,7 +14,6 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -25,7 +24,6 @@ public class GameplayHitCircle extends GameObject {
     private GameObjectListener listener;
     private Scene scene;
     private HitCircle beatmapCircle;
-    private float radiusSquared;
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
@@ -64,11 +62,7 @@ public class GameplayHitCircle extends GameObject {
         kiai = GameHelper.isKiai();
         this.comboColor = comboColor;
 
-        // Calculating position of top/left corner for sprites and hit radius
-        final float scale = beatmapCircle.getScreenSpaceGameplayScale();
-        radiusSquared = (float) beatmapCircle.getScreenSpaceGameplayRadius();
-        radiusSquared *= radiusSquared;
-
+        float scale = beatmapCircle.getScreenSpaceGameplayScale();
         float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
 
         // Initializing sprites
@@ -182,54 +176,6 @@ public class GameplayHitCircle extends GameObject {
         scene = null;
     }
 
-    private boolean canBeHit(float dt, float frameHitOffset) {
-        // At this point, the object's state is already in the next update tick.
-        // However, hit judgements require the object's state to be in the previous tick.
-        // Therefore, we subtract dt to get the object's state in the previous tick.
-        return passedTime - dt + frameHitOffset >= Math.max(0, timePreempt - objectHittableRange);
-    }
-
-    private boolean isHit() {
-        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-
-            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
-            if (GameHelper.isRelax() && passedTime - timePreempt >= 0 && inPosition) {
-                return true;
-            }
-
-            var isPressed = listener.isMousePressed(this, i);
-            if (isPressed && inPosition) {
-                return true;
-            } else if (GameHelper.isAutopilot() && isPressed) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private double hitOffsetToPreviousFrame() {
-        if (!Config.isFixFrameOffset()) {
-            return 0;
-        }
-
-        // 因为这里是阻塞队列, 所以提前点的地方会影响判断
-        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-
-            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
-            if (GameHelper.isRelax() && passedTime - timePreempt >= 0 && inPosition) {
-                return 0;
-            }
-
-            var isPressed = listener.isMousePressed(this, i);
-            if (isPressed && inPosition) {
-                return listener.downFrameOffset(i);
-            } else if (GameHelper.isAutopilot() && isPressed) {
-                return 0;
-            }
-        }
-        return 0;
-    }
-
     private void playHitSamples() {
         listener.playHitSamples(hitSamples);
     }
@@ -253,6 +199,7 @@ public class GameplayHitCircle extends GameObject {
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
+                startHit = true;
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
@@ -263,17 +210,16 @@ public class GameplayHitCircle extends GameObject {
                 return;
             }
         } else {
-            float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
+            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
 
-            // dt is 0 here as the current time is updated *after* this judgement.
-            if (canBeHit(0, frameHitOffset) && isHit()) {
-                float signAcc = passedTime - timePreempt + frameHitOffset;
-                listener.registerAccuracy(signAcc);
+            if (hittingCursor != null) {
+                double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
+                listener.registerAccuracy(hitOffset);
+                startHit = true;
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                startHit = true;
-                listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
-                if (Math.abs(signAcc) <= mehWindow) {
+                listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
+                if (Math.abs(hitOffset) <= mehWindow) {
                     playHitSamples();
                 }
                 removeFromScene();
@@ -321,30 +267,5 @@ public class GameplayHitCircle extends GameObject {
                 listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }
-    } // update(float dt)
-
-    @Override
-    public void tryHit(final float dt) {
-        if (beatmapCircle.hitWindow == null) {
-            return;
-        }
-
-        float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
-
-        if (canBeHit(dt, frameHitOffset) && isHit()) {
-            // At this point, the object's state is already in the next update tick.
-            // However, hit judgements require the object's state to be in the previous tick.
-            // Therefore, we subtract dt to get the object's state in the previous tick.
-            float signAcc = passedTime - timePreempt - dt + frameHitOffset;
-            listener.registerAccuracy(signAcc);
-            passedTime = -1;
-            // Remove circle and register hit in update thread
-            listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
-            if (Math.abs(signAcc) <= beatmapCircle.hitWindow.getMehWindow() / 1000) {
-                playHitSamples();
-            }
-            removeFromScene();
-        }
     }
-
 }

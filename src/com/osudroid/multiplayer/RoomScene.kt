@@ -491,7 +491,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         roomInformationText.text = """
             Mods: ${room!!.modsToReadableString()}
-            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled"}
             Team mode: ${if (room!!.teamMode == HeadToHead) "Head-to-head" else "Team VS"}
             Win condition: ${when (room!!.winCondition) {
                 ScoreV1 -> "Score V1"
