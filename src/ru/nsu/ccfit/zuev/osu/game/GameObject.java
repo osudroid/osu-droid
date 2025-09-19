@@ -130,6 +130,8 @@ public abstract class GameObject {
             var downEvents = cursor.downEvents;
             int downEventsSize = downEvents.size();
 
+            // Consume down events that have not been processed yet, even those that are already past the hit threshold.
+            // This ensures that start time ordered hit policy (aka "notelock") is enforced correctly.
             while (cursor.latestProcessedDownEventIndex < downEventsSize) {
                 var downEvent = downEvents.get(cursor.latestProcessedDownEventIndex++);
 
