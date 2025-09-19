@@ -1241,11 +1241,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         applyPlayfieldSizeScale();
         applyBackground();
 
-        // Enable historical event processing for more frequent ACTION_MOVE reports.
-        var touchOptions = new TouchOptions();
-        touchOptions.setRunOnUpdateThread(true);
-        touchOptions.setProcessHistoricalEvents(true);
-        engine.getTouchController().applyTouchOptions(touchOptions);
+        if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
+            // Enable historical event processing for more frequent ACTION_MOVE reports.
+            var touchOptions = new TouchOptions();
+            touchOptions.setRunOnUpdateThread(true);
+            touchOptions.setProcessHistoricalEvents(true);
+            engine.getTouchController().applyTouchOptions(touchOptions);
+        }
 
         // Disable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_BRIGHT);
