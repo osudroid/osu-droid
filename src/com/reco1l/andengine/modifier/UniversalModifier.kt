@@ -368,7 +368,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
          * The global pool for universal modifiers.
          */
         @JvmField
-        val GlobalPool = SynchronizedPool<UniversalModifier>(32).apply {
+        // Very big pool size because gameplay uses a _lot_ of modifiers.
+        val GlobalPool = SynchronizedPool<UniversalModifier>(300).apply {
             release(UniversalModifier(this))
         }
 
