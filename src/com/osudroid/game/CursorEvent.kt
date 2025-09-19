@@ -85,13 +85,13 @@ class CursorEvent {
     /**
      * Copies this [CursorEvent] to a new instance.
      */
-    fun copy() = obtain().also {
-        systemTime = it.systemTime
-        trackTime = it.trackTime
-        action = it.action
-        offset = it.offset
-        position.set(it.position)
-        trackPosition.set(it.trackPosition)
+    fun copy() = obtain().also { copy ->
+        copy.systemTime = systemTime
+        copy.trackTime = trackTime
+        copy.action = action
+        copy.offset = offset
+        copy.position.set(position)
+        copy.trackPosition.set(trackPosition)
     }
 
     private fun apply(event: TouchEvent) {
