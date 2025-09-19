@@ -29,11 +29,20 @@
 
 - Add beatmap attribute display <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Can be displayed by pressing the text with difficulty values (CS, AR, OD, HP, star rating) in song select.
+- Add option for selecting language in settings <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Can be accessed under the `General` category in settings.
+  - Changing the language requires restarting the game. Therefore, it is disabled in multiplayer.
 
 # Changes
 
 - Do not update OD value when using Precise mod in song select <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - It's the hit window that is different, not the OD, so attempting to "pair" OD like this is conceptually wrong.
+- Rework input handling in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This solves an issue where inputs between two frames (commonly known as subframe inputs) are discarded except the
+    last input before the next frame (an input is either a finger press, finger drag, or finger lift).
+  - Makes hitobject judgements "consume" finger presses sequentially. This means that if there are `n` hitobjects with
+    the same starting time, and they overlap, they would require `n` presses to hit instead of one (there is a
+    [beatmap](https://osu.ppy.sh/beatmapsets/1157609#osu/2439789) that abuses this behavior).
 
 # Bug Fixes
 
@@ -42,7 +51,14 @@
 - Fix score overflow when playing a beatmap with information that has not been fully populated <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Full population happens in background difficulty calculation. This bug happens when a player plays a beatmap with
     the ScoreV2 mod enabled and with the beatmap not being calculated yet.
+- Fix replay import notifications not showing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix Really Easy mod approach rate adjustment only counting Custom Speed mod instead of all constant rate-changing mods <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix wrong displayed score when opening it from pp-based beatmap leaderboard if the score is different from the score-based leaderboard <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
+# Removals
+
+- Remove `Remove slider lock and spinner lock` setting
+  - With the rework to gameplay input handling, this is enabled by default and thus is no longer needed.
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
