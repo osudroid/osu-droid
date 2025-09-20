@@ -470,10 +470,17 @@ object ModMenu : UIScene() {
         enabledMods.toList().fastForEach {
             val mod = it.second
 
-            // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
-            // since only the host can change those mods.
-            if (room != null && !isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
-                return@fastForEach
+            if (room != null) {
+                // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
+                // since only the host can change those mods.
+                if (!isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
+                    return@fastForEach
+                }
+
+                // Special handling for the ScoreV2 mod, which is used by the ScoreV2 win condition.
+                if (mod is ModScoreV2) {
+                    return@fastForEach
+                }
             }
 
             removeMod(mod::class)
