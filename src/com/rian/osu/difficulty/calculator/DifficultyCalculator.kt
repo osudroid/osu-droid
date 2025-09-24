@@ -61,7 +61,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      */
     @JvmOverloads
     fun calculate(beatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
-        val skills = createSkills(beatmap)
+        val skills = createSkills(beatmap, false)
         val objects = createDifficultyHitObjects(beatmap, scope)
 
         for (obj in objects) {
@@ -111,7 +111,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         }
 
         val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(beatmap.hitObjects.objects.size)
-        val skills = createSkills(beatmap)
+        val skills = createSkills(beatmap, true)
         val progressiveBeatmap = ProgressiveCalculationBeatmap(beatmap)
 
         val difficultyObjects = createDifficultyHitObjects(beatmap, scope)
@@ -154,9 +154,10 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
+     * @param timed Whether the [Skill]s are being created for a timed difficulty calculation.
      * @return The [Skill]s.
      */
-    protected abstract fun createSkills(beatmap: TBeatmap): Array<Skill<TObject>>
+    protected abstract fun createSkills(beatmap: TBeatmap, timed: Boolean): Array<Skill<TObject>>
 
     /**
      * Retrieves the [DifficultyHitObject]s to calculate against.

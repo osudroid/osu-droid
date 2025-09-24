@@ -90,7 +90,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         ).toDouble()
     }
 
-    override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
+    override fun createSkills(beatmap: DroidPlayableBeatmap, timed: Boolean): Array<Skill<DroidDifficultyHitObject>> {
         val mods = beatmap.mods.values
         val skills = mutableListOf<Skill<DroidDifficultyHitObject>>()
 

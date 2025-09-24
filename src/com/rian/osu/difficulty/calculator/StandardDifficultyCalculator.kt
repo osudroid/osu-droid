@@ -82,7 +82,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         spinnerCount = beatmap.hitObjects.spinnerCount
     }
 
-    override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
+    override fun createSkills(beatmap: StandardPlayableBeatmap, timed: Boolean): Array<Skill<StandardDifficultyHitObject>> {
         val mods = beatmap.mods.values
         val skills = mutableListOf<Skill<StandardDifficultyHitObject>>()
 
