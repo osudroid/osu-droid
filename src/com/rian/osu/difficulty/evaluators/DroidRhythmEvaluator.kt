@@ -77,9 +77,10 @@ object DroidRhythmEvaluator {
             // Either we're limited by time or limited by object count.
             val currentHistoricalDecay = min(noteDecay, timeDecay)
 
-            val currentDelta = currentObject.strainTime
-            val prevDelta = prevObject.strainTime
-            val lastDelta = lastObject.strainTime
+            // Use custom cap value to ensure that at this point delta time is actually zero.
+            val currentDelta = currentObject.deltaTime.coerceAtLeast(1e-7)
+            val prevDelta = prevObject.deltaTime.coerceAtLeast(1e-7)
+            val lastDelta = lastObject.deltaTime.coerceAtLeast(1e-7)
 
             // Calculate how much current delta difference deserves a rhythm bonus
             // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
