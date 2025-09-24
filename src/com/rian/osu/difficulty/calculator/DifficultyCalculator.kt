@@ -71,7 +71,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
             }
         }
 
-        return createDifficultyAttributes(beatmap, skills, objects)
+        return createDifficultyAttributes(beatmap, skills, objects, false)
     }
 
     /**
@@ -133,7 +133,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
 
             attributes[i] = TimedDifficultyAttributes(
                 obj.endTime,
-                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex))
+                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex), true)
             )
         }
 
@@ -182,9 +182,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @param beatmap The [PlayableBeatmap] whose difficulty was calculated.
      * @param skills The [Skill]s which processed the beatmap.
      * @param objects The [TObject]s that were generated.
+     * @param timed Whether the [TAttributes] are being created for a timed difficulty calculation.
      * @return [TAttributes] describing the beatmap's difficulty.
      */
-    protected abstract fun createDifficultyAttributes(beatmap: PlayableBeatmap, skills: Array<Skill<TObject>>, objects: Array<TObject>): TAttributes
+    protected abstract fun createDifficultyAttributes(
+        beatmap: PlayableBeatmap,
+        skills: Array<Skill<TObject>>,
+        objects: Array<TObject>,
+        timed: Boolean
+    ): TAttributes
 
     /**
      * Constructs a [PlayableBeatmap] from a [Beatmap] with specific parameters.

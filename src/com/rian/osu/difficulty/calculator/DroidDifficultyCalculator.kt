@@ -32,6 +32,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         beatmap: PlayableBeatmap,
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
+        timed: Boolean
     ) = DroidDifficultyAttributes().apply {
         mods = beatmap.mods.values.toSet()
         clockRate = beatmap.speedMultiplier.toDouble()

@@ -31,7 +31,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     override fun createDifficultyAttributes(
         beatmap: PlayableBeatmap,
         skills: Array<Skill<StandardDifficultyHitObject>>,
-        objects: Array<StandardDifficultyHitObject>
+        objects: Array<StandardDifficultyHitObject>,
+        timed: Boolean
     ) = StandardDifficultyAttributes().apply {
         mods = beatmap.mods.values.toSet()
 
