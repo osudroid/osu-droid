@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.calculator
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
+import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
 import com.rian.osu.math.ErrorFunction
@@ -493,7 +494,7 @@ class DroidPerformanceCalculator(
 
     private fun getConvertedHitWindow(): HitWindow {
         var od = difficultyAttributes.overallDifficulty.toFloat()
-        val hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+        val hitWindow = StandardHitWindow(od)
         val realGreatWindow = hitWindow.greatWindow * difficultyAttributes.clockRate.toFloat()
 
         // Obtain the good and meh hit window for osu!droid.
