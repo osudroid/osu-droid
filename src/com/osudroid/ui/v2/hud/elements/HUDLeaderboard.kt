@@ -13,8 +13,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class HUDLeaderboard : HUDElement() {
 
-    override val shouldBeShown = super.shouldBeShown && Config.isShowScoreboard()
-
     var nextItems: List<ScoreBoardItem>? = null
 
 

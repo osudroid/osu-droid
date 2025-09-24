@@ -28,6 +28,7 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.component.ComponentsKt;
@@ -1240,6 +1241,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         applyPlayfieldSizeScale();
         applyBackground();
+
+        if (!isHUDEditorMode && !Config.isShowScoreboard()) {
+            hud.detachChild(e -> e instanceof HUDLeaderboard);
+        }
 
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             // Enable historical event processing for more frequent ACTION_MOVE reports.
