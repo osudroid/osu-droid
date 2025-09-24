@@ -1,10 +1,9 @@
 package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.Beatmap
-import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.PlayableBeatmap
-import com.rian.osu.beatmap.PreciseDroidHitWindow
+import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
@@ -80,14 +79,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val isPrecise = ModPrecise::class in beatmap.mods
         // Weird cast of greatWindow, but necessary for difficulty calculation parity
         val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
 
-        overallDifficulty = (
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
-        ).toDouble()
+        overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
     }
 
     override fun createSkills(beatmap: DroidPlayableBeatmap, timed: Boolean): Array<Skill<DroidDifficultyHitObject>> {
