@@ -42,8 +42,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         sliderCount = beatmap.hitObjects.sliderCount
         spinnerCount = beatmap.hitObjects.spinnerCount
 
-        populateAimAttributes(skills)
-        populateTapAttributes(skills, objects)
+        populateAimAttributes(skills, timed)
+        populateTapAttributes(skills, objects, timed)
         populateRhythmAttributes(skills)
         populateFlashlightAttributes(skills)
         populateVisualAttributes(skills)
@@ -145,12 +145,24 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     override fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?) =
         beatmap.createDroidPlayableBeatmap(mods, scope)
 
-    private fun DroidDifficultyAttributes.populateAimAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
+    private fun DroidDifficultyAttributes.populateAimAttributes(skills: Array<Skill<DroidDifficultyHitObject>>, timed: Boolean) {
         val aim = skills.find<DroidAim> { it.withSliders } ?: return
 
         aimDifficulty = calculateRating(aim)
         aimDifficultStrainCount = aim.countTopWeightedStrains()
         aimDifficultSliderCount = aim.countDifficultSliders()
+
+        if (aimDifficulty > 0) {
+            val aimNoSlider = skills.find<DroidAim> { !it.withSliders }!!
+
+            aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
+        } else {
+            aimSliderFactor = 1.0
+        }
+
+        if (timed) {
+            return
+        }
 
         val velocitySum = aim.sliderVelocities.sumOf { s -> s.difficultyRating }
 
@@ -167,19 +179,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         // Take the top 15% most difficult sliders.
         difficultSliders.dropLastWhile { difficultSliders.size > ceil(0.15 * sliderCount) }
-
-        if (aimDifficulty > 0) {
-            val aimNoSlider = skills.find<DroidAim> { !it.withSliders }!!
-
-            aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
-        } else {
-            aimSliderFactor = 1.0
-        }
     }
 
     private fun DroidDifficultyAttributes.populateTapAttributes(
         skills: Array<Skill<DroidDifficultyHitObject>>,
-        objects: Array<DroidDifficultyHitObject>
+        objects: Array<DroidDifficultyHitObject>,
+        timed: Boolean
     ) {
         val tap = skills.find<DroidTap> { it.considerCheesability } ?: return
 
@@ -195,6 +200,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
             vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
         }
+
+        if (timed) {
+            return
+        }
+
+        val tapNoCheese = skills.find<DroidTap> { !it.considerCheesability } ?: return
 
         var firstObjectIndex = 0
         val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
@@ -218,8 +229,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         if (objects.size - firstObjectIndex >= minimumSectionObjectCount) {
             sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
         }
-
-        val tapNoCheese = skills.find<DroidTap> { !it.considerCheesability }!!
 
         // Re-filter with tap strain in mind.
         for (section in sectionBoundaries) {
