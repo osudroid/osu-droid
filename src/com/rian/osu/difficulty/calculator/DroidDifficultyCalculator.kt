@@ -99,7 +99,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             skills.add(DroidRhythm(mods))
 
             skills.add(DroidTap(mods, true))
-            skills.add(DroidTap(mods, false))
+
+            if (!timed) {
+                skills.add(DroidTap(mods, false))
+            }
 
             skills.add(DroidVisual(mods, true))
             skills.add(DroidVisual(mods, false))
