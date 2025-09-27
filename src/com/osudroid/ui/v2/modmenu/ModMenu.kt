@@ -80,10 +80,11 @@ object ModMenu : UIScene() {
 
         customizationMenu = ModCustomizationMenu()
 
-        attachChild(UILinearContainer().apply {
+        attachChild(UIFlexContainer().apply {
             width = FillParent
             height = FillParent
-            orientation = Orientation.Vertical
+            direction = FlexDirection.Column
+            justifyContent = JustifyContent.SpaceBetween
             background = UIBox().apply {
                 applyTheme = {
                     color = it.accentColor * 0.1f
@@ -91,136 +92,73 @@ object ModMenu : UIScene() {
                 }
             }
 
-            attachChild(UIContainer().apply {
+            +UILinearContainer().apply {
                 width = FillParent
                 height = MatchContent
+                orientation = Orientation.Horizontal
                 padding = Vec4(60f, 12f)
+                spacing = 10f
 
-                attachChild(UILinearContainer().apply {
-                    orientation = Orientation.Horizontal
-                    anchor = Anchor.CenterLeft
-                    origin = Anchor.CenterLeft
-                    height = MatchContent
-                    spacing = 10f
-
-                    attachChild(UITextButton().apply {
-                        text = "Back"
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                            width = 28f
-                            height = 28f
-                        }
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            back()
-                        }
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
-
-                    customizeButton = UITextButton().apply {
-                        text = "Customize"
-                        isEnabled = false
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("tune")
-                            width = 28f
-                            height = 28f
-                        }
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            if (customizationMenu.isVisible) {
-                                customizationMenu.hide()
-                            } else {
-                                customizationMenu.show()
-                            }
-                        }
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                +UITextButton().apply {
+                    text = "Back"
+                    leadingIcon = UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                        width = 28f
+                        height = 28f
                     }
-                    attachChild(customizeButton)
+                    onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        back()
+                    }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                }
 
-                    attachChild(UITextButton().apply {
-                        text = "Clear"
-                        applyTheme = {}
-                        color = Color4(0xFFFFBFBF)
-                        background?.color = Color4(0xFF342121)
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("backspace")
-                            width = 28f
-                            height = 28f
-                        }
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            clear()
-                        }
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
-                })
-
-                attachChild(UILinearContainer().apply {
-                    orientation = Orientation.Vertical
-                    spacing = 10f
-                    anchor = Anchor.CenterRight
-                    origin = Anchor.CenterRight
-
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        anchor = Anchor.TopRight
-                        origin = Anchor.TopRight
-                        spacing = 10f
-
-                        scoreMultiplierBadge = labeledBadge {
-                            label = "Score multiplier"
-                            value = "1.00x"
-                        }
-
-                        starRatingBadge = labeledBadge {
-                            label = "Star rating"
-                            value = "0.00"
-                        }
-
-                        rankedBadge = badge {
-                            text = "Ranked"
-                            background!!.color = Color4(0xFF83DF6B)
-                            color = Color4(0xFF161622)
-                            applyTheme = {}
+                customizeButton = UITextButton().apply {
+                    text = "Customize"
+                    isEnabled = false
+                    leadingIcon = UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("tune")
+                        width = 28f
+                        height = 28f
+                    }
+                    onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        if (customizationMenu.isVisible) {
+                            customizationMenu.hide()
+                        } else {
+                            customizationMenu.show()
                         }
                     }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                }
 
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        origin = Anchor.TopRight
-                        anchor = Anchor.TopRight
-                        spacing = 10f
+                +customizeButton
 
-                        arBadge = labeledBadge {
-                            label = "AR"
-                            value = "0.00"
-                        }
-                        odBadge = labeledBadge {
-                            label = "OD"
-                            value = "0.00"
-                        }
-                        csBadge = labeledBadge {
-                            label = "CS"
-                            value = "0.00"
-                        }
-                        hpBadge = labeledBadge {
-                            label = "HP"
-                            value = "0.00"
-                        }
-                        bpmBadge = labeledBadge {
-                            label = "BPM"
-                            value = "0.0"
-                        }
+                +UITextButton().apply {
+                    text = "Clear"
+                    applyTheme = {}
+                    color = Color4(0xFFFFBFBF)
+                    background?.color = Color4(0xFF342121)
+                    leadingIcon = UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("backspace")
+                        width = 28f
+                        height = 28f
                     }
-                })
-            })
+                    onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        clear()
+                    }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                }
+            }
 
-            attachChild(UIScrollableContainer().apply {
+            +UIScrollableContainer().apply {
                 width = FillParent
                 height = FillParent
                 scrollAxes = Axes.X
+                flexRules { grow = 1f }
 
-                attachChild(UILinearContainer().apply {
+                +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     width = MatchContent
                     height = FillParent
@@ -242,11 +180,59 @@ object ModMenu : UIScene() {
                             +ModMenuSection(sectionName, sectionToggles)
                         }
                     }
-                })
-            })
+                }
+            }
 
+            +UILinearContainer().apply {
+                width = FillParent
+                height = MatchContent
+                orientation = Orientation.Horizontal
+                spacing = 10f
+                padding = Vec4(60f, 12f)
+
+                arBadge = labeledBadge {
+                    label = "AR"
+                    value = "0.00"
+                }
+
+                odBadge = labeledBadge {
+                    label = "OD"
+                    value = "0.00"
+                }
+
+                csBadge = labeledBadge {
+                    label = "CS"
+                    value = "0.00"
+                }
+
+                hpBadge = labeledBadge {
+                    label = "HP"
+                    value = "0.00"
+                }
+
+                bpmBadge = labeledBadge {
+                    label = "BPM"
+                    value = "0.0"
+                }
+
+                starRatingBadge = labeledBadge {
+                    label = "Star rating"
+                    value = "0.00"
+                }
+
+                rankedBadge = badge {
+                    text = "Ranked"
+                    background!!.color = Color4(0xFF83DF6B)
+                    color = Color4(0xFF161622)
+                    applyTheme = {}
+                }
+
+                scoreMultiplierBadge = labeledBadge {
+                    label = "Score multiplier"
+                    value = "1.00x"
+                }
+            }
         })
-
 
         // Customizations menu
         attachChild(customizationMenu)
