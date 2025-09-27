@@ -15,6 +15,7 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
+import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.UITextButton
@@ -61,7 +62,7 @@ object ModMenu : UIScene() {
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
-
+    private val selectedModsIndicator: ModsIndicator
     private val searchInput: ModMenuSearchInput
 
     private val rankedBadge: UIBadge
@@ -161,6 +162,18 @@ object ModMenu : UIScene() {
                             clear()
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    }
+
+                    +UIScrollableContainer().apply {
+                        width = 340f
+                        height = MatchContent
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        scrollAxes = Axes.X
+                        clipToBounds = true
+
+                        selectedModsIndicator = ModsIndicator()
+                        +selectedModsIndicator
                     }
                 }
 
@@ -586,6 +599,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
+        selectedModsIndicator.mods = ModUtils.serializeMods(enabledMods, includeNonUserPlayable = true, includeIrrelevantMods = true)
         modPresetsSection.onModsChanged()
     }
 
