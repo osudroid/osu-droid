@@ -23,7 +23,7 @@ class ModMenuSearchInput : UITextInput("") {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        if (lastValueChange != Long.MAX_VALUE && System.currentTimeMillis() - lastValueChange >= FILTER_DEBOUNCE_MS) {
+        if (lastValueChange != Long.MAX_VALUE && System.currentTimeMillis() - lastValueChange >= DEBOUNCE_MS) {
             onSearchTermUpdate(value)
             lastValueChange = Long.MAX_VALUE
         }
@@ -32,6 +32,6 @@ class ModMenuSearchInput : UITextInput("") {
     }
 
     companion object {
-        private const val FILTER_DEBOUNCE_MS = 250L
+        private const val DEBOUNCE_MS = 200L
     }
 }
