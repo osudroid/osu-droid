@@ -183,53 +183,65 @@ object ModMenu : UIScene() {
                 }
             }
 
-            +UILinearContainer().apply {
+            +UIContainer().apply {
                 width = FillParent
                 height = MatchContent
-                orientation = Orientation.Horizontal
-                spacing = 10f
                 padding = Vec4(60f, 12f)
 
-                arBadge = labeledBadge {
-                    label = "AR"
-                    value = "0.00"
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    spacing = 10f
+
+                    arBadge = labeledBadge {
+                        label = "AR"
+                        value = "0.00"
+                    }
+
+                    odBadge = labeledBadge {
+                        label = "OD"
+                        value = "0.00"
+                    }
+
+                    csBadge = labeledBadge {
+                        label = "CS"
+                        value = "0.00"
+                    }
+
+                    hpBadge = labeledBadge {
+                        label = "HP"
+                        value = "0.00"
+                    }
+
+                    bpmBadge = labeledBadge {
+                        label = "BPM"
+                        value = "0.0"
+                    }
                 }
 
-                odBadge = labeledBadge {
-                    label = "OD"
-                    value = "0.00"
-                }
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    spacing = 10f
 
-                csBadge = labeledBadge {
-                    label = "CS"
-                    value = "0.00"
-                }
+                    starRatingBadge = labeledBadge {
+                        label = "Star rating"
+                        value = "0.00"
+                    }
 
-                hpBadge = labeledBadge {
-                    label = "HP"
-                    value = "0.00"
-                }
+                    rankedBadge = badge {
+                        text = "Ranked"
+                        background!!.color = Color4(0xFF83DF6B)
+                        color = Color4(0xFF161622)
+                        applyTheme = {}
+                    }
 
-                bpmBadge = labeledBadge {
-                    label = "BPM"
-                    value = "0.0"
-                }
-
-                starRatingBadge = labeledBadge {
-                    label = "Star rating"
-                    value = "0.00"
-                }
-
-                rankedBadge = badge {
-                    text = "Ranked"
-                    background!!.color = Color4(0xFF83DF6B)
-                    color = Color4(0xFF161622)
-                    applyTheme = {}
-                }
-
-                scoreMultiplierBadge = labeledBadge {
-                    label = "Score multiplier"
-                    value = "1.00x"
+                    scoreMultiplierBadge = labeledBadge {
+                        label = "Score multiplier"
+                        value = "1.00x"
+                    }
                 }
             }
         })
