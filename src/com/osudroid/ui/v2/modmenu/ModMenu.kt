@@ -239,7 +239,7 @@ object ModMenu : UIScene() {
                     }
 
                     scoreMultiplierBadge = labeledBadge {
-                        label = "Score multiplier"
+                        label = "Score"
                         value = "1.00x"
                     }
                 }
