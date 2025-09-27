@@ -108,6 +108,7 @@ class LobbyScene : UIScene() {
                             key = "search"
                             width = 500f
                             height = FillParent
+                            placeholder = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.multiplayer_lobby_search_rooms)
                         }
 
                         override fun onValueChanged() {
