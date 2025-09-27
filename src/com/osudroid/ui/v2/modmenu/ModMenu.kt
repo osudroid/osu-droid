@@ -227,7 +227,7 @@ object ModMenu : UIScene() {
                     spacing = 10f
 
                     starRatingBadge = labeledBadge {
-                        label = "Star rating"
+                        label = "★"
                         value = "0.00"
                     }
 
