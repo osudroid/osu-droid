@@ -7,10 +7,11 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
+import com.reco1l.toolkt.kotlin.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class ModMenuSection(name: String, toggles: List<UIButton> = listOf()) : UILinearContainer() {
+open class ModMenuSection(name: String, private val toggles: List<UIButton> = listOf()) : UILinearContainer() {
 
     protected val toggleContainer: UILinearContainer
 
@@ -51,9 +52,32 @@ open class ModMenuSection(name: String, toggles: List<UIButton> = listOf()) : UI
                 spacing = 16f
                 toggleContainer = this
 
-                toggles.forEach { +it }
+                toggles.fastForEach { +it }
             }
         }
+
+        updateVisibility()
+    }
+
+    fun updateVisibility() {
+        isVisible = toggles.any { it.isVisible }
+    }
+
+    open fun onSearchTermUpdate(searchTerm: String) {
+        // Not using updateVisibility() here to avoid iterating over the toggles twice.
+        var anyVisible = false
+
+        toggles.fastForEach {
+            if (it is ModMenuToggle) {
+                it.updateVisibility(searchTerm)
+            }
+
+            if (it.isVisible) {
+                anyVisible = true
+            }
+        }
+
+        isVisible = anyVisible
     }
 
 }

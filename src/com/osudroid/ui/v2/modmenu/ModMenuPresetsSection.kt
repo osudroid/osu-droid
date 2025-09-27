@@ -4,6 +4,7 @@ import com.osudroid.data.*
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu.addMod
 import com.osudroid.ui.v2.modmenu.ModMenu.removeMod
+import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -77,6 +78,13 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
         }
     }
 
+    override fun onSearchTermUpdate(searchTerm: String) {
+        toggleContainer.callOnChildren { toggle ->
+            if (toggle is ModPresetToggle) {
+                toggle.isVisible = toggle.preset.name.searchContiguously(searchTerm)
+            }
+        }
+    }
 
     inner class ModPresetToggle(val preset: ModPreset) : UIButton() {
 

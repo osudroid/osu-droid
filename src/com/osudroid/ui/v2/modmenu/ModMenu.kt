@@ -16,6 +16,7 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
@@ -45,6 +46,11 @@ object ModMenu : UIScene() {
     val enabledMods = ModHashMap()
 
     /**
+     * List of all mod sections.
+     */
+    val modSections = mutableListOf<ModMenuSection>()
+
+    /**
      * List of all mod toggles.
      */
     val modToggles = mutableListOf<ModMenuToggle>()
@@ -55,6 +61,8 @@ object ModMenu : UIScene() {
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
+
+    private val searchInput: ModMenuSearchInput
 
     private val rankedBadge: UIBadge
     private val arBadge: UILabeledBadge
@@ -75,7 +83,7 @@ object ModMenu : UIScene() {
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
         ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
         ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search", "search.png")
+        ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
         ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
 
         customizationMenu = ModCustomizationMenu()
@@ -92,63 +100,96 @@ object ModMenu : UIScene() {
                 }
             }
 
-            +UILinearContainer().apply {
+            +UIContainer().apply {
                 width = FillParent
                 height = MatchContent
-                orientation = Orientation.Horizontal
                 padding = Vec4(60f, 12f)
-                spacing = 10f
 
-                +UITextButton().apply {
-                    text = "Back"
-                    leadingIcon = UISprite().apply {
-                        textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                        width = 28f
-                        height = 28f
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    spacing = 10f
+
+                    +UITextButton().apply {
+                        text = "Back"
+                        leadingIcon = UISprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                            width = 28f
+                            height = 28f
+                        }
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            back()
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        back()
+
+                    customizeButton = UITextButton().apply {
+                        text = "Customize"
+                        isEnabled = false
+                        leadingIcon = UISprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("tune")
+                            width = 28f
+                            height = 28f
+                        }
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            if (customizationMenu.isVisible) {
+                                customizationMenu.hide()
+                            } else {
+                                customizationMenu.show()
+                            }
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+
+                    +customizeButton
+
+                    +UITextButton().apply {
+                        text = "Clear"
+                        applyTheme = {}
+                        color = Color4(0xFFFFBFBF)
+                        background?.color = Color4(0xFF342121)
+                        leadingIcon = UISprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("backspace")
+                            width = 28f
+                            height = 28f
+                        }
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            clear()
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    }
                 }
 
-                customizeButton = UITextButton().apply {
-                    text = "Customize"
-                    isEnabled = false
-                    leadingIcon = UISprite().apply {
-                        textureRegion = ResourceManager.getInstance().getTexture("tune")
-                        width = 28f
-                        height = 28f
-                    }
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        if (customizationMenu.isVisible) {
-                            customizationMenu.hide()
-                        } else {
-                            customizationMenu.show()
+                +UIContainer().apply {
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    height = FillParent
+
+                    searchInput = ModMenuSearchInput().apply {
+                        width = 400f
+                        height = FillParent
+                        onSearchTermUpdate = { searchTerm ->
+                            modSections.fastForEach { it.onSearchTermUpdate(searchTerm) }
+
+                            if (modPresetsSection.isVisible) {
+                                modPresetsSection.onSearchTermUpdate(searchTerm)
+                            }
                         }
                     }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                }
 
-                +customizeButton
+                    +searchInput
 
-                +UITextButton().apply {
-                    text = "Clear"
-                    applyTheme = {}
-                    color = Color4(0xFFFFBFBF)
-                    background?.color = Color4(0xFF342121)
-                    leadingIcon = UISprite().apply {
-                        textureRegion = ResourceManager.getInstance().getTexture("backspace")
-                        width = 28f
-                        height = 28f
+                    +UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("search-small")
+                        size = Vec2(52f, 28f)
+                        anchor = Anchor.CenterRight
+                        origin = Anchor.CenterRight
+                        applyTheme = { color = it.accentColor }
                     }
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        clear()
-                    }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 }
             }
 
@@ -176,9 +217,10 @@ object ModMenu : UIScene() {
 
                         modToggles.addAll(sectionToggles)
 
-                        if (sectionToggles.isNotEmpty()) {
-                            +ModMenuSection(sectionName, sectionToggles)
-                        }
+                        val section = ModMenuSection(sectionName, sectionToggles)
+
+                        +section
+                        modSections.add(section)
                     }
                 }
             }
@@ -366,6 +408,10 @@ object ModMenu : UIScene() {
         // Do not show mod presets in multiplayer.
         modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
+        if (modPresetsSection.isVisible) {
+            modPresetsSection.onSearchTermUpdate(searchInput.value)
+        }
+
         // Ensure mods and customizations that can be enabled by the user are displayed and enabled.
         updateModButtonVisibility()
         updateCustomizationMenuEnabledStates()
@@ -450,9 +496,12 @@ object ModMenu : UIScene() {
 
     fun updateModButtonVisibility() {
         modToggles.fastForEach {
-            it.updateVisibility()
+            it.updateVisibility(searchInput.value)
             it.applyCompatibilityState()
         }
+
+        // Update section visibility after toggles have been updated since it may not need to be visible anymore.
+        modSections.fastForEach { it.updateVisibility() }
     }
 
     fun updateCustomizationMenuEnabledStates() {
