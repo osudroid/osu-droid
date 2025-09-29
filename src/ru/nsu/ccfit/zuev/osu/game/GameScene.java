@@ -1143,24 +1143,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         hud.setSkinData(OsuSkin.get().getHUDSkinData());
 
         String playname = Config.getOnlineUsername();
-        ChangeableText replayText = null;
-
-        if (!Config.isHideReplayMarquee()) {
-            replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-            replayText.setPosition(0, 140);
-            replayText.setAlpha(0.7f);
-            hud.attachChild(replayText, 0);
-        }
 
         if (GameHelper.isAutoplay() || replaying) {
             var metadata = playableBeatmap.getMetadata();
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
-            if (replayText != null) {
+            if (!Config.isHideReplayMarquee()) {
+                var replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
+                replayText.setPosition(0, 140);
+                replayText.setAlpha(0.7f);
+                hud.attachChild(replayText, 0);
             }
-
         } else if (Multiplayer.room != null && Multiplayer.room.isTeamVersus()) {
             //noinspection DataFlowIssue
             playname = Multiplayer.player.getTeam().toString();
