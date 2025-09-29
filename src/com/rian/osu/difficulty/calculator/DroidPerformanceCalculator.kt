@@ -408,9 +408,9 @@ class DroidPerformanceCalculator(
         val mehWindow = hitWindow.mehWindow / clockRate
 
         // Assume a fixed ratio of non-300s hit in speed notes based on speed note count ratio and OD.
-        // Graph: https://www.desmos.com/calculator/31argjcxqc
+        // Graph: https://www.desmos.com/calculator/eayyireisv
         val speedNoteRatio = speedNoteCount / totalHits
-        val nonGreatRatio = 1 - (exp(sqrt(greatWindow)) + 1.0).pow(1 - speedNoteRatio) / exp(sqrt(greatWindow))
+        val nonGreatRatio = 1 - ((exp(sqrt(greatWindow)) + 1).pow(1 - speedNoteRatio) - 1) / exp(sqrt(greatWindow))
 
         // Assume worst case - all non-300s happened in speed notes.
         val relevantCountMiss = min(countMiss * nonGreatRatio, speedNoteCount)
