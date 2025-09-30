@@ -13,8 +13,8 @@ import kotlin.math.*
  * An evaluator for calculating osu!droid aim difficulty.
  */
 object DroidAimEvaluator {
-    private const val WIDE_ANGLE_MULTIPLIER = 1.5
-    private const val ACUTE_ANGLE_MULTIPLIER = 2.55
+    private const val WIDE_ANGLE_MULTIPLIER = 1.6
+    private const val ACUTE_ANGLE_MULTIPLIER = 2.4
     private const val SLIDER_MULTIPLIER = 1.35
     private const val VELOCITY_CHANGE_MULTIPLIER = 0.75
     private const val WIGGLE_MULTIPLIER = 1.02
