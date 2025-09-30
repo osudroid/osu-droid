@@ -108,7 +108,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         if (ModFlashlight::class in beatmap.mods) {
             skills.add(DroidFlashlight(mods, true))
-            skills.add(DroidFlashlight(mods, false))
+
+            if (!timed) {
+                skills.add(DroidFlashlight(mods, false))
+            }
         }
 
         skills.add(DroidReading(mods, beatmap.speedMultiplier.toDouble(), beatmap.hitObjects.objects))
@@ -279,17 +282,13 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     private fun DroidDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
         val flashlight = skills.find<DroidFlashlight> { it.withSliders } ?: return
+        val flashlightNoSlider = skills.find<DroidFlashlight> { !it.withSliders }
 
         flashlightDifficulty = calculateRating(flashlight)
         flashlightDifficultStrainCount = flashlight.countTopWeightedStrains()
-
-        if (flashlightDifficulty > 0) {
-            val flashlightNoSlider = skills.find<DroidFlashlight> { !it.withSliders }!!
-
-            flashlightSliderFactor = calculateRating(flashlightNoSlider) / flashlightDifficulty
-        } else {
-            flashlightSliderFactor = 1.0
-        }
+        flashlightDifficulty =
+            if (flashlightNoSlider != null && flashlightDifficulty > 0) calculateRating(flashlightNoSlider) / flashlightDifficulty
+            else 1.0
     }
 
     private fun DroidDifficultyAttributes.populateReadingAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
