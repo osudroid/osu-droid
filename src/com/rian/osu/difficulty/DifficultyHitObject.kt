@@ -167,9 +167,8 @@ abstract class DifficultyHitObject(
      * Computes the properties of this [DifficultyHitObject].
      *
      * @param clockRate The clock rate to compute the properties with.
-     * @param objects The list of all [HitObject]s in the beatmap.
      */
-    open fun computeProperties(clockRate: Double, objects: List<HitObject>) {
+    open fun computeProperties(clockRate: Double) {
         computeSliderCursorPosition()
         setDistances(clockRate)
     }

@@ -85,7 +85,7 @@ class StandardDifficultyHitObjectTest {
                 1.0,
                 arrayOf(),
                 0
-            ).also { it.computeProperties(1.0, hitObjects) }
+            ).also { it.computeProperties(1.0) }
         }
     }
 }

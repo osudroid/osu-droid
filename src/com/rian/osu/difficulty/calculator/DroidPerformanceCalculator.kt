@@ -74,14 +74,14 @@ class DroidPerformanceCalculator(
         it.tap = calculateTapValue()
         it.accuracy = calculateAccuracyValue()
         it.flashlight = calculateFlashlightValue()
-        it.visual = calculateVisualValue()
+        it.reading = calculateReadingValue()
 
         it.total = (
             it.aim.pow(1.1) +
             it.tap.pow(1.1) +
             it.accuracy.pow(1.1) +
             it.flashlight.pow(1.1) +
-            it.visual.pow(1.1)
+            it.reading.pow(1.1)
         ).pow(1 / 1.1) * multiplier
     }
 
@@ -226,24 +226,22 @@ class DroidPerformanceCalculator(
         flashlightValue
     }
 
-    private fun calculateVisualValue() = difficultyAttributes.run {
-        var visualValue = visualDifficulty.pow(1.6) * 22.5
+    private fun calculateReadingValue() = difficultyAttributes.run {
+        var readingValue = (readingDifficulty.pow(2) * 25).pow(0.8)
 
-        visualValue *= min(calculateStrainBasedMissPenalty(visualDifficultStrainCount), proportionalMissPenalty)
+        readingValue *= min(calculateStrainBasedMissPenalty(readingDifficultNoteCount), proportionalMissPenalty)
 
         // Scale the visual value with estimated full combo deviation.
         // As visual is easily "bypassable" with memorization, punish for memorization.
-        visualValue *= calculateDeviationBasedLengthScaling(punishForMemorization = true)
-
-        visualValue *= sliderCheesePenalty.visual
+        readingValue *= calculateDeviationBasedLengthScaling(punishForMemorization = true)
 
         // Scale the visual value with deviation.
-        visualValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.775)
+        readingValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation))
 
         // OD 5 SS stays the same.
-        visualValue *= 0.98 + 5.0.pow(2) / 2500
+        readingValue *= 0.98 + 5.0.pow(2) / 2500
 
-        visualValue
+        readingValue
     }
 
     private fun calculateStrainBasedMissPenalty(difficultStrainCount: Double) =
@@ -506,6 +504,6 @@ class DroidPerformanceCalculator(
     }
 
     companion object {
-        const val FINAL_MULTIPLIER = 1.25
+        const val FINAL_MULTIPLIER = 1.24
     }
 }

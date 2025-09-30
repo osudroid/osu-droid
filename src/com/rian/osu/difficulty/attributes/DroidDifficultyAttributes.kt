@@ -20,10 +20,10 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var rhythmDifficulty = 0.0
 
     /**
-     * The difficulty corresponding to the visual skill.
+     * The difficulty corresponding to the reading skill.
      */
     @JvmField
-    var visualDifficulty = 0.0
+    var readingDifficulty = 0.0
 
     /**
      * The amount of strains that are considered difficult with respect to the tap skill.
@@ -38,10 +38,10 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var flashlightDifficultStrainCount = 0.0
 
     /**
-     * The amount of strains that are considered difficult with respect to the visual skill.
+     * The amount of notes that are considered difficult with respect to the reading skill.
      */
     @JvmField
-    var visualDifficultStrainCount = 0.0
+    var readingDifficultNoteCount = 0.0
 
     /**
      * The average delta time of speed objects.
@@ -70,16 +70,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var flashlightSliderFactor = 1.0
-
-    /**
-     * Describes how much of visual difficulty is contributed to by [HitCircle]s or [Slider]s.
-     *
-     * A value closer to 1 indicates most visual difficulty is contributed by [HitCircle]s.
-     *
-     * A value closer to 0 indicates most visual difficulty is contributed by [Slider]s.
-     */
-    @JvmField
-    var visualSliderFactor = 1.0
 
     /**
      * Describes how much of tap difficulty is contributed by notes that are "vibroable".
