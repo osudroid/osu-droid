@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.osudroid.multiplayer.Multiplayer;
 import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
