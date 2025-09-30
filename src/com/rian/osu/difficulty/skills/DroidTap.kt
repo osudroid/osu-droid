@@ -25,7 +25,7 @@ class DroidTap(
     /**
      * The strain time to cap to.
      */
-    private val strainTimeCap: Double? = null
+    val strainTimeCap: Double? = null
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.1
 

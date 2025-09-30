@@ -100,6 +100,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             // Tap skills depend on rhythm skill, so we put it first
             skills.add(DroidRhythm(mods))
             skills.add(DroidTap(mods, true))
+            skills.add(DroidTap(mods, true, 50.0))
 
             if (!timed) {
                 skills.add(DroidTap(mods, false))
@@ -189,6 +190,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         timed: Boolean
     ) {
         val tap = skills.find<DroidTap> { it.considerCheesability } ?: return
+        val tapVibro = skills.find<DroidTap> { it.considerCheesability && it.strainTimeCap != null } ?: return
 
         tapDifficulty = calculateRating(tap)
         tapDifficultStrainCount = tap.countTopWeightedStrains()
@@ -196,11 +198,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         averageSpeedDeltaTime = tap.relevantDeltaTime()
 
         if (tapDifficulty > 0) {
-            val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
-
-            objects.forEach { tapSkillVibro.process(it) }
-
-            vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
+            vibroFactor = calculateRating(tapVibro) / tapDifficulty
         }
 
         if (timed) {
