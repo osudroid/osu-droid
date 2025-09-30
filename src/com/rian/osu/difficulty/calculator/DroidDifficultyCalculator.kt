@@ -310,6 +310,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
          */
-        const val VERSION = 1757336835000
+        const val VERSION = 1759210780000
     }
 }
