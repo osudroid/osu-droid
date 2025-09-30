@@ -45,6 +45,21 @@
     the same starting time, and they overlap, they would require `n` presses to hit instead of one (there is a
     [beatmap](https://osu.ppy.sh/beatmapsets/1157609#osu/2439789) that abuses this behavior).
 
+## osu!droid Star Rating and Performance Points Changes
+
+A newspost containing more details about these changes will be published after they are applied to global ranking.
+
+- Replace existing visual skill with a better implemented reading skill <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This is a port of [this](https://github.com/ppy/osu/pull/33196) change with but modified to fit osu!droid's gameplay
+    environment and existing system.
+  - Notable adjustments:
+    - Reduced high AR difficulty since approach circle starts at 3x scale instead of 4x
+    - Partial slider reading difficulty assessment from visual skill is kept with some changes to constants for balancing
+    - Rhythm is accounted for via rhythm difficulty calculation
+    - Miss penalty additionally accounts for a proportion-based miss penalty to account for cheesing
+    - Accuracy scaling uses estimated unstable rate (lower OD gives a harsher scaling) instead of accuracy percentage
+- Adjusted angle bonuses in aim to balance very difficult aim scores gaining a lot of pp from reading skill <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 # Bug Fixes
 
 - Fix potential crash when canceling gameplay loading while slider paths are being loaded <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
@@ -58,6 +73,7 @@
 - Fix room host being able to clear ScoreV2 mod in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix incorrect overall difficulty in Relax osu!droid performance calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fix show scoreboard setting potentially only taking effect after restarting gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix beatmap reimport (e.g., redownloading a beatmap in beatmap downloader) not working due to import redundancy checks <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Removals
 
