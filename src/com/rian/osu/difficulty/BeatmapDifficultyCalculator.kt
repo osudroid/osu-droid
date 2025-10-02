@@ -90,8 +90,8 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidDifficulty(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(mods) ?:
-        droidDifficultyCalculator.calculate(beatmap, mods, scope).also { addCache(beatmap, it) }
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(mods, false) ?:
+        droidDifficultyCalculator.calculate(beatmap, mods, scope).also { addCache(beatmap, it, false) }
 
     /**
      * Calculates the difficulty of a [DroidPlayableBeatmap].
@@ -103,8 +103,37 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidDifficulty(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(beatmap.mods.values) ?:
-        droidDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, it) }
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(beatmap.mods.values, false) ?:
+        droidDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, it, false) }
+
+    /**
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s. The result of this calculation can be used in
+     * replay-based performance calculations.
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param mods The [Mod]s to apply to the [Beatmap].
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidDifficultyForReplay(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(mods, true) ?:
+        droidDifficultyCalculator.calculate(beatmap, mods, scope).also { addCache(beatmap, it, true) }
+
+    /**
+     * Calculates the difficulty of a [DroidPlayableBeatmap]. The result of this calculation can be used in
+     * replay-based performance calculations.
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the osu!droid difficulty of the [DroidPlayableBeatmap].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidDifficultyForReplay(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) =
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(beatmap.mods.values, true) ?:
+        droidDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, it, true) }
 
     /**
      * Calculates the difficulty of a [Beatmap] with specific [Mod]s, returning a set of [TimedDifficultyAttributes]
@@ -452,9 +481,10 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [IBeatmap] to cache.
      * @param attributes The [DifficultyAttributes] to cache.
+     * @param forReplay Whether this cache is for replay-based calculations.
      */
-    private fun addCache(beatmap: IBeatmap, attributes: DroidDifficultyAttributes) =
-        difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(attributes, 60 * 1000) }
+    private fun addCache(beatmap: IBeatmap, attributes: DroidDifficultyAttributes, forReplay: Boolean) =
+        difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(attributes, forReplay, 60 * 1000) }
 
     /**
      * Adds a cache to the difficulty cache.
@@ -555,10 +585,11 @@ private class BeatmapDifficultyCacheManager {
      * Adds a [DroidDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
      *
      * @param attributes The [DroidDifficultyAttributes] to cache.
+     * @param forReplay Whether this cache is for replay-based calculations.
      * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
      */
-    fun addCache(attributes: DroidDifficultyAttributes, timeToLive: Long) =
-        addCache(attributes.mods, GameMode.Droid, attributes, droidAttributeCache, timeToLive)
+    fun addCache(attributes: DroidDifficultyAttributes, forReplay: Boolean, timeToLive: Long) =
+        addCache(attributes.mods, GameMode.Droid, attributes, droidAttributeCache, forReplay, timeToLive)
 
     /**
      * Adds a [StandardDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -567,7 +598,7 @@ private class BeatmapDifficultyCacheManager {
      * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
      */
     fun addCache(attributes: StandardDifficultyAttributes, timeToLive: Long) =
-        addCache(attributes.mods, GameMode.Standard, attributes, standardAttributeCache, timeToLive)
+        addCache(attributes.mods, GameMode.Standard, attributes, standardAttributeCache, false, timeToLive)
 
     /**
      * Adds a set of [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -577,7 +608,7 @@ private class BeatmapDifficultyCacheManager {
      */
     @JvmName("addDroidTimedCache")
     fun addCache(attributes: Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>, timeToLive: Long) =
-        addCache(attributes.first().attributes.mods, GameMode.Droid, attributes, droidTimedAttributeCache, timeToLive)
+        addCache(attributes.first().attributes.mods, GameMode.Droid, attributes, droidTimedAttributeCache, false, timeToLive)
 
     /**
      * Adds a set of [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -587,15 +618,16 @@ private class BeatmapDifficultyCacheManager {
      */
     @JvmName("addStandardTimedCache")
     fun addCache(attributes: Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>, timeToLive: Long) =
-        addCache(attributes.first().attributes.mods, GameMode.Standard, attributes, standardTimedAttributeCache, timeToLive)
+        addCache(attributes.first().attributes.mods, GameMode.Standard, attributes, standardTimedAttributeCache, false, timeToLive)
 
     /**
      * Retrieves the [DroidDifficultyAttributes] cache of a set of [Mod]s.
      *
      * @param mods The [Mod]s to retrieve.
+     * @param forReplay Whether to retrieve a cache for replay-based calculations.
      * @return The [DroidDifficultyAttributes], `null` if not found.
      */
-    fun getDroidDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Droid, droidAttributeCache)
+    fun getDroidDifficultyCache(mods: Iterable<Mod>?, forReplay: Boolean) = getCache(mods, GameMode.Droid, droidAttributeCache, forReplay)
 
     /**
      * Retrieves the [TimedDifficultyAttributes] cache of a set of [Mod]s.
@@ -603,7 +635,7 @@ private class BeatmapDifficultyCacheManager {
      * @param mods The [Mod]s to retrieve.
      * @return The [TimedDifficultyAttributes], `null` if not found.
      */
-    fun getDroidTimedDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Droid, droidTimedAttributeCache)
+    fun getDroidTimedDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Droid, droidTimedAttributeCache, false)
 
     /**
      * Retrieves the [StandardDifficultyAttributes] cache of a set of [Mod]s.
@@ -611,7 +643,7 @@ private class BeatmapDifficultyCacheManager {
      * @param mods The [Mod]s to retrieve.
      * @return The [StandardDifficultyAttributes], `null` if not found.
      */
-    fun getStandardDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Standard, standardAttributeCache)
+    fun getStandardDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Standard, standardAttributeCache, false)
 
     /**
      * Retrieves the [TimedDifficultyAttributes] cache of a set of [Mod]s.
@@ -619,7 +651,7 @@ private class BeatmapDifficultyCacheManager {
      * @param mods The [Mod]s to retrieve.
      * @return The [TimedDifficultyAttributes], `null` if not found.
      */
-    fun getStandardTimedDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Standard, standardTimedAttributeCache)
+    fun getStandardTimedDifficultyCache(mods: Iterable<Mod>?) = getCache(mods, GameMode.Standard, standardTimedAttributeCache, false)
 
     /**
      * Whether this [BeatmapDifficultyCacheManager] does not hold any cache.
@@ -664,31 +696,49 @@ private class BeatmapDifficultyCacheManager {
      * @param mode The [GameMode] to get for.
      * @param cache The difficulty attributes cache to add.
      * @param cacheMap The map to add the cache to.
+     * @param forReplay Whether this cache is for replay-based calculations.
      * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
      */
     private fun <T> addCache(
         mods: Iterable<Mod>?, mode: GameMode, cache: T,
         cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>,
-        timeToLive: Long
+        forReplay: Boolean, timeToLive: Long
     ) {
-        cacheMap[processMods(mods, mode)] = BeatmapDifficultyCache(cache, timeToLive)
+        val existing = cacheMap[processMods(mods, mode)]
+
+        if (!forReplay && existing != null && existing.forReplay) {
+            // Do not overwrite a replay cache with a non-replay cache.
+            return
+        }
+
+        cacheMap[processMods(mods, mode)] = BeatmapDifficultyCache(cache, forReplay, timeToLive)
     }
 
     /**
      * Gets the cache of difficulty attributes of a [ModHashMap].
      *
+     * @param T The type of difficulty attributes to retrieve.
      * @param mods The [ModHashMap] to retrieve.
      * @param mode The [GameMode] to get for.
      * @param cacheMap The map containing the cache to lookup for.
+     * @param forReplay Whether to retrieve a cache for replay-based calculations.
      * @return The difficulty attributes, `null` if not found.
-     * @param <T> The difficulty attributes cache type.
-    </T> */
+     */
     private fun <T> getCache(
-        mods: Iterable<Mod>?, mode: GameMode,
-        cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>
-    ) = cacheMap[processMods(mods, mode)]?.let {
-        it.refresh()
-        it.cache
+        mods: Iterable<Mod>?,
+        mode: GameMode,
+        cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>,
+        forReplay: Boolean
+    ): T? {
+        val cache = cacheMap[processMods(mods, mode)]
+
+        if (forReplay && cache?.forReplay != true) {
+            return null
+        }
+
+        cache?.refresh()
+
+        return cache?.cache
     }
 
     /**
@@ -712,6 +762,11 @@ private class BeatmapDifficultyCache<T>(
      * The cached data.
      */
     val cache: T,
+
+    /**
+     * Whether this cache is for replay-based calculations.
+     */
+    val forReplay: Boolean,
 
     /**
      * The duration at which this cache is allowed to live, in milliseconds.
