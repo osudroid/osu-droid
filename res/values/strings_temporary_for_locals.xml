@@ -3,6 +3,8 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_category_localization">Localization</string>
+
     <string name="opt_language_title">Language</string>
     <string name="opt_language_summary">Change the language of the game. Requires a restart.</string>
 

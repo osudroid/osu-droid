@@ -91,7 +91,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Language">
+    <PreferenceCategory android:title="@string/opt_category_localization">
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="system"
