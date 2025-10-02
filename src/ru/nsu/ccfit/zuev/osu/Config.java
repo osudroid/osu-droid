@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.osudroid.multiplayer.Multiplayer;
 import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
@@ -66,7 +65,6 @@ public class Config {
         useCustomComboColors,
         forceRomanized,
         fixFrameOffset,
-        removeSliderLock,
         displayScoreStatistics,
         hideReplayMarquee,
         hideInGameUI,
@@ -223,7 +221,6 @@ public class Config {
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
-        removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
@@ -296,11 +293,6 @@ public class Config {
 
     public static boolean isFixFrameOffset() {
         return fixFrameOffset;
-    }
-
-    public static boolean isRemoveSliderLock() {
-        //noinspection DataFlowIssue
-        return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
     }
 
     public static boolean isDisplayScoreStatistics() {

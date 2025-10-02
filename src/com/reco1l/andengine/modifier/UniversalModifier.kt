@@ -2,8 +2,9 @@ package com.reco1l.andengine.modifier
 
 import android.util.*
 import androidx.core.util.Pools.Pool
-import androidx.core.util.Pools.SynchronizedPool
 import com.edlplan.framework.easing.Easing
+import com.osudroid.utils.IPoolable
+import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
@@ -20,7 +21,8 @@ import kotlin.math.*
  * @see ModifierType
  * @author Reco1l
  */
-class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain {
+class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain,
+    IPoolable {
 
     /**
      * The parent chain of this modifier.
@@ -79,6 +81,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     var onFinished: OnModifierFinished? = null
 
+    override var isRecycled = false
 
     private var easing = Easing.None
     private var duration = 0f
@@ -365,7 +368,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
          * The global pool for universal modifiers.
          */
         @JvmField
-        val GlobalPool = SynchronizedPool<UniversalModifier>(32).apply {
+        // Very big pool size because gameplay uses a _lot_ of modifiers.
+        val GlobalPool = SynchronizedPool<UniversalModifier>(300).apply {
             release(UniversalModifier(this))
         }
 

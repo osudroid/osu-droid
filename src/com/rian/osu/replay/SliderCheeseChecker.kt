@@ -53,8 +53,7 @@ class SliderCheeseChecker(
             difficultyAttributes.difficultSliders.isEmpty() ||
             doubleArrayOf(
                 difficultyAttributes.aimSliderFactor,
-                difficultyAttributes.flashlightSliderFactor,
-                difficultyAttributes.visualSliderFactor
+                difficultyAttributes.flashlightSliderFactor
             ).all { it == 1.0 }
         ) {
             return SliderCheesePenalty()
@@ -64,8 +63,7 @@ class SliderCheeseChecker(
 
         return SliderCheesePenalty(
             computePenalty(difficultyAttributes.aimSliderFactor, summedDifficultyRating),
-            computePenalty(difficultyAttributes.flashlightSliderFactor, summedDifficultyRating),
-            computePenalty(difficultyAttributes.visualSliderFactor, summedDifficultyRating)
+            computePenalty(difficultyAttributes.flashlightSliderFactor, summedDifficultyRating)
         )
     }
 

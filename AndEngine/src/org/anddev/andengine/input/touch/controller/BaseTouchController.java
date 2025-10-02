@@ -89,6 +89,27 @@ public abstract class BaseTouchController implements ITouchController  {
 		return handled;
 	}
 
+    // BEGIN osu!droid modified - added method to fire touch events with custom event time
+    protected boolean fireTouchEvent(final long pEventTime, final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
+        final boolean handled;
+        final MotionEvent motionEvent = MotionEvent.obtain(pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(), pX, pY, pMotionEvent.getMetaState());
+        final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, motionEvent);
+
+        if(this.mRunOnUpdateThread) {
+            final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
+            touchEventRunnablePoolItem.set(touchEvent);
+            this.mTouchEventRunnablePoolUpdateHandler.postPoolItem(touchEventRunnablePoolItem);
+
+            handled = true;
+        } else {
+            handled = this.mTouchEventCallback.onTouchEvent(touchEvent);
+            touchEvent.recycle();
+        }
+
+        return handled;
+    }
+    // END osu!droid modified
+
 	// ===========================================================
 	// Methods
 	// ===========================================================

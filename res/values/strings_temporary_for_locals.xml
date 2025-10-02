@@ -55,4 +55,6 @@
     <string name="opt_language_title">Language</string>
     <string name="opt_language_summary">Change the language of the game. Requires a restart.</string>
 
+    <string name="multiplayer_lobby_search_rooms">Search rooms...</string>
+
 </resources>

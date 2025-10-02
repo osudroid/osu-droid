@@ -109,7 +109,7 @@ class DroidDifficultyHitObjectTest {
                     1.0,
                     objects,
                     i - 1
-                ).also { it.computeProperties(1.0, hitObjects) }
+                ).also { it.computeProperties(1.0) }
             }
         }
     }

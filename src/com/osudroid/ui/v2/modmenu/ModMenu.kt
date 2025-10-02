@@ -15,7 +15,9 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
+import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
@@ -45,6 +47,11 @@ object ModMenu : UIScene() {
     val enabledMods = ModHashMap()
 
     /**
+     * List of all mod sections.
+     */
+    val modSections = mutableListOf<ModMenuSection>()
+
+    /**
      * List of all mod toggles.
      */
     val modToggles = mutableListOf<ModMenuToggle>()
@@ -55,6 +62,8 @@ object ModMenu : UIScene() {
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
+    private val selectedModsIndicator: ModsIndicator
+    private val searchInput: ModMenuSearchInput
 
     private val rankedBadge: UIBadge
     private val arBadge: UILabeledBadge
@@ -75,15 +84,16 @@ object ModMenu : UIScene() {
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
         ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
         ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search", "search.png")
+        ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
         ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
 
         customizationMenu = ModCustomizationMenu()
 
-        attachChild(UILinearContainer().apply {
+        attachChild(UIFlexContainer().apply {
             width = FillParent
             height = FillParent
-            orientation = Orientation.Vertical
+            direction = FlexDirection.Column
+            justifyContent = JustifyContent.SpaceBetween
             background = UIBox().apply {
                 applyTheme = {
                     color = it.accentColor * 0.1f
@@ -91,19 +101,18 @@ object ModMenu : UIScene() {
                 }
             }
 
-            attachChild(UIContainer().apply {
+            +UIContainer().apply {
                 width = FillParent
                 height = MatchContent
                 padding = Vec4(60f, 12f)
 
-                attachChild(UILinearContainer().apply {
+                +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    height = MatchContent
                     spacing = 10f
 
-                    attachChild(UITextButton().apply {
+                    +UITextButton().apply {
                         text = "Back"
                         leadingIcon = UISprite().apply {
                             textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
@@ -115,7 +124,7 @@ object ModMenu : UIScene() {
                             back()
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
+                    }
 
                     customizeButton = UITextButton().apply {
                         text = "Customize"
@@ -135,9 +144,10 @@ object ModMenu : UIScene() {
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
-                    attachChild(customizeButton)
 
-                    attachChild(UITextButton().apply {
+                    +customizeButton
+
+                    +UITextButton().apply {
                         text = "Clear"
                         applyTheme = {}
                         color = Color4(0xFFFFBFBF)
@@ -152,75 +162,57 @@ object ModMenu : UIScene() {
                             clear()
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
-                })
+                    }
 
-                attachChild(UILinearContainer().apply {
-                    orientation = Orientation.Vertical
-                    spacing = 10f
+                    +UIScrollableContainer().apply {
+                        width = 340f
+                        height = MatchContent
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        scrollAxes = Axes.X
+                        clipToBounds = true
+
+                        selectedModsIndicator = ModsIndicator()
+                        +selectedModsIndicator
+                    }
+                }
+
+                +UIContainer().apply {
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
+                    height = FillParent
 
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        anchor = Anchor.TopRight
-                        origin = Anchor.TopRight
-                        spacing = 10f
+                    searchInput = ModMenuSearchInput().apply {
+                        width = 400f
+                        height = FillParent
+                        onSearchTermUpdate = { searchTerm ->
+                            modSections.fastForEach { it.onSearchTermUpdate(searchTerm) }
 
-                        scoreMultiplierBadge = labeledBadge {
-                            label = "Score multiplier"
-                            value = "1.00x"
-                        }
-
-                        starRatingBadge = labeledBadge {
-                            label = "Star rating"
-                            value = "0.00"
-                        }
-
-                        rankedBadge = badge {
-                            text = "Ranked"
-                            background!!.color = Color4(0xFF83DF6B)
-                            color = Color4(0xFF161622)
-                            applyTheme = {}
+                            if (modPresetsSection.isVisible) {
+                                modPresetsSection.onSearchTermUpdate(searchTerm)
+                            }
                         }
                     }
 
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        origin = Anchor.TopRight
-                        anchor = Anchor.TopRight
-                        spacing = 10f
+                    +searchInput
 
-                        arBadge = labeledBadge {
-                            label = "AR"
-                            value = "0.00"
-                        }
-                        odBadge = labeledBadge {
-                            label = "OD"
-                            value = "0.00"
-                        }
-                        csBadge = labeledBadge {
-                            label = "CS"
-                            value = "0.00"
-                        }
-                        hpBadge = labeledBadge {
-                            label = "HP"
-                            value = "0.00"
-                        }
-                        bpmBadge = labeledBadge {
-                            label = "BPM"
-                            value = "0.0"
-                        }
+                    +UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("search-small")
+                        size = Vec2(52f, 28f)
+                        anchor = Anchor.CenterRight
+                        origin = Anchor.CenterRight
+                        applyTheme = { color = it.accentColor }
                     }
-                })
-            })
+                }
+            }
 
-            attachChild(UIScrollableContainer().apply {
+            +UIScrollableContainer().apply {
                 width = FillParent
                 height = FillParent
                 scrollAxes = Axes.X
+                flexRules { grow = 1f }
 
-                attachChild(UILinearContainer().apply {
+                +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     width = MatchContent
                     height = FillParent
@@ -238,15 +230,76 @@ object ModMenu : UIScene() {
 
                         modToggles.addAll(sectionToggles)
 
-                        if (sectionToggles.isNotEmpty()) {
-                            +ModMenuSection(sectionName, sectionToggles)
-                        }
+                        val section = ModMenuSection(sectionName, sectionToggles)
+
+                        +section
+                        modSections.add(section)
                     }
-                })
-            })
+                }
+            }
 
+            +UIContainer().apply {
+                width = FillParent
+                height = MatchContent
+                padding = Vec4(60f, 12f)
+
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    spacing = 10f
+
+                    arBadge = labeledBadge {
+                        label = "AR"
+                        value = "0.00"
+                    }
+
+                    odBadge = labeledBadge {
+                        label = "OD"
+                        value = "0.00"
+                    }
+
+                    csBadge = labeledBadge {
+                        label = "CS"
+                        value = "0.00"
+                    }
+
+                    hpBadge = labeledBadge {
+                        label = "HP"
+                        value = "0.00"
+                    }
+
+                    bpmBadge = labeledBadge {
+                        label = "BPM"
+                        value = "0.0"
+                    }
+                }
+
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    spacing = 10f
+
+                    starRatingBadge = labeledBadge {
+                        label = "★"
+                        value = "0.00"
+                    }
+
+                    rankedBadge = badge {
+                        text = "Ranked"
+                        background!!.color = Color4(0xFF83DF6B)
+                        color = Color4(0xFF161622)
+                        applyTheme = {}
+                    }
+
+                    scoreMultiplierBadge = labeledBadge {
+                        label = "Score"
+                        value = "1.00x"
+                    }
+                }
+            }
         })
-
 
         // Customizations menu
         attachChild(customizationMenu)
@@ -368,6 +421,10 @@ object ModMenu : UIScene() {
         // Do not show mod presets in multiplayer.
         modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
+        if (modPresetsSection.isVisible) {
+            modPresetsSection.onSearchTermUpdate(searchInput.value)
+        }
+
         // Ensure mods and customizations that can be enabled by the user are displayed and enabled.
         updateModButtonVisibility()
         updateCustomizationMenuEnabledStates()
@@ -452,9 +509,12 @@ object ModMenu : UIScene() {
 
     fun updateModButtonVisibility() {
         modToggles.fastForEach {
-            it.updateVisibility()
+            it.updateVisibility(searchInput.value)
             it.applyCompatibilityState()
         }
+
+        // Update section visibility after toggles have been updated since it may not need to be visible anymore.
+        modSections.fastForEach { it.updateVisibility() }
     }
 
     fun updateCustomizationMenuEnabledStates() {
@@ -470,10 +530,17 @@ object ModMenu : UIScene() {
         enabledMods.toList().fastForEach {
             val mod = it.second
 
-            // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
-            // since only the host can change those mods.
-            if (room != null && !isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
-                return@fastForEach
+            if (room != null) {
+                // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
+                // since only the host can change those mods.
+                if (!isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
+                    return@fastForEach
+                }
+
+                // Special handling for the ScoreV2 mod, which is used by the ScoreV2 win condition.
+                if (mod is ModScoreV2) {
+                    return@fastForEach
+                }
             }
 
             removeMod(mod::class)
@@ -532,6 +599,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
+        selectedModsIndicator.mods = ModUtils.serializeMods(enabledMods, includeNonUserPlayable = true, includeIrrelevantMods = true)
         modPresetsSection.onModsChanged()
     }
 

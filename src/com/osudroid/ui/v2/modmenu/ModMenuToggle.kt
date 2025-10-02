@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.multiplayer.*
+import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -79,13 +80,22 @@ class ModMenuToggle(var mod: Mod): UIButton() {
         updateVisibility()
     }
 
-    fun updateVisibility() {
-        isVisible = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
+    @JvmOverloads
+    fun updateVisibility(searchTerm: String = "") {
+        var shouldBeVisible = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
             mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
                     (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
         } else {
             true
         }
+
+        if (searchTerm.isNotBlank()) {
+            shouldBeVisible = shouldBeVisible &&
+                (mod.acronym.equals(searchTerm, true) ||
+                    mod.name.searchContiguously(searchTerm, true))
+        }
+
+        isVisible = shouldBeVisible
     }
 
     fun applyCompatibilityState() {

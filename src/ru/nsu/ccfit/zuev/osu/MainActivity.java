@@ -76,6 +76,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -388,6 +389,7 @@ public class MainActivity extends BaseGameActivity implements
     public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
+        final HashSet<String> forceImportedBeatmaps = new HashSet<>();
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
@@ -396,6 +398,7 @@ public class MainActivity extends BaseGameActivity implements
                         false);
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
+                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                 // LibraryManager.INSTANCE.sort();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
@@ -420,6 +423,7 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                         }
                     } catch (IOException ignored) {
                     }
@@ -435,6 +439,7 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                         }
                     } catch (IOException ignored) {
                     }
@@ -456,7 +461,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        LibraryManager.scanDirectory();
+        LibraryManager.scanDirectory(forceImportedBeatmaps);
         LibraryManager.loadLibrary();
     }
 

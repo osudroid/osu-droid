@@ -6,6 +6,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
+import com.osudroid.game.CursorEvent;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
@@ -769,30 +770,6 @@ public class GameplaySlider extends GameObject {
         removeFromScene();
     }
 
-    private boolean canBeHit(float dt, float frameOffset) {
-        // At this point, the object's state is already in the next update tick.
-        // However, hit judgements require the object's state to be in the previous tick.
-        // Therefore, we subtract dt to get the object's state in the previous tick.
-        return elapsedSpanTime - dt + frameOffset >= -objectHittableRange;
-    }
-
-    private boolean isHit() {
-        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
-        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-
-            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
-                return true;
-            }
-
-            if (listener.isMousePressed(this, i) && (GameHelper.isAutopilot() || inPosition)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void updateTracking(PointF position) {
         if (!startHit) {
             // Do not allow tracking to happen when the slider head is not yet judged.
@@ -806,8 +783,11 @@ public class GameplaySlider extends GameObject {
             isTracking = true;
         } else if (hasTrackingCursor()) {
             // If the slider is being tracked, we only want to check if the tracking cursor is still tracking it.
-            if (listener.isMouseDown(trackingCursorId)) {
-                isTracking = isCursorTracking(position, trackingCursorId);
+            var trackingCursor = listener.getCursor(trackingCursorId);
+            var latestEvent = trackingCursor.getLatestEvent();
+
+            if (latestEvent != null && !latestEvent.isActionUp()) {
+                isTracking = isCursorTracking(position, latestEvent);
             } else {
                 trackingCursorId = -1;
                 isTracking = false;
@@ -815,7 +795,10 @@ public class GameplaySlider extends GameObject {
         } else {
             // Otherwise, we need to check if any cursor is tracking the slider.
             for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-                if (isCursorTracking(position, i)) {
+                var cursor = listener.getCursor(i);
+                var latestEvent = cursor.getLatestEvent();
+
+                if (latestEvent != null && isCursorTracking(position, latestEvent)) {
                     trackingCursorId = i;
                     isTracking = true;
                     break;
@@ -826,11 +809,17 @@ public class GameplaySlider extends GameObject {
         updateFollowCircleTrackingState();
     }
 
-    private boolean isCursorTracking(PointF position, int id) {
-        float trackingDistanceThresholdSquared = getTrackingDistanceThresholdSquared(isTracking());
-        boolean inPosition = Utils.squaredDistance(position, listener.getMousePos(id)) <= trackingDistanceThresholdSquared;
+    private boolean isCursorTracking(PointF trackingPosition, CursorEvent cursorEvent) {
+        if (cursorEvent.isActionUp()) {
+            return false;
+        }
 
-        return listener.isMouseDown(id) && (GameHelper.isAutopilot() || inPosition);
+        if (GameHelper.isAutopilot()) {
+            return true;
+        }
+
+        float trackingDistanceThresholdSquared = getTrackingDistanceThresholdSquared(isTracking());
+        return Utils.squaredDistance(trackingPosition, cursorEvent.position) <= trackingDistanceThresholdSquared;
     }
 
     private boolean isTracking() {
@@ -888,32 +877,6 @@ public class GameplaySlider extends GameObject {
         }
     }
 
-    private double hitOffsetToPreviousFrame() {
-        if (!Config.isFixFrameOffset()) {
-            return 0;
-        }
-
-        // Hit judgement is done in the update thread, but inputs are received in the main thread,
-        // the time when the player clicked in advance will affect judgement. This offset is used
-        // to offset the hit from the previous update tick.
-        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
-        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-
-            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
-                return 0;
-            }
-
-            var isPressed = listener.isMousePressed(this, i);
-            if (isPressed && inPosition) {
-                return listener.downFrameOffset(i);
-            } else if (GameHelper.isAutopilot() && isPressed) {
-                return 0;
-            }
-        }
-        return 0;
-    }
-
 
     @Override
     public void update(final float dt) {
@@ -928,17 +891,18 @@ public class GameplaySlider extends GameObject {
             double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
 
             if (replayObjectData == null) {
-                float frameOffset = (float) hitOffsetToPreviousFrame() / 1000;
+                if (!autoPlay) {
+                    if (elapsedTime <= getLateHitThreshold()) {
+                        var hittingCursor = getHittingCursor(listener, beatmapSlider, elapsedTime);
 
-                if (!autoPlay && canBeHit(dt, frameOffset) && isHit()) {
-                    // At this point, the object's state is already in the next update tick.
-                    // However, hit judgements require the object's state to be in the previous tick.
-                    // Therefore, we subtract dt to get the object's state in the previous tick.
-                    onSliderHeadHit(elapsedTime - dt + frameOffset);
-                } else if (!autoPlay && completedSpanCount * spanDuration + elapsedSpanTime > getLateHitThreshold()) {
-                    // If it's too late, mark this hit missing.
-                    onSliderHeadHit(elapsedTime);
-                } else if (autoPlay && elapsedSpanTime >= 0) {
+                        if (hittingCursor != null) {
+                            onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
+                        }
+                    } else {
+                        // If it's too late, mark this hit missing.
+                        onSliderHeadHit(elapsedTime);
+                    }
+                } else if (elapsedSpanTime >= 0) {
                     onSliderHeadHit(0);
                 }
             } else {
@@ -1380,28 +1344,6 @@ public class GameplaySlider extends GameObject {
     private Color4 getSynesthesiaComboColor(double time) {
         return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
     }
-
-    @Override
-    public void tryHit(final float dt) {
-        if (startHit) {
-            return;
-        }
-
-        float frameOffset = (float) hitOffsetToPreviousFrame() / 1000;
-
-        if (canBeHit(dt, frameOffset) && isHit()) {
-            // At this point, the object's state is already in the next update tick.
-            // However, hit judgements require the object's state to be in the previous tick.
-            // Therefore, we subtract dt to get the object's state in the previous tick.
-            onSliderHeadHit(elapsedSpanTime - dt + frameOffset);
-        }
-
-        if (elapsedSpanTime < 0 && startHit) {
-            approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
-        }
-    }
-
 
     /**
      * Gets the absolute position of a point on the path taking into account the slider's position.

@@ -330,6 +330,11 @@ class SettingsFragment : SettingsFragment() {
         }
 
         findPreference<SelectPreference>("appLanguage")!!.apply {
+            if (Multiplayer.isMultiplayer) {
+                isEnabled = false
+                return
+            }
+
             options = mutableListOf(
                 Option("System Default", "system"),
                 Option("English", "en"),
@@ -656,15 +661,6 @@ class SettingsFragment : SettingsFragment() {
 
             setOnPreferenceChangeListener { _, newValue ->
                 RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()))
-                true
-            }
-        }
-
-        findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
-            isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
-
-            setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
                 true
             }
         }

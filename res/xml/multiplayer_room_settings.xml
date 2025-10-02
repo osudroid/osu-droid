@@ -48,13 +48,8 @@
             android:entryValues="@array/mp_win_condition_values"
             android:key="room_win_condition"
             android:summary="@string/mp_room_win_condition_summary"
-            android:title="@string/mp_room_win_condition_title" />
-
-        <CheckBoxPreference
-            android:key="room_removeSliderLock"
-            android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
-            android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            android:title="@string/mp_room_win_condition_title"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 

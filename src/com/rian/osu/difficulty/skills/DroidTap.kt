@@ -4,6 +4,7 @@ import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.DroidTapEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
+import kotlin.math.max
 import kotlin.math.pow
 
 /**
@@ -24,7 +25,7 @@ class DroidTap(
     /**
      * The strain time to cap to.
      */
-    private val strainTimeCap: Double? = null
+    val strainTimeCap: Double? = null
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.1
 
@@ -35,39 +36,30 @@ class DroidTap(
     private val strainDecayBase = 0.3
 
     private val objectDeltaTimes = mutableListOf<Double>()
+    private var maxStrain = 0.0
 
     /**
      * Gets the amount of notes that are relevant to the difficulty.
      */
-    fun relevantNoteCount() = objectStrains.run {
-        if (isEmpty()) {
+    fun relevantNoteCount(): Double {
+        if (objectStrains.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
-        val maxStrain = max()
-        if (maxStrain == 0.0) {
-            return 0.0
-        }
-
-        fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        return objectStrains.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
     /**
      * Gets the delta time relevant to the difficulty.
      */
-    fun relevantDeltaTime() = objectStrains.run {
-        if (isEmpty()) {
+    fun relevantDeltaTime(): Double {
+        if (objectStrains.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
-        val maxStrain = max()
-        if (maxStrain == 0.0) {
-            return 0.0
-        }
-
-        objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
-            acc + d / (1 + exp(-(this[i] / maxStrain * 25 - 20)))
-        } / fold(0.0) { acc, d ->
+        return objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
+            acc + d / (1 + exp(-(objectStrains[i] / maxStrain * 25 - 20)))
+        } / objectStrains.fold(0.0) { acc, d ->
             acc + 1 / (1 + exp(-(d / maxStrain * 25 - 20)))
         }
     }
@@ -82,6 +74,7 @@ class DroidTap(
 
         val totalStrain = currentStrain * currentRhythm
 
+        maxStrain = max(maxStrain, totalStrain)
         objectStrains.add(totalStrain)
         objectDeltaTimes.add(current.deltaTime)
 

@@ -549,9 +549,7 @@ public class ScoringScene {
                 return;
             }
 
-            boolean hasUnrankedMod = SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
-
-            if (hasUnrankedMod || Config.isRemoveSliderLock()) {
+            if (SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext()) {
                 return;
             }
 

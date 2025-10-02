@@ -25,8 +25,14 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         background?.color = theme.accentColor * 0.25f
         foreground?.color = if (isFocused) theme.accentColor else theme.accentColor * 0.4f
         textEntity.color = theme.accentColor
+        placeholderEntity.color = theme.accentColor * 0.6f
     }
 
+    private val placeholderEntity = UIText().apply {
+        font = ResourceManager.getInstance().getFont("smallFont")
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+    }
 
     private val textEntity = UIText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
@@ -57,6 +63,11 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
      */
     var font by textEntity::font
 
+    /**
+     * The placeholder text displayed when the input field is empty.
+     */
+    var placeholder by placeholderEntity::text
+
 
     private var caretFading = false
 
@@ -72,6 +83,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         padding = Vec4(12f, 0f)
         caretPosition = value.length
 
+        +placeholderEntity
         +textEntity
         +caret
 
@@ -266,6 +278,8 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
     private fun updateVisuals() {
         textEntity.text = value
+        placeholderEntity.isVisible = value.isEmpty()
+
         caretPosition = min(caretPosition, value.length)
     }
 

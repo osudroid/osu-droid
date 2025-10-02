@@ -4,7 +4,6 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModTraceable
-import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -51,30 +50,10 @@ class DroidDifficultyHitObject(
     var rhythmMultiplier = 1.0
 
     /**
-     * The note density of the [HitObject].
-     */
-    @JvmField
-    var noteDensity = 1.0
-
-    /**
-     * The overlapping factor of the [HitObject].
-     *
-     * This is used to scale visual skill.
-     */
-    @JvmField
-    var overlappingFactor = 0.0
-
-    /**
      * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
      */
     @JvmField
     val timePreempt = obj.timePreempt / clockRate
-
-    override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
-        super.computeProperties(clockRate, objects)
-
-        setVisuals(clockRate, objects)
-    }
 
     override fun previous(backwardsIndex: Int) = if (index - backwardsIndex >= 0) difficultyHitObjects[index - backwardsIndex] else null
 
@@ -129,75 +108,5 @@ class DroidDifficultyHitObject(
         }
 
         return true
-    }
-
-    private fun setVisuals(clockRate: Double, objects: List<HitObject>) {
-        // We'll have two visible object lists. The first list contains objects before the current object starts in a
-        // reversed order, while the second list contains objects after the current object ends.
-        // For overlapping factor, we also need to consider objects that are prior to the current object.
-        val prevVisibleObjects = mutableListOf<HitObject>()
-        val nextVisibleObjects = mutableListOf<HitObject>()
-
-        for (i in index + 2 until objects.size) {
-            val o = objects[i]
-
-            if (o is Spinner) {
-                continue
-            }
-
-            if (o.startTime > obj.endTime + obj.timePreempt) {
-                break
-            }
-
-            nextVisibleObjects.add(o)
-        }
-
-        for (i in 0 until index) {
-            val prev = previous(i) ?: continue
-
-            if (prev.obj is Spinner) {
-                continue
-            }
-
-            if (prev.obj.startTime >= obj.startTime) {
-                continue
-            }
-
-            if (prev.obj.startTime < obj.startTime - obj.timePreempt) {
-                break
-            }
-
-            prevVisibleObjects.add(prev.obj)
-        }
-
-        for (hitObject in prevVisibleObjects) {
-            val distance = obj.difficultyStackedPosition.getDistance(hitObject.difficultyStackedEndPosition)
-            val deltaTime = startTime - hitObject.endTime / clockRate
-
-            applyToOverlappingFactor(distance, deltaTime)
-        }
-
-        for (hitObject in nextVisibleObjects) {
-            val distance = hitObject.difficultyStackedPosition.getDistance(obj.difficultyStackedEndPosition)
-
-            // We are not using clock rate adjusted delta time here for note density calculation.
-            val deltaTime = hitObject.startTime - obj.endTime
-
-            if (deltaTime >= 0) {
-                noteDensity += 1 - deltaTime / obj.timePreempt
-            }
-
-            // But for overlapping factor, we need to use clock rate adjusted delta time.
-            applyToOverlappingFactor(distance, deltaTime / clockRate)
-        }
-    }
-
-    private fun applyToOverlappingFactor(distance: Float, deltaTime: Double) {
-        // Penalize objects that are too close to the object in both distance
-        // and delta time to prevent stream maps from being overweighted.
-        overlappingFactor += max(
-            0.0,
-            1 - distance / (2.5 * obj.difficultyRadius)
-        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME.toDouble()) - 75)))
     }
 }
