@@ -4,6 +4,7 @@ import com.edlplan.ui.fragment.WebViewFragment
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.*
+import com.osudroid.multiplayer.api.data.PlayerStatus.*
 import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -29,9 +30,24 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
         background = UIBox().apply {
             cornerRadius = 12f
-            applyTheme = {
-                color = it.accentColor * 0.1f
-                alpha = 0.5f
+            color = when {
+                room.isTeamVersus -> when (player.team) {
+                    RoomTeam.Blue -> Color4("#A0C0FF")
+                    RoomTeam.Red -> Color4("#FFA0A0")
+                    null -> Theme.current.accentColor
+                } * 0.1f
+                else -> Theme.current.accentColor
+            } * 0.1f
+            alpha = 0.5f
+        }
+
+        foreground = UIBox().apply {
+            cornerRadius = 12f
+            paintStyle = PaintStyle.Outline
+            color =  when (player.status) {
+                Playing -> Theme.current.accentColor
+                Ready -> Color4("#A0FFA0")
+                NotReady, MissingBeatmap -> Color4("#FFA0A0")
             }
         }
 
@@ -44,7 +60,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
                 applyTheme = { color = it.accentColor }
             }
 
-            if (!room.gameplaySettings.isFreeMod) {
+            if (room.gameplaySettings.isFreeMod) {
                 +ModsIndicator().apply {
                     minHeight = 24f // Force to take space even if no mods are enabled
                     iconSize = 18f

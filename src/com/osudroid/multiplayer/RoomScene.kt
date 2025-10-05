@@ -246,6 +246,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                                 orientation = Orientation.Vertical
                                 width = FillParent
                                 spacing = 4f
+                                padding = Vec4.One
                                 playersContainer = this
                             }
                         }
@@ -833,11 +834,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.gameplaySettings = settings
 
+        updateButtons()
         updateInformation()
+        updatePlayerList()
 
         isWaitingForModsChange = true
-
-        modsButton.isVisible = isRoomHost || settings.isFreeMod
 
         updateThread {
             ModMenu.back(false)
