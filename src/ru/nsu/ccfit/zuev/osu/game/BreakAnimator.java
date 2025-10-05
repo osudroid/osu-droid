@@ -150,7 +150,7 @@ public class BreakAnimator extends GameObject {
             }
 
             if (Multiplayer.isMultiplayer) {
-                Multiplayer.roomScene.getChat().dismiss();
+                Multiplayer.roomScene.getChat().hide();
             }
         }
         if (length > 1) {

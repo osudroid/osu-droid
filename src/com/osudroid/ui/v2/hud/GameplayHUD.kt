@@ -64,27 +64,13 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     private var isInEditMode = false
 
 
-    init {
-        // The engine expects the HUD to be an instance of AndEngine's HUD class.
-        // Since we need Container features, we set an HUD instance as the parent, and we just need to
-        // reference the parent of this container to set the engine's HUD.
-        val parent = object : HUD() {
-            override fun onManagedUpdate(pSecondsElapsed: Float) {
-                val engine = ExtendedEngine.Current
-
-                if (engine.scene != GlobalManager.getInstance().gameScene?.scene) {
-                    engine.camera.hud = null
-                    return
-                }
-
-                super.onManagedUpdate(pSecondsElapsed)
-            }
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (ExtendedEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
+            detachSelf()
+            return
         }
 
-        parent.attachChild(this)
-        parent.camera = GlobalManager.getInstance().engine.camera
-
-        setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
@@ -248,11 +234,9 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
-
-            parent!!.attachChild(elementSelector)
+            ExtendedEngine.current.overlay.attachChild(elementSelector)
         } else {
-            parent!!.detachChild(elementSelector)
-
+            elementSelector?.detachSelf()
             elementSelector = null
         }
 
@@ -307,12 +291,6 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     }
 
     //endregion
-
-
-    override fun getParent(): HUD? {
-        // Nullable because during initialization the parent is not set yet.
-        return super.getParent() as? HUD
-    }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 

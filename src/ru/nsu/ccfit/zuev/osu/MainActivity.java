@@ -49,7 +49,6 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -149,7 +148,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new ExtendedEngine(this, opt);
+        ExtendedEngine engine = new ExtendedEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.

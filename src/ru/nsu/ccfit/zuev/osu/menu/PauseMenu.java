@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import com.reco1l.andengine.ExtendedEngine;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
@@ -64,6 +66,12 @@ public class PauseMenu implements IOnMenuItemClickListener {
 
             @Override
             protected void onManagedUpdate(float pSecondsElapsed) {
+
+                if (ExtendedEngine.getCurrent().getScene() != game.getScene()) {
+                    back();
+                    return;
+                }
+
                 // The fade in animation duration is 1 second. We want to speed it up.
                 super.onManagedUpdate(pSecondsElapsed * 2.5f);
             }

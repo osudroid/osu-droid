@@ -243,6 +243,16 @@ object ModMenu : UIScene() {
                 height = MatchContent
                 padding = Vec4(60f, 12f)
 
+                onUpdateTick = {
+                    if (Multiplayer.isConnected) {
+                        val chat = Multiplayer.roomScene!!.chat
+
+                        if (padding.bottom != chat.buttonHeight) {
+                            padding = Vec4(60f, 12f, 60f, chat.buttonHeight + 12f)
+                        }
+                    }
+                }
+
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft

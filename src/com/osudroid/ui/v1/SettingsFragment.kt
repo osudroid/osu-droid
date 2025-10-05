@@ -37,8 +37,6 @@ import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.UpdateManager
 import com.osudroid.data.DatabaseManager
-import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomTeam

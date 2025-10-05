@@ -27,6 +27,7 @@ import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.multi.*
 import com.osudroid.ui.v2.modmenu.ModMenu
+import com.osudroid.ui.v2.multi.RoomChat
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -39,7 +40,6 @@ import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
-import org.anddev.andengine.entity.scene.Scene
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.*
@@ -125,305 +125,304 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         ResourceManager.getInstance().loadHighQualityAsset("star", "star.png")
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png")
         ResourceManager.getInstance().loadHighQualityAsset("download", "download.png")
+        ResourceManager.getInstance().loadHighQualityAsset("send", "send.png")
 
         RoomAPI.playerEventListener = this
         RoomAPI.roomEventListener = this
         chat = RoomChat()
 
-        flexContainer {
+        container {
             width = FillParent
             height = FillParent
-            direction = FlexDirection.Column
+            padding = Vec4(80f, 0f)
 
-            container {
+            onUpdateTick = {
+                if (padding.bottom != chat.buttonHeight) {
+                    padding = Vec4(80f, 0f, 80f, chat.buttonHeight + 12f)
+                }
+            }
+
+            background = UISprite().apply {
+                scaleType = ScaleType.Crop
+                textureRegion = ResourceManager.getInstance().getTexture("menu-background")
+                backgroundSprite = this
+
+                if (!Config.isSafeBeatmapBg()) {
+                    textureRegion = ResourceManager.getInstance().getTexture("::background") ?: textureRegion
+                }
+
+                foreground = UIBox().apply {
+                    applyTheme = {
+                        color = it.accentColor * 0.1f
+                        alpha = 0.9f
+                    }
+                }
+            }
+
+            linearContainer {
+                orientation = Orientation.Vertical
                 width = FillParent
-                padding = Vec4(80f, 0f)
-                flexRules { grow = 1f }
+                height = FillParent
 
-                background = UISprite().apply {
-                    scaleType = ScaleType.Crop
-                    textureRegion = ResourceManager.getInstance().getTexture("menu-background")
-                    backgroundSprite = this
+                linearContainer {
+                    orientation = Orientation.Vertical
+                    spacing = 8f
+                    padding = Vec4(0f, 18f)
 
-                    if (!Config.isSafeBeatmapBg()) {
-                        textureRegion = ResourceManager.getInstance().getTexture("::background") ?: textureRegion
+                    nameText = text {
+                        text = room.name
+                        applyTheme = { color = it.accentColor }
                     }
 
-                    foreground = UIBox().apply {
-                        applyTheme = {
-                            color = it.accentColor * 0.1f
-                            alpha = 0.9f
+                    linearContainer {
+                        spacing = 8f
+
+                        teamModeBadge = badge {
+                            sizeVariant = SizeVariant.Small
+                        }
+
+                        winConditionBadge = badge {
+                            sizeVariant = SizeVariant.Small
+                        }
+
+                        playersBadge = labeledBadge {
+                            sizeVariant = SizeVariant.Small
+                            label = StringTable.get(R.string.multiplayer_room_players)
+                            value = "0/${room.maxPlayers}"
+                        }
+
+                        freeModsBadge = badge {
+                            sizeVariant = SizeVariant.Small
+                            applyTheme = {
+                                color = it.accentColor * 0.1f
+                                background?.color = it.accentColor
+                            }
+                            setText(R.string.multiplayer_room_free_mods)
+                            isVisible = false
+                        }
+
+                        +ModsIndicator().apply {
+                            iconSize = 24f
+                            modsIndicator = this
                         }
                     }
                 }
 
-                linearContainer {
-                    orientation = Orientation.Vertical
+                flexContainer {
                     width = FillParent
                     height = FillParent
+                    gap = 24f
+                    padding = Vec4(0f, 12f)
 
-                    linearContainer {
-                        orientation = Orientation.Vertical
-                        spacing = 8f
-                        padding = Vec4(0f, 18f)
+                    fun UIFlexContainer.Section(title: Int, block: UILinearContainer.() -> Unit) {
+                        linearContainer {
+                            orientation = Orientation.Vertical
+                            height = FillParent
+                            spacing = 8f
 
-                        nameText = text {
-                            text = room.name
-                            applyTheme = { color = it.accentColor }
+                            flexRules {
+                                grow = 1f
+                                basis = 0f
+                            }
+
+                            text {
+                                text = StringTable.get(title).uppercase()
+                                applyTheme = { color = it.accentColor * 0.7f }
+                            }
+
+                            block()
+                        }
+                    }
+
+                    Section(R.string.multiplayer_room_players) {
+
+                        scrollableContainer {
+                            width = FillParent
+                            height = FillParent
+                            scrollAxes = Axes.Y
+                            clipToBounds = true
+
+                            linearContainer {
+                                orientation = Orientation.Vertical
+                                width = FillParent
+                                spacing = 4f
+                                playersContainer = this
+                            }
+                        }
+                    }
+
+                    Section(R.string.multiplayer_room_beatmap) {
+
+                        +BeatmapInfoLayout().apply {
+                            padding = Vec4(16f)
+                            background = UIBox().apply {
+                                cornerRadius = 12f
+                                applyTheme = {
+                                    color = it.accentColor * 0.1f
+                                    alpha = 0.5f
+                                }
+                            }
+                            isVisible = false
+                            beatmapInfoLayout = this
+                        }
+
+                        beatmapInfoAlert = text {
+                            width = FillParent
+                            padding = Vec4(16f)
+                            alignment = Anchor.Center
+                            background = UIBox().apply {
+                                cornerRadius = 12f
+                                applyTheme = {
+                                    color = it.accentColor * 0.1f
+                                    alpha = 0.5f
+                                }
+                            }
                         }
 
                         linearContainer {
+                            width = FillParent
                             spacing = 8f
 
-                            teamModeBadge = badge {
-                                sizeVariant = SizeVariant.Small
-                            }
-
-                            winConditionBadge = badge {
-                                sizeVariant = SizeVariant.Small
-                            }
-
-                            playersBadge = labeledBadge {
-                                sizeVariant = SizeVariant.Small
-                                label = StringTable.get(R.string.multiplayer_room_players)
-                                value = "0/${room.maxPlayers}"
-                            }
-
-                            freeModsBadge = badge {
-                                sizeVariant = SizeVariant.Small
-                                applyTheme = {
-                                    color = it.accentColor * 0.1f
-                                    background?.color = it.accentColor
-                                }
-                                setText(R.string.multiplayer_room_free_mods)
-                                isVisible = false
-                            }
-
-                            +ModsIndicator().apply {
-                                iconSize = 24f
-                                modsIndicator = this
-                            }
-                        }
-                    }
-
-                    flexContainer {
-                        width = FillParent
-                        height = FillParent
-                        gap = 24f
-                        padding = Vec4(0f, 12f)
-
-                        fun UIFlexContainer.Section(title: Int, block: UILinearContainer.() -> Unit) {
-                            linearContainer {
-                                orientation = Orientation.Vertical
-                                height = FillParent
-                                spacing = 8f
-
-                                flexRules {
-                                    grow = 1f
-                                    basis = 0f
-                                }
-
-                                text {
-                                    text = StringTable.get(title).uppercase()
-                                    applyTheme = { color = it.accentColor * 0.7f }
-                                }
-
-                                block()
-                            }
-                        }
-
-                        Section(R.string.multiplayer_room_players) {
-
-                            scrollableContainer {
-                                width = FillParent
-                                height = FillParent
-                                scrollAxes = Axes.Y
-                                clipToBounds = true
-
-                                linearContainer {
-                                    orientation = Orientation.Vertical
-                                    width = FillParent
-                                    spacing = 4f
-                                    playersContainer = this
-                                }
-                            }
-                        }
-
-                        Section(R.string.multiplayer_room_beatmap) {
-
-                            +BeatmapInfoLayout().apply {
-                                padding = Vec4(16f)
-                                background = UIBox().apply {
-                                    cornerRadius = 12f
-                                    applyTheme = {
-                                        color = it.accentColor * 0.1f
-                                        alpha = 0.5f
-                                    }
-                                }
-                                isVisible = false
-                                beatmapInfoLayout = this
-                            }
-
-                            beatmapInfoAlert = text {
-                                width = FillParent
-                                padding = Vec4(16f)
-                                alignment = Anchor.Center
-                                background = UIBox().apply {
-                                    cornerRadius = 12f
-                                    applyTheme = {
-                                        color = it.accentColor * 0.1f
-                                        alpha = 0.5f
-                                    }
-                                }
-                            }
-
-                            linearContainer {
-                                width = FillParent
-                                spacing = 8f
-
-                                changeBeatmapButton = textButton {
-                                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("swap"))
-                                    alignment = Anchor.CenterLeft
-                                    setText(R.string.multiplayer_room_change_beatmap)
-                                    onActionUp = {
-                                        if (isRoomHost) {
-                                            if (LibraryManager.getLibrary().isEmpty()) {
-                                                GlobalManager.getInstance().songService.pause()
-                                                BeatmapListing().show()
-                                            }
-
-                                            GlobalManager.getInstance().songMenu.reload()
-                                            GlobalManager.getInstance().songMenu.show()
-                                            GlobalManager.getInstance().songMenu.select()
-
-                                            // We notify all clients that the host is changing beatmap
-                                            RoomAPI.changeBeatmap()
+                            changeBeatmapButton = textButton {
+                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("swap"))
+                                alignment = Anchor.CenterLeft
+                                setText(R.string.multiplayer_room_change_beatmap)
+                                onActionUp = {
+                                    if (isRoomHost) {
+                                        if (LibraryManager.getLibrary().isEmpty()) {
+                                            GlobalManager.getInstance().songService.pause()
+                                            BeatmapListing().show()
                                         }
-                                    }
-                                }
 
-                                downloadBeatmapButton = textButton {
-                                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
-                                    alignment = Anchor.CenterLeft
-                                    isVisible = false
+                                        GlobalManager.getInstance().songMenu.reload()
+                                        GlobalManager.getInstance().songMenu.show()
+                                        GlobalManager.getInstance().songMenu.select()
+
+                                        // We notify all clients that the host is changing beatmap
+                                        RoomAPI.changeBeatmap()
+                                    }
                                 }
                             }
 
+                            downloadBeatmapButton = textButton {
+                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
+                                alignment = Anchor.CenterLeft
+                                isVisible = false
+                            }
                         }
+
                     }
                 }
+            }
 
-                linearContainer {
-                    origin = Anchor.BottomLeft
-                    anchor = Anchor.BottomLeft
-                    spacing = 8f
-                    padding = Vec4(0f, 12f)
+            linearContainer {
+                origin = Anchor.BottomLeft
+                anchor = Anchor.BottomLeft
+                spacing = 8f
+                padding = Vec4(0f, 12f)
 
-                    textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
-                        setText(R.string.multiplayer_room_leave)
-                        onActionUp = { back() }
-                    }
-
-                    modsButton = textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
-                        setText(R.string.multiplayer_room_mods)
-                        onActionUp = { ModMenu.show() }
-                    }
+                textButton {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
+                    setText(R.string.multiplayer_room_leave)
+                    onActionUp = { back() }
                 }
 
-                linearContainer {
-                    width = 300f
-                    orientation = Orientation.Vertical
-                    origin = Anchor.BottomRight
-                    anchor = Anchor.BottomRight
-                    spacing = 8f
-                    padding = Vec4(0f, 12f)
+                modsButton = textButton {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
+                    setText(R.string.multiplayer_room_mods)
+                    onActionUp = { ModMenu.show() }
+                }
+            }
 
-                    textButton {
-                        width = FillParent
-                        setText(R.string.multiplayer_room_start_game)
-                        isSelected = true
-                        onActionUp = callback@{
+            linearContainer {
+                width = 300f
+                orientation = Orientation.Vertical
+                origin = Anchor.BottomRight
+                anchor = Anchor.BottomRight
+                spacing = 8f
+                padding = Vec4(0f, 12f)
 
-                            if (isWaitingForStatusChange || !isRoomHost || player!!.status != Ready) {
-                                return@callback
-                            }
+                textButton {
+                    width = FillParent
+                    setText(R.string.multiplayer_room_start_game)
+                    isSelected = true
+                    onActionUp = callback@{
 
-                            if (room.beatmap == null) {
-                                ToastLogger.showText(R.string.multiplayer_room_must_select_beatmap, true)
-                                return@callback
-                            }
+                        if (isWaitingForStatusChange || !isRoomHost || player!!.status != Ready) {
+                            return@callback
+                        }
 
-                            if (!BuildSettings.MOCK_MULTIPLAYER) {
-                                if (room.teamMode == TeamVersus) {
-                                    val teams = room.teamMap
+                        if (room.beatmap == null) {
+                            ToastLogger.showText(R.string.multiplayer_room_must_select_beatmap, true)
+                            return@callback
+                        }
 
-                                    if (teams.values.any { it.isEmpty() }) {
-                                        ToastLogger.showText(R.string.multiplayer_room_at_least_one_player_per_team, true)
-                                        return@callback
-                                    }
-                                }
+                        if (!BuildSettings.MOCK_MULTIPLAYER) {
+                            if (room.teamMode == TeamVersus) {
+                                val teams = room.teamMap
 
-                                val players = room.activePlayers.filter { it.status != MissingBeatmap }
-
-                                if (players.size <= 1) {
-                                    ToastLogger.showText(R.string.multiplayer_room_at_least_two_players_beatmap, true)
+                                if (teams.values.any { it.isEmpty() }) {
+                                    ToastLogger.showText(R.string.multiplayer_room_at_least_one_player_per_team, true)
                                     return@callback
                                 }
                             }
 
-                            ResourceManager.getInstance().getSound("menuhit")?.play()
-                            RoomAPI.notifyMatchPlay()
-                        }
-                        startButton = this
-                    }
+                            val players = room.activePlayers.filter { it.status != MissingBeatmap }
 
-                    textButton {
-                        width = FillParent
-                        setText(R.string.multiplayer_room_not_ready)
-                        onActionUp = callback@{
-
-                            if (isWaitingForStatusChange) {
+                            if (players.size <= 1) {
+                                ToastLogger.showText(R.string.multiplayer_room_at_least_two_players_beatmap, true)
                                 return@callback
                             }
+                        }
 
-                            ResourceManager.getInstance().getSound("menuclick")?.play()
-                            isWaitingForStatusChange = true
+                        ResourceManager.getInstance().getSound("menuhit")?.play()
+                        RoomAPI.notifyMatchPlay()
+                    }
+                    startButton = this
+                }
 
-                            when (player!!.status) {
+                textButton {
+                    width = FillParent
+                    setText(R.string.multiplayer_room_not_ready)
+                    onActionUp = callback@{
 
-                                NotReady -> {
-                                    if (room.beatmap == null) {
-                                        ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
-                                        isWaitingForStatusChange = false
-                                    }
+                        if (isWaitingForStatusChange) {
+                            return@callback
+                        }
 
-                                    if (room.teamMode == TeamVersus && player!!.team == null) {
-                                        ToastLogger.showText("You must select a team first!", true)
-                                        isWaitingForStatusChange = false
-                                    }
+                        ResourceManager.getInstance().getSound("menuclick")?.play()
+                        isWaitingForStatusChange = true
 
-                                    RoomAPI.setPlayerStatus(Ready)
-                                }
+                        when (player!!.status) {
 
-                                Ready -> invalidateStatus()
-
-                                MissingBeatmap -> {
-                                    ToastLogger.showText("Beatmap is missing, cannot ready.", true)
+                            NotReady -> {
+                                if (room.beatmap == null) {
+                                    ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
                                     isWaitingForStatusChange = false
                                 }
 
-                                else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
-                            }
-                        }
-                        statusButton = this
-                    }
-                }
+                                if (room.teamMode == TeamVersus && player!!.team == null) {
+                                    ToastLogger.showText("You must select a team first!", true)
+                                    isWaitingForStatusChange = false
+                                }
 
+                                RoomAPI.setPlayerStatus(Ready)
+                            }
+
+                            Ready -> invalidateStatus()
+
+                            MissingBeatmap -> {
+                                ToastLogger.showText("Beatmap is missing, cannot ready.", true)
+                                isWaitingForStatusChange = false
+                            }
+
+                            else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
+                        }
+                    }
+                    statusButton = this
+                }
             }
 
-            +com.osudroid.ui.v2.multi.RoomChat()
         }
 
         Multiplayer.roomScene = this
@@ -617,13 +616,9 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         Multiplayer.room = null
         player = null
+        chat.hide()
 
-        mainThread {
-            chat.clear()
-            chat.dismiss()
-        }
-
-        ExtendedEngine.Current.scene = LobbyScene()
+        ExtendedEngine.current.scene = LobbyScene()
     }
 
     override fun show() {
@@ -645,7 +640,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         }
 
         invalidateStatus()
-        //chat.show()
+        chat.show()
     }
 
 
@@ -660,7 +655,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         if (uid != null) {
 
             val player = room.playersMap[uid] ?: run {
-
                 Multiplayer.log("WARNING: Unable to find user by ID on chat message")
                 return
             }
@@ -1035,6 +1029,4 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         updateInformation()
     }
 
-
-    fun init() = Unit
 }

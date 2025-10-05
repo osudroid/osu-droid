@@ -441,3 +441,11 @@ open class CompoundText : UIContainer() {
         super.onManagedUpdate(deltaTimeSec)
     }
 }
+
+
+fun UITextCompoundBuffer(capacity: Int): CompoundBuffer {
+    return CompoundBuffer(
+        UIText.TextTextureBuffer(capacity),
+        UIText.TextVertexBuffer(capacity)
+    )
+}

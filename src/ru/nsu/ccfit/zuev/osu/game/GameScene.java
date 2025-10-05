@@ -31,6 +31,7 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.ExtendedEngine;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.shape.PaintStyle;
 import com.reco1l.andengine.shape.UIBox;
@@ -46,7 +47,6 @@ import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDPPCounter;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.reco1l.framework.Color4;
 import com.rian.osu.GameMode;
@@ -131,7 +131,7 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
-    private final Engine engine;
+    private final ExtendedEngine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     public String audioFilePath = null;
     private UIScene scene;
@@ -313,7 +313,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ScoreBoardItem lastScoreSent = null;
 
 
-    public GameScene(final Engine engine) {
+    public GameScene(final ExtendedEngine engine) {
         this.engine = engine;
         scene = createMainScene();
         bgScene = new UIScene();
@@ -1231,8 +1231,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - totalOffset);
         initialElapsedTime = elapsedTime;
 
-        if (skipTime <= 1)
-            Multiplayer.roomScene.getChat().dismiss();
+        if (skipTime <= 1 && Multiplayer.isConnected()) {
+            Multiplayer.roomScene.getChat().hide();
+        }
 
         applyPlayfieldSizeScale();
         applyBackground();
@@ -1254,7 +1255,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
 
         engine.setScene(scene);
-        engine.getCamera().setHUD(hud.getParent());
+        engine.getOverlay().attachChild(hud);
 
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
@@ -1478,7 +1479,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (breakAnimator.isOver()) {
 
                 // Ensure the chat is dismissed if it's still shown
-                Multiplayer.roomScene.getChat().dismiss();
+                if (Multiplayer.isConnected()) {
+                    Multiplayer.roomScene.getChat().hide();
+                }
 
                 gameStarted = true;
                 hud.onBreakStateChange(false);
@@ -1779,7 +1782,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (elapsedTime > skipTime - 1f && skipBtn != null) {
-            Multiplayer.roomScene.getChat().dismiss();
+            if (Multiplayer.isConnected()) {
+                Multiplayer.roomScene.getChat().hide();
+            }
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
@@ -1833,7 +1838,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void skip(boolean force)
     {
-        Multiplayer.roomScene.getChat().dismiss();
+        if (Multiplayer.isConnected()) {
+            Multiplayer.roomScene.getChat().hide();
+        }
 
         if (elapsedTime > skipTime - 1f && !force) {
             return;
@@ -2502,7 +2509,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        hud.getParent().setChildScene(menu.getScene(), false, true, true);
+        ExtendedEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2630,7 +2637,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    hud.getParent().setChildScene(menu.getScene(), false, true, true);
+                    ExtendedEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
                 }
             }
 
@@ -2646,7 +2653,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         scene.setIgnoreUpdate(false);
-        hud.getParent().getChildScene().back();
+        ExtendedEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {

@@ -5,7 +5,6 @@ import android.util.Log;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.utils.Execution;

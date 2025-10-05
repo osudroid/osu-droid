@@ -105,7 +105,7 @@ open class UIModal(
     protected open fun onShow() {
         // If there's not parent previously set, attach to the current scene.
         if (parent == null) {
-            var currentScene = ExtendedEngine.Current.scene
+            var currentScene = ExtendedEngine.current.scene
 
             // Find the top-most scene in the hierarchy.
             while (currentScene.hasChildScene()) {

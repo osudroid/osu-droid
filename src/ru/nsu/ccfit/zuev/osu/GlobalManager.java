@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
+import com.reco1l.andengine.ExtendedEngine;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
@@ -16,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
  */
 public class GlobalManager {
     private static GlobalManager instance;
-    private Engine engine;
+    private ExtendedEngine engine;
     private Camera camera;
     private GameScene gameScene;
     private MainScene mainScene;
@@ -69,11 +71,11 @@ public class GlobalManager {
         }
     }
 
-    public Engine getEngine() {
+    public ExtendedEngine getEngine() {
         return engine;
     }
 
-    public void setEngine(Engine engine) {
+    public void setEngine(ExtendedEngine engine) {
         this.engine = engine;
     }
 

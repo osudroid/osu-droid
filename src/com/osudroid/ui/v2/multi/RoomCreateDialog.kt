@@ -66,7 +66,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                         RoomAPI.connectToRoom(roomId, OnlineManager.getInstance().userId, OnlineManager.getInstance().username, password)
 
                     } catch (e: Exception) {
-                        ExtendedEngine.Current.scene = lobbyScene
+                        ExtendedEngine.current.scene = lobbyScene
                         ToastLogger.showText("Failed to create a room: ${e.message}", true)
                         e.printStackTrace()
                     }

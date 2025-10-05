@@ -54,6 +54,11 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     var confirmOnEnter = true
 
     /**
+     * A callback that is invoked when the input is confirmed by pressing the enter key.
+     */
+    var onConfirm: (() -> Unit)? = null
+
+    /**
      * The maximum number of characters allowed in the text field. If set to 0, there is no limit.
      */
     var maxCharacters = 0
@@ -112,16 +117,16 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor * 0.4f, 0.1f)
 
-        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, null)
+        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.current.context.window.decorView, null)
     }
 
     @Suppress("DEPRECATION")
     private fun setKeyboardVisibility(value: Boolean) = mainThread {
 
-        val imm = ExtendedEngine.Current.context.getSystemService<InputMethodManager>()
+        val imm = ExtendedEngine.current.context.getSystemService<InputMethodManager>()
             ?: throw NullPointerException("InputMethodManager is null")
 
-        val windowInsets = ViewCompat.getRootWindowInsets(ExtendedEngine.Current.context.window.decorView)
+        val windowInsets = ViewCompat.getRootWindowInsets(ExtendedEngine.current.context.window.decorView)
         val keyboardHeight = windowInsets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
 
         // Tricky prevention from opening the keyboard while it should be closed and vice versa.
@@ -310,6 +315,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
                 KEYCODE_ENTER -> {
                     if (confirmOnEnter) {
                         blur()
+                        onConfirm?.invoke()
                     } else {
                         appendCharacter('\n')
                     }

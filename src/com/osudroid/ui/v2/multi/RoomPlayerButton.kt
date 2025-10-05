@@ -34,6 +34,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
         linearContainer {
             orientation = Orientation.Vertical
+            inheritAncestorsColor = false
 
             text {
                 text = player.name
