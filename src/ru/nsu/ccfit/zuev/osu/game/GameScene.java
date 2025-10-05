@@ -1254,7 +1254,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
 
         engine.setScene(scene);
-        engine.getOverlay().attachChild(hud);
+        engine.getOverlay().attachChild(hud, 0);
 
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);

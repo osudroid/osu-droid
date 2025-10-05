@@ -233,7 +233,6 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
-            UIEngine.current.overlay.attachChild(elementSelector)
         } else {
             elementSelector?.detachSelf()
             elementSelector = null
@@ -243,6 +242,14 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // Cannot use forEachElement {} because we're modifying the list.
         mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
     }
+
+    override fun onAttached() {
+        if (isInEditMode) {
+            UIEngine.current.overlay.attachChild(elementSelector)
+        }
+        super.onAttached()
+    }
+
     //endregion
 
     //region Gameplay Events
