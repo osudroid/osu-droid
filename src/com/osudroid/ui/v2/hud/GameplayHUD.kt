@@ -8,11 +8,10 @@ import com.reco1l.andengine.container.UIContainer
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
-import com.reco1l.andengine.ExtendedEngine
+import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
-import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent
 import org.json.JSONObject
@@ -65,7 +64,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        if (ExtendedEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
+        if (UIEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
             detachSelf()
             return
         }
@@ -234,7 +233,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
-            ExtendedEngine.current.overlay.attachChild(elementSelector)
+            UIEngine.current.overlay.attachChild(elementSelector)
         } else {
             elementSelector?.detachSelf()
             elementSelector = null

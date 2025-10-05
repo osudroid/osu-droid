@@ -117,16 +117,16 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor * 0.4f, 0.1f)
 
-        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.current.context.window.decorView, null)
+        ViewCompat.setOnApplyWindowInsetsListener(UIEngine.current.context.window.decorView, null)
     }
 
     @Suppress("DEPRECATION")
     private fun setKeyboardVisibility(value: Boolean) = mainThread {
 
-        val imm = ExtendedEngine.current.context.getSystemService<InputMethodManager>()
+        val imm = UIEngine.current.context.getSystemService<InputMethodManager>()
             ?: throw NullPointerException("InputMethodManager is null")
 
-        val windowInsets = ViewCompat.getRootWindowInsets(ExtendedEngine.current.context.window.decorView)
+        val windowInsets = ViewCompat.getRootWindowInsets(UIEngine.current.context.window.decorView)
         val keyboardHeight = windowInsets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
 
         // Tricky prevention from opening the keyboard while it should be closed and vice versa.

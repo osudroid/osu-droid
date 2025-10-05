@@ -163,7 +163,7 @@ class RoomChat : UILinearContainer() {
 
     fun show() {
         if (!hasParent()) {
-            ExtendedEngine.current.overlay.attachChild(this)
+            UIEngine.current.overlay.attachChild(this)
         }
     }
 

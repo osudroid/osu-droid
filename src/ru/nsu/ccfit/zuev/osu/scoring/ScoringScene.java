@@ -8,7 +8,7 @@ import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
 import com.rian.osu.GameMode;
@@ -596,7 +596,7 @@ public class ScoringScene {
         {
             // Preventing NPEs when player gets disconnected while playing
             if (!Multiplayer.isConnected()) {
-                ExtendedEngine.getCurrent().setScene(new LobbyScene());
+                UIEngine.getCurrent().setScene(new LobbyScene());
             } else {
                 Multiplayer.roomScene.show();
             }

@@ -618,7 +618,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         player = null
         chat.hide()
 
-        ExtendedEngine.current.scene = LobbyScene()
+        UIEngine.current.scene = LobbyScene()
     }
 
     override fun show() {

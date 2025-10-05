@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.scene.Scene;
@@ -67,7 +67,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
             @Override
             protected void onManagedUpdate(float pSecondsElapsed) {
 
-                if (ExtendedEngine.getCurrent().getScene() != game.getScene()) {
+                if (UIEngine.getCurrent().getScene() != game.getScene()) {
                     back();
                     return;
                 }

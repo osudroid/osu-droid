@@ -31,7 +31,7 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.shape.PaintStyle;
 import com.reco1l.andengine.shape.UIBox;
@@ -74,7 +74,6 @@ import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
-import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -131,7 +130,7 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
-    private final ExtendedEngine engine;
+    private final UIEngine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     public String audioFilePath = null;
     private UIScene scene;
@@ -313,7 +312,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ScoreBoardItem lastScoreSent = null;
 
 
-    public GameScene(final ExtendedEngine engine) {
+    public GameScene(final UIEngine engine) {
         this.engine = engine;
         scene = createMainScene();
         bgScene = new UIScene();
@@ -2509,7 +2508,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        ExtendedEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2637,7 +2636,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    ExtendedEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
                 }
             }
 
@@ -2653,7 +2652,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         scene.setIgnoreUpdate(false);
-        ExtendedEngine.getCurrent().getOverlay().getChildScene().back();
+        UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {

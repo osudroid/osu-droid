@@ -152,7 +152,7 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
 
             wrapper.detachSelf()
 
-            val scene = ExtendedEngine.current.scene
+            val scene = UIEngine.current.scene
             if (scene.hasChildScene()) {
                 scene.childScene.attachChild(wrapper)
             } else {

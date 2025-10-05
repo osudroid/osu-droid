@@ -24,7 +24,7 @@ data class Theme(
             set(value) {
                 if (field != value) {
                     field = value
-                    ExtendedEngine.current.onThemeChange(value)
+                    UIEngine.current.onThemeChange(value)
                 }
             }
 

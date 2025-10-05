@@ -187,7 +187,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                 ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
                 Multiplayer.log(e)
 
-                ExtendedEngine.current.scene = lobbyScene
+                UIEngine.current.scene = lobbyScene
             }
         }
 

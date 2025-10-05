@@ -15,7 +15,7 @@ import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
@@ -192,7 +192,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     companion object {
 
         @JvmStatic
-        lateinit var current: ExtendedEngine
+        lateinit var current: UIEngine
             private set
 
     }

@@ -140,7 +140,7 @@ object Multiplayer {
                 ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
                 Log.e("LobbyScene", "Failed to connect to room.", e)
 
-                ExtendedEngine.current.scene = LobbyScene()
+                UIEngine.current.scene = LobbyScene()
             }
 
         }

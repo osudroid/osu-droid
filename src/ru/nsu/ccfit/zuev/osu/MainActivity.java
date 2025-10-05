@@ -42,7 +42,7 @@ import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
@@ -148,7 +148,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        ExtendedEngine engine = new ExtendedEngine(this, opt);
+        UIEngine engine = new UIEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -712,7 +712,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
+        if (UIEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
         }
 

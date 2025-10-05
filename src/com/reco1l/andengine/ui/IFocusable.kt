@@ -7,7 +7,7 @@ interface IFocusable {
 
 
     val isFocused
-        get() = ExtendedEngine.current.focusedEntity == this as? UIComponent
+        get() = UIEngine.current.focusedEntity == this as? UIComponent
 
 
     /**
@@ -25,15 +25,15 @@ interface IFocusable {
      * Request focus for this entity.
      */
     fun focus() {
-        ExtendedEngine.current.focusedEntity = this as UIComponent
+        UIEngine.current.focusedEntity = this as UIComponent
     }
 
     /**
      * Clear focus for this entity.
      */
     fun blur() {
-        if (ExtendedEngine.current.focusedEntity == this) {
-            ExtendedEngine.current.focusedEntity = null
+        if (UIEngine.current.focusedEntity == this) {
+            UIEngine.current.focusedEntity = null
         }
     }
 }

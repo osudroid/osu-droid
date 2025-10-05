@@ -244,13 +244,9 @@ object ModMenu : UIScene() {
                 padding = Vec4(60f, 12f)
 
                 onUpdateTick = {
-                    if (Multiplayer.isConnected) {
-                        val chat = Multiplayer.roomScene!!.chat
+                    val buttonHeight = Multiplayer.roomScene?.chat?.buttonHeight ?: 0f
 
-                        if (padding.bottom != chat.buttonHeight) {
-                            padding = Vec4(60f, 12f, 60f, chat.buttonHeight + 12f)
-                        }
-                    }
+                    paddingBottom = if (Multiplayer.isConnected) buttonHeight + 12f else 12f
                 }
 
                 +UILinearContainer().apply {

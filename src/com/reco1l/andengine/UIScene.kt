@@ -192,6 +192,6 @@ open class UIScene : Scene(), IShape {
     //endregion
 
     open fun show() {
-        ExtendedEngine.current.scene = this
+        UIEngine.current.scene = this
     }
 }
