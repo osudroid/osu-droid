@@ -12,10 +12,7 @@ import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-class UIDropdown(var trigger: UIComponent) : UIContainer() {
-
-    private val optionsContainer: UILinearContainer
-
+class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
     /**
      * Whether the dropdown menu is currently expanded or not.
@@ -23,10 +20,25 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
     val isExpanded: Boolean
         get() = wrapper.hasParent()
 
-    /**
-     * The menu that contains the options.
-     */
-    val menu = UIScrollableContainer().apply {
+
+    private val wrapper = object : UIContainer() {
+        init {
+            width = FillParent
+            height = FillParent
+        }
+
+        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+            if (!super.onAreaTouched(event, localX, localY) && !this@UIDropdown.contains(localX, localY)) {
+                hide()
+            }
+            return true
+        }
+    }
+
+    private val optionsContainer: UILinearContainer
+
+
+    init {
         width = MatchContent
         height = MatchContent
         scrollAxes = Axes.Y
@@ -44,29 +56,7 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
             spacing = 4f
             padding = Vec4(4f)
         }
-    }
 
-
-    private val wrapper = object : UIContainer() {
-        init {
-            width = FillParent
-            height = FillParent
-        }
-
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-            if (!super.onAreaTouched(event, localX, localY) && !menu.contains(localX, localY)) {
-                hide()
-            }
-            return true
-        }
-    }
-
-
-    init {
-        width = FillParent
-        height = FillParent
-
-        attachChild(menu)
         wrapper.attachChild(this)
     }
 
@@ -90,9 +80,9 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
         if (isExpanded) {
             val (sceneSpaceX, sceneSpaceY) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
 
-            menu.x = sceneSpaceX
-            menu.y = sceneSpaceY
-            menu.maxHeight = parent.getHeight() - sceneSpaceY
+            x = sceneSpaceX
+            y = sceneSpaceY
+            maxHeight = parent.getHeight() - sceneSpaceY
         }
 
         super.onManagedDraw(gl, camera)
@@ -146,9 +136,9 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
 
     fun show() {
         if (!isExpanded) {
-            menu.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
-            menu.fadeTo(1f, 0.2f)
-            menu.scaleTo(1f, 0.2f)
+            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            fadeTo(1f, 0.2f)
+            scaleTo(1f, 0.2f)
 
             wrapper.detachSelf()
 
@@ -163,9 +153,9 @@ class UIDropdown(var trigger: UIComponent) : UIContainer() {
 
     fun hide() {
         if (isExpanded) {
-            menu.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
-            menu.scaleTo(0.9f, 0.2f)
-            menu.fadeTo(0f, 0.2f).after {
+            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            scaleTo(0.9f, 0.2f)
+            fadeTo(0f, 0.2f).after {
                 updateThread {
                     wrapper.detachSelf()
                 }

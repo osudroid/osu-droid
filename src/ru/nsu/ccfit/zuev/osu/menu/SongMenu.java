@@ -13,6 +13,8 @@ import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.osudroid.ui.v1.BeatmapAttributeDisplay;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
+import com.reco1l.andengine.component.ComponentsKt;
+import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.framework.EasingKt;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.data.BeatmapInfo;
@@ -87,7 +89,7 @@ import ru.nsu.ccfit.zuev.skins.SkinLayout;
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
     public UIScene scene;
-    public Entity frontLayer = new Entity();
+    public UIContainer frontLayer = new UIContainer();
     SortOrder sortOrder = SortOrder.Title;
     private Engine engine;
     public GameScene game;
@@ -182,7 +184,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reload() {
-        frontLayer = new Entity();
+        frontLayer = new UIContainer();
         backLayer = new Entity();
         scene.unregisterUpdateHandler(this);
         scene.setTouchAreaBindingEnabled(false);
@@ -206,6 +208,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         scene.attachChild(backLayer);
         scene.attachChild(frontLayer);
+        scene.registerTouchArea(frontLayer);
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
         float height = tex.getHeight();
@@ -393,6 +396,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
                 }
 
+                setScaleCenter(0f, 1f); // Bottom left corner
                 setSize(getWidth(), getHeight());
             }
 
@@ -669,6 +673,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
+        float paddingBottom = 0f;
+        if (Multiplayer.isConnected()) {
+            paddingBottom = Multiplayer.roomScene.getChat().getButtonHeight();
+        }
+
         if (modSelection != null)
             modSelection.setScale(1.5f);
 
@@ -680,14 +689,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (isNewLayout && layoutBackButton != null) {
             layoutBackButton.apply(backButton);
         } else {
-            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
+            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled() - paddingBottom);
         }
 
         if (modSelection != null) {
             if (isNewLayout && layoutMods != null) {
                 layoutMods.apply(modSelection, backButton);
             } else {
-                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled() - paddingBottom);
             }
         }
 
@@ -695,13 +704,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
         } else {
             var prevButton = modSelection != null ? modSelection : backButton;
-            optionSelection.setPosition(prevButton.getX() + prevButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+            optionSelection.setPosition(prevButton.getX() + prevButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled() - paddingBottom);
         }
 
         if (isNewLayout && layoutRandom != null) {
             layoutRandom.apply(randomMap, optionSelection);
         } else {
-            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
+            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled() - paddingBottom);
         }
 
         frontLayer.attachChild(backButton);
@@ -720,7 +729,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
-            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110);
+            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110 - paddingBottom);
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 

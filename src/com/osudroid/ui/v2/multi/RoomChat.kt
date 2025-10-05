@@ -45,9 +45,10 @@ class RoomChat : UILinearContainer() {
     private val button = ChatButton()
     private val body = UILinearContainer()
 
-    private val timestampSharedBuffer = UITextCompoundBuffer(8).asSharedDynamically()
-    private val playerNameSharedBuffer = UITextCompoundBuffer(32).asSharedDynamically()
-    private val messageSharedBuffer = UITextCompoundBuffer(128).asSharedDynamically()
+    private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
+    private val messagePlayerTagBuffer = UITextCompoundBuffer(32).asSharedDynamically()
+    private val messageTextBuffer = UITextCompoundBuffer(128).asSharedDynamically()
+    private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
 
     private lateinit var input: UITextInput
     private lateinit var messageContainer: UILinearContainer
@@ -89,7 +90,6 @@ class RoomChat : UILinearContainer() {
 
                 messageContainer = linearContainer {
                     width = FillParent
-                    padding = Vec4(80f, 0f)
                     orientation = Orientation.Vertical
 
                     repeat(max_messages) {
@@ -176,7 +176,7 @@ class RoomChat : UILinearContainer() {
             isExpanded = true
             body.apply {
                 clearModifiers(ModifierType.SizeY)
-                sizeToY(body_height, 0.2f).eased(Easing.OutSine)
+                sizeToY(body_height, 0.4f).eased(Easing.OutExpo)
             }
         }
     }
@@ -186,7 +186,7 @@ class RoomChat : UILinearContainer() {
             isExpanded = false
             body.apply {
                 clearModifiers(ModifierType.SizeY)
-                sizeToY(0f, 0.2f).eased(Easing.OutSine)
+                sizeToY(0f, 0.4f).eased(Easing.OutExpo)
             }
         }
     }
@@ -262,7 +262,7 @@ class RoomChat : UILinearContainer() {
             background = UIBox().apply {
                 applyTheme = {
                     color = it.accentColor * 0.15f
-                    alpha = 0.9f
+                    alpha = 0.5f
                 }
             }
 
@@ -296,7 +296,7 @@ class RoomChat : UILinearContainer() {
 
 
         fun updateState() {
-            val lastMessage = messages.peekFirst()
+            val lastMessage = messages.peekLast()
 
             if (isExpanded || lastMessage == null) {
                 tagText.apply {
@@ -344,8 +344,16 @@ class RoomChat : UILinearContainer() {
 
         init {
             width = FillParent
+            padding = Vec4(80f, 0f)
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
+            background = UIBox().apply {
+                buffer = messageBackgroundBuffer
+                applyTheme = {
+                    color = it.accentColor * 0.09f
+                    alpha = 0f
+                }
+            }
         }
 
 
@@ -357,10 +365,13 @@ class RoomChat : UILinearContainer() {
                 detachChildren()
 
                 val message = message ?: return
+                val messageIndex = messages.indexOf(message)
+
+                background!!.alpha = if (messageIndex % 2 == 0) 0.9f else 0f
 
                 if (message is SystemMessage) {
                     text {
-                        buffer = messageSharedBuffer
+                        buffer = messageTextBuffer
                         width = FillParent
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
@@ -371,6 +382,10 @@ class RoomChat : UILinearContainer() {
                     }
                 } else if (message is PlayerMessage) {
 
+                    val showSender = messageIndex == 0
+                        || messages[messageIndex - 1] !is PlayerMessage
+                        || (messages[messageIndex - 1] as PlayerMessage).player.id != message.player.id
+
                     flexContainer {
                         relativeSizeAxes = Axes.X
                         width = 0.2f
@@ -380,25 +395,28 @@ class RoomChat : UILinearContainer() {
                         justifyContent = JustifyContent.SpaceBetween
 
                         text {
-                            buffer = timestampSharedBuffer
+                            buffer = messageTimestampBuffer
                             applyTheme = { color = it.accentColor * 0.5f }
                             text = timestampFormat.format(message.time)
                         }
 
-                        text {
-                            buffer = playerNameSharedBuffer
-                            color = getPlayerTagColor(message.player)
-                            text = "${message.player.name}: "
+                        if (showSender) {
+                            text {
+                                buffer = messagePlayerTagBuffer
+                                color = getPlayerTagColor(message.player)
+                                text = "${message.player.name}: "
+                            }
                         }
                     }
 
                     text {
-                        buffer = messageSharedBuffer
+                        buffer = messageTextBuffer
                         width = FillParent
                         applyTheme = { color = it.accentColor }
                         text = message.content
                     }
                 } else {
+                    // Technically should never happen.
                     isVisible = false
                 }
             }
@@ -411,7 +429,7 @@ class RoomChat : UILinearContainer() {
 
     companion object {
         private const val max_messages = 50
-        private const val body_height = 500f
+        private const val body_height = 420f
     }
 }
 

@@ -615,6 +615,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         runSafe { RoomAPI.disconnect() }
 
         Multiplayer.room = null
+        Multiplayer.roomScene = null
         player = null
         chat.hide()
 

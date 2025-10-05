@@ -1,5 +1,8 @@
 package com.osudroid.ui.v2.multi
 
+import com.edlplan.ui.fragment.WebViewFragment
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
@@ -51,10 +54,66 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
         }
 
         onActionLongPress = {
-            UIDropdown(this@RoomPlayerButton).apply {
+            UIDropdown(this@RoomPlayerButton).apply dropdown@{
+                maxWidth = 260f
+
                 addButton {
                     text = "View profile"
+                    onActionUp = {
+                        WebViewFragment()
+                            .setURL(WebViewFragment.PROFILE_URL + player.id)
+                            .show()
+                        this@dropdown.hide()
+                    }
                 }
+
+                if (player.id != Multiplayer.player!!.id) {
+                    addButton {
+                        text = if (player.isMuted) "Unmute" else "Mute"
+                        onActionUp = {
+                            player.isMuted = !player.isMuted
+                            this@dropdown.hide()
+                        }
+                    }
+
+                    if (Multiplayer.isRoomHost) {
+                        addButton {
+                            text = "Transfer host"
+                            onActionUp = {
+                                UIConfirmDialog().apply {
+                                    title = "Transfer room host to ${player.name}"
+                                    text = "Are you sure?"
+                                    onConfirm = {
+                                        if (Multiplayer.isConnected) {
+                                            RoomAPI.setRoomHost(player.id)
+                                        }
+                                    }
+                                }.show()
+                                this@dropdown.hide()
+                            }
+                        }
+
+                        addButton {
+                            text = "Kick player"
+                            applyTheme = {
+                                color = Color4("#FFBFBF")
+                            }
+                            onActionUp = {
+                                UIConfirmDialog().apply {
+                                    title = "Kick ${player.name}"
+                                    text = "Are you sure?"
+                                    onConfirm = {
+                                        if (Multiplayer.isConnected) {
+                                            RoomAPI.kickPlayer(player.id)
+                                        }
+                                    }
+                                }.show()
+                                this@dropdown.hide()
+                            }
+                        }
+                    }
+                }
+
             }.show()
         }
     }
