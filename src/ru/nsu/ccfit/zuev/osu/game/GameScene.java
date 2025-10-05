@@ -1032,15 +1032,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
-        skipBtn = null;
-        if (skipTime > 1) {
-            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
-            skipBtn.setOrigin(Anchor.BottomRight);
-            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-            skipBtn.setAlpha(0.7f);
-            fgScene.attachChild(skipBtn);
-        }
-
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             comboBurst.attachAll(bgScene);
@@ -1140,6 +1131,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         hud.setEditMode(isHUDEditorMode);
         hud.setSkinData(OsuSkin.get().getHUDSkinData());
+
+        skipBtn = null;
+        if (skipTime > 1) {
+            float paddingBottom = Multiplayer.isConnected() ? Multiplayer.roomScene.getChat().getButtonHeight() : 0f;
+
+            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
+            skipBtn.setOrigin(Anchor.BottomRight);
+            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT() - paddingBottom);
+            skipBtn.setAlpha(0.7f);
+            hud.attachChild(skipBtn);
+        }
 
         String playname = Config.getOnlineUsername();
 
