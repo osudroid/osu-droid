@@ -7,7 +7,6 @@ import com.osudroid.utils.async
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.beatmaplisting.BeatmapDownloader
 import com.osudroid.beatmaplisting.BeatmapListing
-import com.osudroid.multiplayer.RoomScene
 import com.reco1l.andengine.component.*
 import com.reco1l.framework.*
 import org.anddev.andengine.entity.sprite.Sprite

@@ -13,7 +13,6 @@ import com.osudroid.multiplayer.api.RoomAPI.setPlayerMods
 import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.utils.updateThread

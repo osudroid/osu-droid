@@ -7,7 +7,6 @@ import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IFileRequestObserver
 import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.v1.DownloadFragment
 import com.reco1l.toolkt.kotlin.async
 import net.lingala.zip4j.ZipFile

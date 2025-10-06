@@ -13,7 +13,6 @@ import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.osudroid.ui.v1.BeatmapAttributeDisplay;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
-import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.framework.EasingKt;
 import com.osudroid.multiplayer.api.RoomAPI;
@@ -23,7 +22,6 @@ import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;

@@ -14,6 +14,7 @@ import com.osudroid.multiplayer.api.data.parseBeatmap
 import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
+import com.osudroid.ui.v2.multi.RoomScene
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
