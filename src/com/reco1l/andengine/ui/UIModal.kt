@@ -228,6 +228,10 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
     }
 
 
+    fun addButton(block: UITextButton.() -> Unit) {
+        addButton(UITextButton().apply(block))
+    }
+
     fun addButton(button: UIButton) {
         buttonLayout.apply {
             attachChild(button.apply {

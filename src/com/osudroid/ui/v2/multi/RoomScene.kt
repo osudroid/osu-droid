@@ -49,6 +49,7 @@ import com.reco1l.andengine.textButton
 import com.reco1l.andengine.ui.SizeVariant
 import com.reco1l.andengine.ui.UIBadge
 import com.reco1l.andengine.ui.UILabeledBadge
+import com.reco1l.andengine.ui.UIMessageDialog
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
@@ -230,12 +231,12 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
                     textButton {
                         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("settings-icon"))
-                        text = "Settings"
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         onActionUp = {
                             SettingsFragment().show()
                         }
+                        setText(R.string.multiplayer_room_settings)
                     }
                 }
 
@@ -429,12 +430,12 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
                             PlayerStatus.NotReady -> {
                                 if (room.beatmap == null) {
-                                    ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
+                                    ToastLogger.showText(R.string.multiplayer_room_cannot_ready_changing_beatmap, true)
                                     isWaitingForStatusChange = false
                                 }
 
                                 if (room.teamMode == TeamMode.TeamVersus && Multiplayer.player!!.team == null) {
-                                    ToastLogger.showText("You must select a team first!", true)
+                                    ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
                                     isWaitingForStatusChange = false
                                 }
 
@@ -444,7 +445,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             PlayerStatus.Ready -> invalidateStatus()
 
                             PlayerStatus.MissingBeatmap -> {
-                                ToastLogger.showText("Beatmap is missing, cannot ready.", true)
+                                ToastLogger.showText(R.string.multiplayer_room_cannot_ready_missing_beatmap, true)
                                 isWaitingForStatusChange = false
                             }
 
@@ -602,7 +603,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                         try {
                             BeatmapDownloader.download(url, "${roomBeatmap.parentSetID} ${roomBeatmap.artist} - ${roomBeatmap.title}")
                         } catch (e: Exception) {
-                            ToastLogger.showText("Unable to download beatmap: ${e.message}", true)
+                            ToastLogger.showText(StringTable.format(R.string.multiplayer_room_unable_download, e.message), true)
                             e.printStackTrace()
                         }
                     }
@@ -713,7 +714,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     override fun onRoomConnect(newRoom: Room) {
 
         if (Multiplayer.room != newRoom) {
-            chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#459FFF")
+            chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
         }
 
         Multiplayer.room = newRoom
@@ -761,7 +762,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             isWaitingForStatusChange = true
             isWaitingForModsChange = true
 
-            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FFBFBF")
+            chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
             Multiplayer.onReconnect()
             return
         }
@@ -811,7 +812,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         // Notify to the host when other players can't download the beatmap.
         if (Multiplayer.isRoomHost && beatmap != null && beatmap.parentSetID == null) {
-            ToastLogger.showText("This beatmap isn't available in the download mirror servers.", false)
+            ToastLogger.showText(R.string.multiplayer_room_beatmap_unavailable, false)
         }
 
         invalidateStatus()
@@ -834,7 +835,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.host = uid
 
-        chat.onSystemChatMessage("Player ${room.playersMap[uid]?.name} is now the room host.", "#459FFF")
+        chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_new_host, room.playersMap[uid]?.name.toString()), "#459FFF")
 
         updateThread {
             ModMenu.back(false)
@@ -994,7 +995,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         // We send the message if the player wasn't in the room, sometimes this event can be called by a reconnection.
         if (room.addPlayer(player)) {
-            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#459FFF")
+            chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_joined, player.name, player.id), "#459FFF")
         }
 
         updateInformation()
@@ -1006,7 +1007,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         val player = room.removePlayer(uid)
 
         if (player != null) {
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#459FFF")
+            chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_left, player.name, player.id), "#459FFF")
         }
 
         updateInformation()
@@ -1020,28 +1021,28 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             Multiplayer.log("Kicked from room.")
 
             if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
-                ToastLogger.showText("You were kicked by the room host, but you can continue playing.", true)
+                ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true)
                 return
             }
 
             back()
 
-            mainThread {
-                MessageDialog().apply {
+            UIMessageDialog().apply dialog@{
+                title = StringTable.get(R.string.multiplayer_room_kicked_title)
+                text = StringTable.get(R.string.multiplayer_room_kicked_message)
 
-                    setTitle("Message")
-                    setMessage("You've been kicked by room host.")
-                    addButton("Close") { it.dismiss() }
-
-                }.show()
-            }
+                addButton {
+                    setText(R.string.multiplayer_room_kicked_close)
+                    onActionUp = { this@dialog.hide() }
+                }
+            }.show()
             return
         }
 
         val player = room.removePlayer(uid)
 
         if (player != null) {
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FFBFBF")
+            chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_kicked, player.name, player.id), "#FFBFBF")
         }
 
         updateInformation()

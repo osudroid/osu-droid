@@ -13,6 +13,8 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
@@ -75,7 +77,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
                 maxWidth = 260f
 
                 addButton {
-                    text = "View profile"
+                    setText(R.string.multiplayer_room_player_menu_view_profile)
                     onActionUp = {
                         WebViewFragment()
                             .setURL(WebViewFragment.PROFILE_URL + player.id)
@@ -86,7 +88,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
                 if (player.id != Multiplayer.player!!.id) {
                     addButton {
-                        text = if (player.isMuted) "Unmute" else "Mute"
+                        setText(if (player.isMuted) R.string.multiplayer_room_player_menu_unmute else R.string.multiplayer_room_player_menu_mute)
                         onActionUp = {
                             player.isMuted = !player.isMuted
                             this@dropdown.hide()
@@ -95,11 +97,11 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
                     if (Multiplayer.isRoomHost) {
                         addButton {
-                            text = "Transfer host"
+                            setText(R.string.multiplayer_room_player_menu_transfer_host)
                             onActionUp = {
                                 UIConfirmDialog().apply {
-                                    title = "Transfer room host to ${player.name}"
-                                    text = "Are you sure?"
+                                    title = StringTable.get(R.string.multiplayer_room_player_transfer_dialog_title)
+                                    text = StringTable.format(R.string.multiplayer_room_player_transfer_dialog_message, player.name)
                                     onConfirm = {
                                         if (Multiplayer.isConnected) {
                                             RoomAPI.setRoomHost(player.id)
@@ -111,14 +113,14 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
                         }
 
                         addButton {
-                            text = "Kick player"
+                            setText(R.string.multiplayer_room_player_menu_kick)
                             applyTheme = {
                                 color = Color4("#FFBFBF")
                             }
                             onActionUp = {
                                 UIConfirmDialog().apply {
-                                    title = "Kick ${player.name}"
-                                    text = "Are you sure?"
+                                    title = StringTable.format(R.string.multiplayer_room_player_kick_dialog_title, player.name)
+                                    text = StringTable.get(R.string.multiplayer_room_player_kick_dialog_message)
                                     onConfirm = {
                                         if (Multiplayer.isConnected) {
                                             RoomAPI.kickPlayer(player.id)
