@@ -21,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.*
 import java.text.*
 import java.util.*
+import kotlin.math.roundToInt
 
 class BeatmapInfoLayout : UILinearContainer() {
 
@@ -217,16 +218,16 @@ class BeatmapInfoLayout : UILinearContainer() {
         difficulty.od = GameHelper.Round(difficulty.od.toDouble(), 2)
         difficulty.hp = GameHelper.Round(difficulty.hp.toDouble(), 2)
 
-        val minBpm = Math.round(beatmapInfo.bpmMin * totalSpeedMultiplier)
-        val maxBpm = Math.round(beatmapInfo.bpmMax * totalSpeedMultiplier)
-        val commonBpm = Math.round(beatmapInfo.mostCommonBPM * totalSpeedMultiplier)
+        val minBpm = (beatmapInfo.bpmMin * totalSpeedMultiplier).roundToInt()
+        val maxBpm = (beatmapInfo.bpmMax * totalSpeedMultiplier).roundToInt()
+        val commonBpm = (beatmapInfo.mostCommonBPM * totalSpeedMultiplier).roundToInt()
         val length = (beatmapInfo.length / totalSpeedMultiplier).toLong()
 
         val sdf = SimpleDateFormat(if (length > 3600 * 1000) "HH:mm:ss" else "mm:ss")
         sdf.timeZone = TimeZone.getTimeZone("GMT+0")
         lengthText.text = sdf.format(length)
 
-        bpmText.text = (if (minBpm == maxBpm) commonBpm.toString() else "$minBpm-$maxBpm ($commonBpm)")
+        bpmText.text = if (minBpm == maxBpm) commonBpm.toString() else "$minBpm-$maxBpm ($commonBpm)"
 
         arText.value = difficulty.ar.toString()
         odText.value = difficulty.od.toString()
