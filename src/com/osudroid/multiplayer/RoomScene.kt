@@ -75,11 +75,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     val chat: RoomChat
 
     /**
-     * The chat preview text that shows the last message sent in the chat.
-     */
-    val chatPreviewText = ComposedText(0f, 0f, ResourceManager.getInstance().getFont("smallFont"), 100)
-
-    /**
      * The leave dialog that will be shown when the player tries to leave the room.
      */
     val leaveDialog = MessageDialog().apply {

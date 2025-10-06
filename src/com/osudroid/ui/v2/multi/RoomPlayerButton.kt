@@ -36,6 +36,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
                     RoomTeam.Red -> Color4("#FFA0A0")
                     null -> Theme.current.accentColor
                 } * 0.1f
+
                 else -> Theme.current.accentColor
             } * 0.1f
             alpha = 0.5f
@@ -44,7 +45,7 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
         foreground = UIBox().apply {
             cornerRadius = 12f
             paintStyle = PaintStyle.Outline
-            color =  when (player.status) {
+            color = when (player.status) {
                 Playing -> Theme.current.accentColor
                 Ready -> Color4("#A0FFA0")
                 NotReady, MissingBeatmap -> Color4("#FFA0A0")
