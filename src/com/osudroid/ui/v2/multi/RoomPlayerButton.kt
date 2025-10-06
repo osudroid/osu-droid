@@ -5,11 +5,15 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.multiplayer.api.data.PlayerStatus.*
+import com.osudroid.multiplayer.api.data.RoomTeam.Blue
+import com.osudroid.multiplayer.api.data.RoomTeam.Red
 import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.text.UIText
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -17,7 +21,12 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 
-class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
+class RoomPlayerButton() : UIButton() {
+
+    private lateinit var nameText: UIText
+    private lateinit var modsIndicator: ModsIndicator
+    private lateinit var missingIndicator: UISprite
+
 
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         color = theme.accentColor
@@ -33,26 +42,11 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
 
         background = UIBox().apply {
             cornerRadius = 12f
-            color = when {
-                room.isTeamVersus -> when (player.team) {
-                    RoomTeam.Blue -> Color4("#A0C0FF")
-                    RoomTeam.Red -> Color4("#FFA0A0")
-                    null -> Theme.current.accentColor
-                } * 0.1f
-
-                else -> Theme.current.accentColor
-            } * 0.1f
-            alpha = 0.5f
         }
 
         foreground = UIBox().apply {
             cornerRadius = 12f
             paintStyle = PaintStyle.Outline
-            color = when (player.status) {
-                Playing -> Theme.current.accentColor
-                Ready -> Color4("#A0FFA0")
-                NotReady, MissingBeatmap -> Color4("#FFA0A0")
-            }
         }
 
         linearContainer {
@@ -63,29 +57,52 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
                 orientation = Orientation.Horizontal
                 spacing = 4f
 
-                text {
-                    text = player.name
+                nameText = text {
                     applyTheme = { color = it.accentColor }
                 }
 
-                if (player.status == MissingBeatmap) {
-                    sprite {
-                        textureRegion = ResourceManager.getInstance().getTexture("missing")
-                        anchor = Anchor.CenterLeft
-                        origin = Anchor.CenterLeft
-                        size = Vec2(18f)
-                    }
+                missingIndicator = sprite {
+                    textureRegion = ResourceManager.getInstance().getTexture("missing")
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    size = Vec2(18f)
                 }
             }
 
-            if (room.gameplaySettings.isFreeMod) {
-                +ModsIndicator().apply {
-                    minHeight = 24f // Force to take space even if no mods are enabled
-                    iconSize = 18f
-                    mods = player.mods.json
-                }
+            +ModsIndicator().apply {
+                minHeight = 18f // Force to take space even if no mods are enabled
+                iconSize = 18f
+                modsIndicator = this
             }
         }
+
+    }
+
+
+    fun updateState(room: Room, player: RoomPlayer) {
+
+        background!!.apply {
+            color = when {
+                room.isTeamVersus -> when (player.team) {
+                    Blue -> Color4("#A0C0FF") * 0.1f
+                    Red -> Color4("#FFA0A0") * 0.1f
+                    null -> Theme.current.accentColor * 0.1f
+                }
+
+                else -> Theme.current.accentColor * 0.1f
+            }
+            alpha = 0.5f
+        }
+
+        foreground!!.color = when (player.status) {
+            Playing -> Theme.current.accentColor
+            Ready -> Color4("#A0FFA0")
+            NotReady, MissingBeatmap -> Color4("#FFA0A0")
+        }
+
+        nameText.text = player.name
+        missingIndicator.isVisible = player.status == MissingBeatmap
+        modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.json else null
 
         onActionLongPress = {
             UIDropdown(this@RoomPlayerButton).apply dropdown@{
@@ -151,4 +168,5 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
             }.show()
         }
     }
+
 }

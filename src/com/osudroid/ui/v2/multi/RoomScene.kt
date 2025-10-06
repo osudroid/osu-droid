@@ -31,6 +31,7 @@ import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.badge
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
+import com.reco1l.andengine.component.forEach
 import com.reco1l.andengine.component.setText
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.JustifyContent
@@ -64,7 +65,6 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
@@ -130,6 +130,9 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     private lateinit var playersContainer: UILinearContainer
     private lateinit var changeBeatmapButton: UITextButton
     private lateinit var downloadBeatmapButton: UITextButton
+
+
+    private var currentPlayers = LongArray(0)
 
 
     init {
@@ -504,12 +507,27 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     }
 
     private fun updatePlayerList() {
+
+        val shouldReload = currentPlayers.size != room.playersMap.size
+            || !currentPlayers.all { room.playersMap.containsKey(it) }
+
         updateThread {
             playersContainer.apply {
-                detachChildren()
 
-                room.activePlayers.forEach {
-                    +RoomPlayerButton(room, it)
+                if (shouldReload) {
+                    detachChildren()
+
+                    room.activePlayers.forEach {
+                        +RoomPlayerButton().apply {
+                            updateState(room, it)
+                        }
+                    }
+                    currentPlayers = room.playersMap.keys.toLongArray()
+                } else {
+                    room.activePlayers.forEachIndexed { index, player ->
+                        val button = getChild(index) as RoomPlayerButton
+                        button.updateState(room, player)
+                    }
                 }
             }
         }
@@ -718,11 +736,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         if (Multiplayer.room != newRoom) {
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
         }
-
-        Multiplayer.room = newRoom
-        Multiplayer.player = newRoom.playersMap[OnlineManager.getInstance().userId]!!
-
-        clearChildScene()
 
         ModMenu.clear()
         ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)

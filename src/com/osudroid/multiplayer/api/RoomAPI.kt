@@ -21,6 +21,7 @@ import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 object RoomAPI {
 
@@ -209,7 +210,14 @@ object RoomAPI {
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
         }
 
-        RoomScene(room).onRoomConnect(room)
+        val scene = RoomScene(room)
+
+        Multiplayer.room = room
+        Multiplayer.player = room.playersMap[OnlineManager.getInstance().userId]!!
+        Multiplayer.roomScene = scene
+        
+
+        scene.onRoomConnect(room)
     }
 
     private val playerJoined = Listener {
