@@ -13,6 +13,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 
@@ -58,9 +59,23 @@ class RoomPlayerButton(room: Room, player: RoomPlayer) : UIButton() {
             orientation = Orientation.Vertical
             inheritAncestorsColor = false
 
-            text {
-                text = player.name
-                applyTheme = { color = it.accentColor }
+            linearContainer {
+                orientation = Orientation.Horizontal
+                spacing = 4f
+
+                text {
+                    text = player.name
+                    applyTheme = { color = it.accentColor }
+                }
+
+                if (player.status == MissingBeatmap) {
+                    sprite {
+                        textureRegion = ResourceManager.getInstance().getTexture("missing")
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        size = Vec2(18f)
+                    }
+                }
             }
 
             if (room.gameplaySettings.isFreeMod) {

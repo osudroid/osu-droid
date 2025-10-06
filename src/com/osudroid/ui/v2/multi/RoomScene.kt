@@ -143,6 +143,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         ResourceManager.getInstance().loadHighQualityAsset("download", "download.png")
         ResourceManager.getInstance().loadHighQualityAsset("send", "send.png")
         ResourceManager.getInstance().loadHighQualityAsset("settings-icon", "settings-icon.png")
+        ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png")
 
         RoomAPI.playerEventListener = this
         RoomAPI.roomEventListener = this
