@@ -47,6 +47,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.input.touch.TouchEvent;
+import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
@@ -319,58 +320,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
         frontLayer.attachChild(beatmapCreatorText);
 
-        beatmapLengthText = new ChangeableText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
+        beatmapLengthText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
         frontLayer.attachChild(beatmapLengthText);
 
-        beatmapHitObjectsText = new ChangeableText(Utils.toRes(4), beatmapLengthText.getY() + beatmapLengthText.getHeight() + Utils.toRes(2),
+        beatmapHitObjectsText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapLengthText.getY() + beatmapLengthText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
         frontLayer.attachChild(beatmapHitObjectsText);
 
-        beatmapDifficultyText = new ChangeableText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024) {
-            private boolean moved = false;
-            private float dx = 0, dy = 0;
-
-            @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    if (currentPressedButton == null) {
-                        currentPressedButton = this;
-                        moved = false;
-                        dx = pTouchAreaLocalX;
-                        dy = pTouchAreaLocalY;
-                    }
-                    return true;
-                }
-
-                if (pSceneTouchEvent.isActionUp()) {
-                    if (currentPressedButton == this) {
-                        currentPressedButton = null;
-                        var selectedBeatmap = SongMenu.this.selectedBeatmap;
-
-                        if (selectedBeatmap != null && !moved) {
-                            var mods = ModMenu.INSTANCE.getEnabledMods();
-                            new BeatmapAttributeDisplay(selectedBeatmap.getBeatmapDifficulty(), mods.values()).show();
-                        }
-                    }
-                    return true;
-                }
-
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50) && currentPressedButton == this) {
-                    currentPressedButton = null;
-                    moved = true;
-                }
-
-                return false;
-            }
-        };
-
+        beatmapDifficultyText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(beatmapDifficultyText);
-        scene.registerTouchArea(beatmapDifficultyText);
 
         var clickShortSound = ResourceManager.getInstance().getSound("click-short");
         var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
@@ -1763,5 +1723,56 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public enum GroupType {
         MapSet, SingleDiff
+    }
+
+    private class BeatmapStatisticToggleText extends ChangeableText {
+        public BeatmapStatisticToggleText(float pX, float pY, Font pFont, String pText, int pCharactersMaximum) {
+            super(pX, pY, pFont, pText, pCharactersMaximum);
+        }
+
+        private boolean moved = false;
+        private float dx = 0, dy = 0;
+
+        @Override
+        public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+            if (pSceneTouchEvent.isActionDown()) {
+                if (currentPressedButton == null) {
+                    currentPressedButton = this;
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
+                }
+                return true;
+            }
+
+            if (pSceneTouchEvent.isActionUp()) {
+                if (currentPressedButton == this) {
+                    currentPressedButton = null;
+                    var selectedBeatmap = SongMenu.this.selectedBeatmap;
+
+                    if (selectedBeatmap != null && !moved) {
+                        var mods = ModMenu.INSTANCE.getEnabledMods();
+                        new BeatmapAttributeDisplay(selectedBeatmap.getBeatmapDifficulty(), mods.values()).show();
+                    }
+                }
+                return true;
+            }
+
+            if (pSceneTouchEvent.isActionOutside()
+                    || pSceneTouchEvent.isActionMove()
+                    && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                    pTouchAreaLocalY) > 50) && currentPressedButton == this) {
+                currentPressedButton = null;
+                moved = true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onAttached() {
+            scene.registerTouchArea(this);
+            super.onAttached();
+        }
     }
 }

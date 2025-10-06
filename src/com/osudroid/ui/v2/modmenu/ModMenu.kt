@@ -227,6 +227,10 @@ object ModMenu : UIScene() {
                         val sectionName = StringTable.get(type.stringId)
                         val sectionToggles = mods.filter { it !is IMigratableMod && it.isUserPlayable && it.type == type }.map { ModMenuToggle(it) }
 
+                        if (sectionToggles.isEmpty()) {
+                            return@forEach
+                        }
+
                         modToggles.addAll(sectionToggles)
 
                         val section = ModMenuSection(sectionName, sectionToggles)
