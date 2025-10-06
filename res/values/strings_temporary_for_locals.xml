@@ -56,6 +56,10 @@
     <string name="multiplayer_room_player_kick_dialog_message">Are you sure?</string>
     <string name="multiplayer_room_player_transfer_dialog_title">Transfer host to %s</string>
     <string name="multiplayer_room_player_transfer_dialog_message">Are you sure?</string>
+    <string name="multiplayer_room_chat">Chat</string>
+    <string name="multiplayer_room_chat_system">System</string>
+    <string name="multiplayer_room_chat_send">Send</string>
+    <string name="multiplayer_room_chat_error">Error to send message: %s</string>
 
     <string name="opt_category_localization">Localization</string>
 

@@ -12,12 +12,15 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.LinkedList
 
 /**
@@ -45,10 +48,12 @@ class RoomChat : UILinearContainer() {
     private val button = ChatButton()
     private val body = UILinearContainer()
 
+    //region Buffers
     private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
     private val messagePlayerTagBuffer = UITextCompoundBuffer(32).asSharedDynamically()
     private val messageTextBuffer = UITextCompoundBuffer(128).asSharedDynamically()
     private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
+    //endregion
 
     private lateinit var input: UITextInput
     private lateinit var messageContainer: UILinearContainer
@@ -114,9 +119,10 @@ class RoomChat : UILinearContainer() {
                     input = this
                 }
 
-                iconButton {
-                    icon = ResourceManager.getInstance().getTexture("send")
+                textButton {
+                    trailingIcon = UISprite(ResourceManager.getInstance().getTexture("send"))
                     isSelected = true
+                    setText(R.string.multiplayer_room_chat_send)
                     onActionUp = { sendMessage() }
                 }
             }
@@ -139,7 +145,7 @@ class RoomChat : UILinearContainer() {
             try {
                 RoomAPI.sendMessage(text)
             } catch (e: Exception) {
-                onSystemChatMessage("Error to send message: ${e.message}", "#FFBFBF")
+                onSystemChatMessage(StringTable.format(R.string.multiplayer_room_chat_error, e.message), "#FFBFBF")
                 e.printStackTrace()
             }
         }
@@ -279,7 +285,7 @@ class RoomChat : UILinearContainer() {
                 orientation = Orientation.Horizontal
 
                 tagText = text {
-                    text = "Chat"
+                    text = StringTable.get(R.string.multiplayer_room_chat)
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     color = Theme.current.accentColor
@@ -300,13 +306,13 @@ class RoomChat : UILinearContainer() {
 
             if (isExpanded || lastMessage == null) {
                 tagText.apply {
-                    text = "Chat"
+                    text = StringTable.get(R.string.multiplayer_room_chat)
                     color = Theme.current.accentColor
                 }
                 messageText.text = ""
             } else {
                 tagText.apply {
-                    text = "${if (lastMessage is PlayerMessage) lastMessage.player.name else "System"}: "
+                    text = "${if (lastMessage is PlayerMessage) lastMessage.player.name else StringTable.get(R.string.multiplayer_room_chat_system)}: "
                     color = if (lastMessage is PlayerMessage) getPlayerTagColor(lastMessage.player) else Theme.current.accentColor
                 }
                 messageText.text = lastMessage.content
@@ -345,6 +351,7 @@ class RoomChat : UILinearContainer() {
         init {
             width = FillParent
             padding = Vec4(80f, 0f)
+            spacing = 12f
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
             background = UIBox().apply {
@@ -367,7 +374,7 @@ class RoomChat : UILinearContainer() {
                 val message = message ?: return
                 val messageIndex = messages.indexOf(message)
 
-                background!!.alpha = if (messageIndex % 2 == 0) 0.9f else 0f
+                background!!.alpha = if (messageIndex % 2 == 0) 0.5f else 0f
 
                 if (message is SystemMessage) {
                     text {
@@ -388,7 +395,7 @@ class RoomChat : UILinearContainer() {
 
                     flexContainer {
                         relativeSizeAxes = Axes.X
-                        width = 0.2f
+                        width = 0.25f
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         direction = FlexDirection.Row
@@ -404,7 +411,7 @@ class RoomChat : UILinearContainer() {
                             text {
                                 buffer = messagePlayerTagBuffer
                                 color = getPlayerTagColor(message.player)
-                                text = "${message.player.name}: "
+                                text = message.player.name
                             }
                         }
                     }
