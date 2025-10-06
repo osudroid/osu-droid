@@ -22,6 +22,7 @@ import com.osudroid.multiplayer.api.data.WinCondition.*
 import com.osudroid.multiplayer.Multiplayer.isConnected
 import com.osudroid.multiplayer.Multiplayer.isRoomHost
 import com.osudroid.multiplayer.Multiplayer.player
+import com.osudroid.ui.v1.SettingsFragment
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v2.*
@@ -121,6 +122,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png")
         ResourceManager.getInstance().loadHighQualityAsset("download", "download.png")
         ResourceManager.getInstance().loadHighQualityAsset("send", "send.png")
+        ResourceManager.getInstance().loadHighQualityAsset("settings-icon", "settings-icon.png")
 
         RoomAPI.playerEventListener = this
         RoomAPI.roomEventListener = this
@@ -159,46 +161,62 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 width = FillParent
                 height = FillParent
 
-                linearContainer {
-                    orientation = Orientation.Vertical
-                    spacing = 8f
-                    padding = Vec4(0f, 18f)
-
-                    nameText = text {
-                        text = room.name
-                        applyTheme = { color = it.accentColor }
-                    }
+                flexContainer {
+                    width = FillParent
+                    justifyContent = JustifyContent.SpaceBetween
 
                     linearContainer {
+                        orientation = Orientation.Vertical
                         spacing = 8f
+                        padding = Vec4(0f, 18f)
 
-                        teamModeBadge = badge {
-                            sizeVariant = SizeVariant.Small
+                        nameText = text {
+                            text = room.name
+                            font = ResourceManager.getInstance().getFont("font")
+                            applyTheme = { color = it.accentColor }
                         }
 
-                        winConditionBadge = badge {
-                            sizeVariant = SizeVariant.Small
-                        }
+                        linearContainer {
+                            spacing = 8f
 
-                        playersBadge = labeledBadge {
-                            sizeVariant = SizeVariant.Small
-                            label = StringTable.get(R.string.multiplayer_room_players)
-                            value = "0/${room.maxPlayers}"
-                        }
-
-                        freeModsBadge = badge {
-                            sizeVariant = SizeVariant.Small
-                            applyTheme = {
-                                color = it.accentColor * 0.1f
-                                background?.color = it.accentColor
+                            teamModeBadge = badge {
+                                sizeVariant = SizeVariant.Small
                             }
-                            setText(R.string.multiplayer_room_free_mods)
-                            isVisible = false
-                        }
 
-                        +ModsIndicator().apply {
-                            iconSize = 24f
-                            modsIndicator = this
+                            winConditionBadge = badge {
+                                sizeVariant = SizeVariant.Small
+                            }
+
+                            playersBadge = labeledBadge {
+                                sizeVariant = SizeVariant.Small
+                                label = StringTable.get(R.string.multiplayer_room_players)
+                                value = "0/${room.maxPlayers}"
+                            }
+
+                            freeModsBadge = badge {
+                                sizeVariant = SizeVariant.Small
+                                applyTheme = {
+                                    color = it.accentColor * 0.1f
+                                    background?.color = it.accentColor
+                                }
+                                setText(R.string.multiplayer_room_free_mods)
+                                isVisible = false
+                            }
+
+                            +ModsIndicator().apply {
+                                iconSize = 24f
+                                modsIndicator = this
+                            }
+                        }
+                    }
+
+                    textButton {
+                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("settings-icon"))
+                        text = "Settings"
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        onActionUp = {
+                            SettingsFragment().show()
                         }
                     }
                 }
@@ -442,17 +460,21 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         playersBadge.value = "${room.activePlayers.size}/${room.maxPlayers}"
 
-        winConditionBadge.setText(when (room.winCondition) {
-            ScoreV1 -> R.string.multiplayer_room_score_v1
-            ScoreV2 -> R.string.multiplayer_room_score_v2
-            HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
-            MaximumCombo -> R.string.multiplayer_room_maximum_combo
-        })
+        winConditionBadge.setText(
+            when (room.winCondition) {
+                ScoreV1 -> R.string.multiplayer_room_score_v1
+                ScoreV2 -> R.string.multiplayer_room_score_v2
+                HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
+                MaximumCombo -> R.string.multiplayer_room_maximum_combo
+            }
+        )
 
-        teamModeBadge.setText(when (room.teamMode) {
-            HeadToHead -> R.string.multiplayer_room_head_to_head
-            TeamVersus -> R.string.multiplayer_room_team_versus
-        })
+        teamModeBadge.setText(
+            when (room.teamMode) {
+                HeadToHead -> R.string.multiplayer_room_head_to_head
+                TeamVersus -> R.string.multiplayer_room_team_versus
+            }
+        )
 
         freeModsBadge.isVisible = room.gameplaySettings.isFreeMod
 
@@ -475,11 +497,13 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     private fun updateButtons() {
 
         statusButton.apply {
-            setText(when (player!!.status) {
-                NotReady -> R.string.multiplayer_room_ready
-                Ready -> R.string.multiplayer_room_not_ready
-                else -> R.string.multiplayer_room_unable_status
-            })
+            setText(
+                when (player!!.status) {
+                    NotReady -> R.string.multiplayer_room_ready
+                    Ready -> R.string.multiplayer_room_not_ready
+                    else -> R.string.multiplayer_room_unable_status
+                }
+            )
 
             isEnabled = when (player!!.status) {
                 Ready, NotReady -> true
