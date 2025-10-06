@@ -30,6 +30,7 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.badge
 import com.reco1l.andengine.component.UIComponent
+import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.component.setText
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.JustifyContent
@@ -148,8 +149,8 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         chat = RoomChat()
 
         container {
-            width = UIComponent.Companion.FillParent
-            height = UIComponent.Companion.FillParent
+            width = FillParent
+            height = FillParent
             padding = Vec4(80f, 0f)
 
             onUpdateTick = {
@@ -177,11 +178,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
             linearContainer {
                 orientation = Orientation.Vertical
-                width = UIComponent.Companion.FillParent
-                height = UIComponent.Companion.FillParent
+                width = FillParent
+                height = FillParent
 
                 flexContainer {
-                    width = UIComponent.Companion.FillParent
+                    width = FillParent
                     justifyContent = JustifyContent.SpaceBetween
 
                     linearContainer {
@@ -241,15 +242,15 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 }
 
                 flexContainer {
-                    width = UIComponent.Companion.FillParent
-                    height = UIComponent.Companion.FillParent
+                    width = FillParent
+                    height = FillParent
                     gap = 24f
                     padding = Vec4(0f, 12f)
 
                     fun UIFlexContainer.Section(title: Int, block: UILinearContainer.() -> Unit) {
                         linearContainer {
                             orientation = Orientation.Vertical
-                            height = UIComponent.Companion.FillParent
+                            height = FillParent
                             spacing = 8f
 
                             flexRules {
@@ -269,14 +270,14 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                     Section(R.string.multiplayer_room_players) {
 
                         scrollableContainer {
-                            width = UIComponent.Companion.FillParent
-                            height = UIComponent.Companion.FillParent
+                            width = FillParent
+                            height = FillParent
                             scrollAxes = Axes.Y
                             clipToBounds = true
 
                             linearContainer {
                                 orientation = Orientation.Vertical
-                                width = UIComponent.Companion.FillParent
+                                width = FillParent
                                 spacing = 4f
                                 padding = Vec4.Companion.One
                                 playersContainer = this
@@ -300,7 +301,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                         }
 
                         beatmapInfoAlert = text {
-                            width = UIComponent.Companion.FillParent
+                            width = FillParent
                             padding = Vec4(16f)
                             alignment = Anchor.Center
                             background = UIBox().apply {
@@ -313,7 +314,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                         }
 
                         linearContainer {
-                            width = UIComponent.Companion.FillParent
+                            width = FillParent
                             spacing = 8f
 
                             changeBeatmapButton = textButton {
@@ -376,7 +377,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 padding = Vec4(0f, 12f)
 
                 textButton {
-                    width = UIComponent.Companion.FillParent
+                    width = FillParent
                     setText(R.string.multiplayer_room_start_game)
                     isSelected = true
                     onActionUp = callback@{
@@ -415,7 +416,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 }
 
                 textButton {
-                    width = UIComponent.Companion.FillParent
+                    width = FillParent
                     setText(R.string.multiplayer_room_not_ready)
                     onActionUp = callback@{
 
