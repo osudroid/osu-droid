@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import com.edlplan.framework.easing.Easing
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -82,7 +83,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
             x = sceneSpaceX
             y = sceneSpaceY
-            maxHeight = parent.getHeight() - sceneSpaceY
+            maxHeight = min(optionsContainer.height, parent.getHeight() - sceneSpaceY)
         }
 
         super.onManagedDraw(gl, camera)
@@ -101,7 +102,13 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             init {
                 width = FillParent
                 alignment = Anchor.CenterLeft
-                background = null
+                background = UIBox().apply {
+                    cornerRadius = 12f
+                    applyTheme = {
+                        color = it.accentColor * 0.9f
+                        alpha = 0f
+                    }
+                }
                 foreground = UIBox().apply {
                     cornerRadius = 12f
                     applyTheme = {
@@ -115,6 +122,22 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             override fun onSelectionChange() {
                 foreground!!.clearModifiers(ModifierType.Alpha)
                 foreground!!.fadeTo(if (isSelected) 0.25f else 0f, 0.2f)
+            }
+
+            override fun processTouchFeedback(event: TouchEvent) {
+                if (event.isActionDown) {
+                    background!!.apply {
+                        clearModifiers(ModifierType.Alpha)
+                        fadeTo(0.2f, 0.3f).eased(Easing.Out)
+                    }
+                }
+
+                if ((event.isActionUp || event.isActionCancel) && background!!.alpha != 0f) {
+                    background!!.apply {
+                        clearModifiers(ModifierType.Alpha)
+                        fadeOut(0.4f).eased(Easing.OutExpo)
+                    }
+                }
             }
         }
 
