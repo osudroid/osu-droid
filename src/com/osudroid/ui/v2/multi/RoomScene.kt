@@ -506,7 +506,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             playersContainer.apply {
                 detachChildren()
 
-                room.players.filterNotNull().forEach {
+                room.activePlayers.forEach {
                     +RoomPlayerButton(room, it)
                 }
             }
