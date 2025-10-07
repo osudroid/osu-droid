@@ -9,7 +9,6 @@ import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
 import com.osudroid.ui.v2.multi.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -139,8 +138,6 @@ class MainMenu(val main: MainScene) {
                     GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
                     GlobalManager.getInstance().songMenu.reload()
-
-                    RoomScene.load()
                     GlobalManager.getInstance().engine.scene = LobbyScene()
                 }
                 return true

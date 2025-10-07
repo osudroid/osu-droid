@@ -31,6 +31,7 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.shape.PaintStyle;
 import com.reco1l.andengine.shape.UIBox;
@@ -46,7 +47,6 @@ import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDPPCounter;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.reco1l.framework.Color4;
 import com.rian.osu.GameMode;
@@ -74,7 +74,6 @@ import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
-import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -131,7 +130,7 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
-    private final Engine engine;
+    private final UIEngine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     public String audioFilePath = null;
     private UIScene scene;
@@ -313,7 +312,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ScoreBoardItem lastScoreSent = null;
 
 
-    public GameScene(final Engine engine) {
+    public GameScene(final UIEngine engine) {
         this.engine = engine;
         scene = createMainScene();
         bgScene = new UIScene();
@@ -1033,15 +1032,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
-        skipBtn = null;
-        if (skipTime > 1) {
-            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
-            skipBtn.setOrigin(Anchor.BottomRight);
-            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-            skipBtn.setAlpha(0.7f);
-            fgScene.attachChild(skipBtn);
-        }
-
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             comboBurst.attachAll(bgScene);
@@ -1142,6 +1132,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         hud.setEditMode(isHUDEditorMode);
         hud.setSkinData(OsuSkin.get().getHUDSkinData());
 
+        skipBtn = null;
+        if (skipTime > 1) {
+            float paddingBottom = Multiplayer.isConnected() ? Multiplayer.roomScene.getChat().getButtonHeight() : 0f;
+
+            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
+            skipBtn.setOrigin(Anchor.BottomRight);
+            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT() - paddingBottom);
+            skipBtn.setAlpha(0.7f);
+            hud.attachChild(skipBtn);
+        }
+
         String playname = Config.getOnlineUsername();
 
         if (GameHelper.isAutoplay() || replaying) {
@@ -1231,8 +1232,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - totalOffset);
         initialElapsedTime = elapsedTime;
 
-        if (skipTime <= 1)
-            RoomScene.INSTANCE.getChat().dismiss();
+        if (skipTime <= 1 && Multiplayer.isConnected()) {
+            Multiplayer.roomScene.getChat().hide();
+        }
 
         applyPlayfieldSizeScale();
         applyBackground();
@@ -1254,7 +1256,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
 
         engine.setScene(scene);
-        engine.getCamera().setHUD(hud.getParent());
+        engine.getOverlay().attachChild(hud, 0);
 
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
@@ -1468,7 +1470,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
 
                     if (Multiplayer.isConnected())
-                        RoomScene.INSTANCE.getChat().show();
+                        Multiplayer.roomScene.getChat().show();
 
                     hud.onBreakStateChange(true);
                     breakPeriods.poll();
@@ -1478,7 +1480,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (breakAnimator.isOver()) {
 
                 // Ensure the chat is dismissed if it's still shown
-                RoomScene.INSTANCE.getChat().dismiss();
+                if (Multiplayer.isConnected()) {
+                    Multiplayer.roomScene.getChat().hide();
+                }
 
                 gameStarted = true;
                 hud.onBreakStateChange(false);
@@ -1739,7 +1743,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (Multiplayer.isConnected())
                     {
                         Multiplayer.log("Match ended, moving to results scene.");
-                        RoomScene.INSTANCE.getChat().show();
+                        Multiplayer.roomScene.getChat().show();
 
                         Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
@@ -1779,7 +1783,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (elapsedTime > skipTime - 1f && skipBtn != null) {
-            RoomScene.INSTANCE.getChat().dismiss();
+            if (Multiplayer.isConnected()) {
+                Multiplayer.roomScene.getChat().hide();
+            }
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
@@ -1833,7 +1839,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void skip(boolean force)
     {
-        RoomScene.INSTANCE.getChat().dismiss();
+        if (Multiplayer.isConnected()) {
+            Multiplayer.roomScene.getChat().hide();
+        }
 
         if (elapsedTime > skipTime - 1f && !force) {
             return;
@@ -1967,7 +1975,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (Multiplayer.isMultiplayer)
         {
-            RoomScene.INSTANCE.show();
+            Multiplayer.roomScene.show();
             return;
         }
         ResourceManager.getInstance().getSound("failsound").stop();
@@ -2502,7 +2510,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        hud.getParent().setChildScene(menu.getScene(), false, true, true);
+        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2630,7 +2638,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    hud.getParent().setChildScene(menu.getScene(), false, true, true);
+                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
                 }
             }
 
@@ -2646,7 +2654,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         scene.setIgnoreUpdate(false);
-        hud.getParent().getChildScene().back();
+        UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {

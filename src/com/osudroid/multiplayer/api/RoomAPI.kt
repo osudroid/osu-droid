@@ -2,6 +2,7 @@ package com.osudroid.multiplayer.api
 
 import com.osudroid.BuildSettings
 import com.osudroid.debug.MockSocket
+import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomMods
@@ -13,13 +14,14 @@ import com.osudroid.multiplayer.api.data.parseBeatmap
 import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
-import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.ui.v2.multi.RoomScene
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 object RoomAPI {
 
@@ -208,7 +210,14 @@ object RoomAPI {
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
         }
 
-        roomEventListener?.onRoomConnect(room)
+        val scene = RoomScene(room)
+
+        Multiplayer.room = room
+        Multiplayer.player = room.playersMap[OnlineManager.getInstance().userId]!!
+        Multiplayer.roomScene = scene
+        
+
+        scene.onRoomConnect(room)
     }
 
     private val playerJoined = Listener {
