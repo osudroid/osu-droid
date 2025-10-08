@@ -24,63 +24,19 @@
 <article id="content" class="markdown-body">
 # Additions
 
-- Add beatmap attribute display <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Can be displayed by pressing the text with difficulty values (CS, AR, OD, HP, star rating) in song select.
-- Add option for selecting language in settings <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Can be accessed under the `General` category in settings.
-  - Changing the language requires restarting the game. Therefore, it is disabled in multiplayer.
-- Add ability to search mods and mod presets in mod menu <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-# Changes
-
-- Do not update OD value when using Precise mod in song select <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - It's the hit window that is different, not the OD, so attempting to "pair" OD like this is conceptually wrong.
-- Rework input handling in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This solves an issue where inputs between two frames (commonly known as subframe inputs) are discarded except the
-    last input before the next frame (an input is either a finger press, finger drag, or finger lift).
-  - Makes hitobject judgements "consume" finger presses sequentially. This means that if there are `n` hitobjects with
-    the same starting time, and they overlap, they would require `n` presses to hit instead of one (there is a
-    [beatmap](https://osu.ppy.sh/beatmapsets/1157609#osu/2439789) that abuses this behavior).
-- Numerous optimizations to difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - May not be noticeable, but should be better regardless. Maybe the improvement is noticeable in gameplay loading if real-time pp counter is enabled.
-- Localization updates <span style="font-size: 0.75em">by community contributors</span>
+- Re-add `Remove slider lock and spinner lock` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Turns out this setting screws up scoring due to judgement ordering. It is now disabled by default.
 
 ## osu!droid Star Rating and Performance Points Changes
 
-A newspost containing more details about these changes have been published.
-
-- Replace existing visual skill with a better implemented reading skill <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - This is a port of [this](https://github.com/ppy/osu/pull/33196) change with but modified to fit osu!droid's gameplay
-    environment and existing system.
-  - Notable adjustments:
-    - Reduced high AR difficulty since approach circle starts at 3x scale instead of 4x
-    - Partial slider reading difficulty assessment from visual skill is kept with some changes to constants for balancing
-    - Rhythm is accounted for via rhythm difficulty calculation
-    - Miss penalty additionally accounts for a proportion-based miss penalty to account for cheesing
-    - Accuracy scaling uses estimated unstable rate (lower OD gives a harsher scaling) instead of accuracy percentage
-- Adjust angle bonuses in aim to balance very difficult aim scores gaining a lot of pp from reading skill <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Cap vibro tapping difficulty delta time at 300 1/4 BPM interval <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Scores with note intervals higher than said interval will receive more pp, provided that they are above a certain estimated unstable rate.
+- Reduce general Hidden bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Increase high density Hidden bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Bug Fixes
 
-- Fix potential crash when canceling gameplay loading while slider paths are being loaded <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix non-host players being able to change required mods' settings in free mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix score overflow when playing a beatmap with information that has not been fully populated <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Full population happens in background difficulty calculation. This bug happens when a player plays a beatmap with
-    the ScoreV2 mod enabled and with the beatmap not being calculated yet.
-- Fix replay import notifications not showing <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix Really Easy mod approach rate adjustment only counting Custom Speed mod instead of all constant rate-changing mods <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix wrong displayed score when opening it from pp-based beatmap leaderboard if the score is different from the score-based leaderboard <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix room host being able to clear ScoreV2 mod in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix incorrect overall difficulty in Relax osu!droid performance calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix show scoreboard setting potentially only taking effect after restarting gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix beatmap reimport (e.g., redownloading a beatmap in beatmap downloader) not working due to import redundancy checks <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-
-# Removals
-
-- Remove `Remove slider lock and spinner lock` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - With the rework to gameplay input handling, this is enabled by default and thus is no longer needed.
+- Fix Relax input handling not considering cases of a finger standing still <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider path position and length retrieval potentially crashing the game <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Notable in beatmaps that use a slider with zero distance but non-zero repeat points.
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
