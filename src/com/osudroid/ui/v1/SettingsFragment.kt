@@ -663,6 +663,15 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+
+        findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
+                true
+            }
+        }
     }
 
 
