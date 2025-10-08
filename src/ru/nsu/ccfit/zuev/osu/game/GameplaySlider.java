@@ -893,10 +893,12 @@ public class GameplaySlider extends GameObject {
             if (replayObjectData == null) {
                 if (!autoPlay) {
                     if (elapsedTime <= getLateHitThreshold()) {
-                        var hittingCursor = getHittingCursor(listener, beatmapSlider, elapsedTime);
+                        if (listener.isObjectHittable(this)) {
+                            var hittingCursor = getHittingCursor(listener, beatmapSlider, elapsedTime);
 
-                        if (hittingCursor != null) {
-                            onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
+                            if (hittingCursor != null) {
+                                onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
+                            }
                         }
                     } else {
                         // If it's too late, mark this hit missing.

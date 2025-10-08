@@ -56,6 +56,10 @@ public abstract class GameObject {
         return position;
     }
 
+    public boolean isStartHit() {
+        return startHit;
+    }
+
     public void stopLoopingSamples() {}
 
     /**

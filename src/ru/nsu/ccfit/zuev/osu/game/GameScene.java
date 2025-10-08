@@ -155,6 +155,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> expiredObjects;
+    private GameObject judgeableObject;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private Metronome metronome;
     private float scale;
@@ -696,6 +697,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
+        judgeableObject = null;
         lastObjectId = -1;
         hitWindow = playableBeatmap.getHitWindow();
         videoStarted = false;
@@ -1076,7 +1078,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             timeOffset += 0.25f;
         }
 
-        if (SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext()) {
+        boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
+        if (hasUnrankedMod || Config.isRemoveSliderLock()) {
             unrankedSprite = new UISprite(ResourceManager.getInstance().getTexture("play-unranked"));
             unrankedSprite.setAnchor(Anchor.TopCenter);
             unrankedSprite.setOrigin(Anchor.Center);
@@ -1811,8 +1814,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void updateActiveObjects(float deltaTime) {
+        judgeableObject = searchJudgeableObject(0);
+
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            activeObjects.get(i).update(deltaTime);
+            var obj = activeObjects.get(i);
+            obj.update(deltaTime);
+
+            if (Config.isRemoveSliderLock() && obj.isStartHit()) {
+                // In remove slider lock mode, immediately mark the next object as judgeable once the current object
+                // is hit.
+                judgeableObject = searchJudgeableObject(i + 1);
+            }
         }
     }
 
@@ -1825,6 +1837,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (countdownAnimator != null) {
             countdownAnimator.update(deltaTime);
         }
+    }
+
+    @Nullable
+    private GameObject searchJudgeableObject(int startIndex) {
+        if (!Config.isRemoveSliderLock()) {
+            return activeObjects.isEmpty() ? null : activeObjects.peek();
+        }
+
+        for (int i = startIndex, size = activeObjects.size(); i < size; i++) {
+            var obj = activeObjects.get(i);
+
+            if (!obj.isStartHit()) {
+                return obj;
+            }
+        }
+
+        return null;
     }
 
     public void skip() {
@@ -2313,6 +2342,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void removeObject(final GameObject object) {
         expiredObjects.add(object);
+    }
+
+    @Override
+    public boolean isObjectHittable(GameObject object) {
+        return object == judgeableObject;
     }
 
     @Override
