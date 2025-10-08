@@ -99,22 +99,32 @@ public abstract class GameObject {
                 var events = cursor.events;
                 int size = events.size();
 
-                while (cursor.latestProcessedEventIndex < size) {
-                    var event = events.get(cursor.latestProcessedEventIndex++);
+                if (size > 0) {
+                    while (cursor.latestProcessedEventIndex < size) {
+                        var event = events.get(cursor.latestProcessedEventIndex++);
 
-                    if (event.isActionUp()) {
-                        continue;
+                        if (event.isActionUp()) {
+                            continue;
+                        }
+
+                        boolean isHit = isHit(hitObject, event);
+
+                        // Case 1
+                        if (event.isActionDown() && isHit && canHit(event)) {
+                            return event;
+                        }
+
+                        // Case 2
+                        if (objectElapsedTime >= 0 && isHit) {
+                            return event;
+                        }
                     }
+                } else {
+                    // If there are no new events, check the latest event.
+                    // Not passing ACTION_DOWN or ACTION_MOVE here to avoid array allocation.
+                    var event = cursor.getLatestEvent();
 
-                    boolean isHit = isHit(hitObject, event);
-
-                    // Case 1
-                    if (event.isActionDown() && isHit && canHit(event)) {
-                        return event;
-                    }
-
-                    // Case 2
-                    if (objectElapsedTime >= 0 && isHit) {
+                    if (event != null && !event.isActionUp() && isHit(hitObject, event) && canHit(event)) {
                         return event;
                     }
                 }
