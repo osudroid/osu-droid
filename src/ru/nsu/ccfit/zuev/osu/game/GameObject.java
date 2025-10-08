@@ -128,7 +128,9 @@ public abstract class GameObject {
                     // Not passing ACTION_DOWN or ACTION_MOVE here to avoid array allocation.
                     var event = cursor.getLatestEvent();
 
-                    if (event != null && !event.isActionUp() && isHit(hitObject, event) && canHit(event)) {
+                    // Only consider case 2 in this scenario, as the event should logically be marked as a move event
+                    // even if it's a down event (no new events mean the user keeps pressing on the same spot).
+                    if (event != null && !event.isActionUp() && objectElapsedTime >= 0 && isHit(hitObject, event)) {
                         return event;
                     }
                 }
