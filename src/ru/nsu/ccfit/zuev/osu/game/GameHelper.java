@@ -465,16 +465,33 @@ public class GameHelper {
         }
 
         public float getX(int index) {
-            return data[index * strip + offsetX];
+            return getData(index, offsetX);
         }
 
         public float getY(int index) {
-            return data[index * strip + offsetY];
+            return getData(index, offsetY);
         }
 
         public float getLength(int index) {
-            return data[index * strip + offsetLength];
+            return getData(index, offsetLength);
         }
 
+        private float getData(int index, int offset) {
+            if (data.length == 0) {
+                return 0;
+            }
+
+            int idx = index * strip + offset;
+
+            if (idx < 0) {
+                return 0;
+            }
+
+            if (idx >= data.length) {
+                return data[data.length - strip + offset];
+            }
+
+            return data[idx];
+        }
     }
 }
