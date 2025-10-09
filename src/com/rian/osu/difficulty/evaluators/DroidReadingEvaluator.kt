@@ -78,7 +78,7 @@ object DroidReadingEvaluator {
             hiddenDifficulty += (timeSpentInvisibleFactor + densityFactor) *  constantAngleNerfFactor * velocityFactor * 0.007
 
             // Apply a soft cap to general Hidden reading to account for partial memorization.
-            hiddenDifficulty = hiddenDifficulty.pow(0.65) * HIDDEN_MULTIPLIER
+            hiddenDifficulty = hiddenDifficulty.pow(0.85) * HIDDEN_MULTIPLIER
 
             val prev = current.previous(0) as DroidDifficultyHitObject
 
