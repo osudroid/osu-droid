@@ -677,6 +677,8 @@ class SettingsFragment : SettingsFragment() {
 
     private fun loadSkin(context: Context, path: String): Job {
         val loading = LoadingFragment()
+
+        loading.isDismissOnBackPress = false
         loading.show()
 
         return async {
