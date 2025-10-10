@@ -1258,6 +1258,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         engine.setScene(scene);
         engine.getCamera().setHUD(hud.getParent());
+        isReadyToStart = true;
 
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
@@ -1275,6 +1276,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void update(final float dt) {
+        if (!isReadyToStart) {
+            return;
+        }
+
         elapsedTime += dt;
         previousFrameTime = SystemClock.uptimeMillis();
 
