@@ -915,7 +915,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     @SuppressLint("SimpleDateFormat")
-    public void changeDimensionInfo(BeatmapInfo beatmapInfo) {
+    public synchronized void changeDimensionInfo(BeatmapInfo beatmapInfo) {
         if (beatmapInfo == null) {
             return;
         }
@@ -1014,7 +1014,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    public void updateInfo(BeatmapInfo beatmapInfo) {
+    public synchronized void updateInfo(BeatmapInfo beatmapInfo) {
         if (beatmapInfo == null) {
             return;
         }
