@@ -737,9 +737,9 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && currentScene == gameScene.getScene() &&
                 (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
             if (gameScene.isPaused()) {
-                gameScene.resume();
+                Execution.updateThread(gameScene::resume);
             } else {
-                gameScene.pause();
+                Execution.updateThread(gameScene::pause);
             }
             return true;
         }
