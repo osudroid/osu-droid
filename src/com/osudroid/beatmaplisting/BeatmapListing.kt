@@ -694,12 +694,15 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
                 mainThread {
                     previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
-                    detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.pause_24px,
-                        0,
-                        0,
-                        0
-                    )
+
+                    if (detailsFragment?.isLoaded == true) {
+                        detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.pause_24px,
+                            0,
+                            0,
+                            0
+                        )
+                    }
                 }
 
             } catch (e: Exception) {
@@ -729,7 +732,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         mainThread {
             previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
-            detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+
+            if (detailsFragment?.isLoaded == true) {
+                detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+            }
         }
 
         if (shouldResumeMusic && BeatmapListing.isPlayingMusic) {
