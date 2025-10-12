@@ -2223,6 +2223,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             case 10:
                 scoreName = "sliderpoint10";
                 stat.registerHit(10, false, false);
+                stat.addSliderTickHit();
                 break;
         }
 
@@ -2241,7 +2242,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 case GameObjectListener.SLIDER_REPEAT:
                     break;
                 default:
-                    stat.addSliderTickHit();
                     createBurstEffect(judgementPos, color);
             }
         }
