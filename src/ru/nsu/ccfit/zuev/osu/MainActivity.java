@@ -642,10 +642,10 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
-                gameScene.quit();
+                Execution.updateThread(gameScene::quit);
                 Multiplayer.log("Player left the match.");
             } else {
-                gameScene.pause();
+                Execution.updateThread(gameScene::pause);
             }
         }
 
@@ -668,13 +668,10 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (getEngine() != null && !hasFocus) {
+            var gameScene = GlobalManager.getInstance().getGameScene();
 
-            if (GlobalManager.getInstance().getGameScene() != null
-                    && getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
-                    && GlobalManager.getInstance().getGameScene() != null) {
-
-                if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
-                    GlobalManager.getInstance().getGameScene().pause();
+            if (gameScene != null && getEngine().getScene() == gameScene.getScene() && !gameScene.isPaused() && !Multiplayer.isMultiplayer) {
+                Execution.updateThread(gameScene::pause);
             }
 
             if (Multiplayer.isConnected()
