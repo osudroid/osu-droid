@@ -267,7 +267,7 @@ class BeatmapListing : BaseFragment(),
 
                 mainThread {
                     adapter.data.addAll(beatmapSets)
-                    adapter.notifyItemRangeChanged(offset, beatmapSets.size)
+                    adapter.notifyItemRangeInserted(offset, beatmapSets.size)
                     indicator.visibility = GONE
                 }
             }
