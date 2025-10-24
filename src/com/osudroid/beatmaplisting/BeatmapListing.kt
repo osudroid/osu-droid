@@ -239,10 +239,11 @@ class BeatmapListing : BaseFragment(),
             if (!keepData) {
                 offset = 0
 
-                val itemCount = adapter.data.size
-                adapter.data.clear()
-
-                mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
+                mainThread {
+                    val itemCount = adapter.data.size
+                    adapter.data.clear()
+                    adapter.notifyItemRangeRemoved(0, itemCount)
+                }
             }
 
             ensureActive()
@@ -264,9 +265,8 @@ class BeatmapListing : BaseFragment(),
                 val beatmapSets = mirror.search.response(request.execute().json)
                 ensureActive()
 
-                adapter.data.addAll(beatmapSets)
-
                 mainThread {
+                    adapter.data.addAll(beatmapSets)
                     adapter.notifyItemRangeChanged(offset, beatmapSets.size)
                     indicator.visibility = GONE
                 }
