@@ -88,7 +88,7 @@ public class GameHelper {
         // In linear paths, the distance threshold is further extended to 32 osu!pixels.
         int distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
 
-        // Invert the scale to convert from osu!pixels to screen pixels.
+        // Invert the scale to convert from screen pixels to osu!pixels.
         var invertedScale = new Vec2(
             (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
             (float) Constants.MAP_HEIGHT / Constants.MAP_ACTUAL_HEIGHT
@@ -97,8 +97,6 @@ public class GameHelper {
         // Additional consideration for Catmull sliders that form "bulbs" around points with identical positions.
         boolean isCatmull = sliderPath.pathType == SliderPathType.Catmull;
         int catmullSegmentLength = PathApproximation.CATMULL_DETAIL * 2;
-
-        Vec2 lastStart = null;
 
         for (int i = 0; i < sliderPath.anchorCount; ++i) {
             if (scope != null) {
@@ -109,18 +107,16 @@ public class GameHelper {
             var y = sliderPath.getY(i);
             var vec = new Vec2(x, y);
 
-            if (lastStart == null) {
+            if (renderPath.size() == 0) {
                 renderPath.add(vec);
-                lastStart = vec;
                 continue;
             }
 
-            float distanceFromStart = vec.copy().minus(lastStart).multiple(invertedScale).length();
+            float distanceFromLast = vec.copy().minus(renderPath.getLast()).multiple(invertedScale).length();
 
-            if (distanceFromStart > distanceThreshold || i == sliderPath.anchorCount - 1 ||
+            if (distanceFromLast > distanceThreshold || i == sliderPath.anchorCount - 1 ||
                     (isCatmull && (i + 1) % catmullSegmentLength == 0)) {
                 renderPath.add(vec);
-                lastStart = null;
             }
         }
 
