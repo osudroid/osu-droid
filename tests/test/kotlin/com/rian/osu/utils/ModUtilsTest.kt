@@ -22,35 +22,35 @@ class ModUtilsTest {
     @Test
     fun `Test mod serialization with non-user playable mods`() {
         ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())).apply {
-            Assert.assertEquals(length(), 4)
-            Assert.assertEquals(getJSONObject(0).getString("acronym"), "AT")
-            Assert.assertEquals(getJSONObject(1).getString("acronym"), "CS")
+            Assert.assertEquals(4, length())
+            Assert.assertEquals("AT", getJSONObject(0).getString("acronym"))
+            Assert.assertEquals("CS", getJSONObject(1).getString("acronym"))
 
             Assert.assertEquals(
-                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
                 1.25f,
+                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
                 0.01f
             )
 
-            Assert.assertEquals(getJSONObject(2).getString("acronym"), "HD")
-            Assert.assertEquals(getJSONObject(3).getString("acronym"), "RV6")
+            Assert.assertEquals("HD", getJSONObject(2).getString("acronym"))
+            Assert.assertEquals("RV6", getJSONObject(3).getString("acronym"))
         }
     }
 
     @Test
     fun `Test mod serialization without non-user playable mods`() {
         ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()), false).apply {
-            Assert.assertEquals(length(), 3)
-            Assert.assertEquals(getJSONObject(0).getString("acronym"), "AT")
-            Assert.assertEquals(getJSONObject(1).getString("acronym"), "CS")
+            Assert.assertEquals(3, length())
+            Assert.assertEquals("AT", getJSONObject(0).getString("acronym"))
+            Assert.assertEquals("CS", getJSONObject(1).getString("acronym"))
 
             Assert.assertEquals(
-                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
                 1.25f,
+                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
                 0.01f
             )
 
-            Assert.assertEquals(getJSONObject(2).getString("acronym"), "HD")
+            Assert.assertEquals("HD", getJSONObject(2).getString("acronym"))
         }
     }
 
@@ -66,14 +66,14 @@ class ModUtilsTest {
 
         val deserializedMods = ModUtils.deserializeMods(serializedMods)
 
-        Assert.assertEquals(deserializedMods.size, 3)
+        Assert.assertEquals(3, deserializedMods.size)
         Assert.assertTrue(ModAutoplay::class in deserializedMods)
         Assert.assertTrue(ModCustomSpeed::class in deserializedMods)
         Assert.assertTrue(ModHidden::class in deserializedMods)
 
         val customSpeed = deserializedMods.ofType<ModCustomSpeed>()
         Assert.assertNotNull(customSpeed)
-        Assert.assertEquals(customSpeed!!.trackRateMultiplier, 1.25f, 0f)
+        Assert.assertEquals(1.25f, customSpeed!!.trackRateMultiplier, 0f)
     }
 
     @Test
@@ -93,11 +93,11 @@ class ModUtilsTest {
         fun test(original: BeatmapDifficulty, expected: BeatmapDifficulty, mode: GameMode, vararg mods: Mod) {
             ModUtils.applyModsToBeatmapDifficulty(original, mode, mods.toList())
 
-            Assert.assertEquals(original.difficultyCS, expected.difficultyCS, 1e-2f)
-            Assert.assertEquals(original.gameplayCS, expected.gameplayCS, 1e-2f)
-            Assert.assertEquals(original.ar, expected.ar, 1e-2f)
-            Assert.assertEquals(original.od, expected.od, 1e-2f)
-            Assert.assertEquals(original.hp, expected.hp, 1e-2f)
+            Assert.assertEquals(expected.difficultyCS, original.difficultyCS, 1e-2f)
+            Assert.assertEquals(expected.gameplayCS, original.gameplayCS, 1e-2f)
+            Assert.assertEquals(expected.ar, original.ar, 1e-2f)
+            Assert.assertEquals(expected.od, original.od, 1e-2f)
+            Assert.assertEquals(expected.hp, original.hp, 1e-2f)
         }
 
         test(BeatmapDifficulty(cs = 5f), BeatmapDifficulty(cs = 5f), GameMode.Standard, ModAutoplay())

@@ -17,13 +17,13 @@ class BeatmapTest {
         val beatmap = Beatmap(GameMode.Standard)
 
         beatmap.formatVersion = 3
-        Assert.assertEquals(beatmap.getOffsetTime(1000), 1024)
+        Assert.assertEquals(1024, beatmap.getOffsetTime(1000))
 
         beatmap.formatVersion = 4
-        Assert.assertEquals(beatmap.getOffsetTime(1000), 1024)
+        Assert.assertEquals(1024, beatmap.getOffsetTime(1000))
 
         beatmap.formatVersion = 10
-        Assert.assertEquals(beatmap.getOffsetTime(1000), 1000)
+        Assert.assertEquals(1000, beatmap.getOffsetTime(1000))
     }
 
     @Test

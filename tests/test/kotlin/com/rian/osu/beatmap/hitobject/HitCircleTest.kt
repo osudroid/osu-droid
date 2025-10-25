@@ -9,22 +9,22 @@ class HitCircleTest : HitObjectTest() {
     @Test
     fun `Test start time and end time`() {
         createCircle().apply {
-            Assert.assertEquals(startTime, endTime, 0.0)
+            Assert.assertEquals(endTime, startTime, 0.0)
         }
     }
 
     @Test
     fun `Test end position`() {
         createCircle().apply {
-            Assert.assertEquals(position, endPosition)
+            Assert.assertEquals(endPosition, position)
         }
     }
 
     @Test
     fun `Test stacked position without stack height`() {
         createCircle().apply {
-            Assert.assertEquals(position, difficultyStackedPosition)
-            Assert.assertEquals(endPosition, difficultyStackedEndPosition)
+            Assert.assertEquals(difficultyStackedPosition, position)
+            Assert.assertEquals(difficultyStackedEndPosition, endPosition)
         }
     }
 

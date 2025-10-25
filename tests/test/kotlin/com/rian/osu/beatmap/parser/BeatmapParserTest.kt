@@ -29,9 +29,9 @@ class BeatmapParserTest {
     @Test
     fun `Test version 14 beatmap colors section`() {
         fun test(color: Color4, red: Int, green: Int, blue: Int) {
-            Assert.assertEquals(color.redInt, red)
-            Assert.assertEquals(color.greenInt, green)
-            Assert.assertEquals(color.blueInt, blue)
+            Assert.assertEquals(red, color.redInt)
+            Assert.assertEquals(green, color.greenInt)
+            Assert.assertEquals(blue, color.blueInt)
         }
 
         val colors = v14Beatmap.colors
@@ -52,55 +52,55 @@ class BeatmapParserTest {
             Assert.assertTrue(difficulty.controlPoints.isEmpty())
             Assert.assertTrue(effect.controlPoints.isEmpty())
             Assert.assertTrue(sample.controlPoints.isEmpty())
-            Assert.assertEquals(timing.controlPoints.size, 1)
+            Assert.assertEquals(1, timing.controlPoints.size)
         }
     }
 
     @Test
     fun `Test version 14 beatmap control points section`() {
         v14Beatmap.controlPoints.apply {
-            Assert.assertEquals(difficulty.controlPoints.size, 14)
-            Assert.assertEquals(effect.controlPoints.size, 14)
-            Assert.assertEquals(sample.controlPoints.size, 526)
-            Assert.assertEquals(timing.controlPoints.size, 5)
+            Assert.assertEquals(14, difficulty.controlPoints.size)
+            Assert.assertEquals(14, effect.controlPoints.size)
+            Assert.assertEquals(526, sample.controlPoints.size)
+            Assert.assertEquals(5, timing.controlPoints.size)
         }
     }
 
     @Test
     fun `Test version 3 beatmap difficulty section`() {
         v3Beatmap.difficulty.apply {
-            Assert.assertEquals(ar, 6f, 0f)
-            Assert.assertEquals(difficultyCS, 4f, 0f)
-            Assert.assertEquals(gameplayCS, 4f, 0f)
-            Assert.assertEquals(hp, 6f, 0f)
-            Assert.assertEquals(od, 6f, 0f)
-            Assert.assertEquals(sliderMultiplier, 1.4, 0.0)
-            Assert.assertEquals(sliderTickRate, 2.0, 0.0)
+            Assert.assertEquals(6f, ar, 0f)
+            Assert.assertEquals(4f, difficultyCS, 0f)
+            Assert.assertEquals(4f, gameplayCS, 0f)
+            Assert.assertEquals(6f, hp, 0f)
+            Assert.assertEquals(6f, od, 0f)
+            Assert.assertEquals(1.4, sliderMultiplier, 0.0)
+            Assert.assertEquals(2.0, sliderTickRate, 0.0)
         }
     }
 
     @Test
     fun `Test version 14 beatmap difficulty section`() {
         v14Beatmap.difficulty.apply {
-            Assert.assertEquals(ar, 9f, 0f)
-            Assert.assertEquals(difficultyCS, 4f, 0f)
-            Assert.assertEquals(gameplayCS, 4f, 0f)
-            Assert.assertEquals(hp, 5f, 0f)
-            Assert.assertEquals(od, 8f, 0f)
-            Assert.assertEquals(sliderMultiplier, 1.9, 0.0)
-            Assert.assertEquals(sliderTickRate, 1.0, 0.0)
+            Assert.assertEquals(9f, ar, 0f)
+            Assert.assertEquals(4f, difficultyCS, 0f)
+            Assert.assertEquals(4f, gameplayCS, 0f)
+            Assert.assertEquals(5f, hp, 0f)
+            Assert.assertEquals(8f, od, 0f)
+            Assert.assertEquals(1.9, sliderMultiplier, 0.0)
+            Assert.assertEquals(1.0, sliderTickRate, 0.0)
         }
     }
 
     @Test
     fun `Test version 3 beatmap events section`() {
         v3Beatmap.events.apply {
-            Assert.assertEquals(backgroundFilename, "katamari2.jpg")
+            Assert.assertEquals("katamari2.jpg", backgroundFilename)
 
             Assert.assertNotNull(backgroundColor)
-            Assert.assertEquals(backgroundColor!!.redInt, 54)
-            Assert.assertEquals(backgroundColor!!.greenInt, 140)
-            Assert.assertEquals(backgroundColor!!.blueInt, 191)
+            Assert.assertEquals(54, backgroundColor!!.redInt)
+            Assert.assertEquals(140, backgroundColor!!.greenInt)
+            Assert.assertEquals(191, backgroundColor!!.blueInt)
 
             Assert.assertEquals(breaks.size, 3)
             Assert.assertNull(videoFilename)
@@ -111,25 +111,25 @@ class BeatmapParserTest {
     @Test
     fun `Test version 14 beatmap events section`() {
         v14Beatmap.events.apply {
-            Assert.assertEquals(backgroundFilename, "school.jpg")
+            Assert.assertEquals("school.jpg", backgroundFilename)
             Assert.assertNull(backgroundColor)
             Assert.assertTrue(breaks.isEmpty())
-            Assert.assertEquals(videoFilename, "Yoasobi.mp4")
-            Assert.assertEquals(videoStartTime, -150)
+            Assert.assertEquals("Yoasobi.mp4", videoFilename)
+            Assert.assertEquals(-150,  videoStartTime)
         }
     }
 
     @Test
     fun `Test version 3 beatmap general section`() {
         v3Beatmap.general.apply {
-            Assert.assertEquals(audioFilename, "20.mp3")
-            Assert.assertEquals(audioLeadIn, 0)
-            Assert.assertEquals(countdown, BeatmapCountdown.Normal)
+            Assert.assertEquals("20.mp3", audioFilename)
+            Assert.assertEquals(0, audioLeadIn)
+            Assert.assertEquals(BeatmapCountdown.Normal, countdown)
             Assert.assertFalse(letterboxInBreaks)
-            Assert.assertEquals(mode, 0)
-            Assert.assertEquals(previewTime, -1)
-            Assert.assertEquals(sampleBank, SampleBank.Normal)
-            Assert.assertEquals(sampleVolume, 100)
+            Assert.assertEquals(0, mode)
+            Assert.assertEquals(-1, previewTime)
+            Assert.assertEquals(SampleBank.Normal, sampleBank)
+            Assert.assertEquals(100, sampleVolume)
             Assert.assertFalse(samplesMatchPlaybackRate)
         }
     }
@@ -137,14 +137,14 @@ class BeatmapParserTest {
     @Test
     fun `Test version 14 beatmap general section`() {
         v14Beatmap.general.apply {
-            Assert.assertEquals(audioFilename, "audio.mp3")
-            Assert.assertEquals(audioLeadIn, 0)
-            Assert.assertEquals(countdown, BeatmapCountdown.NoCountdown)
+            Assert.assertEquals("audio.mp3", audioFilename)
+            Assert.assertEquals(0, audioLeadIn)
+            Assert.assertEquals(BeatmapCountdown.NoCountdown, countdown)
             Assert.assertFalse(letterboxInBreaks)
-            Assert.assertEquals(mode, 0)
-            Assert.assertEquals(previewTime, 49037)
-            Assert.assertEquals(sampleBank, SampleBank.Soft)
-            Assert.assertEquals(sampleVolume, 100)
+            Assert.assertEquals(0, mode)
+            Assert.assertEquals(49037, previewTime)
+            Assert.assertEquals(SampleBank.Soft, sampleBank)
+            Assert.assertEquals(100, sampleVolume)
             Assert.assertFalse(samplesMatchPlaybackRate)
         }
     }
@@ -152,22 +152,22 @@ class BeatmapParserTest {
     @Test
     fun `Test version 3 beatmap hit object counters`() {
         v3Beatmap.hitObjects.apply {
-            Assert.assertEquals(objects.size, 194)
-            Assert.assertEquals(circleCount, 160)
-            Assert.assertEquals(sliderCount, 30)
-            Assert.assertEquals(sliderTickCount, 75)
-            Assert.assertEquals(spinnerCount, 4)
+            Assert.assertEquals(194, objects.size)
+            Assert.assertEquals(160, circleCount)
+            Assert.assertEquals(30, sliderCount)
+            Assert.assertEquals(75, sliderTickCount)
+            Assert.assertEquals(4, spinnerCount)
         }
     }
 
     @Test
     fun `Test version 14 beatmap hit object counters`() {
         v14Beatmap.hitObjects.apply {
-            Assert.assertEquals(objects.size, 592)
-            Assert.assertEquals(circleCount, 198)
-            Assert.assertEquals(sliderCount, 393)
-            Assert.assertEquals(sliderTickCount, 21)
-            Assert.assertEquals(spinnerCount, 1)
+            Assert.assertEquals(592, objects.size)
+            Assert.assertEquals(198, circleCount)
+            Assert.assertEquals(393, sliderCount)
+            Assert.assertEquals(21, sliderTickCount)
+            Assert.assertEquals(1, spinnerCount)
         }
     }
 
@@ -175,23 +175,23 @@ class BeatmapParserTest {
     @Test
     fun `Test version 3 beatmap hit object samples`() {
         val circle = v3Beatmap.hitObjects.objects[0] as HitCircle
-        Assert.assertEquals(circle.samples.size, 2)
+        Assert.assertEquals(2, circle.samples.size)
 
         val (firstSample, lastSample) = circle.samples as MutableList<BankHitSampleInfo>
 
         firstSample.apply {
-            Assert.assertEquals(name, BankHitSampleInfo.HIT_NORMAL)
-            Assert.assertEquals(bank, SampleBank.Normal)
-            Assert.assertEquals(customSampleBank, 0)
-            Assert.assertEquals(volume, 100)
+            Assert.assertEquals(BankHitSampleInfo.HIT_NORMAL, name)
+            Assert.assertEquals(SampleBank.Normal, bank)
+            Assert.assertEquals(0, customSampleBank)
+            Assert.assertEquals(100, volume)
             Assert.assertTrue(isLayered)
         }
 
         lastSample.apply {
-            Assert.assertEquals(name, BankHitSampleInfo.HIT_FINISH)
-            Assert.assertEquals(bank, SampleBank.Normal)
-            Assert.assertEquals(customSampleBank, 0)
-            Assert.assertEquals(volume, 100)
+            Assert.assertEquals(BankHitSampleInfo.HIT_FINISH, name)
+            Assert.assertEquals(SampleBank.Normal, bank)
+            Assert.assertEquals(0, customSampleBank)
+            Assert.assertEquals(100, volume)
             Assert.assertFalse(isLayered)
         }
     }
@@ -200,23 +200,23 @@ class BeatmapParserTest {
     @Test
     fun `Test version 14 beatmap hit object samples`() {
         val slider = v14Beatmap.hitObjects.objects[1] as Slider
-        Assert.assertEquals(slider.samples.size, 2)
+        Assert.assertEquals(2, slider.samples.size)
 
         val (firstSample, lastSample) = slider.samples as MutableList<BankHitSampleInfo>
 
         firstSample.apply {
-            Assert.assertEquals(name, BankHitSampleInfo.HIT_NORMAL)
-            Assert.assertEquals(bank, SampleBank.Soft)
-            Assert.assertEquals(customSampleBank, 1)
-            Assert.assertEquals(volume, 40)
+            Assert.assertEquals(BankHitSampleInfo.HIT_NORMAL, name)
+            Assert.assertEquals(SampleBank.Soft, bank)
+            Assert.assertEquals(1, customSampleBank)
+            Assert.assertEquals(40, volume)
             Assert.assertTrue(isLayered)
         }
 
         lastSample.apply {
-            Assert.assertEquals(name, BankHitSampleInfo.HIT_CLAP)
-            Assert.assertEquals(bank, SampleBank.Drum)
-            Assert.assertEquals(customSampleBank, 1)
-            Assert.assertEquals(volume, 40)
+            Assert.assertEquals(BankHitSampleInfo.HIT_CLAP, name)
+            Assert.assertEquals(SampleBank.Drum, bank)
+            Assert.assertEquals(1, customSampleBank)
+            Assert.assertEquals(40, volume)
             Assert.assertFalse(isLayered)
         }
     }
@@ -227,10 +227,10 @@ class BeatmapParserTest {
 
         for (nodeSample in slider.nodeSamples) {
             (nodeSample[0] as BankHitSampleInfo).apply {
-                Assert.assertEquals(name, BankHitSampleInfo.HIT_NORMAL)
-                Assert.assertEquals(bank, SampleBank.Normal)
-                Assert.assertEquals(customSampleBank, 0)
-                Assert.assertEquals(volume, 100)
+                Assert.assertEquals(BankHitSampleInfo.HIT_NORMAL, name)
+                Assert.assertEquals(SampleBank.Normal, bank)
+                Assert.assertEquals(0, customSampleBank)
+                Assert.assertEquals(100, volume)
                 Assert.assertFalse(isLayered)
             }
         }
@@ -245,18 +245,18 @@ class BeatmapParserTest {
             val (firstSample, lastSample) = nodeSample as MutableList<BankHitSampleInfo>
 
             firstSample.apply {
-                Assert.assertEquals(name, BankHitSampleInfo.HIT_NORMAL)
-                Assert.assertEquals(bank, SampleBank.Soft)
-                Assert.assertEquals(customSampleBank, 1)
-                Assert.assertEquals(volume, 40)
+                Assert.assertEquals(BankHitSampleInfo.HIT_NORMAL, name)
+                Assert.assertEquals(SampleBank.Soft, bank)
+                Assert.assertEquals(1, customSampleBank)
+                Assert.assertEquals(40, volume)
                 Assert.assertTrue(isLayered)
             }
 
             lastSample.apply {
-                Assert.assertEquals(name, BankHitSampleInfo.HIT_CLAP)
-                Assert.assertEquals(bank, SampleBank.Drum)
-                Assert.assertEquals(customSampleBank, 1)
-                Assert.assertEquals(volume, 40)
+                Assert.assertEquals(BankHitSampleInfo.HIT_CLAP, name)
+                Assert.assertEquals(SampleBank.Drum, bank)
+                Assert.assertEquals(1, customSampleBank)
+                Assert.assertEquals(40, volume)
                 Assert.assertFalse(isLayered)
             }
         }
@@ -265,14 +265,14 @@ class BeatmapParserTest {
     @Test
     fun `Test version 3 beatmap metadata section`() {
         v3Beatmap.metadata.apply {
-            Assert.assertEquals(artist, "Kenji Ninuma")
+            Assert.assertEquals("Kenji Ninuma", artist)
             Assert.assertTrue(artistUnicode.isEmpty())
-            Assert.assertEquals(beatmapId, -1)
-            Assert.assertEquals(beatmapSetId, -1)
-            Assert.assertEquals(creator, "peppy")
-            Assert.assertEquals(title, "DISCO★PRINCE")
+            Assert.assertEquals(-1, beatmapId)
+            Assert.assertEquals(-1, beatmapSetId)
+            Assert.assertEquals("peppy", creator)
+            Assert.assertEquals("DISCO★PRINCE", title)
             Assert.assertTrue(titleUnicode.isEmpty())
-            Assert.assertEquals(version, "Normal")
+            Assert.assertEquals("Normal", version)
             Assert.assertTrue(source.isEmpty())
             Assert.assertTrue(tags.isEmpty())
         }
@@ -281,14 +281,14 @@ class BeatmapParserTest {
     @Test
     fun `Test version 14 beatmap metadata section`() {
         v14Beatmap.metadata.apply {
-            Assert.assertEquals(artist, "YOASOBI")
-            Assert.assertEquals(artistUnicode, "YOASOBI")
-            Assert.assertEquals(beatmapId, 3324715)
-            Assert.assertEquals(beatmapSetId, 1585863)
-            Assert.assertEquals(creator, "ohm002")
-            Assert.assertEquals(title, "Love Letter")
-            Assert.assertEquals(titleUnicode, "ラブレター")
-            Assert.assertEquals(version, "Please accept my overflowing emotions.")
+            Assert.assertEquals("YOASOBI", artist)
+            Assert.assertEquals("YOASOBI", artistUnicode)
+            Assert.assertEquals(3324715, beatmapId)
+            Assert.assertEquals(1585863, beatmapSetId)
+            Assert.assertEquals("ohm002", creator)
+            Assert.assertEquals("Love Letter", title)
+            Assert.assertEquals("ラブレター", titleUnicode)
+            Assert.assertEquals("Please accept my overflowing emotions.", version)
             Assert.assertTrue(source.isEmpty())
             Assert.assertTrue(tags.isNotEmpty())
         }
@@ -296,25 +296,25 @@ class BeatmapParserTest {
 
     @Test
     fun `Test max combo`() {
-        Assert.assertEquals(v3Beatmap.maxCombo, 314)
-        Assert.assertEquals(v14Beatmap.maxCombo, 1033)
+        Assert.assertEquals(314, v3Beatmap.maxCombo)
+        Assert.assertEquals(1033, v14Beatmap.maxCombo)
     }
 
     @Test
     fun `Test NaN control points`() {
         nanBeatmap.controlPoints.apply {
-            Assert.assertEquals(timing.controlPoints.size, 1)
-            Assert.assertEquals(difficulty.controlPoints.size, 2)
+            Assert.assertEquals(1, timing.controlPoints.size)
+            Assert.assertEquals(2, difficulty.controlPoints.size)
 
-            Assert.assertEquals(timing.controlPointAt(1000.0).msPerBeat, 500.0, 0.0)
+            Assert.assertEquals(500.0, timing.controlPointAt(1000.0).msPerBeat, 0.0)
 
             difficulty.controlPointAt(2000.0).apply {
-                Assert.assertEquals(speedMultiplier, 1.0, 0.0)
+                Assert.assertEquals(1.0, speedMultiplier, 0.0)
                 Assert.assertFalse(generateTicks)
             }
 
             difficulty.controlPointAt(3000.0).apply {
-                Assert.assertEquals(speedMultiplier, 1.0, 0.0)
+                Assert.assertEquals(1.0, speedMultiplier, 0.0)
                 Assert.assertTrue(generateTicks)
             }
         }

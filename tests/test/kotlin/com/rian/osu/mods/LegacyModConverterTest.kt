@@ -13,7 +13,7 @@ class LegacyModConverterTest {
         val map =
             LegacyModConverter.convert(setOf(GameMod.MOD_DOUBLETIME, GameMod.MOD_TRACEABLE, GameMod.MOD_EASY), "")
 
-        Assert.assertTrue(map.size == 3)
+        Assert.assertEquals(3, map.size)
         Assert.assertTrue(ModDoubleTime::class in map)
         Assert.assertTrue(ModTraceable::class in map)
         Assert.assertTrue(ModEasy::class in map)
@@ -27,68 +27,69 @@ class LegacyModConverterTest {
                 "x1.10|FLD0.24|CS2.5|AR7.6|OD10.0|HP5.0"
             )
 
-        Assert.assertTrue(map.size == 6)
+        Assert.assertEquals(6, map.size)
         Assert.assertTrue(ModDoubleTime::class in map)
         Assert.assertTrue(ModTraceable::class in map)
         Assert.assertTrue(ModNoFail::class in map)
 
         val customSpeed = map.ofType<ModCustomSpeed>()
         Assert.assertNotNull(customSpeed)
-        Assert.assertTrue(customSpeed!!.trackRateMultiplier == 1.1f)
+        Assert.assertEquals(1.1f, customSpeed!!.trackRateMultiplier)
 
         val flashlight = map.ofType<ModFlashlight>()
         Assert.assertNotNull(flashlight)
-        Assert.assertTrue(flashlight!!.followDelay == 0.24f)
+        Assert.assertEquals(0.24f, flashlight!!.followDelay)
 
         val difficultyAdjust = map.ofType<ModDifficultyAdjust>()
         Assert.assertNotNull(difficultyAdjust)
-        Assert.assertTrue(difficultyAdjust!!.cs == 2.5f)
-        Assert.assertTrue(difficultyAdjust.ar == 7.6f)
-        Assert.assertTrue(difficultyAdjust.od == 10.0f)
-        Assert.assertTrue(difficultyAdjust.hp == 5.0f)
+        Assert.assertEquals(2.5f, difficultyAdjust!!.cs)
+        Assert.assertEquals(7.6f, difficultyAdjust.ar)
+        Assert.assertEquals(10.0f, difficultyAdjust.od)
+        Assert.assertEquals(5.0f, difficultyAdjust.hp)
     }
 
     @Test
     fun `Test mod string conversion`() {
-        val map = LegacyModConverter.convert("rhd")
-
-        Assert.assertTrue(map.size == 3)
-        Assert.assertTrue(ModDoubleTime::class in map)
-        Assert.assertTrue(ModHardRock::class in map)
-        Assert.assertTrue(ModHidden::class in map)
+        LegacyModConverter.convert("rhd").apply {
+            Assert.assertEquals(3, size)
+            Assert.assertTrue(ModDoubleTime::class in this)
+            Assert.assertTrue(ModHardRock::class in this)
+            Assert.assertTrue(ModHidden::class in this)
+        }
     }
 
     @Test
     fun `Test mod string with only extra mod string`() {
         LegacyModConverter.convert("|x1.25").apply {
-            Assert.assertEquals(size, 1)
+            Assert.assertEquals(1, size)
             Assert.assertTrue(ModCustomSpeed::class in this)
-            Assert.assertEquals(ofType<ModCustomSpeed>()!!.trackRateMultiplier, 1.25f, 0f)
+            Assert.assertEquals(1.25f, ofType<ModCustomSpeed>()!!.trackRateMultiplier, 0f)
         }
     }
 
     @Test
     fun `Test mod string conversion without migration`() {
-        val map = LegacyModConverter.convert("rhdm")
-
-        Assert.assertTrue(map.size == 4)
-        Assert.assertTrue(ModDoubleTime::class in map)
-        Assert.assertTrue(ModHardRock::class in map)
-        Assert.assertTrue(ModHidden::class in map)
-        Assert.assertTrue(ModSmallCircle::class in map)
+        LegacyModConverter.convert("rhdm").apply {
+            Assert.assertEquals(4, size)
+            Assert.assertTrue(ModDoubleTime::class in this)
+            Assert.assertTrue(ModHardRock::class in this)
+            Assert.assertTrue(ModHidden::class in this)
+            Assert.assertTrue(ModSmallCircle::class in this)
+        }
     }
 
     @Test
     fun `Test mod string conversion with migration`() {
         val difficulty = BeatmapDifficulty(cs = 4f)
-        val map = LegacyModConverter.convert("hdm", difficulty)
 
-        Assert.assertTrue(map.size == 3)
-        Assert.assertTrue(ModDoubleTime::class in map)
-        Assert.assertTrue(ModHidden::class in map)
+        LegacyModConverter.convert("hdm", difficulty).apply {
+            Assert.assertEquals(3, size)
+            Assert.assertTrue(ModDoubleTime::class in this)
+            Assert.assertTrue(ModHidden::class in this)
 
-        val difficultyAdjust = map.ofType<ModDifficultyAdjust>()
-        Assert.assertNotNull(difficultyAdjust)
-        Assert.assertTrue(difficultyAdjust!!.cs == 8f)
+            val difficultyAdjust = ofType<ModDifficultyAdjust>()
+            Assert.assertNotNull(difficultyAdjust)
+            Assert.assertEquals(8f, difficultyAdjust!!.cs)
+        }
     }
 }

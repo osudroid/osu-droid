@@ -38,8 +38,8 @@ class UIFlexContainerTest {
             onHandleInvalidations()
         }
 
-        assertEquals(component1.width, 100f * (2f / 3f))
-        assertEquals(component2.width, 100f * (1f / 3f))
+        assertEquals(100f * (2f / 3f), component1.width)
+        assertEquals(100f * (1f / 3f), component2.width)
     }
 
 }

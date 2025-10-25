@@ -16,9 +16,9 @@ class HitObjectGenerationUtilsTest {
         createSlider().apply {
             HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(this)
 
-            Assert.assertEquals(position, Vector2(412, 100))
-            Assert.assertEquals(endPosition, Vector2(212, 100))
-            Assert.assertEquals(nestedHitObjects[1].position, Vector2(312, 100))
+            Assert.assertEquals(Vector2(412, 100), position)
+            Assert.assertEquals(Vector2(212, 100), endPosition)
+            Assert.assertEquals(Vector2(312, 100), nestedHitObjects[1].position)
         }
     }
 
@@ -27,9 +27,9 @@ class HitObjectGenerationUtilsTest {
         createSlider().apply {
             HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(this)
 
-            Assert.assertEquals(position, Vector2(100, 284))
-            Assert.assertEquals(endPosition, Vector2(300, 284))
-            Assert.assertEquals(nestedHitObjects[1].position, Vector2(200, 284))
+            Assert.assertEquals(Vector2(100, 284), position)
+            Assert.assertEquals(Vector2(300, 284), endPosition)
+            Assert.assertEquals(Vector2(200, 284), nestedHitObjects[1].position)
         }
     }
 

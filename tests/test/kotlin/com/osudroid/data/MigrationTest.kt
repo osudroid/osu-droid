@@ -89,21 +89,21 @@ class MigrationTest {
                         val modMap = LegacyModConverter.convert("rhd|x1.10", difficulty)
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     2L -> {
                         val modMap = LegacyModConverter.convert("m")
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     3L -> {
                         val modMap = LegacyModConverter.convert("m", difficulty)
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     else -> throw IllegalStateException("Unknown score ID: $id")

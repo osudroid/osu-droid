@@ -23,11 +23,11 @@ class ModHiddenTest {
         }
 
         beatmap.hitObjects.add(hitCircle)
-        Assert.assertEquals(beatmap.hitObjects.objects.size, 1)
+        Assert.assertEquals(1, beatmap.hitObjects.objects.size)
 
         ModHidden().applyToBeatmap(beatmap)
 
-        Assert.assertEquals(hitCircle.timeFadeIn, 480.0, 1e-5)
+        Assert.assertEquals(480.0, hitCircle.timeFadeIn, 1e-5)
     }
 
     @Test

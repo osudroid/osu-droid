@@ -19,7 +19,7 @@ class BeatmapHitObjectsTest {
         BeatmapHitObjects().apply {
             add(createCircle())
 
-            Assert.assertEquals(objects.size, 1)
+            Assert.assertEquals(1, objects.size)
         }
     }
 
@@ -29,8 +29,8 @@ class BeatmapHitObjectsTest {
             add(listOf(createCircle(), createCircle(1500.0)))
             add(createCircle(500.0))
 
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(objects[0].startTime, 500.0, 0.0)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(500.0, objects[0].startTime, 0.0)
         }
     }
 
@@ -40,8 +40,8 @@ class BeatmapHitObjectsTest {
             add(listOf(createCircle(500.0), createCircle(1500.0)))
             add(createCircle())
 
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(objects[1].startTime, 1000.0, 0.0)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(1000.0, objects[1].startTime, 0.0)
         }
     }
 
@@ -51,8 +51,8 @@ class BeatmapHitObjectsTest {
             add(listOf(createCircle(500.0), createCircle(1000.0)))
             add(createCircle(1500.0))
 
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(objects[2].startTime, 1500.0, 0.0)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(1500.0, objects[2].startTime, 0.0)
         }
     }
 
@@ -60,14 +60,14 @@ class BeatmapHitObjectsTest {
     fun `Test circle counter`() {
         BeatmapHitObjects().apply {
             add(createCircle())
-            Assert.assertEquals(circleCount, 1)
+            Assert.assertEquals(1, circleCount)
 
             add(createCircle(1500.0))
-            Assert.assertEquals(circleCount, 2)
+            Assert.assertEquals(2, circleCount)
 
             add(createSpinner(2000.0))
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(circleCount, 2)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(2, circleCount)
         }
     }
 
@@ -75,14 +75,14 @@ class BeatmapHitObjectsTest {
     fun `Test slider counter`() {
         BeatmapHitObjects().apply {
             add(createSlider())
-            Assert.assertEquals(sliderCount, 1)
+            Assert.assertEquals(1, sliderCount)
 
             add(createSlider(1500.0))
-            Assert.assertEquals(sliderCount, 2)
+            Assert.assertEquals(2, sliderCount)
 
             add(createSpinner(2000.0))
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(sliderCount, 2)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(2, sliderCount)
         }
     }
 
@@ -90,14 +90,14 @@ class BeatmapHitObjectsTest {
     fun `Test spinner counter`() {
         BeatmapHitObjects().apply {
             add(createSpinner())
-            Assert.assertEquals(spinnerCount, 1)
+            Assert.assertEquals(1, spinnerCount)
 
             add(createSpinner(1500.0))
-            Assert.assertEquals(spinnerCount, 2)
+            Assert.assertEquals(2, spinnerCount)
 
             add(createCircle(2000.0))
-            Assert.assertEquals(objects.size, 3)
-            Assert.assertEquals(spinnerCount, 2)
+            Assert.assertEquals(3, objects.size)
+            Assert.assertEquals(2, spinnerCount)
         }
     }
 
@@ -113,8 +113,8 @@ class BeatmapHitObjectsTest {
             add(createSpinner(1500.0))
 
             Assert.assertTrue(remove(0) is HitCircle)
-            Assert.assertEquals(objects.size, 1)
-            Assert.assertEquals(circleCount, 0)
+            Assert.assertEquals(1, objects.size)
+            Assert.assertEquals(0, circleCount)
         }
     }
 
@@ -125,8 +125,8 @@ class BeatmapHitObjectsTest {
             add(createSlider(1500.0))
 
             Assert.assertTrue(remove(1) is Slider)
-            Assert.assertEquals(objects.size, 1)
-            Assert.assertEquals(sliderCount, 0)
+            Assert.assertEquals(1, objects.size)
+            Assert.assertEquals(0, sliderCount)
         }
     }
 
@@ -137,8 +137,8 @@ class BeatmapHitObjectsTest {
             add(createSpinner(1500.0))
 
             Assert.assertTrue(remove(1) is Spinner)
-            Assert.assertEquals(objects.size, 1)
-            Assert.assertEquals(spinnerCount, 0)
+            Assert.assertEquals(1, objects.size)
+            Assert.assertEquals(0, spinnerCount)
         }
     }
 

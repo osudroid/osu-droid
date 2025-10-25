@@ -29,25 +29,25 @@ class StandardDifficultyHitObjectTest {
 
     @Test
     fun `Test No Mod opacity before hit time`() {
-        Assert.assertEquals(obj.opacityAt(400.0, listOf()), 0.0, 0.0)
-        Assert.assertEquals(obj.opacityAt(600.0, listOf()), 0.5, 1e-2)
-        Assert.assertEquals(obj.opacityAt(800.0, listOf()), 1.0, 0.0)
-        Assert.assertEquals(obj.opacityAt(1000.0, listOf()), 1.0, 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(400.0, listOf()), 0.0)
+        Assert.assertEquals(0.5, obj.opacityAt(600.0, listOf()), 1e-2)
+        Assert.assertEquals(1.0, obj.opacityAt(800.0, listOf()), 0.0)
+        Assert.assertEquals(1.0, obj.opacityAt(1000.0, listOf()), 0.0)
     }
 
     @Test
     fun `Test Hidden opacity before hit time`() {
-        Assert.assertEquals(obj.opacityAt(400.0, hidden), 0.0, 0.0)
-        Assert.assertEquals(obj.opacityAt(600.0, hidden), 0.5, 1e-2)
-        Assert.assertEquals(obj.opacityAt(800.0, hidden), 1.0, 0.0)
-        Assert.assertEquals(obj.opacityAt(900.0, hidden), 0.44, 1e-2)
-        Assert.assertEquals(obj.opacityAt(1000.0, hidden), 0.0, 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(400.0, hidden), 0.0)
+        Assert.assertEquals(0.5, obj.opacityAt(600.0, hidden), 1e-2)
+        Assert.assertEquals(1.0, obj.opacityAt(800.0, hidden), 0.0)
+        Assert.assertEquals(0.44, obj.opacityAt(900.0, hidden), 1e-2)
+        Assert.assertEquals(0.0, obj.opacityAt(1000.0, hidden), 0.0)
     }
 
     @Test
     fun `Test opacity after hit time`() {
-        Assert.assertEquals(obj.opacityAt(1100.0, listOf()), 0.0, 0.0)
-        Assert.assertEquals(obj.opacityAt(1100.0, hidden), 0.0, 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(1100.0, listOf()), 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(1100.0, hidden), 0.0)
     }
 
     companion object {
