@@ -155,7 +155,7 @@ class BeatmapParserTest {
             Assert.assertEquals(objects.size, 194)
             Assert.assertEquals(circleCount, 160)
             Assert.assertEquals(sliderCount, 30)
-            Assert.assertEquals(sliderTickCount, 0)
+            Assert.assertEquals(sliderTickCount, 75)
             Assert.assertEquals(spinnerCount, 4)
         }
     }
@@ -166,7 +166,7 @@ class BeatmapParserTest {
             Assert.assertEquals(objects.size, 592)
             Assert.assertEquals(circleCount, 198)
             Assert.assertEquals(sliderCount, 393)
-            Assert.assertEquals(sliderTickCount, 0)
+            Assert.assertEquals(sliderTickCount, 21)
             Assert.assertEquals(spinnerCount, 1)
         }
     }
