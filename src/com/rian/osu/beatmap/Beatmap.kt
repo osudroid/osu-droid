@@ -115,7 +115,7 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, adjustmentMods)
+                it.applyToHitObject(mode, obj, adjustmentMods, scope)
             }
         }
 

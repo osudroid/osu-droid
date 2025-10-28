@@ -5,6 +5,7 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Represents the Precise mod.
@@ -20,7 +21,8 @@ class ModPrecise : Mod(), IModApplicableToHitObject {
     override fun applyToHitObject(
         mode: GameMode,
         hitObject: HitObject,
-        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>,
+        scope: CoroutineScope?
     ) {
         if (mode == GameMode.Standard || hitObject is Spinner) {
             return
