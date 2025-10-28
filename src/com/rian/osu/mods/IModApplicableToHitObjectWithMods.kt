@@ -24,5 +24,5 @@ interface IModApplicableToHitObjectWithMods {
      * @param mods The [Mod]s that are used.
      * @param scope The [CoroutineScope] to use for the operation.
      */
-    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, scope: CoroutineScope?)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, scope: CoroutineScope? = null)
 }

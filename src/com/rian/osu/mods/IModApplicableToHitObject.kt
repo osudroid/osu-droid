@@ -16,5 +16,5 @@ interface IModApplicableToHitObject {
      * @param adjustmentMods [Mod]s that apply [IModFacilitatesAdjustment].
      * @param scope The [CoroutineScope] to use for the operation.
      */
-    fun applyToHitObject(mode: GameMode, hitObject: HitObject, adjustmentMods: Iterable<IModFacilitatesAdjustment>, scope: CoroutineScope?)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject, adjustmentMods: Iterable<IModFacilitatesAdjustment>, scope: CoroutineScope? = null)
 }
