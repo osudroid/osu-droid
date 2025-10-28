@@ -53,7 +53,7 @@ class SliderPath @JvmOverloads constructor(
      *
      * @param progress Ranges from 0 (beginning of the path) to 1 (end of the path).
      */
-    fun positionAt(progress: Double): Vector2 =
+    fun positionAt(progress: Double) =
         progressToDistance(progress).let { interpolateVertices(indexOfDistance(it), it) }
 
     /**
@@ -62,9 +62,11 @@ class SliderPath @JvmOverloads constructor(
      *
      * @param p0 Start progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
      * @param p1 End progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
+     * @param scope The [CoroutineScope] to use for job cancellation.
      * @return The computed path between the two ranges.
      */
-    fun getPathToProgress(p0: Double, p1: Double): MutableList<Vector2> {
+    @JvmOverloads
+    fun getPathToProgress(p0: Double, p1: Double, scope: CoroutineScope? = null): MutableList<Vector2> {
         val path = mutableListOf<Vector2>()
         val d0 = progressToDistance(p0)
         val d1 = progressToDistance(p1)
@@ -72,12 +74,14 @@ class SliderPath @JvmOverloads constructor(
         var i = 0
 
         while (i < calculatedPath.size && cumulativeLength[i] < d0) {
+            scope?.ensureActive()
             i++
         }
 
         path.add(interpolateVertices(i, d0))
 
         while (i < calculatedPath.size && cumulativeLength[i] <= d1) {
+            scope?.ensureActive()
             path.add(calculatedPath[i++])
         }
 

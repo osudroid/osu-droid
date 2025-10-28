@@ -117,11 +117,12 @@ object HitObjectGenerationUtils {
      *
      * @param hitObject The [HitObject] to reflect.
      */
-    fun reflectHorizontallyAlongPlayfield(hitObject: HitObject) {
+    @JvmOverloads
+    fun reflectHorizontallyAlongPlayfield(hitObject: HitObject, scope: CoroutineScope? = null) {
         hitObject.position = reflectVectorHorizontallyAlongPlayfield(hitObject.position)
 
         if (hitObject is Slider) {
-            modifySlider(hitObject) { Vector2(-x, y) }
+            modifySlider(hitObject, scope) { Vector2(-x, y) }
         }
     }
 
@@ -129,12 +130,14 @@ object HitObjectGenerationUtils {
      * Reflects the position of a [HitObject] in the playfield vertically.
      *
      * @param hitObject The [HitObject] to reflect.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
-    fun reflectVerticallyAlongPlayfield(hitObject: HitObject) {
+    @JvmOverloads
+    fun reflectVerticallyAlongPlayfield(hitObject: HitObject, scope: CoroutineScope? = null) {
         hitObject.position = reflectVectorVerticallyAlongPlayfield(hitObject.position)
 
         if (hitObject is Slider) {
-            modifySlider(hitObject) { Vector2(x, -y) }
+            modifySlider(hitObject, scope) { Vector2(x, -y) }
         }
     }
 
@@ -142,16 +145,19 @@ object HitObjectGenerationUtils {
      * Flips the position of a [Slider] around its start position horizontally.
      *
      * @param slider The [Slider] to be flipped.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
-    fun flipSliderInPlaceHorizontally(slider: Slider) {
-        modifySlider(slider) { Vector2(-x, y) }
+    @JvmOverloads
+    fun flipSliderInPlaceHorizontally(slider: Slider, scope: CoroutineScope? = null) {
+        modifySlider(slider, scope) { Vector2(-x, y) }
     }
 
-    private fun modifySlider(slider: Slider, modifyControlPoint: Vector2.() -> Vector2) {
+    private fun modifySlider(slider: Slider, scope: CoroutineScope?, modifyControlPoint: Vector2.() -> Vector2) {
         slider.path = SliderPath(
             slider.path.pathType,
             slider.path.controlPoints.map { it.modifyControlPoint() },
-            slider.path.expectedDistance
+            slider.path.expectedDistance,
+            scope
         )
     }
 
@@ -167,15 +173,19 @@ object HitObjectGenerationUtils {
      * positioned.
      *
      * @param hitObjects A list of [HitObject]s to process.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      * @return A list of [HitObjectPositionInfo]s describing how each [HitObject] is positioned relative to the previous
      * one.
      */
-    fun generatePositionInfos(hitObjects: Iterable<HitObject>): List<HitObjectPositionInfo> {
+    @JvmOverloads
+    fun generatePositionInfos(hitObjects: Iterable<HitObject>, scope: CoroutineScope? = null): List<HitObjectPositionInfo> {
         val positionInfos = mutableListOf<HitObjectPositionInfo>()
         var previousPosition = playfieldCenter
         var previousAngle = 0f
 
         for (obj in hitObjects) {
+            scope?.ensureActive()
+
             val relativePosition = obj.position - previousPosition
             var absoluteAngle = atan2(relativePosition.y, relativePosition.x)
             val relativeAngle = absoluteAngle - previousAngle
@@ -229,12 +239,12 @@ object HitObjectGenerationUtils {
                 continue
             }
 
-            computeModifiedPosition(current, previous, workingObjects.getOrNull(i - 2))
+            computeModifiedPosition(current, previous, workingObjects.getOrNull(i - 2), scope)
 
             // Move hit objects back into the playfield if they are outside of it.
             val shift = when (hitObject) {
                 is HitCircle -> clampHitCircleToPlayfield(current)
-                is Slider -> clampSliderToPlayfield(current)
+                is Slider -> clampSliderToPlayfield(current, scope)
                 else -> Vector2(0)
             }
 
@@ -242,6 +252,8 @@ object HitObjectGenerationUtils {
                 val toBeShifted = mutableListOf<HitObject>()
 
                 for (j in i - 1 downTo max(i - PRECEDING_OBJECTS_TO_SHIFT, 0)) {
+                    scope?.ensureActive()
+
                     // Only shift hit circles
                     toBeShifted.add(workingObjects[j].hitObject as? HitCircle ?: break)
                 }
@@ -333,11 +345,13 @@ object HitObjectGenerationUtils {
      * @param current The [WorkingObject] representing the [HitObject] to have the modified position computed for.
      * @param previous The [WorkingObject] representing the [HitObject] immediately preceding [current].
      * @param beforePrevious The [WorkingObject] representing the [HitObject] immediately preceding [previous].
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
     private fun computeModifiedPosition(
         current: WorkingObject,
         previous: WorkingObject?,
-        beforePrevious: WorkingObject?
+        beforePrevious: WorkingObject?,
+        scope: CoroutineScope?
     ) {
         var previousAbsoluteAngle = 0f
 
@@ -380,7 +394,7 @@ object HitObjectGenerationUtils {
             atan2(centerOfMassModified.y, centerOfMassModified.x) - atan2(centerOfMassOriginal.y, centerOfMassOriginal.x)
 
         if (!Precision.almostEquals(relativeRotation, 0f)) {
-            rotateSlider(slider, relativeRotation)
+            rotateSlider(slider, relativeRotation, scope)
         }
     }
 
@@ -407,9 +421,9 @@ object HitObjectGenerationUtils {
      * @param workingObject The [WorkingObject] that represents the [Slider].
      * @return The deviation from the original modified position in order to fit within the playfield.
      */
-    private fun clampSliderToPlayfield(workingObject: WorkingObject): Vector2 {
+    private fun clampSliderToPlayfield(workingObject: WorkingObject, scope: CoroutineScope?): Vector2 {
         val slider = workingObject.hitObject as Slider
-        var possibleMovementBounds = calculatePossibleMovementBounds(slider)
+        var possibleMovementBounds = calculatePossibleMovementBounds(slider, scope)
 
         // The slider rotation applied in computeModifiedPosition might make it impossible to fit the slider into the
         // playfield. For example, a long horizontal slider will be off-screen when rotated by 90 degrees.
@@ -425,7 +439,7 @@ object HitObjectGenerationUtils {
                 rotateSlider(slider, workingObject.rotationOriginal + Math.PI.toFloat() - currentRotation)
             }
 
-            possibleMovementBounds = calculatePossibleMovementBounds(slider)
+            possibleMovementBounds = calculatePossibleMovementBounds(slider, scope)
         }
 
         val previousPosition = workingObject.positionModified
@@ -489,11 +503,13 @@ object HitObjectGenerationUtils {
      * than its X/Y component.
      *
      * @param slider The [Slider] whose movement bound is to be calculated.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      * @return A [Vector4] which contains all possible movements of a [Slider] (in relative X/Y coordinates) such
      * that the entire [Slider] is inside the playfield.
      */
-    fun calculatePossibleMovementBounds(slider: Slider): Vector4 {
-        val pathPositions = slider.path.getPathToProgress(0.0, 1.0)
+    @JvmOverloads
+    fun calculatePossibleMovementBounds(slider: Slider, scope: CoroutineScope? = null): Vector4 {
+        val pathPositions = slider.path.getPathToProgress(0.0, 1.0, scope)
 
         var minX = Float.POSITIVE_INFINITY
         var maxX = Float.NEGATIVE_INFINITY
@@ -503,6 +519,8 @@ object HitObjectGenerationUtils {
 
         // Compute the bounding box of the slider.
         for (position in pathPositions) {
+            scope?.ensureActive()
+
             minX = min(minX, position.x)
             maxX = max(maxX, position.x)
 
@@ -535,9 +553,11 @@ object HitObjectGenerationUtils {
      *
      * @param slider The [Slider] to rotate.
      * @param rotation The angle to rotate [slider] by, in radians.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
-    fun rotateSlider(slider: Slider, rotation: Float) {
-        modifySlider(slider) { rotateVector(this, rotation) }
+    @JvmOverloads
+    fun rotateSlider(slider: Slider, rotation: Float, scope: CoroutineScope? = null) {
+        modifySlider(slider, scope) { rotateVector(this, rotation) }
     }
 
     /**

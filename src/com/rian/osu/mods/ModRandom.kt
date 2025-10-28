@@ -74,7 +74,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
 
         random = Random(seed!!)
 
-        val positionInfos = HitObjectGenerationUtils.generatePositionInfos(beatmap.hitObjects.objects)
+        val positionInfos = HitObjectGenerationUtils.generatePositionInfos(beatmap.hitObjects.objects, scope)
 
         // Offsets the angles of all hit objects in a "section" by the same amount.
         var sectionOffset = 0f
@@ -92,7 +92,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
             }
 
             if (positionInfo.hitObject is Slider && random!!.nextDouble() < 0.5) {
-                HitObjectGenerationUtils.flipSliderInPlaceHorizontally(positionInfo.hitObject)
+                HitObjectGenerationUtils.flipSliderInPlaceHorizontally(positionInfo.hitObject, scope)
             }
 
             if (i == 0) {
