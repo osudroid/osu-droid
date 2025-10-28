@@ -5,6 +5,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.math.times
 import java.util.*
 import kotlin.math.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Helper methods to approximate a path by interpolating a sequence of control points.
@@ -23,8 +25,11 @@ object PathApproximation {
      * the control points until their approximation error vanishes below a given threshold.
      *
      * @param controlPoints The control points of the curve.
+     * @param scope The [CoroutineScope] to use for job cancellation.
+     * @return The points representing the resulting piecewise-linear approximation.
      */
-    fun approximateBezier(controlPoints: List<Vector2>): MutableList<Vector2> {
+    @JvmOverloads
+    fun approximateBezier(controlPoints: List<Vector2>, scope: CoroutineScope? = null): MutableList<Vector2> {
         val output = mutableListOf<Vector2>()
         val count = controlPoints.size - 1
 
@@ -40,19 +45,23 @@ object PathApproximation {
         val toFlatten = Stack<Array<Vector2?>>()
         val freeBuffers = Stack<Array<Vector2?>>()
 
+        scope?.ensureActive()
+
         toFlatten.push(controlPoints.toTypedArray())
         val subdivisionBuffer1 = arrayOfNulls<Vector2>(count + 1)
         val subdivisionBuffer2 = arrayOfNulls<Vector2>(count * 2 + 1)
 
         while (toFlatten.isNotEmpty()) {
+            scope?.ensureActive()
+
             val parent = toFlatten.pop()
 
-            if (bezierIsFlatEnough(parent)) {
+            if (bezierIsFlatEnough(parent, scope)) {
                 // If the control points we currently operate on are sufficiently "flat", we use
                 // an extension to De Casteljau's algorithm to obtain a piecewise-linear approximation
                 // of the Bézier curve represented by our control points, consisting of the same amount
                 // of points as there are control points.
-                bezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, count + 1)
+                bezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, count + 1, scope)
                 freeBuffers.push(parent)
                 continue
             }
@@ -60,16 +69,18 @@ object PathApproximation {
             // If we do not yet have a sufficiently "flat" (in other words, detailed) approximation we keep
             // subdividing the curve we are currently operating on.
             val rightChild = if (freeBuffers.isNotEmpty()) freeBuffers.pop() else arrayOfNulls(count + 1)
-            bezierSubdivide(parent, subdivisionBuffer2, rightChild, subdivisionBuffer1, count + 1)
+            bezierSubdivide(parent, subdivisionBuffer2, rightChild, subdivisionBuffer1, count + 1, scope)
 
             // We re-use the buffer of the parent for one of the children, so that we save one allocation per iteration.
-            if (count + 1 >= 0) {
-                System.arraycopy(subdivisionBuffer2, 0, parent, 0, count + 1)
+            for (i in 0..count) {
+                scope?.ensureActive()
+                parent[i] = subdivisionBuffer2[i]
             }
 
             toFlatten.push(rightChild)
             toFlatten.push(parent)
         }
+
         output.add(controlPoints[count])
         return output
     }
@@ -78,17 +89,24 @@ object PathApproximation {
      * Creates a piecewise-linear approximation of a Catmull-Rom spline.
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for job cancellation.
+     * @return The points representing the resulting piecewise-linear approximation.
      */
-    fun approximateCatmull(controlPoints: List<Vector2>): MutableList<Vector2> {
+    @JvmOverloads
+    fun approximateCatmull(controlPoints: List<Vector2>, scope: CoroutineScope? = null): MutableList<Vector2> {
         val result = mutableListOf<Vector2>()
 
         for (i in 0 until controlPoints.size - 1) {
+            scope?.ensureActive()
+
             val v1 = if (i > 0) controlPoints[i - 1] else controlPoints[i]
             val v2 = controlPoints[i]
             val v3 = if (i < controlPoints.size - 1) controlPoints[i + 1] else v2 + v2 - v1
             val v4 = if (i < controlPoints.size - 2) controlPoints[i + 2] else v3 + v3 - v2
 
             for (c in 0 until CATMULL_DETAIL) {
+                scope?.ensureActive()
+
                 result.add(catmullFindPoint(v1, v2, v3, v4, c.toFloat() / CATMULL_DETAIL))
                 result.add(catmullFindPoint(v1, v2, v3, v4, (c + 1).toFloat() / CATMULL_DETAIL))
             }
@@ -101,10 +119,13 @@ object PathApproximation {
      * Creates a piecewise-linear approximation of a circular arc curve.
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for job cancellation.
+     * @return The points representing the resulting piecewise-linear approximation.
      */
-    fun approximateCircularArc(controlPoints: List<Vector2>): MutableList<Vector2> {
+    @JvmOverloads
+    fun approximateCircularArc(controlPoints: List<Vector2>, scope: CoroutineScope? = null): MutableList<Vector2> {
         if (controlPoints.size != 3) {
-            return approximateBezier(controlPoints)
+            return approximateBezier(controlPoints, scope)
         }
 
         val a = controlPoints[0]
@@ -114,7 +135,7 @@ object PathApproximation {
         // If we have a degenerate triangle where a side-length is almost zero, then give up and fall
         // back to a more numerically stable method.
         if (almostEquals(0f, (b.y - a.y) * (c.x - a.x) - (b.x - a.x) * (c.y - a.y))) {
-            return approximateBezier(controlPoints)
+            return approximateBezier(controlPoints, scope)
         }
 
         // See: https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates_2
@@ -123,7 +144,7 @@ object PathApproximation {
         val bSq = b.lengthSquared
         val cSq = c.lengthSquared
 
-        val center: Vector2 = Vector2(
+        val center = Vector2(
             aSq * (b - c).y + bSq * (c - a).y + cSq * (a - b).y,
             aSq * (c - b).x + bSq * (a - c).x + cSq * (b - a).x
         ) / d
@@ -136,6 +157,7 @@ object PathApproximation {
         var thetaEnd = atan2(dC.y.toDouble(), dC.x.toDouble())
 
         while (thetaEnd < thetaStart) {
+            scope?.ensureActive()
             thetaEnd += 2 * Math.PI
         }
 
@@ -168,6 +190,8 @@ object PathApproximation {
         val output = mutableListOf<Vector2>()
 
         for (i in 0 until amountPoints) {
+            scope?.ensureActive()
+
             val fraction = i.toDouble() / (amountPoints - 1)
             val theta = thetaStart + direction * fraction * thetaRange
             val o = Vector2(cos(theta).toFloat(), sin(theta).toFloat()) * radius
@@ -196,10 +220,13 @@ object PathApproximation {
      * need to have a denser approximation to be more "flat".
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
-    private fun bezierIsFlatEnough(controlPoints: Array<Vector2?>) =
+    private fun bezierIsFlatEnough(controlPoints: Array<Vector2?>, scope: CoroutineScope?) =
         controlPoints.let {
             for (i in 1 until it.size - 1) {
+                scope?.ensureActive()
+
                 val prev = it[i - 1]!!
                 val current = it[i]!!
                 val next = it[i + 1]!!
@@ -224,21 +251,25 @@ object PathApproximation {
      * @param subdivisionBuffer1 The first buffer containing the current subdivision state.
      * @param subdivisionBuffer2 The second buffer containing the current subdivision state.
      * @param count The number of control points in the original array.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
     private fun bezierApproximate(
         controlPoints: Array<Vector2?>, output: MutableList<Vector2>,
         subdivisionBuffer1: Array<Vector2?>, subdivisionBuffer2: Array<Vector2?>,
-        count: Int
+        count: Int, scope: CoroutineScope?
     ) {
-        bezierSubdivide(controlPoints, subdivisionBuffer2, subdivisionBuffer1, subdivisionBuffer1, count)
+        bezierSubdivide(controlPoints, subdivisionBuffer2, subdivisionBuffer1, subdivisionBuffer1, count, scope)
 
         for (i in 0 until count - 1) {
+            scope?.ensureActive()
             subdivisionBuffer2[count + i] = subdivisionBuffer1[i + 1]
         }
 
         output.add(controlPoints[0]!!)
 
         for (i in 1 until count - 1) {
+            scope?.ensureActive()
+
             val index = 2 * i
             val p = 0.25 * (subdivisionBuffer2[index - 1]!! + subdivisionBuffer2[index]!! * 2 + subdivisionBuffer2[index + 1]!!)
 
@@ -257,20 +288,24 @@ object PathApproximation {
      * @param r Parts of the slider for approximation.
      * @param subdivisionBuffer Parts of the slider for approximation.
      * @param count The amount of anchor points in the slider.
+     * @param scope The [CoroutineScope] to use for job cancellation.
      */
     private fun bezierSubdivide(
         controlPoints: Array<Vector2?>, l: Array<Vector2?>, r: Array<Vector2?>,
-        subdivisionBuffer: Array<Vector2?>, count: Int
+        subdivisionBuffer: Array<Vector2?>, count: Int, scope: CoroutineScope?
     ) {
         for (i in 0 until count) {
+            scope?.ensureActive()
             subdivisionBuffer[i] = controlPoints[i]
         }
 
         for (i in 0 until count) {
+            scope?.ensureActive()
             l[i] = subdivisionBuffer[0]
             r[count - i - 1] = subdivisionBuffer[count - i - 1]
 
             for (j in 0 until count - i - 1) {
+                scope?.ensureActive()
                 subdivisionBuffer[j] = (subdivisionBuffer[j]!! + subdivisionBuffer[j + 1]!!) / 2
             }
         }
