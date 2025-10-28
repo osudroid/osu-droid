@@ -12,6 +12,8 @@ import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.reflect.KProperty0
 import kotlin.reflect.jvm.isAccessible
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import org.json.JSONObject
 
 /**
@@ -196,7 +198,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             }
         }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>) {
+    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, scope: CoroutineScope?) {
         // Special case for force AR in replay version 6 and older, where the AR value is kept constant with respect to
         // game time. This makes the player perceive the fade in animation as is under all speed multipliers.
         if (ar == null || mods.none { it is ModReplayV6 }) {
@@ -206,7 +208,11 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         applyOldFadeAdjustment(hitObject, mods)
 
         if (hitObject is Slider) {
-            hitObject.nestedHitObjects.forEach { applyOldFadeAdjustment(it, mods) }
+            hitObject.nestedHitObjects.forEach {
+                scope?.ensureActive()
+
+                applyOldFadeAdjustment(it, mods)
+            }
         }
     }
 
