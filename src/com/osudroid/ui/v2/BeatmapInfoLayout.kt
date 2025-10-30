@@ -136,22 +136,22 @@ class BeatmapInfoLayout : UILinearContainer() {
 
                 arText = labeledBadge {
                     label = "AR"
-                    value = "00.0"
+                    value = "0.00"
                     sizeVariant = SizeVariant.Small
                 }
                 odText = labeledBadge {
                     label = "OD"
-                    value = "00.0"
+                    value = "0.00"
                     sizeVariant = SizeVariant.Small
                 }
                 csText = labeledBadge {
                     label = "CS"
-                    value = "00.0"
+                    value = "0.00"
                     sizeVariant = SizeVariant.Small
                 }
                 hpText = labeledBadge {
                     label = "HP"
-                    value = "00.0"
+                    value = "0.00"
                     sizeVariant = SizeVariant.Small
                 }
             }
@@ -183,10 +183,10 @@ class BeatmapInfoLayout : UILinearContainer() {
         spinnersBadge.value = beatmapInfo?.spinnerCount?.toString() ?: "0"
 
         if (beatmapInfo == null) {
-            arText.value = "00.0"
-            odText.value = "00.0"
-            csText.value = "00.0"
-            hpText.value = "00.0"
+            arText.value = "0.00"
+            odText.value = "0.00"
+            csText.value = "0.00"
+            hpText.value = "0.00"
             starsText.text = "0.00"
             bpmText.text = "0"
             lengthText.text = "00:00"
