@@ -139,7 +139,6 @@ class RoomChat : UILinearContainer() {
         }
 
         input.value = ""
-        input.blur()
 
         async {
             try {
