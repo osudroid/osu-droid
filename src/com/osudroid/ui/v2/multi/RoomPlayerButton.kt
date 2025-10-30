@@ -132,8 +132,8 @@ class RoomPlayerButton() : UIButton() {
                             setText(R.string.multiplayer_room_player_menu_transfer_host)
                             onActionUp = {
                                 UIConfirmDialog().apply {
-                                    title = StringTable.get(R.string.multiplayer_room_player_transfer_dialog_title)
-                                    text = StringTable.format(R.string.multiplayer_room_player_transfer_dialog_message, player.name)
+                                    title = StringTable.format(R.string.multiplayer_room_player_transfer_dialog_title, player.name)
+                                    text = StringTable.get(R.string.multiplayer_room_player_transfer_dialog_message)
                                     onConfirm = {
                                         if (Multiplayer.isConnected) {
                                             RoomAPI.setRoomHost(player.id)
