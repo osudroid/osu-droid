@@ -1226,7 +1226,25 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
+        // Since the statistics will be parsed in ScoringScene.load, we take the chance to update the score with its
+        // complete statistics.
+        boolean scoreNeedsUpdate =
+            stat.getSliderHeadHits() == -1 ||
+            stat.getSliderTickHits() == -1 ||
+            stat.getSliderRepeatHits() == -1 ||
+            stat.getSliderEndHits() == -1;
+
         scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
+
+        if (scoreNeedsUpdate) {
+            score.setSliderHeadHits(stat.getSliderHeadHits() == -1 ? null : stat.getSliderHeadHits());
+            score.setSliderTickHits(stat.getSliderTickHits() == -1 ? null : stat.getSliderTickHits());
+            score.setSliderRepeatHits(stat.getSliderRepeatHits() == -1 ? null : stat.getSliderRepeatHits());
+            score.setSliderEndHits(stat.getSliderEndHits() == -1 ? null : stat.getSliderEndHits());
+
+            DatabaseManager.getScoreInfoTable().updateScore(score);
+        }
+
         engine.setScene(scoreScene.getScene());
     }
 

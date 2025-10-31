@@ -417,6 +417,16 @@ public class ScoringScene {
                     replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                     if (replay.load(replayPath, true)) {
+                        // If statistics information is not complete, we populate it with information from replay.
+                        if (
+                            stat.getSliderHeadHits() == -1 ||
+                            stat.getSliderTickHits() == -1 ||
+                            stat.getSliderRepeatHits() == -1 ||
+                            stat.getSliderEndHits() == -1
+                        ) {
+                            replay.populateStatistics(beatmapData, stat);
+                        }
+
                         var copiedMods = mods;
 
                         if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
