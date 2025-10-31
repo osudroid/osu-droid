@@ -522,7 +522,11 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getMisses());
         builder.append(' ');
+        builder.append(getSliderHeadHits());
+        builder.append(' ');
         builder.append(getSliderTickHits());
+        builder.append(' ');
+        builder.append(getSliderRepeatHits());
         builder.append(' ');
         builder.append(getSliderEndHits());
         builder.append(' ');
