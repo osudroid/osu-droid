@@ -200,4 +200,26 @@ class MigrationTest {
             }
         }
     }
+
+    @Test
+    @Throws(IOException::class)
+    fun `Test migration from version 3 to 4`() {
+        @Suppress("VariableInitializerIsRedundant")
+        var db = helper.createDatabase(testDb, 3).apply {
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '', 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+        }
+
+        db = helper.runMigrationsAndValidate(testDb, 4, true, MIGRATION_3_4)
+
+        db.query("SELECT sliderHeadHits, sliderRepeatHits FROM ScoreInfo").use {
+            it.moveToFirst()
+
+            Assert.assertTrue(it.isNull(0))
+            Assert.assertTrue(it.isNull(1))
+        }
+    }
 }

@@ -210,4 +210,17 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+/**
+ * Migration from version 3 to 4.
+ *
+ * Contains the following changes:
+ * - Adds slider head and repeat hits statistics to `ScoreInfo`
+ */
+val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
+    override fun performMigration(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderHeadHits INTEGER")
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderRepeatHits INTEGER")
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
