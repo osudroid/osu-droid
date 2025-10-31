@@ -638,7 +638,9 @@ public class StatisticV2 implements Serializable {
             hit50,
             misses,
             time,
+            sliderHeadHits >= 0 ? sliderHeadHits : null,
             sliderTickHits >= 0 ? sliderTickHits : null,
+            sliderRepeatHits >= 0 ? sliderRepeatHits : null,
             sliderEndHits >= 0 ? sliderEndHits : null
         );
     }

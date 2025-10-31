@@ -204,7 +204,9 @@ object DatabaseManager {
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                    sliderHeadHits = null,
                                     sliderTickHits = null,
+                                    sliderRepeatHits = null,
                                     sliderEndHits = null
                                 )
 
