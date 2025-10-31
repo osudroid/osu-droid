@@ -201,14 +201,6 @@ class BeatmapInfoLayout : UILinearContainer() {
 
         applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values, true)
 
-        if (isPreciseMod) {
-            // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
-            // map the hit window back to the original hit window for the user to understand the difficulty
-            // increase of the mod.
-            val greatWindow = PreciseDroidHitWindow(difficulty.od).greatWindow
-            difficulty.od = hitWindow300ToOverallDifficulty(greatWindow)
-        }
-
         // Round to 2 decimal places.
         // Using difficulty circle size is quite inaccurate here as the real circle size changes
         // depending on the height of the running device, but for the sake of comparison across
