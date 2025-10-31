@@ -34,6 +34,12 @@ open class BeatmapHitObjects : Iterable<HitObject> {
         private set
 
     /**
+     * The amount of slider repeats in this beatmap.
+     */
+    var sliderRepeatCount = 0
+        internal set
+
+    /**
      * The amount of slider ticks in this beatmap.
      */
     var sliderTickCount = 0

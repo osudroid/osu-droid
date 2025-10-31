@@ -65,6 +65,7 @@ class BeatmapProcessor @JvmOverloads constructor(
             scope?.ensureActive()
 
             if (it is Slider) {
+                sliderRepeatCount += it.repeatCount
                 sliderTickCount += it.nestedHitObjects.size - 2 - it.repeatCount
             }
 
