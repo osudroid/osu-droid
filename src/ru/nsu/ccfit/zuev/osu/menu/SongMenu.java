@@ -28,11 +28,9 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.math.Precision;
-import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModDifficultyAdjust;
 import com.rian.osu.mods.ModNightCore;
 import com.rian.osu.mods.ModPrecise;
-import com.rian.osu.mods.ModReplayV6;
 import com.rian.osu.utils.LRUCache;
 import com.rian.osu.utils.ModUtils;
 
@@ -1222,23 +1220,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         try {
             stat = score.toStatisticV2(difficulty);
-        } catch (JSONException e1) {
-            // When this happens, the mods are likely in the old format (that somehow was not converted during
-            // migration). Convert them.
-            var convertedMods = LegacyModConverter.convert(score.getMods());
-
-            // Scores that are using the legacy mods format are guaranteed to use these mods.
-            convertedMods.put(new ModReplayV6());
-
-            score.setMods(convertedMods.serializeMods().toString());
-            DatabaseManager.getScoreInfoTable().updateScore(score);
-
-            try {
-                stat = score.toStatisticV2(difficulty);
-            } catch (JSONException e2) {
-                ToastLogger.showText("Could not open score", true);
-                return;
-            }
+        } catch (JSONException e) {
+            Debug.e("Cannot not open score: " + e.getMessage(), e);
+            ToastLogger.showText("Could not open score", true);
+            return;
         }
 
         scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
