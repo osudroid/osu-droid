@@ -43,8 +43,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 1 to 2`() {
-        @Suppress("VariableInitializerIsRedundant")
-        var db = helper.createDatabase(testDb, 1).apply {
+        helper.createDatabase(testDb, 1).apply {
             // Insert a fake beatmap.
             execSQL(
                 "INSERT INTO BeatmapInfo (filename, md5, audioFilename, setDirectory, title, titleUnicode, artist, " +
@@ -74,7 +73,7 @@ class MigrationTest {
             )
         }
 
-        db = helper.runMigrationsAndValidate(testDb, 2, true, MIGRATION_1_2)
+        val db = helper.runMigrationsAndValidate(testDb, 2, true, MIGRATION_1_2)
 
         db.query("SELECT id, mods FROM ScoreInfo").use {
             val difficulty = BeatmapDifficulty(4f, 9f, 8f, 6f)
@@ -115,8 +114,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 2 to 3`() {
-        @Suppress("VariableInitializerIsRedundant")
-        var db = helper.createDatabase(testDb, 2).apply {
+        helper.createDatabase(testDb, 2).apply {
             val scores = mutableListOf<String>()
 
             fun addScore(mods: ModHashMap, time: Long = 1752863880000L) {
@@ -155,7 +153,7 @@ class MigrationTest {
             )
         }
 
-        db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
+        val db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
 
         db.query("SELECT id, score, mods FROM ScoreInfo").use {
             while (it.moveToNext()) {
@@ -204,8 +202,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 3 to 4`() {
-        @Suppress("VariableInitializerIsRedundant")
-        var db = helper.createDatabase(testDb, 3).apply {
+        helper.createDatabase(testDb, 3).apply {
             execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
@@ -213,7 +210,7 @@ class MigrationTest {
             )
         }
 
-        db = helper.runMigrationsAndValidate(testDb, 4, true, MIGRATION_3_4)
+        val db = helper.runMigrationsAndValidate(testDb, 4, true, MIGRATION_3_4)
 
         db.query("SELECT sliderHeadHits, sliderRepeatHits FROM ScoreInfo").use {
             it.moveToFirst()
