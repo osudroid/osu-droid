@@ -37,7 +37,9 @@ public class StatisticV2 implements Serializable {
     private int hit300k = 0, hit100k = 0;
     private int misses = 0;
     private int scoreMaxCombo = 0;
+    private int sliderHeadHits = 0;
     private int sliderTickHits = 0;
+    private int sliderRepeatHits = 0;
     private int sliderEndHits = 0;
     private long time = 0;
     private int currentCombo = 0;
@@ -385,6 +387,18 @@ public class StatisticV2 implements Serializable {
         this.misses = misses;
     }
 
+    public int getSliderHeadHits() {
+        return sliderHeadHits;
+    }
+
+    public void setSliderHeadHits(int sliderHeadHits) {
+        this.sliderHeadHits = sliderHeadHits;
+    }
+
+    public void addSliderHeadHit() {
+        sliderHeadHits++;
+    }
+
     public int getSliderTickHits() {
         return sliderTickHits;
     }
@@ -395,6 +409,18 @@ public class StatisticV2 implements Serializable {
 
     public void addSliderTickHit() {
         sliderTickHits++;
+    }
+
+    public int getSliderRepeatHits() {
+        return sliderRepeatHits;
+    }
+
+    public void setSliderRepeatHits(int sliderRepeatHits) {
+        this.sliderRepeatHits = sliderRepeatHits;
+    }
+
+    public void addSliderRepeatHit() {
+        sliderRepeatHits++;
     }
 
     public int getSliderEndHits() {

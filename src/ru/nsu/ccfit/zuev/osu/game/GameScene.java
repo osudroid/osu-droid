@@ -2230,6 +2230,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (score > 10) {
             switch (type) {
                 case GameObjectListener.SLIDER_START:
+                    stat.addSliderHeadHit();
                     createBurstEffectSliderStart(judgementPos, color);
                     if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
@@ -2240,6 +2241,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     createBurstEffectSliderEnd(judgementPos, color);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
+                    stat.addSliderRepeatHit();
                     break;
                 default:
                     createBurstEffect(judgementPos, color);
