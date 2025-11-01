@@ -164,7 +164,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
          */
-        const val VERSION = 1746800175000
+        const val VERSION = 1762003732000
 
         @JvmStatic
         fun calculateRateAdjustedApproachRate(approachRate: Double, clockRate: Double): Double {
