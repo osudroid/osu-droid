@@ -265,25 +265,23 @@ class StandardPerformanceCalculator(
             return Double.POSITIVE_INFINITY
         }
 
-        val objectCount = relevantCountGreat + relevantCountOk + relevantCountMeh + relevantCountMiss
+        val clockRate = difficultyAttributes.clockRate
 
         // Obtain the great, ok, and meh windows.
         val hitWindow = StandardHitWindow(
             StandardHitWindow.hitWindow300ToOverallDifficulty(
                 // Convert current OD to non clock rate-adjusted OD.
                 StandardHitWindow(difficultyAttributes.overallDifficulty.toFloat()).greatWindow *
-                    difficultyAttributes.clockRate.toFloat()
+                    clockRate.toFloat()
             )
         )
 
-        val greatWindow = hitWindow.greatWindow
-        val okWindow = hitWindow.okWindow
-        val mehWindow = hitWindow.mehWindow
+        val greatWindow = hitWindow.greatWindow / clockRate
+        val okWindow = hitWindow.okWindow / clockRate
+        val mehWindow = hitWindow.mehWindow / clockRate
 
-        // The probability that a player hits a circle is unknown, but we can estimate it to be
-        // the number of greats on circles divided by the number of circles, and then add one
-        // to the number of circles as a bias correction.
-        val n = max(1.0, objectCount - relevantCountMiss - relevantCountMeh)
+        // The sample proportion of successful hits.
+        val n = max(1.0, relevantCountGreat + relevantCountOk)
 
         // 99% critical value for the normal distribution (one-tailed).
         val z = 2.32634787404
@@ -291,27 +289,27 @@ class StandardPerformanceCalculator(
         // Proportion of greats hit on circles, ignoring misses and 50s.
         val p = relevantCountGreat / n
 
-        // We can be 99% confident that p is at least this value.
+        // We can be 99% confident that the population proportion is at least this value.
         val pLowerBound = (n * p + z * z / 2) / (n + z * z) - z / (n + z * z) * sqrt(n * p * (1 - p) + z * z / 4)
+        var deviation: Double
 
-        // Compute the deviation assuming greats and oks are normally distributed, and mehs are uniformly distributed.
-        // Begin with greats and oks first. Ignoring mehs, we can be 99% confident that the deviation is not higher than:
-        var deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(pLowerBound))
+        // Tested max precision for the deviation calculation.
+        if (pLowerBound > 0.01) {
+            // Compute the deviation assuming greats and oks are normally distributed.
+            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(pLowerBound))
 
-        val randomValue = sqrt(2 / Math.PI) * okWindow * exp(-0.5 * (okWindow / deviation).pow(2)) /
-            (deviation * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviation)))
+            // Subtract the deviation provided by tails that land outside the ok hit window from the deviation computed above.
+            // This is equivalent to calculating the deviation of a normal distribution truncated at +-okHitWindow.
+            val okHitWindowTailAmount = sqrt(2 / Math.PI) * okWindow *
+                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviation)))
 
-        deviation *= sqrt(1 - randomValue)
-
-        // Value deviation approach as greatCount approaches 0
-        val limitValue = okWindow / sqrt(3.0)
-
-        // If precision is not enough to compute true deviation - use limit value
-        if (pLowerBound == 0.0 || randomValue >= 1 || deviation > limitValue) {
-            deviation = limitValue
+            deviation *= sqrt(1 - okHitWindowTailAmount)
+        } else {
+            // A tested limit value for the case of a score only containing oks.
+            deviation = okWindow / sqrt(3.0)
         }
 
-        // Then compute the variance for mehs.
+        // Compute and add the variance for mehs, assuming that they are uniformly distributed.
         val mehVariance = (mehWindow.pow(2) + okWindow * mehWindow + okWindow.pow(2)) / 3
 
         // Find the total deviation.
