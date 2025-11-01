@@ -46,7 +46,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDroidPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
         DroidPerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this)
+            populateParameters(it, beatmap, this, GameMode.Droid)
         }
     }
 
@@ -61,19 +61,28 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructStandardPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
         PerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this)
+            populateParameters(it, beatmap, this, GameMode.Standard)
         }
     }
 
-    private fun populateParameters(parameters: PerformanceCalculationParameters, beatmap: IBeatmap, stat: StatisticV2) {
+    private fun populateParameters(parameters: PerformanceCalculationParameters, beatmap: IBeatmap, stat: StatisticV2, mode: GameMode) {
         parameters.maxCombo = stat.getScoreMaxCombo()
         parameters.countGreat = stat.hit300
         parameters.countOk = stat.hit100
         parameters.countMeh = stat.hit50
         parameters.countMiss = stat.misses
 
-        parameters.comboBreakingSliderNestedMisses =
-            if (stat.sliderTickHits >= 0) beatmap.hitObjects.sliderTickCount - stat.sliderTickHits else null
+        parameters.comboBreakingSliderNestedMisses = when (mode) {
+            GameMode.Droid -> if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
+                beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+                    (stat.sliderHeadHits + stat.sliderTickHits + stat.sliderRepeatHits)
+            } else null
+
+            GameMode.Standard -> if (stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
+                beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+                    (stat.sliderTickHits + stat.sliderRepeatHits)
+            } else null
+        }
 
         parameters.nonComboBreakingSliderNestedMisses =
             if (stat.sliderEndHits >= 0) beatmap.hitObjects.sliderCount - stat.sliderEndHits else null
