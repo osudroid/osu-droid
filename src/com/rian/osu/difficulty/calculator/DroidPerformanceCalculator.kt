@@ -117,7 +117,7 @@ class DroidPerformanceCalculator(
                 // We add tick misses here since they too mean that the player didn't follow the slider
                 // properly. However, we aren't adding misses here because missing slider heads has a harsh
                 // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
-                (sliderEndsDropped!! + sliderTicksMissed!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                (nonComboBreakingSliderNestedMisses!! + comboBreakingSliderNestedMisses!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
             }
 
             aimValue *=

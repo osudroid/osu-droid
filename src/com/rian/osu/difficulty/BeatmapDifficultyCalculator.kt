@@ -72,10 +72,10 @@ object BeatmapDifficultyCalculator {
         parameters.countMeh = stat.hit50
         parameters.countMiss = stat.misses
 
-        parameters.sliderTicksMissed =
+        parameters.comboBreakingSliderNestedMisses =
             if (stat.sliderTickHits >= 0) beatmap.hitObjects.sliderTickCount - stat.sliderTickHits else null
 
-        parameters.sliderEndsDropped =
+        parameters.nonComboBreakingSliderNestedMisses =
             if (stat.sliderEndHits >= 0) beatmap.hitObjects.sliderCount - stat.sliderEndHits else null
     }
 
@@ -500,8 +500,8 @@ object BeatmapDifficultyCalculator {
         replayObjectData: Array<ReplayObjectData>,
         scope: CoroutineScope? = null
     ) {
-        sliderEndsDropped = 0
-        sliderTicksMissed = 0
+        nonComboBreakingSliderNestedMisses = 0
+        comboBreakingSliderNestedMisses = 0
 
         val objects = beatmap.hitObjects.objects
 
@@ -513,8 +513,8 @@ object BeatmapDifficultyCalculator {
 
             if (objData?.tickSet == null) {
                 // No object data - assume all slider ticks and the end were dropped.
-                sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
-                sliderTicksMissed = (sliderTicksMissed ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
+                nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
+                comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
                 continue
             }
 
@@ -526,8 +526,8 @@ object BeatmapDifficultyCalculator {
                 }
 
                 when (obj.nestedHitObjects[j]) {
-                    is SliderTick -> sliderTicksMissed = (sliderTicksMissed ?: 0) + 1
-                    is SliderTail -> sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
+                    is SliderTick -> comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + 1
+                    is SliderTail -> nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
                 }
             }
         }
