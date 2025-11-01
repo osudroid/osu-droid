@@ -23,9 +23,8 @@ import kotlinx.coroutines.ensureActive
  * A difficulty calculator for calculating osu!droid star rating.
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
-    override val difficultyMultiplier = 0.18
     override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
-        setOf(ModPrecise::class, ModScoreV2::class, ModTraceable::class, ModFreezeFrame::class, ModReplayV6::class)
+        setOf(ModPrecise::class, ModScoreV2::class, ModFreezeFrame::class, ModReplayV6::class)
 
     private val minimumSectionObjectCount = 5
     private val threeFingerStrainThreshold = 175.0
@@ -69,10 +68,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             readingDifficulty *= 0.4
         }
 
-        val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
-        val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(1.6) * 25 else 0.0
-        val baseReadingPerformance = (readingDifficulty.pow(2) * 25).pow(0.8)
+        val baseAimPerformance = DroidAim.difficultyToPerformance(aimDifficulty)
+        val baseTapPerformance = StrainSkill.difficultyToPerformance(tapDifficulty)
+        val baseFlashlightPerformance = DroidFlashlight.difficultyToPerformance(flashlightDifficulty)
+        val baseReadingPerformance = DroidReading.difficultyToPerformance(readingDifficulty)
 
         val basePerformance = (
             baseAimPerformance.pow(1.1) +
@@ -287,7 +286,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)
 
+    /**
+     * Calculates the rating of a [Skill] based on its difficulty.
+     *
+     * @param skill The [Skill] to calculate the rating for.
+     * @return The rating of the [Skill].
+     */
+    private fun calculateRating(skill: Skill<*>) = sqrt(skill.difficultyValue()) * DIFFICULTY_MULTIPLIER
+
     companion object {
+        private const val DIFFICULTY_MULTIPLIER = 0.18
+
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
          */

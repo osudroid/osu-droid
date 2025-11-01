@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.skills
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.StandardDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.StandardAimEvaluator.evaluateDifficultyOf
+import com.rian.osu.difficulty.utils.StrainUtils
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.max
@@ -24,7 +25,7 @@ class StandardAim(
     val withSliders: Boolean
 ) : StandardStrainSkill(mods) {
     private var currentStrain = 0.0
-    private val skillMultiplier = 25.6
+    private val skillMultiplier = 26
     private val strainDecayBase = 0.15
 
     private val sliderStrains = mutableListOf<Double>()
@@ -42,6 +43,8 @@ class StandardAim(
             total + 1 / (1 + exp(-(strain / maxSliderStrain * 12 - 6)))
         }
     }
+
+    fun countTopWeightedSliders() = StrainUtils.countTopWeightedSliders(sliderStrains, difficulty)
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)

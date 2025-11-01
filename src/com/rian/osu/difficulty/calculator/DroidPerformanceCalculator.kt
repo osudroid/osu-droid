@@ -6,6 +6,10 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
+import com.rian.osu.difficulty.skills.DroidAim
+import com.rian.osu.difficulty.skills.DroidFlashlight
+import com.rian.osu.difficulty.skills.DroidReading
+import com.rian.osu.difficulty.skills.StrainSkill
 import com.rian.osu.math.ErrorFunction
 import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.*
@@ -25,6 +29,7 @@ class DroidPerformanceCalculator(
     DroidPerformanceAttributes,
     DroidPerformanceCalculationParameters
 >(difficultyAttributes) {
+    private var effectiveMissCount = 0.0
     private var sliderCheesePenalty = SliderCheesePenalty()
     private var tapPenalty = 1.0
 
@@ -37,6 +42,8 @@ class DroidPerformanceCalculator(
 
     override fun createPerformanceAttributes() = DroidPerformanceAttributes().also {
         var multiplier = FINAL_MULTIPLIER
+
+        effectiveMissCount = calculateEffectiveMissCount()
 
         difficultyAttributes.run {
             if (mods.any { m -> m is ModNoFail }) {
@@ -95,13 +102,13 @@ class DroidPerformanceCalculator(
     override fun resetDefaults() {
         super.resetDefaults()
 
+        effectiveMissCount = 0.0
         sliderCheesePenalty = SliderCheesePenalty()
-
         tapPenalty = 1.0
     }
 
     private fun calculateAimValue() = difficultyAttributes.run {
-        var aimValue = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
+        var aimValue = DroidAim.difficultyToPerformance(aimDifficulty)
 
         aimValue *= min(calculateStrainBasedMissPenalty(aimDifficultStrainCount), proportionalMissPenalty)
 
@@ -117,7 +124,7 @@ class DroidPerformanceCalculator(
                 // We add tick misses here since they too mean that the player didn't follow the slider
                 // properly. However, we aren't adding misses here because missing slider heads has a harsh
                 // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
-                (nonComboBreakingSliderNestedMisses!! + comboBreakingSliderNestedMisses!!).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                (nonComboBreakingSliderNestedMisses + comboBreakingSliderNestedMisses).toDouble().coerceIn(0.0, aimDifficultSliderCount)
             }
 
             aimValue *=
@@ -138,7 +145,7 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateTapValue() = difficultyAttributes.run {
-        var tapValue = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
+        var tapValue = StrainSkill.difficultyToPerformance(tapDifficulty)
 
         tapValue *= calculateStrainBasedMissPenalty(tapDifficultStrainCount)
 
@@ -210,7 +217,7 @@ class DroidPerformanceCalculator(
             return@run 0.0
         }
 
-        var flashlightValue = flashlightDifficulty.pow(1.6) * 25
+        var flashlightValue = DroidFlashlight.difficultyToPerformance(flashlightDifficulty)
 
         flashlightValue *= min(calculateStrainBasedMissPenalty(flashlightDifficultStrainCount), proportionalMissPenalty)
 
@@ -227,7 +234,7 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateReadingValue() = difficultyAttributes.run {
-        var readingValue = (readingDifficulty.pow(2) * 25).pow(0.8)
+        var readingValue = DroidReading.difficultyToPerformance(readingDifficulty)
 
         readingValue *= min(calculateStrainBasedMissPenalty(readingDifficultNoteCount), proportionalMissPenalty)
 
@@ -501,6 +508,38 @@ class DroidPerformanceCalculator(
             else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
 
         return if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+    }
+
+    private fun calculateEffectiveMissCount() = difficultyAttributes.run {
+        var missCount = countMiss.toDouble()
+
+        if (sliderCount > 0) {
+            if (usingClassicSliderCalculation) {
+                // Consider that full combo is maximum combo minus dropped slider tails since
+                // they don't contribute to combo but also don't break it.
+                // In classic scores, we can't know the amount of dropped sliders so we estimate
+                // to 10% of all sliders in the beatmap.
+                val fullComboThreshold = maxCombo - 0.1 * sliderCount
+
+                if (scoreMaxCombo < fullComboThreshold) {
+                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
+                }
+
+                // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
+                missCount = min(missCount, totalImperfectHits.toDouble())
+            } else {
+                val fullComboThreshold = maxCombo.toDouble() - nonComboBreakingSliderNestedMisses
+
+                if (scoreMaxCombo < fullComboThreshold) {
+                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
+                }
+
+                // Combine regular misses with combo-breaking misses because they break combo as well.
+                missCount = min(missCount, comboBreakingSliderNestedMisses + countMiss.toDouble())
+            }
+        }
+
+        missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
     }
 
     companion object {

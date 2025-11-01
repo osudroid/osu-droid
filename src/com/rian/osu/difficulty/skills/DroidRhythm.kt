@@ -25,7 +25,7 @@ class DroidRhythm(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         val rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current, useSliderAccuracy)
-        val doubletapness = 1 - current.doubletapness
+        val doubletapness = 1 - current.getDoubletapness(current.next(0))
 
         current.rhythmMultiplier = rhythmMultiplier * doubletapness
 

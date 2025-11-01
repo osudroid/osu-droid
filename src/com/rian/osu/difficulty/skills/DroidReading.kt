@@ -7,6 +7,7 @@ import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.log10
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -104,4 +105,15 @@ class DroidReading(
     }
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = (difficulty.pow(2) * 25).pow(0.8)
+    }
 }
