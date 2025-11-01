@@ -248,7 +248,7 @@ class StandardPerformanceCalculator(
         val relevantCountOk = min(countOk.toDouble(), speedNoteCount - relevantCountMiss - relevantCountMeh)
         val relevantCountGreat = max(0.0, speedNoteCount - relevantCountMiss - relevantCountMeh - relevantCountOk)
 
-        return calculateDeviation(relevantCountGreat, relevantCountOk, relevantCountMeh, relevantCountMiss)
+        return calculateDeviation(relevantCountGreat, relevantCountOk, relevantCountMeh)
     }
 
     /**
@@ -260,7 +260,7 @@ class StandardPerformanceCalculator(
      *
      * Greats and oks are assumed to follow a normal distribution, whereas mehs are assumed to follow a uniform distribution.
      */
-    private fun calculateDeviation(relevantCountGreat: Double, relevantCountOk: Double, relevantCountMeh: Double, relevantCountMiss: Double): Double {
+    private fun calculateDeviation(relevantCountGreat: Double, relevantCountOk: Double, relevantCountMeh: Double): Double {
         if (relevantCountGreat + relevantCountOk + relevantCountMeh <= 0) {
             return Double.POSITIVE_INFINITY
         }
