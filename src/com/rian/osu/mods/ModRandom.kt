@@ -9,7 +9,6 @@ import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.exp
 import kotlin.math.max
-import kotlin.reflect.jvm.isAccessible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import org.json.JSONObject
@@ -132,10 +131,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
     }
 
     private fun getRandomOffset(stdDev: Float): Float {
-        val angleSharpness = ::angleSharpness.run {
-            isAccessible = true
-            getDelegate() as FloatModSetting
-        }
+        val angleSharpness = getModSettingDelegate<FloatModSetting>(::angleSharpness)
 
         // Range: [0.5, 2]
         // Higher angle sharpness -> lower multiplier
@@ -152,10 +148,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      * @param flowDirection Whether the relative angle should be positive (`false`) or negative (`true`).
      */
     private fun getRelativeTargetAngle(targetDistance: Float, offset: Float, flowDirection: Boolean): Float {
-        val angleSharpnessDelegate = ::angleSharpness.run {
-            isAccessible = true
-            getDelegate() as FloatModSetting
-        }
+        val angleSharpnessDelegate = getModSettingDelegate<FloatModSetting>(::angleSharpness)
 
         // Range: [0.1, 1]
         val angleSharpness = angleSharpnessDelegate.value / angleSharpnessDelegate.maxValue

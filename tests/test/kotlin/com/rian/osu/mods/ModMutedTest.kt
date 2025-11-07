@@ -1,7 +1,6 @@
 package com.rian.osu.mods
 
 import com.rian.osu.mods.settings.*
-import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,20 +15,14 @@ class ModMutedTest {
 
             Assert.assertEquals(
                 0,
-                ::muteComboCount.run {
-                    isAccessible = true
-                    (getDelegate() as IntegerModSetting).minValue
-                }
+                getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue
             )
 
             inverseMuting = true
 
             Assert.assertEquals(
                 1,
-                ::muteComboCount.run {
-                    isAccessible = true
-                    (getDelegate() as IntegerModSetting).minValue
-                }
+                getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue
             )
         }
     }

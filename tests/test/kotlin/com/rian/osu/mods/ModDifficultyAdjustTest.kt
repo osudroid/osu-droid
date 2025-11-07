@@ -8,8 +8,6 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.settings.NullableFloatModSetting
-import kotlin.reflect.KProperty0
-import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -170,16 +168,11 @@ class ModDifficultyAdjustTest {
 
     @Test
     fun `Test deep copy`() {
-        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
-            property.isAccessible = true
-            return property.getDelegate() as NullableFloatModSetting
-        }
-
         ModDifficultyAdjust(4f, 9f, 8f, 6f).apply {
-            getDelegate(::cs).defaultValue = 2f
-            getDelegate(::ar).defaultValue = 3f
-            getDelegate(::od).defaultValue = 5f
-            getDelegate(::hp).defaultValue = 1f
+            getModSettingDelegate<NullableFloatModSetting>(::cs).defaultValue = 2f
+            getModSettingDelegate<NullableFloatModSetting>(::ar).defaultValue = 3f
+            getModSettingDelegate<NullableFloatModSetting>(::od).defaultValue = 5f
+            getModSettingDelegate<NullableFloatModSetting>(::hp).defaultValue = 1f
 
             val copy = deepCopy()
 
@@ -190,10 +183,10 @@ class ModDifficultyAdjustTest {
             Assert.assertEquals(8f, copy.od)
             Assert.assertEquals(6f, copy.hp)
 
-            Assert.assertEquals(2f, getDelegate(copy::cs).defaultValue)
-            Assert.assertEquals(3f, getDelegate(copy::ar).defaultValue)
-            Assert.assertEquals(5f, getDelegate(copy::od).defaultValue)
-            Assert.assertEquals(1f, getDelegate(copy::hp).defaultValue)
+            Assert.assertEquals(2f, getModSettingDelegate<NullableFloatModSetting>(copy::cs).defaultValue)
+            Assert.assertEquals(3f, getModSettingDelegate<NullableFloatModSetting>(copy::ar).defaultValue)
+            Assert.assertEquals(5f, getModSettingDelegate<NullableFloatModSetting>(copy::od).defaultValue)
+            Assert.assertEquals(1f, getModSettingDelegate<NullableFloatModSetting>(copy::hp).defaultValue)
         }
     }
 

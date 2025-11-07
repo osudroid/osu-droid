@@ -3,7 +3,6 @@ package com.rian.osu.mods
 import com.rian.osu.mods.settings.*
 import kotlin.math.max
 import kotlin.reflect.KProperty
-import kotlin.reflect.jvm.isAccessible
 import org.json.JSONObject
 
 /**
@@ -36,10 +35,7 @@ class ModMuted : Mod() {
         }
 
         private fun onValueChange(newValue: Boolean) {
-            ::muteComboCount.run {
-                isAccessible = true
-                (getDelegate() as IntegerModSetting).minValue = if (newValue) 1 else 0
-            }
+            getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue = if (newValue) 1 else 0
         }
     }
 
