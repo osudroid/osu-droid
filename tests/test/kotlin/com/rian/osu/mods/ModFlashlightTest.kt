@@ -41,7 +41,7 @@ class ModFlashlightTest {
 
             followDelay = 0.36f
 
-            Assert.assertEquals("FL (0.36s)", toString())
+            Assert.assertEquals("FL (360ms)", toString())
 
             followDelay = 0.12f
             sizeMultiplier = 1.5f
@@ -50,7 +50,7 @@ class ModFlashlightTest {
 
             followDelay = 0.36f
 
-            Assert.assertEquals("FL (0.36s, 1.5x)", toString())
+            Assert.assertEquals("FL (360ms, 1.5x)", toString())
         }
     }
 }
