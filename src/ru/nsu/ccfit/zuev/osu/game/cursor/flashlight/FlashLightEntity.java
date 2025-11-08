@@ -1,12 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
+import com.reco1l.andengine.modifier.Modifiers;
 import com.rian.osu.mods.ModFlashlight;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -49,7 +49,7 @@ public class FlashLightEntity extends Entity  {
             return;
         }
 
-        currentModifier = new MoveModifier(areaFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
+        currentModifier = Modifiers.move(areaFollowDelay, getX(), nextPX, getY(), nextPY, null, Easing.OutExpo);
 
         registerEntityModifier(currentModifier);
     }
