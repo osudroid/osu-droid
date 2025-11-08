@@ -691,10 +691,14 @@ public class Entity implements IEntity {
 		}
 
 		// BEGIN osu!droid modified
-		pEntityModifier.onUnregister();
-		// END osu!droid modified
+        boolean removed = this.mEntityModifiers.remove(pEntityModifier);
 
-		return this.mEntityModifiers.remove(pEntityModifier);
+        if (removed) {
+            pEntityModifier.onUnregister();
+        }
+
+        return removed;
+        // END osu!droid modified
 	}
 
 	@Override
