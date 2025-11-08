@@ -11,7 +11,8 @@ import com.rian.osu.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.reflect.KProperty0
-import kotlin.reflect.jvm.isAccessible
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import org.json.JSONObject
 
 /**
@@ -107,8 +108,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         get() {
             // Graph: https://www.desmos.com/calculator/yrggkhrkzz
             var multiplier = 1f
-            val cs = getDelegate(::cs)
-            val od = getDelegate(::od)
+            val cs = getModSettingDelegate<NullableFloatModSetting>(::cs)
+            val od = getModSettingDelegate<NullableFloatModSetting>(::od)
 
             if (cs.value != null && cs.defaultValue != null) {
                 val diff = cs.value!! - cs.defaultValue!!
@@ -196,7 +197,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             }
         }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>) {
+    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, scope: CoroutineScope?) {
         // Special case for force AR in replay version 6 and older, where the AR value is kept constant with respect to
         // game time. This makes the player perceive the fade in animation as is under all speed multipliers.
         if (ar == null || mods.none { it is ModReplayV6 }) {
@@ -206,7 +207,11 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         applyOldFadeAdjustment(hitObject, mods)
 
         if (hitObject is Slider) {
-            hitObject.nestedHitObjects.forEach { applyOldFadeAdjustment(it, mods) }
+            hitObject.nestedHitObjects.forEach {
+                scope?.ensureActive()
+
+                applyOldFadeAdjustment(it, mods)
+            }
         }
     }
 
@@ -220,12 +225,9 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     }
 
     private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
-        property.isAccessible = true
+        val delegate = getModSettingDelegate<NullableFloatModSetting>(property)
 
-        val delegate = property.getDelegate() as NullableFloatModSetting
         delegate.defaultValue = value
-
-        property.isAccessible = false
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
@@ -240,11 +242,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     }
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
-
-    private fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
-        property.isAccessible = true
-        return property.getDelegate() as NullableFloatModSetting
-    }
 
     override val extraInformation: String
         get() {
@@ -274,9 +271,9 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             copy.defaultValue = original.defaultValue
         }
 
-        setDefault(getDelegate(::cs), getDelegate(it::cs))
-        setDefault(getDelegate(::ar), getDelegate(it::ar))
-        setDefault(getDelegate(::od), getDelegate(it::od))
-        setDefault(getDelegate(::hp), getDelegate(it::hp))
+        setDefault(getModSettingDelegate(::cs), getModSettingDelegate(it::cs))
+        setDefault(getModSettingDelegate(::ar), getModSettingDelegate(it::ar))
+        setDefault(getModSettingDelegate(::od), getModSettingDelegate(it::od))
+        setDefault(getModSettingDelegate(::hp), getModSettingDelegate(it::hp))
     }
 }

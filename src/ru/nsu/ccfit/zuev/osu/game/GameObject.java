@@ -56,6 +56,10 @@ public abstract class GameObject {
         return position;
     }
 
+    public boolean isStartHit() {
+        return startHit;
+    }
+
     public void stopLoopingSamples() {}
 
     /**
@@ -99,22 +103,34 @@ public abstract class GameObject {
                 var events = cursor.events;
                 int size = events.size();
 
-                while (cursor.latestProcessedEventIndex < size) {
-                    var event = events.get(cursor.latestProcessedEventIndex++);
+                if (size > 0) {
+                    while (cursor.latestProcessedEventIndex < size) {
+                        var event = events.get(cursor.latestProcessedEventIndex++);
 
-                    if (event.isActionUp()) {
-                        continue;
+                        if (event.isActionUp()) {
+                            continue;
+                        }
+
+                        boolean isHit = isHit(hitObject, event);
+
+                        // Case 1
+                        if (event.isActionDown() && isHit && canHit(event)) {
+                            return event;
+                        }
+
+                        // Case 2
+                        if (objectElapsedTime >= 0 && isHit) {
+                            return event;
+                        }
                     }
+                } else {
+                    // If there are no new events, check the latest event.
+                    // Not passing ACTION_DOWN or ACTION_MOVE here to avoid array allocation.
+                    var event = cursor.getLatestEvent();
 
-                    boolean isHit = isHit(hitObject, event);
-
-                    // Case 1
-                    if (event.isActionDown() && isHit && canHit(event)) {
-                        return event;
-                    }
-
-                    // Case 2
-                    if (objectElapsedTime >= 0 && isHit) {
+                    // Only consider case 2 in this scenario, as the event should logically be marked as a move event
+                    // even if it's a down event (no new events mean the user keeps pressing on the same spot).
+                    if (event != null && !event.isActionUp() && objectElapsedTime >= 0 && isHit(hitObject, event)) {
                         return event;
                     }
                 }

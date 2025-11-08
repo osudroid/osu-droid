@@ -159,6 +159,22 @@ sealed class Mod {
     open fun copySettings(settings: JSONObject) {}
 
     /**
+     * Obtains the delegate [ModSetting] for the given [setting] property.
+     *
+     * @param setting The property representing the setting.
+     * @param T The type of the [ModSetting].
+     * @return The delegate [ModSetting] of type [T].
+     * @throws ClassCastException If the delegate is not of type [T].
+     */
+    @Throws(ClassCastException::class)
+    fun <T : ModSetting<*>> getModSettingDelegate(setting: KProperty0<*>): T {
+        setting.isAccessible = true
+
+        @Suppress("UNCHECKED_CAST")
+        return setting.getDelegate() as T
+    }
+
+    /**
      * Serializes the settings of this [Mod] to a [JSONObject].
      *
      * @return The serialized settings of this [Mod], or `null` if this [Mod] has no settings.

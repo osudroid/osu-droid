@@ -20,8 +20,8 @@ sealed class HitObjectTest {
         fun testOffset() {
             val positionOffset = stackedPositionGetter() - positionGetter()
 
-            Assert.assertEquals(positionOffset.x, difficultyStackOffset.x, 1e-2f)
-            Assert.assertEquals(positionOffset.y, difficultyStackOffset.y, 1e-2f)
+            Assert.assertEquals(difficultyStackOffset.x, positionOffset.x, 1e-2f)
+            Assert.assertEquals(difficultyStackOffset.y, positionOffset.y, 1e-2f)
         }
 
         difficultyStackHeight = 1

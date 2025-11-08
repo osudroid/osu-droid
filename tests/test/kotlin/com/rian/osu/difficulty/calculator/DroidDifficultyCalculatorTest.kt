@@ -40,8 +40,8 @@ class DroidDifficultyCalculatorTest {
             Assert.assertEquals(1.4808324669581225, tapDifficulty, 1e-5)
             Assert.assertEquals(0.812969288725491, rhythmDifficulty, 1e-5)
             Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
-            Assert.assertEquals(0.7796653929878461, readingDifficulty, 1e-5)
-            Assert.assertEquals(3.8554014394316556, starRating, 1e-6)
+            Assert.assertEquals(0.7798882536263991, readingDifficulty, 1e-5)
+            Assert.assertEquals(3.8554857722148643, starRating, 1e-6)
         }
     }
 }

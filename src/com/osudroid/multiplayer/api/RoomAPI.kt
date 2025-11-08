@@ -427,6 +427,21 @@ object RoomAPI {
     }
 
     /**
+     * Change the remove slider lock setting.
+     */
+    fun setRoomRemoveSliderLock(isEnabled: Boolean) {
+        val json = JSONObject().apply {
+            put("isRemoveSliderLock", isEnabled)
+        }
+
+        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
+    }
+
+    /**
      * Change `free mods` condition.
      */
     fun setRoomFreeMods(value: Boolean) {

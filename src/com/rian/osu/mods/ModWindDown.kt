@@ -3,7 +3,6 @@ package com.rian.osu.mods
 import com.reco1l.toolkt.roundBy
 import com.rian.osu.mods.settings.*
 import kotlin.reflect.KProperty
-import kotlin.reflect.jvm.isAccessible
 
 class ModWindDown : ModTimeRamp() {
     override val name = "Wind Down"
@@ -59,19 +58,13 @@ class ModWindDown : ModTimeRamp() {
 
     private fun onInitialRateChange() {
         if (initialRate <= finalRate) {
-            finalRate = initialRate - (::finalRate).run {
-                isAccessible = true
-                (getDelegate() as FloatModSetting).step
-            }
+            finalRate = initialRate - getModSettingDelegate<FloatModSetting>(::finalRate).step
         }
     }
 
     private fun onFinalRateChange() {
         if (finalRate >= initialRate) {
-            initialRate = finalRate + (::initialRate).run {
-                isAccessible = true
-                (getDelegate() as FloatModSetting).step
-            }
+            initialRate = finalRate + getModSettingDelegate<FloatModSetting>(::initialRate).step
         }
     }
 

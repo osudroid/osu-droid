@@ -4,6 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
+import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
 
 /**
@@ -49,18 +50,19 @@ class ModMirror : Mod(), IModApplicableToHitObject {
     override fun applyToHitObject(
         mode: GameMode,
         hitObject: HitObject,
-        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>,
+        scope: CoroutineScope?
     ) {
         when (reflection) {
             MirrorType.Horizontal ->
-                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject, scope)
 
             MirrorType.Vertical ->
-                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject, scope)
 
             MirrorType.Both -> {
-                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
-                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject, scope)
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject, scope)
             }
         }
     }

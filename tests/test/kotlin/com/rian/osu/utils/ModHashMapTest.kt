@@ -33,11 +33,11 @@ class ModHashMapTest {
         map.put(ModReallyEasy())
         map.put(ModHardRock())
 
-        Assert.assertTrue(map.size == 2)
+        Assert.assertEquals(2, map.size)
 
         map.put(ModDifficultyAdjust(1f, 1f, 1f, 1f))
 
-        Assert.assertTrue(map.size == 1)
+        Assert.assertEquals(1, map.size)
     }
 
     @Test
@@ -46,15 +46,15 @@ class ModHashMapTest {
             put(ModReallyEasy())
             put(ModHardRock())
 
-            Assert.assertEquals(toLegacyModString(), "rl|")
+            Assert.assertEquals("rl|", toLegacyModString())
 
             put(ModCustomSpeed(1.25f))
 
-            Assert.assertEquals(toLegacyModString(), "rl|x1.25")
+            Assert.assertEquals("rl|x1.25", toLegacyModString())
 
             put(ModDifficultyAdjust(cs = 4f, ar = 8f))
 
-            Assert.assertEquals(toLegacyModString(), "rl|x1.25|AR8.0|CS4.0")
+            Assert.assertEquals("rl|x1.25|AR8.0|CS4.0", toLegacyModString())
         }
     }
 
@@ -66,7 +66,7 @@ class ModHashMapTest {
             put(ModDoubleTime())
             put(ModReplayV6())
 
-            Assert.assertEquals(toDisplayModString(), "HR,HD,DT,RV6")
+            Assert.assertEquals("HR,HD,DT,RV6", toDisplayModString())
         }
     }
 
@@ -78,7 +78,7 @@ class ModHashMapTest {
             put(ModDoubleTime())
             put(ModReplayV6())
 
-            Assert.assertEquals(toDisplayModString(false), "HR,HD,DT")
+            Assert.assertEquals("HR,HD,DT", toDisplayModString(false))
         }
     }
 

@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
-import org.anddev.andengine.entity.modifier.ScaleModifier;
+import com.reco1l.andengine.modifier.Modifiers;
+import com.reco1l.andengine.modifier.UniversalModifier;
+
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -12,19 +14,24 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public static final int TEXTURE_HEIGHT = DEFAULT_TEXTURE.getHeight();
     public final float AREA_CHANGE_FADE_DURATION = 0.8f;
     public float currentSize = BASE_SIZE;
-    private ScaleModifier modifier;
+    private UniversalModifier modifier;
+    private final float sizeMultiplier;
+    private final boolean comboBasedSize;
     private boolean isBreak;
 
-    public MainFlashLightSprite() {
+    public MainFlashLightSprite(final float sizeMultiplier, final boolean comboBasedSize) {
         super(DEFAULT_TEXTURE);
+
+        this.sizeMultiplier = sizeMultiplier;
+        this.comboBasedSize = comboBasedSize;
     }
 
     private void changeArea(float fromScale, float toScale) {
-        if (modifier != null) {
+        if (modifier != null && !modifier.isFinished()) {
             unregisterEntityModifier(modifier);
         }
 
-        modifier = new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale);
+        modifier = Modifiers.scale(AREA_CHANGE_FADE_DURATION, fromScale * sizeMultiplier, toScale * sizeMultiplier);
         registerEntityModifier(modifier);
     }
 
@@ -33,6 +40,10 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     public void handleAreaShrinking(int combo) {
+        if (!comboBasedSize) {
+            return;
+        }
+
         // Area stops shrinking at 200 combo
         if (combo <= 200 && combo % 100 == 0) {
             // For every 100 combo, the size is decreased by 10%

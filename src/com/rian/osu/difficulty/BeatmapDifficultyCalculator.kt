@@ -46,7 +46,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDroidPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
         DroidPerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this)
+            populateParameters(it, beatmap, this, GameMode.Droid)
         }
     }
 
@@ -61,21 +61,30 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructStandardPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
         PerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this)
+            populateParameters(it, beatmap, this, GameMode.Standard)
         }
     }
 
-    private fun populateParameters(parameters: PerformanceCalculationParameters, beatmap: IBeatmap, stat: StatisticV2) {
+    private fun populateParameters(parameters: PerformanceCalculationParameters, beatmap: IBeatmap, stat: StatisticV2, mode: GameMode) {
         parameters.maxCombo = stat.getScoreMaxCombo()
         parameters.countGreat = stat.hit300
         parameters.countOk = stat.hit100
         parameters.countMeh = stat.hit50
         parameters.countMiss = stat.misses
 
-        parameters.sliderTicksMissed =
-            if (stat.sliderTickHits >= 0) beatmap.hitObjects.sliderTickCount - stat.sliderTickHits else null
+        parameters.comboBreakingSliderNestedMisses = when (mode) {
+            GameMode.Droid -> if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
+                beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+                    (stat.sliderHeadHits + stat.sliderTickHits + stat.sliderRepeatHits)
+            } else null
 
-        parameters.sliderEndsDropped =
+            GameMode.Standard -> if (stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
+                beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+                    (stat.sliderTickHits + stat.sliderRepeatHits)
+            } else null
+        }
+
+        parameters.nonComboBreakingSliderNestedMisses =
             if (stat.sliderEndHits >= 0) beatmap.hitObjects.sliderCount - stat.sliderEndHits else null
     }
 
@@ -500,8 +509,8 @@ object BeatmapDifficultyCalculator {
         replayObjectData: Array<ReplayObjectData>,
         scope: CoroutineScope? = null
     ) {
-        sliderEndsDropped = 0
-        sliderTicksMissed = 0
+        nonComboBreakingSliderNestedMisses = 0
+        comboBreakingSliderNestedMisses = 0
 
         val objects = beatmap.hitObjects.objects
 
@@ -513,8 +522,8 @@ object BeatmapDifficultyCalculator {
 
             if (objData?.tickSet == null) {
                 // No object data - assume all slider ticks and the end were dropped.
-                sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
-                sliderTicksMissed = (sliderTicksMissed ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
+                nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
+                comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
                 continue
             }
 
@@ -526,8 +535,8 @@ object BeatmapDifficultyCalculator {
                 }
 
                 when (obj.nestedHitObjects[j]) {
-                    is SliderTick -> sliderTicksMissed = (sliderTicksMissed ?: 0) + 1
-                    is SliderTail -> sliderEndsDropped = (sliderEndsDropped ?: 0) + 1
+                    is SliderTick -> comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + 1
+                    is SliderTail -> nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
                 }
             }
         }

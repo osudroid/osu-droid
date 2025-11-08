@@ -3,8 +3,6 @@ package com.rian.osu.difficulty.calculator
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.PerformanceAttributes
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * A performance calculator for calculating performance points.
@@ -20,14 +18,51 @@ abstract class PerformanceCalculator<
     @JvmField
     val difficultyAttributes: TDiffAttributes
 ) {
+    /**
+     * The maximum combo achieved.
+     */
     protected var scoreMaxCombo = 0
+        private set
+
+    /**
+     * The amount of great hits achieved.
+     */
     protected var countGreat = 0
+        private set
+
+    /**
+     * The amount of ok hits achieved.
+     */
     protected var countOk = 0
+        private set
+
+    /**
+     * The amount of meh hits achieved.
+     */
     protected var countMeh = 0
+        private set
+
+    /**
+     * The amount of misses achieved.
+     */
     protected var countMiss = 0
-    protected var sliderEndsDropped: Int? = null
-    protected var sliderTicksMissed: Int? = null
-    protected var effectiveMissCount = 0.0
+        private set
+
+    /**
+     * The amount of slider nested object misses that do not break combo.
+     *
+     * Will only be accurate if [usingClassicSliderCalculation] is `false`.
+     */
+    protected var nonComboBreakingSliderNestedMisses = 0
+        private set
+
+    /**
+     * The amount of slider nested object misses that break combo.
+     *
+     * Will only be accurate if [usingClassicSliderCalculation] is `false`.
+     */
+    protected var comboBreakingSliderNestedMisses = 0
+        private set
 
     /**
      * The accuracy of the parameters.
@@ -56,8 +91,8 @@ abstract class PerformanceCalculator<
     /**
      * Whether this score uses classic slider calculation.
      */
-    protected val usingClassicSliderCalculation
-        get() = sliderEndsDropped == null || sliderTicksMissed == null
+    protected var usingClassicSliderCalculation = false
+        private set
 
     /**
      * Calculates the performance value of the [DifficultyAttributes] with the specified parameters.
@@ -85,9 +120,11 @@ abstract class PerformanceCalculator<
             countOk = it.countOk
             countMeh = it.countMeh
             countMiss = it.countMiss
-            sliderEndsDropped = it.sliderEndsDropped
-            sliderTicksMissed = it.sliderTicksMissed
-            effectiveMissCount = calculateEffectiveMissCount()
+
+            usingClassicSliderCalculation = it.comboBreakingSliderNestedMisses != null && it.nonComboBreakingSliderNestedMisses != null
+
+            nonComboBreakingSliderNestedMisses = it.nonComboBreakingSliderNestedMisses ?: 0
+            comboBreakingSliderNestedMisses = it.comboBreakingSliderNestedMisses ?: 0
         } ?: resetDefaults()
 
     /**
@@ -99,43 +136,8 @@ abstract class PerformanceCalculator<
         countOk = 0
         countMeh = 0
         countMiss = 0
-        sliderEndsDropped = null
-        sliderTicksMissed = null
-        effectiveMissCount = 0.0
-    }
-
-    private fun calculateEffectiveMissCount() = difficultyAttributes.run {
-        var missCount = countMiss.toDouble()
-
-        if (sliderCount > 0) {
-            if (usingClassicSliderCalculation) {
-                // Consider that full combo is maximum combo minus dropped slider tails since
-                // they don't contribute to combo but also don't break it.
-                // In classic scores, we can't know the amount of dropped sliders so we estimate
-                // to 10% of all sliders in the beatmap.
-                val fullComboThreshold = maxCombo - 0.1 * sliderCount
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
-                missCount = min(missCount, totalImperfectHits.toDouble())
-            } else {
-                val fullComboThreshold = maxCombo.toDouble() - sliderEndsDropped!!
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // Combine regular misses with tick misses, since tick misses break combo as well.
-                missCount = min(missCount, sliderTicksMissed!! + countMiss.toDouble())
-            }
-        }
-
-        missCount = max(countMiss.toDouble(), missCount)
-        missCount = min(totalHits.toDouble(), missCount)
-
-        missCount
+        usingClassicSliderCalculation = false
+        nonComboBreakingSliderNestedMisses = 0
+        comboBreakingSliderNestedMisses = 0
     }
 }

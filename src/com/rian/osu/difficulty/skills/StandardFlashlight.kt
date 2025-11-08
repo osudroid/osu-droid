@@ -35,4 +35,15 @@ class StandardFlashlight(
     override fun difficultyValue() = currentStrainPeaks.sum()
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = difficulty.pow(2) * 25
+    }
 }

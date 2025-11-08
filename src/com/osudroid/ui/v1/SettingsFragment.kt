@@ -662,11 +662,22 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+
+        findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
+                true
+            }
+        }
     }
 
 
     private fun loadSkin(context: Context, path: String): Job {
         val loading = LoadingFragment()
+
+        loading.isDismissOnBackPress = false
         loading.show()
 
         return async {

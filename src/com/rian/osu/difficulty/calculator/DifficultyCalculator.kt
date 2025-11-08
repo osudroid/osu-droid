@@ -19,15 +19,13 @@ import kotlinx.coroutines.ensureActive
  * A difficulty calculator for calculating star rating.
  */
 abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : DifficultyHitObject, TAttributes : DifficultyAttributes> {
-    protected abstract val difficultyMultiplier: Double
-
     /**
      * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
     protected open val difficultyAdjustmentMods = setOf(
         ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
         ModMirror::class, ModHardRock::class, ModHidden::class, ModFlashlight::class,
-        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class
+        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class, ModTraceable::class
     )
 
     /**
@@ -207,14 +205,6 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return The generated [DifficultyHitObject]s.
      */
     protected abstract fun createDifficultyHitObjects(beatmap: TBeatmap, scope: CoroutineScope? = null): Array<TObject>
-
-    /**
-     * Calculates the rating of a [Skill] based on its difficulty.
-     *
-     * @param skill The [Skill] to calculate the rating for.
-     * @return The rating of the [Skill].
-     */
-    protected fun calculateRating(skill: Skill<TObject>) = sqrt(skill.difficultyValue()) * difficultyMultiplier
 
     /**
      * Creates a [TAttributes] to describe a beatmap's difficulty.

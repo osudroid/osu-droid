@@ -360,7 +360,7 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
-            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+            (mods.contains(ModFlashlight.class) && !mods.ofType(ModFlashlight.class).getUsesDefaultSettings())) {
 
             var customSpeed = mods.ofType(ModCustomSpeed.class);
             var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
@@ -389,8 +389,14 @@ public class ScoringScene {
                 }
             }
 
-            if (flashlight != null && flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
-                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
+            if (flashlight != null && !flashlight.getUsesDefaultSettings()) {
+                if (flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
+                    mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
+                }
+
+                if (flashlight.getSizeMultiplier() != ModFlashlight.DEFAULT_SIZE_MULTIPLIER) {
+                    mapperStr += String.format(Locale.ENGLISH, "%.2fx,", flashlight.getSizeMultiplier());
+                }
             }
 
             if (mapperStr.endsWith(",")){
@@ -430,6 +436,16 @@ public class ScoringScene {
                     replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                     if (replay.load(replayPath, true)) {
+                        // If statistics information is not complete, we populate it with information from replay.
+                        if (
+                            stat.getSliderHeadHits() == -1 ||
+                            stat.getSliderTickHits() == -1 ||
+                            stat.getSliderRepeatHits() == -1 ||
+                            stat.getSliderEndHits() == -1
+                        ) {
+                            replay.populateStatistics(beatmapData, stat);
+                        }
+
                         var copiedMods = mods;
 
                         if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
@@ -560,7 +576,9 @@ public class ScoringScene {
                 return;
             }
 
-            if (SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext()) {
+            boolean hasUnrankedMod = SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
+
+            if (hasUnrankedMod || Config.isRemoveSliderLock()) {
                 return;
             }
 

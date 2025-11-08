@@ -1,11 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
+import com.reco1l.andengine.modifier.Modifiers;
+import com.rian.osu.mods.ModFlashlight;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -20,11 +21,11 @@ public class FlashLightEntity extends Entity  {
     private float nextPX;
     private float nextPY;
 
-    public FlashLightEntity(final float areaFollowDelay) {
+    public FlashLightEntity(final ModFlashlight flashlight) {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
 
-        this.areaFollowDelay = areaFollowDelay;
-        mainSprite = new MainFlashLightSprite();
+        areaFollowDelay = flashlight.getFollowDelay();
+        mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier(), flashlight.isComboBasedSize());
         dimLayer = new FlashLightDimLayerSprite();
 
         attachChild(mainSprite);
@@ -48,7 +49,7 @@ public class FlashLightEntity extends Entity  {
             return;
         }
 
-        currentModifier = new MoveModifier(areaFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
+        currentModifier = Modifiers.move(areaFollowDelay, getX(), nextPX, getY(), nextPY, null, Easing.OutExpo);
 
         registerEntityModifier(currentModifier);
     }

@@ -48,7 +48,7 @@ object StandardFlashlightEvaluator {
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
                 val jumpDistance = current.obj.difficultyStackedPosition
-                    .getDistance(currentObject.obj.endPosition)
+                    .getDistance(currentObject.obj.difficultyStackedEndPosition)
 
                 // We want to nerf objects that can be easily seen within the Flashlight circle radius.
                 if (i == 0) {

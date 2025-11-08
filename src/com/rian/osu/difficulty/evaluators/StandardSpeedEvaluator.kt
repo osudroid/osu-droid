@@ -1,19 +1,21 @@
 package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.StandardDifficultyHitObject
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModAutopilot
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * An evaluator for calculating osu!standard speed difficulty.
  */
 object StandardSpeedEvaluator {
-    private const val SINGLE_SPACING_THRESHOLD = 125.0 // 1.25 circles distance between centers
+    private val SINGLE_SPACING_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 // 1.25 circles distance between centers
     private const val MIN_SPEED_BONUS = 75.0 // 200 1/4 BPM
-    private const val DISTANCE_MULTIPLIER = 0.9
+    private const val DISTANCE_MULTIPLIER = 0.8
 
     /**
      * Evaluates the difficulty of tapping the current object, based on:
@@ -33,7 +35,7 @@ object StandardSpeedEvaluator {
         var strainTime = current.strainTime
 
         // Nerf double-tappable doubles.
-        val doubletapness = 1 - current.doubletapness
+        val doubletapness = 1 - current.getDoubletapness(current.next(0))
 
         // Cap deltatime to the OD 300 hitwindow.
         // 0.93 is derived from making sure 260 BPM 1/4 OD8 streams aren't nerfed harshly, whilst 0.92 limits the effect of the cap.
@@ -53,9 +55,12 @@ object StandardSpeedEvaluator {
         val distance = min(SINGLE_SPACING_THRESHOLD, travelDistance + current.minimumJumpDistance)
 
         // Max distance bonus is 1 * `distance_multiplier` at single_spacing_threshold
-        val distanceBonus =
+        var distanceBonus =
             if (mods.any { it is ModAutopilot }) 0.0
             else (distance / SINGLE_SPACING_THRESHOLD).pow(3.95) * DISTANCE_MULTIPLIER
+
+        // Apply reduced small circle bonus because flow aim difficulty on small circles does not scale as hard as jumps.
+        distanceBonus *= sqrt(current.smallCircleBonus)
 
         // Base difficulty with all bonuses
         val difficulty = (1 + speedBonus + distanceBonus) * 1000 / strainTime

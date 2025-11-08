@@ -115,14 +115,14 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, adjustmentMods)
+                it.applyToHitObject(mode, obj, adjustmentMods, scope)
             }
         }
 
         mods?.filterIsInstance<IModApplicableToHitObjectWithMods>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, mods)
+                it.applyToHitObject(mode, obj, mods, scope)
             }
         }
 

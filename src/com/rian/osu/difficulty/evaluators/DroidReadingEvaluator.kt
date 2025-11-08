@@ -20,7 +20,7 @@ object DroidReadingEvaluator {
     private val EMPTY_MODS = emptyList<Mod>()
     private const val READING_WINDOW_SIZE = 3000.0
     private val DISTANCE_INFLUENCE_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 // 1.25 circles distance between centers
-    private const val HIDDEN_MULTIPLIER = 0.85
+    private const val HIDDEN_MULTIPLIER = 0.5
     private const val DENSITY_MULTIPLIER = 0.8
     private const val DENSITY_DIFFICULTY_BASE = 1.5
     private const val PREEMPT_BALANCING_FACTOR = 220000.0
@@ -73,12 +73,12 @@ object DroidReadingEvaluator {
             val futureObjectDifficultyInfluence = calculateCurrentVisibleObjectsDensity(current)
 
             // Account for both past and current densities.
-            val densityFactor = max(1.0, futureObjectDifficultyInfluence + pastObjectDifficultyInfluence - 2).pow(2.2) * 3.1
+            val densityFactor = max(1.0, futureObjectDifficultyInfluence + pastObjectDifficultyInfluence - 2).pow(2.3) * 3.2
 
             hiddenDifficulty += (timeSpentInvisibleFactor + densityFactor) *  constantAngleNerfFactor * velocityFactor * 0.007
 
             // Apply a soft cap to general Hidden reading to account for partial memorization.
-            hiddenDifficulty = hiddenDifficulty.pow(0.65) * HIDDEN_MULTIPLIER
+            hiddenDifficulty = hiddenDifficulty.pow(0.85) * HIDDEN_MULTIPLIER
 
             val prev = current.previous(0) as DroidDifficultyHitObject
 

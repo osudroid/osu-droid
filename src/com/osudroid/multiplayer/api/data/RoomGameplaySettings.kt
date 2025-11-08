@@ -7,5 +7,10 @@ data class RoomGameplaySettings(
     /**
      * Whether this room allows free mod.
      */
-    var isFreeMod: Boolean
+    var isFreeMod: Boolean,
+
+    /**
+     * Whether this room has the remove slider lock setting enabled.
+     */
+    var isRemoveSliderLock: Boolean
 )

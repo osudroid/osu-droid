@@ -43,8 +43,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 1 to 2`() {
-        @Suppress("VariableInitializerIsRedundant")
-        var db = helper.createDatabase(testDb, 1).apply {
+        helper.createDatabase(testDb, 1).apply {
             // Insert a fake beatmap.
             execSQL(
                 "INSERT INTO BeatmapInfo (filename, md5, audioFilename, setDirectory, title, titleUnicode, artist, " +
@@ -74,7 +73,7 @@ class MigrationTest {
             )
         }
 
-        db = helper.runMigrationsAndValidate(testDb, 2, true, MIGRATION_1_2)
+        val db = helper.runMigrationsAndValidate(testDb, 2, true, MIGRATION_1_2)
 
         db.query("SELECT id, mods FROM ScoreInfo").use {
             val difficulty = BeatmapDifficulty(4f, 9f, 8f, 6f)
@@ -89,21 +88,21 @@ class MigrationTest {
                         val modMap = LegacyModConverter.convert("rhd|x1.10", difficulty)
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     2L -> {
                         val modMap = LegacyModConverter.convert("m")
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     3L -> {
                         val modMap = LegacyModConverter.convert("m", difficulty)
                         modMap.put(ModReplayV6())
 
-                        Assert.assertEquals(mods, modMap.serializeMods().toString())
+                        Assert.assertEquals(modMap.serializeMods().toString(), mods)
                     }
 
                     else -> throw IllegalStateException("Unknown score ID: $id")
@@ -115,8 +114,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 2 to 3`() {
-        @Suppress("VariableInitializerIsRedundant")
-        var db = helper.createDatabase(testDb, 2).apply {
+        helper.createDatabase(testDb, 2).apply {
             val scores = mutableListOf<String>()
 
             fun addScore(mods: ModHashMap, time: Long = 1752863880000L) {
@@ -155,7 +153,7 @@ class MigrationTest {
             )
         }
 
-        db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
+        val db = helper.runMigrationsAndValidate(testDb, 3, true, MIGRATION_2_3)
 
         db.query("SELECT id, score, mods FROM ScoreInfo").use {
             while (it.moveToNext()) {
@@ -196,6 +194,63 @@ class MigrationTest {
                     }
 
                     else -> throw IllegalStateException("Unknown score ID: $id")
+                }
+            }
+        }
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun `Test migration from version 3 to 4`() {
+        helper.createDatabase(testDb, 3).apply {
+            // A score without Flashlight mod. This should not be recalculated.
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '', 1000, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+
+            // A score with Flashlight mod in default settings. This should not be recalculated.
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '[{\"acronym\":\"FL\"}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+
+            // A score with Flashlight mod with custom settings. This should be recalculated.
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '[{\"acronym\":\"FL\",\"settings\":{\"areaFollowDelay\":0.24}}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 4, true, MIGRATION_3_4)
+
+        db.query("SELECT id, score, sliderHeadHits, sliderRepeatHits FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+
+                when (id) {
+                    1L -> {
+                        // Score without Flashlight mod, should remain unchanged.
+                        Assert.assertEquals(1000, score)
+
+                        // Only check the newly added columns in the first row because the others are the same.
+                        Assert.assertTrue(it.isNull(2))
+                        Assert.assertTrue(it.isNull(3))
+                    }
+
+                    2L -> {
+                        // Score with default Flashlight mod, should remain unchanged.
+                        Assert.assertEquals(1120, score)
+                    }
+
+                    3L -> {
+                        // Score with custom Flashlight mod, should be recalculated.
+                        Assert.assertEquals(1000, score)
+                    }
                 }
             }
         }

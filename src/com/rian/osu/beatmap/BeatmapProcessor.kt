@@ -53,15 +53,23 @@ class BeatmapProcessor @JvmOverloads constructor(
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
      */
-    fun postProcess() = beatmap.hitObjects.objects.run {
-        if (isEmpty()) {
+    fun postProcess() = beatmap.hitObjects.run {
+        if (objects.isEmpty()) {
             return@run
         }
 
-        // Reset stacking
+        // Recount slider ticks as nested hit objects are only generated after HitObject.applyDefaults.
+        sliderTickCount = 0
+
         forEach {
             scope?.ensureActive()
 
+            if (it is Slider) {
+                sliderRepeatCount += it.repeatCount
+                sliderTickCount += it.nestedHitObjects.size - 2 - it.repeatCount
+            }
+
+            // Reset stacking
             it.difficultyStackHeight = 0
             it.gameplayStackHeight = 0
         }

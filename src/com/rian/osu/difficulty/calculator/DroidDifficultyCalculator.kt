@@ -9,9 +9,11 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
 import com.rian.osu.difficulty.skills.*
 import com.rian.osu.mods.*
+import com.rian.osu.utils.ModUtils
 import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlinx.coroutines.CoroutineScope
@@ -21,11 +23,9 @@ import kotlinx.coroutines.ensureActive
  * A difficulty calculator for calculating osu!droid star rating.
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
-    override val difficultyMultiplier = 0.18
     override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
-        setOf(ModPrecise::class, ModScoreV2::class, ModTraceable::class, ModFreezeFrame::class, ModReplayV6::class)
+        setOf(ModPrecise::class, ModScoreV2::class, ModFreezeFrame::class, ModReplayV6::class)
 
-    private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
     private val threeFingerStrainThreshold = 175.0
 
@@ -68,10 +68,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             readingDifficulty *= 0.4
         }
 
-        val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
-        val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(1.6) * 25 else 0.0
-        val baseReadingPerformance = (readingDifficulty.pow(2) * 25).pow(0.8)
+        val baseAimPerformance = DroidAim.difficultyToPerformance(aimDifficulty)
+        val baseTapPerformance = StrainSkill.difficultyToPerformance(tapDifficulty)
+        val baseFlashlightPerformance = DroidFlashlight.difficultyToPerformance(flashlightDifficulty)
+        val baseReadingPerformance = DroidReading.difficultyToPerformance(readingDifficulty)
 
         val basePerformance = (
             baseAimPerformance.pow(1.1) +
@@ -207,66 +207,48 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         val tapNoCheese = skills.find<DroidTap> { !it.considerCheesability } ?: return
 
-        var firstObjectIndex = 0
-        val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
+        var inSpeedSection = false
+        var firstSpeedObjectIndex = 0
+        val clockRate = ModUtils.calculateRateWithMods(mods)
 
-        for (i in 0 until objects.size - 1) {
-            val current = objects[i].obj
-            val next = objects[i + 1].obj
-            val deltaTime = next.startTime - current.endTime
+        for (i in 2 until objects.size) {
+            val current = objects[i]
+            val prev = objects[i - 1]
+            val prevPrev = objects[i - 2]
 
-            if (deltaTime >= maximumSectionDeltaTime) {
-                // Ignore sections that do not meet object count requirement.
-                if (i - firstObjectIndex >= minimumSectionObjectCount) {
-                    sectionBoundaries.add(Pair(firstObjectIndex, i))
-                }
+            val currentStrain = tapNoCheese.objectStrains[i]
 
-                firstObjectIndex = i + 1
+            if (!inSpeedSection && currentStrain >= threeFingerStrainThreshold) {
+                inSpeedSection = true
+                firstSpeedObjectIndex = i
+                continue
             }
-        }
 
-        // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
-        if (objects.size - firstObjectIndex >= minimumSectionObjectCount) {
-            sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
-        }
+            val currentDelta = (current.startTime - prev.startTime) / clockRate
+            val prevDelta = (prev.startTime - prevPrev.startTime) / clockRate
 
-        // Re-filter with tap strain in mind.
-        for (section in sectionBoundaries) {
-            var inSpeedSection = false
-            var newFirstObjectIndex = section.first
+            val deltaRatio = min(prevDelta, currentDelta) / max(prevDelta, currentDelta)
 
-            for (i in section.first until section.second) {
-                val strain = tapNoCheese.objectStrains[i]
+            if (
+                inSpeedSection &&
+                (currentStrain < threeFingerStrainThreshold ||
+                    // Stop speed section on slowing down 1/2 rhythm change or anything slower.
+                    (prevDelta < currentDelta && deltaRatio <= 0.5) ||
+                    // Don't forget to manually add the last section, which would otherwise be ignored.
+                    i == objects.size - 1)
+            ) {
+                val lastSpeedObjectIndex = i - if (i == objects.size - 1) 0 else 1
+                inSpeedSection = false
 
-                if (!inSpeedSection && strain >= threeFingerStrainThreshold) {
-                    inSpeedSection = true
-                    newFirstObjectIndex = i
+                // Ignore sections that don't meet object count requirement.
+                if (i - firstSpeedObjectIndex < minimumSectionObjectCount) {
                     continue
                 }
 
-                if (inSpeedSection && strain < threeFingerStrainThreshold) {
-                    inSpeedSection = false
-
-                    // Ignore sections that do not meet object count requirement.
-                    if (i - newFirstObjectIndex < minimumSectionObjectCount) {
-                        continue
-                    }
-
-                    possibleThreeFingeredSections.add(HighStrainSection(
-                        newFirstObjectIndex,
-                        i,
-                        calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(newFirstObjectIndex, i))
-                    ))
-                }
-            }
-
-            // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
-            // Ignore sections that don't meet object count requirement.
-            if (inSpeedSection && section.second - newFirstObjectIndex >= minimumSectionObjectCount) {
                 possibleThreeFingeredSections.add(HighStrainSection(
-                    newFirstObjectIndex,
-                    section.second,
-                    calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(newFirstObjectIndex, section.second))
+                    firstSpeedObjectIndex,
+                    lastSpeedObjectIndex,
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
                 ))
             }
         }
@@ -304,7 +286,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)
 
+    /**
+     * Calculates the rating of a [Skill] based on its difficulty.
+     *
+     * @param skill The [Skill] to calculate the rating for.
+     * @return The rating of the [Skill].
+     */
+    private fun calculateRating(skill: Skill<*>) = sqrt(skill.difficultyValue()) * DIFFICULTY_MULTIPLIER
+
     companion object {
+        private const val DIFFICULTY_MULTIPLIER = 0.18
+
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
          */

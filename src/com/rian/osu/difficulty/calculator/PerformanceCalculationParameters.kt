@@ -35,20 +35,20 @@ open class PerformanceCalculationParameters(
     var countMiss: Int = 0,
 
     /**
-     * The amount of slider ends dropped.
+     * The amount of slider nested object misses that do not break combo.
      */
     @JvmField
-    var sliderEndsDropped: Int? = null,
+    var nonComboBreakingSliderNestedMisses: Int? = null,
 
     /**
-     * The amount of slider ticks missed.
+     * The amount of slider nested object misses that break combo.
      */
     @JvmField
-    var sliderTicksMissed: Int? = null
+    var comboBreakingSliderNestedMisses: Int? = null
 ) {
     /**
      * Whether this score uses classic slider calculation.
      */
     val usingClassicSliderCalculation
-        get() = sliderEndsDropped == null || sliderTicksMissed == null
+        get() = nonComboBreakingSliderNestedMisses == null || comboBreakingSliderNestedMisses == null
 }

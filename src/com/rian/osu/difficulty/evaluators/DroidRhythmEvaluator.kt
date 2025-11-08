@@ -25,6 +25,7 @@ object DroidRhythmEvaluator {
     @JvmStatic
     fun evaluateDifficultyOf(current: DroidDifficultyHitObject, useSliderAccuracy: Boolean): Double {
         if (
+            current.index <= 1 ||
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
             current.isOverlapping(false)
@@ -64,10 +65,11 @@ object DroidRhythmEvaluator {
             ++rhythmStart
         }
 
+        var prevObject = validPrevious[rhythmStart]
+        var lastObject = validPrevious[rhythmStart + 1]
+
         for (i in rhythmStart downTo 1) {
-            val currentObject = current.previous(i - 1)!!
-            val prevObject = current.previous(i)!!
-            val lastObject = current.previous(i + 1)!!
+            val currentObject = validPrevious[i - 1]
 
             // Scale note 0 to 1 from history to now.
             // Scale note 0 to 1 from history to now.
@@ -153,7 +155,7 @@ object DroidRhythmEvaluator {
                     }
 
                     // Scale down the difficulty if the object is doubletappable.
-                    effectiveRatio *= 1 - prevObject.doubletapness * 0.75
+                    effectiveRatio *= 1 - prevObject.getDoubletapness(currentObject) * 0.75
 
                     rhythmComplexitySum += sqrt(effectiveRatio * startRatio) * currentHistoricalDecay
 
@@ -187,6 +189,9 @@ object DroidRhythmEvaluator {
 
                 island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
             }
+
+            lastObject = prevObject
+            prevObject = currentObject
         }
 
         return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2

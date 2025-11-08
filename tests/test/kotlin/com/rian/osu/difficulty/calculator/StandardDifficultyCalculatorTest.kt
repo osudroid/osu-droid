@@ -36,10 +36,13 @@ class StandardDifficultyCalculatorTest {
 
         calculator.calculate(beatmap).apply {
             // These results are off by a margin from server-side results due to floating point differences.
-            Assert.assertEquals(2.413839842506594, aimDifficulty, 1e-5)
-            Assert.assertEquals(1.808471044396375, speedDifficulty, 1e-5)
-            Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
-            Assert.assertEquals(4.528123418924582, starRating, 1e-6)
+            Assert.assertEquals(2.5071363711640458, aimDifficulty, 1e-5)
+            Assert.assertEquals(1.801599146984512, speedDifficulty, 1e-5)
+            Assert.assertEquals(4.552663607000551, starRating, 1e-6)
+        }
+
+        calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
+            Assert.assertEquals(1.5678659774040957, flashlightDifficulty, 1e-5)
         }
     }
 }

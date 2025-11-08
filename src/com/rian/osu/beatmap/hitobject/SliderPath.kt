@@ -3,44 +3,33 @@ package com.rian.osu.beatmap.hitobject
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.PathApproximation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents the path of a [Slider].
  */
-class SliderPath(
+class SliderPath @JvmOverloads constructor(
     /**
      * The path type of the [Slider].
      */
-    type: SliderPathType,
+    val pathType: SliderPathType,
 
     /**
      * The control points (anchor points) of this [SliderPath].
      */
-    controlPoints: List<Vector2>,
+    val controlPoints: List<Vector2>,
 
     /**
      * The distance that is expected when calculating [SliderPath].
      */
-    expectedDistance: Double
+    val expectedDistance: Double,
+
+    /**
+     * The [CoroutineScope] to use for job cancellation.
+     */
+    scope: CoroutineScope? = null
 ) {
-    /**
-     * The path type of the [Slider].
-     */
-    var pathType = type
-        private set
-
-    /**
-     * The control points (anchor points) of this [SliderPath].
-     */
-    var controlPoints = controlPoints
-        private set
-
-    /**
-     * The distance that is expected when calculating this [SliderPath].
-     */
-    var expectedDistance = expectedDistance
-        private set
-
     /**
      * The calculated path of this [SliderPath].
      */
@@ -54,8 +43,8 @@ class SliderPath(
         private set
 
     init {
-        calculatePath()
-        calculateCumulativeLength()
+        calculatePath(scope)
+        calculateCumulativeLength(scope)
     }
 
     /**
@@ -64,7 +53,7 @@ class SliderPath(
      *
      * @param progress Ranges from 0 (beginning of the path) to 1 (end of the path).
      */
-    fun positionAt(progress: Double): Vector2 =
+    fun positionAt(progress: Double) =
         progressToDistance(progress).let { interpolateVertices(indexOfDistance(it), it) }
 
     /**
@@ -73,9 +62,11 @@ class SliderPath(
      *
      * @param p0 Start progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
      * @param p1 End progress. Ranges from 0 (beginning of the slider) to 1 (end of the slider).
+     * @param scope The [CoroutineScope] to use for job cancellation.
      * @return The computed path between the two ranges.
      */
-    fun getPathToProgress(p0: Double, p1: Double): MutableList<Vector2> {
+    @JvmOverloads
+    fun getPathToProgress(p0: Double, p1: Double, scope: CoroutineScope? = null): MutableList<Vector2> {
         val path = mutableListOf<Vector2>()
         val d0 = progressToDistance(p0)
         val d1 = progressToDistance(p1)
@@ -83,12 +74,14 @@ class SliderPath(
         var i = 0
 
         while (i < calculatedPath.size && cumulativeLength[i] < d0) {
+            scope?.ensureActive()
             i++
         }
 
         path.add(interpolateVertices(i, d0))
 
         while (i < calculatedPath.size && cumulativeLength[i] <= d1) {
+            scope?.ensureActive()
             path.add(calculatedPath[i++])
         }
 
@@ -100,7 +93,7 @@ class SliderPath(
     /**
      * Calculates the path of this [SliderPath].
      */
-    private fun calculatePath() {
+    private fun calculatePath(scope: CoroutineScope?) {
         calculatedPath.clear()
 
         if (controlPoints.isEmpty()) {
@@ -111,11 +104,13 @@ class SliderPath(
         var spanStart = 0
 
         for (i in controlPoints.indices) {
+            scope?.ensureActive()
+
             if (i == controlPoints.size - 1 || controlPoints[i] == controlPoints[i + 1]) {
                 val spanEnd = i + 1
                 val cpSpan = controlPoints.subList(spanStart, spanEnd)
 
-                for (t in calculateSubPath(cpSpan)) {
+                for (t in calculateSubPath(cpSpan, scope)) {
                     if (calculatedPath.isEmpty() || calculatedPath[calculatedPath.size - 1] != t) {
                         calculatedPath.add(t)
                     }
@@ -129,13 +124,15 @@ class SliderPath(
     /**
      * Calculates the cumulative length of this [SliderPath].
      */
-    private fun calculateCumulativeLength() {
+    private fun calculateCumulativeLength(scope: CoroutineScope?) {
         cumulativeLength.clear()
         cumulativeLength.add(0.0)
 
         var calculatedLength = 0.0
 
         for (i in 0 until calculatedPath.size - 1) {
+            scope?.ensureActive()
+
             val diff = calculatedPath[i + 1] - calculatedPath[i]
             calculatedLength += diff.length.toDouble()
             cumulativeLength.add(calculatedLength)
@@ -158,6 +155,7 @@ class SliderPath(
             if (calculatedLength > expectedDistance) {
                 // The path will be shortened further, in which case we should trim any more unnecessary lengths and their associated path segments
                 while (cumulativeLength.isNotEmpty() && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
+                    scope?.ensureActive()
                     cumulativeLength.removeAt(cumulativeLength.size - 1)
                     calculatedPath.removeAt(pathEndIndex--)
                 }
@@ -178,17 +176,17 @@ class SliderPath(
         }
     }
 
-    private fun calculateSubPath(subControlPoints: List<Vector2>) =
+    private fun calculateSubPath(subControlPoints: List<Vector2>, scope: CoroutineScope?) =
         when (pathType) {
             SliderPathType.Linear -> PathApproximation.approximateLinear(subControlPoints)
 
             SliderPathType.PerfectCurve ->
-                if (subControlPoints.size == 3) PathApproximation.approximateCircularArc(subControlPoints)
-                else PathApproximation.approximateBezier(subControlPoints)
+                if (subControlPoints.size == 3) PathApproximation.approximateCircularArc(subControlPoints, scope)
+                else PathApproximation.approximateBezier(subControlPoints, scope)
 
-            SliderPathType.Catmull -> PathApproximation.approximateCatmull(subControlPoints)
+            SliderPathType.Catmull -> PathApproximation.approximateCatmull(subControlPoints, scope)
 
-            else -> PathApproximation.approximateBezier(subControlPoints)
+            else -> PathApproximation.approximateBezier(subControlPoints, scope)
         }
 
     /**

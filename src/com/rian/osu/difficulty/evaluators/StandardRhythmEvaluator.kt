@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.StandardDifficultyHitObject
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import kotlin.math.*
 
 /**
@@ -11,8 +12,8 @@ import kotlin.math.*
 object StandardRhythmEvaluator {
     private const val HISTORY_TIME_MAX = 5 * 1000 // 5 seconds of calculateRhythmBonus max.
     private const val HISTORY_OBJECTS_MAX = 32
-    private const val RHYTHM_OVERALL_MULTIPLIER = 0.95
-    private const val RHYTHM_RATIO_MULTIPLIER = 12.0
+    private const val RHYTHM_OVERALL_MULTIPLIER = 1.0
+    private const val RHYTHM_RATIO_MULTIPLIER = 15.0
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
@@ -23,6 +24,10 @@ object StandardRhythmEvaluator {
     fun evaluateDifficultyOf(current: StandardDifficultyHitObject): Double {
         if (current.obj is Spinner) {
             return 0.0
+        }
+
+        if (current.index <= 1) {
+            return 1.0
         }
 
         var rhythmComplexitySum = 0.0
@@ -45,10 +50,11 @@ object StandardRhythmEvaluator {
             ++rhythmStart
         }
 
+        var prevObject = current.previous(rhythmStart)!!
+        var lastObject = current.previous(rhythmStart + 1)!!
+
         for (i in rhythmStart downTo 1) {
             val currentObject = current.previous(i - 1)!!
-            val prevObject = current.previous(i)!!
-            val lastObject = current.previous(i + 1)!!
 
             // Scale note 0 to 1 from history to now.
             val timeDecay = (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
@@ -57,24 +63,27 @@ object StandardRhythmEvaluator {
             // Either we're limited by time or limited by object count.
             val currentHistoricalDecay = min(noteDecay, timeDecay)
 
-            val currentDelta = currentObject.strainTime
-            val prevDelta = prevObject.strainTime
-            val lastDelta = lastObject.strainTime
+            // Use custom cap value to ensure that at this point delta time is actually zero.
+            val currentDelta = currentObject.deltaTime.coerceAtLeast(1e-7)
+            val prevDelta = prevObject.deltaTime.coerceAtLeast(1e-7)
+            val lastDelta = lastObject.deltaTime.coerceAtLeast(1e-7)
 
             // Calculate how much current delta difference deserves a rhythm bonus
             // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
-            val deltaDifferenceRatio = min(prevDelta, currentDelta) / max(prevDelta, currentDelta)
+            val deltaDifference = max(prevDelta, currentDelta) / min(prevDelta, currentDelta)
 
-            val currentRatio = 1 + RHYTHM_RATIO_MULTIPLIER * min(0.5, sin(Math.PI / deltaDifferenceRatio).pow(2.0))
+            // Take only the fractional part of the value since we are only interested in punishing multiples
+            val deltaDifferenceFraction = deltaDifference - truncate(deltaDifference)
+
+            val currentRatio = 1 + RHYTHM_RATIO_MULTIPLIER * min(0.5, DifficultyCalculationUtils.smoothstepBellCurve(deltaDifferenceFraction))
 
             // Reduce ratio bonus if delta difference is too big
-            val fraction = max(prevDelta / currentDelta, currentDelta / prevDelta)
-            val fractionMultiplier = (2 - fraction / 8).coerceIn(0.0, 1.0)
+            val differenceMultiplier = (2 - deltaDifference / 8).coerceIn(0.0, 1.0)
 
             val windowPenalty =
                 ((abs(prevDelta - currentDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon).coerceIn(0.0, 1.0)
 
-            var effectiveRatio = windowPenalty * currentRatio * fractionMultiplier
+            var effectiveRatio = windowPenalty * currentRatio * differenceMultiplier
 
             if (firstDeltaSwitch) {
                 if (abs(prevDelta - currentDelta) < deltaDifferenceEpsilon) {
@@ -126,7 +135,7 @@ object StandardRhythmEvaluator {
                     }
 
                     // Scale down the difficulty if the object is doubletappable.
-                    effectiveRatio *= 1 - prevObject.doubletapness * 0.75
+                    effectiveRatio *= 1 - prevObject.getDoubletapness(currentObject) * 0.75
 
                     rhythmComplexitySum += sqrt(effectiveRatio * startRatio) * currentHistoricalDecay
 
@@ -160,8 +169,11 @@ object StandardRhythmEvaluator {
 
                 island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
             }
+
+            lastObject = prevObject
+            prevObject = currentObject
         }
 
-        return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2
+        return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2 * (1 - current.getDoubletapness(current.next(0)))
     }
 }
