@@ -1087,10 +1087,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(unrankedSprite);
         }
 
-        if (GameHelper.isFlashlight()){
-            var flashlight = lastMods.ofType(ModFlashlight.class);
-
-            flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).getFollowDelay());
+        if (GameHelper.isFlashlight()) {
+            flashlightSprite = new FlashLightEntity(GameHelper.getFlashlight());
             fgScene.attachChild(flashlightSprite, 0);
         }
 

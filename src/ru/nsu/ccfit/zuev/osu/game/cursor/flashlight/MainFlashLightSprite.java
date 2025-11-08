@@ -13,10 +13,12 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public final float AREA_CHANGE_FADE_DURATION = 0.8f;
     public float currentSize = BASE_SIZE;
     private ScaleModifier modifier;
+    private final float sizeMultiplier;
     private boolean isBreak;
 
-    public MainFlashLightSprite() {
+    public MainFlashLightSprite(final float sizeMultiplier) {
         super(DEFAULT_TEXTURE);
+        this.sizeMultiplier = sizeMultiplier;
     }
 
     private void changeArea(float fromScale, float toScale) {
@@ -24,7 +26,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
             unregisterEntityModifier(modifier);
         }
 
-        modifier = new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale);
+        modifier = new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale * sizeMultiplier, toScale * sizeMultiplier);
         registerEntityModifier(modifier);
     }
 

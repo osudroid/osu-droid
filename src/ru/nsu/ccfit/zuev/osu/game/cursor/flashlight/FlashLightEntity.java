@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import com.edlplan.framework.math.FMath;
+import com.rian.osu.mods.ModFlashlight;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -20,11 +21,11 @@ public class FlashLightEntity extends Entity  {
     private float nextPX;
     private float nextPY;
 
-    public FlashLightEntity(final float areaFollowDelay) {
+    public FlashLightEntity(final ModFlashlight flashlight) {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
 
-        this.areaFollowDelay = areaFollowDelay;
-        mainSprite = new MainFlashLightSprite();
+        areaFollowDelay = flashlight.getFollowDelay();
+        mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier());
         dimLayer = new FlashLightDimLayerSprite();
 
         attachChild(mainSprite);
