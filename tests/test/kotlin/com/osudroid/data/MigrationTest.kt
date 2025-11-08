@@ -203,20 +203,56 @@ class MigrationTest {
     @Throws(IOException::class)
     fun `Test migration from version 3 to 4`() {
         helper.createDatabase(testDb, 3).apply {
+            // A score without Flashlight mod. This should not be recalculated.
             execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
-                "'', '', '', 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+                "'', '', '', 1000, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+
+            // A score with Flashlight mod in default settings. This should not be recalculated.
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '[{\"acronym\":\"FL\"}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+            )
+
+            // A score with Flashlight mod with custom settings. This should be recalculated.
+            execSQL(
+                "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
+                "'', '', '[{\"acronym\":\"FL\",\"settings\":{\"areaFollowDelay\":0.24}}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
             )
         }
 
         val db = helper.runMigrationsAndValidate(testDb, 4, true, MIGRATION_3_4)
 
-        db.query("SELECT sliderHeadHits, sliderRepeatHits FROM ScoreInfo").use {
-            it.moveToFirst()
+        db.query("SELECT id, score, sliderHeadHits, sliderRepeatHits FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
 
-            Assert.assertTrue(it.isNull(0))
-            Assert.assertTrue(it.isNull(1))
+                when (id) {
+                    1L -> {
+                        // Score without Flashlight mod, should remain unchanged.
+                        Assert.assertEquals(1000, score)
+
+                        // Only check the newly added columns in the first row because the others are the same.
+                        Assert.assertTrue(it.isNull(2))
+                        Assert.assertTrue(it.isNull(3))
+                    }
+
+                    2L -> {
+                        // Score with default Flashlight mod, should remain unchanged.
+                        Assert.assertEquals(1120, score)
+                    }
+
+                    3L -> {
+                        // Score with custom Flashlight mod, should be recalculated.
+                        Assert.assertEquals(1000, score)
+                    }
+                }
+            }
         }
     }
 }

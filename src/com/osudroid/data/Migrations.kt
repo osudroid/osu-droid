@@ -6,6 +6,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
+import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRateAdjust
 import com.rian.osu.mods.ModReplayV6
 import com.rian.osu.utils.ModHashMap
@@ -214,12 +215,32 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
  * Migration from version 3 to 4.
  *
  * Contains the following changes:
- * - Adds slider head and repeat hits statistics to `ScoreInfo`
+ * - Adds slider head and repeat hits statistics to `ScoreInfo`.
+ * - Recalculates Flashlight scores that do not use default settings.
  */
 val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
     override fun performMigration(db: SupportSQLiteDatabase) {
+        // Add new columns.
         db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderHeadHits INTEGER")
         db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN sliderRepeatHits INTEGER")
+
+        // Recalculate Flashlight scores that do not use default settings.
+        db.query("SELECT id, score, mods FROM ScoreInfo WHERE mods LIKE '%\"acronym\":\"FL\"%'").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                var score = it.getInt(1)
+                val mods = ModUtils.deserializeMods(it.getString(2))
+
+                val flashlight = mods.ofType<ModFlashlight>()!!
+
+                if (!flashlight.usesDefaultSettings) {
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET score = ? WHERE id = ?",
+                        arrayOf<Any>((score / 1.12f).toInt(), id)
+                    )
+                }
+            }
+        }
     }
 }
 
