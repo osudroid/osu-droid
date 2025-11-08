@@ -30,7 +30,8 @@ class ModFlashlight : Mod() {
         minValue = DEFAULT_FOLLOW_DELAY,
         maxValue = DEFAULT_FOLLOW_DELAY * 10,
         step = DEFAULT_FOLLOW_DELAY,
-        precision = 2
+        precision = 2,
+        orderPosition = 0
     )
 
     /**
@@ -43,7 +44,18 @@ class ModFlashlight : Mod() {
         minValue = 0.5f,
         maxValue = 2f,
         step = 0.1f,
-        precision = 1
+        precision = 1,
+        orderPosition = 1
+    )
+
+    /**
+     * Whether to decrease the Flashlight size as combo increases.
+     */
+    @get:JvmName("isComboBasedSize")
+    var comboBasedSize by BooleanModSetting(
+        name = "Change size based on combo",
+        defaultValue = true,
+        orderPosition = 2
     )
 
     override fun copySettings(settings: JSONObject) {
@@ -51,11 +63,13 @@ class ModFlashlight : Mod() {
 
         followDelay = settings.optDouble("areaFollowDelay", followDelay.toDouble()).toFloat()
         sizeMultiplier = settings.optDouble("sizeMultiplier", sizeMultiplier.toDouble()).toFloat()
+        comboBasedSize = settings.optBoolean("comboBasedSize", comboBasedSize)
     }
 
     override fun serializeSettings() = JSONObject().apply {
         put("areaFollowDelay", followDelay)
         put("sizeMultiplier", sizeMultiplier)
+        put("comboBasedSize", comboBasedSize)
     }
 
     override val extraInformation
@@ -72,6 +86,7 @@ class ModFlashlight : Mod() {
     override fun deepCopy() = ModFlashlight().also {
         it.followDelay = followDelay
         it.sizeMultiplier = sizeMultiplier
+        it.comboBasedSize = comboBasedSize
     }
 
     companion object {

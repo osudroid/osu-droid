@@ -25,7 +25,7 @@ public class FlashLightEntity extends Entity  {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
 
         areaFollowDelay = flashlight.getFollowDelay();
-        mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier());
+        mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier(), flashlight.isComboBasedSize());
         dimLayer = new FlashLightDimLayerSprite();
 
         attachChild(mainSprite);

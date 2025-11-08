@@ -14,11 +14,14 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public float currentSize = BASE_SIZE;
     private ScaleModifier modifier;
     private final float sizeMultiplier;
+    private final boolean comboBasedSize;
     private boolean isBreak;
 
-    public MainFlashLightSprite(final float sizeMultiplier) {
+    public MainFlashLightSprite(final float sizeMultiplier, final boolean comboBasedSize) {
         super(DEFAULT_TEXTURE);
+
         this.sizeMultiplier = sizeMultiplier;
+        this.comboBasedSize = comboBasedSize;
     }
 
     private void changeArea(float fromScale, float toScale) {
@@ -35,6 +38,10 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     public void handleAreaShrinking(int combo) {
+        if (!comboBasedSize) {
+            return;
+        }
+
         // Area stops shrinking at 200 combo
         if (combo <= 200 && combo % 100 == 0) {
             // For every 100 combo, the size is decreased by 10%

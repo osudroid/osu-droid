@@ -25,6 +25,12 @@ class ModFlashlightTest {
             serialize().getJSONObject("settings").apply {
                 Assert.assertEquals(1.5f, getDouble("sizeMultiplier").toFloat())
             }
+
+            comboBasedSize = false
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertFalse(getBoolean("comboBasedSize"))
+            }
         }
     }
 
