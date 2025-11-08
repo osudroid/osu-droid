@@ -17,7 +17,8 @@ class ModFlashlight : Mod() {
     override val isRanked
         get() = usesDefaultSettings
 
-    override val scoreMultiplier = 1.12f
+    override val scoreMultiplier
+        get() = if (usesDefaultSettings) 1.12f else 1f
 
     /**
      * The amount of seconds until the flashlight reaches the cursor.
