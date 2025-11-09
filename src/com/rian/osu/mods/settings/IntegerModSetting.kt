@@ -1,7 +1,11 @@
 package com.rian.osu.mods.settings
 
 import kotlin.math.*
+import kotlinx.serialization.json.*
 
+/**
+ * A [ModSetting] that represents an [Int] value with range constraints.
+ */
 open class IntegerModSetting(
     name: String,
     key: String? = null,
@@ -64,6 +68,18 @@ open class IntegerModSetting(
         require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
     }
 
+    override fun load(json: JsonObject) {
+        if (key != null) {
+            value = json[key]?.jsonPrimitive?.intOrNull ?: defaultValue
+        }
+    }
+
+    override fun save(builder: JsonObjectBuilder) {
+        if (key != null) {
+            builder.put(key, value)
+        }
+    }
+
     override fun processValue(value: Int) = when {
         value < minValue -> minValue
         value > maxValue -> maxValue
@@ -72,6 +88,9 @@ open class IntegerModSetting(
     }
 }
 
+/**
+ * A [ModSetting] that represents a nullable [Int] value with range constraints.
+ */
 open class NullableIntegerModSetting(
     name: String,
     key: String? = null,
@@ -124,6 +143,31 @@ open class NullableIntegerModSetting(
         require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
         require(step >= 0f) { "step must be greater than or equal to 0." }
         require(defaultValue == null || defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+    }
+
+    override fun load(json: JsonObject) {
+        if (key == null) {
+            return
+        }
+
+        val element = json[key]
+
+        value =
+            if (element is JsonNull) null
+            else element?.jsonPrimitive?.intOrNull ?: defaultValue
+    }
+
+    override fun save(builder: JsonObjectBuilder) {
+        if (key == null) {
+            return
+        }
+
+        if (value == null) {
+            builder.put(key, JsonNull)
+            return
+        }
+
+        builder.put(key, value)
     }
 
     override fun processValue(value: Int?) = when {

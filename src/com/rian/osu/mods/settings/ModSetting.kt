@@ -5,12 +5,13 @@ package com.rian.osu.mods.settings
 import com.rian.osu.mods.Mod
 import kotlin.properties.*
 import kotlin.reflect.*
+import kotlinx.serialization.json.*
 import org.json.JSONObject
 
 /**
  * Represents a [Mod] specific setting.
  */
-open class ModSetting<V>(
+abstract class ModSetting<V>(
 
     /**
      * The legible name of this [ModSetting].
@@ -68,25 +69,18 @@ open class ModSetting<V>(
     }
 
     /**
-     * Loads the value of this [ModSetting] from a [JSONObject].
+     * Loads the value of this [ModSetting] from a [JsonObject].
      *
-     * @param json The [JSONObject] to load the value from.
+     * @param json The [JsonObject] to load the value from.
      */
-    open fun load(json: JSONObject) {
-        if (key != null) {
-            @Suppress("UNCHECKED_CAST")
-            value = json.opt(key) as? V ?: defaultValue
-        }
-    }
+    abstract fun load(json: JsonObject)
 
     /**
-     * Saves the value of this [ModSetting] to a [JSONObject].
+     * Saves the value of this [ModSetting] to a [JsonObjectBuilder].
      *
-     * @param json The [JSONObject] to save the value to.
+     * @param builder The [JsonObjectBuilder] to save the value to.
      */
-    open fun save(json: JSONObject) {
-        json.putOpt(key, value)
-    }
+    abstract fun save(builder: JsonObjectBuilder)
 
     /**
      * Copies another [ModSetting] into this [ModSetting].

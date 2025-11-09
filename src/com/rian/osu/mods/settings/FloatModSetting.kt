@@ -2,8 +2,11 @@ package com.rian.osu.mods.settings
 
 import com.rian.osu.math.*
 import kotlin.math.*
-import org.json.JSONObject
+import kotlinx.serialization.json.*
 
+/**
+ * A [ModSetting] that represents a [Float] value with range constraints.
+ */
 open class FloatModSetting(
     name: String,
     key: String? = null,
@@ -95,9 +98,16 @@ open class FloatModSetting(
         require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
     }
 
-    override fun load(json: JSONObject) {
-        // Floats are stored as Doubles in JSON, so we need to handle that here.
-        value = json.optDouble(key).takeUnless { it.isNaN() }?.toFloat() ?: defaultValue
+    override fun load(json: JsonObject) {
+        if (key != null) {
+            value = json[key]?.jsonPrimitive?.floatOrNull ?: defaultValue
+        }
+    }
+
+    override fun save(builder: JsonObjectBuilder) {
+        if (key != null) {
+            builder.put(key, value)
+        }
     }
 
     override fun processValue(value: Float) = when {
@@ -122,6 +132,9 @@ open class FloatModSetting(
     }
 }
 
+/**
+ * A [ModSetting] that represents a nullable [Float] value with range constraints.
+ */
 open class NullableFloatModSetting(
     name: String,
     key: String? = null,
@@ -216,9 +229,29 @@ open class NullableFloatModSetting(
         }
     }
 
-    override fun load(json: JSONObject) {
-        // Floats are stored as Doubles in JSON, so we need to handle that here.
-        value = json.optDouble(key).takeUnless { it.isNaN() }?.toFloat() ?: defaultValue
+    override fun load(json: JsonObject) {
+        if (key == null) {
+            return
+        }
+
+        val element = json[key]
+
+        value =
+            if (element is JsonNull) null
+            else element?.jsonPrimitive?.floatOrNull ?: defaultValue
+    }
+
+    override fun save(builder: JsonObjectBuilder) {
+        if (key == null) {
+            return
+        }
+
+        if (value == null) {
+            builder.put(key, JsonNull)
+            return
+        }
+
+        builder.put(key, value)
     }
 
     override fun processValue(value: Float?) = when {
