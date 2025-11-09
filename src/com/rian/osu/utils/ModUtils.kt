@@ -62,8 +62,8 @@ object ModUtils {
      * The serialized [Mod]s can be deserialized using [deserializeMods].
      *
      * @param mods The list of [Mod]s to serialize.
-     * @param includeNonUserPlayable Whether to serialize non-user-playable [Mod]s. Defaults to `true`.
-     * @param includeIrrelevantMods Whether to include [Mod]s that are not relevant to gameplay. Defaults to `false`.
+     * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
+     * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
      * @return The serialized [Mod]s in a [JSONArray].
      */
     @JvmStatic

@@ -157,10 +157,8 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     /**
      * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
      *
-     * @param includeNonUserPlayable Whether to include non-user-playable [Mod]s in the serialization.
-     * Defaults to `true`.
-     * @param includeIrrelevantMods Whether to include irrelevant [Mod]s in the serialization.
-     * Defaults to `false`.
+     * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
+     * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
      * @return The serialized [Mod]s in a [JSONArray].
      */
     @JvmOverloads
