@@ -211,6 +211,7 @@ abstract class Mod {
         result = 31 * result + incompatibleMods.contentHashCode()
 
         for (setting in settings) {
+            result = 31 * result + setting.defaultValue.hashCode()
             result = 31 * result + setting.value.hashCode()
         }
 
