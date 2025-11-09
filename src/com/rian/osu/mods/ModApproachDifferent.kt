@@ -61,11 +61,6 @@ class ModApproachDifferent : Mod() {
             AnimationStyle.BounceInOut -> Easing.InOutBounce
         }
 
-    override fun deepCopy() = ModApproachDifferent().also {
-        it.scale = scale
-        it.style = style
-    }
-
     enum class AnimationStyle {
         Linear,
         Gravity,

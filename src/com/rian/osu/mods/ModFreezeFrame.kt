@@ -42,6 +42,4 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
             applyFadeInAdjustment(hitObject.tail)
         }
     }
-
-    override fun deepCopy() = ModFreezeFrame()
 }

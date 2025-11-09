@@ -61,10 +61,6 @@ class ModMirror : Mod(), IModApplicableToHitObject {
             return settings.joinToString(", ")
         }
 
-    override fun deepCopy() = ModMirror().also {
-        it.reflection = reflection
-    }
-
     enum class MirrorType {
         Horizontal,
         Vertical,

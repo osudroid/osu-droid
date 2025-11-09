@@ -69,8 +69,6 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
 
-    override fun deepCopy() = ModHardRock()
-
     companion object {
         private const val ADJUST_RATIO = 1.4f
     }

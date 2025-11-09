@@ -70,9 +70,4 @@ class ModWindUp : ModTimeRamp() {
             initialRate = finalRate - getModSettingDelegate<FloatModSetting>(::initialRate).step
         }
     }
-
-    override fun deepCopy() = ModWindUp().also {
-        it.initialRate = initialRate
-        it.finalRate = finalRate
-    }
 }

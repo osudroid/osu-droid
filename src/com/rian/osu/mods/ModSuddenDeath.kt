@@ -12,6 +12,4 @@ class ModSuddenDeath : Mod() {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAutoplay::class
     )
-
-    override fun deepCopy() = ModSuddenDeath()
 }

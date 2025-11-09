@@ -74,8 +74,6 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
             }
         }
 
-    override fun deepCopy() = ModReallyEasy()
-
     companion object {
         private const val ADJUST_RATIO = 0.5f
     }

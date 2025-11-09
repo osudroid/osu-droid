@@ -30,9 +30,23 @@ class ModTest {
             }
         }
     }
+
+    @Test
+    fun `Test deep copy`() {
+        val originalMod = TestMod().apply {
+            testSetting1 = true
+            testSetting2 = true
+            testSetting3 = true
+        }
+
+        val copiedMod = originalMod.deepCopy() as TestMod
+
+        Assert.assertNotSame(originalMod, copiedMod)
+        Assert.assertEquals(originalMod, copiedMod)
+    }
 }
 
-private class TestMod : Mod() {
+internal class TestMod : Mod() {
     override val name = "Test mod"
     override val acronym = "TM"
     override val description = "This is a test mod"
@@ -41,6 +55,4 @@ private class TestMod : Mod() {
     var testSetting1 by BooleanModSetting(name = "Test 1", key = "test1", defaultValue = false)
     var testSetting2 by BooleanModSetting(name = "Test 2", key = "test2", defaultValue = false)
     var testSetting3 by BooleanModSetting(name = "Test 3", defaultValue = false)
-
-    override fun deepCopy() = TestMod()
 }

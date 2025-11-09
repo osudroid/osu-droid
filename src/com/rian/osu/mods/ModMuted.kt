@@ -81,11 +81,4 @@ class ModMuted : Mod() {
 
         return if (inverseMuting) volume else 1 - volume
     }
-
-    override fun deepCopy() = ModMuted().also {
-        it.inverseMuting = inverseMuting
-        it.enableMetronome = enableMetronome
-        it.muteComboCount = muteComboCount
-        it.affectsHitSounds = affectsHitSounds
-    }
 }

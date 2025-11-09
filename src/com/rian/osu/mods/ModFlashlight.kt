@@ -71,12 +71,6 @@ class ModFlashlight : Mod() {
             }
         }.substringBeforeLast(", ")
 
-    override fun deepCopy() = ModFlashlight().also {
-        it.followDelay = followDelay
-        it.sizeMultiplier = sizeMultiplier
-        it.comboBasedSize = comboBasedSize
-    }
-
     companion object {
         /**
          * The default amount of seconds until the flashlight reaches the cursor.

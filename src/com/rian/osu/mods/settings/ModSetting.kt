@@ -88,6 +88,16 @@ open class ModSetting<V>(
         json.putOpt(key, value)
     }
 
+    /**
+     * Copies another [ModSetting] into this [ModSetting].
+     *
+     * @param other The other [ModSetting] to copy from.
+     */
+    open fun copyFrom(other: ModSetting<V>) {
+        defaultValue = other.defaultValue
+        value = other.value
+    }
+
     override fun getValue(thisRef: Any?, property: KProperty<*>): V {
         return value
     }
@@ -182,6 +192,16 @@ abstract class RangeConstrainedModSetting<V>(
         }
 
     protected abstract fun processValue(value: V): V
+
+    override fun copyFrom(other: ModSetting<V>) {
+        super.copyFrom(other)
+
+        if (other is RangeConstrainedModSetting<V>) {
+            minValue = other.minValue
+            maxValue = other.maxValue
+            step = other.step
+        }
+    }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
         super.setValue(thisRef, property, processValue(value))

@@ -112,6 +112,14 @@ open class FloatModSetting(
             if (precision != null) value.preciseRoundBy(precision) else value
         }
     }
+
+    override fun copyFrom(other: ModSetting<Float>) {
+        super.copyFrom(other)
+
+        if (other is FloatModSetting) {
+            precision = other.precision
+        }
+    }
 }
 
 open class NullableFloatModSetting(
@@ -227,6 +235,14 @@ open class NullableFloatModSetting(
             val value = round((value - minValue) / step) * step + minValue
 
             if (precision != null) value.preciseRoundBy(precision) else value
+        }
+    }
+
+    override fun copyFrom(other: ModSetting<Float?>) {
+        super.copyFrom(other)
+
+        if (other is NullableFloatModSetting) {
+            precision = other.precision
         }
     }
 }

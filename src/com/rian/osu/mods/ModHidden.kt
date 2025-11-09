@@ -55,10 +55,6 @@ class ModHidden : ModWithVisibilityAdjustment() {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
-    override fun deepCopy() = ModHidden().also {
-        it.onlyFadeApproachCircles = onlyFadeApproachCircles
-    }
-
     companion object {
         const val FADE_IN_DURATION_MULTIPLIER = 0.4
         const val FADE_OUT_DURATION_MULTIPLIER = 0.3

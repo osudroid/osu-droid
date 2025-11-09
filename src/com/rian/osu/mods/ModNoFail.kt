@@ -14,6 +14,4 @@ class ModNoFail : Mod() {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModPerfect::class, ModSuddenDeath::class, ModAutopilot::class, ModRelax::class
     )
-
-    override fun deepCopy() = ModNoFail()
 }

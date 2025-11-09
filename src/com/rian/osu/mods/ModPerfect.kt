@@ -12,6 +12,4 @@ class ModPerfect : Mod() {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModSuddenDeath::class, ModAutoplay::class
     )
-
-    override fun deepCopy() = ModPerfect()
 }

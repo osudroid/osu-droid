@@ -53,8 +53,6 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
         hp *= ADJUST_RATIO
     }
 
-    override fun deepCopy() = ModEasy()
-
     companion object {
         private const val ADJUST_RATIO = 0.5f
     }

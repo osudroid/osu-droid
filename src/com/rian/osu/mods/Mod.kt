@@ -8,6 +8,9 @@ import kotlin.reflect.jvm.*
 
 /**
  * Represents a mod.
+ *
+ * All [Mod]s must have a parameterless constructor or one with default parameters to allow for reflection-based
+ * instantiation.
  */
 abstract class Mod {
     /**
@@ -158,6 +161,27 @@ abstract class Mod {
     }
 
     /**
+     * Copies [ModSetting]s from another [Mod] into this [Mod], overwriting all existing [ModSetting]s.
+     *
+     * @param other The [Mod] to copy from. The [Mod] must be of the same type as this [Mod].
+     * @throws IllegalArgumentException If [other] is not of the same type as this [Mod].
+     */
+    @Throws(IllegalArgumentException::class)
+    fun copyFrom(other: Mod) {
+        if (this::class != other::class) {
+            throw IllegalArgumentException("Expected mod of type ${this::class.java.simpleName}, got ${other::class.java.simpleName}.")
+        }
+
+        // Because settings are stably sorted, we can safely assume that the settings at the same index correspond to each other.
+        for (i in settings.indices) {
+            val setting = settings[i]
+            val otherSetting = other.settings[i]
+
+            setting.copyFrom(otherSetting)
+        }
+    }
+
+    /**
      * Copies the settings of this [Mod] from a [JSONObject].
      *
      * By default, this copies all [ModSetting]s in this [Mod]. Subclasses can override this to customize the
@@ -238,5 +262,5 @@ abstract class Mod {
      *
      * @return A deep copy of this [Mod].
      */
-    abstract fun deepCopy(): Mod
+    fun deepCopy() = this::class.createInstance().also { it.copyFrom(this) }
 }

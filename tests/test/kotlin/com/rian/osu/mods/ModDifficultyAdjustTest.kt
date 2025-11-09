@@ -138,30 +138,6 @@ class ModDifficultyAdjustTest {
     }
 
     @Test
-    fun `Test deep copy`() {
-        ModDifficultyAdjust(4f, 9f, 8f, 6f).apply {
-            getModSettingDelegate<NullableFloatModSetting>(::cs).defaultValue = 2f
-            getModSettingDelegate<NullableFloatModSetting>(::ar).defaultValue = 3f
-            getModSettingDelegate<NullableFloatModSetting>(::od).defaultValue = 5f
-            getModSettingDelegate<NullableFloatModSetting>(::hp).defaultValue = 1f
-
-            val copy = deepCopy()
-
-            Assert.assertNotSame(this, copy)
-
-            Assert.assertEquals(4f, copy.cs)
-            Assert.assertEquals(9f, copy.ar)
-            Assert.assertEquals(8f, copy.od)
-            Assert.assertEquals(6f, copy.hp)
-
-            Assert.assertEquals(2f, getModSettingDelegate<NullableFloatModSetting>(copy::cs).defaultValue)
-            Assert.assertEquals(3f, getModSettingDelegate<NullableFloatModSetting>(copy::ar).defaultValue)
-            Assert.assertEquals(5f, getModSettingDelegate<NullableFloatModSetting>(copy::od).defaultValue)
-            Assert.assertEquals(1f, getModSettingDelegate<NullableFloatModSetting>(copy::hp).defaultValue)
-        }
-    }
-
-    @Test
     fun `Test compatibility with difficulty-adjusting mods`() {
         // Theoretically, Small Circle should be here, but it is only dependent on the CS value
         // and will be migrated into Difficulty Adjust anyway.

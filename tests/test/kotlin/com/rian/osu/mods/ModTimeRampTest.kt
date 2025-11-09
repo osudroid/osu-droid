@@ -21,9 +21,4 @@ private class TestModTimeRamp : ModTimeRamp() {
 
     override var initialRate = 1f
     override var finalRate = 1.5f
-
-    override fun deepCopy() = TestModTimeRamp().also {
-        it.initialRate = initialRate
-        it.finalRate = finalRate
-    }
 }

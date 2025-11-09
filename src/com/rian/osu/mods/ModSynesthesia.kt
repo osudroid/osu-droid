@@ -12,8 +12,6 @@ class ModSynesthesia : Mod() {
     override val type = ModType.Fun
     override val scoreMultiplier = 0.8f
 
-    override fun deepCopy() = ModSynesthesia()
-
     companion object {
         /**
          * Retrieves the appropriate color for a beat divisor.

@@ -235,15 +235,4 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
             return settings.joinToString(", ")
         }
-
-    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp).also {
-        fun setDefault(original: NullableFloatModSetting, copy: NullableFloatModSetting) {
-            copy.defaultValue = original.defaultValue
-        }
-
-        setDefault(getModSettingDelegate(::cs), getModSettingDelegate(it::cs))
-        setDefault(getModSettingDelegate(::ar), getModSettingDelegate(it::ar))
-        setDefault(getModSettingDelegate(::od), getModSettingDelegate(it::od))
-        setDefault(getModSettingDelegate(::hp), getModSettingDelegate(it::hp))
-    }
 }

@@ -84,6 +84,4 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
         hitObject.gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(difficulty.gameplayCS)
         hitObject.stackOffsetMultiplier = 4f
     }
-
-    override fun deepCopy() = ModReplayV6()
 }

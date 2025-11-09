@@ -34,6 +34,4 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
             if (mode == GameMode.Standard || adjustmentMods.none { it is ModReplayV6 }) difficulty.difficultyCS + 4
             else CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficulty.gameplayCS)
     }
-
-    override fun deepCopy() = ModSmallCircle()
 }

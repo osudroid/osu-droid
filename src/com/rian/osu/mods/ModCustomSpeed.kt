@@ -15,6 +15,4 @@ class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) 
 
     override val extraInformation
         get() = "%.2fx".format(trackRateMultiplier)
-
-    override fun deepCopy() = ModCustomSpeed(trackRateMultiplier)
 }

@@ -13,6 +13,4 @@ class ModAutopilot : Mod() {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModRelax::class, ModAutoplay::class, ModNoFail::class
     )
-
-    override fun deepCopy() = ModAutopilot()
 }
