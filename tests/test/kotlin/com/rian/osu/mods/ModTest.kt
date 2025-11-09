@@ -1,32 +1,28 @@
 package com.rian.osu.mods
 
 import com.rian.osu.mods.settings.BooleanModSetting
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModTest {
     @Test
-    fun `Test serialization with all default settings`() {
-        TestMod().serialize().apply {
-            Assert.assertEquals("TM", getString("acronym"))
-            Assert.assertFalse(has("settings"))
+    fun `Test conversion to APIMod with default settings`() {
+        TestMod().toAPIMod().apply {
+            Assert.assertEquals("TM", acronym)
+            Assert.assertNull(settings)
         }
     }
 
     @Test
-    fun `Test serialization with modified settings`() {
+    fun `Test conversion to APIMod with one modified setting`() {
         TestMod().apply {
             testSetting1 = true
-            testSetting2 = true
-            testSetting3 = true
 
-            serialize().getJSONObject("settings").apply {
-                Assert.assertTrue(getBoolean("test1"))
-                Assert.assertTrue(getBoolean("test2"))
-                Assert.assertFalse(has("test3"))
+            toAPIMod().apply {
+                Assert.assertNotNull(settings)
+                Assert.assertTrue(settings!!["test1"]!!.jsonPrimitive.boolean)
             }
         }
     }

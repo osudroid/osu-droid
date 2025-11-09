@@ -1,12 +1,11 @@
 package com.rian.osu.mods.settings
 
-import org.json.JSONObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class FloatModSettingTest {
     @Test
     fun `Test boundaries`() {
@@ -117,11 +116,9 @@ class FloatModSettingTest {
     @Test
     fun `Test float-double coercion when saving and reloading to JSON`() {
         val setting = FloatModSetting(name = "Test", key = "test", defaultValue = 1.5f)
-        val json = JSONObject()
+        val json = buildJsonObject { setting.save(this) }
 
-        setting.save(json)
-
-        Assert.assertEquals(1.5, json.getDouble("test"), 0.0)
+        Assert.assertEquals(1.5, json["test"]!!.jsonPrimitive.double, 0.0)
 
         setting.value = 1f
         setting.load(json)

@@ -14,43 +14,40 @@ import com.rian.osu.mods.ModPrecise
 import com.rian.osu.mods.ModReplayV6
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModUtilsTest {
     @Test
     fun `Test mod serialization with non-user playable mods`() {
-        ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())).apply {
-            Assert.assertEquals(4, length())
-            Assert.assertEquals("AT", getJSONObject(0).getString("acronym"))
-            Assert.assertEquals("CS", getJSONObject(1).getString("acronym"))
+        val serializedMods = ModUtils.serializeMods(
+            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())
+        )
 
-            Assert.assertEquals(
-                1.25f,
-                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
-                0.01f
-            )
+        ModUtils.deserializeMods(serializedMods).apply {
+            Assert.assertEquals(4, size)
+            Assert.assertTrue(ModAutoplay::class in this)
+            Assert.assertTrue(ModCustomSpeed::class in this)
+            Assert.assertTrue(ModHidden::class in this)
+            Assert.assertTrue(ModReplayV6::class in this)
 
-            Assert.assertEquals("HD", getJSONObject(2).getString("acronym"))
-            Assert.assertEquals("RV6", getJSONObject(3).getString("acronym"))
+            Assert.assertEquals(1.25f, ofType<ModCustomSpeed>()!!.trackRateMultiplier, 0f)
         }
     }
 
     @Test
     fun `Test mod serialization without non-user playable mods`() {
-        ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()), false).apply {
-            Assert.assertEquals(3, length())
-            Assert.assertEquals("AT", getJSONObject(0).getString("acronym"))
-            Assert.assertEquals("CS", getJSONObject(1).getString("acronym"))
+        val serializedMods = ModUtils.serializeMods(
+            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()),
+            false
+        )
 
-            Assert.assertEquals(
-                1.25f,
-                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
-                0.01f
-            )
+        ModUtils.deserializeMods(serializedMods).apply {
+            Assert.assertEquals(3, size)
+            Assert.assertTrue(ModAutoplay::class in this)
+            Assert.assertTrue(ModCustomSpeed::class in this)
+            Assert.assertTrue(ModHidden::class in this)
+            Assert.assertFalse(ModReplayV6::class in this)
 
-            Assert.assertEquals("HD", getJSONObject(2).getString("acronym"))
+            Assert.assertEquals(1.25f, ofType<ModCustomSpeed>()!!.trackRateMultiplier, 0f)
         }
     }
 
@@ -64,16 +61,14 @@ class ModUtilsTest {
             )
         )
 
-        val deserializedMods = ModUtils.deserializeMods(serializedMods)
+        ModUtils.deserializeMods(serializedMods).apply {
+            Assert.assertEquals(3, size)
+            Assert.assertTrue(ModAutoplay::class in this)
+            Assert.assertTrue(ModCustomSpeed::class in this)
+            Assert.assertTrue(ModHidden::class in this)
 
-        Assert.assertEquals(3, deserializedMods.size)
-        Assert.assertTrue(ModAutoplay::class in deserializedMods)
-        Assert.assertTrue(ModCustomSpeed::class in deserializedMods)
-        Assert.assertTrue(ModHidden::class in deserializedMods)
-
-        val customSpeed = deserializedMods.ofType<ModCustomSpeed>()
-        Assert.assertNotNull(customSpeed)
-        Assert.assertEquals(1.25f, customSpeed!!.trackRateMultiplier, 0f)
+            Assert.assertEquals(1.25f, ofType<ModCustomSpeed>()!!.trackRateMultiplier, 0f)
+        }
     }
 
     @Test

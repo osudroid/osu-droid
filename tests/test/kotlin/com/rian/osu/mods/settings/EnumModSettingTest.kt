@@ -1,21 +1,17 @@
 package com.rian.osu.mods.settings
 
-import org.json.JSONObject
+import kotlinx.serialization.json.*
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class EnumModSettingTest {
     @Test
     fun `Test loading value from enum ordinal`() {
-        val setting = createSetting()
-
-        val json = JSONObject().apply {
+        val json = buildJsonObject {
             put("test", 1)
         }
 
+        val setting = createSetting()
         setting.load(json)
 
         Assert.assertEquals(TestEnum.Value2, setting.value)
@@ -26,10 +22,11 @@ class EnumModSettingTest {
         val setting = createSetting()
         setting.value = TestEnum.Value2
 
-        val json = JSONObject()
-        setting.save(json)
+        val json = buildJsonObject {
+            setting.save(this)
+        }
 
-        Assert.assertEquals(1, json.getInt("test"))
+        Assert.assertEquals(1, json["test"]!!.jsonPrimitive.int)
     }
 
     private fun createSetting() = EnumModSetting(name = "Test", key = "test", defaultValue = TestEnum.Value1)
