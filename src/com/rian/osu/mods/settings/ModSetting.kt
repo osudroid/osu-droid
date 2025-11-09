@@ -11,7 +11,7 @@ import org.json.JSONObject
 /**
  * Represents a [Mod] specific setting.
  */
-abstract class ModSetting<V>(
+abstract class ModSetting<T>(
 
     /**
      * The legible name of this [ModSetting].
@@ -30,19 +30,19 @@ abstract class ModSetting<V>(
      *
      * This is used to format the value of this [ModSetting] when displaying it.
      */
-    val valueFormatter: (ModSetting<V>.(V) -> String)?,
+    val valueFormatter: (ModSetting<T>.(T) -> String)?,
 
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
      */
-    open var defaultValue: V,
+    open var defaultValue: T,
 
     /**
      * The position of this [ModSetting] in the mod customization menu.
      */
     val orderPosition: Int? = null
 
-) : ReadWriteProperty<Any?, V>, Comparable<ModSetting<*>> {
+) : ReadWriteProperty<Any?, T>, Comparable<ModSetting<*>> {
 
     /**
      * The initial value.
@@ -87,16 +87,16 @@ abstract class ModSetting<V>(
      *
      * @param other The other [ModSetting] to copy from.
      */
-    open fun copyFrom(other: ModSetting<V>) {
+    open fun copyFrom(other: ModSetting<T>) {
         defaultValue = other.defaultValue
         value = other.value
     }
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): V {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return value
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         this.value = value
     }
 
@@ -113,39 +113,44 @@ abstract class ModSetting<V>(
 /**
  * Represents a [Mod] specific setting whose value is constrained to a range of values.
  */
-abstract class RangeConstrainedModSetting<V>(
+abstract class RangeConstrainedModSetting<T : Comparable<T>>(
     name: String,
     key: String? = null,
-    valueFormatter: ModSetting<V>.(V) -> String = { it.toString() },
-    defaultValue: V,
+    valueFormatter: ModSetting<T>.(T) -> String = { it.toString() },
+    defaultValue: T,
 
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    minValue: V & Any,
+    minValue: T,
 
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    maxValue: V & Any,
-
-    /**
-     * The step size for the value of this [RangeConstrainedModSetting].
-     */
-    step: V & Any,
+    maxValue: T,
 
     /**
      * The position of this [RangeConstrainedModSetting] in the mod customization menu.
      */
     orderPosition: Int? = null
 
-) : ModSetting<V>(name, key, valueFormatter, defaultValue, orderPosition) {
+) : ModSetting<T>(name, key, valueFormatter, defaultValue, orderPosition) {
+    final override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            require(value in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+
+            super.defaultValue = value
+        }
+
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    open var minValue = minValue
+    var minValue = minValue
         set(value) {
             if (field != value) {
+                require(value <= maxValue) { "minValue cannot be greater maxValue." }
+
                 field = value
 
                 // Trigger processValue to ensure the value is within the new range
@@ -156,22 +161,11 @@ abstract class RangeConstrainedModSetting<V>(
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    open var maxValue = maxValue
+    var maxValue = maxValue
         set(value) {
             if (field != value) {
-                field = value
+                require(value >= minValue) { "maxValue cannot be less than minValue." }
 
-                // Trigger processValue to ensure the value is within the new range
-                this.value = this.value
-            }
-        }
-
-    /**
-     * The step size for the value of this [RangeConstrainedModSetting].
-     */
-    open var step = step
-        set(value) {
-            if (field != value) {
                 field = value
 
                 // Trigger processValue to ensure the value is within the new range
@@ -185,19 +179,133 @@ abstract class RangeConstrainedModSetting<V>(
             super.value = processValue(value)
         }
 
-    protected abstract fun processValue(value: V): V
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+        require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
+    }
 
-    override fun copyFrom(other: ModSetting<V>) {
+    /**
+     * Processes [value] to ensure it meets constraints.
+     *
+     * @return The processed value.
+     */
+    protected open fun processValue(value: T) = value.coerceIn(minValue, maxValue)
+
+    override fun copyFrom(other: ModSetting<T>) {
+        if (other is RangeConstrainedModSetting<T>) {
+            // When copying, we need to respect constraints. For example, assigning the other minValue first when the
+            // current maxValue is smaller it would cause an exception.
+            if (other.minValue > maxValue) {
+                maxValue = other.maxValue
+                minValue = other.minValue
+            } else {
+                minValue = other.minValue
+                maxValue = other.maxValue
+            }
+        }
+
         super.copyFrom(other)
+    }
 
-        if (other is RangeConstrainedModSetting<V>) {
-            minValue = other.minValue
-            maxValue = other.maxValue
-            step = other.step
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        super.setValue(thisRef, property, processValue(value))
+    }
+}
+
+/**
+ * Represents a [Mod] specific setting whose value is nullable and constrained to a range of values.
+ */
+abstract class NullableRangeConstrainedModSetting<T>(
+    name: String,
+    key: String? = null,
+    valueFormatter: ModSetting<T?>.(T?) -> String = { it.toString() },
+    defaultValue: T?,
+
+    /**
+     * The minimum value of this [NullableRangeConstrainedModSetting].
+     */
+    minValue: T,
+
+    /**
+     * The maximum value of this [NullableRangeConstrainedModSetting].
+     */
+    maxValue: T,
+
+    /**
+     * The position of this [NullableRangeConstrainedModSetting] in the mod customization menu.
+     */
+    orderPosition: Int? = null
+
+) : ModSetting<T?>(name, key, valueFormatter, defaultValue, orderPosition) where T : Comparable<T> {
+    final override var defaultValue
+        get() = super.defaultValue
+        set(value) {
+            require(value == null || value in minValue..maxValue) {
+                "defaultValue must be null or between minValue and maxValue."
+            }
+
+            super.defaultValue = value
+        }
+
+    /**
+     * The minimum value of this [NullableRangeConstrainedModSetting].
+     */
+    var minValue = minValue
+        set(value) {
+            require(value <= maxValue) { "minValue cannot be greater maxValue." }
+
+            if (field != value) {
+                field = value
+
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    /**
+     * The maximum value of this [NullableRangeConstrainedModSetting].
+     */
+    var maxValue = maxValue
+        set(value) {
+            require(value >= minValue) { "maxValue cannot be less than minValue." }
+
+            if (field != value) {
+                field = value
+
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    final override var value
+        get() = super.value
+        set(value) {
+            super.value = processValue(value)
+        }
+
+    init {
+        require(minValue <= maxValue) { "minValue must be less than or equal to maxValue." }
+
+        require(defaultValue == null || defaultValue in minValue..maxValue) {
+            "defaultValue must be null or between minValue and maxValue."
         }
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+    /**
+     * Processes [value] to ensure it meets constraints.
+     */
+    protected open fun processValue(value: T?) = value?.coerceIn(minValue, maxValue)
+
+    override fun copyFrom(other: ModSetting<T?>) {
+        if (other is NullableRangeConstrainedModSetting<T>) {
+            minValue = other.minValue
+            maxValue = other.maxValue
+        }
+
+        super.copyFrom(other)
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
         super.setValue(thisRef, property, processValue(value))
     }
 }
