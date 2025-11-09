@@ -6,7 +6,7 @@ import org.junit.Test
 
 class EnumModSettingTest {
     @Test
-    fun `Test loading value from enum ordinal`() {
+    fun `Test loading value from JSON`() {
         val json = buildJsonObject {
             put("test", 1)
         }
@@ -18,7 +18,7 @@ class EnumModSettingTest {
     }
 
     @Test
-    fun `Test saving value saving enum ordinal instead of value`() {
+    fun `Test saving value to JSON`() {
         val setting = createSetting()
         setting.value = TestEnum.Value2
 

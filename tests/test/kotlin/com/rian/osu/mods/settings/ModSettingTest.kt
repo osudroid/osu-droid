@@ -18,6 +18,17 @@ class ModSettingTest {
         Assert.assertEquals(1, setting.defaultValue)
         Assert.assertEquals(1, setting.value)
     }
+
+    @Test
+    fun `Test copying`() {
+        val setting = TestModSetting(1)
+        val otherSetting = TestModSetting(2)
+
+        otherSetting.copyFrom(setting)
+
+        Assert.assertEquals(setting.defaultValue, otherSetting.defaultValue)
+        Assert.assertEquals(setting.value, otherSetting.value)
+    }
 }
 
 private class TestModSetting(defaultValue: Int) :

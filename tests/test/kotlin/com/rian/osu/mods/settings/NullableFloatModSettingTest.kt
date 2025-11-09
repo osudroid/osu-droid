@@ -1,10 +1,9 @@
 package com.rian.osu.mods.settings
 
-import kotlinx.serialization.json.*
 import org.junit.Assert
 import org.junit.Test
 
-class FloatModSettingTest {
+class NullableFloatModSettingTest {
     @Test
     fun `Test boundaries`() {
         fun test(action: () -> Unit) {
@@ -12,27 +11,29 @@ class FloatModSettingTest {
         }
 
         // Test precision < 0
-        test { FloatModSetting(name = "Test", defaultValue = 0.12f, precision = -1) }
+        test { NullableFloatModSetting(name = "Test", defaultValue = 0.12f, precision = -1) }
     }
 
     @Test
     fun `Test step without precision`() {
-        var setting by FloatModSetting(name = "Test", defaultValue = 0.12f, step = 0.12f)
-        Assert.assertEquals(0.12f, setting, 1e-5f)
+        var setting by NullableFloatModSetting(name = "Test", defaultValue = 0.12f, step = 0.12f)
+
+        Assert.assertNotNull(setting)
+        Assert.assertEquals(0.12f, setting!!, 1e-5f)
 
         setting = 0.24f
-        Assert.assertEquals(0.24f, setting, 1e-5f)
+        Assert.assertEquals(0.24f, setting!!, 1e-5f)
 
         setting = 0.36f
-        Assert.assertEquals(0.36f, setting, 1e-5f)
+        Assert.assertEquals(0.36f, setting!!, 1e-5f)
 
         setting = 0.48f
-        Assert.assertEquals(0.48f, setting, 1e-5f)
+        Assert.assertEquals(0.48f, setting!!, 1e-5f)
     }
 
     @Test
     fun `Test step with precision`() {
-        var setting by FloatModSetting(
+        var setting by NullableFloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
             step = 0.12f,
@@ -54,7 +55,7 @@ class FloatModSettingTest {
 
     @Test
     fun `Test value cap without precision`() {
-        var setting by FloatModSetting(
+        var setting by NullableFloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
             minValue = 0.12f,
@@ -62,21 +63,22 @@ class FloatModSettingTest {
             step = 0.12f,
         )
 
-        Assert.assertEquals(0.12f, setting, 1e-5f)
+        Assert.assertNotNull(setting)
+        Assert.assertEquals(0.12f, setting!!, 1e-5f)
 
         setting = 0f
-        Assert.assertEquals(0.12f, setting, 1e-5f)
+        Assert.assertEquals(0.12f, setting!!, 1e-5f)
 
         setting = 1.2f
-        Assert.assertEquals(1.2f, setting, 1e-5f)
+        Assert.assertEquals(1.2f, setting!!, 1e-5f)
 
         setting = 1.5f
-        Assert.assertEquals(1.2f, setting, 1e-5f)
+        Assert.assertEquals(1.2f, setting!!, 1e-5f)
     }
 
     @Test
     fun `Test value cap with precision`() {
-        var setting by FloatModSetting(
+        var setting by NullableFloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
             minValue = 0.12f,
@@ -101,7 +103,7 @@ class FloatModSettingTest {
 
     @Test
     fun `Test copying`() {
-        val setting = FloatModSetting(
+        val setting = NullableFloatModSetting(
             name = "Test",
             defaultValue = 1.5f,
             minValue = 0.5f,
@@ -110,42 +112,18 @@ class FloatModSettingTest {
             precision = 2
         )
 
-        val otherSetting = FloatModSetting(
+        val otherSetting = NullableFloatModSetting(
             name = "OtherTest",
-            defaultValue = 0.0f
+            defaultValue = 0f
         )
 
         otherSetting.copyFrom(setting)
 
-        Assert.assertEquals(setting.defaultValue, otherSetting.defaultValue, 0f)
-        Assert.assertEquals(setting.value, otherSetting.value, 0f)
+        Assert.assertEquals(setting.defaultValue, otherSetting.defaultValue)
+        Assert.assertEquals(setting.value, otherSetting.value)
         Assert.assertEquals(setting.minValue, otherSetting.minValue, 0f)
         Assert.assertEquals(setting.maxValue, otherSetting.maxValue, 0f)
         Assert.assertEquals(setting.step, otherSetting.step, 0f)
         Assert.assertEquals(setting.precision, otherSetting.precision)
-    }
-
-    @Test
-    fun `Test loading value from JSON`() {
-        val setting = FloatModSetting(name = "Test", key = "test", defaultValue = 0f)
-        val json = buildJsonObject {
-            put("test", 1.25)
-        }
-
-        setting.load(json)
-
-        Assert.assertEquals(1.25f, setting.value, 0f)
-    }
-
-    @Test
-    fun `Test saving value to JSON`() {
-        val setting = FloatModSetting(name = "Test", key = "test", defaultValue = 0f)
-        setting.value = 2.5f
-
-        val json = buildJsonObject {
-            setting.save(this)
-        }
-
-        Assert.assertEquals(2.5f, json["test"]!!.jsonPrimitive.float, 0f)
     }
 }
