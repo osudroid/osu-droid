@@ -3,10 +3,7 @@ package com.rian.osu.mods
 import com.edlplan.framework.easing.Easing
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModApproachDifferentTest {
     @Test
     fun `Test animation style`() {

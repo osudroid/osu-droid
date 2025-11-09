@@ -3,10 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.mods.settings.*
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModMutedTest {
     @Test
     fun `Test inverse muting affecting mute combo count minimum value`() {

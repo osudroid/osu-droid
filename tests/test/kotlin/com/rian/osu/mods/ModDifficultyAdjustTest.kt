@@ -7,13 +7,9 @@ import com.rian.osu.beatmap.hitobject.SliderPathType
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
-import com.rian.osu.mods.settings.NullableFloatModSetting
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModDifficultyAdjustTest {
     @Test
     fun `Test beatmap setting override without additional mods`() {
