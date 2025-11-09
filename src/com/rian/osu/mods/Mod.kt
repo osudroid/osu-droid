@@ -211,6 +211,24 @@ abstract class Mod {
         return setting.getDelegate() as T
     }
 
+    /**
+     * Converts this [Mod] into an [APIMod].
+     */
+    fun toAPIMod(): APIMod {
+        val settingsJson = buildJsonObject {
+            for (setting in settings) {
+                if (!setting.isDefault) {
+                    setting.save(this)
+                }
+            }
+        }
+
+        return APIMod(
+            acronym = acronym,
+            settings = if (settingsJson.isEmpty()) null else settingsJson
+        )
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other === this) {
             return true
