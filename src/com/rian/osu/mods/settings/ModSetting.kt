@@ -5,6 +5,7 @@ package com.rian.osu.mods.settings
 import com.rian.osu.mods.Mod
 import kotlin.properties.*
 import kotlin.reflect.*
+import org.json.JSONObject
 
 /**
  * Represents a [Mod] specific setting.
@@ -15,6 +16,13 @@ open class ModSetting<V>(
      * The legible name of this [ModSetting].
      */
     val name: String,
+
+    /**
+     * The key used to load and save this [ModSetting] from a [JSONObject].
+     *
+     * If set to `null`, this [ModSetting] will not be loaded or saved.
+     */
+    val key: String? = null,
 
     /**
      * The value formatter of this [ModSetting].
@@ -59,6 +67,27 @@ open class ModSetting<V>(
         value = initialValue
     }
 
+    /**
+     * Loads the value of this [ModSetting] from a [JSONObject].
+     *
+     * @param json The [JSONObject] to load the value from.
+     */
+    open fun load(json: JSONObject) {
+        if (key != null) {
+            @Suppress("UNCHECKED_CAST")
+            value = json.opt(key) as? V ?: defaultValue
+        }
+    }
+
+    /**
+     * Saves the value of this [ModSetting] to a [JSONObject].
+     *
+     * @param json The [JSONObject] to save the value to.
+     */
+    open fun save(json: JSONObject) {
+        json.putOpt(key, value)
+    }
+
     override fun getValue(thisRef: Any?, property: KProperty<*>): V {
         return value
     }
@@ -82,6 +111,7 @@ open class ModSetting<V>(
  */
 abstract class RangeConstrainedModSetting<V>(
     name: String,
+    key: String? = null,
     valueFormatter: ModSetting<V>.(V) -> String = { it.toString() },
     defaultValue: V,
 
@@ -105,7 +135,7 @@ abstract class RangeConstrainedModSetting<V>(
      */
     orderPosition: Int? = null
 
-) : ModSetting<V>(name, valueFormatter, defaultValue, orderPosition) {
+) : ModSetting<V>(name, key, valueFormatter, defaultValue, orderPosition) {
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */

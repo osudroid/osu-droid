@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.math.Interpolation
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
-import org.json.JSONObject
 
 /**
  * Represents a [Mod] that gradually adjusts the track's playback rate over time.
@@ -34,18 +33,6 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
                 calculateScoreMultiplierAt(finalRate),
                 FINAL_RATE_PROGRESS.toFloat()
             )
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        initialRate = settings.optDouble("initialRate", initialRate.toDouble()).toFloat()
-        finalRate = settings.optDouble("finalRate", finalRate.toDouble()).toFloat()
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("initialRate", initialRate)
-        put("finalRate", finalRate)
-    }
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         initialRateTime = beatmap.hitObjects.objects.firstOrNull()?.startTime ?: 0.0

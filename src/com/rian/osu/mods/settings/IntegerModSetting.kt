@@ -4,6 +4,7 @@ import kotlin.math.*
 
 open class IntegerModSetting(
     name: String,
+    key: String? = null,
     valueFormatter: ModSetting<Int>.(Int) -> String = { it.toString() },
     defaultValue: Int,
     minValue: Int = Int.MIN_VALUE,
@@ -16,7 +17,7 @@ open class IntegerModSetting(
      */
     val useManualInput: Boolean = false
 
-) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
+) : RangeConstrainedModSetting<Int>(name, key, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
     override var defaultValue
         get() = super.defaultValue
         set(value) {
@@ -73,6 +74,7 @@ open class IntegerModSetting(
 
 open class NullableIntegerModSetting(
     name: String,
+    key: String? = null,
     valueFormatter: ModSetting<Int?>.(Int?) -> String = { it.toString() },
     defaultValue: Int?,
     minValue: Int = Int.MIN_VALUE,
@@ -85,7 +87,7 @@ open class NullableIntegerModSetting(
      */
     val useManualInput: Boolean = false
 
-) : RangeConstrainedModSetting<Int?>(name, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
+) : RangeConstrainedModSetting<Int?>(name, key, valueFormatter, defaultValue, minValue, maxValue, step, orderPosition) {
     override var defaultValue
         get() = super.defaultValue
         set(value) {

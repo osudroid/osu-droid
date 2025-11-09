@@ -9,24 +9,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ModApproachDifferentTest {
     @Test
-    fun `Test serialization`() {
-        ModApproachDifferent().apply {
-            serialize().getJSONObject("settings").apply {
-                Assert.assertTrue(has("scale"))
-                Assert.assertTrue(has("style"))
-            }
-
-            scale = 5f
-            style = ModApproachDifferent.AnimationStyle.Gravity
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(5f, getDouble("scale").toFloat(), 1e-2f)
-                Assert.assertEquals(ModApproachDifferent.AnimationStyle.Gravity.ordinal, getInt("style"))
-            }
-        }
-    }
-
-    @Test
     fun `Test animation style`() {
         val mod = ModApproachDifferent()
 

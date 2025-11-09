@@ -48,14 +48,4 @@ class ModMutedTest {
             Assert.assertEquals(1f, volumeAt(150), 1e-2f)
         }
     }
-
-    @Test
-    fun `Test serialization`() {
-        ModMuted().serialize().getJSONObject("settings").apply {
-            Assert.assertTrue(has("inverseMuting"))
-            Assert.assertTrue(has("enableMetronome"))
-            Assert.assertTrue(has("muteComboCount"))
-            Assert.assertTrue(has("affectsHitSounds"))
-        }
-    }
 }

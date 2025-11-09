@@ -7,10 +7,7 @@ import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.math.Vector2
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModHiddenTest {
     @Test
     fun `Test object fade in adjustment`() {
@@ -40,21 +37,5 @@ class ModHiddenTest {
         val hidden = ModHidden().apply { applyToBeatmap(beatmap) }
 
         Assert.assertTrue(hidden.firstObject is HitCircle)
-    }
-
-    @Test
-    fun `Test serialization`() {
-        ModHidden().apply {
-            serialize().apply {
-                Assert.assertEquals(getString("acronym"), "HD")
-                Assert.assertFalse(has("settings"))
-            }
-
-            onlyFadeApproachCircles = true
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertTrue(getBoolean("onlyFadeApproachCircles"))
-            }
-        }
     }
 }

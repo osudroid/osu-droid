@@ -3,7 +3,6 @@ package com.rian.osu.mods
 import com.reco1l.toolkt.roundBy
 import com.rian.osu.mods.settings.*
 import kotlin.math.round
-import org.json.JSONObject
 
 /**
  * Represents the Flashlight mod.
@@ -25,6 +24,7 @@ class ModFlashlight : Mod() {
      */
     var followDelay by FloatModSetting(
         name = "Flashlight follow delay",
+        key = "areaFollowDelay",
         valueFormatter = { "${round(it * 1000).toInt()}ms" },
         defaultValue = DEFAULT_FOLLOW_DELAY,
         minValue = DEFAULT_FOLLOW_DELAY,
@@ -39,6 +39,7 @@ class ModFlashlight : Mod() {
      */
     var sizeMultiplier by FloatModSetting(
         name = "Flashlight size",
+        key = "sizeMultiplier",
         valueFormatter = { "${it.roundBy(1)}x" },
         defaultValue = DEFAULT_SIZE_MULTIPLIER,
         minValue = 0.5f,
@@ -54,23 +55,10 @@ class ModFlashlight : Mod() {
     @get:JvmName("isComboBasedSize")
     var comboBasedSize by BooleanModSetting(
         name = "Change size based on combo",
+        key = "comboBasedSize",
         defaultValue = true,
         orderPosition = 2
     )
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        followDelay = settings.optDouble("areaFollowDelay", followDelay.toDouble()).toFloat()
-        sizeMultiplier = settings.optDouble("sizeMultiplier", sizeMultiplier.toDouble()).toFloat()
-        comboBasedSize = settings.optBoolean("comboBasedSize", comboBasedSize)
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("areaFollowDelay", followDelay)
-        put("sizeMultiplier", sizeMultiplier)
-        put("comboBasedSize", comboBasedSize)
-    }
 
     override val extraInformation
         get() = if (usesDefaultSettings) super.extraInformation else buildString {

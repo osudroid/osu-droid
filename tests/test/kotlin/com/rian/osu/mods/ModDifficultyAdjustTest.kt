@@ -124,35 +124,6 @@ class ModDifficultyAdjustTest {
     }
 
     @Test
-    fun `Test serialization`() {
-        ModDifficultyAdjust().apply {
-            serialize().apply {
-                Assert.assertNull(optJSONObject("settings"))
-            }
-
-            cs = 4f
-            ar = 9f
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat())
-                Assert.assertEquals(9f, getDouble("ar").toFloat())
-                Assert.assertTrue(optDouble("od").isNaN())
-                Assert.assertTrue(optDouble("hp").isNaN())
-            }
-
-            od = 8f
-            hp = 6f
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat())
-                Assert.assertEquals(9f, getDouble("ar").toFloat())
-                Assert.assertEquals(8f, getDouble("od").toFloat())
-                Assert.assertEquals(6f, getDouble("hp").toFloat())
-            }
-        }
-    }
-
-    @Test
     fun `Test toString`() {
         ModDifficultyAdjust().apply {
             Assert.assertEquals("DA", toString())

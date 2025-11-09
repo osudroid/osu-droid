@@ -13,6 +13,7 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
      */
     open var trackRateMultiplier by FloatModSetting(
         name = "Track rate multiplier",
+        key = "rateMultiplier",
         valueFormatter = { "${it.roundBy(2)}x" },
         defaultValue = 1f,
         minValue = 0.5f,

@@ -9,7 +9,7 @@ import kotlin.reflect.jvm.*
 /**
  * Represents a mod.
  */
-sealed class Mod {
+abstract class Mod {
     /**
      * The name of this [Mod].
      */
@@ -144,19 +144,32 @@ sealed class Mod {
     fun serialize() = JSONObject().apply {
         put("acronym", acronym)
 
-        val settings = serializeSettings()
+        val settingsJson = JSONObject()
 
-        if (settings != null) {
-            put("settings", settings)
+        for (setting in settings) {
+            if (!setting.isDefault) {
+                setting.save(settingsJson)
+            }
+        }
+
+        if (settingsJson.length() > 0) {
+            put("settings", settingsJson)
         }
     }
 
     /**
      * Copies the settings of this [Mod] from a [JSONObject].
      *
+     * By default, this copies all [ModSetting]s in this [Mod]. Subclasses can override this to customize the
+     * copying process.
+     *
      * @param settings The [JSONObject] containing the settings to copy.
      */
-    open fun copySettings(settings: JSONObject) {}
+    fun copySettings(settings: JSONObject) {
+        for (setting in this.settings) {
+            setting.load(settings)
+        }
+    }
 
     /**
      * Obtains the delegate [ModSetting] for the given [setting] property.
@@ -173,13 +186,6 @@ sealed class Mod {
         @Suppress("UNCHECKED_CAST")
         return setting.getDelegate() as T
     }
-
-    /**
-     * Serializes the settings of this [Mod] to a [JSONObject].
-     *
-     * @return The serialized settings of this [Mod], or `null` if this [Mod] has no settings.
-     */
-    protected open fun serializeSettings(): JSONObject? = null
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

@@ -2,9 +2,11 @@ package com.rian.osu.mods.settings
 
 import com.rian.osu.math.*
 import kotlin.math.*
+import org.json.JSONObject
 
 open class FloatModSetting(
     name: String,
+    key: String? = null,
     valueFormatter: ModSetting<Float>.(Float) -> String = { it.toString() },
     defaultValue: Float,
     minValue: Float = Float.MIN_VALUE,
@@ -27,6 +29,7 @@ open class FloatModSetting(
 
 ) : RangeConstrainedModSetting<Float>(
     name,
+    key,
     valueFormatter,
     if (precision != null) defaultValue.preciseRoundBy(precision) else defaultValue,
     if (precision != null) minValue.preciseRoundBy(precision) else minValue,
@@ -92,6 +95,11 @@ open class FloatModSetting(
         require(defaultValue in minValue..maxValue) { "defaultValue must be between minValue and maxValue." }
     }
 
+    override fun load(json: JSONObject) {
+        // Floats are stored as Doubles in JSON, so we need to handle that here.
+        value = json.optDouble(key).takeUnless { it.isNaN() }?.toFloat() ?: defaultValue
+    }
+
     override fun processValue(value: Float) = when {
         value < minValue -> minValue
         value > maxValue -> maxValue
@@ -108,6 +116,7 @@ open class FloatModSetting(
 
 open class NullableFloatModSetting(
     name: String,
+    key: String? = null,
     valueFormatter: ModSetting<Float?>.(Float?) -> String = { it.toString() },
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
@@ -130,6 +139,7 @@ open class NullableFloatModSetting(
 
 ) : RangeConstrainedModSetting<Float?>(
     name,
+    key,
     valueFormatter,
     if (precision != null) defaultValue?.preciseRoundBy(precision) else defaultValue,
     if (precision != null) minValue.preciseRoundBy(precision) else minValue,
@@ -196,6 +206,11 @@ open class NullableFloatModSetting(
         require(defaultValue == null || defaultValue in minValue..maxValue) {
             "defaultValue must be between minValue and maxValue."
         }
+    }
+
+    override fun load(json: JSONObject) {
+        // Floats are stored as Doubles in JSON, so we need to handle that here.
+        value = json.optDouble(key).takeUnless { it.isNaN() }?.toFloat() ?: defaultValue
     }
 
     override fun processValue(value: Float?) = when {

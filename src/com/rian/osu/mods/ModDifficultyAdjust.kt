@@ -13,7 +13,6 @@ import kotlin.math.pow
 import kotlin.reflect.KProperty0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
-import org.json.JSONObject
 
 /**
  * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
@@ -30,6 +29,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var cs by NullableFloatModSetting(
         name = "Circle size",
+        key = "cs",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
         defaultValue = null,
         minValue = 0f,
@@ -44,6 +44,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var ar by NullableFloatModSetting(
         name = "Approach rate",
+        key = "ar",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
         defaultValue = null,
         minValue = 0f,
@@ -58,6 +59,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var od by NullableFloatModSetting(
         name = "Overall difficulty",
+        key = "od",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
         defaultValue = null,
         minValue = 0f,
@@ -72,6 +74,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var hp by NullableFloatModSetting(
         name = "Health drain",
+        key = "hp",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
         defaultValue = null,
         minValue = 0f,
@@ -144,39 +147,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
         return true
-    }
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        cs = settings.optDouble("cs").toFloat().takeUnless { it.isNaN() }
-        ar = settings.optDouble("ar").toFloat().takeUnless { it.isNaN() }
-        od = settings.optDouble("od").toFloat().takeUnless { it.isNaN() }
-        hp = settings.optDouble("hp").toFloat().takeUnless { it.isNaN() }
-    }
-
-    override fun serializeSettings(): JSONObject? {
-        if (!isRelevant) {
-            return null
-        }
-
-        return JSONObject().apply {
-            if (cs != null) {
-                put("cs", cs)
-            }
-
-            if (ar != null) {
-                put("ar", ar)
-            }
-
-            if (od != null) {
-                put("od", od)
-            }
-
-            if (hp != null) {
-                put("hp", hp)
-            }
-        }
     }
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =

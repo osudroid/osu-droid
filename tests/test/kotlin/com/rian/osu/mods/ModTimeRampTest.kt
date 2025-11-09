@@ -8,14 +8,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ModTimeRampTest {
     @Test
-    fun `Test serialization`() {
-        TestModTimeRamp().serialize().getJSONObject("settings").apply {
-            Assert.assertEquals(1f, getDouble("initialRate").toFloat())
-            Assert.assertEquals(1.5f, getDouble("finalRate").toFloat())
-        }
-    }
-
-    @Test
     fun `Test toString`() {
         Assert.assertEquals("TS (1.00x - 1.50x)", TestModTimeRamp().toString())
     }

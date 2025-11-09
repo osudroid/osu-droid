@@ -6,7 +6,7 @@ import org.junit.Test
 class ModSettingTest {
     @Test
     fun `Test setting reset`() {
-        val setting = ModSetting("Test", null, 1)
+        val setting = ModSetting(name = "Test", valueFormatter = null, defaultValue = 1)
 
         setting.defaultValue = 2
         setting.value = 3

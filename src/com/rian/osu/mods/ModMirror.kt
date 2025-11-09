@@ -5,7 +5,6 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlinx.coroutines.CoroutineScope
-import org.json.JSONObject
 
 /**
  * Represents the Mirror mod.
@@ -22,30 +21,10 @@ class ModMirror : Mod(), IModApplicableToHitObject {
      */
     var reflection by EnumModSetting(
         name = "Flipped axes",
+        key = "flippedAxes",
         valueFormatter = { it.name },
         defaultValue = MirrorType.Horizontal
     )
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        reflection = when (settings.optInt("flippedAxes")) {
-            0 -> MirrorType.Horizontal
-            1 -> MirrorType.Vertical
-            2 -> MirrorType.Both
-            else -> reflection
-        }
-    }
-
-    override fun serializeSettings(): JSONObject? {
-        if (!isRelevant) {
-            return null
-        }
-
-        return JSONObject().apply {
-            put("flippedAxes", reflection.ordinal)
-        }
-    }
 
     override fun applyToHitObject(
         mode: GameMode,

@@ -11,7 +11,6 @@ import kotlin.math.exp
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
-import org.json.JSONObject
 
 /**
  * Represents the Random mod.
@@ -29,6 +28,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      */
     var seed by NullableIntegerModSetting(
         name = "Seed",
+        key = "seed",
         valueFormatter = { it?.toString() ?: "" },
         defaultValue = null,
         minValue = 0,
@@ -41,6 +41,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      */
     var angleSharpness by FloatModSetting(
         name = "Angle sharpness",
+        key = "angleSharpness",
         valueFormatter = { it.roundBy(1).toString() },
         defaultValue = 7f,
         minValue = 1f,
@@ -50,21 +51,6 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
     )
 
     private var random: Random? = null
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        if (settings.has("seed")) {
-            seed = settings.getInt("seed")
-        }
-
-        angleSharpness = settings.optDouble("angleSharpness", angleSharpness.toDouble()).toFloat()
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("seed", seed)
-        put("angleSharpness", angleSharpness)
-    }
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         if (seed == null) {
