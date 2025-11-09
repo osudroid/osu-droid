@@ -1,9 +1,14 @@
 package com.rian.osu.mods.settings
 
+import kotlin.math.round
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
+import kotlinx.serialization.json.*
+
 /**
  * A [ModSetting] that represents a numeric value with range constraints and step increments.
  */
-abstract class NumberModSetting<T>(
+open class NumberModSetting<T>(
     name: String,
     key: String? = null,
     valueFormatter: ModSetting<T>.(T) -> String = { it.toString() },
@@ -55,7 +60,7 @@ abstract class NumberModSetting<T>(
         var processedValue = super.processValue(value)
 
         if (step.toDouble() > 0) {
-            processedValue = snapToStep(processedValue)
+            processedValue = snapToStep(processedValue, minValue, step)
         }
 
         return processedValue
@@ -69,16 +74,30 @@ abstract class NumberModSetting<T>(
         super.copyFrom(other)
     }
 
-    /**
-     * Snaps [value] to the nearest step increment. When this is called, [step] is guaranteed to be greater than 0.
-     */
-    protected abstract fun snapToStep(value: T): T
+    final override fun load(json: JsonObject) {
+        if (key == null) {
+            return
+        }
+
+        val element = json[key]?.jsonPrimitive
+
+        @Suppress("UNCHECKED_CAST")
+        value = when (value) {
+            is Int -> element?.intOrNull
+            is Long -> element?.longOrNull
+            is Float -> element?.floatOrNull
+            is Double -> element?.doubleOrNull
+            else -> null
+        } as? T ?: defaultValue
+    }
+
+    final override fun save(builder: JsonObjectBuilder) = saveToJSON(builder)
 }
 
 /**
  * A [ModSetting] that represents a nullable numeric value with range constraints and step increments.
  */
-abstract class NullableNumberModSetting<T>(
+open class NullableNumberModSetting<T>(
     name: String,
     key: String? = null,
     valueFormatter: ModSetting<T?>.(T?) -> String = { it.toString() },
@@ -129,7 +148,7 @@ abstract class NullableNumberModSetting<T>(
         var processedValue = super.processValue(value)
 
         if (processedValue != null && step.toDouble() > 0) {
-            processedValue = snapToStep(processedValue)
+            processedValue = snapToStep(processedValue, minValue, step)
         }
 
         return processedValue
@@ -143,8 +162,74 @@ abstract class NullableNumberModSetting<T>(
         super.copyFrom(other)
     }
 
-    /**
-     * Snaps [value] to the nearest step increment. When this is called, [step] is guaranteed to be greater than 0.
-     */
-    protected abstract fun snapToStep(value: T): T
+    final override fun load(json: JsonObject) {
+        if (key == null) {
+            return
+        }
+
+        val element = json[key]
+
+        if (element is JsonNull) {
+            value = null
+            return
+        }
+
+        val primitive = element?.jsonPrimitive
+
+        // Take advantage of minValue's non-nullability to determine the type of T
+        @Suppress("UNCHECKED_CAST")
+        value = when (minValue) {
+            is Int -> primitive?.intOrNull
+            is Long -> primitive?.longOrNull
+            is Float -> primitive?.floatOrNull
+            is Double -> primitive?.doubleOrNull
+            else -> null
+        } as? T ?: defaultValue
+    }
+
+    final override fun save(builder: JsonObjectBuilder) = saveToJSON(builder)
 }
+
+/**
+ * Saves a [Number] or nullable [Number] value in a [ModSetting] to a [JsonObjectBuilder].
+ *
+ * @param builder The [JsonObjectBuilder] to save the value to.
+ */
+private fun <T : Number?> ModSetting<T>.saveToJSON(builder: JsonObjectBuilder) {
+    if (key == null) {
+        return
+    }
+
+    if (value == null) {
+        builder.put(key, JsonNull)
+        return
+    }
+
+    builder.put(key, value)
+}
+
+/**
+ * Snaps a [Number] value to the nearest step increment.
+ *
+ * @param value The value to snap.
+ * @param minValue The minimum value of the range.
+ * @param step The step increment.
+ * @return The snapped value.
+ */
+@Suppress("UNCHECKED_CAST")
+private fun <T : Number> snapToStep(value: T, minValue: T, step: T) =
+    when {
+        value is Int && minValue is Int && step is Int ->
+            (round((value - minValue) / step.toFloat()) * step + minValue).roundToInt()
+
+        value is Long && minValue is Long && step is Long ->
+            (round((value - minValue) / step.toDouble()) * step + minValue).roundToLong()
+
+        value is Float && minValue is Float && step is Float ->
+            round((value - minValue) / step) * step + minValue
+
+        value is Double && minValue is Double && step is Double ->
+            round((value - minValue) / step) * step + minValue
+
+        else -> value
+    } as T

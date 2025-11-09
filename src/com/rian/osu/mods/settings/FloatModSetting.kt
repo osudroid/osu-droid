@@ -1,8 +1,6 @@
 package com.rian.osu.mods.settings
 
 import com.rian.osu.math.*
-import kotlin.math.*
-import kotlinx.serialization.json.*
 
 /**
  * A [ModSetting] that represents a [Float] value with range constraints.
@@ -52,18 +50,6 @@ open class FloatModSetting(
         require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
     }
 
-    override fun load(json: JsonObject) {
-        if (key != null) {
-            value = json[key]?.jsonPrimitive?.floatOrNull ?: defaultValue
-        }
-    }
-
-    override fun save(builder: JsonObjectBuilder) {
-        if (key != null) {
-            builder.put(key, value)
-        }
-    }
-
     override fun processValue(value: Float): Float {
         val precision = precision
         var processedValue = super.processValue(value)
@@ -74,8 +60,6 @@ open class FloatModSetting(
 
         return processedValue
     }
-
-    override fun snapToStep(value: Float) = round((value - minValue) / step) * step + minValue
 
     override fun copyFrom(other: ModSetting<Float>) {
         if (other is FloatModSetting) {
@@ -134,31 +118,6 @@ open class NullableFloatModSetting(
         require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
     }
 
-    override fun load(json: JsonObject) {
-        if (key == null) {
-            return
-        }
-
-        val element = json[key]
-
-        value =
-            if (element is JsonNull) null
-            else element?.jsonPrimitive?.floatOrNull ?: defaultValue
-    }
-
-    override fun save(builder: JsonObjectBuilder) {
-        if (key == null) {
-            return
-        }
-
-        if (value == null) {
-            builder.put(key, JsonNull)
-            return
-        }
-
-        builder.put(key, value)
-    }
-
     override fun processValue(value: Float?): Float? {
         val precision = precision
         var processedValue = super.processValue(value)
@@ -169,8 +128,6 @@ open class NullableFloatModSetting(
 
         return processedValue
     }
-
-    override fun snapToStep(value: Float) = round((value - minValue) / step) * step + minValue
 
     override fun copyFrom(other: ModSetting<Float?>) {
         if (other is NullableFloatModSetting) {
