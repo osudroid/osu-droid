@@ -6,11 +6,10 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
-import kotlin.reflect.full.createInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 
 /**
  * A set of utilities to handle [Mod] combinations.
@@ -18,7 +17,7 @@ import org.json.JSONException
 object ModUtils {
 
     /**
-     * Returns a list of all available [Mod]s.
+     * All available [Mod]s.
      */
     val allModsInstances by lazy {
         arrayOf(
@@ -54,75 +53,56 @@ object ModUtils {
         )
     }
 
-    private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
+    /**
+     * All [Mod] classes by their acronym.
+     */
+    val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
 
     /**
-     * Serializes a list of [Mod]s into a [JSONArray].
+     * Serializes a list of [Mod]s into a list of [APIMod]s, contained within a JSON string.
      *
-     * The serialized [Mod]s can be deserialized using [deserializeMods].
+     * The result can be deserialized using [deserializeMods].
      *
      * @param mods The list of [Mod]s to serialize.
      * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
      * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
-     * @return The serialized [Mod]s in a [JSONArray].
+     * @return The list of [APIMod]s as a JSON string.
+     * @throws SerializationException If there is an error during serialization of [mods].
      */
     @JvmStatic
     @JvmOverloads
+    @Throws(SerializationException::class)
     fun serializeMods(
         mods: Iterable<Mod>,
         includeNonUserPlayable: Boolean = true,
         includeIrrelevantMods: Boolean = false
-    ) = JSONArray().also {
-        for (mod in mods) {
-            if (!includeNonUserPlayable && !mod.isUserPlayable) {
-                continue
-            }
-
-            if (!includeIrrelevantMods && !mod.isRelevant) {
-                continue
-            }
-
-            it.put(mod.serialize())
+    ): String {
+        val filteredMods = mods.filter {
+            (includeNonUserPlayable || it.isUserPlayable) &&
+            (includeIrrelevantMods || it.isRelevant)
         }
+
+        return Json.encodeToString(filteredMods.map { it.toAPIMod() })
     }
 
     /**
-     * Deserializes a list of [Mod]s from a JSON string received from [serializeMods].
+     * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serializeMods].
      *
-     * @param str The JSON string containing the serialized [Mod]s.
+     * @param str The JSON string containing the list of [APIMod]s.
      * @return The deserialized [Mod]s in a [ModHashMap].
-     * @throws JSONException If the string cannot be parsed as a valid JSON array.
+     * @throws SerializationException If there is an error during deserialization of [str].
+     * @throws IllegalArgumentException If [str] is not a valid representation of a list of [APIMod]s.
      */
     @JvmStatic
-    @Throws(JSONException::class)
-    fun deserializeMods(str: String) = deserializeMods(JSONArray(str))
-
-    /**
-     * Deserializes a list of [Mod]s from a [JSONArray] received from [serializeMods].
-     *
-     * @param json The [JSONArray] containing the serialized [Mod]s.
-     * @return The deserialized [Mod]s in a [ModHashMap].
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun deserializeMods(json: JSONArray? = null) = ModHashMap().also {
-        if (json == null) {
-            return@also
+    @Throws(SerializationException::class, IllegalArgumentException::class)
+    fun deserializeMods(str: String): ModHashMap {
+        if (str.isEmpty()) {
+            return ModHashMap()
         }
 
-        for (i in 0 until json.length()) {
-            val obj = json.getJSONObject(i)
-            val acronym = obj.optString("acronym") ?: continue
-            val settings = obj.optJSONObject("settings")
+        val apiMods = Json.decodeFromString<List<APIMod>>(str)
 
-            val mod = allModsClassesByAcronym[acronym]?.createInstance() ?: continue
-
-            if (settings != null) {
-                mod.copySettings(settings)
-            }
-
-            it.put(mod)
-        }
+        return ModHashMap(apiMods.mapNotNull { it.toMod() })
     }
 
     /**

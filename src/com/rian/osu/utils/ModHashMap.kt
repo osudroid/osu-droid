@@ -5,7 +5,7 @@ import com.rian.osu.mods.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
-import org.json.JSONArray
+import kotlinx.serialization.SerializationException
 
 /**
  * A [ConcurrentHashMap] of [Mod]s with additional functionalities.
@@ -155,13 +155,17 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
 
     /**
-     * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
+     * Serializes all [Mod]s in this [ModHashMap] into a list of [APIMod]s, contained within a JSON string.
+     *
+     * The result can be deserialized using [ModUtils.deserializeMods].
      *
      * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
      * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
-     * @return The serialized [Mod]s in a [JSONArray].
+     * @return The list of [APIMod]s as a JSON string.
+     * @throws SerializationException If there is an error during serialization.
      */
     @JvmOverloads
+    @Throws(SerializationException::class)
     fun serializeMods(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
         ModUtils.serializeMods(values, includeNonUserPlayable, includeIrrelevantMods)
 

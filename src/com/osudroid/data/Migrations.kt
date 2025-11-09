@@ -97,7 +97,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
 
                     db.execSQL(
                         "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
-                        arrayOf<Any>(newMods.serializeMods().toString(), id)
+                        arrayOf<Any>(newMods.serializeMods(), id)
                     )
                 }
             }
@@ -170,7 +170,7 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
 
                     db.execSQL(
                         "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
-                        arrayOf<Any>(mods.serializeMods().toString(), id)
+                        arrayOf<Any>(mods.serializeMods(), id)
                     )
                 }
 
@@ -200,7 +200,7 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
 
                 db.execSQL(
                     "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
-                    arrayOf<Any>(score, mods.serializeMods().toString(), id)
+                    arrayOf<Any>(score, mods.serializeMods(), id)
                 )
             }
         }

@@ -1,10 +1,11 @@
 package com.rian.osu.mods
 
 import com.rian.osu.mods.settings.*
-import org.json.JSONObject
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 
 /**
  * Represents a mod.
@@ -135,32 +136,6 @@ abstract class Mod {
         other.incompatibleMods.none { it.isInstance(this) }
 
     /**
-     * Serializes this [Mod] into a [JSONObject].
-     *
-     * The [JSONObject] will contain the following fields:
-     *
-     * - `acronym`: The acronym of this [Mod].
-     * - `settings`: Settings specific to this [Mod] in a [JSONObject], if any.
-     *
-     * @return The serialized form of this [Mod] in a [JSONObject].
-     */
-    fun serialize() = JSONObject().apply {
-        put("acronym", acronym)
-
-        val settingsJson = JSONObject()
-
-        for (setting in settings) {
-            if (!setting.isDefault) {
-                setting.save(settingsJson)
-            }
-        }
-
-        if (settingsJson.length() > 0) {
-            put("settings", settingsJson)
-        }
-    }
-
-    /**
      * Copies [ModSetting]s from another [Mod] into this [Mod], overwriting all existing [ModSetting]s.
      *
      * @param other The [Mod] to copy from. The [Mod] must be of the same type as this [Mod].
@@ -182,14 +157,11 @@ abstract class Mod {
     }
 
     /**
-     * Copies the settings of this [Mod] from a [JSONObject].
+     * Copies the [ModSetting]s of this [Mod] from a [JsonObject].
      *
-     * By default, this copies all [ModSetting]s in this [Mod]. Subclasses can override this to customize the
-     * copying process.
-     *
-     * @param settings The [JSONObject] containing the settings to copy.
+     * @param settings The [JsonObject] containing the settings to copy.
      */
-    fun copySettings(settings: JSONObject) {
+    fun copySettings(settings: JsonObject) {
         for (setting in this.settings) {
             setting.load(settings)
         }

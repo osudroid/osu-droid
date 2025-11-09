@@ -45,7 +45,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
         val modPreset = ModPreset(
             name = name,
-            serializedMods = ModMenu.enabledMods.serializeMods(includeIrrelevantMods = true).toString()
+            serializedMods = ModMenu.enabledMods.serializeMods(includeIrrelevantMods = true)
         )
 
         DatabaseManager.modPresetTable.insert(modPreset)

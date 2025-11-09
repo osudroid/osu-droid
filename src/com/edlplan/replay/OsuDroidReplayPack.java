@@ -134,7 +134,7 @@ public class OsuDroidReplayPack {
             // Additionally, it uses the legacy mods format and needs to be converted.
             var oldMods = replayData.getString("mod");
 
-            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods(false).toString());
+            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods(false));
             replayData.remove("mod");
         }
 

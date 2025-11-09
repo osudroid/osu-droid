@@ -151,7 +151,7 @@ public class Replay {
                     os.writeInt(stat.getTotalScoreWithMultiplier());
                     os.writeInt(stat.getScoreMaxCombo());
                     os.writeObject(stat.getPlayerName());
-                    os.writeObject(stat.getMod().serializeMods().toString());
+                    os.writeObject(stat.getMod().serializeMods());
                 }
 
                 os.writeInt(cursorMoves.size());

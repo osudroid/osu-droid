@@ -627,7 +627,7 @@ public class StatisticV2 implements Serializable {
             beatmapMD5,
             playerName,
             replayFilename,
-            mod.serializeMods(false).toString(),
+            mod.serializeMods(false),
             getTotalScoreWithMultiplier(),
             scoreMaxCombo,
             getMark(),
