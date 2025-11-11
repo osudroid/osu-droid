@@ -77,7 +77,7 @@ public class ScoreNumber extends Entity {
 
 
     // Leaving this to support old usages.
-    public void attachToScene(final Scene scene) {
+    public void attachToScene(final Entity scene) {
         scene.attachChild(this);
     }
 

@@ -164,6 +164,42 @@ val UIComponent.originPositionY: Float
 
 //endregion
 
+//region Padding
+
+var UIComponent.paddingLeft
+    get() = padding.left
+    set(value) {
+        if (padding.left != value) {
+            padding = padding.copy(x = value)
+        }
+    }
+
+var UIComponent.paddingTop
+    get() = padding.top
+    set(value) {
+        if (padding.top != value) {
+            padding = padding.copy(y = value)
+        }
+    }
+
+var UIComponent.paddingRight
+    get() = padding.right
+    set(value) {
+        if (padding.right != value) {
+            padding = padding.copy(z = value)
+        }
+    }
+
+var UIComponent.paddingBottom
+    get() = padding.bottom
+    set(value) {
+        if (padding.bottom != value) {
+            padding = padding.copy(w = value)
+        }
+    }
+
+//endregion
+
 //region Transformation properties
 
 /**

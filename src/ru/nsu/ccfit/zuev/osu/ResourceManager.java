@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
@@ -155,7 +155,7 @@ public class ResourceManager {
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
 
-        ExtendedEngine.getCurrent().onSkinChange();
+        UIEngine.getCurrent().onSkinChange();
     }
 
     public void loadCustomSkin(String folder) {

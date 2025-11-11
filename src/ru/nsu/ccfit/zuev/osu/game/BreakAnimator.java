@@ -4,7 +4,6 @@ import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -149,8 +148,9 @@ public class BreakAnimator extends GameObject {
                 sp.setIgnoreUpdate(false);
             }
 
-            if (Multiplayer.isMultiplayer)
-                RoomScene.INSTANCE.getChat().dismiss();
+            if (Multiplayer.isMultiplayer) {
+                Multiplayer.roomScene.getChat().hide();
+            }
         }
         if (length > 1) {
             if (time < 0.5f) {

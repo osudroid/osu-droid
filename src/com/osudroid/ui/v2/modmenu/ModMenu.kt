@@ -13,7 +13,6 @@ import com.osudroid.multiplayer.api.RoomAPI.setPlayerMods
 import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.utils.updateThread
@@ -247,6 +246,12 @@ object ModMenu : UIScene() {
                 height = MatchContent
                 padding = Vec4(60f, 12f)
 
+                onUpdateTick = {
+                    val buttonHeight = Multiplayer.roomScene?.chat?.buttonHeight ?: 0f
+
+                    paddingBottom = if (Multiplayer.isConnected) buttonHeight + 12f else 12f
+                }
+
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
@@ -444,8 +449,8 @@ object ModMenu : UIScene() {
     fun back(updatePlayerMods: Boolean) {
 
         if (Multiplayer.isConnected) {
-            RoomScene.chat.show()
-            RoomScene.isWaitingForModsChange = true
+            Multiplayer.roomScene?.chat?.show()
+            Multiplayer.roomScene?.isWaitingForModsChange = true
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost) {
@@ -453,7 +458,7 @@ object ModMenu : UIScene() {
             } else if (updatePlayerMods) {
                 setPlayerMods(enabledMods.serializeMods())
             } else {
-                RoomScene.isWaitingForModsChange = false
+                Multiplayer.roomScene?.isWaitingForModsChange = false
             }
         }
 
