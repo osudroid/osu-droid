@@ -12,11 +12,9 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.*
 import com.rian.osu.*
-import com.rian.osu.mods.*
 import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
 import com.rian.osu.utils.ModUtils.calculateRateWithMods
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.game.*
 import java.text.*
 import java.util.*
 import kotlin.math.roundToInt
@@ -192,21 +190,11 @@ class BeatmapInfoLayout : UILinearContainer() {
         }
 
         val mods = ModMenu.enabledMods
-        val isPreciseMod = ModPrecise::class in mods
         val totalSpeedMultiplier = calculateRateWithMods(mods.values, Double.POSITIVE_INFINITY)
 
         val difficulty = beatmapInfo.getBeatmapDifficulty()
 
         applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values, true)
-
-        // Round to 2 decimal places.
-        // Using difficulty circle size is quite inaccurate here as the real circle size changes
-        // depending on the height of the running device, but for the sake of comparison across
-        // players, we assume the height of the device to be fixed.
-        difficulty.difficultyCS = GameHelper.Round(difficulty.difficultyCS.toDouble(), 2)
-        difficulty.ar = GameHelper.Round(difficulty.ar.toDouble(), 2)
-        difficulty.od = GameHelper.Round(difficulty.od.toDouble(), 2)
-        difficulty.hp = GameHelper.Round(difficulty.hp.toDouble(), 2)
 
         val minBpm = (beatmapInfo.bpmMin * totalSpeedMultiplier).roundToInt()
         val maxBpm = (beatmapInfo.bpmMax * totalSpeedMultiplier).roundToInt()
@@ -219,10 +207,11 @@ class BeatmapInfoLayout : UILinearContainer() {
 
         bpmText.text = if (minBpm == maxBpm) commonBpm.toString() else "$minBpm-$maxBpm ($commonBpm)"
 
-        arText.value = difficulty.ar.toString()
-        odText.value = difficulty.od.toString()
-        csText.value = difficulty.difficultyCS.toString()
-        hpText.value = difficulty.hp.toString()
+        // Round to 2 decimal places.
+        arText.value = difficulty.ar.roundBy(2).toString()
+        odText.value = difficulty.od.roundBy(2).toString()
+        csText.value = difficulty.difficultyCS.roundBy(2).toString()
+        hpText.value = difficulty.hp.roundBy(2).toString()
 
         setStarRatingDisplay(beatmapInfo.getStarRating().toDouble())
     }
