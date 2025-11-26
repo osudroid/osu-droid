@@ -629,10 +629,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        float paddingBottom = 0f;
-        if (Multiplayer.isConnected()) {
-            paddingBottom = Multiplayer.roomScene.getChat().getButtonHeight();
-        }
+        float paddingBottom = Multiplayer.isConnected() ? Multiplayer.roomScene.getChat().getButtonHeight() : 0f;
 
         if (modSelection != null)
             modSelection.setScale(1.5f);
