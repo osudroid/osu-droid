@@ -2,14 +2,12 @@ package com.osudroid.ui.v2
 
 import com.osudroid.data.*
 import com.osudroid.multiplayer.api.data.*
-import com.osudroid.ui.*
 import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.framework.*
 import com.reco1l.toolkt.*
 import com.rian.osu.*
 import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
@@ -37,7 +35,7 @@ class BeatmapInfoLayout : UILinearContainer() {
     private lateinit var slidersBadge: UILabeledBadge
     private lateinit var spinnersBadge: UILabeledBadge
 
-    private lateinit var starsText: CompoundText
+    private lateinit var starRatingBadge: StarRatingBadge
     private lateinit var versionText: UIText
 
 
@@ -76,10 +74,8 @@ class BeatmapInfoLayout : UILinearContainer() {
                 }
             }
 
-            starsText = badge {
-                text = "0.00"
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
-            }
+            starRatingBadge = StarRatingBadge()
+            +starRatingBadge
         }
 
         linearContainer {
@@ -183,7 +179,7 @@ class BeatmapInfoLayout : UILinearContainer() {
             odText.value = "0.00"
             csText.value = "0.00"
             hpText.value = "0.00"
-            starsText.text = "0.00"
+            starRatingBadge.rating = 0.0
             bpmText.text = "0"
             lengthText.text = "00:00"
             return
@@ -212,19 +208,7 @@ class BeatmapInfoLayout : UILinearContainer() {
         odText.value = difficulty.od.roundBy(2).toString()
         csText.value = difficulty.difficultyCS.roundBy(2).toString()
         hpText.value = difficulty.hp.roundBy(2).toString()
-
-        setStarRatingDisplay(beatmapInfo.getStarRating().toDouble())
-    }
-
-    /**
-     * Change the displayed star rating.
-     */
-    fun setStarRatingDisplay(value: Double) {
-        starsText.apply {
-            text = value.roundBy(2).toString()
-            color = if (value >= 6.5) Color4(0xFFFFD966) else Color4.Black.copy(alpha = 0.75f)
-            background?.color = OsuColors.getStarRatingColor(value)
-        }
+        starRatingBadge.rating = beatmapInfo.getStarRating().toDouble()
     }
 
 
