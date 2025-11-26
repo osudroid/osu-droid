@@ -12,8 +12,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.*
 import com.rian.osu.*
-import com.rian.osu.beatmap.*
-import com.rian.osu.beatmap.DroidHitWindow.Companion.hitWindow300ToOverallDifficulty
 import com.rian.osu.mods.*
 import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
 import com.rian.osu.utils.ModUtils.calculateRateWithMods
