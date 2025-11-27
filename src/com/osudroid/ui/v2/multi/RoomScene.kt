@@ -22,16 +22,13 @@ import com.osudroid.ui.v2.GameLoaderScene
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
-import com.osudroid.utils.mainThread
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.badge
-import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
-import com.reco1l.andengine.component.forEach
 import com.reco1l.andengine.component.setText
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.JustifyContent
@@ -141,7 +138,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         ResourceManager.getInstance().loadHighQualityAsset("swap", "swap.png")
         ResourceManager.getInstance().loadHighQualityAsset("clock", "clock.png")
         ResourceManager.getInstance().loadHighQualityAsset("bpm", "bpm.png")
-        ResourceManager.getInstance().loadHighQualityAsset("star", "star.png")
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png")
         ResourceManager.getInstance().loadHighQualityAsset("download", "download.png")
         ResourceManager.getInstance().loadHighQualityAsset("send", "send.png")

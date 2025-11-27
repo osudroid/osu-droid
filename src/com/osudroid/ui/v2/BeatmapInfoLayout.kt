@@ -216,7 +216,6 @@ class BeatmapInfoLayout : UILinearContainer() {
         init {
             ResourceManager.getInstance().loadHighQualityAsset("clock", "clock.png")
             ResourceManager.getInstance().loadHighQualityAsset("bpm", "bpm.png")
-            ResourceManager.getInstance().loadHighQualityAsset("star-xs", "star.png")
         }
     }
 }
