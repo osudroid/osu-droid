@@ -42,7 +42,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
      * The font to use for this text.
      * It must be already loaded and ready to use before setting it.
      */
-    var font: Font? = null
+    var font: Font? = ResourceManager.getInstance().getFont("smallFont")
         set(value) {
             if (field != value) {
                 field = value
@@ -440,4 +440,12 @@ open class CompoundText : UIContainer() {
 
         super.onManagedUpdate(deltaTimeSec)
     }
+}
+
+
+fun UITextCompoundBuffer(capacity: Int): CompoundBuffer {
+    return CompoundBuffer(
+        UIText.TextTextureBuffer(capacity),
+        UIText.TextVertexBuffer(capacity)
+    )
 }

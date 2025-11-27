@@ -107,7 +107,7 @@ class ModMenuToggle(var mod: Mod): UIButton() {
     companion object {
 
         private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
-        private val sharedTextCB = CompoundBuffer(UIText.TextTextureBuffer(256), UIText.TextVertexBuffer(256)).asSharedDynamically()
+        private val sharedTextCB = UITextCompoundBuffer(256).asSharedDynamically()
 
     }
 

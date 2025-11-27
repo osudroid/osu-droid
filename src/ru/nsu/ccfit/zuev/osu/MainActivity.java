@@ -42,14 +42,13 @@ import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -149,7 +148,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new ExtendedEngine(this, opt);
+        UIEngine engine = new UIEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -289,11 +288,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
-
-        // Initializing this class because they contain fragments in its constructors that should be initialized in
-        // main thread because of the Looper.
-        RoomScene.INSTANCE.init();
-
         Execution.async(() -> {
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -675,9 +669,9 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             if (Multiplayer.isConnected()
-                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    && (getEngine().getScene() == Multiplayer.roomScene
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
+                Execution.async(() -> Execution.runSafe(Multiplayer.roomScene::invalidateStatus));
             }
         }
 
@@ -715,7 +709,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
+        if (UIEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
         }
 
@@ -787,13 +781,13 @@ public class MainActivity extends BaseGameActivity implements
                         return true;
                     }
 
-                    if (currentScene == RoomScene.INSTANCE) {
+                    if (currentScene == Multiplayer.roomScene) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
+                        if (Multiplayer.roomScene.hasChildScene() && Multiplayer.roomScene.getChildScene() == ModMenu.INSTANCE) {
                             ModMenu.INSTANCE.back();
                             return true;
                         }
-                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
                 } else if (currentScene instanceof GameLoaderScene loaderScene) {

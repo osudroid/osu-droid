@@ -13,9 +13,8 @@ import com.osudroid.multiplayer.api.RoomAPI.setPlayerMods
 import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
-import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.ModsIndicator
+import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.UITextButton
@@ -71,7 +70,7 @@ object ModMenu : UIScene() {
     private val csBadge: UILabeledBadge
     private val hpBadge: UILabeledBadge
     private val bpmBadge: UILabeledBadge
-    private val starRatingBadge: UILabeledBadge
+    private val starRatingBadge: StarRatingBadge
     private val scoreMultiplierBadge: UILabeledBadge
 
     private var parsedBeatmap: Beatmap? = null
@@ -247,6 +246,12 @@ object ModMenu : UIScene() {
                 height = MatchContent
                 padding = Vec4(60f, 12f)
 
+                onUpdateTick = {
+                    val buttonHeight = Multiplayer.roomScene?.chat?.buttonHeight ?: 0f
+
+                    paddingBottom = if (Multiplayer.isConnected) buttonHeight + 12f else 12f
+                }
+
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
@@ -285,10 +290,8 @@ object ModMenu : UIScene() {
                     origin = Anchor.CenterRight
                     spacing = 10f
 
-                    starRatingBadge = labeledBadge {
-                        label = "★"
-                        value = "0.00"
-                    }
+                    starRatingBadge = StarRatingBadge()
+                    +starRatingBadge
 
                     rankedBadge = badge {
                         text = "Ranked"
@@ -387,24 +390,7 @@ object ModMenu : UIScene() {
 
             ensureActive()
 
-            updateThread {
-                starRatingBadge.clearEntityModifiers()
-                starRatingBadge.background!!.clearEntityModifiers()
-
-                starRatingBadge.valueEntity.text = "%.2f".format(attributes.starRating)
-                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
-
-                if (attributes.starRating >= 6.5) {
-                    starRatingBadge.colorTo(Color4(0xFFFFD966), 0.1f)
-                    starRatingBadge.fadeTo(1f, 0.1f)
-                } else {
-                    starRatingBadge.colorTo(Color4.Black, 0.1f)
-                    starRatingBadge.fadeTo(0.75f, 0.1f)
-                }
-            }
-
-            ensureActive()
-
+            starRatingBadge.rating = attributes.starRating
             songMenu.changeDimensionInfo(selectedBeatmap)
             songMenu.setStarsDisplay(attributes.starRating.toFloat())
         }
@@ -444,8 +430,8 @@ object ModMenu : UIScene() {
     fun back(updatePlayerMods: Boolean) {
 
         if (Multiplayer.isConnected) {
-            RoomScene.chat.show()
-            RoomScene.isWaitingForModsChange = true
+            Multiplayer.roomScene?.chat?.show()
+            Multiplayer.roomScene?.isWaitingForModsChange = true
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost) {
@@ -453,7 +439,7 @@ object ModMenu : UIScene() {
             } else if (updatePlayerMods) {
                 setPlayerMods(enabledMods.serializeMods())
             } else {
-                RoomScene.isWaitingForModsChange = false
+                Multiplayer.roomScene?.isWaitingForModsChange = false
             }
         }
 

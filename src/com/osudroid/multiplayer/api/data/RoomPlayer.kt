@@ -1,5 +1,7 @@
 package com.osudroid.multiplayer.api.data
 
+import com.osudroid.multiplayer.*
+
 data class RoomPlayer(
 
     /**
@@ -28,6 +30,13 @@ data class RoomPlayer(
     var mods: RoomMods
 
 ) {
+
+    /**
+     * Whether this player is the host of the room.
+     */
+    val isHost
+        get() = Multiplayer.room?.host == id
+
 
     /**
      * Locally used to indicate the player is muted.

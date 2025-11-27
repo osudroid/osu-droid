@@ -7,6 +7,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import org.anddev.andengine.engine.Engine
+import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
@@ -14,7 +15,13 @@ import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+
+    /**
+     * The global HUD used for overlays (menus, dialogs, etc).
+     */
+    val overlay = HUD()
+
 
     /**
      * The current focused entity.
@@ -45,7 +52,8 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
 
     init {
-        Current = this
+        current = this
+        camera.hud = overlay
     }
 
 
@@ -70,11 +78,13 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                 // so we assume it is safe to override the position.
                 scene.setPosition(0f, -sceneOffset)
                 scene.childScene?.setPosition(0f, -sceneOffset)
+                overlay.setPosition(0f, -sceneOffset)
             }
 
         } else {
             scene.setPosition(0f, 0f)
             scene.childScene?.setPosition(0f, 0f)
+            overlay.setPosition(0f, 0f)
         }
 
         super.onDrawScene(pGL)
@@ -141,6 +151,10 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             return false
         }
 
+        if (overlay.propagateKeyPress(keyCode, event)) {
+            return true
+        }
+
         val scene = scene ?: return false
 
         if (scene.childScene?.propagateKeyPress(keyCode, event) == true) {
@@ -178,7 +192,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     companion object {
 
         @JvmStatic
-        lateinit var Current: ExtendedEngine
+        lateinit var current: UIEngine
             private set
 
     }

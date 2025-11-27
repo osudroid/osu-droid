@@ -379,6 +379,15 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //endregion
 
+    //region Events
+
+    /**
+     * Called every update thread tick, avoid heavy operations here.
+     */
+    var onUpdateTick: OnUpdateEvent? = null
+
+    //endregion
+
     //region Attachment
 
     /**
@@ -765,6 +774,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        onUpdateTick?.invoke(deltaTimeSec)
 
         background?.onManagedUpdate(deltaTimeSec)
         foreground?.onManagedUpdate(deltaTimeSec)

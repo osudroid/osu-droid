@@ -186,6 +186,12 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         }
     }
 
+
+    override fun onAttached() {
+        super.onAttached()
+        mainContainer.paddingBottom = if (Multiplayer.isConnected) Multiplayer.roomScene!!.chat.buttonHeight + 12f else 0f
+    }
+
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (!isStarting) {
