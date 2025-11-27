@@ -108,7 +108,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
                 if (room.mods.isNotEmpty()) {
                     +ModsIndicator().apply {
-                        mods = room.mods.json
+                        mods = room.mods.values
                         iconSize = 24f
                     }
                 }

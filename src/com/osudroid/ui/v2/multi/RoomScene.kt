@@ -499,7 +499,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         freeModsBadge.isVisible = room.gameplaySettings.isFreeMod
 
         nameText.text = room.name
-        modsIndicator.mods = room.mods.json
+        modsIndicator.mods = room.mods.values
     }
 
     private fun updatePlayerList() {

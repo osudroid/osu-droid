@@ -102,7 +102,7 @@ class RoomPlayerButton() : UIButton() {
 
         nameText.text = player.name
         missingIndicator.isVisible = player.status == MissingBeatmap
-        modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.json else null
+        modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.values else null
 
         onActionLongPress = {
             UIDropdown(this@RoomPlayerButton).apply dropdown@{

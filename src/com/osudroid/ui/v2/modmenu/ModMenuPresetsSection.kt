@@ -143,7 +143,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
             +ModsIndicator().apply {
                 iconSize = 21f
-                mods = preset.mods.serializeMods(includeIrrelevantMods = true)
+                mods = preset.mods.values
             }
         }
 

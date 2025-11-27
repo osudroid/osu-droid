@@ -3,10 +3,7 @@ package com.osudroid.ui.v2
 import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.toolkt.kotlin.fastForEach
-import com.rian.osu.mods.APIMod
-import com.rian.osu.utils.*
-import kotlinx.serialization.json.Json
+import com.rian.osu.mods.*
 
 class ModsIndicator : UILinearContainer() {
 
@@ -28,29 +25,18 @@ class ModsIndicator : UILinearContainer() {
     /**
      * The list of mods to display.
      */
-    var mods: String? = null
+    var mods: Iterable<Mod>? = null
         set(value) {
             if (field != value) {
                 field = value
 
                 detachChildren()
 
-                if (value.isNullOrEmpty()) {
-                    return
-                }
-
-                val apiMods = Json.decodeFromString<List<APIMod>>(value)
-
-                apiMods.fastForEach { apiMod ->
-
-                    val mod = ModUtils.allModsInstances.find { it.acronym.equals(apiMod.acronym, ignoreCase = true) }!!
-
+                value?.forEach { mod ->
                     if (!showNonPlayableMods && !mod.isUserPlayable) {
-                        // Skip mods that are not selectable by the user
-                        return@fastForEach
+                        return@forEach
                     }
 
-                    // Mods that come from the server have a abbreviated structure.
                     +ModIcon(mod).apply {
                         width = iconSize
                         height = iconSize

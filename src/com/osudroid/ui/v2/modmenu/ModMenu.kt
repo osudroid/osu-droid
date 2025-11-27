@@ -589,7 +589,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
-        selectedModsIndicator.mods = ModUtils.serializeMods(enabledMods, includeNonUserPlayable = true, includeIrrelevantMods = true)
+        selectedModsIndicator.mods = enabledMods
         modPresetsSection.onModsChanged()
     }
 

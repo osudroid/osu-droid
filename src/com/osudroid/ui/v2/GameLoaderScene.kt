@@ -124,7 +124,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
                 // Mods
                 if (mods.isNotEmpty()) {
-                    +ModsIndicator().also { it.mods = mods.serializeMods() }
+                    +ModsIndicator().also { it.mods = mods.values }
                 }
             }
 
