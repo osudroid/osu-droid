@@ -110,25 +110,15 @@ data class Color4(private val hex: Long) {
 
     fun toInt() = hex.toInt()
 
-    fun colorEquals(other: Color4) = red == other.red && green == other.green && blue == other.blue
-
 
     companion object {
-
         val Black = Color4(Color.BLACK)
-
         val White = Color4(Color.WHITE)
-
         val Red = Color4(Color.RED)
-
         val Green = Color4(Color.GREEN)
-
         val Blue = Color4(Color.BLUE)
-
         val Transparent = Color4(Color.TRANSPARENT)
-
     }
-
 }
 
 enum class HexComposition {
