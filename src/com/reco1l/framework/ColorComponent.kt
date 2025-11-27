@@ -129,4 +129,43 @@ enum class HexComposition {
 
 fun Int.toColor4() = Color4(this)
 
-fun Long.toColor4() = Color4(this)
+fun oklch(l: Float, c: Float, h: Float, alpha: Float = 1f): Color4 {
+    // oklab
+    val hRad = h * PI / 180.0
+    val a = c * cos(hRad)
+    val b = c * sin(hRad)
+
+    // linear rgb
+    val lm = l + 0.3963377774 * a + 0.2158037573 * b
+    val mm = l - 0.1055613458 * a - 0.0638541728 * b
+    val sm = l - 0.0894841775 * a - 1.2914855480 * b
+
+    val l3 = lm * lm * lm
+    val m3 = mm * mm * mm
+    val s3 = sm * sm * sm
+
+    val lr = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3
+    val lg = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3
+    val lb = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3
+
+    // rgb to srgb
+    fun linearToSrgb(c: Double): Float {
+        return if (c <= 0.0031308) {
+            (12.92 * c).toFloat()
+        } else {
+            (1.055 * c.pow(1.0 / 2.4) - 0.055).toFloat()
+        }
+    }
+
+    val red = linearToSrgb(lr).coerceIn(0f, 1f)
+    val green = linearToSrgb(lg).coerceIn(0f, 1f)
+    val blue = linearToSrgb(lb).coerceIn(0f, 1f)
+
+    return Color4(red, green, blue, alpha.coerceIn(0f, 1f))
+}
+
+fun rgb(r: Int, g: Int, b: Int) = Color4(r, g, b)
+fun rgb(r: Float, g: Float, b: Float) = Color4(r, g, b)
+fun rgb(r: Int, g: Int, b: Int, a: Int) = Color4(r, g, b, a)
+fun rgb(r: Float, g: Float, b: Float, a: Float) = Color4(r, g, b, a)
+
