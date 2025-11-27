@@ -9,25 +9,6 @@ class RoomMods @JvmOverloads constructor(val json: String = "") : ModHashMap(Mod
 
     constructor(array: JSONArray) : this(array.toString())
 
-    fun toString(room: Room): String {
-        if (isEmpty()) {
-            return if (room.gameplaySettings.isFreeMod) "Free mods" else "None"
-        }
-
-        return if (room.gameplaySettings.isFreeMod) buildString {
-
-            append("Free mods, ")
-
-            for (mod in values) {
-                if (!mod.isValidForMultiplayerAsFreeMod) {
-                    append("$mod, ")
-                }
-            }
-
-        }.substringBeforeLast(',') else toDisplayModString()
-    }
-
-
     override fun equals(other: Any?): Boolean {
 
         if (other === this) {
