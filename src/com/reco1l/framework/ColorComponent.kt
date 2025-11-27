@@ -1,14 +1,12 @@
 package com.reco1l.framework
 
-import android.graphics.*
+import android.graphics.Color
+import kotlin.math.*
 
 data class Color4(private val hex: Long) {
 
-    constructor() : this(Color.BLACK)
-
+    constructor() : this(0xFF000000)
     constructor(hex: Int): this(hex.toLong())
-
-    constructor(other: Color4) : this(other.hex)
 
     @JvmOverloads
     constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this((alpha shl 24) or (red shl 16) or (green shl 8) or blue)
