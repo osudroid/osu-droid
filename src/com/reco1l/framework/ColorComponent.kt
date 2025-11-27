@@ -52,28 +52,10 @@ data class Color4(private val hex: Long) {
     val blue
         get() = blueInt / 255f
 
-
-    operator fun plus(other: Color4) = Color4(
-        red = red + other.red,
-        green = green + other.green,
-        blue = blue + other.blue,
-        alpha = alpha + other.alpha
-    )
-
-    operator fun minus(other: Color4) = Color4(
-        red = red - other.red,
-        green = green - other.green,
-        blue = blue - other.blue,
-        alpha = alpha - other.alpha
-    )
-
-    operator fun times(other: Color4) = Color4(
-        red = red * other.red,
-        green = green * other.green,
-        blue = blue * other.blue,
-        alpha = alpha * other.alpha
-    )
-
+    /**
+     * Brigthens or darkens the color by multiplying each RGB component by the given
+     * scalar value. Alpha remains unchanged.
+     */
     operator fun times(scalar: Float) = Color4(
         red = red * scalar,
         green = green * scalar,
