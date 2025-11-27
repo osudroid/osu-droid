@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import kotlinx.coroutines.CoroutineScope;
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -84,9 +85,15 @@ public class GameHelper {
             return renderPath;
         }
 
-        // osu!stable optimizes gameplay path rendering by only including points that are 6 osu!pixels apart.
-        // In linear paths, the distance threshold is further extended to 32 osu!pixels.
-        int distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
+        int distanceThreshold = 0;
+
+        if (!Config.isSnakingOutSliders()) {
+            // osu!stable optimizes gameplay path rendering by only including points that are 6 osu!pixels apart.
+            // In linear paths, the distance threshold is further extended to 32 osu!pixels.
+            // However, we exclude this optimization if snaking out sliders is enabled as slider velocity may not be
+            // reliably computed with respect to slider ball travel velocity.
+            distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
+        }
 
         // Invert the scale to convert from screen pixels to osu!pixels.
         var invertedScale = new Vec2(
