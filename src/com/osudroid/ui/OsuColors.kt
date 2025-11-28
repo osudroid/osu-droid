@@ -38,7 +38,7 @@ object OsuColors {
         val sr = ceil(point).toFloat().roundBy(2)
 
         if (sr < 0.1f) {
-            return (0xAAAAAA).toColor4()
+            return Color4(0xAAAAAA)
         }
 
         for (i in 0 until STAR_RATING_GRADIENT.size - 1) {
