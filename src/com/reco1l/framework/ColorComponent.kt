@@ -129,6 +129,15 @@ enum class HexComposition {
 
 fun Int.toColor4() = Color4(this)
 
+/**
+ * Converts the cylindrical form of an [Oklab](https://bottosson.github.io/posts/oklab/) color space to the sRGB color space.
+ *
+ * @param l The perceived lightness of the color (0 to 1).
+ * @param c The chroma of the color (0 to ~0.4).
+ * @param h The hue angle in degrees (0 to 360).
+ * @param alpha The alpha component of the color (0 to 1). Defaults to 1.
+ * @return A [Color4] representing the color in sRGB.
+ */
 fun oklch(l: Float, c: Float, h: Float, alpha: Float = 1f): Color4 {
     // oklab
     val hRad = h * PI / 180.0
