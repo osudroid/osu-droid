@@ -21,7 +21,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
@@ -41,14 +41,14 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
 
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Instance)
+        requestNewBuffer()
     }
 
     override fun onCreateBuffer(): BoxVBO {
