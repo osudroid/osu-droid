@@ -82,11 +82,11 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     /**
      * The scale type of the sprite.
      */
-    var scaleType: ScaleType = Fit
+    open var scaleType: ScaleType = Fit
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -99,7 +99,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -113,21 +113,18 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
 
     open fun onTextureRegionChanged() {
-
         val textureRegion = textureRegion ?: return
-
         textureRegion.setTexturePosition(textureX, textureY)
         textureRegion.isFlippedVertical = flippedVertical
         textureRegion.isFlippedHorizontal = flippedHorizontal
-
         blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
 
