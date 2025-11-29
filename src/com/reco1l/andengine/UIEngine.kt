@@ -22,6 +22,10 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
      */
     val overlay = HUD()
 
+    /**
+     * The resource manager for loading and accessing UI resources (fonts, textures, etc).
+     */
+    val resources = UIResourceManager(context)
 
     /**
      * The current focused entity.
