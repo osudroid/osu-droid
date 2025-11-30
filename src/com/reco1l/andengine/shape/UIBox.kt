@@ -53,7 +53,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
 
     override fun onCreateBuffer(): BoxVBO {
 
-        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+        val radius = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
 
         val buffer = buffer
