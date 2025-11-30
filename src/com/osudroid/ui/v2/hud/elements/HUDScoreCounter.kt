@@ -25,8 +25,6 @@ class HUDScoreCounter : HUDElement() {
         sprite.spacing = -OsuSkin.get().scoreOverlap
         sprite.text = format.format(0)
         attachChild(sprite)
-
-        onContentChanged()
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {

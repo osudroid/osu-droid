@@ -5,11 +5,12 @@ import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
@@ -40,24 +41,24 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
         // Background
         sprite {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             scaleType = ScaleType.Crop
             textureRegion = ResourceManager.getInstance().getTexture(if (Config.isSafeBeatmapBg()) "menu-background" else "::background")
         }
 
         // Dim
         dimBox = box {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             color = Color4.Black
             alpha = 0.7f
         }
 
         // Beatmap info
         mainContainer = container {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             alpha = 0f
             scaleX = 0.9f
             scaleY = 0.9f
@@ -83,7 +84,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                     }
 
                     text {
-                        font = ResourceManager.getInstance().getFont("smallFont")
+                        fontSize = FontSize.SM
                         text = StringTable.get(com.osudroid.resources.R.string.epilepsy_warning)
                     }
                 }
@@ -98,28 +99,28 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
                 // Title
                 text {
-                    font = ResourceManager.getInstance().getFont("bigFont")
+                    fontSize = FontSize.XL
                     text = beatmapInfo.titleText
                     width = 700f
                     clipToBounds = true
                     autoScrollSpeed = 30f
-                    applyTheme = { color = it.accentColor }
+                    style = { color = it.accentColor }
                 }
 
                 // Difficulty
                 text {
-                    font = ResourceManager.getInstance().getFont("middleFont")
+                    fontSize = FontSize.LG
                     text = beatmapInfo.version
                     width = 700f
                     clipToBounds = true
-                    applyTheme = { color = it.accentColor }
+                    style = { color = it.accentColor }
                 }
 
                 // Creator
                 text {
-                    font = ResourceManager.getInstance().getFont("middleFont")
+                    fontSize = FontSize.LG
                     text = "by ${beatmapInfo.artistText}"
-                    applyTheme = { color = it.accentColor * 0.9f }
+                    style = { color = it.accentColor * 0.9f }
                 }
 
                 // Mods
@@ -240,19 +241,19 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             anchor = Anchor.CenterRight
             origin = Anchor.CenterRight
             width = 460f
-            height = FillParent
+            height = Size.Full
             x = -20f
             scrollAxes = Axes.Y
             alpha = 0.5f
 
             linearContainer {
-                width = FillParent
+                width = Size.Full
                 spacing = 20f
                 padding = Vec4(0f, 20f)
                 orientation = Orientation.Vertical
 
                 collapsibleCard {
-                    width = FillParent
+                    width = Size.Full
                     title = "Beatmap"
 
                     content.apply {
@@ -308,7 +309,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 }
 
                 collapsibleCard {
-                    width = FillParent
+                    width = Size.Full
                     title = "Settings"
 
                     content.apply {

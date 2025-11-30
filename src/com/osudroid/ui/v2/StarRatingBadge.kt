@@ -23,12 +23,12 @@ class StarRatingBadge : UIBadge() {
             }
         }
 
-    // Badge color is determined by rating and should not be affected by themes.
-    override var applyTheme: UIComponent.(Theme) -> Unit = {}
 
     private var ratingChanged = true
 
     init {
+        // Badge color is determined by rating and should not be affected by themes.
+        style = {}
         text = "0.00"
         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
     }
@@ -38,10 +38,9 @@ class StarRatingBadge : UIBadge() {
             ratingChanged = false
 
             clearEntityModifiers()
-            background?.clearEntityModifiers()
 
             text = "%.2f".format(rating)
-            background?.colorTo(OsuColors.getStarRatingColor(rating), 0.1f)
+            backgroundColor = OsuColors.getStarRatingColor(rating)
 
             if (rating >= 6.5) {
                 colorTo(Color4(0xFFFFD966), 0.1f)
