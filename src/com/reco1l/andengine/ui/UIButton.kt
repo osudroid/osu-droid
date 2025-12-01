@@ -87,8 +87,8 @@ open class UIButton : UIClickableContainer(), ISizeVariable, IColorVariable {
 
             when (sizeVariant) {
                 SizeVariant.Small -> {
-                    height = 2f.rem
-                    padding = Vec4(2f.srem, 0f)
+                    height = 1f.rem
+                    padding = Vec4(1.25f.srem, 0f)
                     radius = Radius.MD
                 }
                 SizeVariant.Medium -> {
@@ -156,8 +156,8 @@ open class UITextButton : UIButton() {
         style = {
             when (sizeVariant) {
                 SizeVariant.Small -> {
-                    fontSize = FontSize.SM
-                    spacing = 1f.srem
+                    fontSize = FontSize.XS
+                    spacing = 0.5f.srem
                 }
                 SizeVariant.Medium -> {
                     fontSize = FontSize.MD
