@@ -256,13 +256,24 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      * nor re-layout of the parent container. It is considered as a transformation.
      */
     var translationX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Transformations)
+            }
+        }
 
     /**
      * The translation in the Y axis, translation does not trigger any kind of invalidation
      * nor re-layout of the parent container. It is considered as a transformation.
      */
     var translationY = 0f
-
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Transformations)
+            }
+        }
 
     /**
      * The calculated anchor position for the X axis in the parent's coordinate system.
