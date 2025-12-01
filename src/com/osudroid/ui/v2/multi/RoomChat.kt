@@ -51,7 +51,7 @@ class RoomChat : UILinearContainer() {
     private val timestampFormat = SimpleDateFormat("HH:mm:ss")
 
     private val button = ChatButton()
-    private val body = UILinearContainer()
+    private val body: UIFillContainer
 
     //region Buffers
     private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
@@ -81,17 +81,21 @@ class RoomChat : UILinearContainer() {
         origin = Anchor.BottomCenter
         style = {
             backgroundColor = it.accentColor * 0.1f / 0.9f
+            y = if (isExpanded) 0f else BODY_HEIGHT.rem
         }
 
         +button
-        +body.apply {
+
+        body = fillContainer {
             width = Size.Full
-            height = 0f
             orientation = Orientation.Vertical
+            style = {
+                height = BODY_HEIGHT.rem
+            }
 
             scrollableContainer {
                 width = Size.Full
-                height = body_height - 84f // Input height based of button height plus padding
+                height = Size.Full
                 scrollAxes = Axes.Y
                 clipToBounds = true
 
@@ -99,7 +103,7 @@ class RoomChat : UILinearContainer() {
                     width = Size.Full
                     orientation = Orientation.Vertical
 
-                    repeat(max_messages) {
+                    repeat(MAX_MESSAGES) {
                         attachChild(MessageComponent())
                     }
                 }
@@ -107,8 +111,10 @@ class RoomChat : UILinearContainer() {
 
             fillContainer {
                 width = Size.Full
-                padding = Vec4(80f, 12f)
-                spacing = 8f
+                style = {
+                    spacing = 2f.srem
+                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
+                }
 
                 +UITextInput("").apply {
                     width = Size.Full
@@ -121,7 +127,7 @@ class RoomChat : UILinearContainer() {
 
                 textButton {
                     trailingIcon = UISprite(ResourceManager.getInstance().getTexture("send"))
-                    isSelected = true
+                    colorVariant = ColorVariant.Primary
                     setText(R.string.multiplayer_room_chat_send)
                     onActionUp = { sendMessage() }
                 }
@@ -157,7 +163,7 @@ class RoomChat : UILinearContainer() {
         }
 
         messages.add(message)
-        if (messages.size > max_messages) {
+        if (messages.size > MAX_MESSAGES) {
             messages.pollFirst()
         }
 
@@ -179,20 +185,16 @@ class RoomChat : UILinearContainer() {
     fun expand() {
         if (!isExpanded) {
             isExpanded = true
-            body.apply {
-                clearModifiers(ModifierType.SizeY)
-                sizeToY(body_height, 0.4f).eased(Easing.OutExpo)
-            }
+            clearModifiers(ModifierType.SizeY)
+            moveToY(0f, 0.4f).eased(Easing.OutExpo)
         }
     }
 
     fun collapse() {
         if (isExpanded) {
             isExpanded = false
-            body.apply {
-                clearModifiers(ModifierType.SizeY)
-                sizeToY(0f, 0.4f).eased(Easing.OutExpo)
-            }
+            clearModifiers(ModifierType.SizeY)
+            moveToY(BODY_HEIGHT.rem, 0.4f).eased(Easing.OutExpo)
         }
     }
 
@@ -223,7 +225,7 @@ class RoomChat : UILinearContainer() {
         if (messagesChanged) {
             messagesChanged = false
 
-            for (i in max_messages - 1 downTo 0) {
+            for (i in MAX_MESSAGES - 1 downTo 0) {
                 val messageComponent = messageContainer.getChild(i) as MessageComponent
                 messageComponent.message = if (i < messages.size) messages[i] else null
             }
@@ -253,7 +255,7 @@ class RoomChat : UILinearContainer() {
     }
 
 
-    inner class ChatButton : UILinearContainer() {
+    inner class ChatButton : UIFillContainer() {
 
         private lateinit var tagText: UIText
         private lateinit var messageText: UIText
@@ -263,7 +265,7 @@ class RoomChat : UILinearContainer() {
             width = Size.Full
             orientation = Orientation.Horizontal
             style = {
-                height = 3f.rem
+                height = 2.75f.rem
                 spacing = 2f.srem
                 backgroundColor = it.accentColor * 0.15f / 0.5f
                 padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
@@ -277,6 +279,8 @@ class RoomChat : UILinearContainer() {
 
             linearContainer {
                 width = Size.Full
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
                 orientation = Orientation.Horizontal
 
                 tagText = text {
@@ -345,12 +349,12 @@ class RoomChat : UILinearContainer() {
 
         init {
             width = Size.Full
-            padding = Vec4(80f, 0f)
-            spacing = 12f
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
             style = {
                 backgroundColor = it.accentColor * 0.09f / 0f
+                padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
+                spacing = 2f.srem
             }
         }
 
@@ -428,8 +432,8 @@ class RoomChat : UILinearContainer() {
 
 
     companion object {
-        private const val max_messages = 50
-        private const val body_height = 420f
+        private const val MAX_MESSAGES = 50
+        private const val BODY_HEIGHT = 18f
     }
 }
 
