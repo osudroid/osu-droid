@@ -562,35 +562,38 @@ open class CompoundText : UIText() {
         super.onContentChanged()
         textWidth = contentWidth
 
-        val components = arrayOf(leadingIcon, this, trailingIcon)
+        val leadingIcon = leadingIcon
+        val trailingIcon = trailingIcon
+
         var totalWidth = 0f
 
-        components.filterNotNull().forEachIndexed { i, component ->
-            if (component != this) {
-                component.anchor = Anchor.CenterLeft
-                component.origin = Anchor.CenterLeft
-                component.width = fontSize
-                component.height = fontSize
+        if (leadingIcon != null) {
+            leadingIcon.anchor = Anchor.CenterLeft
+            leadingIcon.origin = Anchor.CenterLeft
+            leadingIcon.setSize(fontSize, fontSize)
 
-                // We set the base X to padding left because decorators do not are affected by padding changes.
-                component.x = totalWidth
-
-                totalWidth += component.width
-            } else {
-                totalWidth += textWidth
-            }
-
-            if (i > 0 && i < components.size - 1) {
-                totalWidth += spacing
-            }
+            totalWidth += leadingIcon.width + spacing
         }
 
-        this.contentWidth = totalWidth
+        totalWidth += textWidth
+
+        if (trailingIcon != null) {
+            trailingIcon.anchor = Anchor.CenterLeft
+            trailingIcon.origin = Anchor.CenterLeft
+            trailingIcon.x = totalWidth + spacing
+            trailingIcon.setSize(fontSize, fontSize)
+
+            totalWidth += spacing + trailingIcon.width
+        }
+
+        contentWidth = totalWidth
 
         // Move trailing icon to the end.
         if (width > intrinsicWidth) {
-            trailingIcon?.x = innerWidth - (trailingIcon?.width ?: 0f)
+            trailingIcon?.x = innerWidth - trailingIcon.width
         }
+
+        requestBufferUpdate()
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
