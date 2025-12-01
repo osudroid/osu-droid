@@ -19,6 +19,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.theme.srem
 import com.reco1l.framework.*
@@ -33,12 +34,17 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         fontSize = FontSize.SM
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
+        clipToBounds = true
+        width = Size.Full
     }
 
     private val textComponent = UIText().apply {
         fontSize = FontSize.SM
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
+        clipToBounds = true
+        width = Size.Full
+        wrapText = true
     }
 
     private val caret = UIBox().apply {
@@ -162,8 +168,6 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
 
     init {
-        clipToBounds = true
-
         style = {
             height = 2.5f.rem
             padding = Vec4(2f.srem)
