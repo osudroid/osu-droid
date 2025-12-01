@@ -82,12 +82,6 @@ object ModMenu : UIScene() {
     init {
         isBackgroundEnabled = false
 
-        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
-        ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
-        ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
-        ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
-
         customizationMenu = ModCustomizationMenu()
 
         attachChild(UIFillContainer().apply {
@@ -184,11 +178,17 @@ object ModMenu : UIScene() {
 
                     +searchInput
 
-                    +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                    container {
                         anchor = Anchor.CenterRight
                         origin = Anchor.CenterRight
                         style = {
-                            color = it.accentColor
+                            padding = Vec4(2f.srem, 0f)
+                        }
+
+                        +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                            style = {
+                                color = it.accentColor
+                            }
                         }
                     }
                 }
@@ -245,7 +245,9 @@ object ModMenu : UIScene() {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     arBadge = labeledBadge {
                         label = "AR"
@@ -277,7 +279,9 @@ object ModMenu : UIScene() {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     starRatingBadge = StarRatingBadge()
                     +starRatingBadge

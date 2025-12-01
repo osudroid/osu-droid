@@ -8,6 +8,7 @@ import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -23,18 +24,18 @@ open class ModMenuSection(name: String, private val toggles: List<UIButton> = li
         height = Size.Full
         cullingMode = CullingMode.CameraBounds
         style = {
-            width = 10f.rem
+            width = 12f.rem
             backgroundColor = it.accentColor * 0.1f
             radius = Radius.LG
         }
 
         +UIText().apply {
             width = Size.Full
-            text = name
+            text = name.uppercase()
             alignment = Anchor.Center
-            fontSize = FontSize.SM
-            padding = Vec4(12f)
             style = {
+                fontSize = FontSize.XS
+                padding = Vec4(3f.srem)
                 color = it.accentColor
                 alpha = 0.75f
             }
@@ -49,11 +50,13 @@ open class ModMenuSection(name: String, private val toggles: List<UIButton> = li
             +UILinearContainer().apply {
                 width = Size.Full
                 orientation = Orientation.Vertical
-                padding = Vec4(12f, 0f, 12f, 12f)
-                spacing = 16f
-                toggleContainer = this
+                style = {
+                    padding = Vec4(2f.srem, 0f, 2f.srem, 2f.srem)
+                    spacing = 2f.srem
+                }
 
                 toggles.fastForEach { +it }
+                toggleContainer = this
             }
         }
 

@@ -7,13 +7,13 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.math.Vec4
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.*
 
@@ -32,20 +32,23 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
 
     init {
         width = Size.Full
+        style += {
+            padding = Vec4(3f.srem, 2f.srem)
+        }
 
         fillContainer {
             width = Size.Full
             cullingMode = CullingMode.CameraBounds
             style = {
-                spacing = 2f.srem
+                spacing = 3f.srem
             }
 
             +ModIcon(mod).apply {
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
                 style = {
-                    width = 1.25f.rem
-                    height = 1.25f.rem
+                    width = 1.35f.rem
+                    height = 1.35f.rem
                 }
             }
 
@@ -57,16 +60,17 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
 
                 text {
                     text = mod.name
-                    fontSize = FontSize.SM
                     buffer = sharedTextCB
                 }
 
                 text {
                     width = Size.Full
-                    fontSize = FontSize.XS
                     text = mod.description
                     clipToBounds = true
-                    alpha = 0.75f
+                    style = {
+                        fontSize = FontSize.XS
+                        alpha = 0.75f
+                    }
                     buffer = sharedTextCB
                 }
             }
@@ -112,7 +116,6 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
 
     companion object {
 
-        private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
         private val sharedTextCB = UITextCompoundBuffer(256).asSharedDynamically()
 
     }
