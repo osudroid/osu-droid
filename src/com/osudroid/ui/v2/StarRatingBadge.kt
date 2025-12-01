@@ -47,7 +47,7 @@ class StarRatingBadge : UIBadge() {
         val animationTime = deltaTimeSec.coerceIn(0f, 0.3f)
 
         backgroundColor = Interpolation.colorAt(animationTime, backgroundColor, ratingColor, 0f, animationDuration, Easing.OutQuad)
-        color = Interpolation.colorAt(animationTime, color, if (rating >= 6.5) Color4(0xFFFFD966) else Color4.Black, 0f, animationDuration, Easing.OutQuad)
+        color = Interpolation.colorAt(animationTime, color, if (rating >= 6.5) Color4(0xFFFFD966) else Color4.Black.copy(alpha = 0.75f), 0f, animationDuration, Easing.OutQuad)
 
         super.onManagedUpdate(deltaTimeSec)
     }
