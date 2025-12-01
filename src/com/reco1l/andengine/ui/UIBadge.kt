@@ -51,25 +51,29 @@ open class UIBadge : CompoundText(), ISizeVariable, IColorVariable {
                 }
             }
 
-            when (sizeVariant) {
-                SizeVariant.Small -> {
-                    fontSize = FontSize.XS
-                    padding = Vec4(1.25f.srem, 0.75f.srem)
-                    spacing = 1.25f.srem
-                    radius = Radius.MD
-                }
-                SizeVariant.Medium -> {
-                    fontSize = FontSize.SM
-                    padding = Vec4(2f.srem, 1.25f.srem)
-                    spacing = 2f.srem
-                    radius = Radius.LG
-                }
-                SizeVariant.Large -> {
-                    fontSize = FontSize.MD
-                    padding = Vec4(2f.srem, 1.5f.srem)
-                    spacing = 2f.srem
-                    radius = Radius.LG
-                }
+            applySizeStyle()
+        }
+    }
+
+    protected fun applySizeStyle() {
+        when (sizeVariant) {
+            SizeVariant.Small -> {
+                fontSize = FontSize.XS
+                padding = Vec4(1.25f.srem, 0.75f.srem)
+                spacing = 1.25f.srem
+                radius = Radius.MD
+            }
+            SizeVariant.Medium -> {
+                fontSize = FontSize.SM
+                padding = Vec4(2f.srem, 1.25f.srem)
+                spacing = 2f.srem
+                radius = Radius.LG
+            }
+            SizeVariant.Large -> {
+                fontSize = FontSize.MD
+                padding = Vec4(2f.srem, 1.5f.srem)
+                spacing = 2f.srem
+                radius = Radius.LG
             }
         }
     }
