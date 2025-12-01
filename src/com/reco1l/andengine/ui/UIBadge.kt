@@ -61,7 +61,7 @@ open class UIBadge : CompoundText(), ISizeVariable, IColorVariable {
                 fontSize = FontSize.XS
                 padding = Vec4(1.25f.srem, 0.75f.srem)
                 spacing = 1.25f.srem
-                radius = Radius.MD
+                radius = Radius.SM
             }
             SizeVariant.Medium -> {
                 fontSize = FontSize.SM
