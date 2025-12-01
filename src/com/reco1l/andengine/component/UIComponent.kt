@@ -506,6 +506,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
         if (attachmentMode == AttachmentMode.Decorator) {
+            // Set color-inheritance to false for decorators by default, but allowing to
+            // change this after attaching if needed.
+            inheritAncestorsColor = false
+
             if (entity == null) {
                 onDetached()
             } else {
@@ -646,32 +650,30 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
     }
 
-    open fun onApplyColor(gl: GL10) {
+    fun onApplyColor(gl: GL10) {
 
         var red = mRed
         var green = mGreen
         var blue = mBlue
         var alpha = mAlpha
         var parent = parent
-        var multiplyColor = inheritAncestorsColor
+        var inheritColor = inheritAncestorsColor
 
         while (parent != null) {
 
-            // If this entity is a decoration we only multiply the alpha.
-            if (attachmentMode == AttachmentMode.Child && multiplyColor) {
+            if (inheritColor) {
                 red *= parent.red
                 green *= parent.green
                 blue *= parent.blue
             }
             alpha *= parent.alpha
 
-            // We'll assume at this point there's no need to keep multiplying.
-            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+            if (red == 0f && green == 0f && blue == 0f || alpha == 0f) {
                 break
             }
 
             if (parent is UIComponent && !parent.inheritAncestorsColor) {
-                multiplyColor = false
+                inheritColor = false
             }
 
             parent = parent.parent
