@@ -4,10 +4,11 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.container.*
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Fonts
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.ui.Theme
+import com.reco1l.framework.rgb
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -132,6 +133,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 invalidate(InvalidationFlag.Content)
             }
         }
+
+
+    protected open val textViewportWidth: Float
+        get() = innerWidth
+
+    protected open val textViewportHeight: Float
+        get() = innerHeight
+
+    protected open val textViewportX: Float
+        get() = padding.left
+
+    protected open val textViewportY: Float
+        get() = padding.top
 
 
     private var currentLength = 0
@@ -385,7 +399,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
+        fun update(component: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
 
             if (font == null || lines == null || linesWidth == null) {
                 mFloatBuffer.clear()
@@ -397,8 +411,8 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
             lines.fastForEachIndexed { lineIndex, line ->
 
-                var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
-                val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
+                var lineX =  component.textViewportX + component.textViewportWidth * component.alignment.x - linesWidth[lineIndex] * component.alignment.x
+                val lineY = component.textViewportY + component.textViewportHeight * component.alignment.y - lines.size * lineHeight * component.alignment.y + lineIndex * lineHeight
 
                 var charIndex = 0
                 while (charIndex < line.length) {
@@ -493,29 +507,18 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 /**
  * A compound text entity that can be displayed with leading and trailing icons.
  */
-open class CompoundText : UIFillContainer() {
+open class CompoundText : UIText() {
 
     /**
-     * The text entity.
+     * The spacing between the icons and the text.
      */
-    val textComponent = UIText().apply {
-        width = Size.Full
-        shrink = false
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-        isVisible = false
-    }
-
-    //region Shortcuts
-
-    var text by textComponent::text
-    var fontSize by textComponent::fontSize
-    var fontFamily by textComponent::fontFamily
-    var alignment by textComponent::alignment
-
-    //endregion
-
-    //region Icons
+    var spacing = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Content)
+            }
+        }
 
     /**
      * The leading icon.
@@ -523,13 +526,9 @@ open class CompoundText : UIFillContainer() {
     var leadingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
-                field?.detachSelf()
                 field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value, 0)
-                }
+                value?.setParent(this, AttachmentMode.Child)
+                invalidate(InvalidationFlag.Content)
             }
         }
 
@@ -539,44 +538,64 @@ open class CompoundText : UIFillContainer() {
     var trailingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
-                field?.detachSelf()
                 field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value)
-                }
+                value?.setParent(this, AttachmentMode.Child)
+                invalidate(InvalidationFlag.Content)
             }
         }
 
     /**
-     * The size of the icons.
+     * The width of the text without icons.
      */
-    var iconSize = FontSize.MD
+    var textWidth = 0f
+        private set
 
-    /**
-     * Called when one of the icons changes.
-     */
-    var onIconChange: (UIComponent) -> Unit = {
-        it.anchor = Anchor.CenterLeft
-        it.origin = Anchor.CenterLeft
-        it.style = {
-            width = iconSize
-            height = iconSize
+
+    override val textViewportX: Float
+        get() = padding.left + (leadingIcon?.let { it.width + spacing } ?: 0f)
+
+    override val textViewportWidth: Float
+        get() = innerWidth - (leadingIcon?.let { it.width + spacing } ?: 0f) - (trailingIcon?.let { it.width + spacing } ?: 0f)
+
+
+    override fun onContentChanged() {
+        super.onContentChanged()
+        textWidth = contentWidth
+
+        val components = arrayOf(leadingIcon, this, trailingIcon)
+        var totalWidth = 0f
+
+        components.filterNotNull().forEachIndexed { i, component ->
+            if (component != this) {
+                component.anchor = Anchor.CenterLeft
+                component.origin = Anchor.CenterLeft
+                component.width = fontSize
+                component.height = fontSize
+
+                // We set the base X to padding left because decorators do not are affected by padding changes.
+                component.x = totalWidth
+
+                totalWidth += component.width
+            } else {
+                totalWidth += textWidth
+            }
+
+            if (i > 0 && i < components.size - 1) {
+                totalWidth += spacing
+            }
+        }
+
+        this.contentWidth = totalWidth
+
+        // Move trailing icon to the end.
+        if (width > intrinsicWidth) {
+            trailingIcon?.x = innerWidth - (trailingIcon?.width ?: 0f)
         }
     }
 
-    //endregion
-
-
-    init {
-        +textComponent
-    }
-
-
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-        textComponent.isVisible = text.isNotEmpty()
-        super.onManagedDraw(gl, camera)
+    override fun onDrawChildren(gl: GL10, camera: Camera) {
+        leadingIcon?.onDraw(gl, camera)
+        trailingIcon?.onDraw(gl, camera)
     }
 }
 
