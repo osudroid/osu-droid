@@ -24,7 +24,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
     clipToBounds = true
     style = {
         height = 0.55f.vh
-        padding = Vec4(2f.srem, 4f.srem)
+        padding = Vec4(2f.srem, 0f)
     }
 }) {
     init {
@@ -32,6 +32,9 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
         val form = FormContainer().apply {
             width = Size.Full
             orientation = Orientation.Vertical
+            style = {
+                padding = Vec4(0f, 4f.srem)
+            }
 
             onSubmit = { data ->
                 async {
