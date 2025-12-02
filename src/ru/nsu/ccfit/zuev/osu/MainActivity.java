@@ -46,6 +46,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.mainmenu.MainScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
@@ -313,13 +314,11 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    GlobalManager.getInstance().getEngine().setScene(MainScene.INSTANCE);
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-
                 scheduledExecutor.scheduleAtFixedRate(() -> {
                     if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         float refreshRate = getRefreshRate();
@@ -340,7 +339,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                //GlobalManager.getInstance().getMainScene().loadBannerSprite();
             });
         });
     }

@@ -1071,7 +1071,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Cosmetic functions
 
-    fun onStyle(theme: Theme) {
+    open fun onStyle(theme: Theme) {
         background?.onStyle(theme)
         border?.onStyle(theme)
 
