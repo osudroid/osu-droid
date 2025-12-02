@@ -7,8 +7,6 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Fonts
 import com.reco1l.andengine.theme.Size
-import com.reco1l.andengine.ui.Theme
-import com.reco1l.framework.rgb
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -287,17 +285,29 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         }
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        val currentLength = currentLength
-        val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
+    private fun nextPowerOfTwo(n: Int): Int {
+        if (n <= 0) return 1
+        val highest = n.takeHighestOneBit()
+        return if (highest == n) n else highest shl 1
+    }
 
-        if (currentBuffer == null || currentLength > currentBuffer.length) {
-            return CompoundBuffer(
-                TextTextureBuffer(currentLength),
-                TextVertexBuffer(currentLength)
-            )
+    override fun onCreateBuffer(): CompoundBuffer {
+
+        val currentLength = currentLength
+        val capacity = nextPowerOfTwo(currentLength)
+
+        val bufferKey = "UITextVBO@$capacity,$fontSize$fontFamily"
+        val newBuffer = UIEngine.current.resources.getOrStoreBuffer(bufferKey) {
+            UITextCompoundBuffer(capacity)
+        } as CompoundBuffer
+
+        val oldBuffer = buffer
+        if (oldBuffer != null) {
+            UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
         }
-        return buffer!!
+
+        UIEngine.current.resources.subscribeToBuffer(newBuffer, this)
+        return newBuffer
     }
 
     override fun onUpdateBuffer() {
