@@ -248,13 +248,9 @@ class LobbyScene : UIScene() {
             messageContainer.apply {
                 detachChildren()
 
-                +CircularProgressBar().apply {
+                +Loader().apply {
                     anchor = Anchor.Center
                     origin = Anchor.Center
-                    style = {
-                        width = 3f.rem
-                        height = 3f.rem
-                    }
                 }
             }
 

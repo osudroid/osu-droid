@@ -90,7 +90,6 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -810,7 +809,7 @@ public class MainActivity extends BaseGameActivity implements
                 //SongMenu 界面按返回按钮（系统按钮）
                 songMenu.back();
             } else {
-                if (currentScene instanceof LoadingScreen.LoadingScene) {
+                if (currentScene instanceof LoaderScene) {
                     return true;
                 }
 

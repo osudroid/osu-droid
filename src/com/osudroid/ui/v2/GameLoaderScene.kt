@@ -137,10 +137,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 y = if (Multiplayer.isMultiplayer) -60f else -30f
                 spacing = 30f
 
-                +CircularProgressBar().apply {
-                    width = 32f
-                    height = 32f
-                }
+                +Loader()
 
                 if (!Multiplayer.isMultiplayer) {
                     +UITextButton().apply {

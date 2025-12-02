@@ -176,7 +176,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
     fun connectToRoom(password: String? = null) {
 
         Multiplayer.log("Trying to connect socket...")
-        LoadingScreen().show()
+        LoaderScene().show()
 
         async {
 

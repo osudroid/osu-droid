@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.multi
 import com.osudroid.resources.R.string
 import com.osudroid.multiplayer.api.*
 import com.osudroid.multiplayer.api.data.*
+import com.osudroid.ui.v2.LoaderScene
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -38,7 +39,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
 
             onSubmit = { data ->
                 async {
-                    LoadingScreen().show()
+                    LoaderScene().show()
 
                     val name = data.getString("name") ?: StringTable.format(string.multiplayer_lobby_create_room_name_default, OnlineManager.getInstance().username)
                     val password = data.optString("password").takeUnless(String::isBlank)
