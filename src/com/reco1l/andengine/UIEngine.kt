@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.osudroid.MusicManager
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
@@ -88,6 +89,11 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
         Log.i("UI", "Root font size: ${rootFontSize}px")
     }
 
+
+    override fun onUpdateScene(pSecondsElapsed: Float) {
+        MusicManager.onUpdate(pSecondsElapsed)
+        super.onUpdateScene(pSecondsElapsed)
+    }
 
     override fun onDrawScene(pGL: GL10) {
 

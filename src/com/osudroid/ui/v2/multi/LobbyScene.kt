@@ -7,6 +7,7 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.utils.updateThread
 import com.osudroid.resources.R.string
+import com.osudroid.ui.v2.mainmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -294,8 +295,7 @@ class LobbyScene : UIScene() {
     override fun back() {
         Multiplayer.isMultiplayer = false
         GlobalManager.getInstance().songService.isGaming = false
-
-        GlobalManager.getInstance().mainScene.show()
+        MainScene.show()
     }
 
 
