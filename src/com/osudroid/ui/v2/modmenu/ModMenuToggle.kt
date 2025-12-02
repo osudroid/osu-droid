@@ -60,7 +60,6 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
 
                 text {
                     text = mod.name
-                    buffer = sharedTextCB
                 }
 
                 text {
@@ -71,7 +70,6 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
                         fontSize = FontSize.XS
                         alpha = 0.75f
                     }
-                    buffer = sharedTextCB
                 }
             }
 
@@ -112,12 +110,6 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
         // Intentionally not using isEnabled here, otherwise the button will not be clickable.
         clearModifiers(ModifierType.Alpha)
         fadeTo(if (hasIncompatibility) 0.5f else 1f, 0.2f)
-    }
-
-    companion object {
-
-        private val sharedTextCB = UITextCompoundBuffer(256).asSharedDynamically()
-
     }
 
 }

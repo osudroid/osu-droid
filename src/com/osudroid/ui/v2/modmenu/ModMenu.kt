@@ -82,8 +82,6 @@ object ModMenu : UIScene() {
     init {
         isBackgroundEnabled = false
 
-        customizationMenu = ModCustomizationMenu()
-
         attachChild(UIFillContainer().apply {
             width = Size.Full
             height = Size.Full
@@ -120,7 +118,7 @@ object ModMenu : UIScene() {
                     customizeButton = UITextButton().apply {
                         text = "Customize"
                         isEnabled = false
-                        leadingIcon = FontAwesomeIcon(Icon.Sliders)
+                        leadingIcon = FontAwesomeIcon(Icon.Wrench)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             if (customizationMenu.isVisible) {
@@ -149,12 +147,14 @@ object ModMenu : UIScene() {
                     }
 
                     +UIScrollableContainer().apply {
-                        width = 340f
                         height = Size.Auto
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         scrollAxes = Axes.X
                         clipToBounds = true
+                        style = {
+                            width = 12f.rem
+                        }
 
                         selectedModsIndicator = ModsIndicator()
                         +selectedModsIndicator
@@ -302,6 +302,7 @@ object ModMenu : UIScene() {
         })
 
         // Customizations menu
+        customizationMenu = ModCustomizationMenu(customizeButton)
         attachChild(customizationMenu)
 
         modPresetsSection.loadPresets()

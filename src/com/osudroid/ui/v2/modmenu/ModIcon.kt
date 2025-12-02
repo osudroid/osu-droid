@@ -63,7 +63,6 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
                 attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
                     width = Size.Full
                     height = Size.Full
-                    buffer = sharedSpriteVBO
                 })
             } else {
                 backgroundColor = Theme.current.accentColor * 0.1f
@@ -87,8 +86,4 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
         shouldUpdateTexture = true
     }
 
-
-    companion object {
-        private val sharedSpriteVBO = UISprite.SpriteVBO().asSharedDynamically()
-    }
 }
