@@ -53,13 +53,6 @@ class RoomChat : UILinearContainer() {
     private val button = ChatButton()
     private val body: UIFillContainer
 
-    //region Buffers
-    private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
-    private val messagePlayerTagBuffer = UITextCompoundBuffer(32).asSharedDynamically()
-    private val messageTextBuffer = UITextCompoundBuffer(128).asSharedDynamically()
-    private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
-    //endregion
-
     private lateinit var input: UITextInput
     private lateinit var messageContainer: UILinearContainer
 
@@ -113,7 +106,7 @@ class RoomChat : UILinearContainer() {
                 width = Size.Full
                 style = {
                     spacing = 2f.srem
-                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
+                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 3f.srem)
                 }
 
                 +UITextInput("").apply {
@@ -126,7 +119,7 @@ class RoomChat : UILinearContainer() {
                 }
 
                 textButton {
-                    trailingIcon = UISprite(ResourceManager.getInstance().getTexture("send"))
+                    trailingIcon = FontAwesomeIcon(Icon.PaperPlane)
                     colorVariant = ColorVariant.Primary
                     setText(R.string.multiplayer_room_chat_send)
                     onActionUp = { sendMessage() }
@@ -265,7 +258,7 @@ class RoomChat : UILinearContainer() {
             width = Size.Full
             orientation = Orientation.Horizontal
             style = {
-                height = 2.75f.rem
+                height = 2.85f.rem
                 spacing = 2f.srem
                 backgroundColor = it.accentColor * 0.15f / 0.5f
                 padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
@@ -373,7 +366,6 @@ class RoomChat : UILinearContainer() {
 
                 if (message is SystemMessage) {
                     text {
-                        buffer = messageTextBuffer
                         width = Size.Full
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
@@ -397,7 +389,6 @@ class RoomChat : UILinearContainer() {
                         text {
                             anchor = Anchor.CenterLeft
                             origin = Anchor.CenterLeft
-                            buffer = messageTimestampBuffer
                             style = { color = it.accentColor * 0.5f }
                             text = timestampFormat.format(message.time)
                         }
@@ -406,7 +397,6 @@ class RoomChat : UILinearContainer() {
                             text {
                                 anchor = Anchor.CenterRight
                                 origin = Anchor.CenterRight
-                                buffer = messagePlayerTagBuffer
                                 color = getPlayerTagColor(message.player)
                                 text = message.player.name
                             }
@@ -414,7 +404,6 @@ class RoomChat : UILinearContainer() {
                     }
 
                     text {
-                        buffer = messageTextBuffer
                         width = Size.Full
                         style = { color = it.accentColor }
                         text = message.content

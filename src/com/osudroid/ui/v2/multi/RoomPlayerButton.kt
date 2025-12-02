@@ -13,8 +13,13 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.text.UIText
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -26,21 +31,26 @@ class RoomPlayerButton() : UIButton() {
 
     private lateinit var nameText: UIText
     private lateinit var modsIndicator: ModsIndicator
-    private lateinit var missingIndicator: UISprite
+    private lateinit var missingIndicator: FontAwesomeIcon
 
 
     init {
+        width = Size.Full
+        clipToBounds = false
 
         style = {
             color = it.accentColor
             alpha = if (isEnabled) 1f else 0.5f
+            borderWidth = 2f
+            padding = Vec4(2f.srem)
         }
 
         fillContainer {
             width = Size.Full
             orientation = Orientation.Horizontal
-            padding = Vec4(12f)
-            spacing = 6f
+            style = {
+                spacing = 2f.srem
+            }
 
             linearContainer {
                 orientation = Orientation.Vertical
@@ -48,23 +58,31 @@ class RoomPlayerButton() : UIButton() {
 
                 linearContainer {
                     orientation = Orientation.Horizontal
-                    spacing = 4f
+                    style = {
+                        spacing = 3f.srem
+                    }
 
                     nameText = text {
                         style = { color = it.accentColor }
                     }
 
-                    missingIndicator = sprite {
-                        textureRegion = ResourceManager.getInstance().getTexture("missing")
+                    missingIndicator = FontAwesomeIcon(Icon.Music).apply {
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
-                        size = Vec2(18f)
+                        style = {
+                            width = FontSize.SM
+                            height = FontSize.SM
+                            color = Colors.Red200
+                        }
                     }
+                    +missingIndicator
                 }
 
                 +ModsIndicator().apply {
-                    minHeight = 18f // Force to take space even if no mods are enabled
-                    iconSize = 18f
+                    style = {
+                        minHeight = FontSize.SM // Force to take space even if no mods are enabled
+                        iconSize = FontSize.SM
+                    }
                     modsIndicator = this
                 }
             }
@@ -76,8 +94,8 @@ class RoomPlayerButton() : UIButton() {
 
         backgroundColor = when {
             room.isTeamVersus -> when (player.team) {
-                Blue -> Color4("#A0C0FF") * 0.1f
-                Red -> Color4("#FFA0A0") * 0.1f
+                Blue -> Colors.Blue400
+                Red -> Colors.Red400
                 null -> Theme.current.accentColor * 0.1f
             }
             else -> Theme.current.accentColor * 0.1f
@@ -85,17 +103,16 @@ class RoomPlayerButton() : UIButton() {
 
         borderColor = when (player.status) {
             Playing -> Theme.current.accentColor
-            Ready -> Color4("#A0FFA0")
-            NotReady, MissingBeatmap -> Color4("#FFA0A0")
+            Ready -> Colors.Green200
+            NotReady, MissingBeatmap -> Colors.Red200
         }
 
         nameText.text = player.name
-        missingIndicator.isVisible = player.status == MissingBeatmap
+        missingIndicator.isVisible = true || player.status == MissingBeatmap
         modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.values else null
 
         onActionLongPress = {
             UIDropdown(this@RoomPlayerButton).apply dropdown@{
-                maxWidth = 260f
 
                 addButton {
                     setText(R.string.multiplayer_room_player_menu_view_profile)

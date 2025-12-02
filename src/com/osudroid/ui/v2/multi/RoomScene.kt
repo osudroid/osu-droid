@@ -42,10 +42,16 @@ import com.reco1l.andengine.sprite
 import com.reco1l.andengine.sprite.ScaleType
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text
+import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.text.UIText
 import com.reco1l.andengine.textButton
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.theme.srem
+import com.reco1l.andengine.ui.ColorVariant
 import com.reco1l.andengine.ui.SizeVariant
 import com.reco1l.andengine.ui.Theme
 import com.reco1l.andengine.ui.UIBadge
@@ -53,7 +59,6 @@ import com.reco1l.andengine.ui.UILabeledBadge
 import com.reco1l.andengine.ui.UIMessageDialog
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.math.Vec4
-import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
@@ -65,6 +70,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
+import com.reco1l.andengine.ui.plus
 
 class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
 
@@ -97,18 +103,24 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     /**
      * The leave dialog that will be shown when the player tries to leave the room.
      */
-    val leaveDialog = MessageDialog().apply {
+    val leaveDialog = UIMessageDialog().apply {
 
-        setTitle("Leave room")
-        setMessage("Are you sure?")
-        addButton("Yes") {
+        title = "Leave room"
+        text = "Are you sure?"
 
-            it.dismiss()
-            back()
+        addButton {
+            text = "Yes"
+            onActionUp = {
+                hide()
+                back()
+            }
         }
 
-        addButton("No") {
-            it.dismiss()
+        addButton {
+            text = "No"
+            onActionUp = {
+                back()
+            }
         }
 
     }
@@ -151,6 +163,8 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         chat = RoomChat()
 
         backgroundSprite = sprite {
+            width = Size.Full
+            height = Size.Full
             scaleType = ScaleType.Crop
             textureRegion = ResourceManager.getInstance().getTexture("menu-background")
 
@@ -173,25 +187,35 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             height = Size.Full
             padding = Vec4(80f, 0f)
             style = {
-                padding = Vec4(80f, 0f, 80f, chat.buttonHeight + 12f)
+                padding = UIEngine.current.safeArea.copy(
+                    y = 2f.srem,
+                    w = 2f.srem + (Multiplayer.roomScene?.chat?.buttonHeight ?: 0f)
+                )
             }
 
-            linearContainer {
+            fillContainer {
                 orientation = Orientation.Vertical
                 width = Size.Full
                 height = Size.Full
 
                 container {
                     width = Size.Full
+                    style = {
+                        padding = Vec4(0f, 2.5f.srem)
+                    }
 
                     linearContainer {
                         orientation = Orientation.Vertical
-                        spacing = 8f
-                        padding = Vec4(0f, 18f)
+                        style = {
+                            spacing = 2f.srem
+                        }
 
                         nameText = text {
                             text = room.name
-                            style = { color = it.accentColor }
+                            style = {
+                                color = it.accentColor
+                                fontSize = FontSize.LG
+                            }
                         }
 
                         linearContainer {
@@ -224,14 +248,16 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             }
 
                             +ModsIndicator().apply {
-                                iconSize = 24f
                                 modsIndicator = this
+                                style += {
+                                    iconSize = FontSize.MD
+                                }
                             }
                         }
                     }
 
                     textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("settings-icon"))
+                        leadingIcon = FontAwesomeIcon(Icon.Gear)
                         anchor = Anchor.CenterRight
                         origin = Anchor.CenterRight
                         onActionUp = {
@@ -244,15 +270,19 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 fillContainer {
                     width = Size.Full
                     height = Size.Full
-                    spacing = 24f
-                    padding = Vec4(0f, 12f)
+                    style = {
+                        padding = Vec4(0f, 2f.srem)
+                        spacing = 6f.srem
+                    }
 
                     fun UIFillContainer.Section(title: Int, block: UILinearContainer.() -> Unit) {
                         linearContainer {
                             orientation = Orientation.Vertical
                             width = Size.Full
                             height = Size.Full
-                            spacing = 8f
+                            style = {
+                                spacing = 2f.srem
+                            }
 
                             text {
                                 text = StringTable.get(title).uppercase()
@@ -274,8 +304,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             linearContainer {
                                 orientation = Orientation.Vertical
                                 width = Size.Full
-                                spacing = 4f
-                                padding = Vec4.Companion.One
+                                padding = Vec4.One
+                                style = {
+                                    spacing = 1f.srem
+                                }
+
                                 playersContainer = this
                             }
                         }
@@ -284,31 +317,34 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                     Section(R.string.multiplayer_room_beatmap) {
 
                         +BeatmapInfoLayout().apply {
-                            padding = Vec4(16f)
                             style = {
-                                radius = 12f
+                                radius = Radius.MD
+                                padding = Vec4(3f.srem)
                                 backgroundColor = it.accentColor * 0.1f / 0.5f
                             }
                             isVisible = false
+
                             beatmapInfoLayout = this
                         }
 
                         beatmapInfoAlert = text {
                             width = Size.Full
-                            padding = Vec4(16f)
                             alignment = Anchor.Center
                             style = {
-                                radius = 12f
+                                radius = Radius.MD
+                                padding = Vec4(3f.srem)
                                 backgroundColor = it.accentColor * 0.1f / 0.5f
                             }
                         }
 
                         linearContainer {
                             width = Size.Full
-                            spacing = 8f
+                            style = {
+                                spacing = 2f.srem
+                            }
 
                             changeBeatmapButton = textButton {
-                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("swap"))
+                                leadingIcon = FontAwesomeIcon(Icon.ArrowRightArrowLeft)
                                 alignment = Anchor.CenterLeft
                                 setText(R.string.multiplayer_room_change_beatmap)
                                 onActionUp = {
@@ -329,7 +365,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             }
 
                             downloadBeatmapButton = textButton {
-                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
+                                leadingIcon = FontAwesomeIcon(Icon.Download)
                                 alignment = Anchor.CenterLeft
                                 isVisible = false
                             }
@@ -337,113 +373,122 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
                     }
                 }
-            }
 
-            linearContainer {
-                origin = Anchor.BottomLeft
-                anchor = Anchor.BottomLeft
-                spacing = 8f
-                padding = Vec4(0f, 12f)
-
-                textButton {
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
-                    setText(R.string.multiplayer_room_leave)
-                    onActionUp = { back() }
-                }
-
-                modsButton = textButton {
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
-                    setText(R.string.multiplayer_room_mods)
-                    onActionUp = { ModMenu.show() }
-                }
-            }
-
-            linearContainer {
-                width = 300f
-                orientation = Orientation.Vertical
-                origin = Anchor.BottomRight
-                anchor = Anchor.BottomRight
-                spacing = 8f
-                padding = Vec4(0f, 12f)
-
-                textButton {
+                container {
                     width = Size.Full
-                    setText(R.string.multiplayer_room_start_game)
-                    isSelected = true
-                    onActionUp = callback@{
+                    style = {
+                        padding = Vec4(0f, 2f.srem)
+                    }
 
-                        if (isWaitingForStatusChange || !Multiplayer.isRoomHost || Multiplayer.player!!.status != PlayerStatus.Ready) {
-                            return@callback
+                    linearContainer {
+                        origin = Anchor.BottomLeft
+                        anchor = Anchor.BottomLeft
+                        style = {
+                            spacing = 2f.srem
                         }
 
-                        if (room.beatmap == null) {
-                            ToastLogger.showText(R.string.multiplayer_room_must_select_beatmap, true)
-                            return@callback
+                        textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.ArrowRightFromBracket)
+                            setText(R.string.multiplayer_room_leave)
+                            onActionUp = { back() }
                         }
 
-                        if (!BuildSettings.MOCK_MULTIPLAYER) {
-                            if (room.teamMode == TeamMode.TeamVersus) {
-                                val teams = room.teamMap
+                        modsButton = textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.Sliders)
+                            setText(R.string.multiplayer_room_mods)
+                            onActionUp = { ModMenu.show() }
+                        }
+                    }
 
-                                if (teams.values.any { it.isEmpty() }) {
-                                    ToastLogger.showText(R.string.multiplayer_room_at_least_one_player_per_team, true)
+                    linearContainer {
+                        orientation = Orientation.Vertical
+                        origin = Anchor.CenterRight
+                        anchor = Anchor.CenterRight
+                        style = {
+                            width = 10f.rem
+                            spacing = 2f.srem
+                        }
+
+                        textButton {
+                            width = Size.Full
+                            colorVariant = ColorVariant.Primary
+                            setText(R.string.multiplayer_room_start_game)
+                            onActionUp = callback@{
+
+                                if (isWaitingForStatusChange || !Multiplayer.isRoomHost || Multiplayer.player!!.status != PlayerStatus.Ready) {
                                     return@callback
                                 }
-                            }
 
-                            val players = room.activePlayers.filter { it.status != PlayerStatus.MissingBeatmap }
-
-                            if (players.size <= 1) {
-                                ToastLogger.showText(R.string.multiplayer_room_at_least_two_players_beatmap, true)
-                                return@callback
-                            }
-                        }
-
-                        ResourceManager.getInstance().getSound("menuhit")?.play()
-                        RoomAPI.notifyMatchPlay()
-                    }
-                    startButton = this
-                }
-
-                textButton {
-                    width = Size.Full
-                    setText(R.string.multiplayer_room_not_ready)
-                    onActionUp = callback@{
-
-                        if (isWaitingForStatusChange) {
-                            return@callback
-                        }
-
-                        ResourceManager.getInstance().getSound("menuclick")?.play()
-                        isWaitingForStatusChange = true
-
-                        when (Multiplayer.player!!.status) {
-
-                            PlayerStatus.NotReady -> {
                                 if (room.beatmap == null) {
-                                    ToastLogger.showText(R.string.multiplayer_room_cannot_ready_changing_beatmap, true)
-                                    isWaitingForStatusChange = false
+                                    ToastLogger.showText(R.string.multiplayer_room_must_select_beatmap, true)
+                                    return@callback
                                 }
 
-                                if (room.teamMode == TeamMode.TeamVersus && Multiplayer.player!!.team == null) {
-                                    ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
-                                    isWaitingForStatusChange = false
+                                if (!BuildSettings.MOCK_MULTIPLAYER) {
+                                    if (room.teamMode == TeamMode.TeamVersus) {
+                                        val teams = room.teamMap
+
+                                        if (teams.values.any { it.isEmpty() }) {
+                                            ToastLogger.showText(R.string.multiplayer_room_at_least_one_player_per_team, true)
+                                            return@callback
+                                        }
+                                    }
+
+                                    val players = room.activePlayers.filter { it.status != PlayerStatus.MissingBeatmap }
+
+                                    if (players.size <= 1) {
+                                        ToastLogger.showText(R.string.multiplayer_room_at_least_two_players_beatmap, true)
+                                        return@callback
+                                    }
                                 }
 
-                                RoomAPI.setPlayerStatus(PlayerStatus.Ready)
+                                ResourceManager.getInstance().getSound("menuhit")?.play()
+                                RoomAPI.notifyMatchPlay()
                             }
+                            startButton = this
+                        }
 
-                            PlayerStatus.Ready -> invalidateStatus()
+                        textButton {
+                            width = Size.Full
+                            setText(R.string.multiplayer_room_not_ready)
+                            onActionUp = callback@{
 
-                            PlayerStatus.MissingBeatmap -> {
-                                ToastLogger.showText(R.string.multiplayer_room_cannot_ready_missing_beatmap, true)
-                                isWaitingForStatusChange = false
+                                if (isWaitingForStatusChange) {
+                                    return@callback
+                                }
+
+                                ResourceManager.getInstance().getSound("menuclick")?.play()
+                                isWaitingForStatusChange = true
+
+                                when (Multiplayer.player!!.status) {
+
+                                    PlayerStatus.NotReady -> {
+                                        if (room.beatmap == null) {
+                                            ToastLogger.showText(R.string.multiplayer_room_cannot_ready_changing_beatmap, true)
+                                            isWaitingForStatusChange = false
+                                        }
+
+                                        if (room.teamMode == TeamMode.TeamVersus && Multiplayer.player!!.team == null) {
+                                            ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
+                                            isWaitingForStatusChange = false
+                                        }
+
+                                        RoomAPI.setPlayerStatus(PlayerStatus.Ready)
+                                    }
+
+                                    PlayerStatus.Ready -> invalidateStatus()
+
+                                    PlayerStatus.MissingBeatmap -> {
+                                        ToastLogger.showText(R.string.multiplayer_room_cannot_ready_missing_beatmap, true)
+                                        isWaitingForStatusChange = false
+                                    }
+
+                                    else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
+                                }
                             }
-
-                            else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
+                            statusButton = this
                         }
                     }
-                    statusButton = this
                 }
             }
 
