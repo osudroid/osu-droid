@@ -184,7 +184,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         val originalLines = text.split('\n')
 
-        if (wrapText && width > 0f) {
+        if (wrapText && width > 0f && rawWidth != Size.Auto) {
             val wrappedLines = mutableListOf<String>()
             val wrappedLinesWidth = mutableListOf<Int>()
 
