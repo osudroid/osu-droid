@@ -61,17 +61,6 @@ data class Color4(private val hex: Long) {
         alpha = alpha
     )
 
-    /**
-     * Replaces the color alpha with the given scalar value.
-     * Similar to [Tailwind CSS opacity utilities](https://tailwindcss.com/docs/opacity).
-     */
-    operator fun div(scalar: Float) = Color4(
-        red = red,
-        green = green,
-        blue = blue,
-        alpha = scalar
-    )
-
 
     /**
      * Lightens the color by the given factor.
