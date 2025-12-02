@@ -35,7 +35,6 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         clipToBounds = true
-        width = Size.Full
     }
 
     private val textComponent = UIText().apply {
@@ -43,7 +42,6 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         clipToBounds = true
-        width = Size.Full
         wrapText = true
     }
 
@@ -209,7 +207,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         val keyboardHeight = windowInsets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
 
         // Tricky prevention from opening the keyboard while it should be closed and vice versa.
-        if (value == (keyboardHeight > 0) || !value == (keyboardHeight == 0)) {
+        if (value && keyboardHeight > 0) {
             return@mainThread
         }
 
@@ -238,6 +236,9 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        textComponent.maxWidth = innerWidth
+        placeholderEntity.maxWidth = innerWidth
 
         selectionBox.width = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.3f), selectionBox.width, targetSelectionBoxWidth, 0f, 0.3f, Easing.OutExpo)
         caret.x = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.3f), caret.x, textComponent.x + targetCursorPosition, 0f, 0.3f, Easing.OutExpo)
