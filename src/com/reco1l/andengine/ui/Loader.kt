@@ -17,7 +17,7 @@ open class Loader : UILinearContainer() {
             color = Colors.White
             paintStyle = PaintStyle.Outline
             style = {
-                lineWidth = 0.125f.rem
+                lineWidth = 0.115f.rem
                 width = TRIANGLE_SIZE.rem
                 height = TRIANGLE_SIZE.rem
                 y = (TRIANGLE_SIZE / 2.5f).rem
@@ -29,7 +29,7 @@ open class Loader : UILinearContainer() {
             rotationCenter = Anchor.Center
             rotation = 180f
             style = {
-                lineWidth = 0.125f.rem
+                lineWidth = 0.115f.rem
                 width = TRIANGLE_SIZE.rem
                 height = TRIANGLE_SIZE.rem
             }
@@ -38,7 +38,7 @@ open class Loader : UILinearContainer() {
             color = Colors.White
             paintStyle = PaintStyle.Outline
             style = {
-                lineWidth = 0.125f.rem
+                lineWidth = 0.115f.rem
                 width = TRIANGLE_SIZE.rem
                 height = TRIANGLE_SIZE.rem
                 y = (TRIANGLE_SIZE / 2.5f).rem
@@ -95,7 +95,7 @@ open class Loader : UILinearContainer() {
     companion object {
         private const val PULSE_DURATION = 0.7f
         private const val PULSE_DELAY = 0.4f
-        private const val TRIANGLE_SIZE = 1.5f
+        private const val TRIANGLE_SIZE = 1.25f
     }
 
 }
