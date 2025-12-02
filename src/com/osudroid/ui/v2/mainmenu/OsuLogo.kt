@@ -67,7 +67,7 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
                 height = 0.9f.pct
                 anchor = Anchor.Center
                 origin = Anchor.Center
-                //color = OSU_COLOR
+                color = OSU_COLOR
                 clearInfo = ClearInfo.Companion.ClearDepthBuffer
                 depthInfo = DepthInfo(test = true, mask = true, function = GLES10.GL_ALWAYS)
             }
@@ -104,7 +104,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             }
 
             osuText = text {
-                isVisible = false
                 text = "OSU!"
                 fontFamily = Fonts.TorusBold
                 color = Colors.White
@@ -117,8 +116,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        if (true) return
-
         osuText.fontSize = height * 0.295f
 
         val beatLengthSeconds = RythimManager.beatLength.toFloat() / 1000f

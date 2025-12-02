@@ -77,7 +77,6 @@ object MainScene : UIScene() {
     init {
 
         container {
-            isVisible = false
             width = Size.Full
             height = Size.Full
 
