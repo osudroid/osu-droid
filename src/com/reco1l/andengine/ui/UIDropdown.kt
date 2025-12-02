@@ -68,6 +68,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
         optionsContainer = linearContainer {
             orientation = Orientation.Vertical
+            shrink = false
             style = {
                 spacing = 0.5f.srem
                 padding = Vec4(1f.srem)
@@ -75,21 +76,6 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         }
 
         wrapper.attachChild(this)
-    }
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        if (isExpanded) {
-            var minWidth = trigger.width
-
-            optionsContainer.forEach { it as UITextButton
-                minWidth = max(minWidth, it.contentWidth + it.padding.horizontal)
-            }
-
-            optionsContainer.minWidth = minWidth
-        }
-
-        super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
@@ -113,11 +99,6 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             width = Size.Full
             alignment = Anchor.CenterLeft
             colorVariant = ColorVariant.Tertiary
-            style += {
-                color = it.accentColor
-                backgroundColor = (it.accentColor * 0.9f) / 0f
-                radius = Radius.LG
-            }
             block()
         }
 
