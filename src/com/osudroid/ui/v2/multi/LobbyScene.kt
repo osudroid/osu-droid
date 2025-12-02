@@ -111,19 +111,24 @@ class LobbyScene : UIScene() {
 
                     +UITextInput("").apply {
                         key = "search"
-                        width = 500f
                         height = Size.Full
                         placeholder = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.multiplayer_lobby_search_rooms)
                         onValueChange = { value ->
                             searchQuery = value
                         }
+                        style = {
+                            width = 13f.rem
+                        }
                     }
 
-                    +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                    container {
                         anchor = Anchor.CenterRight
                         origin = Anchor.CenterRight
-                        style = {
-                            color = it.accentColor
+                        style = { padding = Vec4(2f.srem, 0f) }
+                        +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                            style = {
+                                color = it.accentColor
+                            }
                         }
                     }
                 }
