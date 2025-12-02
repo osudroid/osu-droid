@@ -108,7 +108,7 @@ class RoomPlayerButton() : UIButton() {
         }
 
         nameText.text = player.name
-        missingIndicator.isVisible = true || player.status == MissingBeatmap
+        missingIndicator.isVisible = player.status == MissingBeatmap
         modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.values else null
 
         onActionLongPress = {
