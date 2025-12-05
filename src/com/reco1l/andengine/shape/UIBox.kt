@@ -1,9 +1,11 @@
 package com.reco1l.andengine.shape
 
+import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
+import com.reco1l.andengine.shape.UICircle.Companion.calculateArcResolution
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
@@ -21,7 +23,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
@@ -41,27 +43,35 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
 
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Instance)
+        requestNewBuffer()
     }
 
     override fun onCreateBuffer(): BoxVBO {
 
-        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
-        val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
+        val radius = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+        val segments = if (radius > 0f) calculateArcResolution(radius, radius, 90f) else 0
 
-        val buffer = buffer
-        if (buffer?.radius == radius && buffer.segments == segments && buffer.paintStyle == paintStyle) {
-            return buffer
+        val bufferKey = "BoxVBO@$width,$height,$radius,$segments,$paintStyle"
+        val newBuffer = UIEngine.current.resources.getOrStoreBuffer(bufferKey) {
+            BoxVBO(radius, segments, paintStyle)
+        } as BoxVBO
+
+        val oldBuffer = buffer
+        if (oldBuffer != null) {
+            UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
         }
 
-        return BoxVBO(radius, segments, paintStyle)
+        // We use static sharing mode because the key ensures uniqueness of the buffer by using width and height.
+        UIEngine.current.resources.subscribeToBuffer(newBuffer, this, BufferSharingMode.Static)
+
+        return newBuffer
     }
 
     override fun onUpdateBuffer() {

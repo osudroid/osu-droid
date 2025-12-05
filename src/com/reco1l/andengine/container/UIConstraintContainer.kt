@@ -35,8 +35,8 @@ open class UIConstraintContainer : UIContainer() {
             val targetWidth = target.transformedWidth
             val targetHeight = target.transformedHeight
 
-            val cancelledX = contentX + child.anchorPositionX
-            val cancelledY = contentY + child.anchorPositionY
+            val cancelledX = padding.left + child.anchorPositionX
+            val cancelledY = padding.right + child.anchorPositionY
 
             child.x = -cancelledX + targetX + targetWidth * child.anchor.x
             child.y = -cancelledY + targetY + targetHeight * child.anchor.y
@@ -76,16 +76,6 @@ open class UIConstraintContainer : UIContainer() {
     override fun onChildDetached(child: IEntity) {
         super.onChildDetached(child)
         removeConstraint(child as? UIComponent)
-    }
-
-    override fun onChildPositionChanged(child: IEntity) {
-        constraints.forEach { (source, target) ->
-            if (target == child) {
-                source.invalidate(InvalidationFlag.Transformations)
-                onChildPositionChanged(source)
-            }
-        }
-        super.onChildPositionChanged(child)
     }
 
 }

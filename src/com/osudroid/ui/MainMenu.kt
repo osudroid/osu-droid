@@ -9,6 +9,7 @@ import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
 import com.osudroid.ui.v2.multi.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.ui.v2.LoaderScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -16,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 class MainMenu(val main: MainScene) {
@@ -69,7 +69,7 @@ class MainMenu(val main: MainScene) {
                 GlobalManager.getInstance().songService.isGaming = true
 
                 async {
-                    LoadingScreen().show()
+                    LoaderScene().show()
 
                     GlobalManager.getInstance().mainActivity.checkNewSkins()
                     GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
@@ -132,7 +132,7 @@ class MainMenu(val main: MainScene) {
                 Multiplayer.isMultiplayer = true
 
                 async {
-                    LoadingScreen().show()
+                    LoaderScene().show()
 
                     GlobalManager.getInstance().mainActivity.checkNewSkins()
                     GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()

@@ -3,87 +3,101 @@
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
-import com.reco1l.andengine.ui.SizeVariant.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.srem
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.Font
-import ru.nsu.ccfit.zuev.osu.ResourceManager
-import javax.microedition.khronos.opengles.*
 
 
 /**
  * A badge is a small piece of information that can be used to display a value or a status.
  */
-open class UIBadge : CompoundText(), ISizeVariable {
+open class UIBadge : CompoundText(), ISizeVariable, IColorVariable {
 
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        color = theme.accentColor
-        background?.color = theme.accentColor * 0.15f
-    }
-
-    override var sizeVariant = Medium
+    override var sizeVariant = SizeVariant.Medium
         set(value) {
             if (field != value) {
                 field = value
-                onSizeVariantChanged()
+                applyStyle()
             }
         }
+
+    override var colorVariant = ColorVariant.Secondary
+        set(value) {
+            if (field != value) {
+                field = value
+                applyStyle()
+            }
+        }
+
 
     init {
-        background = UIBox()
-        onSizeVariantChanged()
+        style = {
+            when (colorVariant) {
+                ColorVariant.Primary -> {
+                    color = it.accentColor
+                    backgroundColor = it.accentColor * 0.15f
+                }
+                ColorVariant.Secondary -> {
+                    color = it.accentColor * 0.15f
+                    backgroundColor = it.accentColor
+                }
+                ColorVariant.Tertiary -> {
+                    color = it.accentColor
+                    backgroundColor = Color4.Transparent
+                }
+            }
+
+            applySizeStyle()
+        }
     }
 
-
-    override fun onSizeVariantChanged() {
-
-        val cornerRadius: Float
-
+    protected fun applySizeStyle() {
         when (sizeVariant) {
-            Small -> {
-                font = ResourceManager.getInstance().getFont("xs")
-                padding = Vec4(8f, 4f)
-                spacing = 4f
-                cornerRadius = 6f
+            SizeVariant.Small -> {
+                fontSize = FontSize.XS
+                padding = Vec4(1.25f.srem, 0.75f.srem)
+                spacing = 1.25f.srem
+                radius = Radius.SM
             }
-            Medium -> {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                padding = Vec4(12f, 8f)
-                spacing = 8f
-                cornerRadius = 12f
+            SizeVariant.Medium -> {
+                fontSize = FontSize.SM
+                padding = Vec4(2f.srem, 1.25f.srem)
+                spacing = 2f.srem
+                radius = Radius.LG
             }
-            Large -> {
-                font = ResourceManager.getInstance().getFont("font")
-                padding = Vec4(16f, 12f)
-                spacing = 12f
-                cornerRadius = 16f
+            SizeVariant.Large -> {
+                fontSize = FontSize.MD
+                padding = Vec4(2f.srem, 1.5f.srem)
+                spacing = 2f.srem
+                radius = Radius.LG
             }
         }
-
-        (background as? UIBox)?.cornerRadius = cornerRadius
     }
+
 }
 
 /**
  * A statistic badge is a badge that displays a value next to a label.
  */
-open class UILabeledBadge : UILinearContainer(), ISizeVariable {
+open class UILabeledBadge : UILinearContainer(), ISizeVariable, IColorVariable {
 
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        color = theme.accentColor
-        background?.color = theme.accentColor * 0.15f
-    }
-
-    override var sizeVariant = Medium
+    override var sizeVariant = SizeVariant.Medium
         set(value) {
             if (field != value) {
                 field = value
-                onSizeVariantChanged()
+                applyStyle()
+            }
+        }
+
+    override var colorVariant = ColorVariant.Secondary
+        set(value) {
+            if (field != value) {
+                field = value
+                applyStyle()
             }
         }
 
@@ -91,21 +105,16 @@ open class UILabeledBadge : UILinearContainer(), ISizeVariable {
     /**
      * The entity of the badge's label.
      */
-    val labelEntity = text {
-
+    val labelComponent = text {
         alignment = Anchor.Center
-        background = UIBox().apply {
-            color = Color4.Black
-            alpha = 0.1f
-        }
+        backgroundColor = Color4.Black / 0.1f
     }
 
     /**
      * The value of the badge.
      */
-    val valueEntity = text {
-        font = ResourceManager.getInstance().getFont("smallFont")
-        padding = Vec4(12f, 8f)
+    val valueComponent = text {
+        fontSize = FontSize.SM
         alignment = Anchor.Center
     }
 
@@ -114,59 +123,63 @@ open class UILabeledBadge : UILinearContainer(), ISizeVariable {
     /**
      * The label of the badge.
      */
-    var label by labelEntity::text
+    var label by labelComponent::text
 
     /**
      * The value of the badge.
      */
-    var value by valueEntity::text
+    var value by valueComponent::text
 
     //endregion
 
 
     init {
         orientation = Orientation.Horizontal
-        background = UIBox()
+        style = {
+            when (colorVariant) {
+                ColorVariant.Primary -> {
+                    labelComponent.color = it.accentColor * 0.15f
+                    valueComponent.color = it.accentColor * 0.15f
+                    backgroundColor = it.accentColor
+                }
+                ColorVariant.Secondary -> {
+                    labelComponent.color = it.accentColor
+                    valueComponent.color = it.accentColor
+                    backgroundColor = it.accentColor * 0.15f
+                }
 
-        onSizeVariantChanged()
-    }
-
-
-    override fun onSizeVariantChanged() {
-
-        val font: Font
-        val padding: Vec4
-        val cornerRadius: Float
-
-        when (sizeVariant) {
-            Small -> {
-                font = ResourceManager.getInstance().getFont("xs")
-                padding = Vec4(8f, 4f)
-                cornerRadius = 6f
+                ColorVariant.Tertiary -> TODO()
             }
-            Medium -> {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                padding = Vec4(12f, 8f)
-                cornerRadius = 12f
-            }
-            Large -> {
-                font = ResourceManager.getInstance().getFont("font")
-                padding = Vec4(16f, 12f)
-                cornerRadius = 16f
+
+            when (sizeVariant) {
+                SizeVariant.Small -> {
+                    labelComponent.fontSize = FontSize.XS
+                    valueComponent.fontSize = FontSize.XS
+                    labelComponent.padding = Vec4(1.25f.srem, 0.75f.srem)
+                    valueComponent.padding = Vec4(1.25f.srem, 0.75f.srem)
+                    radius = Radius.MD
+                    labelComponent.radius = Radius.MD
+                }
+                SizeVariant.Medium -> {
+                    labelComponent.fontSize = FontSize.SM
+                    valueComponent.fontSize = FontSize.SM
+                    labelComponent.padding = Vec4(2f.srem, 1.25f.srem)
+                    valueComponent.padding = Vec4(2f.srem, 1.25f.srem)
+                    radius = Radius.LG
+                    labelComponent.radius = Radius.LG
+                }
+                SizeVariant.Large -> {
+                    labelComponent.fontSize = FontSize.MD
+                    valueComponent.fontSize = FontSize.MD
+                    labelComponent.padding = Vec4(2f.srem, 1.5f.srem)
+                    valueComponent.padding = Vec4(2f.srem, 1.5f.srem)
+                    radius = Radius.LG
+                    labelComponent.radius = Radius.LG
+                }
             }
         }
-
-        labelEntity.font = font
-        valueEntity.font = font
-        labelEntity.padding = padding
-        valueEntity.padding = padding
-        (background as? UIBox)?.cornerRadius = cornerRadius
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-        (labelEntity.background as? UIBox)?.cornerRadius = (background as? UIBox)?.cornerRadius ?: 0f
-        super.onManagedDraw(gl, camera)
-    }
 }
 
 

@@ -13,7 +13,13 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.text.UIText
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -25,79 +31,80 @@ class RoomPlayerButton() : UIButton() {
 
     private lateinit var nameText: UIText
     private lateinit var modsIndicator: ModsIndicator
-    private lateinit var missingIndicator: UISprite
-
-
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        color = theme.accentColor
-        alpha = if (isEnabled) 1f else 0.5f
-    }
+    private lateinit var missingIndicator: FontAwesomeIcon
 
 
     init {
-        width = FillParent
-        orientation = Orientation.Horizontal
-        padding = Vec4(12f)
-        spacing = 6f
+        width = Size.Full
+        clipToBounds = false
 
-        background = UIBox().apply {
-            cornerRadius = 12f
+        style = {
+            color = it.accentColor
+            alpha = if (isEnabled) 1f else 0.5f
+            borderWidth = 2f
+            padding = Vec4(2f.srem)
         }
 
-        foreground = UIBox().apply {
-            cornerRadius = 12f
-            paintStyle = PaintStyle.Outline
-        }
-
-        linearContainer {
-            orientation = Orientation.Vertical
-            inheritAncestorsColor = false
+        fillContainer {
+            width = Size.Full
+            orientation = Orientation.Horizontal
+            style = {
+                spacing = 2f.srem
+            }
 
             linearContainer {
-                orientation = Orientation.Horizontal
-                spacing = 4f
+                orientation = Orientation.Vertical
+                inheritAncestorsColor = false
 
-                nameText = text {
-                    applyTheme = { color = it.accentColor }
+                linearContainer {
+                    orientation = Orientation.Horizontal
+                    style = {
+                        spacing = 3f.srem
+                    }
+
+                    nameText = text {
+                        style = { color = it.accentColor }
+                    }
+
+                    missingIndicator = FontAwesomeIcon(Icon.Music).apply {
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        style = {
+                            width = FontSize.SM
+                            height = FontSize.SM
+                            color = Colors.Red200
+                        }
+                    }
+                    +missingIndicator
                 }
 
-                missingIndicator = sprite {
-                    textureRegion = ResourceManager.getInstance().getTexture("missing")
-                    anchor = Anchor.CenterLeft
-                    origin = Anchor.CenterLeft
-                    size = Vec2(18f)
+                +ModsIndicator().apply {
+                    style = {
+                        minHeight = FontSize.SM // Force to take space even if no mods are enabled
+                        iconSize = FontSize.SM
+                    }
+                    modsIndicator = this
                 }
-            }
-
-            +ModsIndicator().apply {
-                minHeight = 18f // Force to take space even if no mods are enabled
-                iconSize = 18f
-                modsIndicator = this
             }
         }
-
     }
 
 
     fun updateState(room: Room, player: RoomPlayer) {
 
-        background!!.apply {
-            color = when {
-                room.isTeamVersus -> when (player.team) {
-                    Blue -> Color4("#A0C0FF") * 0.1f
-                    Red -> Color4("#FFA0A0") * 0.1f
-                    null -> Theme.current.accentColor * 0.1f
-                }
-
-                else -> Theme.current.accentColor * 0.1f
+        backgroundColor = when {
+            room.isTeamVersus -> when (player.team) {
+                Blue -> Colors.Blue400
+                Red -> Colors.Red400
+                null -> Theme.current.accentColor * 0.1f
             }
-            alpha = 0.5f
-        }
+            else -> Theme.current.accentColor * 0.1f
+        } / 0.5f
 
-        foreground!!.color = when (player.status) {
+        borderColor = when (player.status) {
             Playing -> Theme.current.accentColor
-            Ready -> Color4("#A0FFA0")
-            NotReady, MissingBeatmap -> Color4("#FFA0A0")
+            Ready -> Colors.Green200
+            NotReady, MissingBeatmap -> Colors.Red200
         }
 
         nameText.text = player.name
@@ -106,7 +113,6 @@ class RoomPlayerButton() : UIButton() {
 
         onActionLongPress = {
             UIDropdown(this@RoomPlayerButton).apply dropdown@{
-                maxWidth = 260f
 
                 addButton {
                     setText(R.string.multiplayer_room_player_menu_view_profile)
@@ -146,7 +152,7 @@ class RoomPlayerButton() : UIButton() {
 
                         addButton {
                             setText(R.string.multiplayer_room_player_menu_kick)
-                            applyTheme = {
+                            style = {
                                 color = Color4("#FFBFBF")
                             }
                             onActionUp = {

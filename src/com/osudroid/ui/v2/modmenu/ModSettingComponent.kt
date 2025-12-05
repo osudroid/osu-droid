@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FormControl
 import com.rian.osu.mods.Mod
@@ -47,7 +48,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
      * The [FormControl] that is used to display this [ModSettingComponent].
      */
     protected val control = createControl().apply {
-        width = FillParent
+        width = Size.Full
 
         label = setting.name
 
@@ -68,7 +69,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
         }
 
     init {
-        width = FillParent
+        width = Size.Full
         +control
     }
 

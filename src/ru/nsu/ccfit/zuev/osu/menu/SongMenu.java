@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.osudroid.ui.v1.BeatmapAttributeDisplay;
+import com.osudroid.ui.v2.LoaderScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.container.UIContainer;
@@ -642,14 +643,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (isNewLayout && layoutBackButton != null) {
             layoutBackButton.apply(backButton);
         } else {
-            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled() - paddingBottom);
+            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getTransformedHeight() - paddingBottom);
         }
 
         if (modSelection != null) {
             if (isNewLayout && layoutMods != null) {
                 layoutMods.apply(modSelection, backButton);
             } else {
-                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled() - paddingBottom);
+                modSelection.setPosition(backButton.getX() + backButton.getTransformedWidth(), Config.getRES_HEIGHT() - modSelection.getTransformedHeight() - paddingBottom);
             }
         }
 
@@ -657,13 +658,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
         } else {
             var prevButton = modSelection != null ? modSelection : backButton;
-            optionSelection.setPosition(prevButton.getX() + prevButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled() - paddingBottom);
+            optionSelection.setPosition(prevButton.getX() + prevButton.getTransformedWidth(), Config.getRES_HEIGHT() - optionSelection.getTransformedHeight() - paddingBottom);
         }
 
         if (isNewLayout && layoutRandom != null) {
             layoutRandom.apply(randomMap, optionSelection);
         } else {
-            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled() - paddingBottom);
+            randomMap.setPosition(optionSelection.getX() + optionSelection.getTransformedWidth(), Config.getRES_HEIGHT() - randomMap.getTransformedHeight() - paddingBottom);
         }
 
         frontLayer.attachChild(backButton);
@@ -682,7 +683,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
-            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110 - paddingBottom);
+            panel.setPosition(randomMap.getX() + randomMap.getTransformedWidth() + 20, Config.getRES_HEIGHT() - 110 - paddingBottom);
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
@@ -1187,7 +1188,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         var difficulty = selectedBeatmap.getBeatmapDifficulty();
 
         if (showOnline) {
-            engine.setScene(new LoadingScreen().getScene());
+            new LoaderScene().show();
             ToastLogger.showText(com.osudroid.resources.R.string.online_loadrecord, false);
 
             cancelCalculationJobs();
