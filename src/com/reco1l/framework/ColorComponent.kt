@@ -51,7 +51,7 @@ data class Color4(private val hex: Long) {
         get() = blueInt / 255f
 
     /**
-     * Brigthens or darkens the color by multiplying each RGB component by the given
+     * Brightens or darkens the color by multiplying each RGB component by the given
      * scalar value. Alpha remains unchanged.
      */
     operator fun times(scalar: Float) = Color4(
@@ -65,7 +65,7 @@ data class Color4(private val hex: Long) {
     /**
      * Lightens the color by the given factor.
      */
-    fun lighteen(factor: Float): Color4 {
+    fun lighten(factor: Float): Color4 {
         val factor = max(1f, 1f + factor)
         return Color4(
             (red * factor).coerceIn(0f, 1f),
