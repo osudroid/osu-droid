@@ -6,7 +6,6 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.math.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -146,7 +145,7 @@ open class UIScrollableContainer : UIContainer() {
         color = Color4.White
         height = 6f
         alpha = 0.5f
-        cornerRadius = 3f
+        radius = 3f
     }
         set(value) {
             if (field != value) {
@@ -163,7 +162,7 @@ open class UIScrollableContainer : UIContainer() {
         color = Color4.White
         width = 6f
         alpha = 0.5f
-        cornerRadius = 3f
+        radius = 3f
     }
         set(value) {
             if (field != value) {
@@ -428,6 +427,8 @@ open class UIScrollableContainer : UIContainer() {
             return super.onAreaTouched(event, localX, localY)
         }
 
+        val wasUserScrolling = isUserScrolling
+
         when (event.action) {
 
             ACTION_DOWN -> {
@@ -472,8 +473,8 @@ open class UIScrollableContainer : UIContainer() {
             }
         }
 
-        if (!isScrolling) {
-            super.onAreaTouched(event, localX, localY)
+        if (!wasUserScrolling && !isUserScrolling) {
+            return super.onAreaTouched(event, localX, localY)
         }
 
         return true

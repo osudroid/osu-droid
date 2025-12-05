@@ -25,14 +25,19 @@ import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
 import androidx.core.content.PermissionChecker;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.ui.ActivityOverlay;
@@ -41,6 +46,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.mainmenu.MainScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
@@ -51,6 +57,7 @@ import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
+import com.reco1l.framework.math.Vec4;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -307,13 +314,11 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    GlobalManager.getInstance().getEngine().setScene(MainScene.INSTANCE);
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-
                 scheduledExecutor.scheduleAtFixedRate(() -> {
                     if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         float refreshRate = getRefreshRate();
@@ -334,7 +339,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                //GlobalManager.getInstance().getMainScene().loadBannerSprite();
             });
         });
     }
@@ -383,6 +388,39 @@ public class MainActivity extends BaseGameActivity implements
 
         setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+
+            int radiusTopLeft = 0;
+            int radiusTopRight = 0;
+            int radiusBottomLeft = 0;
+            int radiusBottomRight = 0;
+
+            // Unfortunately there's no backward compatible API to get corner radius.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                WindowInsets windowInsets = v.getRootWindowInsets();
+
+                RoundedCorner topLeft = windowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+                RoundedCorner topRight = windowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+                RoundedCorner bottomLeft = windowInsets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+                RoundedCorner bottomRight = windowInsets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+
+                if (topLeft != null) radiusTopLeft = topLeft.getRadius();
+                if (topRight != null) radiusTopRight = topRight.getRadius();
+                if (bottomLeft != null) radiusBottomLeft = bottomLeft.getRadius();
+                if (bottomRight != null) radiusBottomRight = bottomRight.getRadius();
+            }
+
+            int leftRadius = Math.max(radiusTopLeft, radiusBottomLeft);
+            int rightRadius = Math.max(radiusTopRight, radiusBottomRight);
+
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+
+            // We don't care about top and bottom insets as the game is always in landscape mode.
+            UIEngine.getCurrent().setSafeArea(new Vec4(Math.max(bars.left, leftRadius),0f, Math.max(bars.right, rightRadius),0f));
+
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     public void loadBeatmapLibrary() {
