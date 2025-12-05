@@ -2,6 +2,7 @@ package com.reco1l.andengine.text
 
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.text.UITextureText.*
+import com.reco1l.andengine.theme.Size
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
@@ -63,8 +64,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
 
     init {
-        width = MatchContent
-        height = MatchContent
+        width = Size.Auto
+        height = Size.Auto
     }
 
 

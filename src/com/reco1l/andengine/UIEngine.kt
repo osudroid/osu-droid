@@ -1,11 +1,13 @@
 package com.reco1l.andengine
 
 import android.app.Activity
+import android.util.Log
 import android.view.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.engine.options.EngineOptions
@@ -17,11 +19,40 @@ import kotlin.math.*
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
+    private val displayDensity = context.resources.displayMetrics.density
+
+    /**
+     * The root font size in pixels, adjusted for display density.
+     */
+    val rootFontSize
+        get() = CSS_BASE_ROOT_FONT_SIZE * displayDensity * fontScale
+
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
      */
     val overlay = HUD()
 
+    /**
+     * The resource manager for loading and accessing UI resources (fonts, textures, etc).
+     */
+    val resources = UIResourceManager(context)
+
+    /**
+     * The safe area insets of the display, in pixels. This is used to avoid placing UI elements in areas that
+     * may be obscured by notches, rounded corners, etc.
+     */
+    var safeArea = Vec4.Zero
+
+    /**
+     * The current font scale factor. Changing this will scale all UI elements accordingly.
+     */
+    var fontScale = 1f
+        set(value) {
+            if (field != value) {
+                field = value
+                onThemeChange(Theme.current)
+            }
+        }
 
     /**
      * The current focused entity.
@@ -54,6 +85,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
     init {
         current = this
         camera.hud = overlay
+        Log.i("UI", "Root font size: ${rootFontSize}px")
     }
 
 
@@ -118,7 +150,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
         fun IEntity.propagateThemeChange() {
 
             if (this is UIComponent) {
-                onThemeChanged(theme)
+                onStyle(theme)
             }
 
             if (this is Scene) {
@@ -190,6 +222,8 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
 
 
     companion object {
+
+        private const val CSS_BASE_ROOT_FONT_SIZE = 16f
 
         @JvmStatic
         lateinit var current: UIEngine

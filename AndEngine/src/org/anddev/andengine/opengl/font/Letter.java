@@ -10,6 +10,7 @@ package org.anddev.andengine.opengl.font;
  * @author Nicolas Gramlich
  * @since 10:30:22 - 03.04.2010
  */
+// osu!droid modified: Use String for characters to support UTF-16.
 public class Letter {
 	// ===========================================================
 	// Constants
@@ -26,13 +27,13 @@ public class Letter {
 	public final float mTextureY;
 	public final float mTextureWidth;
 	public final float mTextureHeight;
-	public final char mCharacter;
+	public final String mCharacter;
 
 	// ===========================================================
 	// Constructors
 	// ===========================================================
 
-	Letter(final char pCharacter, final int pAdvance, final int pWidth, final int pHeight, final float pTextureX, final float pTextureY, final float pTextureWidth, final float pTextureHeight) {
+	Letter(final String pCharacter, final int pAdvance, final int pWidth, final int pHeight, final float pTextureX, final float pTextureY, final float pTextureWidth, final float pTextureHeight) {
 		this.mCharacter = pCharacter;
 		this.mAdvance = pAdvance;
 		this.mWidth = pWidth;
@@ -55,7 +56,7 @@ public class Letter {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + this.mCharacter;
+		result = prime * result + this.mCharacter.hashCode();
 		return result;
 	}
 
