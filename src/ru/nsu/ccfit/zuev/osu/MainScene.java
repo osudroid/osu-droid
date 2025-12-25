@@ -1,5 +1,10 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static com.acivev.ui.EffectKt.addFireworks;
+import static com.acivev.ui.EffectKt.addFireworksWithPeriod;
+import static com.acivev.ui.EffectKt.addSnowfall;
+import static com.acivev.ui.EffectKt.addSnowfallWithPeriod;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
@@ -143,6 +148,10 @@ public class MainScene implements IUpdateHandler {
                     252 / 255f));
         }
         lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), ResourceManager.getInstance().getTexture("emptyavatar"));
+
+        addSnowfallWithPeriod(scene, context);
+        addFireworksWithPeriod(scene, context);
+
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
         logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex) {
             @Override
@@ -360,8 +369,6 @@ public class MainScene implements IUpdateHandler {
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
         music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
-
-//        addSnowfall(scene, context);
 
         for (int i = 0; i < 120; i++) {
             final float pX = (float) Config.getRES_WIDTH() / 2;
