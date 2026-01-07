@@ -50,6 +50,15 @@ public class FontManager {
 		this.mFontsManaged.add(pFont);
 	}
 
+	//BEGIN osu!droid modified - Add unload methods
+	public synchronized void unloadFont(final Font pFont) {
+		if(pFont == null) {
+			throw new IllegalArgumentException("pFont must not be null!");
+		}
+		this.mFontsManaged.remove(pFont);
+	}
+	//END osu!droid modified
+
 	public synchronized void loadFonts(final FontLibrary pFontLibrary) {
 		pFontLibrary.loadFonts(this);
 	}

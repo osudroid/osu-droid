@@ -6,9 +6,11 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
-import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
 open class UICard(
@@ -18,7 +20,7 @@ open class UICard(
      */
     val content: UIContainer = UILinearContainer().apply {
         orientation = Orientation.Vertical
-        width = FillParent
+        width = Size.Full
         clipToBounds = true
     },
 
@@ -54,20 +56,20 @@ open class UICard(
 
     init {
         orientation = Orientation.Vertical
-        background = UIBox().apply {
-            cornerRadius = 14f
-            applyTheme = { color = it.accentColor * 0.15f }
+        style = {
+            backgroundColor = it.accentColor * 0.15f
+            radius = Radius.MD
         }
 
         +titleBar.apply {
-            width = FillParent
+            width = Size.Full
             padding = Vec4(12f, 8f)
 
             +UIText().apply {
-                font = ResourceManager.getInstance().getFont("smallFont")
+                fontSize = FontSize.SM
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                applyTheme = { color = it.accentColor }
+                style = { color = it.accentColor }
             }
 
             +UITriangle().apply {
@@ -76,7 +78,7 @@ open class UICard(
                 rotationCenter = Anchor.Center
                 width = 16f
                 height = 12f
-                applyTheme = {
+                style = {
                     color = it.accentColor
                     alpha = 0.5f
                 }
@@ -84,9 +86,9 @@ open class UICard(
         }
 
         +UIBox().apply {
-            width = FillParent
+            width = Size.Full
             height = 1f
-            applyTheme = {
+            style = {
                 color = it.accentColor
                 alpha = 0.025f
             }

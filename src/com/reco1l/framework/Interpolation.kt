@@ -42,4 +42,12 @@ object Interpolation {
     }
 
 
+    fun colorAt(time: Float, start: Color4, end: Color4, startTime: Float, endTime: Float, easing: Easing = Easing.None): Color4 {
+        val r = floatAt(time, start.red, end.red, startTime, endTime, easing)
+        val g = floatAt(time, start.green, end.green, startTime, endTime, easing)
+        val b = floatAt(time, start.blue, end.blue, startTime, endTime, easing)
+        val a = floatAt(time, start.alpha, end.alpha, startTime, endTime, easing)
+        return Color4(r, g, b, a)
+    }
+
 }

@@ -76,7 +76,7 @@ public class GameplaySpinner extends GameObject {
 
         metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
-        metre.setHeight(background.getHeightScaled());
+        metre.setHeight(background.getTransformedHeight());
 
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
@@ -145,7 +145,7 @@ public class GameplaySpinner extends GameObject {
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
 
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
+        metreY = (Config.getRES_HEIGHT() - background.getTransformedHeight()) / 2;
         metre.setAlpha(0);
         metre.registerEntityModifier(Modifiers.sequence(
             Modifiers.delay(timePreempt * 0.75f),

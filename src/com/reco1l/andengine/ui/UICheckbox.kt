@@ -5,28 +5,23 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.rem
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {
 
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        if (value) {
-            background?.color = theme.accentColor * 0.5f
-        } else {
-            background?.color = theme.accentColor * 0.25f
-        }
-
-        checkSprite.color = theme.accentColor
-    }
-
-
-    private val checkSprite = sprite {
-        textureRegion = ResourceManager.getInstance().getTexture("check")
-        width = 32f
-        height = 32f
+    private val checkIcon = FontAwesomeIcon(Icon.Check).apply {
         anchor = Anchor.Center
         origin = Anchor.Center
+        style = {
+            width = 1.075f.rem
+            height = 1.075f.rem
+            color = it.accentColor
+        }
 
         if (!initialValue) {
             scaleX = 0f
@@ -37,29 +32,29 @@ class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValu
 
 
     init {
-        width = 48f
-        height = 48f
-
-        background = UIBox().apply {
-            cornerRadius = 12f
+        style = {
+            width = 2.15f.rem
+            height = 2.15f.rem
+            backgroundColor = if (value) it.accentColor * 0.5f else it.accentColor * 0.25f
+            radius = Radius.LG
         }
+        +checkIcon
     }
 
     override fun onValueChanged() {
         super.onValueChanged()
 
-        background!!.clearModifiers(ModifierType.Color)
-        checkSprite.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+        checkIcon.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
 
         if (value) {
-            background!!.colorTo(Theme.current.accentColor * 0.5f, 0.1f)
-            checkSprite.scaleTo(1f, 0.2f, Easing.OutBounce)
+            backgroundColor = Theme.current.accentColor * 0.5f
+            checkIcon.scaleTo(1f, 0.2f, Easing.OutBounce)
         } else {
-            background!!.colorTo(Theme.current.accentColor * 0.25f, 0.1f)
-            checkSprite.scaleTo(0f, 0.2f, Easing.OutBounce)
+            backgroundColor = Theme.current.accentColor * 0.25f
+            checkIcon.scaleTo(0f, 0.2f, Easing.OutBounce)
         }
 
-        checkSprite.fadeIn(0.2f)
+        checkIcon.fadeIn(0.2f)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {

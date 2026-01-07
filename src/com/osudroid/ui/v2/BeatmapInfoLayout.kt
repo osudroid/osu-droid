@@ -7,6 +7,8 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.*
 import com.rian.osu.*
@@ -40,37 +42,35 @@ class BeatmapInfoLayout : UILinearContainer() {
 
 
     init {
-        width = FillParent
+        width = Size.Full
         orientation = Orientation.Vertical
         spacing = 6f
 
-        flexContainer {
-            width = FillParent
+        fillContainer {
+            width = Size.Full
 
             linearContainer {
-                flexRules {
-                    grow = 1f
-                }
+                width = Size.Full
                 orientation = Orientation.Vertical
 
                 artistText = text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    fontSize = FontSize.SM
                     text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.9f}
+                    style = { color = it.accentColor * 0.9f }
                 }
 
                 titleText = text {
-                    width = FillParent
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    width = Size.Full
+                    fontSize = FontSize.SM
                     text = "No selected beatmap"
-                    applyTheme = { color = it.accentColor }
+                    style = { color = it.accentColor }
                     clipToBounds = true
                 }
 
                 versionText = text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    fontSize = FontSize.SM
                     text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.8f}
+                    style = { color = it.accentColor * 0.8f }
                 }
             }
 
@@ -85,15 +85,15 @@ class BeatmapInfoLayout : UILinearContainer() {
             lengthText = compoundText {
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
                 text = "00:00"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
+                style = { color = it.accentColor }
+                fontSize = FontSize.XS
             }
 
             bpmText = compoundText {
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
                 text = "0"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
+                style = { color = it.accentColor }
+                fontSize = FontSize.XS
             }
         }
 

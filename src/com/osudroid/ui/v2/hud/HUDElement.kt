@@ -157,10 +157,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
         isInEditMode = value
 
         if (value) {
-            background = UIBox().apply {
-                color = Color4(0x29F27272)
-                alpha = 0.15f
-            }
+            backgroundColor = Color4(0x29F27272) / 0.15f
             editorOverlay = HUDElementOverlay(this)
 
             parent!!.attachChild(editorOverlay!!)
@@ -168,8 +165,8 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
             connectionLine?.detachSelf()
             editorOverlay?.detachSelf()
 
+            backgroundColor = Color4.Transparent
             connectionLine = null
-            background = null
             editorOverlay = null
         }
     }
@@ -179,8 +176,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
      */
     open fun onSelectionStateChange(isSelected: Boolean) {
 
-        background?.clearEntityModifiers()
-        background?.fadeTo(if (isSelected) 0.5f else 0.15f, 0.1f)
+        backgroundColor /= if (isSelected) 0.5f else 0.15f
 
         editorOverlay?.clearEntityModifiers()
         editorOverlay?.fadeTo(if (isSelected) 1f else 0f, 0.1f)

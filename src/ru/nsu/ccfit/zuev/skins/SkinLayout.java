@@ -47,14 +47,14 @@ public class SkinLayout {
         // different origins yet. To work around this, we need to flip the position in the Y axis.
         // TODO: When ExtendedSprite supports touch area properly, this should be changed to use bottom-left origin
         float x = xPosition;
-        float y = Config.getRES_HEIGHT() - sprite.getHeightScaled() - yPosition;
+        float y = Config.getRES_HEIGHT() - sprite.getTransformedHeight() - yPosition;
 
         if (Float.isNaN(x)) {
-            x = previousSprite != null ? previousSprite.getX() + previousSprite.getWidthScaled() : 0;
+            x = previousSprite != null ? previousSprite.getX() + previousSprite.getTransformedWidth() : 0;
         }
 
         if (Float.isNaN(y)) {
-            y = Config.getRES_HEIGHT() - sprite.getHeightScaled();
+            y = Config.getRES_HEIGHT() - sprite.getTransformedHeight();
         }
 
         sprite.setPosition(x, y);
