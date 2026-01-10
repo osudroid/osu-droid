@@ -30,6 +30,19 @@ object OsuColors {
         )
     )
 
+    // Sourced from https://github.com/ppy/osu-web/blob/e510645e16af97997d3ce97624472b3f1fbe12a2/resources/js/utils/beatmap-helper.ts#L28.
+    // Do note that the source has one more color in the range than the domain, which is unused.
+    // In addition to that, gamma correction is ignored, following similar spectrum behavior of the star rating color itself.
+    private val starRatingTextColorSpectrum = LinearColorScale(
+        listOf(
+            9.0f to Color4(0xFFF6F05C.toInt()),
+            9.9f to Color4(0xFFFF8068.toInt()),
+            10.6f to Color4(0xFFFF4E6F.toInt()),
+            11.5f to Color4(0xFFC645B8.toInt()),
+            12.4f to Color4(0xFF6563DE.toInt())
+        )
+    )
+
     /**
      * Retrieves the colour for a given point in the star range.
      */
@@ -42,6 +55,20 @@ object OsuColors {
         }
 
         return starRatingColorSpectrum.get(sr)
+    }
+
+    /**
+     * Retrieves the text colour for a given point in the star range.
+     */
+    fun getStarRatingTextColor(point: Double): Color4 {
+        // Mimics the MidpointRounding.AwayFromZero rounding from C#
+        val sr = ceil(point).toFloat().roundBy(2)
+
+        if (sr < 6.5) {
+            return Color.BLACK.toColor4()
+        }
+
+        return starRatingTextColorSpectrum.get(sr)
     }
 
     val green = Color4(0xFF88B300)
