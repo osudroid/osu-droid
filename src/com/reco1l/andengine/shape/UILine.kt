@@ -25,7 +25,7 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -36,7 +36,7 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
