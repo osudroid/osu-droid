@@ -25,7 +25,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
@@ -41,7 +41,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -52,7 +52,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -63,7 +63,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
      */
     fun setPortion(value: Float) {
         endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
 
@@ -74,7 +74,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Instance)
+        requestNewBuffer()
     }
 
     override fun onCreateBuffer(): CircleVertexBuffer {
