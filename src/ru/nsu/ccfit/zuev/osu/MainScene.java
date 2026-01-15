@@ -201,7 +201,7 @@ public class MainScene implements IUpdateHandler {
                         .setMessage(
                                 "<h1>osu!droid</h1>\n" +
                                 "<h5>Version " + BuildConfig.VERSION_NAME + "</h5>\n" +
-                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2025</p>\n" +
+                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2026</p>\n" +
                                 "<br>\n" +
                                 "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
                                 "<br>\n" +

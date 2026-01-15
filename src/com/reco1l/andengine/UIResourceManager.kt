@@ -28,7 +28,7 @@ class UIResourceManager(private val context: Context) {
             return fetchedFont
         }
 
-        Log.i("UI", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
 
         val texture = BitmapTextureAtlas(
             GLHelper.GlMaxTextureWidth / 2,
@@ -62,7 +62,7 @@ class UIResourceManager(private val context: Context) {
 
         if (subscribers.isEmpty()) {
             val fontKey = fonts.entries.find { it.value == font }?.key
-            Log.i("UI", "Unloading font: $fontKey")
+            Log.i("UIResourceManager", "Unloading font: $fontKey")
 
             fonts.remove(fontKey)
             fontSubscribers.remove(font)

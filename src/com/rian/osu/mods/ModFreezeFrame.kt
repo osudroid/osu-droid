@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.Spinner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -33,7 +34,9 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
     }
 
     private fun applyFadeInAdjustment(hitObject: HitObject) {
-        hitObject.timePreempt += hitObject.startTime - lastNewComboTime
+        if (hitObject !is Spinner) {
+            hitObject.timePreempt += hitObject.startTime - lastNewComboTime
+        }
 
         if (hitObject is Slider) {
             // Freezing slider ticks doesn't play well with snaking sliders, and slider repeats will not layer
