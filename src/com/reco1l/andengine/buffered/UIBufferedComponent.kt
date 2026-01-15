@@ -185,7 +185,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo.Mixture
     }
 
-    fun finalize() {
+    open fun finalize() {
         buffer?.finalize()
     }
 
