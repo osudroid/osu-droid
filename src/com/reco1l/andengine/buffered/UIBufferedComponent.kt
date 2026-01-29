@@ -41,7 +41,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
 
     /**
-     * Indicates whether a new buffer is needed to be created.
+     * Indicates whether a new buffer needs to be created.
      */
     protected var needsNewBuffer = true
         private set
@@ -83,7 +83,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Draw pipeline
 
-    override fun onHandleInvalidations() {
+    override fun onHandleInvalidations(restoreFlags: Boolean) {
 
         if (needsNewBuffer) {
             needsNewBuffer = false
@@ -91,7 +91,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             requestBufferUpdate()
         }
 
-        super.onHandleInvalidations()
+        super.onHandleInvalidations(restoreFlags)
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.

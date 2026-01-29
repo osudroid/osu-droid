@@ -44,7 +44,7 @@ class StarRatingBadge : UIBadge() {
             background?.colorTo(OsuColors.getStarRatingColor(rating), 0.1f)
 
             if (rating >= 6.5) {
-                colorTo(Color4(0xFFFFD966), 0.1f)
+                colorTo(OsuColors.getStarRatingTextColor(rating), 0.1f)
                 fadeTo(1f, 0.1f)
             } else {
                 colorTo(Color4.Black, 0.1f)
