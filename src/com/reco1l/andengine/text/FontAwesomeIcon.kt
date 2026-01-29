@@ -16,7 +16,7 @@ import kotlin.math.*
 /**
  * A text entity that can be displayed on the screen.
  */
-open class FontAwesomeIcon(icon: Int = Icon.Question) : UIBufferedComponent<CompoundBuffer>() {
+open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
 
     /**
      * The text to be displayed
