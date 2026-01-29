@@ -23,7 +23,9 @@ class ModHidden : ModWithVisibilityAdjustment() {
     override val scoreMultiplier: Float
         get() = if (usesDefaultSettings) 1.06f else 1f
 
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModTraceable::class)
+    override val incompatibleMods = super.incompatibleMods + arrayOf(
+        ModApproachDifferent::class, ModTraceable::class, ModFreezeFrame::class
+    )
 
     /**
      * Whether to only fade approach circles.
