@@ -31,7 +31,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 currentLength = value.length
 
                 if (currentLength > previousLength) {
-                    invalidateBuffer(BufferInvalidationFlag.Instance)
+                    requestNewBuffer()
                 }
 
                 invalidate(InvalidationFlag.Content)
@@ -57,7 +57,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Data)
+                requestBufferUpdate()
             }
         }
 
@@ -114,12 +114,12 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         contentWidth = linesWidth!!.max().toFloat()
         contentHeight = (lines!!.size * font.lineHeight + (lines!!.size - 1) * font.lineGap).toFloat()
 
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
     override fun onCreateBuffer(): CompoundBuffer {

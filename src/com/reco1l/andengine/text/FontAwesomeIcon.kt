@@ -99,12 +99,12 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         contentWidth = font.getLetter(text).mAdvance.toFloat()
         contentHeight = font.lineHeight.toFloat()
 
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
     override fun onCreateBuffer(): CompoundBuffer {
