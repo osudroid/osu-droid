@@ -63,6 +63,12 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     private var isInEditMode = false
 
 
+    init {
+        width = FillParent
+        height = FillParent
+    }
+
+
     override fun onManagedUpdate(deltaTimeSec: Float) {
         if (UIEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
             detachSelf()
