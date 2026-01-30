@@ -248,7 +248,8 @@ class LobbyScene : UIScene() {
             val list = LobbyAPI.getRooms(
                 query = searchQuery,
                 sessionId = OnlineManager.getInstance().sessionId,
-                sign = SecurityUtils.signRequest("${searchQuery ?: ""}_${OnlineManager.getInstance().sessionId}")
+                uid = OnlineManager.getInstance().userId,
+                sign = SecurityUtils.signRequest("${searchQuery ?: ""}_${OnlineManager.getInstance().userId}_${OnlineManager.getInstance().sessionId}")
             )
 
             updateThread {
