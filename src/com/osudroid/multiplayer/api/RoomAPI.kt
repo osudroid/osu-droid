@@ -292,7 +292,8 @@ object RoomAPI {
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
      * [IRoomEventListener.onRoomConnectFail]
      */
-    fun connectToRoom(roomId: Long, userId: Long, username: String, roomPassword: String? = null, sessionID: String? = null) {
+    fun connectToRoom(roomId: Long, userId: Long, username: String, gameSessionId: String, roomPassword: String? = null,
+                      multiplayerSessionID: String? = null) {
 
         // Clearing previous socket in case of reconnection.
         socket?.off()
@@ -300,14 +301,15 @@ object RoomAPI {
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
-        val sign = SecurityUtils.signRequest("${userId}_$username")
+        val sign = SecurityUtils.signRequest("${userId}_${username}_$gameSessionId")
 
         auth["uid"] = userId.toString()
         auth["username"] = username
+        auth["gameSessionID"] = gameSessionId
         auth["version"] = API_VERSION.toString()
 
-        if (sessionID != null) {
-            auth["sessionID"] = sessionID
+        if (multiplayerSessionID != null) {
+            auth["multiplayerSessionID"] = multiplayerSessionID
         }
 
         if (sign != null) {

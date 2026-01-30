@@ -63,7 +63,13 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                             maxPlayers = capacity
                         )
 
-                        RoomAPI.connectToRoom(roomId, OnlineManager.getInstance().userId, OnlineManager.getInstance().username, password)
+                        RoomAPI.connectToRoom(
+                            roomId = roomId,
+                            userId = OnlineManager.getInstance().userId,
+                            username = OnlineManager.getInstance().username,
+                            gameSessionId = OnlineManager.getInstance().sessionId,
+                            roomPassword = password
+                        )
 
                     } catch (e: Exception) {
                         UIEngine.current.scene = lobbyScene

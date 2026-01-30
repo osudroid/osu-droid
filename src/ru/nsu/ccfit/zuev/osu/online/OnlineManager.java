@@ -390,6 +390,10 @@ public class OnlineManager {
         return userId;
     }
 
+    public String getSessionId() {
+        return ssid;
+    }
+
     public String getPassword() {
         return password;
     }

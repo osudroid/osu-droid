@@ -181,6 +181,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                     roomId = room.id,
                     userId = OnlineManager.getInstance().userId,
                     username = OnlineManager.getInstance().username,
+                    gameSessionId = OnlineManager.getInstance().sessionId,
                     roomPassword = password
                 )
             } catch (e: Exception) {
