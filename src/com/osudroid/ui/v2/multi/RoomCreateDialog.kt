@@ -66,7 +66,6 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                         RoomAPI.connectToRoom(
                             roomId = roomId,
                             userId = OnlineManager.getInstance().userId,
-                            username = OnlineManager.getInstance().username,
                             gameSessionId = OnlineManager.getInstance().sessionId,
                             roomPassword = password
                         )
