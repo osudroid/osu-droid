@@ -40,7 +40,7 @@ object LobbyAPI {
     /**
      * Get room list.
      */
-    fun getRooms(query: String?, sign: String?): List<Room> {
+    fun getRooms(query: String?, sessionId: String, sign: String?): List<Room> {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return listOf(
@@ -56,6 +56,7 @@ object LobbyAPI {
                 it.buildUrl {
                     addQueryParameter("sign", sign)
                     addQueryParameter("query", query)
+                    addQueryParameter("sessionId", sessionId)
                 }
             }
 
