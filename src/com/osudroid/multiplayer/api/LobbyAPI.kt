@@ -90,7 +90,7 @@ object LobbyAPI {
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, sessionId: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return 1
@@ -119,6 +119,7 @@ object LobbyAPI {
                 }
 
                 put("version", RoomAPI.API_VERSION)
+                put("sessionId", sessionId)
                 put("sign", sign)
             }
 

@@ -49,7 +49,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                     if (password != null) {
                         signStr += "_${password}"
                     }
-                    signStr += "_${RoomAPI.API_VERSION}"
+                    signStr += "_${RoomAPI.API_VERSION}_${OnlineManager.getInstance().sessionId}"
 
                     try {
 
@@ -57,6 +57,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                             name = name,
                             beatmap = beatmap,
                             hostUID = OnlineManager.getInstance().userId,
+                            sessionId = OnlineManager.getInstance().sessionId,
                             sign = SecurityUtils.signRequest(signStr),
                             password = password,
                             maxPlayers = capacity
