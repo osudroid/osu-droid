@@ -103,7 +103,7 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
             put("beatmap", null)
 
             putObject("host") {
-                put("uid", uid)
+                put("id", uid)
             }
 
             put("mods", JSONArray())
@@ -116,7 +116,7 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
             putArray("players") {
 
                 putObject {
-                    put("uid", uid)
+                    put("id", uid)
                     put("username", Config.getOnlineUsername())
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)

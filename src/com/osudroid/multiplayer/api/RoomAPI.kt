@@ -183,7 +183,7 @@ object RoomAPI {
         )
 
         room.players = players
-        room.host = json.getJSONObject("host").getString("uid").toLong()
+        room.host = json.getJSONObject("host").getString("id").toLong()
         room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
         room.status = RoomStatus[json.getInt("status")]
 
