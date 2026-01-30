@@ -45,7 +45,7 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                         )
                     }
 
-                    var signStr = "${name}_${capacity}"
+                    var signStr = "${OnlineManager.getInstance().userId}_${name}_${capacity}"
                     if (password != null) {
                         signStr += "_${password}"
                     }
@@ -57,7 +57,6 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                             name = name,
                             beatmap = beatmap,
                             hostUID = OnlineManager.getInstance().userId,
-                            hostUsername = OnlineManager.getInstance().username,
                             sign = SecurityUtils.signRequest(signStr),
                             password = password,
                             maxPlayers = capacity
