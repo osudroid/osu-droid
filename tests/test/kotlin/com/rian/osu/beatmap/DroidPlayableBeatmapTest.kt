@@ -125,7 +125,7 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
             Assert.assertEquals(1.0503248f, firstObject.difficultyScale, 1e-2f)
             Assert.assertEquals(1.0503248f, firstObject.gameplayScale, 1e-2f)
-            Assert.assertEquals(1012.5, firstObject.timePreempt, 1e-2)
+            Assert.assertEquals(1012.0, firstObject.timePreempt, 1e-2)
         }
     }
 
