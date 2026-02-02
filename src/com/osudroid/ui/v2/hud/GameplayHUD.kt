@@ -10,6 +10,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.entity.IEntity
@@ -64,8 +65,8 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
     init {
-        width = FillParent
-        height = FillParent
+        width = Size.Full
+        height = Size.Full
     }
 
 

@@ -68,7 +68,7 @@ class LobbyScene : UIScene() {
             height = Size.Full
             style = {
                 padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
-                backgroundColor = it.accentColor * 0.1f / 0.9f
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
                 spacing = 4f.srem
             }
 

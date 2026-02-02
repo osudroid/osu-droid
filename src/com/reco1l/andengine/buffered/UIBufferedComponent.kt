@@ -83,7 +83,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Draw pipeline
 
-    override fun onHandleInvalidations(restoreFlags: Boolean) {
+    override fun onHandleInvalidations() {
 
         if (needsNewBuffer) {
             needsNewBuffer = false
@@ -91,7 +91,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             requestBufferUpdate()
         }
 
-        super.onHandleInvalidations(restoreFlags)
+        super.onHandleInvalidations()
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.

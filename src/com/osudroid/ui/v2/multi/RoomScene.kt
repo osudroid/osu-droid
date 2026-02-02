@@ -319,7 +319,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             style = {
                                 radius = Radius.MD
                                 padding = Vec4(3f.srem)
-                                backgroundColor = it.accentColor * 0.1f / 0.5f
+                                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.5f)
                             }
                             isVisible = false
 
@@ -332,7 +332,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                             style = {
                                 radius = Radius.MD
                                 padding = Vec4(3f.srem)
-                                backgroundColor = it.accentColor * 0.1f / 0.5f
+                                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.5f)
                             }
                         }
 

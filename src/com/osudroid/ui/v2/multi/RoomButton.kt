@@ -28,7 +28,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
     init {
         width = Size.Full
         style = {
-            backgroundColor = it.accentColor * 0.1f / 0.8f
+            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.8f)
             padding = Vec4(3f.srem)
         }
 
@@ -75,7 +75,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                 text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
                 style = {
                     fontSize = FontSize.XS
-                    color = it.accentColor / 0.95f
+                    color = it.accentColor.copy(alpha = 0.95f)
                 }
             }
 
