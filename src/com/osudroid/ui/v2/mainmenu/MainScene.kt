@@ -121,7 +121,7 @@ object MainScene : UIScene() {
                 alpha = 0f
                 style = {
                     colorStart = it.accentColor * 0.1f
-                    colorEnd = (it.accentColor * 0.1f) / 0.5f
+                    colorEnd = (it.accentColor * 0.1f).copy(alpha = 0.5f)
                 }
                 menuGradientBox = this
             }
@@ -341,7 +341,7 @@ class MenuButton(icon: Int, title: String) : UIButton() {
         style += {
             width = 16f.rem
             radius = Radius.XL
-            backgroundColor /= 0.6f
+            backgroundColor = backgroundColor.copy(alpha = 0.6f)
             padding = Vec4(6f.srem)
         }
 

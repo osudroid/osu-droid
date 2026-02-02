@@ -84,7 +84,7 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
                 }
 
                 colorPalette = arrayOf(
-                    OSU_COLOR.lighteen(0.1f),
+                    OSU_COLOR.lighten(0.1f),
                     OSU_COLOR.darken(0.1f),
                     OSU_COLOR.darken(0.125f),
                     OSU_COLOR.darken(0.15f)
