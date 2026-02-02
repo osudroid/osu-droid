@@ -9,6 +9,7 @@ import com.reco1l.andengine.component.DepthInfo
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.PaintStyle
+import com.reco1l.andengine.shape.UICircle
 import com.reco1l.andengine.shape.UIGradientBox
 import com.reco1l.andengine.text
 import com.reco1l.andengine.text.UIText
@@ -26,6 +27,8 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
     private lateinit var osuText: UIText
 
     private val bounceContainer: UIContainer
+
+    private lateinit var inputFeedbackCircle: UICircle
 
 
     init {
@@ -45,16 +48,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             height = Size.Full
             anchor = Anchor.Center
             origin = Anchor.Center
-
-            if (withExternalEffects) {
-                +RadialVisualizer().apply {
-                    width = Size.Full
-                    height = Size.Full
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    alpha = 0.4f
-                }
-            }
 
             circle {
                 width = Size.Full
@@ -111,8 +104,18 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
                 origin = Anchor.Center
             }
 
+            inputFeedbackCircle = circle {
+                width = Size.Full
+                height = Size.Full
+                color = Colors.White
+                alpha = 0f
+            }
         }
 
+    }
+
+    fun playClickEffect() {
+        inputFeedbackCircle.alpha = 0.9f
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -127,6 +130,8 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             val oneQuart = beatLengthSeconds * 0.25f
             bounceContainer.setScale(Interpolation.floatAt(deltaTimeSec.coerceIn(0f, oneQuart), bounceContainer.scaleX, 0.9f, 0f, oneQuart))
         }
+
+        inputFeedbackCircle.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), inputFeedbackCircle.alpha, 0f, 0f, 0.1f)
 
         super.onManagedUpdate(deltaTimeSec)
     }

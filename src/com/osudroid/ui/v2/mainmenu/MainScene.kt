@@ -1,62 +1,38 @@
 package com.osudroid.ui.v2.mainmenu
 
-import com.edlplan.framework.easing.Easing
-import com.osudroid.BuildSettings
-import com.osudroid.MusicManager
-import com.osudroid.RythimManager
-import com.osudroid.beatmaplisting.BeatmapListing
-import com.osudroid.multiplayer.Multiplayer
+import android.content.*
+import android.net.Uri
+import android.util.*
+import androidx.core.content.*
+import com.edlplan.framework.easing.*
+import com.osudroid.*
+import com.osudroid.beatmaplisting.*
+import com.osudroid.multiplayer.*
 import com.osudroid.resources.R
-import com.osudroid.ui.v1.SettingsFragment
-import com.osudroid.ui.v2.multi.LobbyScene
-import com.osudroid.utils.async
-import com.osudroid.utils.mainThread
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Axes
-import com.reco1l.andengine.UIEngine
-import com.reco1l.andengine.UIScene
-import com.reco1l.andengine.component.UIComponent
-import com.reco1l.andengine.component.forEach
-import com.reco1l.andengine.component.scaleCenter
-import com.reco1l.andengine.container
-import com.reco1l.andengine.container.Orientation
-import com.reco1l.andengine.container.UIContainer
-import com.reco1l.andengine.container.UILinearContainer
-import com.reco1l.andengine.fillContainer
-import com.reco1l.andengine.linearContainer
-import com.reco1l.andengine.modifier.ModifierType
-import com.reco1l.andengine.scrollableContainer
-import com.reco1l.andengine.shape.UIGradientBox
-import com.reco1l.andengine.sprite
-import com.reco1l.andengine.sprite.ScaleType
-import com.reco1l.andengine.sprite.UISprite
-import com.reco1l.andengine.text
-import com.reco1l.andengine.text.FontAwesomeIcon
-import com.reco1l.andengine.textButton
+import com.osudroid.ui.v1.*
+import com.osudroid.ui.v2.multi.*
+import com.osudroid.utils.*
+import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.theme.Colors
-import com.reco1l.andengine.theme.FontSize
-import com.reco1l.andengine.theme.Icon
-import com.reco1l.andengine.theme.Radius
-import com.reco1l.andengine.theme.Size
-import com.reco1l.andengine.theme.rem
-import com.reco1l.andengine.theme.srem
-import com.reco1l.andengine.theme.vh
-import com.reco1l.andengine.ui.UIButton
-import com.reco1l.andengine.ui.UITextButton
-import com.reco1l.framework.Interpolation
-import com.reco1l.framework.math.Vec4
-import ru.nsu.ccfit.zuev.osu.LibraryManager
-
-import com.reco1l.andengine.ui.plus
-import org.anddev.andengine.engine.camera.Camera
-import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
-import javax.microedition.khronos.opengles.GL10
-import kotlin.math.abs
+import com.reco1l.andengine.ui.*
+import com.reco1l.framework.*
+import com.reco1l.framework.math.*
+import org.anddev.andengine.engine.camera.*
+import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.helper.*
+import ru.nsu.ccfit.zuev.osu.menu.*
+import ru.nsu.ccfit.zuev.osu.online.*
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
+import java.io.*
+import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
 
 object MainScene : UIScene() {
@@ -70,8 +46,9 @@ object MainScene : UIScene() {
     private lateinit var menuContainer: UIContainer
     private lateinit var menuGradientBox: UIGradientBox
 
-    private val isMenuExpanded
-        get() = menuContainer.width > 0f
+    private var isMenuExpanded = false
+
+    private var lastMusicChange = System.currentTimeMillis()
 
 
     init {
@@ -142,6 +119,8 @@ object MainScene : UIScene() {
                 }
 
                 onActionUp = {
+                    playClickEffect()
+
                     menuContainer.apply {
                         clearModifiers(ModifierType.SizeX, ModifierType.Alpha)
 
@@ -163,6 +142,8 @@ object MainScene : UIScene() {
                             fadeIn(0.4f, Easing.OutQuint)
                         }
                     }
+
+                    isMenuExpanded = !isMenuExpanded
                 }
 
                 logo = this
@@ -275,10 +256,35 @@ object MainScene : UIScene() {
 
                 val musicPlayer = MusicPlayer(this)
                 onActionUp = {
-                    musicPlayer.show()
+                    if (alpha > 0f)
+                        musicPlayer.show()
                 }
             }
         }
+
+        clickableContainer {
+            anchor = Anchor.BottomLeft
+            origin = Anchor.BottomLeft
+            style = {
+                paddingLeft = UIEngine.current.safeArea.x
+                paddingBottom = 4f.srem
+            }
+
+            text {
+                text = "osu!droid ${BuildConfig.VERSION_NAME}"
+                style = {
+                    backgroundColor = Colors.Black.copy(alpha = 0.5f)
+                    padding = Vec4(2f.srem, 1f.srem)
+                    radius = Radius.MD
+                    fontSize = FontSize.SM
+                }
+            }
+
+            onActionUp = {
+                BuildInformationDialog().show()
+            }
+        }
+
 
         RythimManager.addOnBeatChangeListener(this) {
             if (!RythimManager.isKiai) {
@@ -305,6 +311,8 @@ object MainScene : UIScene() {
             } else {
                 background.textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             }
+
+            musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         }
     }
 
@@ -323,7 +331,15 @@ object MainScene : UIScene() {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
+        logo.setScale(Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), logo.scaleX, if (isMenuExpanded) 1f else 1.3f, 0f, 0.1f))
+
+        val mightShowMusicButton = isMenuExpanded || System.currentTimeMillis() - lastMusicChange < 3000
+
+        musicButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.translationX, if (mightShowMusicButton) 0f else 8f.srem, 0f, 0.05f)
+        musicButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.alpha, if (mightShowMusicButton) 1f else 0f, 0f, 0.05f)
+
+        playerButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.translationX, if (isMenuExpanded) 0f else (-8f).srem, 0f, 0.05f)
+        playerButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.alpha, if (isMenuExpanded) 1f else 0f, 0f, 0.05f)
 
         val beatLengthSeconds = RythimManager.beatLength.toFloat() / 1000f * (if (RythimManager.isKiai) 1f else RythimManager.beatSignature.toFloat())
         leftFlash.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, beatLengthSeconds), leftFlash.alpha, 0f, 0f, beatLengthSeconds)
@@ -414,3 +430,138 @@ class CarrouselLinearContainer(private val logo: OsuLogo) : UILinearContainer() 
 
 }
 
+
+class BuildInformationDialog : UIDialog<UIScrollableContainer>(UIScrollableContainer().apply {
+    width = Size.Full
+    clipToBounds = true
+    scrollAxes = Axes.Y
+    style = {
+        maxHeight = 0.7f.vh
+    }
+}) {
+    init {
+        title = "About"
+
+        innerContent.apply {
+
+            linearContainer {
+                width = Size.Full
+                orientation = Orientation.Vertical
+                style = {
+                    spacing = 4f.srem
+                    paddingTop = 4f.srem
+                    paddingBottom = 4f.srem
+                }
+
+                text {
+                    text = "osu!droid"
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    style = {
+                        fontSize = FontSize.XL
+                        fontFamily = Fonts.TorusBold
+                    }
+                }
+
+                text {
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    text = "Version: ${BuildConfig.VERSION_NAME}"
+                    style = { fontSize = FontSize.MD }
+                }
+
+                text {
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    alignment = Anchor.TopCenter
+                    text = "Made by the osu!droid team\nosu! is © peppy 2007-2026"
+                }
+
+
+                fun goToLink(link: String) {
+                    hide()
+                    val context = GlobalManager.getInstance().mainActivity
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(link)
+                    context.startActivity(intent)
+                }
+
+                textButton {
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    scaleCenter = Anchor.Center
+                    colorVariant = ColorVariant.Tertiary
+                    trailingIcon = FontAwesomeIcon(Icon.ArrowUpRightFromSquare)
+                    text = "Visit official osu! website"
+                    onActionUp = {
+                        goToLink("https://osu.ppy.sh")
+                    }
+                }
+
+                textButton {
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    scaleCenter = Anchor.Center
+                    colorVariant = ColorVariant.Tertiary
+                    trailingIcon = FontAwesomeIcon(Icon.ArrowUpRightFromSquare)
+                    text = "Visit official osu!droid website"
+                    onActionUp = {
+                        goToLink("https://osudroid.moe")
+                    }
+                }
+
+                textButton {
+                    anchor = Anchor.TopCenter
+                    origin = Anchor.TopCenter
+                    scaleCenter = Anchor.Center
+                    colorVariant = ColorVariant.Tertiary
+                    trailingIcon = FontAwesomeIcon(Icon.ArrowUpRightFromSquare)
+                    text = "Join the official Discord server"
+                    onActionUp = {
+                        goToLink("https://discord.gg/nyD92cE")
+                    }
+                }
+
+            }
+        }
+
+        addButton {
+            text = "Changelog"
+            onActionUp = {
+                hide()
+
+                try {
+                    val context = GlobalManager.getInstance().mainActivity
+                    val changelogFile = File(context.cacheDir, "changelog.html")
+
+                    context.assets.open("app/changelog.html").use { inputStream ->
+                        changelogFile.outputStream().use { outputStream ->
+                            val buffer = ByteArray(1024)
+                            var length: Int
+                            while ((inputStream.read(buffer).also { length = it }) > 0) {
+                                outputStream.write(buffer, 0, length)
+                            }
+                        }
+                    }
+
+                    val changelogUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", changelogFile)
+
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.setDataAndType(changelogUri, "text/html")
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("MainScene", "Failed to load changelog", e)
+                }
+            }
+        }
+
+        addButton {
+            text = "Close"
+            onActionUp = {
+                hide()
+            }
+        }
+    }
+}
