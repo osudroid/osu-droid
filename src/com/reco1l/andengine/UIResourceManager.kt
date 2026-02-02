@@ -5,6 +5,7 @@ package com.reco1l.andengine
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.util.Log
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.IBuffer
@@ -87,6 +88,8 @@ class UIResourceManager(private val context: Context) {
             return fetchedFont
         }
 
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
+
         val texture = BitmapTextureAtlas(
             GLHelper.GlMaxTextureWidth / 2,
             GLHelper.GlMaxTextureWidth / 2,
@@ -119,6 +122,7 @@ class UIResourceManager(private val context: Context) {
 
         if (subscribers.isEmpty()) {
             val fontKey = fonts.entries.find { it.value == font }?.key
+            Log.i("UIResourceManager", "Unloading font: $fontKey")
 
             fonts.remove(fontKey)
             fontSubscribers.remove(font)

@@ -55,11 +55,11 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                         )
                     }
 
-                    var signStr = "${name}_${capacity}"
+                    var signStr = "${OnlineManager.getInstance().userId}_${name}_${capacity}"
                     if (password != null) {
                         signStr += "_${password}"
                     }
-                    signStr += "_${RoomAPI.API_VERSION}"
+                    signStr += "_${RoomAPI.API_VERSION}_${OnlineManager.getInstance().sessionId}"
 
                     try {
 
@@ -67,13 +67,18 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                             name = name,
                             beatmap = beatmap,
                             hostUID = OnlineManager.getInstance().userId,
-                            hostUsername = OnlineManager.getInstance().username,
+                            sessionId = OnlineManager.getInstance().sessionId,
                             sign = SecurityUtils.signRequest(signStr),
                             password = password,
                             maxPlayers = capacity
                         )
 
-                        RoomAPI.connectToRoom(roomId, OnlineManager.getInstance().userId, OnlineManager.getInstance().username, password)
+                        RoomAPI.connectToRoom(
+                            roomId = roomId,
+                            userId = OnlineManager.getInstance().userId,
+                            gameSessionId = OnlineManager.getInstance().sessionId,
+                            roomPassword = password
+                        )
 
                     } catch (e: Exception) {
                         UIEngine.current.scene = lobbyScene

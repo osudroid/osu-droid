@@ -132,7 +132,7 @@ object Multiplayer {
                 RoomAPI.connectToRoom(
                     roomId = roomID,
                     userId = OnlineManager.getInstance().userId,
-                    username = OnlineManager.getInstance().username,
+                    gameSessionId = OnlineManager.getInstance().sessionId,
                     roomPassword = password
                 )
 
@@ -274,8 +274,8 @@ object Multiplayer {
                     RoomAPI.connectToRoom(
                         roomId = room!!.id,
                         userId = OnlineManager.getInstance().userId,
-                        username = OnlineManager.getInstance().username,
-                        sessionID = room!!.sessionID
+                        gameSessionId = OnlineManager.getInstance().sessionId,
+                        multiplayerSessionID = room!!.sessionID
                     )
 
                     isWaitingAttemptResponse = true

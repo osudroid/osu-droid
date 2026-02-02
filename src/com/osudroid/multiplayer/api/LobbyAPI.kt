@@ -40,7 +40,7 @@ object LobbyAPI {
     /**
      * Get room list.
      */
-    fun getRooms(query: String?, sign: String?): List<Room> {
+    fun getRooms(query: String?, uid: Long, sessionId: String, sign: String?): List<Room> {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return listOf(
@@ -56,6 +56,8 @@ object LobbyAPI {
                 it.buildUrl {
                     addQueryParameter("sign", sign)
                     addQueryParameter("query", query)
+                    addQueryParameter("uid", uid.toString())
+                    addQueryParameter("sessionId", sessionId)
                 }
             }
 
@@ -79,7 +81,7 @@ object LobbyAPI {
                         status = RoomStatus[json.getInt("status")]
                     )
 
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
 
@@ -90,7 +92,7 @@ object LobbyAPI {
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, sessionId: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return 1
@@ -100,13 +102,9 @@ object LobbyAPI {
 
             request.buildRequestBody {
 
+                put("hostUid", hostUID)
                 put("name", name)
                 put("maxPlayers", maxPlayers)
-
-                putObject("host") {
-                    put("uid", hostUID.toString())
-                    put("username", hostUsername)
-                }
 
                 if (beatmap != null) {
                     putObject("beatmap") {
@@ -123,6 +121,7 @@ object LobbyAPI {
                 }
 
                 put("version", RoomAPI.API_VERSION)
+                put("sessionId", sessionId)
                 put("sign", sign)
             }
 

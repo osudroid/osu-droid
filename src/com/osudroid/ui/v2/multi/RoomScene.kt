@@ -308,7 +308,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                                 style = {
                                     spacing = 1f.srem
                                 }
-
                                 playersContainer = this
                             }
                         }
@@ -549,15 +548,15 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                     detachChildren()
 
                     room.activePlayers.forEach {
-                        +RoomPlayerButton().apply {
+                        +RoomPlayerCard().apply {
                             updateState(room, it)
                         }
                     }
                     currentPlayers = room.playersMap.keys.toLongArray()
                 } else {
                     room.activePlayers.forEachIndexed { index, player ->
-                        val button = getChild(index) as RoomPlayerButton
-                        button.updateState(room, player)
+                        val card = getChild(index) as RoomPlayerCard
+                        card.updateState(room, player)
                     }
                 }
             }
@@ -565,7 +564,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     }
 
     private fun updateButtons() {
-
         statusButton.apply {
             setText(
                 when (Multiplayer.player!!.status) {
@@ -648,7 +646,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("download"))
                 setText(R.string.multiplayer_room_download_beatmap)
                 onActionUp = {
-                    val url = BeatmapListing.Companion.mirror.download.request(roomBeatmap.parentSetID!!).toString()
+                    val url = BeatmapListing.mirror.download.request(roomBeatmap.parentSetID!!).toString()
 
                     async {
                         try {
@@ -709,7 +707,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         Multiplayer.player = null
         chat.hide()
 
-        UIEngine.Companion.current.scene = LobbyScene()
+        UIEngine.current.scene = LobbyScene()
     }
 
     override fun show() {

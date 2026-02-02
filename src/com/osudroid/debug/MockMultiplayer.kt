@@ -13,6 +13,7 @@ import com.reco1l.toolkt.kotlin.*
 import io.socket.client.*
 import io.socket.emitter.*
 import org.json.*
+import ru.nsu.ccfit.zuev.osu.Config
 
 /**
  * Creates a mock multiplayer room.
@@ -34,7 +35,7 @@ fun MockRoom() = Room(
 /**
  * Creates a mock multiplayer socket.
  */
-class MockSocket(private val uid: Long, private val username: String) : Socket(null, null, null) {
+class MockSocket(private val uid: Long) : Socket(null, null, null) {
 
     override fun emit(event: String?, vararg args: Any?): Emitter {
 
@@ -45,7 +46,7 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
             "scoreSubmission" -> "allPlayersScoreSubmitted" to arrayOf(JSONArray().apply { put(args[0]) })
             "liveScoreData" -> "liveScoreData" to arrayOf(JSONArray().apply {
                 // The username is expected to be added by the server.
-                put((args[0] as JSONObject).put("username", username))
+                put((args[0] as JSONObject).put("username", Config.getOnlineUsername()))
             })
 
             // Simulating the server response when all players emit these events.
@@ -96,13 +97,13 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
             put("teamMode", TeamMode.HeadToHead.ordinal)
             put("winCondition", WinCondition.ScoreV1.ordinal)
             put("playerCount", 1)
-            put("playerNames", username)
+            put("playerNames", Config.getOnlineUsername())
             put("sessionId", "")
             put("status", RoomStatus.Idle.ordinal)
             put("beatmap", null)
 
             putObject("host") {
-                put("uid", uid)
+                put("id", uid)
             }
 
             put("mods", JSONArray())
@@ -115,8 +116,8 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
             putArray("players") {
 
                 putObject {
-                    put("uid", uid)
-                    put("username", username)
+                    put("id", uid)
+                    put("username", Config.getOnlineUsername())
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)
                     put("mods", JSONArray())

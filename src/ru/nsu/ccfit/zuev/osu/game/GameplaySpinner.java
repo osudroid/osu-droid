@@ -279,7 +279,7 @@ public class GameplaySpinner extends GameObject {
                 currMouse.set(mouse.x - position.x, mouse.y - position.y);
             }
 
-            if (oldMouse == null || (latestEvent != null && latestEvent.isActionDown())) {
+            if (oldMouse == null || (!autoPlay && latestEvent != null && latestEvent.isActionDown())) {
                 if (oldMouse == null) {
                     oldMouse = new PointF();
                 }
