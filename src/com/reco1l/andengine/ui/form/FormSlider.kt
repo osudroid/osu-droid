@@ -27,7 +27,7 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, UISlider>(i
             fontSize = FontSize.XS
             padding = Vec4(2f.srem, 1f.srem)
             color = it.accentColor
-            backgroundColor = Color4.Black / 0.1f
+            backgroundColor = Color4.Black.copy(alpha = 0.1f)
             radius = Radius.MD
         }
     }

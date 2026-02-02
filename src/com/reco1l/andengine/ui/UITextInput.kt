@@ -57,7 +57,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         origin = Anchor.CenterLeft
 
         style = {
-            color = Theme.current.accentColor / 0.1f
+            color = Theme.current.accentColor.copy(alpha = 0.1f)
         }
     }
 

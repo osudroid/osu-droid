@@ -51,7 +51,7 @@ data class Color4(private val hex: Long) {
         get() = blueInt / 255f
 
     /**
-     * Brigthens or darkens the color by multiplying each RGB component by the given
+     * Brightens or darkens the color by multiplying each RGB component by the given
      * scalar value. Alpha remains unchanged.
      */
     operator fun times(scalar: Float) = Color4(
@@ -61,22 +61,11 @@ data class Color4(private val hex: Long) {
         alpha = alpha
     )
 
-    /**
-     * Replaces the color alpha with the given scalar value.
-     * Similar to [Tailwind CSS opacity utilities](https://tailwindcss.com/docs/opacity).
-     */
-    operator fun div(scalar: Float) = Color4(
-        red = red,
-        green = green,
-        blue = blue,
-        alpha = scalar
-    )
-
 
     /**
      * Lightens the color by the given factor.
      */
-    fun lighteen(factor: Float): Color4 {
+    fun lighten(factor: Float): Color4 {
         val factor = max(1f, 1f + factor)
         return Color4(
             (red * factor).coerceIn(0f, 1f),
@@ -129,6 +118,15 @@ enum class HexComposition {
 
 fun Int.toColor4() = Color4(this)
 
+/**
+ * Converts the cylindrical form of an [Oklab](https://bottosson.github.io/posts/oklab/) color space to the sRGB color space.
+ *
+ * @param l The perceived lightness of the color (0 to 1).
+ * @param c The chroma of the color (0 to ~0.4).
+ * @param h The hue angle in degrees (0 to 360).
+ * @param alpha The alpha component of the color (0 to 1). Defaults to 1.
+ * @return A [Color4] representing the color in sRGB.
+ */
 fun oklch(l: Float, c: Float, h: Float, alpha: Float = 1f): Color4 {
     // oklab
     val hRad = h * PI / 180.0

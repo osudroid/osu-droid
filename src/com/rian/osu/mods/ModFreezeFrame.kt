@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.Spinner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -14,7 +15,7 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
     override val acronym = "FR"
     override val description = "Burn the notes into your memory."
     override val type = ModType.Fun
-    override val incompatibleMods = super.incompatibleMods + ModApproachDifferent::class
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModHidden::class)
 
     private var lastNewComboTime = 0.0
 
@@ -33,7 +34,9 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
     }
 
     private fun applyFadeInAdjustment(hitObject: HitObject) {
-        hitObject.timePreempt += hitObject.startTime - lastNewComboTime
+        if (hitObject !is Spinner) {
+            hitObject.timePreempt += hitObject.startTime - lastNewComboTime
+        }
 
         if (hitObject is Slider) {
             // Freezing slider ticks doesn't play well with snaking sliders, and slider repeats will not layer

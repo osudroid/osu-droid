@@ -183,7 +183,7 @@ object RoomAPI {
         )
 
         room.players = players
-        room.host = json.getJSONObject("host").getString("uid").toLong()
+        room.host = json.getJSONObject("host").getString("id").toLong()
         room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
         room.status = RoomStatus[json.getInt("status")]
 
@@ -292,7 +292,8 @@ object RoomAPI {
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
      * [IRoomEventListener.onRoomConnectFail]
      */
-    fun connectToRoom(roomId: Long, userId: Long, username: String, roomPassword: String? = null, sessionID: String? = null) {
+    fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
+                      multiplayerSessionID: String? = null) {
 
         // Clearing previous socket in case of reconnection.
         socket?.off()
@@ -300,14 +301,14 @@ object RoomAPI {
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
-        val sign = SecurityUtils.signRequest("${userId}_$username")
+        val sign = SecurityUtils.signRequest("${userId}_$gameSessionId")
 
         auth["uid"] = userId.toString()
-        auth["username"] = username
+        auth["gameSessionID"] = gameSessionId
         auth["version"] = API_VERSION.toString()
 
-        if (sessionID != null) {
-            auth["sessionID"] = sessionID
+        if (multiplayerSessionID != null) {
+            auth["multiplayerSessionID"] = multiplayerSessionID
         }
 
         if (sign != null) {
@@ -318,9 +319,9 @@ object RoomAPI {
             auth["password"] = roomPassword
         }
 
-        Multiplayer.log("Starting connection -> $roomId, $userId, $username")
+        Multiplayer.log("Starting connection -> $roomId, $userId")
 
-        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId, username) else IO.socket(url, IO.Options().also {
+        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own

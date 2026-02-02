@@ -68,7 +68,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
 
         // AR
 
-        val approachTime = BeatmapDifficulty.difficultyRange(
+        val approachTime = BeatmapDifficulty.difficultyRangeInt(
             rateAdjustedDifficulty.ar.toDouble(),
             HitObject.PREEMPT_MAX,
             HitObject.PREEMPT_MID,
@@ -80,7 +80,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
             "Affects how early objects appear on screen relative to their hit time.",
             difficulty.ar,
             rateAdjustedDifficulty.ar,
-            arrayOf(Metric("Approach time", "${approachTime.roundBy(2)}ms"))
+            arrayOf(Metric("Approach time", "${approachTime}ms"))
         )
 
         // OD

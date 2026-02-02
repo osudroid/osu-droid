@@ -41,7 +41,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
 
     /**
-     * Indicates whether a new buffer is needed to be created.
+     * Indicates whether a new buffer needs to be created.
      */
     protected var needsNewBuffer = true
         private set

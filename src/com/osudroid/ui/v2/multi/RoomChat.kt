@@ -73,7 +73,7 @@ class RoomChat : UILinearContainer() {
         anchor = Anchor.BottomCenter
         origin = Anchor.BottomCenter
         style = {
-            backgroundColor = it.accentColor * 0.1f / 0.9f
+            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
             y = if (isExpanded) 0f else BODY_HEIGHT.rem
         }
 
@@ -260,7 +260,7 @@ class RoomChat : UILinearContainer() {
             style = {
                 height = 2.85f.rem
                 spacing = 2f.srem
-                backgroundColor = it.accentColor * 0.15f / 0.5f
+                backgroundColor = (it.accentColor * 0.15f).copy(alpha = 0.5f)
                 padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
             }
 
@@ -345,7 +345,7 @@ class RoomChat : UILinearContainer() {
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
             style = {
-                backgroundColor = it.accentColor * 0.09f / 0f
+                backgroundColor = (it.accentColor * 0.09f).copy(alpha = 0f)
                 padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
                 spacing = 2f.srem
             }
@@ -362,7 +362,7 @@ class RoomChat : UILinearContainer() {
                 val message = message ?: return
                 val messageIndex = messages.indexOf(message)
 
-                backgroundColor /= if (messageIndex % 2 == 0) 0.5f else 0f
+                backgroundColor = backgroundColor.copy(alpha = if (messageIndex % 2 == 0) 0.5f else 0f)
 
                 if (message is SystemMessage) {
                     text {

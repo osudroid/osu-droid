@@ -152,7 +152,7 @@ class ModCustomizationMenu(trigger: UIButton) : UIModal(
                 style = {
                     padding = Vec4(3f.srem)
                     spacing = 2f.srem
-                    backgroundColor = Color4.Black / 0.05f
+                    backgroundColor = Color4.Black.copy(alpha = 0.05f)
                     radius = Radius.LG
                 }
 

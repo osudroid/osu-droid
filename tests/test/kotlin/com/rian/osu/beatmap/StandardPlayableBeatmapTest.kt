@@ -118,7 +118,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
 
             Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
             Assert.assertEquals(0.57023364f, firstObject.difficultyScale, 1e-2f)
-            Assert.assertEquals(1012.5, firstObject.timePreempt, 1e-2)
+            Assert.assertEquals(1012.0, firstObject.timePreempt, 1e-2)
         }
     }
 

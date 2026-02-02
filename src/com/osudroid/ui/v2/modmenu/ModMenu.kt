@@ -87,7 +87,7 @@ object ModMenu : UIScene() {
             height = Size.Full
             orientation = Orientation.Vertical
             style = {
-                backgroundColor = it.accentColor * 0.1f / 0.9f
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
             }
 
             +UIContainer().apply {
