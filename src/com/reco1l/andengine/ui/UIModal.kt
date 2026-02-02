@@ -47,7 +47,7 @@ open class UIModal(
 
     init {
         style = {
-            backgroundColor = Color4.Black / 0.3f
+            backgroundColor = Color4.Black.copy(alpha = 0.3f)
         }
 
         width = Size.Full
@@ -214,7 +214,7 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
                 width = Size.Full
                 height = 2f
                 style = {
-                    color = it.accentColor / 0.1f
+                    color = it.accentColor.copy(alpha = 0.1f)
                 }
             }
 
@@ -224,7 +224,7 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
                 width = Size.Full
                 height = 2f
                 style = {
-                    color = it.accentColor / 0.1f
+                    color = it.accentColor.copy(alpha = 0.1f)
                 }
             }
 

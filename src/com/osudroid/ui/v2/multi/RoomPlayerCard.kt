@@ -129,7 +129,9 @@ class RoomPlayerCard : UILinearContainer() {
 
             onActionLongPress = {
                 UIDropdown(this@RoomPlayerButton).apply dropdown@{
-                    maxWidth = 260f
+                    style = {
+                        24f.rem
+                    }
 
                     addButton {
                         setText(R.string.multiplayer_room_player_menu_view_profile)

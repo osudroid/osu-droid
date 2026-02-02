@@ -92,7 +92,7 @@ open class UICard(
             width = Size.Full
             height = 2f
             style = {
-                color = it.accentColor / 0.1f
+                color = it.accentColor.copy(alpha = 0.1f)
             }
         }
 

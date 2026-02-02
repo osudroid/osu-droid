@@ -48,7 +48,7 @@ open class CircularProgressBar : UIContainer() {
 
     init {
         style = {
-            trackCircle.color = it.accentColor / trackCircle.alpha
+            trackCircle.color = it.accentColor.copy(alpha = trackCircle.alpha)
             rotatingCircle.color = it.accentColor
         }
     }
