@@ -26,6 +26,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.osu.menu.*
 import ru.nsu.ccfit.zuev.osu.online.*
@@ -61,6 +62,7 @@ object MainScene : UIScene() {
                 width = Size.Full
                 height = Size.Full
                 scaleType = ScaleType.Crop
+                textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             }
 
             +UIGradientBox().apply {
@@ -306,13 +308,11 @@ object MainScene : UIScene() {
         MusicManager.addOnBeatmapChangeListener(this) { beatmap ->
             val textureRegion = if (beatmap != null) ResourceManager.getInstance().loadBackground(beatmap.backgroundPath) else null
 
-            if (textureRegion != null) {
+            if (textureRegion != null && !Config.isSafeBeatmapBg()) {
                 background.textureRegion = textureRegion
             } else {
                 background.textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             }
-
-            musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         }
     }
 
@@ -335,6 +335,7 @@ object MainScene : UIScene() {
 
         val mightShowMusicButton = isMenuExpanded || System.currentTimeMillis() - lastMusicChange < 3000
 
+        musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         musicButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.translationX, if (mightShowMusicButton) 0f else 8f.srem, 0f, 0.05f)
         musicButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.alpha, if (mightShowMusicButton) 1f else 0f, 0f, 0.05f)
 
