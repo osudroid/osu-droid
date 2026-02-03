@@ -45,7 +45,7 @@ val Int.srem: Float
 
 /**
  * Indicates that this float value is in percentage units.
- * It will be converted to a value between -4 and -3.
+ * It will be converted to a value between -3 and -2.
  */
 val Float.pct: Float
     get() = Size.relativeSizeRange.start + this.coerceAtLeast(0f).coerceAtMost(1f)
