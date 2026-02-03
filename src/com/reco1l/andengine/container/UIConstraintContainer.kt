@@ -36,7 +36,7 @@ open class UIConstraintContainer : UIContainer() {
             val targetHeight = target.transformedHeight
 
             val cancelledX = padding.left + child.anchorPositionX
-            val cancelledY = padding.right + child.anchorPositionY
+            val cancelledY = padding.top + child.anchorPositionY
 
             child.x = -cancelledX + targetX + targetWidth * child.anchor.x
             child.y = -cancelledY + targetY + targetHeight * child.anchor.y
