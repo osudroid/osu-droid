@@ -2,6 +2,7 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.Orientation.*
+import com.reco1l.andengine.theme.Size
 import kotlin.math.*
 
 open class UILinearContainer : UIContainer() {
@@ -35,13 +36,16 @@ open class UILinearContainer : UIContainer() {
                 continue
             }
 
+            val childWidth = if (child.rawWidth in Size.relativeSizeRange) child.intrinsicWidth else child.width
+            val childHeight = if (child.rawHeight in Size.relativeSizeRange) child.intrinsicHeight else child.height
+
             when (orientation) {
 
                 Horizontal -> {
                     child.x = contentWidth
 
-                    contentWidth += child.width
-                    contentHeight = max(contentHeight, child.height)
+                    contentWidth += childWidth
+                    contentHeight = max(contentHeight, childHeight)
 
                     if (childCount > 1 && i < childCount - 1) {
                         contentWidth += spacing
@@ -51,8 +55,8 @@ open class UILinearContainer : UIContainer() {
                 Vertical -> {
                     child.y = contentHeight
 
-                    contentWidth = max(contentWidth, child.width)
-                    contentHeight += child.height
+                    contentWidth = max(contentWidth, childWidth)
+                    contentHeight += childHeight
 
                     if (childCount > 1 && i < childCount - 1) {
                         contentHeight += spacing

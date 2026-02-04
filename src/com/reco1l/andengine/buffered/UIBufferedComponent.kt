@@ -83,6 +83,11 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Draw pipeline
 
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        requestNewBuffer()
+    }
+
     override fun onHandleInvalidations() {
 
         if (needsNewBuffer) {
