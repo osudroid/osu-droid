@@ -67,6 +67,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         scaleY = 0f
 
         optionsContainer = linearContainer {
+            width = Size.Full
             orientation = Orientation.Vertical
             shrink = false
             style = {
@@ -82,10 +83,24 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
         if (isExpanded) {
             val (sceneSpaceX, sceneSpaceY) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
+            val (_, triggerTopY) = trigger.convertLocalToSceneCoordinates(0f, 0f)
+
+            val spaceBelow = parent.height - sceneSpaceY
+            val expandUpwards = triggerTopY > spaceBelow && spaceBelow < optionsContainer.height
 
             x = sceneSpaceX
-            y = sceneSpaceY
-            maxHeight = min(optionsContainer.height, parent.height - sceneSpaceY)
+
+            if (expandUpwards) {
+                y = triggerTopY - min(optionsContainer.height, triggerTopY)
+                scaleCenter = Anchor.BottomCenter
+                maxHeight = min(optionsContainer.height, triggerTopY)
+            } else {
+                y = sceneSpaceY
+                scaleCenter = Anchor.TopCenter
+                maxHeight = min(optionsContainer.height, spaceBelow)
+            }
+
+            minWidth = trigger.width
         }
 
         super.onManagedDraw(gl, camera)
