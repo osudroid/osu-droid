@@ -27,8 +27,20 @@ open class UIContainer : UIComponent() {
                 val x = max(0f, child.absoluteX)
                 val y = max(0f, child.absoluteY)
 
-                contentWidth = max(contentWidth, x + child.width)
-                contentHeight = max(contentHeight, y + child.height)
+                // Use intrinsic size when child has relative sizing to avoid circular dependencies
+                val childWidth = if (child is UIComponent && child.rawWidth in Size.relativeSizeRange) {
+                    child.intrinsicWidth
+                } else {
+                    child.width
+                }
+                val childHeight = if (child is UIComponent && child.rawHeight in Size.relativeSizeRange) {
+                    child.intrinsicHeight
+                } else {
+                    child.height
+                }
+
+                contentWidth = max(contentWidth, x + childWidth)
+                contentHeight = max(contentHeight, y + childHeight)
             }
         }
 
