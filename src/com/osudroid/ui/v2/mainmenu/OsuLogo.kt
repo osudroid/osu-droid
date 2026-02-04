@@ -49,6 +49,16 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             anchor = Anchor.Center
             origin = Anchor.Center
 
+            if (withExternalEffects) {
+                +RadialVisualizer().apply {
+                    width = Size.Full
+                    height = Size.Full
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    alpha = 0.4f
+                }
+            }
+
             circle {
                 width = Size.Full
                 height = Size.Full
