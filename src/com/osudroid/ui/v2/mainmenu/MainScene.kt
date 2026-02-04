@@ -11,6 +11,7 @@ import com.osudroid.multiplayer.*
 import com.osudroid.resources.R
 import com.osudroid.ui.v1.*
 import com.osudroid.ui.v2.multi.*
+import com.osudroid.ui.v2.settings.SettingsMenu
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -227,7 +228,7 @@ object MainScene : UIScene() {
 
                     +MenuButton(Icon.ArrowRightFromBracket, "Exit").apply {
                         onActionUp = {
-
+                            childScene = SettingsMenu()
                         }
                     }
 

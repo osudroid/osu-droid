@@ -58,7 +58,13 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, UISlider>(i
     }
 }
 
-class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(Config.getFloat(preferenceKey, fallbackValue)) {
+class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(
+    initialValue = try {
+        Config.getFloat(preferenceKey, fallbackValue)
+    } catch (_: Exception) {
+        fallbackValue
+    }
+) {
     override fun onControlValueChanged() {
         Config.setFloat(preferenceKey, control.value)
         super.onControlValueChanged()

@@ -18,7 +18,7 @@ import org.anddev.andengine.input.touch.*
  * Represents a form control that is used to change the value of a property.
  */
 @Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
-abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearContainer() {
+abstract class FormControl<V : Any, C: UIControl<V>>(val initialValue: V): UILinearContainer() {
 
     /**
      * The control that is used to change the value.
@@ -53,16 +53,16 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
     /**
      * The button that is used to reset the value of the control to its default value.
      */
-    open val resetButton = UITextButton().apply {
+    open val resetButton = UIIconButton().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         scaleCenter = Anchor.Center
-        text = "Reset"
-        leadingIcon = FontAwesomeIcon(Icon.RotateLeft)
-        colorVariant = ColorVariant.Primary
+        icon = FontAwesomeIcon(Icon.RotateLeft)
+        colorVariant = ColorVariant.Secondary
         sizeVariant = SizeVariant.Small
 
         alpha = 0f
+        isVisible = false
         translationX = -10f
 
         onActionUp = {

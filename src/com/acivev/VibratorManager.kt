@@ -59,7 +59,7 @@ object VibratorManager {
      * MUST be called before using any vibration function.
      */
     fun init(context: Context) {
-        intensity = Config.getInt("seekBarVibrateIntensity", intensity)
+        intensity = try { Config.getFloat("seekBarVibrateIntensity", intensity.toFloat()).toInt() } catch (e: Exception) { 127 }
         isCircleVibrationEnabled = Config.getBoolean("vibrationCircle", isCircleVibrationEnabled)
         isSliderVibrationEnabled = Config.getBoolean("vibrationSlider", isSliderVibrationEnabled)
         isSpinnerVibrationEnabled = Config.getBoolean("vibrationSpinner", isSpinnerVibrationEnabled)
