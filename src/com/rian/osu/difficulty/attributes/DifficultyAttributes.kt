@@ -76,6 +76,16 @@ abstract class DifficultyAttributes {
     var aimDifficultSliderCount = 0.0
 
     /**
+     * Describes how much of [aimDifficultStrainCount] is contributed to by [HitCircle]s or [Slider]s.
+     *
+     * A value closer to 0 indicates most of [aimDifficultStrainCount] is contributed by [HitCircle]s.
+     *
+     * A value closer to [Double.POSITIVE_INFINITY] indicates most of [aimDifficultStrainCount] is contributed by [Slider]s.
+     */
+    @JvmField
+    var aimTopWeightedSliderFactor = 0.0
+
+    /**
      * The perceived overall difficulty inclusive of rate-adjusting [Mod]s (DT/HT/etc.).
      *
      * Rate-adjusting [Mod]s don't directly affect the overall difficulty value, but have a perceived effect as a result of adjusting audio timing.

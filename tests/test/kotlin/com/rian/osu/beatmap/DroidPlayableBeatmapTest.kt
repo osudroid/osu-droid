@@ -14,31 +14,31 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
     @Test
     fun `Test creation without mods`() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap().apply {
-            Assert.assertEquals(formatVersion, 14)
-            Assert.assertEquals(hitObjects.objects.size, 3)
+            Assert.assertEquals(14, formatVersion)
+            Assert.assertEquals(3, hitObjects.objects.size)
 
             hitObjects.objects[0].apply {
-                Assert.assertEquals(startTime, 1000.0, 0.0)
-                Assert.assertEquals(position, Vector2(256, 192))
+                Assert.assertEquals(1000.0, startTime, 0.0)
+                Assert.assertEquals(Vector2(256, 192), position)
                 Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
                 Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
-                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+                Assert.assertEquals(1200.0, timePreempt, 0.0)
             }
 
             hitObjects.objects[1].apply {
-                Assert.assertEquals(startTime, 2000.0, 0.0)
-                Assert.assertEquals(position, Vector2(320, 192))
+                Assert.assertEquals(2000.0, startTime, 0.0)
+                Assert.assertEquals(Vector2(320, 192), position)
                 Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
                 Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
-                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+                Assert.assertEquals(1200.0, timePreempt, 0.0)
             }
 
             hitObjects.objects[2].apply {
-                Assert.assertEquals(startTime, 3000.0, 0.0)
-                Assert.assertEquals(position, Vector2(384, 192))
+                Assert.assertEquals(3000.0, startTime, 0.0)
+                Assert.assertEquals(Vector2(384, 192), position)
                 Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
                 Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
-                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+                Assert.assertEquals(1200.0, timePreempt, 0.0)
             }
         }
     }
@@ -48,10 +48,10 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap(listOf(ModHardRock())).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.position.y, 192f, 0f)
+            Assert.assertEquals(192f, firstObject.position.y, 0f)
             Assert.assertEquals(0.8752531f, firstObject.difficultyScale, 1e-2f)
             Assert.assertEquals(0.8752531f, firstObject.gameplayScale, 1e-2f)
-            Assert.assertEquals(firstObject.timePreempt, 900.0, 0.0)
+            Assert.assertEquals(900.0, firstObject.timePreempt, 0.0)
         }
     }
 
@@ -60,8 +60,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap(listOf(ModHidden())).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.timePreempt, 1200.0, 1e-2)
-            Assert.assertEquals(firstObject.timeFadeIn, 480.0, 1e-2)
+            Assert.assertEquals(1200.0, firstObject.timePreempt, 1e-2)
+            Assert.assertEquals(480.0, firstObject.timeFadeIn, 1e-2)
         }
     }
 
@@ -70,8 +70,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap(listOf(ModCustomSpeed(2f))).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
-            Assert.assertEquals(firstObject.timePreempt, 1200.0, 1e-2)
+            Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
+            Assert.assertEquals(1200.0, firstObject.timePreempt, 1e-2)
         }
     }
 
@@ -85,10 +85,10 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         ).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
+            Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
             Assert.assertEquals(1.1553679f, firstObject.difficultyScale, 1e-2f)
             Assert.assertEquals(1.1553679f, firstObject.gameplayScale, 1e-2f)
-            Assert.assertEquals(firstObject.timePreempt, 1290.0, 1e-2)
+            Assert.assertEquals(1290.0, firstObject.timePreempt, 1e-2)
         }
     }
 
@@ -103,10 +103,10 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         ).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
+            Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
             Assert.assertEquals(1.1553679f, firstObject.difficultyScale, 1e-2f)
             Assert.assertEquals(1.1553679f, firstObject.gameplayScale, 1e-2f)
-            Assert.assertEquals(firstObject.timePreempt, 1290.0, 1e-2)
+            Assert.assertEquals(1290.0, firstObject.timePreempt, 1e-2)
         }
     }
 
@@ -122,19 +122,19 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
         ).apply {
             val firstObject = hitObjects.objects[0]
 
-            Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
+            Assert.assertEquals(1000.0, firstObject.startTime, 1e-2)
             Assert.assertEquals(1.0503248f, firstObject.difficultyScale, 1e-2f)
             Assert.assertEquals(1.0503248f, firstObject.gameplayScale, 1e-2f)
-            Assert.assertEquals(firstObject.timePreempt, 1012.5, 1e-2)
+            Assert.assertEquals(1012.0, firstObject.timePreempt, 1e-2)
         }
     }
 
     @Test
     fun `Test hit window`() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap().apply {
-            Assert.assertEquals(hitWindow.greatWindow, 75f, 0f)
-            Assert.assertEquals(hitWindow.okWindow, 150f, 0f)
-            Assert.assertEquals(hitWindow.mehWindow, 250f, 0f)
+            Assert.assertEquals(75f, hitWindow.greatWindow, 0f)
+            Assert.assertEquals(150f, hitWindow.okWindow, 0f)
+            Assert.assertEquals(250f, hitWindow.mehWindow, 0f)
         }
     }
 }

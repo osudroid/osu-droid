@@ -16,9 +16,9 @@ class StandardHitWindowTest : HitWindowTest() {
     @Test
     fun `Test hit window to OD conversion`() {
         fun testConversion(od: Float, greatWindow: Float, okWindow: Float, mehWindow: Float) {
-            Assert.assertEquals(StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow), od, 1e-2f)
-            Assert.assertEquals(StandardHitWindow.hitWindow100ToOverallDifficulty(okWindow), od, 1e-2f)
-            Assert.assertEquals(StandardHitWindow.hitWindow50ToOverallDifficulty(mehWindow), od, 1e-2f)
+            Assert.assertEquals(od, StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow), 1e-2f)
+            Assert.assertEquals(od, StandardHitWindow.hitWindow100ToOverallDifficulty(okWindow), 1e-2f)
+            Assert.assertEquals(od, StandardHitWindow.hitWindow50ToOverallDifficulty(mehWindow), 1e-2f)
         }
 
         testConversion(10f, 20f, 60f, 100f)

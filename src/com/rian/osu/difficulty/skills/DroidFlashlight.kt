@@ -43,4 +43,15 @@ class DroidFlashlight(
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = difficulty.pow(1.6) * 25
+    }
 }

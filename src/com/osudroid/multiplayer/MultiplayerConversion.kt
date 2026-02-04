@@ -31,7 +31,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     playerName = json.getString("username")
     setForcedScore(json.getInt("score"))
     time = System.currentTimeMillis()
-    mod = ModUtils.deserializeMods(json.optJSONArray("mods"))
+    mod = ModUtils.deserializeMods(json.optJSONArray("mods")?.toString() ?: "")
     scoreMaxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")

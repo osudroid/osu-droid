@@ -139,7 +139,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
         scope?.ensureActive()
 
-        val path = SliderPath(sliderType, curvePoints, rawLength)
+        val path = SliderPath(sliderType, curvePoints, rawLength, scope)
 
         readCustomSampleBanks(bankInfo, pars.getOrNull(10), true, scope)
 

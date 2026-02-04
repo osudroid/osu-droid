@@ -25,14 +25,19 @@ import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
 import androidx.core.content.PermissionChecker;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.ui.ActivityOverlay;
@@ -41,18 +46,19 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.mainmenu.MainScene;
 import com.osudroid.ui.v2.songselect.SongSelect;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
-import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
+import com.reco1l.framework.math.Vec4;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -77,6 +83,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -149,7 +156,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new ExtendedEngine(this, opt);
+        UIEngine engine = new UIEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -291,11 +298,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
-
-        // Initializing this class because they contain fragments in its constructors that should be initialized in
-        // main thread because of the Looper.
-        RoomScene.INSTANCE.init();
-
         Execution.async(() -> {
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -315,13 +317,11 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    GlobalManager.getInstance().getEngine().setScene(MainScene.INSTANCE);
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-
                 scheduledExecutor.scheduleAtFixedRate(() -> {
                     if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         float refreshRate = getRefreshRate();
@@ -342,7 +342,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                //GlobalManager.getInstance().getMainScene().loadBannerSprite();
 
                 SongSelect.INSTANCE.loadBeatmaps();
             });
@@ -393,11 +393,45 @@ public class MainActivity extends BaseGameActivity implements
 
         setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+
+            int radiusTopLeft = 0;
+            int radiusTopRight = 0;
+            int radiusBottomLeft = 0;
+            int radiusBottomRight = 0;
+
+            // Unfortunately there's no backward compatible API to get corner radius.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                WindowInsets windowInsets = v.getRootWindowInsets();
+
+                RoundedCorner topLeft = windowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+                RoundedCorner topRight = windowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+                RoundedCorner bottomLeft = windowInsets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+                RoundedCorner bottomRight = windowInsets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+
+                if (topLeft != null) radiusTopLeft = topLeft.getRadius();
+                if (topRight != null) radiusTopRight = topRight.getRadius();
+                if (bottomLeft != null) radiusBottomLeft = bottomLeft.getRadius();
+                if (bottomRight != null) radiusBottomRight = bottomRight.getRadius();
+            }
+
+            int leftRadius = Math.max(radiusTopLeft, radiusBottomLeft);
+            int rightRadius = Math.max(radiusTopRight, radiusBottomRight);
+
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+
+            // We don't care about top and bottom insets as the game is always in landscape mode.
+            UIEngine.getCurrent().setSafeArea(new Vec4(Math.max(bars.left, leftRadius),0f, Math.max(bars.right, rightRadius),0f));
+
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
+        final HashSet<String> forceImportedBeatmaps = new HashSet<>();
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
@@ -406,6 +440,7 @@ public class MainActivity extends BaseGameActivity implements
                         false);
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
+                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                 // LibraryManager.INSTANCE.sort();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
@@ -430,6 +465,7 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                         }
                     } catch (IOException ignored) {
                     }
@@ -445,6 +481,7 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                         }
                     } catch (IOException ignored) {
                     }
@@ -466,7 +503,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        LibraryManager.scanDirectory();
+        LibraryManager.scanDirectory(forceImportedBeatmaps);
         LibraryManager.loadLibrary();
     }
 
@@ -642,10 +679,10 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
-                gameScene.quit();
+                Execution.updateThread(gameScene::quit);
                 Multiplayer.log("Player left the match.");
             } else {
-                gameScene.pause();
+                Execution.updateThread(gameScene::pause);
             }
         }
 
@@ -668,19 +705,16 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (getEngine() != null && !hasFocus) {
+            var gameScene = GlobalManager.getInstance().getGameScene();
 
-            if (GlobalManager.getInstance().getGameScene() != null
-                    && getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
-                    && GlobalManager.getInstance().getGameScene() != null) {
-
-                if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
-                    GlobalManager.getInstance().getGameScene().pause();
+            if (gameScene != null && getEngine().getScene() == gameScene.getScene() && !gameScene.isPaused() && !Multiplayer.isMultiplayer) {
+                Execution.updateThread(gameScene::pause);
             }
 
             if (Multiplayer.isConnected()
-                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    && (getEngine().getScene() == Multiplayer.roomScene
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
+                Execution.async(() -> Execution.runSafe(Multiplayer.roomScene::invalidateStatus));
             }
         }
 
@@ -718,7 +752,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
+        if (UIEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
         }
 
@@ -737,9 +771,9 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && currentScene == gameScene.getScene() &&
                 (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
             if (gameScene.isPaused()) {
-                gameScene.resume();
+                Execution.updateThread(gameScene::resume);
             } else {
-                gameScene.pause();
+                Execution.updateThread(gameScene::pause);
             }
             return true;
         }
@@ -790,13 +824,13 @@ public class MainActivity extends BaseGameActivity implements
                         return true;
                     }
 
-                    if (currentScene == RoomScene.INSTANCE) {
+                    if (currentScene == Multiplayer.roomScene) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
+                        if (Multiplayer.roomScene.hasChildScene() && Multiplayer.roomScene.getChildScene() == ModMenu.INSTANCE) {
                             ModMenu.INSTANCE.back();
                             return true;
                         }
-                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
                 } else if (currentScene instanceof GameLoaderScene loaderScene) {

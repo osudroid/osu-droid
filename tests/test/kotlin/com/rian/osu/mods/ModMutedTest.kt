@@ -1,13 +1,9 @@
 package com.rian.osu.mods
 
 import com.rian.osu.mods.settings.*
-import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModMutedTest {
     @Test
     fun `Test inverse muting affecting mute combo count minimum value`() {
@@ -16,20 +12,14 @@ class ModMutedTest {
 
             Assert.assertEquals(
                 0,
-                ::muteComboCount.run {
-                    isAccessible = true
-                    (getDelegate() as IntegerModSetting).minValue
-                }
+                getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue
             )
 
             inverseMuting = true
 
             Assert.assertEquals(
                 1,
-                ::muteComboCount.run {
-                    isAccessible = true
-                    (getDelegate() as IntegerModSetting).minValue
-                }
+                getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue
             )
         }
     }
@@ -53,16 +43,6 @@ class ModMutedTest {
             Assert.assertEquals(0.5f, volumeAt(50), 1e-2f)
             Assert.assertEquals(1f, volumeAt(100), 1e-2f)
             Assert.assertEquals(1f, volumeAt(150), 1e-2f)
-        }
-    }
-
-    @Test
-    fun `Test serialization`() {
-        ModMuted().serialize().getJSONObject("settings").apply {
-            Assert.assertTrue(has("inverseMuting"))
-            Assert.assertTrue(has("enableMetronome"))
-            Assert.assertTrue(has("muteComboCount"))
-            Assert.assertTrue(has("affectsHitSounds"))
         }
     }
 }

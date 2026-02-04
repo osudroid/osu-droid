@@ -81,9 +81,13 @@ public class LibraryManager {
     }
 
     /**
-     * Scan the beatmap directory to find differences between the database and the file system.
+     * Scans the beatmap directory to find differences between the database and the file system. If any differences are
+     * found, the database is updated accordingly.
+     *
+     * @param forceUpdateDirectories The directories to force update, even if they are already in the database.
+     *                               Can be {@code null}.
      */
-    public static void scanDirectory() {
+    public static void scanDirectory(@Nullable Collection<String> forceUpdateDirectories) {
 
         if (!checkDirectory(Config.getBeatmapPath())) {
             return;
@@ -95,7 +99,7 @@ public class LibraryManager {
             return;
         }
 
-        new LibraryDatabaseManager(directories).start();
+        new LibraryDatabaseManager(directories, forceUpdateDirectories).start();
 
         // Wait for all threads to finish
         while (isCaching) {
@@ -260,6 +264,8 @@ public class LibraryManager {
 
         private final File[] directories;
 
+        private final @Nullable Collection<String> forceUpdateDirectories;
+
         private final ExecutorService executors;
 
 
@@ -268,10 +274,11 @@ public class LibraryManager {
         private int fileCached = 0;
 
 
-        private LibraryDatabaseManager(File[] directories) {
+        private LibraryDatabaseManager(File[] directories, @Nullable Collection<String> forceUpdateDirectories) {
 
             this.directories = directories;
             this.directoryCount = directories.length;
+            this.forceUpdateDirectories = forceUpdateDirectories;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         }
 
@@ -290,7 +297,8 @@ public class LibraryManager {
 
                         var directory = directoriesSlice[i1];
 
-                        if (DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getName())) {
+                        if ((forceUpdateDirectories == null || !forceUpdateDirectories.contains(directory.getName())) &&
+                                DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getName())) {
                             directoryCount--;
                             continue;
                         }

@@ -11,10 +11,10 @@ class DroidPerformanceAttributes : PerformanceAttributes() {
     var tap = 0.0
 
     /**
-     * The visual performance value.
+     * The reading performance value.
      */
     @JvmField
-    var visual = 0.0
+    var reading = 0.0
 
     /**
      * The tap penalty used to penalize the tap performance value.
@@ -45,10 +45,4 @@ class DroidPerformanceAttributes : PerformanceAttributes() {
      */
     @JvmField
     var flashlightSliderCheesePenalty = 1.0
-
-    /**
-     * The penalty used to penalize the visual performance value.
-     */
-    @JvmField
-    var visualSliderPerformancePenalty = 1.0
 }

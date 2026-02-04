@@ -2,13 +2,14 @@ package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.math.*
 
 class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContainer>(innerContent = UILinearContainer().apply {
     orientation = Orientation.Vertical
-    width = FillParent
+    width = Size.Full
 }) {
 
     init {
@@ -17,7 +18,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContaine
 
         val nameInput = FormInput().apply {
             label = "Name"
-            width = FillParent
+            width = Size.Full
             showResetButton = false
         }
 
@@ -25,7 +26,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : UIDialog<UILinearContaine
             +nameInput
 
             +ModsIndicator().apply {
-                mods = ModMenu.enabledMods.serializeMods(includeIrrelevantMods = true)
+                mods = ModMenu.enabledMods.values
                 padding = Vec4(24f, 24f, 24f, 12f)
             }
         }

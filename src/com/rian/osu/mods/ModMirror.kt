@@ -4,7 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
-import org.json.JSONObject
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Represents the Mirror mod.
@@ -21,46 +21,27 @@ class ModMirror : Mod(), IModApplicableToHitObject {
      */
     var reflection by EnumModSetting(
         name = "Flipped axes",
+        key = "flippedAxes",
         valueFormatter = { it.name },
         defaultValue = MirrorType.Horizontal
     )
 
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        reflection = when (settings.optInt("flippedAxes")) {
-            0 -> MirrorType.Horizontal
-            1 -> MirrorType.Vertical
-            2 -> MirrorType.Both
-            else -> reflection
-        }
-    }
-
-    override fun serializeSettings(): JSONObject? {
-        if (!isRelevant) {
-            return null
-        }
-
-        return JSONObject().apply {
-            put("flippedAxes", reflection.ordinal)
-        }
-    }
-
     override fun applyToHitObject(
         mode: GameMode,
         hitObject: HitObject,
-        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>,
+        scope: CoroutineScope?
     ) {
         when (reflection) {
             MirrorType.Horizontal ->
-                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject, scope)
 
             MirrorType.Vertical ->
-                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject, scope)
 
             MirrorType.Both -> {
-                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
-                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+                HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject, scope)
+                HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject, scope)
             }
         }
     }
@@ -79,10 +60,6 @@ class ModMirror : Mod(), IModApplicableToHitObject {
 
             return settings.joinToString(", ")
         }
-
-    override fun deepCopy() = ModMirror().also {
-        it.reflection = reflection
-    }
 
     enum class MirrorType {
         Horizontal,

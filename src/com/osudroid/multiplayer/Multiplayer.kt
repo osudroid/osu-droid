@@ -26,6 +26,12 @@ import java.io.File
 object Multiplayer {
 
     /**
+     * The current room scene.
+     */
+    @JvmField
+    var roomScene: RoomScene? = null
+
+    /**
      * The current room, it can become `null` if socket disconnects.
      */
     @JvmField
@@ -120,15 +126,13 @@ object Multiplayer {
                 GlobalManager.getInstance().mainActivity.checkNewSkins()
                 GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
-                RoomScene.load()
-
                 val roomID = link.pathSegments[0].toLong()
                 val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
 
                 RoomAPI.connectToRoom(
                     roomId = roomID,
                     userId = OnlineManager.getInstance().userId,
-                    username = OnlineManager.getInstance().username,
+                    gameSessionId = OnlineManager.getInstance().sessionId,
                     roomPassword = password
                 )
 
@@ -136,7 +140,7 @@ object Multiplayer {
                 ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
                 Log.e("LobbyScene", "Failed to connect to room.", e)
 
-                ExtendedEngine.Current.scene = LobbyScene()
+                UIEngine.current.scene = LobbyScene()
             }
 
         }
@@ -174,7 +178,7 @@ object Multiplayer {
         finalData = null
 
         // Avoiding data parsing if user left from ScoringScene
-        if (GlobalManager.getInstance().engine.scene == RoomScene || GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().songMenu.scene) {
+        if (GlobalManager.getInstance().engine.scene == roomScene || GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().songMenu.scene) {
             return
         }
 
@@ -222,11 +226,11 @@ object Multiplayer {
         if (success) {
             isReconnecting = false
 
-            RoomScene.chat.onSystemChatMessage("Connection was successfully restored.", "#459FFF")
+            roomScene?.chat?.onSystemChatMessage("Connection was successfully restored.", "#459FFF")
         } else if (attemptCount < 5) {
             attemptCount++
 
-            RoomScene.chat.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FFBFBF")
+            roomScene?.chat?.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FFBFBF")
         } else {
             isReconnecting = false
 
@@ -235,7 +239,7 @@ object Multiplayer {
             val gameScene = GlobalManager.getInstance().gameScene
 
             if (gameScene != null && GlobalManager.getInstance().engine.scene != gameScene.scene) {
-                RoomScene.back()
+                roomScene?.back()
             }
         }
 
@@ -260,7 +264,7 @@ object Multiplayer {
                 // Timeout to reconnect was exceed.
                 if (currentTime - reconnectionStartTimeMS >= 30000) {
                     ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
-                    RoomScene.back()
+                    roomScene?.back()
                     return@launch
                 }
 
@@ -270,8 +274,8 @@ object Multiplayer {
                     RoomAPI.connectToRoom(
                         roomId = room!!.id,
                         userId = OnlineManager.getInstance().userId,
-                        username = OnlineManager.getInstance().username,
-                        sessionID = room!!.sessionID
+                        gameSessionId = OnlineManager.getInstance().sessionId,
+                        multiplayerSessionID = room!!.sessionID
                     )
 
                     isWaitingAttemptResponse = true

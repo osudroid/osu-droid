@@ -19,15 +19,13 @@ import kotlinx.coroutines.ensureActive
  * A difficulty calculator for calculating star rating.
  */
 abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : DifficultyHitObject, TAttributes : DifficultyAttributes> {
-    protected abstract val difficultyMultiplier: Double
-
     /**
      * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
     protected open val difficultyAdjustmentMods = setOf(
         ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
         ModMirror::class, ModHardRock::class, ModHidden::class, ModFlashlight::class,
-        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class
+        ModDifficultyAdjust::class, ModRateAdjust::class, ModTimeRamp::class, ModTraceable::class
     )
 
     /**
@@ -61,7 +59,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      */
     @JvmOverloads
     fun calculate(beatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
-        val skills = createSkills(beatmap)
+        val skills = createSkills(beatmap, false)
         val objects = createDifficultyHitObjects(beatmap, scope)
 
         for (obj in objects) {
@@ -71,7 +69,42 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
             }
         }
 
-        return createDifficultyAttributes(beatmap, skills, objects)
+        return createDifficultyAttributes(beatmap, skills, objects, false)
+    }
+
+    /**
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s. The result of this calculation can be used in
+     * replay analysis.
+     *
+     * @param beatmap The [Beatmap] whose difficulty is to be calculated.
+     * @param mods The [Mod]s to apply to the [Beatmap].
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the difficulty of the [Beatmap].
+     */
+    @JvmOverloads
+    fun calculateForReplay(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
+        calculateForReplay(createPlayableBeatmap(beatmap, mods, scope), scope)
+
+    /**
+     * Calculates the difficulty of a [PlayableBeatmap]. The result of this calculation can be used in replay analysis.
+     *
+     * @param beatmap The [PlayableBeatmap] whose difficulty is to be calculated.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the difficulty of the [PlayableBeatmap].
+     */
+    @JvmOverloads
+    fun calculateForReplay(beatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
+        val skills = createSkills(beatmap, false)
+        val objects = createDifficultyHitObjects(beatmap, scope)
+
+        for (obj in objects) {
+            for (skill in skills) {
+                scope?.ensureActive()
+                skill.process(obj)
+            }
+        }
+
+        return createDifficultyAttributes(beatmap, skills, objects, true)
     }
 
     /**
@@ -111,7 +144,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         }
 
         val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(beatmap.hitObjects.objects.size)
-        val skills = createSkills(beatmap)
+        val skills = createSkills(beatmap, true)
         val progressiveBeatmap = ProgressiveCalculationBeatmap(beatmap)
 
         val difficultyObjects = createDifficultyHitObjects(beatmap, scope)
@@ -133,7 +166,12 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
 
             attributes[i] = TimedDifficultyAttributes(
                 obj.endTime,
-                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex))
+                createDifficultyAttributes(
+                    progressiveBeatmap,
+                    skills,
+                    difficultyObjects.sliceArray(0..<currentIndex),
+                    false
+                )
             )
         }
 
@@ -154,9 +192,10 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
+     * @param forReplay Whether the [Skill]s are being created for difficulty calculation that can be used in replay analysis.
      * @return The [Skill]s.
      */
-    protected abstract fun createSkills(beatmap: TBeatmap): Array<Skill<TObject>>
+    protected abstract fun createSkills(beatmap: TBeatmap, forReplay: Boolean): Array<Skill<TObject>>
 
     /**
      * Retrieves the [DifficultyHitObject]s to calculate against.
@@ -168,22 +207,20 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     protected abstract fun createDifficultyHitObjects(beatmap: TBeatmap, scope: CoroutineScope? = null): Array<TObject>
 
     /**
-     * Calculates the rating of a [Skill] based on its difficulty.
-     *
-     * @param skill The [Skill] to calculate the rating for.
-     * @return The rating of the [Skill].
-     */
-    protected fun calculateRating(skill: Skill<TObject>) = sqrt(skill.difficultyValue()) * difficultyMultiplier
-
-    /**
      * Creates a [TAttributes] to describe a beatmap's difficulty.
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty was calculated.
      * @param skills The [Skill]s which processed the beatmap.
      * @param objects The [TObject]s that were generated.
+     * @param forReplay Whether the [TAttributes] are being created for replay analysis.
      * @return [TAttributes] describing the beatmap's difficulty.
      */
-    protected abstract fun createDifficultyAttributes(beatmap: PlayableBeatmap, skills: Array<Skill<TObject>>, objects: Array<TObject>): TAttributes
+    protected abstract fun createDifficultyAttributes(
+        beatmap: PlayableBeatmap,
+        skills: Array<Skill<TObject>>,
+        objects: Array<TObject>,
+        forReplay: Boolean
+    ): TAttributes
 
     /**
      * Constructs a [PlayableBeatmap] from a [Beatmap] with specific parameters.

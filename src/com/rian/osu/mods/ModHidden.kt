@@ -7,7 +7,6 @@ import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.mods.settings.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
-import org.json.JSONObject
 
 /**
  * Represents the Hidden mod.
@@ -24,7 +23,9 @@ class ModHidden : ModWithVisibilityAdjustment() {
     override val scoreMultiplier: Float
         get() = if (usesDefaultSettings) 1.06f else 1f
 
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModTraceable::class)
+    override val incompatibleMods = super.incompatibleMods + arrayOf(
+        ModApproachDifferent::class, ModTraceable::class, ModFreezeFrame::class
+    )
 
     /**
      * Whether to only fade approach circles.
@@ -34,26 +35,11 @@ class ModHidden : ModWithVisibilityAdjustment() {
     @get:JvmName("isOnlyFadeApproachCircles")
     var onlyFadeApproachCircles by BooleanModSetting(
         name = "Only fade approach circles",
+        key = "onlyFadeApproachCircles",
         defaultValue = false
     )
 
     override fun isFirstAdjustableObject(hitObject: HitObject) = hitObject !is Spinner
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        onlyFadeApproachCircles = settings.optBoolean("onlyFadeApproachCircles", onlyFadeApproachCircles)
-    }
-
-    override fun serializeSettings(): JSONObject? {
-        if (usesDefaultSettings) {
-            return null
-        }
-
-        return JSONObject().apply {
-            put("onlyFadeApproachCircles", onlyFadeApproachCircles)
-        }
-    }
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         super.applyToBeatmap(beatmap, scope)
@@ -69,10 +55,6 @@ class ModHidden : ModWithVisibilityAdjustment() {
         }
 
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
-    }
-
-    override fun deepCopy() = ModHidden().also {
-        it.onlyFadeApproachCircles = onlyFadeApproachCircles
     }
 
     companion object {

@@ -3,7 +3,6 @@ package com.rian.osu.mods
 import com.edlplan.framework.easing.Easing
 import com.reco1l.toolkt.roundBy
 import com.rian.osu.mods.settings.*
-import org.json.JSONObject
 
 /**
  * Represents the Approach Different mod.
@@ -23,6 +22,7 @@ class ModApproachDifferent : Mod() {
      */
     var scale by FloatModSetting(
         name = "Initial size",
+        key = "scale",
         valueFormatter = { it.roundBy(1).toString() },
         defaultValue = 3f,
         minValue = 1.5f,
@@ -36,6 +36,7 @@ class ModApproachDifferent : Mod() {
      */
     var style by EnumModSetting(
         name = "Animation style",
+        key = "style",
         valueFormatter = { it.name },
         defaultValue = AnimationStyle.Gravity,
     )
@@ -59,23 +60,6 @@ class ModApproachDifferent : Mod() {
             AnimationStyle.BounceOut -> Easing.OutBounce
             AnimationStyle.BounceInOut -> Easing.InOutBounce
         }
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        scale = settings.optDouble("scale", scale.toDouble()).toFloat()
-        style = AnimationStyle.entries.getOrNull(settings.optInt("style", style.ordinal)) ?: style
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("scale", scale)
-        put("style", style.ordinal)
-    }
-
-    override fun deepCopy() = ModApproachDifferent().also {
-        it.scale = scale
-        it.style = style
-    }
 
     enum class AnimationStyle {
         Linear,

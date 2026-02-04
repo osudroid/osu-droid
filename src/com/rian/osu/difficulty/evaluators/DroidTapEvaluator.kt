@@ -39,7 +39,7 @@ object DroidTapEvaluator {
             return 0.0
         }
 
-        val doubletapness = if (considerCheesability) 1 - current.doubletapness else 1.0
+        val doubletapness = if (considerCheesability) 1 - current.getDoubletapness(current.next(0)) else 1.0
 
         val strainTime =
             if (strainTimeCap != null) max(50.0, max(strainTimeCap, current.strainTime))

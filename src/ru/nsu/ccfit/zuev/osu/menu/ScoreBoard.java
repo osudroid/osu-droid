@@ -19,7 +19,6 @@ import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
 
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -186,7 +185,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     try {
                         modString = ModUtils.deserializeMods(mods).toDisplayModString(false);
-                    } catch (final JSONException e) {
+                    } catch (final Exception e) {
                         Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
                     }
 
@@ -277,7 +276,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     try {
                         modString = ModUtils.deserializeMods(score.getMods()).toDisplayModString(false);
-                    } catch (final JSONException e) {
+                    } catch (final Exception e) {
                         Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
                     }
 

@@ -7,15 +7,9 @@ import com.rian.osu.beatmap.hitobject.SliderPathType
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
-import com.rian.osu.mods.settings.NullableFloatModSetting
-import kotlin.reflect.KProperty0
-import kotlin.reflect.jvm.isAccessible
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ModDifficultyAdjustTest {
     @Test
     fun `Test beatmap setting override without additional mods`() {
@@ -126,35 +120,6 @@ class ModDifficultyAdjustTest {
     }
 
     @Test
-    fun `Test serialization`() {
-        ModDifficultyAdjust().apply {
-            serialize().apply {
-                Assert.assertNull(optJSONObject("settings"))
-            }
-
-            cs = 4f
-            ar = 9f
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat())
-                Assert.assertEquals(9f, getDouble("ar").toFloat())
-                Assert.assertTrue(optDouble("od").isNaN())
-                Assert.assertTrue(optDouble("hp").isNaN())
-            }
-
-            od = 8f
-            hp = 6f
-
-            serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat())
-                Assert.assertEquals(9f, getDouble("ar").toFloat())
-                Assert.assertEquals(8f, getDouble("od").toFloat())
-                Assert.assertEquals(6f, getDouble("hp").toFloat())
-            }
-        }
-    }
-
-    @Test
     fun `Test toString`() {
         ModDifficultyAdjust().apply {
             Assert.assertEquals("DA", toString())
@@ -165,35 +130,6 @@ class ModDifficultyAdjustTest {
             hp = 6f
 
             Assert.assertEquals("DA (CS4.0, AR9.0, OD8.0, HP6.0)", toString())
-        }
-    }
-
-    @Test
-    fun `Test deep copy`() {
-        fun getDelegate(property: KProperty0<*>): NullableFloatModSetting {
-            property.isAccessible = true
-            return property.getDelegate() as NullableFloatModSetting
-        }
-
-        ModDifficultyAdjust(4f, 9f, 8f, 6f).apply {
-            getDelegate(::cs).defaultValue = 2f
-            getDelegate(::ar).defaultValue = 3f
-            getDelegate(::od).defaultValue = 5f
-            getDelegate(::hp).defaultValue = 1f
-
-            val copy = deepCopy()
-
-            Assert.assertNotSame(this, copy)
-
-            Assert.assertEquals(4f, copy.cs)
-            Assert.assertEquals(9f, copy.ar)
-            Assert.assertEquals(8f, copy.od)
-            Assert.assertEquals(6f, copy.hp)
-
-            Assert.assertEquals(2f, getDelegate(copy::cs).defaultValue)
-            Assert.assertEquals(3f, getDelegate(copy::ar).defaultValue)
-            Assert.assertEquals(5f, getDelegate(copy::od).defaultValue)
-            Assert.assertEquals(1f, getDelegate(copy::hp).defaultValue)
         }
     }
 

@@ -103,9 +103,19 @@ data class ScoreInfo @JvmOverloads constructor(
     val time: Long,
 
     /**
+     * The amount of slider heads that were hit.
+     */
+    var sliderHeadHits: Int?,
+
+    /**
      * The amount of slider ticks that were hit.
      */
     var sliderTickHits: Int?,
+
+    /**
+     * The amount of slider repeats that were hit.
+     */
+    var sliderRepeatHits: Int?,
 
     /**
      * The amount of slider ends that were hit.
@@ -150,7 +160,9 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
+        it.sliderHeadHits = sliderHeadHits ?: -1
         it.sliderTickHits = sliderTickHits ?: -1
+        it.sliderRepeatHits = sliderRepeatHits ?: -1
         it.sliderEndHits = sliderEndHits ?: -1
 
         if (difficulty != null) {
@@ -182,7 +194,9 @@ fun ScoreInfo(json: JSONObject) =
         hit50 = json.getInt("h50"),
         misses = json.getInt("misses"),
         time = json.getLong("time"),
+        sliderHeadHits = json.optInt("sliderHeadHits", -1).takeIf { it >= 0 },
         sliderTickHits = json.optInt("sliderTickHits", -1).takeIf { it >= 0 },
+        sliderRepeatHits = json.optInt("sliderRepeatHits", -1).takeIf { it >= 0 },
         sliderEndHits = json.optInt("sliderEndHits", -1).takeIf { it >= 0 }
     )
 

@@ -33,8 +33,16 @@ open class UIScene : Scene(), IShape {
 
 
     private var cameraWidth = 0f
-
     private var cameraHeight = 0f
+
+    //region Events
+
+    /**
+     * Called every update thread tick, avoid heavy operations here.
+     */
+    var onUpdateTick: OnUpdateEvent? = null
+
+    //endregion
 
 
     init {
@@ -46,6 +54,7 @@ open class UIScene : Scene(), IShape {
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        onUpdateTick?.invoke(deltaTimeSec * timeMultiplier)
         super.onManagedUpdate(deltaTimeSec * timeMultiplier)
     }
 
@@ -65,7 +74,7 @@ open class UIScene : Scene(), IShape {
         fun IEntity.propagateSkinChanges() {
 
             if (this is UIComponent) {
-                onThemeChanged(Theme.current)
+                onStyle(Theme.current)
             }
 
             if (this is ISkinnable) {
@@ -183,6 +192,6 @@ open class UIScene : Scene(), IShape {
     //endregion
 
     open fun show() {
-        ExtendedEngine.Current.scene = this
+        UIEngine.current.scene = this
     }
 }

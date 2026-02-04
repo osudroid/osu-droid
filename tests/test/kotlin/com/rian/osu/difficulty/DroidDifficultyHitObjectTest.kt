@@ -34,39 +34,39 @@ class DroidDifficultyHitObjectTest {
     @Test
     fun `Test No Mod opacity before hit time`() {
         objects[0].apply {
-            Assert.assertEquals(opacityAt(400.0, listOf()), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(600.0, listOf()), 0.5, 1e-2)
-            Assert.assertEquals(opacityAt(800.0, listOf()), 1.0, 0.0)
-            Assert.assertEquals(opacityAt(1000.0, listOf()), 1.0, 0.0)
+            Assert.assertEquals(0.0, opacityAt(400.0, listOf()), 0.0)
+            Assert.assertEquals(0.5, opacityAt(600.0, listOf()), 1e-2)
+            Assert.assertEquals(1.0, opacityAt(800.0, listOf()), 0.0)
+            Assert.assertEquals(1.0, opacityAt(1000.0, listOf()), 0.0)
         }
     }
 
     @Test
     fun `Test Hidden opacity before hit time`() {
         objects[0].apply {
-            Assert.assertEquals(opacityAt(400.0, hidden), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(600.0, hidden), 0.5, 1e-2)
-            Assert.assertEquals(opacityAt(800.0, hidden), 1.0, 0.0)
-            Assert.assertEquals(opacityAt(900.0, hidden), 0.44, 1e-2)
-            Assert.assertEquals(opacityAt(1000.0, hidden), 0.0, 0.0)
+            Assert.assertEquals(0.0, opacityAt(400.0, hidden), 0.0)
+            Assert.assertEquals(0.5, opacityAt(600.0, hidden), 1e-2)
+            Assert.assertEquals(1.0, opacityAt(800.0, hidden), 0.0)
+            Assert.assertEquals(0.44, opacityAt(900.0, hidden), 1e-2)
+            Assert.assertEquals(0.0, opacityAt(1000.0, hidden), 0.0)
         }
     }
 
     @Test
     fun `Test Traceable opacity before hit time`() {
         objects[0].apply {
-            Assert.assertEquals(opacityAt(400.0, traceable), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(700.0, traceable), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(1000.0, traceable), 0.0, 0.0)
+            Assert.assertEquals(0.0, opacityAt(400.0, traceable), 0.0)
+            Assert.assertEquals(0.0, opacityAt(700.0, traceable), 0.0)
+            Assert.assertEquals(0.0, opacityAt(1000.0, traceable), 0.0)
         }
     }
 
     @Test
     fun `Test opacity after hit time`() {
         objects[0].apply {
-            Assert.assertEquals(opacityAt(1100.0, listOf()), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(1100.0, hidden), 0.0, 0.0)
-            Assert.assertEquals(opacityAt(1100.0, traceable), 0.0, 0.0)
+            Assert.assertEquals(0.0, opacityAt(1100.0, listOf()), 0.0)
+            Assert.assertEquals(0.0, opacityAt(1100.0, hidden), 0.0)
+            Assert.assertEquals(0.0, opacityAt(1100.0, traceable), 0.0)
         }
     }
 
@@ -109,7 +109,7 @@ class DroidDifficultyHitObjectTest {
                     1.0,
                     objects,
                     i - 1
-                ).also { it.computeProperties(1.0, hitObjects) }
+                ).also { it.computeProperties(1.0) }
             }
         }
     }

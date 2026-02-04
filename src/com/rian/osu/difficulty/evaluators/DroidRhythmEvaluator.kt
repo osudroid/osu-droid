@@ -25,6 +25,7 @@ object DroidRhythmEvaluator {
     @JvmStatic
     fun evaluateDifficultyOf(current: DroidDifficultyHitObject, useSliderAccuracy: Boolean): Double {
         if (
+            current.index <= 1 ||
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
             current.isOverlapping(false)
@@ -64,10 +65,11 @@ object DroidRhythmEvaluator {
             ++rhythmStart
         }
 
+        var prevObject = validPrevious[rhythmStart]
+        var lastObject = validPrevious[rhythmStart + 1]
+
         for (i in rhythmStart downTo 1) {
-            val currentObject = current.previous(i - 1)!!
-            val prevObject = current.previous(i)!!
-            val lastObject = current.previous(i + 1)!!
+            val currentObject = validPrevious[i - 1]
 
             // Scale note 0 to 1 from history to now.
             // Scale note 0 to 1 from history to now.
@@ -77,9 +79,10 @@ object DroidRhythmEvaluator {
             // Either we're limited by time or limited by object count.
             val currentHistoricalDecay = min(noteDecay, timeDecay)
 
-            val currentDelta = currentObject.strainTime
-            val prevDelta = prevObject.strainTime
-            val lastDelta = lastObject.strainTime
+            // Use custom cap value to ensure that at this point delta time is actually zero.
+            val currentDelta = currentObject.deltaTime.coerceAtLeast(1e-7)
+            val prevDelta = prevObject.deltaTime.coerceAtLeast(1e-7)
+            val lastDelta = lastObject.deltaTime.coerceAtLeast(1e-7)
 
             // Calculate how much current delta difference deserves a rhythm bonus
             // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
@@ -152,7 +155,7 @@ object DroidRhythmEvaluator {
                     }
 
                     // Scale down the difficulty if the object is doubletappable.
-                    effectiveRatio *= 1 - prevObject.doubletapness * 0.75
+                    effectiveRatio *= 1 - prevObject.getDoubletapness(currentObject) * 0.75
 
                     rhythmComplexitySum += sqrt(effectiveRatio * startRatio) * currentHistoricalDecay
 
@@ -186,6 +189,9 @@ object DroidRhythmEvaluator {
 
                 island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
             }
+
+            lastObject = prevObject
+            prevObject = currentObject
         }
 
         return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2

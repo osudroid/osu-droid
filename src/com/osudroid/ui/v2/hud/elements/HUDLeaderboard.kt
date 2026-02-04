@@ -5,15 +5,12 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.hud.HUDElement
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
-import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class HUDLeaderboard : HUDElement() {
-
-    override val shouldBeShown = super.shouldBeShown && Config.isShowScoreboard()
 
     var nextItems: List<ScoreBoardItem>? = null
 
@@ -32,14 +29,11 @@ class HUDLeaderboard : HUDElement() {
     private val isGlobalLeaderboard = GlobalManager.getInstance().songMenu.isBoardOnline
 
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-
-        // Setting a minimum size for the leaderboard, this is used to prevent the leaderboard
-        // from being too small during HUD editor mode.
-        contentWidth = contentWidth.coerceAtLeast(SPRITE_WIDTH)
-        contentHeight = contentHeight.coerceAtLeast(SPRITE_HEIGHT)
+    init {
+        minWidth = SPRITE_WIDTH
+        minHeight = SPRITE_HEIGHT
     }
+
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         super.onManagedUpdate(deltaTimeSec)

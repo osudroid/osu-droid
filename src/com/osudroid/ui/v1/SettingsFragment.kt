@@ -37,8 +37,6 @@ import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.UpdateManager
 import com.osudroid.data.DatabaseManager
-import com.osudroid.multiplayer.Multiplayer
-import com.osudroid.multiplayer.RoomScene
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomTeam
@@ -48,6 +46,7 @@ import com.osudroid.resources.R.string
 import com.osudroid.utils.async
 import com.osudroid.utils.mainThread
 import com.reco1l.framework.asTimeInterpolator
+import com.osudroid.multiplayer.Multiplayer
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference
@@ -107,7 +106,7 @@ class SettingsFragment : SettingsFragment() {
                     tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
 
                     context.contentResolver.openInputStream(uri)!!.use { input ->
-                        tempFile.outputStream().use { output ->
+                        tempFile!!.outputStream().use { output ->
                             input.copyTo(output)
                         }
                     }
@@ -263,7 +262,7 @@ class SettingsFragment : SettingsFragment() {
             GlobalManager.getInstance().mainScene.loadTimingPoints(false)
             GlobalManager.getInstance().songService.isGaming = false
         } else if (Multiplayer.isConnected) {
-            RoomScene.chat.show()
+            Multiplayer.roomScene?.chat?.show()
         }
 
         GlobalManager.getInstance().songService.volume = Config.getBgmVolume()
@@ -323,12 +322,17 @@ class SettingsFragment : SettingsFragment() {
             if (Multiplayer.isMultiplayer) {
                 // We need to manually update it before because the preference is updated after this listener.
                 Config.setString("difficultyAlgorithm", newValue as String)
-                RoomScene.switchDifficultyAlgorithm()
+                Multiplayer.roomScene?.updateBeatmapInfo()
             }
             true
         }
 
         findPreference<SelectPreference>("appLanguage")!!.apply {
+            if (Multiplayer.isMultiplayer) {
+                isEnabled = false
+                return
+            }
+
             options = mutableListOf(
                 Option("System Default", "system"),
                 Option("English", "en"),
@@ -580,7 +584,7 @@ class SettingsFragment : SettingsFragment() {
 
             setOnPreferenceChangeListener { _, newValue ->
                 Config.setUseNightcoreOnMultiplayer(newValue as Boolean)
-                RoomScene.onRoomModsChange(Multiplayer.room!!.mods)
+                Multiplayer.roomScene?.onRoomModsChange(Multiplayer.room!!.mods)
                 true
             }
         }
@@ -672,6 +676,8 @@ class SettingsFragment : SettingsFragment() {
 
     private fun loadSkin(context: Context, path: String): Job {
         val loading = LoadingFragment()
+
+        loading.isDismissOnBackPress = false
         loading.show()
 
         return async {

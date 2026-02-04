@@ -1,8 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.component.UIComponent.Companion.MatchContent
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -13,10 +11,17 @@ import com.osudroid.multiplayer.api.RoomAPI.setPlayerMods
 import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.ui.v2.ModsIndicator
+import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.songselect.*
 import com.osudroid.utils.updateThread
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
@@ -46,6 +51,11 @@ object ModMenu : UIScene() {
     val enabledMods = ModHashMap()
 
     /**
+     * List of all mod sections.
+     */
+    val modSections = mutableListOf<ModMenuSection>()
+
+    /**
      * List of all mod toggles.
      */
     val modToggles = mutableListOf<ModMenuToggle>()
@@ -56,6 +66,8 @@ object ModMenu : UIScene() {
 
     private val customizeButton: UITextButton
     private val customizationMenu: ModCustomizationMenu
+    private val selectedModsIndicator: ModsIndicator
+    private val searchInput: ModMenuSearchInput
 
     private val rankedBadge: UIBadge
     private val arBadge: UILabeledBadge
@@ -63,7 +75,7 @@ object ModMenu : UIScene() {
     private val csBadge: UILabeledBadge
     private val hpBadge: UILabeledBadge
     private val bpmBadge: UILabeledBadge
-    private val starRatingBadge: UILabeledBadge
+    private val starRatingBadge: StarRatingBadge
     private val scoreMultiplierBadge: UILabeledBadge
 
     private var parsedBeatmap: Beatmap? = null
@@ -73,59 +85,43 @@ object ModMenu : UIScene() {
     init {
         isBackgroundEnabled = false
 
-        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
-        ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
-        ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search", "search.png")
-        ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
-
-        customizationMenu = ModCustomizationMenu()
-
-        attachChild(UILinearContainer().apply {
-            width = FillParent
-            height = FillParent
+        attachChild(UIFillContainer().apply {
+            width = Size.Full
+            height = Size.Full
             orientation = Orientation.Vertical
-            background = UIBox().apply {
-                applyTheme = {
-                    color = it.accentColor * 0.1f
-                    alpha = 0.9f
-                }
+            style = {
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
             }
 
-            attachChild(UIContainer().apply {
-                width = FillParent
-                height = MatchContent
-                padding = Vec4(60f, 12f)
+            +UIContainer().apply {
+                width = Size.Full
+                height = Size.Auto
+                style = {
+                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
+                }
 
-                attachChild(UILinearContainer().apply {
+                +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    height = MatchContent
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
-                    attachChild(UITextButton().apply {
+                    +UITextButton().apply {
                         text = "Back"
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                            width = 28f
-                            height = 28f
-                        }
+                        leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             back()
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
+                    }
 
                     customizeButton = UITextButton().apply {
                         text = "Customize"
                         isEnabled = false
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("tune")
-                            width = 28f
-                            height = 28f
-                        }
+                        leadingIcon = FontAwesomeIcon(Icon.Wrench)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             if (customizationMenu.isVisible) {
@@ -136,97 +132,84 @@ object ModMenu : UIScene() {
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
-                    attachChild(customizeButton)
 
-                    attachChild(UITextButton().apply {
+                    +customizeButton
+
+                    +UITextButton().apply {
                         text = "Clear"
-                        applyTheme = {}
-                        color = Color4(0xFFFFBFBF)
-                        background?.color = Color4(0xFF342121)
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("backspace")
-                            width = 28f
-                            height = 28f
+                        style += {
+                            color = Color4(0xFFFFBFBF)
+                            backgroundColor = Color4(0xFF342121)
                         }
+                        leadingIcon = FontAwesomeIcon(Icon.DeleteLeft)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             clear()
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    })
-                })
+                    }
 
-                attachChild(UILinearContainer().apply {
-                    orientation = Orientation.Vertical
-                    spacing = 10f
+                    +UIScrollableContainer().apply {
+                        height = Size.Auto
+                        anchor = Anchor.CenterLeft
+                        origin = Anchor.CenterLeft
+                        scrollAxes = Axes.X
+                        clipToBounds = true
+                        style = {
+                            width = 12f.rem
+                        }
+
+                        selectedModsIndicator = ModsIndicator()
+                        +selectedModsIndicator
+                    }
+                }
+
+                +UIContainer().apply {
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
 
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        anchor = Anchor.TopRight
-                        origin = Anchor.TopRight
-                        spacing = 10f
+                    searchInput = ModMenuSearchInput().apply {
+                        width = 18f.rem
+                        onSearchTermUpdate = { searchTerm ->
+                            modSections.fastForEach { it.onSearchTermUpdate(searchTerm) }
 
-                        scoreMultiplierBadge = labeledBadge {
-                            label = "Score multiplier"
-                            value = "1.00x"
-                        }
-
-                        starRatingBadge = labeledBadge {
-                            label = "Star rating"
-                            value = "0.00"
-                        }
-
-                        rankedBadge = badge {
-                            text = "Ranked"
-                            background!!.color = Color4(0xFF83DF6B)
-                            color = Color4(0xFF161622)
-                            applyTheme = {}
+                            if (modPresetsSection.isVisible) {
+                                modPresetsSection.onSearchTermUpdate(searchTerm)
+                            }
                         }
                     }
 
-                    +UILinearContainer().apply {
-                        orientation = Orientation.Horizontal
-                        origin = Anchor.TopRight
-                        anchor = Anchor.TopRight
-                        spacing = 10f
+                    +searchInput
 
-                        arBadge = labeledBadge {
-                            label = "AR"
-                            value = "0.00"
+                    container {
+                        anchor = Anchor.CenterRight
+                        origin = Anchor.CenterRight
+                        style = {
+                            padding = Vec4(2f.srem, 0f)
                         }
-                        odBadge = labeledBadge {
-                            label = "OD"
-                            value = "0.00"
-                        }
-                        csBadge = labeledBadge {
-                            label = "CS"
-                            value = "0.00"
-                        }
-                        hpBadge = labeledBadge {
-                            label = "HP"
-                            value = "0.00"
-                        }
-                        bpmBadge = labeledBadge {
-                            label = "BPM"
-                            value = "0.0"
+
+                        +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                            style = {
+                                color = it.accentColor
+                            }
                         }
                     }
-                })
-            })
+                }
+            }
 
-            attachChild(UIScrollableContainer().apply {
-                width = FillParent
-                height = FillParent
+            +UIScrollableContainer().apply {
+                width = Size.Full
+                height = Size.Full
                 scrollAxes = Axes.X
 
-                attachChild(UILinearContainer().apply {
+                +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
-                    width = MatchContent
-                    height = FillParent
-                    spacing = 16f
-                    padding = Vec4(60f, 0f)
+                    width = Size.Auto
+                    height = Size.Full
+                    style = {
+                        spacing = 2f.srem
+                        padding = UIEngine.current.safeArea
+                    }
 
                     modPresetsSection = ModMenuPresetsSection()
                     +modPresetsSection
@@ -237,19 +220,92 @@ object ModMenu : UIScene() {
                         val sectionName = StringTable.get(type.stringId)
                         val sectionToggles = mods.filter { it !is IMigratableMod && it.isUserPlayable && it.type == type }.map { ModMenuToggle(it) }
 
+                        if (sectionToggles.isEmpty()) {
+                            return@forEach
+                        }
+
                         modToggles.addAll(sectionToggles)
 
-                        if (sectionToggles.isNotEmpty()) {
-                            +ModMenuSection(sectionName, sectionToggles)
-                        }
-                    }
-                })
-            })
+                        val section = ModMenuSection(sectionName, sectionToggles)
 
+                        +section
+                        modSections.add(section)
+                    }
+                }
+            }
+
+            +UIContainer().apply {
+                width = Size.Full
+                height = Size.Auto
+                style = {
+                    padding = UIEngine.current.safeArea.copy(
+                        y = 2f.srem,
+                        w = 2f.srem + (Multiplayer.roomScene?.chat?.buttonHeight ?: 0f)
+                    )
+                }
+
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    style = {
+                        spacing = 2f.srem
+                    }
+
+                    arBadge = labeledBadge {
+                        label = "AR"
+                        value = "0.00"
+                    }
+
+                    odBadge = labeledBadge {
+                        label = "OD"
+                        value = "0.00"
+                    }
+
+                    csBadge = labeledBadge {
+                        label = "CS"
+                        value = "0.00"
+                    }
+
+                    hpBadge = labeledBadge {
+                        label = "HP"
+                        value = "0.00"
+                    }
+
+                    bpmBadge = labeledBadge {
+                        label = "BPM"
+                        value = "0.0"
+                    }
+                }
+
+                +UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    style = {
+                        spacing = 2f.srem
+                    }
+
+                    starRatingBadge = StarRatingBadge()
+                    +starRatingBadge
+
+                    rankedBadge = badge {
+                        text = "Ranked"
+                        backgroundColor = Color4(0xFF342121)
+                        color = Color4(0xFF161622)
+                        style = {}
+                    }
+
+                    scoreMultiplierBadge = labeledBadge {
+                        label = "Score"
+                        value = "1.00x"
+                    }
+                }
+            }
         })
 
-
         // Customizations menu
+        customizationMenu = ModCustomizationMenu(customizeButton)
         attachChild(customizationMenu)
 
         modPresetsSection.loadPresets()
@@ -329,24 +385,7 @@ object ModMenu : UIScene() {
 
             ensureActive()
 
-            updateThread {
-                starRatingBadge.clearEntityModifiers()
-                starRatingBadge.background!!.clearEntityModifiers()
-
-                starRatingBadge.valueEntity.text = "%.2f".format(attributes.starRating)
-                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
-
-                if (attributes.starRating >= 6.5) {
-                    starRatingBadge.colorTo(Color4(0xFFFFD966), 0.1f)
-                    starRatingBadge.fadeTo(1f, 0.1f)
-                } else {
-                    starRatingBadge.colorTo(Color4.Black, 0.1f)
-                    starRatingBadge.fadeTo(0.75f, 0.1f)
-                }
-            }
-
-            ensureActive()
-
+            starRatingBadge.rating = attributes.starRating
             SongSelect.setDifficultyStatistics(selectedBeatmap)
             SongSelect.setStarRatingDisplay(attributes.starRating)
         }
@@ -367,6 +406,10 @@ object ModMenu : UIScene() {
         // Do not show mod presets in multiplayer.
         modPresetsSection.isVisible = !Multiplayer.isMultiplayer
 
+        if (modPresetsSection.isVisible) {
+            modPresetsSection.onSearchTermUpdate(searchInput.value)
+        }
+
         // Ensure mods and customizations that can be enabled by the user are displayed and enabled.
         updateModButtonVisibility()
         updateCustomizationMenuEnabledStates()
@@ -382,8 +425,8 @@ object ModMenu : UIScene() {
     fun back(updatePlayerMods: Boolean) {
 
         if (Multiplayer.isConnected) {
-            RoomScene.chat.show()
-            RoomScene.isWaitingForModsChange = true
+            Multiplayer.roomScene?.chat?.show()
+            Multiplayer.roomScene?.isWaitingForModsChange = true
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost) {
@@ -391,7 +434,7 @@ object ModMenu : UIScene() {
             } else if (updatePlayerMods) {
                 setPlayerMods(enabledMods.serializeMods())
             } else {
-                RoomScene.isWaitingForModsChange = false
+                Multiplayer.roomScene?.isWaitingForModsChange = false
             }
         }
 
@@ -451,9 +494,12 @@ object ModMenu : UIScene() {
 
     fun updateModButtonVisibility() {
         modToggles.fastForEach {
-            it.updateVisibility()
+            it.updateVisibility(searchInput.value)
             it.applyCompatibilityState()
         }
+
+        // Update section visibility after toggles have been updated since it may not need to be visible anymore.
+        modSections.fastForEach { it.updateVisibility() }
     }
 
     fun updateCustomizationMenuEnabledStates() {
@@ -469,10 +515,17 @@ object ModMenu : UIScene() {
         enabledMods.toList().fastForEach {
             val mod = it.second
 
-            // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
-            // since only the host can change those mods.
-            if (room != null && !isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
-                return@fastForEach
+            if (room != null) {
+                // For non-host in multiplayer, we want to keep mods that are not allowed to be selected by the player
+                // since only the host can change those mods.
+                if (!isHost && room.gameplaySettings.isFreeMod && !mod.isValidForMultiplayerAsFreeMod) {
+                    return@fastForEach
+                }
+
+                // Special handling for the ScoreV2 mod, which is used by the ScoreV2 win condition.
+                if (mod is ModScoreV2) {
+                    return@fastForEach
+                }
             }
 
             removeMod(mod::class)
@@ -508,8 +561,7 @@ object ModMenu : UIScene() {
             clearEntityModifiers()
             colorTo(if (isRanked) Color4(0xFF161622) else Theme.current.accentColor, 0.1f)
 
-            background!!.clearEntityModifiers()
-            background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
+            backgroundColor = if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f
         }
 
         modToggles.fastForEach {
@@ -531,6 +583,7 @@ object ModMenu : UIScene() {
 
         parseBeatmap()
 
+        selectedModsIndicator.mods = enabledMods
         modPresetsSection.onModsChanged()
         SongSelect.onModsChanged()
     }
@@ -590,13 +643,13 @@ object ModMenu : UIScene() {
 
         val newText = if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 
-        if (valueEntity.text == newText) {
+        if (valueComponent.text == newText) {
             return
         }
-        valueEntity.text = newText
+        valueComponent.text = newText
 
-        valueEntity.clearEntityModifiers()
-        valueEntity.colorTo(Color4(when {
+        valueComponent.clearEntityModifiers()
+        valueComponent.colorTo(Color4(when {
             initialValue < finalValue -> 0xFFF78383
             initialValue > finalValue -> 0xFF40CF5D
             else -> 0xFFFFFFFF

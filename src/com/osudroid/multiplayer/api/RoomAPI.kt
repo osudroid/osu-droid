@@ -2,6 +2,7 @@ package com.osudroid.multiplayer.api
 
 import com.osudroid.BuildSettings
 import com.osudroid.debug.MockSocket
+import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomMods
@@ -13,13 +14,14 @@ import com.osudroid.multiplayer.api.data.parseBeatmap
 import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
-import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.ui.v2.multi.RoomScene
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 object RoomAPI {
 
@@ -181,7 +183,7 @@ object RoomAPI {
         )
 
         room.players = players
-        room.host = json.getJSONObject("host").getString("uid").toLong()
+        room.host = json.getJSONObject("host").getString("id").toLong()
         room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
         room.status = RoomStatus[json.getInt("status")]
 
@@ -208,7 +210,14 @@ object RoomAPI {
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
         }
 
-        roomEventListener?.onRoomConnect(room)
+        val scene = RoomScene(room)
+
+        Multiplayer.room = room
+        Multiplayer.player = room.playersMap[OnlineManager.getInstance().userId]!!
+        Multiplayer.roomScene = scene
+        
+
+        scene.onRoomConnect(room)
     }
 
     private val playerJoined = Listener {
@@ -283,7 +292,8 @@ object RoomAPI {
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
      * [IRoomEventListener.onRoomConnectFail]
      */
-    fun connectToRoom(roomId: Long, userId: Long, username: String, roomPassword: String? = null, sessionID: String? = null) {
+    fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
+                      multiplayerSessionID: String? = null) {
 
         // Clearing previous socket in case of reconnection.
         socket?.off()
@@ -291,14 +301,14 @@ object RoomAPI {
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
-        val sign = SecurityUtils.signRequest("${userId}_$username")
+        val sign = SecurityUtils.signRequest("${userId}_$gameSessionId")
 
         auth["uid"] = userId.toString()
-        auth["username"] = username
+        auth["gameSessionID"] = gameSessionId
         auth["version"] = API_VERSION.toString()
 
-        if (sessionID != null) {
-            auth["sessionID"] = sessionID
+        if (multiplayerSessionID != null) {
+            auth["multiplayerSessionID"] = multiplayerSessionID
         }
 
         if (sign != null) {
@@ -309,9 +319,9 @@ object RoomAPI {
             auth["password"] = roomPassword
         }
 
-        Multiplayer.log("Starting connection -> $roomId, $userId, $username")
+        Multiplayer.log("Starting connection -> $roomId, $userId")
 
-        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId, username) else IO.socket(url, IO.Options().also {
+        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own
@@ -409,8 +419,8 @@ object RoomAPI {
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: JSONArray) {
-        socket?.emit("roomModsChanged", mods) ?: run {
+    fun setRoomMods(mods: String) {
+        socket?.emit("roomModsChanged", JSONArray(mods)) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'roomModsChanged' while socket is null.")
 			return
 		}
@@ -573,8 +583,8 @@ object RoomAPI {
      * Change player mods.
      */
     @JvmStatic
-    fun setPlayerMods(mods: JSONArray) {
-        socket?.emit("playerModsChanged", mods) ?: run {
+    fun setPlayerMods(mods: String) {
+        socket?.emit("playerModsChanged", JSONArray(mods)) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'playerModsChanged' while socket is null.")
 			return
 		}

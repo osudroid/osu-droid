@@ -19,10 +19,4 @@ data class SliderCheesePenalty(
      */
     @JvmField
     val flashlight: Double = 1.0,
-
-    /**
-     * The penalty for visual pp.
-     */
-    @JvmField
-    val visual: Double = 1.0
 )

@@ -1,5 +1,7 @@
 package com.rian.osu.difficulty.attributes
 
+import com.rian.osu.beatmap.hitobject.HitCircle
+import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.mods.Mod
 
 /**
@@ -17,6 +19,16 @@ class StandardDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var speedDifficultStrainCount = 0.0
+
+    /**
+     * Describes how much of [speedDifficultStrainCount] is contributed to by [HitCircle]s or [Slider]s.
+     *
+     * A value closer to 0 indicates most of [speedDifficultStrainCount] is contributed by [HitCircle]s.
+     *
+     * A value closer to [Double.POSITIVE_INFINITY] indicates most of [speedDifficultStrainCount] is contributed by [Slider]s.
+     */
+    @JvmField
+    var speedTopWeightedSliderFactor = 0.0
 
     /**
      * The perceived approach rate inclusive of rate-adjusting [Mod]s (DT/HT/etc.).

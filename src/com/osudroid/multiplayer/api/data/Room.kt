@@ -181,7 +181,4 @@ data class Room(
     private fun sortPlayers() {
         players = players.sortedWith { a, b -> (a == null).compareTo(b == null) }.toTypedArray()
     }
-
-
-    fun modsToReadableString() = mods.toString(this)
 }

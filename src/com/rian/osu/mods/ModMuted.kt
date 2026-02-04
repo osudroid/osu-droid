@@ -3,8 +3,6 @@ package com.rian.osu.mods
 import com.rian.osu.mods.settings.*
 import kotlin.math.max
 import kotlin.reflect.KProperty
-import kotlin.reflect.jvm.isAccessible
-import org.json.JSONObject
 
 /**
  * Represents the Muted mod.
@@ -21,6 +19,7 @@ class ModMuted : Mod() {
     @get:JvmName("isInverseMuting")
     var inverseMuting by object : BooleanModSetting(
         name = "Start muted",
+        key = "inverseMuting",
         defaultValue = false
     ) {
         override var value
@@ -36,10 +35,7 @@ class ModMuted : Mod() {
         }
 
         private fun onValueChange(newValue: Boolean) {
-            ::muteComboCount.run {
-                isAccessible = true
-                (getDelegate() as IntegerModSetting).minValue = if (newValue) 1 else 0
-            }
+            getModSettingDelegate<IntegerModSetting>(::muteComboCount).minValue = if (newValue) 1 else 0
         }
     }
 
@@ -49,6 +45,7 @@ class ModMuted : Mod() {
     @get:JvmName("isEnableMetronome")
     var enableMetronome by BooleanModSetting(
         name = "Enable metronome",
+        key = "enableMetronome",
         defaultValue = true
     )
 
@@ -57,6 +54,7 @@ class ModMuted : Mod() {
      */
     var muteComboCount by IntegerModSetting(
         name = "Final volume at combo",
+        key = "muteComboCount",
         defaultValue = 100,
         minValue = 0,
         maxValue = 500
@@ -68,6 +66,7 @@ class ModMuted : Mod() {
     @get:JvmName("affectsHitSounds")
     var affectsHitSounds by BooleanModSetting(
         name = "Mute hit sounds",
+        key = "affectsHitSounds",
         defaultValue = true
     )
 
@@ -81,28 +80,5 @@ class ModMuted : Mod() {
         val volume = (combo / max(1f, muteComboCount.toFloat())).coerceIn(0f, 1f)
 
         return if (inverseMuting) volume else 1 - volume
-    }
-
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        inverseMuting = settings.optBoolean("inverseMuting", inverseMuting)
-        enableMetronome = settings.optBoolean("enableMetronome", enableMetronome)
-        muteComboCount = settings.optInt("muteComboCount", muteComboCount)
-        affectsHitSounds = settings.optBoolean("affectsHitSounds", affectsHitSounds)
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("inverseMuting", inverseMuting)
-        put("enableMetronome", enableMetronome)
-        put("muteComboCount", muteComboCount)
-        put("affectsHitSounds", affectsHitSounds)
-    }
-
-    override fun deepCopy() = ModMuted().also {
-        it.inverseMuting = inverseMuting
-        it.enableMetronome = enableMetronome
-        it.muteComboCount = muteComboCount
-        it.affectsHitSounds = affectsHitSounds
     }
 }

@@ -1,10 +1,13 @@
 package com.rian.osu.difficulty.skills
 
+import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.StandardDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.StandardRhythmEvaluator
 import com.rian.osu.difficulty.evaluators.StandardSpeedEvaluator
+import com.rian.osu.difficulty.utils.StrainUtils
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
+import kotlin.math.max
 import kotlin.math.pow
 
 /**
@@ -19,25 +22,25 @@ class StandardSpeed(
     override val reducedSectionCount = 5
 
     private var currentStrain = 0.0
+    private var maxStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 1.46
+    private val skillMultiplier = 1.47
     private val strainDecayBase = 0.3
+
+    private val sliderStrains = mutableListOf<Double>()
 
     /**
      * Calculates the number of clickable objects weighted by difficulty.
      */
-    fun relevantNoteCount(): Double = objectStrains.run {
-        if (isEmpty()) {
+    fun relevantNoteCount(): Double {
+        if (objectStrains.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
-        val maxStrain = max()
-        if (maxStrain == 0.0) {
-            return 0.0
-        }
-
-        fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        return objectStrains.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
+
+    fun countTopWeightedSliders() = StrainUtils.countTopWeightedSliders(sliderStrains, difficulty)
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
@@ -46,7 +49,13 @@ class StandardSpeed(
         currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
         val totalStrain = currentStrain * currentRhythm
 
+        maxStrain = max(maxStrain, totalStrain)
         objectStrains.add(totalStrain)
+
+        if (current.obj is Slider) {
+            sliderStrains.add(totalStrain)
+        }
+
         return totalStrain
     }
 

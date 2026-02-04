@@ -6,14 +6,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
 /**
- * Provides functionality to alter a [Beatmap] after it has been converted.
+ * Provides functionality to alter an [IBeatmap] after it has been converted.
  */
 class BeatmapProcessor @JvmOverloads constructor(
     /**
-     * The [Beatmap] to process. This should already be converted to the applicable mode.
+     * The [IBeatmap] to process. This should already be converted to the applicable mode.
      */
     @JvmField
-    val beatmap: Beatmap,
+    val beatmap: IBeatmap,
 
     /**
      * The [CoroutineScope] to use for coroutines.
@@ -21,7 +21,7 @@ class BeatmapProcessor @JvmOverloads constructor(
     private val scope: CoroutineScope? = null
 ) {
     /**
-     * Processes the converted [Beatmap] prior to [HitObject.applyDefaults] being invoked.
+     * Processes the converted [IBeatmap] prior to [HitObject.applyDefaults] being invoked.
      *
      * Nested [HitObject]s generated during [HitObject.applyDefaults] will not be present by this point,
      * and no [Mod]s will have been applied to the [HitObject]s.
@@ -46,22 +46,30 @@ class BeatmapProcessor @JvmOverloads constructor(
     }
 
     /**
-     * Processes the converted [Beatmap] after [HitObject.applyDefaults] has been invoked.
+     * Processes the converted [IBeatmap] after [HitObject.applyDefaults] has been invoked.
      *
      * Nested [HitObject]s generated during [HitObject.applyDefaults] will be present by this point,
      * and [Mod]s will have been applied to all [HitObject]s.
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
      */
-    fun postProcess() = beatmap.hitObjects.objects.run {
-        if (isEmpty()) {
+    fun postProcess() = beatmap.hitObjects.run {
+        if (objects.isEmpty()) {
             return@run
         }
 
-        // Reset stacking
+        // Recount slider ticks as nested hit objects are only generated after HitObject.applyDefaults.
+        sliderTickCount = 0
+
         forEach {
             scope?.ensureActive()
 
+            if (it is Slider) {
+                sliderRepeatCount += it.repeatCount
+                sliderTickCount += it.nestedHitObjects.size - 2 - it.repeatCount
+            }
+
+            // Reset stacking
             it.difficultyStackHeight = 0
             it.gameplayStackHeight = 0
         }
@@ -102,7 +110,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                     }
 
                     val endTime = stackBaseObject.endTime
-                    val stackThreshold = objectN.timePreempt * beatmap.general.stackLeniency
+                    val stackThreshold = calculateStackThreshold(beatmap, objectN)
 
                     if (objectN.startTime - endTime > stackThreshold) {
                         // We are no longer within stacking range of the next object.
@@ -150,7 +158,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                 continue
             }
 
-            val stackThreshold = objectI.timePreempt * beatmap.general.stackLeniency
+            val stackThreshold = calculateStackThreshold(beatmap, objectI)
 
             // If this object is a hit circle, then we enter this "special" case.
             // It either ends with a stack of hit circles only, or a stack of hit circles that are underneath a slider.
@@ -164,7 +172,9 @@ class BeatmapProcessor @JvmOverloads constructor(
                         continue
                     }
 
-                    if (objectI.startTime - objectN.endTime > stackThreshold) {
+                    // Truncation to integer is required to match osu!stable - both quantities being subtracted there
+                    // are integers.
+                    if (objectI.startTime.toInt() - objectN.endTime.toInt() > stackThreshold) {
                         // We are no longer within stacking range of the previous object.
                         break
                     }
@@ -244,7 +254,7 @@ class BeatmapProcessor @JvmOverloads constructor(
 
             var sliderStack = 0
             var startTime = currentObject.endTime
-            val stackThreshold = currentObject.timePreempt * beatmap.general.stackLeniency
+            val stackThreshold = calculateStackThreshold(beatmap, currentObject)
 
             for (j in i + 1 until objects.size) {
                 scope?.ensureActive()
@@ -278,5 +288,18 @@ class BeatmapProcessor @JvmOverloads constructor(
 
     companion object {
         private const val STACK_DISTANCE = 3
+
+        /**
+         * Truncation of [HitObject.timePreempt] to [Int], as well as keeping the result as [Float], are both done for
+         * the purposes of osu!stable compatibility.
+         *
+         * Note that top-level objects [HitObject.timePreempt] is supposed to be integral anyway; see
+         * [HitObject.applyDefaults] using [com.rian.osu.beatmap.sections.BeatmapDifficulty.difficultyRangeInt] when
+         * calculating it.
+         *
+         * Slider ticks and end circles are the exception to that, but they do not matter for stacking.
+         */
+        private fun calculateStackThreshold(beatmap: IBeatmap, hitObject: HitObject) =
+            hitObject.timePreempt.toInt() * beatmap.general.stackLeniency
     }
 }

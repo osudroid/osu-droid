@@ -5,10 +5,12 @@ import android.util.Log;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.multiplayer.RoomScene;
 import com.osudroid.ui.v2.modmenu.ModIcon;
+import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.ui.v2.songselect.SongSelect;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.UIEngine;
+import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
 import com.rian.osu.GameMode;
@@ -111,48 +113,59 @@ public class ScoringScene {
             beatmapInfo = beatmap;
         }
 
-        final int x = 0, y = 100;
+        float paddingButtom = Multiplayer.isConnected()
+                ? Multiplayer.roomScene.getChat().getButtonHeight()
+                : 0f;
+
+        UIContainer scaledContainer = new UIContainer() {{
+            setSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+            setPosition(0f, 100f);
+            setScale((Config.getRES_HEIGHT() - paddingButtom) / Config.getRES_HEIGHT());
+        }};
+        scene.attachChild(scaledContainer);
+
+        final int x = 0, y = 0;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
         final Sprite panel = new Sprite(x, y, Utils.toRes(panelr.getWidth() * 0.9f),
                 Utils.toRes(panelr.getHeight() * 0.9f), panelr);
-        scene.attachChild(panel);
+        scaledContainer.attachChild(panel);
 
         final TextureRegion hit300sr = ResourceManager.getInstance().getTexture("hit300");
         final Sprite hit300s = new Sprite(Utils.toRes(10), Utils.toRes(130),
                 Utils.toRes(hit300sr.getWidth()), Utils.toRes(hit300sr.getHeight()), hit300sr);
         hit300s.setPosition(Utils.toRes(70 - hit300s.getWidth() / 2 + x), Utils.toRes(130 - hit300s.getHeight() / 2 + y));
-        scene.attachChild(hit300s);
+        scaledContainer.attachChild(hit300s);
 
         final TextureRegion hit100sr = ResourceManager.getInstance().getTexture("hit100");
         final Sprite hit100s = new Sprite(Utils.toRes(10), Utils.toRes(130 + 92),
                 Utils.toRes(hit100sr.getWidth()), Utils.toRes(hit100sr.getHeight()), hit100sr);
         hit100s.setPosition(Utils.toRes(70 - hit100s.getWidth() / 2 + x), Utils.toRes(130 + 92 - hit100s.getHeight() / 2 + y));
-        scene.attachChild(hit100s);
+        scaledContainer.attachChild(hit100s);
 
         final TextureRegion hit50sr = ResourceManager.getInstance().getTexture("hit50");
         final Sprite hit50s = new Sprite(0, Utils.toRes(120 + 92 * 2),
                 Utils.toRes(hit50sr.getWidth()), Utils.toRes(hit50sr.getHeight()), hit50sr);
         hit50s.setPosition(Utils.toRes(70 - hit50s.getWidth() / 2 + x), Utils.toRes(130 + 92 * 2 - hit50s.getHeight() / 2 + y));
-        scene.attachChild(hit50s);
+        scaledContainer.attachChild(hit50s);
 
         final TextureRegion hit300ksr = ResourceManager.getInstance().getTexture("hit300g");
         final Sprite hit300ks = new Sprite(Utils.toRes(300), Utils.toRes(100),
                 Utils.toRes(hit300ksr.getWidth()), Utils.toRes(hit300ksr.getHeight()), hit300ksr);
         hit300ks.setPosition(Utils.toRes(340 - hit300ks.getWidth() / 2 + x), Utils.toRes(130 - hit300ks.getHeight() / 2 + y));
-        scene.attachChild(hit300ks);
+        scaledContainer.attachChild(hit300ks);
 
         final TextureRegion hit100ksr = ResourceManager.getInstance().getTexture("hit100k");
         final Sprite hit100ks = new Sprite(Utils.toRes(300), Utils.toRes(120 + 92),
                 Utils.toRes(hit100ksr.getWidth()), Utils.toRes(hit100ksr.getHeight()), hit100ksr);
         hit100ks.setPosition(Utils.toRes(340 - hit100ks.getWidth() / 2 + x), Utils.toRes(130 + 92 - hit100ks.getHeight() / 2 + y));
-        scene.attachChild(hit100ks);
+        scaledContainer.attachChild(hit100ks);
 
         final TextureRegion hit0sr = ResourceManager.getInstance().getTexture("hit0");
         final Sprite hit0s = new Sprite(Utils.toRes(300), Utils.toRes(120 + 92 * 2),
                 Utils.toRes(hit0sr.getWidth()), Utils.toRes(hit0sr.getHeight()), hit0sr);
         hit0s.setPosition(Utils.toRes(340 - hit0s.getWidth() / 2 + x), Utils.toRes(130 + 92 * 2 - hit0s.getHeight() / 2 + y));
-        scene.attachChild(hit0s);
+        scaledContainer.attachChild(hit0s);
 
         final Sprite rankingText = new Sprite(Utils.toRes(580), 0,
                 ResourceManager.getInstance().getTexture("ranking-title"));
@@ -165,50 +178,50 @@ public class ScoringScene {
         }
         final ScoreNumber scoreNum = new ScoreNumber(Utils.toRes(220 + x),
                 Utils.toRes(18 + y), scoreStr.toString(), 1, false);
-        scoreNum.attachToScene(scene);
+        scoreNum.attachToScene(scaledContainer);
 
         final ScoreNumber hit300num = new ScoreNumber(Utils.toRes(138 + x),
                 Utils.toRes(110 + y), stat.getHit300() + "x", 1,
                 false);
-        hit300num.attachToScene(scene);
+        hit300num.attachToScene(scaledContainer);
         final ScoreNumber hit100num = new ScoreNumber(Utils.toRes(138 + x),
                 Utils.toRes(110 + 85 + y), stat.getHit100() + "x",
                 1, false);
-        hit100num.attachToScene(scene);
+        hit100num.attachToScene(scaledContainer);
         final ScoreNumber hit50num = new ScoreNumber(Utils.toRes(138 + x),
                 Utils.toRes(110 + 85 * 2 + y), stat.getHit50() + "x",
                 1, false);
-        hit50num.attachToScene(scene);
+        hit50num.attachToScene(scaledContainer);
 
         final ScoreNumber hit300knum = new ScoreNumber(Utils.toRes(400 + x),
                 Utils.toRes(110 + y), stat.getHit300k() + "x", 1,
                 false);
-        hit300knum.attachToScene(scene);
+        hit300knum.attachToScene(scaledContainer);
         final ScoreNumber hit100knum = new ScoreNumber(Utils.toRes(400 + x),
                 Utils.toRes(110 + 85 + y), stat.getHit100k() + "x",
                 1, false);
-        hit100knum.attachToScene(scene);
+        hit100knum.attachToScene(scaledContainer);
         final ScoreNumber hit0num = new ScoreNumber(Utils.toRes(400 + x),
                 Utils.toRes(110 + 85 * 2 + y), stat.getMisses() + "x",
                 1, false);
-        hit0num.attachToScene(scene);
+        hit0num.attachToScene(scaledContainer);
 
         final Sprite maxComboText = new Sprite(Utils.toRes(20 + x),
                 Utils.toRes(332 + y), ResourceManager.getInstance().getTexture(
                 "ranking-maxcombo"));
-        scene.attachChild(maxComboText);
+        scaledContainer.attachChild(maxComboText);
         final Sprite accText = new Sprite(Utils.toRes(260 + x), Utils.toRes(332 + y),
                 ResourceManager.getInstance().getTexture("ranking-accuracy"));
-        scene.attachChild(accText);
+        scaledContainer.attachChild(accText);
         final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x),
                 Utils.toRes(maxComboText.getY() + 38), stat.getScoreMaxCombo() + "x", 1,
                 false);
-        maxCombo.attachToScene(scene);
+        maxCombo.attachToScene(scaledContainer);
         final String accStr = String
                 .format(Locale.ENGLISH, "%2.2f%%", stat.getAccuracy() * 100);
         final ScoreNumber accuracy = new ScoreNumber(Utils.toRes(260 + x),
                 Utils.toRes(accText.getY() + 38), accStr, 1, false);
-        accuracy.attachToScene(scene);
+        accuracy.attachToScene(scaledContainer);
 
         final Sprite mark = new Sprite(Utils.toRes(610), 0, ResourceManager
                 .getInstance().getTexture("ranking-" + stat.getMark()));
@@ -219,6 +232,7 @@ public class ScoringScene {
                     new FadeInModifier(2), new ScaleModifier(2, 2, 1)));
         }
         mark.setPosition((float) (Config.getRES_WIDTH() * 5) / 6 - mark.getWidth() / 2, 80);
+        scene.attachChild(mark);
 
         final Sprite backBtn = new Sprite(Utils.toRes(580), Utils.toRes(490),
                 ResourceManager.getInstance().getTexture("ranking-back")) {
@@ -240,7 +254,7 @@ public class ScoringScene {
             }
 
         };
-        backBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, Config.getRES_HEIGHT() - backBtn.getHeight() - 10);
+        backBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, Config.getRES_HEIGHT() - backBtn.getHeight() - 10 - paddingButtom);
         scene.attachChild(backBtn);
 
         Sprite retryBtn = null;
@@ -306,7 +320,7 @@ public class ScoringScene {
         if (stat.isPerfect()) {
             final Sprite perfect = new Sprite(0, 0, ResourceManager.getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
-            scene.attachChild(perfect);
+            scaledContainer.attachChild(perfect);
         }
 
         scene.setTouchAreaBindingEnabled(true);
@@ -316,7 +330,6 @@ public class ScoringScene {
             scene.registerTouchArea(replayBtn);
         }
         scene.registerTouchArea(backBtn);
-        scene.attachChild(mark);
 
         if (beatmap != null && retryBtn != null) {
             retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
@@ -348,7 +361,7 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
-            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+            (mods.contains(ModFlashlight.class) && !mods.ofType(ModFlashlight.class).getUsesDefaultSettings())) {
 
             var customSpeed = mods.ofType(ModCustomSpeed.class);
             var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
@@ -377,8 +390,14 @@ public class ScoringScene {
                 }
             }
 
-            if (flashlight != null && flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
-                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
+            if (flashlight != null && !flashlight.getUsesDefaultSettings()) {
+                if (flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
+                    mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
+                }
+
+                if (flashlight.getSizeMultiplier() != ModFlashlight.DEFAULT_SIZE_MULTIPLIER) {
+                    mapperStr += String.format(Locale.ENGLISH, "%.2fx,", flashlight.getSizeMultiplier());
+                }
             }
 
             if (mapperStr.endsWith(",")){
@@ -418,6 +437,16 @@ public class ScoringScene {
                     replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                     if (replay.load(replayPath, true)) {
+                        // If statistics information is not complete, we populate it with information from replay.
+                        if (
+                            stat.getSliderHeadHits() == -1 ||
+                            stat.getSliderTickHits() == -1 ||
+                            stat.getSliderRepeatHits() == -1 ||
+                            stat.getSliderEndHits() == -1
+                        ) {
+                            replay.populateStatistics(beatmapData, stat);
+                        }
+
                         var copiedMods = mods;
 
                         if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
@@ -430,7 +459,7 @@ public class ScoringScene {
                             case droid -> {
                                 var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
 
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficultyForReplay(playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, (DroidDifficultyAttributes) difficultyAttributes, replay.cursorMoves,
@@ -499,8 +528,8 @@ public class ScoringScene {
 
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
                     ResourceManager.getInstance().getFont("smallFont"), ppinfo.toString());
-            ppInfo.setPosition(Utils.toRes(244), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
-            final Rectangle statisticRectangle = new Rectangle(Utils.toRes(240), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
+            ppInfo.setPosition(Utils.toRes(244), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2) - paddingButtom);
+            final Rectangle statisticRectangle = new Rectangle(Utils.toRes(240), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4) - paddingButtom, ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
             statisticRectangle.setColor(0, 0, 0, 0.5f);
             scene.attachChild(statisticRectangle);
             scene.attachChild(ppInfo);
@@ -597,10 +626,11 @@ public class ScoringScene {
         if (Multiplayer.isMultiplayer)
         {
             // Preventing NPEs when player gets disconnected while playing
-            if (!Multiplayer.isConnected())
-                RoomScene.INSTANCE.back();
-            else
-                RoomScene.INSTANCE.show();
+            if (!Multiplayer.isConnected()) {
+                UIEngine.getCurrent().setScene(new LobbyScene());
+            } else {
+                Multiplayer.roomScene.show();
+            }
             return;
         }
         replayMusic();

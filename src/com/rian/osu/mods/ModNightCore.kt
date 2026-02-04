@@ -13,6 +13,4 @@ open class ModNightCore : ModRateAdjust() {
     override val type = ModType.DifficultyIncrease
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)
-
-    override fun deepCopy() = ModNightCore()
 }

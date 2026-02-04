@@ -8,6 +8,7 @@ import kotlin.math.exp
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 
 /**
  * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
@@ -185,5 +186,16 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         // The maximum strain of the new section is not zero by default.
         // This means we need to capture the strain level at the beginning of the new section, and use that as the initial peak level.
         currentSectionPeak = calculateInitialStrain(time, current)
+    }
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = (5 * max(1.0, difficulty / 0.0675) - 4).pow(3) / 100000
     }
 }

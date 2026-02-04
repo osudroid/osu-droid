@@ -7,11 +7,6 @@ interface ISizeVariable {
      */
     var sizeVariant: SizeVariant
 
-
-    /**
-     * Should be called when the size variant changes.
-     */
-    fun onSizeVariantChanged() = Unit
 }
 
 /**

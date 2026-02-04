@@ -3,7 +3,71 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="multiplayer_room_head_to_head">Head to head</string>
+    <string name="multiplayer_room_team_versus">Team versus</string>
+    <string name="multiplayer_room_players">Players</string>
+    <string name="multiplayer_room_beatmap">Beatmap</string>
+    <string name="multiplayer_room_change_beatmap">Change beatmap</string>
+    <string name="multiplayer_room_score_v1">Score V1</string>
+    <string name="multiplayer_room_score_v2">Score V2</string>
+    <string name="multiplayer_room_status_idle">Idle</string>
+    <string name="multiplayer_room_status_changing_beatmap">Changing beatmap</string>
+    <string name="multiplayer_room_status_playing">Playing</string>
+    <string name="multiplayer_room_highest_accuracy">Highest accuracy</string>
+    <string name="multiplayer_room_maximum_combo">Maximum combo</string>
+    <string name="multiplayer_room_no_players">No players</string>
+    <string name="multiplayer_room_free_mods">Free mods</string>
+    <string name="multiplayer_room_mods">Mods</string>
+    <string name="multiplayer_room_leave">Leave</string>
+    <string name="multiplayer_room_ready">Ready</string>
+    <string name="multiplayer_room_not_ready">Not ready</string>
+    <string name="multiplayer_room_unable_status">Cannot set ready!</string>
+    <string name="multiplayer_room_no_beatmap_selected">No beatmap selected.</string>
+    <string name="multiplayer_room_changing_beatmap">Room is changing beatmap...</string>
+    <string name="multiplayer_room_download_beatmap">Download</string>
+    <string name="multiplayer_room_not_available_beatmap">Not available</string>
+    <string name="multiplayer_room_start_game">Start game!</string>
+    <string name="multiplayer_room_force_start_game">Force start game! (%d/%d)</string>
+    <string name="multiplayer_room_must_select_beatmap">You must select a beatmap first.</string>
+    <string name="multiplayer_room_at_least_one_player_per_team">At least 1 player per team is needed to start a match!</string>
+    <string name="multiplayer_room_at_least_two_players_beatmap">At least 2 players need to have the beatmap!</string>
+    <string name="multiplayer_room_settings">Settings</string>
+    <string name="multiplayer_room_cannot_ready_changing_beatmap">Cannot set ready when room is changing beatmap!</string>
+    <string name="multiplayer_room_cannot_ready_no_team">You must select a team first!</string>
+    <string name="multiplayer_room_cannot_ready_missing_beatmap">Cannot set ready, missing beatmap!</string>
+    <string name="multiplayer_room_unable_download">Unable to download beatmap: %s</string>
+    <string name="multiplayer_room_beatmap_unavailable">This beatmap isn\'t available in the download mirror servers.</string>
+    <string name="multiplayer_room_welcome">Welcome to osu!droid multiplayer!</string>
+    <string name="multiplayer_room_reconnecting">Connection lost, trying to reconnect...</string>
+    <string name="multiplayer_room_new_host">Player %s is now the room host.</string>
+    <string name="multiplayer_room_player_joined">Player %s joined (UID: %d).</string>
+    <string name="multiplayer_room_player_left">Player %s left (UID: %d).</string>
+    <string name="multiplayer_room_player_kicked">Player %s was kicked (UID: %d).</string>
+    <string name="multiplayer_room_kicked_gameplay">You were kicked by the room host, but you can continue playing.</string>
+    <string name="multiplayer_room_kicked_title">Kicked</string>
+    <string name="multiplayer_room_kicked_message">You\'ve been kicked by room host.</string>
+    <string name="multiplayer_room_kicked_close">Close</string>
+    <string name="multiplayer_room_player_menu_view_profile">View profile</string>
+    <string name="multiplayer_room_player_menu_mute">Mute</string>
+    <string name="multiplayer_room_player_menu_unmute">Unmute</string>
+    <string name="multiplayer_room_player_menu_transfer_host">Transfer host</string>
+    <string name="multiplayer_room_player_menu_kick">Kick</string>
+    <string name="multiplayer_room_player_kick_dialog_title">Kick player %s</string>
+    <string name="multiplayer_room_player_kick_dialog_message">Are you sure?</string>
+    <string name="multiplayer_room_player_transfer_dialog_title">Transfer host to %s</string>
+    <string name="multiplayer_room_player_transfer_dialog_message">Are you sure?</string>
+    <string name="multiplayer_room_chat">Chat</string>
+    <string name="multiplayer_room_chat_system">System</string>
+    <string name="multiplayer_room_chat_send">Send</string>
+    <string name="multiplayer_room_chat_error">Error to send message: %s</string>
+
+    <string name="opt_category_localization">Localization</string>
+
     <string name="opt_language_title">Language</string>
     <string name="opt_language_summary">Change the language of the game. Requires a restart.</string>
 
+    <string name="multiplayer_lobby_search_rooms">Search rooms...</string>
+
+    <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider and spinner lock</string>
+    <string name="opt_remove_sliderlock_spinnerlock_summary">[UNRANKED] Allow circles and sliders to be hittable when another slider or spinner is currently active.</string>
 </resources>

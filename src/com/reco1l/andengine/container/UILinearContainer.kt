@@ -2,6 +2,7 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.Orientation.*
+import com.reco1l.andengine.theme.Size
 import kotlin.math.*
 
 open class UILinearContainer : UIContainer() {
@@ -24,9 +25,8 @@ open class UILinearContainer : UIContainer() {
 
 
     override fun onContentChanged() {
-
-        var right = 0f
-        var bottom = 0f
+        var contentWidth = 0f
+        var contentHeight = 0f
 
         for (i in 0 until childCount) {
 
@@ -36,34 +36,37 @@ open class UILinearContainer : UIContainer() {
                 continue
             }
 
+            val childWidth = if (child.rawWidth in Size.relativeSizeRange) child.intrinsicWidth else child.width
+            val childHeight = if (child.rawHeight in Size.relativeSizeRange) child.intrinsicHeight else child.height
+
             when (orientation) {
 
                 Horizontal -> {
-                    child.x = right
+                    child.x = contentWidth
 
-                    right += child.getWidth()
-                    bottom = max(bottom, child.getHeight())
+                    contentWidth += childWidth
+                    contentHeight = max(contentHeight, childHeight)
 
                     if (childCount > 1 && i < childCount - 1) {
-                        right += spacing
+                        contentWidth += spacing
                     }
                 }
 
                 Vertical -> {
-                    child.y = bottom
+                    child.y = contentHeight
 
-                    right = max(right, child.getWidth())
-                    bottom += child.getHeight()
+                    contentWidth = max(contentWidth, childWidth)
+                    contentHeight += childHeight
 
                     if (childCount > 1 && i < childCount - 1) {
-                        bottom += spacing
+                        contentHeight += spacing
                     }
                 }
             }
         }
 
-        contentWidth = right
-        contentHeight = bottom
+        this.contentWidth = contentWidth
+        this.contentHeight = contentHeight
     }
 }
 

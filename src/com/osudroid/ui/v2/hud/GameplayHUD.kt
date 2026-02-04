@@ -8,11 +8,11 @@ import com.reco1l.andengine.container.UIContainer
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
-import com.reco1l.andengine.ExtendedEngine
+import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
-import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent
 import org.json.JSONObject
@@ -65,26 +65,18 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
     init {
-        // The engine expects the HUD to be an instance of AndEngine's HUD class.
-        // Since we need Container features, we set an HUD instance as the parent, and we just need to
-        // reference the parent of this container to set the engine's HUD.
-        val parent = object : HUD() {
-            override fun onManagedUpdate(pSecondsElapsed: Float) {
-                val engine = ExtendedEngine.Current
+        width = Size.Full
+        height = Size.Full
+    }
 
-                if (engine.scene != GlobalManager.getInstance().gameScene?.scene) {
-                    engine.camera.hud = null
-                    return
-                }
 
-                super.onManagedUpdate(pSecondsElapsed)
-            }
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (UIEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
+            detachSelf()
+            return
         }
 
-        parent.attachChild(this)
-        parent.camera = GlobalManager.getInstance().engine.camera
-
-        setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
@@ -248,11 +240,8 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
             loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
-
-            parent!!.attachChild(elementSelector)
         } else {
-            parent!!.detachChild(elementSelector)
-
+            elementSelector?.detachSelf()
             elementSelector = null
         }
 
@@ -260,6 +249,14 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         // Cannot use forEachElement {} because we're modifying the list.
         mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
     }
+
+    override fun onAttached() {
+        if (isInEditMode) {
+            UIEngine.current.overlay.attachChild(elementSelector)
+        }
+        super.onAttached()
+    }
+
     //endregion
 
     //region Gameplay Events
@@ -307,12 +304,6 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     }
 
     //endregion
-
-
-    override fun getParent(): HUD? {
-        // Nullable because during initialization the parent is not set yet.
-        return super.getParent() as? HUD
-    }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 

@@ -76,7 +76,7 @@ public class GameplaySpinner extends GameObject {
 
         metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
-        metre.setHeight(background.getHeightScaled());
+        metre.setHeight(background.getTransformedHeight());
 
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
@@ -145,7 +145,7 @@ public class GameplaySpinner extends GameObject {
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
 
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
+        metreY = (Config.getRES_HEIGHT() - background.getTransformedHeight()) / 2;
         metre.setAlpha(0);
         metre.registerEntityModifier(Modifiers.sequence(
             Modifiers.delay(timePreempt * 0.75f),
@@ -263,18 +263,23 @@ public class GameplaySpinner extends GameObject {
         PointF mouse = null;
 
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            var cursor = listener.getCursor(i);
+            var latestEvent = cursor.getLatestEvent();
+
             if (mouse == null) {
                 if (autoPlay) {
                     mouse = position;
-                } else if (listener.isMouseDown(i)) {
-                    mouse = listener.getMousePos(i);
                 } else {
-                    continue;
+                    if (latestEvent != null && !latestEvent.isActionUp()) {
+                        mouse = latestEvent.position;
+                    } else {
+                        continue;
+                    }
                 }
                 currMouse.set(mouse.x - position.x, mouse.y - position.y);
             }
 
-            if (oldMouse == null || listener.isMousePressed(this, i)) {
+            if (oldMouse == null || (!autoPlay && latestEvent != null && latestEvent.isActionDown())) {
                 if (oldMouse == null) {
                     oldMouse = new PointF();
                 }

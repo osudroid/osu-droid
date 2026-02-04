@@ -4,8 +4,7 @@ import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FormControl
 import com.reco1l.andengine.ui.form.FormSlider
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.settings.ModSetting
-import com.rian.osu.mods.settings.RangeConstrainedModSetting
+import com.rian.osu.mods.settings.*
 
 sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     ModSettingComponent<V, Float>(mod, setting) {
@@ -13,21 +12,28 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     final override fun update() {
         val slider = (control as FormSlider).control
 
+        // Assigning some constraining values (e.g., min, max and step) to the slider may unexpectedly change the value
+        // of the setting due to their boundaries. Since the base update call will update the value of the control,
+        // we do not want to trigger its onValueChanged() here (avoid calling it repetitively).
+        val valueChanged = control.onValueChanged
+        control.onValueChanged = null
+
+        slider.precision = when (setting) {
+            is FloatModSetting -> setting.precision
+            is NullableFloatModSetting -> setting.precision
+            else -> slider.precision
+        }
+
         if (setting is RangeConstrainedModSetting<V>) {
-            val setting = setting as RangeConstrainedModSetting<V>
-
-            // Assigning the min, max and step values to the slider may unexpectedly change the value of the setting
-            // due to their boundaries. Since the base update call will update the value of the control, we do not want
-            // to trigger its onValueChanged() here (avoid calling it repetitively).
-            val valueChanged = control.onValueChanged
-            control.onValueChanged = null
-
             slider.min = convertSettingValue(setting.minValue)
             slider.max = convertSettingValue(setting.maxValue)
-            slider.step = convertSettingValue(setting.step)
-
-            control.onValueChanged = valueChanged
         }
+
+        if (setting is NumberModSetting<V>) {
+            slider.step = convertSettingValue(setting.step)
+        }
+
+        control.onValueChanged = valueChanged
 
         super.update()
     }

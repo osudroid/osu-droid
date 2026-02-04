@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * An interface for [Mod]s that can be applied to [HitObject]s.
@@ -21,6 +22,7 @@ interface IModApplicableToHitObjectWithMods {
      * @param mode The [GameMode] to apply for.
      * @param hitObject The [HitObject] to mutate.
      * @param mods The [Mod]s that are used.
+     * @param scope The [CoroutineScope] to use for the operation.
      */
-    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, scope: CoroutineScope? = null)
 }

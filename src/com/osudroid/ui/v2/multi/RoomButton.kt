@@ -8,6 +8,11 @@ import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
@@ -21,110 +26,109 @@ import ru.nsu.ccfit.zuev.osu.online.*
 class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
     init {
-        width = FillParent
-        background?.apply {
-            color = Color4.Black
-            alpha = 0.25f
+        width = Size.Full
+        style = {
+            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.8f)
+            padding = Vec4(3f.srem)
         }
 
-        // Override the default background
-        applyTheme = {}
+        linearContainer {
+            orientation = Orientation.Vertical
+            width = Size.Full
+            inheritAncestorsColor = false
+            style = {
+                spacing = 1f.srem
+            }
 
-        container {
-            width = FillParent
+            fillContainer {
+                width = Size.Full
+                style = {
+                    spacing = 2f.srem
+                }
 
-            linearContainer {
-                orientation = Orientation.Vertical
-                spacing = 8f
-                inheritAncestorsColor = false
-
-                linearContainer {
-                    spacing = 4f
-
-                    sprite {
-                        origin = Anchor.CenterLeft
-                        anchor = Anchor.CenterLeft
-                        textureRegion = ResourceManager.getInstance().getTexture(if (room.isLocked) "lock" else "unlock")
-                        size = Vec2(20f)
-                        applyTheme = { color = it.accentColor }
-                    }
-
-                    text {
-                        origin = Anchor.CenterLeft
-                        anchor = Anchor.CenterLeft
-                        font = ResourceManager.getInstance().getFont("smallFont")
-                        text = room.name
-                        applyTheme = { color = it.accentColor }
-                    }
+                +FontAwesomeIcon(Icon.Lock).apply {
+                    icon = if (room.isLocked) Icon.Lock else Icon.LockOpen
+                    style = { color = it.accentColor }
                 }
 
                 text {
-                    font = ResourceManager.getInstance().getFont("xs")
-                    text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
-                    applyTheme = {
+                    width = Size.Full
+                    text = room.name
+                    style = { color = it.accentColor }
+                }
+
+                text {
+                    setScale(0.85f)
+                    style = {
+                        fontSize = FontSize.SM
                         color = it.accentColor
-                        alpha = 0.95f
                     }
-                }
-
-                linearContainer {
-                    spacing = 8f
-
-                    badge {
-                        sizeVariant = SizeVariant.Small
-                        setText(when (room.teamMode) {
-                            TeamMode.HeadToHead -> string.multiplayer_room_head_to_head
-                            TeamMode.TeamVersus -> string.multiplayer_room_team_versus
-                        })
-                    }
-
-                    badge {
-                        sizeVariant = SizeVariant.Small
-                        setText(when (room.winCondition) {
-                            WinCondition.ScoreV1 -> string.multiplayer_room_score_v1
-                            WinCondition.ScoreV2 -> string.multiplayer_room_score_v2
-                            WinCondition.HighestAccuracy -> string.multiplayer_room_highest_accuracy
-                            WinCondition.MaximumCombo -> string.multiplayer_room_maximum_combo
-                        })
-                    }
-
-                    labeledBadge {
-                        sizeVariant = SizeVariant.Small
-                        label = StringTable.get(string.multiplayer_room_players)
-                        value = "${room.playerCount}/${room.maxPlayers}"
-                    }
-
-                    if (room.gameplaySettings.isFreeMod) {
-                        badge {
-                            sizeVariant = SizeVariant.Small
-                            applyTheme = {
-                                color = it.accentColor * 0.1f
-                                background?.color = it.accentColor
-                            }
-                            setText(string.multiplayer_room_free_mods)
-                        }
-                    }
-                }
-
-                if (room.mods.isNotEmpty()) {
-                    +ModsIndicator().apply {
-                        mods = room.mods.json
-                        iconSize = 24f
-                    }
+                    setText(when (room.status) {
+                        RoomStatus.ChangingBeatmap -> string.multiplayer_room_status_changing_beatmap
+                        RoomStatus.Playing -> string.multiplayer_room_status_playing
+                        else -> string.multiplayer_room_status_idle
+                    })
                 }
             }
 
             text {
-                origin = Anchor.TopRight
-                anchor = Anchor.TopRight
-                font = ResourceManager.getInstance().getFont("smallFont")
-                setScale(0.85f)
-                setText(when (room.status) {
-                    RoomStatus.ChangingBeatmap -> string.multiplayer_room_status_changing_beatmap
-                    RoomStatus.Playing -> string.multiplayer_room_status_playing
-                    else -> string.multiplayer_room_status_idle
-                })
-                applyTheme = { color = it.accentColor }
+                text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
+                style = {
+                    fontSize = FontSize.XS
+                    color = it.accentColor.copy(alpha = 0.95f)
+                }
+            }
+
+            linearContainer {
+                style = {
+                    spacing = 2f.srem
+                }
+
+                badge {
+                    sizeVariant = SizeVariant.Small
+                    setText(
+                        when (room.teamMode) {
+                            TeamMode.HeadToHead -> string.multiplayer_room_head_to_head
+                            TeamMode.TeamVersus -> string.multiplayer_room_team_versus
+                        }
+                    )
+                }
+
+                badge {
+                    sizeVariant = SizeVariant.Small
+                    setText(
+                        when (room.winCondition) {
+                            WinCondition.ScoreV1 -> string.multiplayer_room_score_v1
+                            WinCondition.ScoreV2 -> string.multiplayer_room_score_v2
+                            WinCondition.HighestAccuracy -> string.multiplayer_room_highest_accuracy
+                            WinCondition.MaximumCombo -> string.multiplayer_room_maximum_combo
+                        }
+                    )
+                }
+
+                labeledBadge {
+                    sizeVariant = SizeVariant.Small
+                    label = StringTable.get(string.multiplayer_room_players)
+                    value = "${room.playerCount}/${room.maxPlayers}"
+                }
+
+                if (room.gameplaySettings.isFreeMod) {
+                    badge {
+                        sizeVariant = SizeVariant.Small
+                        style = {
+                            color = it.accentColor * 0.1f
+                            backgroundColor = it.accentColor
+                        }
+                        setText(string.multiplayer_room_free_mods)
+                    }
+                }
+            }
+
+            if (room.mods.isNotEmpty()) {
+                +ModsIndicator().apply {
+                    mods = room.mods.values
+                    iconSize = 24f
+                }
             }
         }
 
@@ -134,12 +138,12 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                 val form: FormContainer
 
                 object : UIDialog<FormContainer>(FormContainer().apply {
-                    width = FillParent
+                    width = Size.Full
                     form = this
 
                     +FormInput().apply {
                         key = "password"
-                        width = FillParent
+                        width = Size.Full
                         label = StringTable.get(string.multiplayer_lobby_room_password)
                     }
 
@@ -180,14 +184,14 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                 RoomAPI.connectToRoom(
                     roomId = room.id,
                     userId = OnlineManager.getInstance().userId,
-                    username = OnlineManager.getInstance().username,
+                    gameSessionId = OnlineManager.getInstance().sessionId,
                     roomPassword = password
                 )
             } catch (e: Exception) {
                 ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
                 Multiplayer.log(e)
 
-                ExtendedEngine.Current.scene = lobbyScene
+                UIEngine.current.scene = lobbyScene
             }
         }
 

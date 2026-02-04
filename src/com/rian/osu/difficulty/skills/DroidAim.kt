@@ -6,6 +6,7 @@ import com.rian.osu.difficulty.attributes.DifficultSlider
 import com.rian.osu.difficulty.evaluators.DroidAimEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
+import kotlin.math.max
 import kotlin.math.pow
 
 /**
@@ -25,7 +26,9 @@ class DroidAim(
     override val starsPerDouble = 1.05
 
     val sliderVelocities = mutableListOf<DifficultSlider>()
+
     private val sliderStrains = mutableListOf<Double>()
+    private var maxSliderStrain = 0.0
 
     private var currentStrain = 0.0
     private val skillMultiplier = 26.5
@@ -35,18 +38,12 @@ class DroidAim(
      * Obtains the amount of sliders that are considered difficult in terms of relative strain.
      */
     fun countDifficultSliders(): Double {
-        if (sliderStrains.isEmpty()) {
-            return 0.0
-        }
-
-        val maxStrain = sliderStrains.max()
-
-        if (maxStrain == 0.0) {
+        if (sliderStrains.isEmpty() || maxSliderStrain == 0.0) {
             return 0.0
         }
 
         return sliderStrains.fold(0.0) { total, strain ->
-            total + 1 / (1 + exp(-(strain / maxStrain * 12 - 6)))
+            total + 1 / (1 + exp(-(strain / maxSliderStrain * 12 - 6)))
         }
     }
 
@@ -62,6 +59,7 @@ class DroidAim(
 
         if (current.obj is Slider) {
             sliderStrains.add(currentStrain)
+            maxSliderStrain = max(maxSliderStrain, currentStrain)
         }
 
         objectStrains.add(currentStrain)
@@ -72,4 +70,15 @@ class DroidAim(
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = StrainSkill.difficultyToPerformance(difficulty.pow(0.8))
+    }
 }

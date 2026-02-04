@@ -239,10 +239,11 @@ class BeatmapListing : BaseFragment(),
             if (!keepData) {
                 offset = 0
 
-                val itemCount = adapter.data.size
-                adapter.data.clear()
-
-                mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
+                mainThread {
+                    val itemCount = adapter.data.size
+                    adapter.data.clear()
+                    adapter.notifyItemRangeRemoved(0, itemCount)
+                }
             }
 
             ensureActive()
@@ -264,10 +265,9 @@ class BeatmapListing : BaseFragment(),
                 val beatmapSets = mirror.search.response(request.execute().json)
                 ensureActive()
 
-                adapter.data.addAll(beatmapSets)
-
                 mainThread {
-                    adapter.notifyItemRangeChanged(offset, 50)
+                    adapter.data.addAll(beatmapSets)
+                    adapter.notifyItemRangeInserted(offset, beatmapSets.size)
                     indicator.visibility = GONE
                 }
             }
@@ -694,12 +694,15 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
                 mainThread {
                     previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
-                    detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.pause_24px,
-                        0,
-                        0,
-                        0
-                    )
+
+                    if (detailsFragment?.isLoaded == true) {
+                        detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.pause_24px,
+                            0,
+                            0,
+                            0
+                        )
+                    }
                 }
 
             } catch (e: Exception) {
@@ -729,7 +732,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         mainThread {
             previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
-            detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+
+            if (detailsFragment?.isLoaded == true) {
+                detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+            }
         }
 
         if (shouldResumeMusic && BeatmapListing.isPlayingMusic) {

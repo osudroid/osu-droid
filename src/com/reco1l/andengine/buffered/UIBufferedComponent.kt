@@ -27,33 +27,33 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     /**
      * The blend information of the entity.
      */
-    open var blendInfo = BlendInfo.Mixture
+    var blendInfo = BlendInfo.Mixture
 
     /**
      * The depth information of the entity.
      */
-    open var depthInfo = DepthInfo.None
+    var depthInfo = DepthInfo.None
 
     /**
      * The clear information of the entity.
      */
-    open var clearInfo = ClearInfo.None
-
-    /**
-     * Flags that determine when the buffer should be invalidated.
-     */
-    open var bufferInvalidationFlags = BufferInvalidationFlag.Data or BufferInvalidationFlag.Instance
+    var clearInfo = ClearInfo.None
 
 
     /**
-     * Marks the buffer's data as invalid to be updated in the next frame.
+     * Indicates whether a new buffer needs to be created.
      */
-    fun invalidateBuffer(@BufferInvalidationFlag flag: Int) {
-        bufferInvalidationFlags = bufferInvalidationFlags or flag
-    }
+    protected var needsNewBuffer = true
+        private set
+
+    /**
+     * Indicates whether the buffer needs to be updated.
+     */
+    protected var needsBufferUpdate = true
+        private set
 
 
-    open fun setBlendFunction(source: Int, destination: Int) {
+    fun setBlendFunction(source: Int, destination: Int) {
         blendInfo = BlendInfo(source, destination)
     }
 
@@ -70,39 +70,46 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      */
     abstract fun onUpdateBuffer()
 
+
+    fun requestNewBuffer() {
+        needsNewBuffer = true
+    }
+
+    fun requestBufferUpdate() {
+        needsBufferUpdate = true
+    }
+
     //endregion
 
     //region Draw pipeline
 
-    override fun onHandleInvalidations(restoreFlags: Boolean) {
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        requestNewBuffer()
+    }
 
-        val invalidationFlags = bufferInvalidationFlags
+    override fun onHandleInvalidations() {
 
-        if (invalidationFlags != 0) {
-            if (invalidationFlags and BufferInvalidationFlag.Instance != 0) {
-                buffer = onCreateBuffer()
-            }
+        if (needsNewBuffer) {
+            needsNewBuffer = false
+            buffer = onCreateBuffer()
+            requestBufferUpdate()
         }
 
-        super.onHandleInvalidations(restoreFlags)
+        super.onHandleInvalidations()
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
-        if (invalidationFlags != 0) {
+        if (needsBufferUpdate) {
+            needsBufferUpdate = false
+
+            val buffer = buffer
 
             // If the buffer is shared and its sharing mode is dynamic, we
             // need to update it before drawing every frame, this might be
             // CPU intensive, but the memory consumption is lower.
-            if (invalidationFlags and BufferInvalidationFlag.Instance != 0 || invalidationFlags and BufferInvalidationFlag.Data != 0) {
-                val buffer = buffer
-
-                if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
-                    updateBuffer()
-                }
-            }
-
-            if (invalidationFlags == bufferInvalidationFlags) {
-                bufferInvalidationFlags = 0
+            if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
+                updateBuffer()
             }
         }
     }
@@ -185,7 +192,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo.Mixture
     }
 
-    fun finalize() {
+    open fun finalize() {
         buffer?.finalize()
     }
 

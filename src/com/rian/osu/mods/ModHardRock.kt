@@ -6,6 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Represents the Hard Rock mod.
@@ -60,14 +61,13 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     override fun applyToHitObject(
         mode: GameMode,
         hitObject: HitObject,
-        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>,
+        scope: CoroutineScope?
     ) {
-        HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
+        HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject, scope)
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
-
-    override fun deepCopy() = ModHardRock()
 
     companion object {
         private const val ADJUST_RATIO = 1.4f

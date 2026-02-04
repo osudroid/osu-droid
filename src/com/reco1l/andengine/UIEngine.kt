@@ -1,12 +1,16 @@
 package com.reco1l.andengine
 
 import android.app.Activity
+import android.util.Log
 import android.view.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.osudroid.MusicManager
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.Engine
+import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
@@ -14,7 +18,42 @@ import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+
+    private val displayDensity = context.resources.displayMetrics.density
+
+    /**
+     * The root font size in pixels, adjusted for display density.
+     */
+    val rootFontSize
+        get() = CSS_BASE_ROOT_FONT_SIZE * displayDensity * fontScale
+
+    /**
+     * The global HUD used for overlays (menus, dialogs, etc).
+     */
+    val overlay = HUD()
+
+    /**
+     * The resource manager for loading and accessing UI resources (fonts, textures, etc).
+     */
+    val resources = UIResourceManager(context)
+
+    /**
+     * The safe area insets of the display, in pixels. This is used to avoid placing UI elements in areas that
+     * may be obscured by notches, rounded corners, etc.
+     */
+    var safeArea = Vec4.Zero
+
+    /**
+     * The current font scale factor. Changing this will scale all UI elements accordingly.
+     */
+    var fontScale = 1f
+        set(value) {
+            if (field != value) {
+                field = value
+                onThemeChange(Theme.current)
+            }
+        }
 
     /**
      * The current focused entity.
@@ -45,9 +84,16 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
 
     init {
-        Current = this
+        current = this
+        camera.hud = overlay
+        Log.i("UI", "Root font size: ${rootFontSize}px")
     }
 
+
+    override fun onUpdateScene(pSecondsElapsed: Float) {
+        MusicManager.onUpdate(pSecondsElapsed)
+        super.onUpdateScene(pSecondsElapsed)
+    }
 
     override fun onDrawScene(pGL: GL10) {
 
@@ -70,11 +116,13 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                 // so we assume it is safe to override the position.
                 scene.setPosition(0f, -sceneOffset)
                 scene.childScene?.setPosition(0f, -sceneOffset)
+                overlay.setPosition(0f, -sceneOffset)
             }
 
         } else {
             scene.setPosition(0f, 0f)
             scene.childScene?.setPosition(0f, 0f)
+            overlay.setPosition(0f, 0f)
         }
 
         super.onDrawScene(pGL)
@@ -108,7 +156,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         fun IEntity.propagateThemeChange() {
 
             if (this is UIComponent) {
-                onThemeChanged(theme)
+                onStyle(theme)
             }
 
             if (this is Scene) {
@@ -139,6 +187,10 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             }
 
             return false
+        }
+
+        if (overlay.propagateKeyPress(keyCode, event)) {
+            return true
         }
 
         val scene = scene ?: return false
@@ -177,8 +229,10 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
     companion object {
 
+        private const val CSS_BASE_ROOT_FONT_SIZE = 16f
+
         @JvmStatic
-        lateinit var Current: ExtendedEngine
+        lateinit var current: UIEngine
             private set
 
     }

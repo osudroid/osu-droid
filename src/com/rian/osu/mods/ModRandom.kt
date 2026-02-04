@@ -9,10 +9,8 @@ import com.rian.osu.mods.settings.*
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.exp
 import kotlin.math.max
-import kotlin.reflect.jvm.isAccessible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
-import org.json.JSONObject
 
 /**
  * Represents the Random mod.
@@ -30,6 +28,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      */
     var seed by NullableIntegerModSetting(
         name = "Seed",
+        key = "seed",
         valueFormatter = { it?.toString() ?: "" },
         defaultValue = null,
         minValue = 0,
@@ -42,6 +41,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      */
     var angleSharpness by FloatModSetting(
         name = "Angle sharpness",
+        key = "angleSharpness",
         valueFormatter = { it.roundBy(1).toString() },
         defaultValue = 7f,
         minValue = 1f,
@@ -52,21 +52,6 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
 
     private var random: Random? = null
 
-    override fun copySettings(settings: JSONObject) {
-        super.copySettings(settings)
-
-        if (settings.has("seed")) {
-            seed = settings.getInt("seed")
-        }
-
-        angleSharpness = settings.optDouble("angleSharpness", angleSharpness.toDouble()).toFloat()
-    }
-
-    override fun serializeSettings() = JSONObject().apply {
-        put("seed", seed)
-        put("angleSharpness", angleSharpness)
-    }
-
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         if (seed == null) {
             seed = Random.nextInt()
@@ -74,7 +59,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
 
         random = Random(seed!!)
 
-        val positionInfos = HitObjectGenerationUtils.generatePositionInfos(beatmap.hitObjects.objects)
+        val positionInfos = HitObjectGenerationUtils.generatePositionInfos(beatmap.hitObjects.objects, scope)
 
         // Offsets the angles of all hit objects in a "section" by the same amount.
         var sectionOffset = 0f
@@ -92,7 +77,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
             }
 
             if (positionInfo.hitObject is Slider && random!!.nextDouble() < 0.5) {
-                HitObjectGenerationUtils.flipSliderInPlaceHorizontally(positionInfo.hitObject)
+                HitObjectGenerationUtils.flipSliderInPlaceHorizontally(positionInfo.hitObject, scope)
             }
 
             if (i == 0) {
@@ -132,10 +117,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
     }
 
     private fun getRandomOffset(stdDev: Float): Float {
-        val angleSharpness = ::angleSharpness.run {
-            isAccessible = true
-            getDelegate() as FloatModSetting
-        }
+        val angleSharpness = getModSettingDelegate<FloatModSetting>(::angleSharpness)
 
         // Range: [0.5, 2]
         // Higher angle sharpness -> lower multiplier
@@ -152,10 +134,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
      * @param flowDirection Whether the relative angle should be positive (`false`) or negative (`true`).
      */
     private fun getRelativeTargetAngle(targetDistance: Float, offset: Float, flowDirection: Boolean): Float {
-        val angleSharpnessDelegate = ::angleSharpness.run {
-            isAccessible = true
-            getDelegate() as FloatModSetting
-        }
+        val angleSharpnessDelegate = getModSettingDelegate<FloatModSetting>(::angleSharpness)
 
         // Range: [0.1, 1]
         val angleSharpness = angleSharpnessDelegate.value / angleSharpnessDelegate.maxValue
@@ -212,11 +191,6 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
             positionInfos[max(0, i - 2)].hitObject.indexInCurrentCombo > 1 && positionInfos[i - 1].hitObject.isNewCombo
 
         return previousObjectStartedCombo && random!!.nextDouble() < 0.6
-    }
-
-    override fun deepCopy() = ModRandom().also {
-        it.seed = seed
-        it.angleSharpness = angleSharpness
     }
 
     companion object {

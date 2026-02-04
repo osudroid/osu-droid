@@ -25,7 +25,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        requestBufferUpdate()
     }
 
     override fun onCreateBuffer(): TriangleVBO {

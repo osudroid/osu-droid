@@ -22,27 +22,44 @@
 </head>
 <body style="background: #0d1117">
 <article id="content" class="markdown-body">
-[insert version here]
+[2025.1012.0]
 ==================
+# Bug Fixes
 
+- Fix wrong Hidden difficulty cap in osu!droid reading difficulty <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when pausing or resuming gameplay using the device's back button <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when restarting gameplay due to race condition <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix loading indicator when loading skins being dismissable using the device's back button <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Skin loading operations are not cancelable since it will leave the game in a broken state.
+- Fix a potential crash when searching beatmaps in beatmap downloader when the amount of returned beatmaps do not reach a certain threshold <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when attempting to preview a beatmap's music in beatmap downloader <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix a potential crash when attempting to update beatmap difficulty statistics in song select from mod menu <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider tick hit statistics not being registered <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+[2025.1008.1]
+==================
+# Bug Fixes
+
+- Fix Relax cursor constantly pressing notes below it when it is not moving <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+
+[2025.1008.0]
+==================
 # Additions
 
-- Add beatmap attribute display <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Can be displayed by pressing the text with difficulty values (CS, AR, OD, HP, star rating) in song select.
+- Re-add `Remove slider lock and spinner lock` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Turns out this setting screws up scoring due to judgement ordering. It is now disabled by default.
 
-# Changes
+## osu!droid Star Rating and Performance Points Changes
 
-- Do not update OD value when using Precise mod in song select <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - It's the hit window that is different, not the OD, so attempting to "pair" OD like this is conceptually wrong.
+- Reduce general Hidden bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Increase high density Hidden bonus <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Bug Fixes
 
-- Fix potential crash when canceling gameplay loading while slider paths are being loaded <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix non-host players being able to change required mods' settings in free mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fix score overflow when playing a beatmap with information that has not been fully populated <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Full population happens in background difficulty calculation. This bug happens when a player plays a beatmap with
-    the ScoreV2 mod enabled and with the beatmap not being calculated yet.
-
+- Fix Relax input handling not considering cases of a finger standing still <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider path position and length retrieval potentially crashing the game <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Notable in beatmaps that use a slider with zero distance but non-zero repeat points.
 </article>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>

@@ -6,6 +6,12 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -13,23 +19,28 @@ import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import com.rian.osu.mods.settings.*
 import kotlin.reflect.KClass
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class ModCustomizationMenu : UIModal(
+class ModCustomizationMenu(trigger: UIButton) : UIModal(
 
     card = UIScrollableContainer().apply {
         scrollAxes = Axes.Y
-        relativeSizeAxes = Axes.Both
-        width = 0.475f
-        height = 0.75f
-        x = 60f
-        y = 90f
+        width = 0.475f.pct
+        height = 0.675f.pct
         scaleCenter = Anchor.TopCenter
         clipToBounds = true
-        scrollPadding = Vec2(0f, 300f)
+        style = {
+            val (_, triggerBottom) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
+
+            x = UIEngine.current.safeArea.x
+            y = triggerBottom + 3f.srem
+
+            scrollPadding = Vec2(0f, 4f.rem)
+            backgroundColor = it.accentColor * 0.15f
+            radius = Radius.LG
+        }
 
         +UILinearContainer().apply {
-            width = FillParent
+            width = Size.Full
             orientation = Orientation.Vertical
         }
     }
@@ -130,40 +141,48 @@ class ModCustomizationMenu : UIModal(
 
         init {
             orientation = Orientation.Vertical
-            width = FillParent
-            padding = Vec4(0f, 0f, 0f, 16f)
+            width = Size.Full
+            style = {
+                padding = Vec4(0f, 0f, 0f, 4f.srem)
+            }
 
             +UILinearContainer().apply {
                 orientation = Orientation.Horizontal
-                width = FillParent
-                padding = Vec4(20f, 14f)
-                spacing = 12f
-                background = UIBox().apply {
-                    color = Color4.Black
-                    alpha = 0.05f
-                    cornerRadius = 12f
+                width = Size.Full
+                style = {
+                    padding = Vec4(3f.srem)
+                    spacing = 2f.srem
+                    backgroundColor = Color4.Black.copy(alpha = 0.05f)
+                    radius = Radius.LG
                 }
 
                 +ModIcon(mod).apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    width = 34f
-                    height = 34f
+                    width = FontSize.SM
+                    height = FontSize.SM
                 }
 
                 +UIText().apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    fontSize = FontSize.SM
                     text = mod.name.uppercase()
-                    applyTheme = {
+                    style = {
                         color = it.accentColor
                         alpha = 0.9f
                     }
                 }
             }
 
-            mod.settings.fastForEach { +ModSettingComponent(mod, it) }
+            linearContainer {
+                orientation = Orientation.Vertical
+                width = Size.Full
+                style = {
+                    padding = Vec4(2f.srem, 0f)
+                }
+                mod.settings.fastForEach { +ModSettingComponent(mod, it) }
+            }
         }
     }
 }

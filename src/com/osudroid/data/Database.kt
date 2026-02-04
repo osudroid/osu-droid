@@ -80,10 +80,6 @@ object DatabaseManager {
         // Be careful when changing the database name, it may cause data loss.
         database = Room.databaseBuilder(context, DroidDatabase::class.java, databasePath)
             .addMigrations(*ALL_MIGRATIONS)
-            // Is preferable to support migrations, otherwise destructive migration will run forcing
-            // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
-            // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
-            .fallbackToDestructiveMigration()
             .allowMainThreadQueries()
             .build()
 
@@ -208,7 +204,9 @@ object DatabaseManager {
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                    sliderHeadHits = null,
                                     sliderTickHits = null,
+                                    sliderRepeatHits = null,
                                     sliderEndHits = null
                                 )
 
@@ -239,7 +237,7 @@ object DatabaseManager {
 }
 
 @Database(
-    version = 3,
+    version = 4,
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,

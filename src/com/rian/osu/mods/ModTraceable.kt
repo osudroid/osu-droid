@@ -15,5 +15,4 @@ class ModTraceable : ModWithVisibilityAdjustment() {
     override val incompatibleMods = super.incompatibleMods + ModHidden::class
 
     override fun isFirstAdjustableObject(hitObject: HitObject) = hitObject !is Spinner
-    override fun deepCopy() = ModTraceable()
 }

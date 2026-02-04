@@ -1,15 +1,19 @@
 package com.rian.osu.mods
 
 import com.rian.osu.mods.settings.*
-import org.json.JSONObject
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 
 /**
  * Represents a mod.
+ *
+ * All [Mod]s must have a parameterless constructor or one with default parameters to allow for reflection-based
+ * instantiation.
  */
-sealed class Mod {
+abstract class Mod {
     /**
      * The name of this [Mod].
      */
@@ -132,38 +136,70 @@ sealed class Mod {
         other.incompatibleMods.none { it.isInstance(this) }
 
     /**
-     * Serializes this [Mod] into a [JSONObject].
+     * Copies [ModSetting]s from another [Mod] into this [Mod], overwriting all existing [ModSetting]s.
      *
-     * The [JSONObject] will contain the following fields:
-     *
-     * - `acronym`: The acronym of this [Mod].
-     * - `settings`: Settings specific to this [Mod] in a [JSONObject], if any.
-     *
-     * @return The serialized form of this [Mod] in a [JSONObject].
+     * @param other The [Mod] to copy from. The [Mod] must be of the same type as this [Mod].
+     * @throws IllegalArgumentException If [other] is not of the same type as this [Mod].
      */
-    fun serialize() = JSONObject().apply {
-        put("acronym", acronym)
+    @Throws(IllegalArgumentException::class)
+    fun copyFrom(other: Mod) {
+        if (this::class != other::class) {
+            throw IllegalArgumentException("Expected mod of type ${this::class.java.simpleName}, got ${other::class.java.simpleName}.")
+        }
 
-        val settings = serializeSettings()
+        // Because settings are stably sorted, we can safely assume that the settings at the same index correspond to each other.
+        for (i in settings.indices) {
+            val setting = settings[i]
+            val otherSetting = other.settings[i]
 
-        if (settings != null) {
-            put("settings", settings)
+            setting.copyFrom(otherSetting)
         }
     }
 
     /**
-     * Copies the settings of this [Mod] from a [JSONObject].
+     * Copies the [ModSetting]s of this [Mod] from a [JsonObject].
      *
-     * @param settings The [JSONObject] containing the settings to copy.
+     * @param settings The [JsonObject] containing the settings to copy.
      */
-    open fun copySettings(settings: JSONObject) {}
+    fun copySettings(settings: JsonObject) {
+        for (setting in this.settings) {
+            setting.load(settings)
+        }
+    }
 
     /**
-     * Serializes the settings of this [Mod] to a [JSONObject].
+     * Obtains the delegate [ModSetting] for the given [setting] property.
      *
-     * @return The serialized settings of this [Mod], or `null` if this [Mod] has no settings.
+     * @param setting The property representing the setting.
+     * @param T The type of the [ModSetting].
+     * @return The delegate [ModSetting] of type [T].
+     * @throws ClassCastException If the delegate is not of type [T].
      */
-    protected open fun serializeSettings(): JSONObject? = null
+    @Throws(ClassCastException::class)
+    fun <T : ModSetting<*>> getModSettingDelegate(setting: KProperty0<*>): T {
+        setting.isAccessible = true
+
+        @Suppress("UNCHECKED_CAST")
+        return setting.getDelegate() as T
+    }
+
+    /**
+     * Converts this [Mod] into an [APIMod].
+     */
+    fun toAPIMod(): APIMod {
+        val settingsJson = buildJsonObject {
+            for (setting in settings) {
+                if (!setting.isDefault) {
+                    setting.save(this)
+                }
+            }
+        }
+
+        return APIMod(
+            acronym = acronym,
+            settings = if (settingsJson.isEmpty()) null else settingsJson
+        )
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
@@ -189,6 +225,7 @@ sealed class Mod {
         result = 31 * result + incompatibleMods.contentHashCode()
 
         for (setting in settings) {
+            result = 31 * result + setting.defaultValue.hashCode()
             result = 31 * result + setting.value.hashCode()
         }
 
@@ -215,5 +252,5 @@ sealed class Mod {
      *
      * @return A deep copy of this [Mod].
      */
-    abstract fun deepCopy(): Mod
+    fun deepCopy() = this::class.createInstance().also { it.copyFrom(this) }
 }

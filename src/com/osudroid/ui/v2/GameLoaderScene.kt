@@ -5,11 +5,16 @@ import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
+import com.reco1l.andengine.theme.vw
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
@@ -38,125 +43,111 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     init {
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
 
-        // Background
         sprite {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             scaleType = ScaleType.Crop
             textureRegion = ResourceManager.getInstance().getTexture(if (Config.isSafeBeatmapBg()) "menu-background" else "::background")
         }
 
-        // Dim
         dimBox = box {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             color = Color4.Black
             alpha = 0.7f
         }
 
-        // Beatmap info
-        mainContainer = container {
-            width = FillParent
-            height = FillParent
+        mainContainer = fillContainer {
+            orientation = Orientation.Horizontal
+            width = Size.Full
+            height = Size.Full
             alpha = 0f
             scaleX = 0.9f
             scaleY = 0.9f
             scaleCenter = Anchor.Center
+            style = {
+                padding = UIEngine.current.safeArea.copy(
+                    y = 4f.srem,
+                    w = 4f.srem + (Multiplayer.roomScene?.chat?.buttonHeight ?: 0f)
+                )
+                spacing = 4f.srem
+            }
 
             fadeIn(0.2f, Easing.OutCubic)
             scaleTo(1f, 0.2f, Easing.OutCubic)
 
-            if (beatmapInfo.epilepsyWarning) {
-                ResourceManager.getInstance().loadHighQualityAsset("warning", "warning.png")
+            container {
+                width = Size.Full
+                height = Size.Full
 
-                linearContainer {
-                    x = 60f
-                    y = 60f
-                    color = Color4(0xFFFFA726)
-                    spacing = 6f
-
-                    sprite {
-                        width = 24f
-                        height = 24f
-                        y = 2f
-                        textureRegion = ResourceManager.getInstance().getTexture("warning")
-                    }
-
-                    text {
-                        font = ResourceManager.getInstance().getFont("smallFont")
+                if (beatmapInfo.epilepsyWarning) {
+                    compoundText {
+                        leadingIcon = FontAwesomeIcon(Icon.TriangleExclamation)
                         text = StringTable.get(com.osudroid.resources.R.string.epilepsy_warning)
                     }
                 }
-            }
 
-            linearContainer {
-                orientation = Orientation.Vertical
-                spacing = 10f
-                anchor = Anchor.CenterLeft
-                origin = Anchor.CenterLeft
-                x = 60f
+                linearContainer {
+                    width = Size.Full
+                    orientation = Orientation.Vertical
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    style = {
+                        spacing = 2f.srem
+                    }
 
-                // Title
-                text {
-                    font = ResourceManager.getInstance().getFont("bigFont")
-                    text = beatmapInfo.titleText
-                    width = 700f
-                    clipToBounds = true
-                    autoScrollSpeed = 30f
-                    applyTheme = { color = it.accentColor }
+                    text {
+                        width = Size.Full
+                        fontSize = FontSize.XL
+                        wrapText = true
+                        text = beatmapInfo.titleText
+                        style = { color = it.accentColor }
+                    }
+
+                    text {
+                        width = Size.Full
+                        fontSize = FontSize.XL
+                        wrapText = true
+                        text = beatmapInfo.version
+                        style = { color = it.accentColor }
+                    }
+
+                    text {
+                        width = Size.Full
+                        fontSize = FontSize.LG
+                        wrapText = true
+                        text = "by ${beatmapInfo.artistText}"
+                        style = { color = it.accentColor * 0.9f }
+                    }
+
+                    if (mods.isNotEmpty()) {
+                        +ModsIndicator().also { it.mods = mods.values }
+                    }
                 }
 
-                // Difficulty
-                text {
-                    font = ResourceManager.getInstance().getFont("middleFont")
-                    text = beatmapInfo.version
-                    width = 700f
-                    clipToBounds = true
-                    applyTheme = { color = it.accentColor }
-                }
+                linearContainer {
+                    orientation = Orientation.Vertical
+                    anchor = Anchor.BottomLeft
+                    origin = Anchor.BottomLeft
+                    style = {
+                        spacing = 4f.srem
+                    }
 
-                // Creator
-                text {
-                    font = ResourceManager.getInstance().getFont("middleFont")
-                    text = "by ${beatmapInfo.artistText}"
-                    applyTheme = { color = it.accentColor * 0.9f }
-                }
-
-                // Mods
-                if (mods.isNotEmpty()) {
-                    +ModsIndicator().also { it.mods = mods.serializeMods() }
-                }
-            }
-
-            linearContainer {
-                orientation = Orientation.Vertical
-                anchor = Anchor.BottomLeft
-                origin = Anchor.BottomLeft
-                x = 60f
-                y = if (Multiplayer.isMultiplayer) -60f else -30f
-                spacing = 30f
-
-                +CircularProgressBar().apply {
+                    +CircularProgressBar().apply {
                     width = 32f
                     height = 32f
                 }
 
-                if (!Multiplayer.isMultiplayer) {
-                    +UITextButton().apply {
-                        text = "Back"
-
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                            width = 28f
-                            height = 28f
+                    if (!Multiplayer.isMultiplayer) {
+                        textButton {
+                            text = "Back"
+                            leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
+                            onActionUp = {
+                                ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                                cancel()
+                            }
+                            onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                         }
-
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            cancel()
-                        }
-
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
                 }
             }
@@ -185,6 +176,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             songMenu.playMusic(selectedBeatmap.audioPath, selectedBeatmap.previewTime)
         }
     }
+
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
@@ -231,22 +223,23 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private inner class QuickSettingsLayout : UIScrollableContainer() {
 
         init {
-            anchor = Anchor.CenterRight
-            origin = Anchor.CenterRight
-            width = 460f
-            height = FillParent
-            x = -20f
+            height = Size.Full
             scrollAxes = Axes.Y
             alpha = 0.5f
 
+            style = {
+                width = 0.3f.vw
+            }
+
             linearContainer {
-                width = FillParent
-                spacing = 20f
-                padding = Vec4(0f, 20f)
+                width = Size.Full
                 orientation = Orientation.Vertical
+                style = {
+                    spacing = 4f.srem
+                }
 
                 collapsibleCard {
-                    width = FillParent
+                    width = Size.Full
                     title = "Beatmap"
 
                     content.apply {
@@ -266,20 +259,16 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                         +offsetSlider
 
                         linearContainer {
-                            spacing = 10f
-                            padding = Vec4(0f, 16f)
                             anchor = Anchor.TopCenter
                             origin = Anchor.TopCenter
+                            style = {
+                                spacing = 3f.srem
+                                padding = Vec4(2f.srem)
+                            }
 
                             fun StepButton(step: Int) = textButton {
                                 text = abs(step).toString()
-                                height = 42f
-                                spacing = 2f
-                                padding = Vec4(12f, 0f, 24f, 0f)
-
-                                leadingIcon = UISprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
-                                leadingIcon!!.height = 20f
-
+                                leadingIcon = FontAwesomeIcon(if (step >= 0) Icon.Plus else Icon.Minus)
                                 onActionUp = {
                                     offsetSlider.value += step
                                 }
@@ -302,7 +291,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 }
 
                 collapsibleCard {
-                    width = FillParent
+                    width = Size.Full
                     title = "Settings"
 
                     content.apply {

@@ -3,9 +3,8 @@ package com.osudroid.ui.v2.hud.elements
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
-import com.reco1l.framework.Pool
 import com.osudroid.ui.v2.hud.HUDElement
-import com.osudroid.utils.updateThread
+import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
@@ -15,7 +14,7 @@ import kotlin.math.abs
 
 class HUDHitErrorMeter : HUDElement() {
 
-    private val expiredIndicators = Pool(20) { Indicator(0f, 0f, Color4.White) }
+    private val expiredIndicators = SynchronizedPool<Indicator>(20)
     private val activeIndicators = mutableListOf<Indicator>()
 
     private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
@@ -43,7 +42,7 @@ class HUDHitErrorMeter : HUDElement() {
             anchor = Anchor.Center
             origin = Anchor.Center
             color = mehColor
-            cornerRadius = BAR_HEIGHT / 2
+            radius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
 
             depthInfo = DepthInfo.Default
@@ -93,7 +92,7 @@ class HUDHitErrorMeter : HUDElement() {
             return
         }
 
-        val indicator = expiredIndicators.obtain()
+        val indicator = expiredIndicators.acquire() ?: Indicator(0f, 0f, Color4.White)
 
         indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow)
         indicator.alpha = 1f
@@ -127,7 +126,8 @@ class HUDHitErrorMeter : HUDElement() {
     //endregion
 
 
-    private inner class Indicator(var x: Float, var alpha: Float, var color: Color4) {
+    private inner class Indicator(var x: Float, var alpha: Float, var color: Color4) : IPoolable {
+        override var isRecycled = false
 
         fun update() {
             if (alpha > 0f) {
@@ -136,7 +136,7 @@ class HUDHitErrorMeter : HUDElement() {
 
             if (alpha <= 0f) {
                 alpha = 0f
-                expiredIndicators.free(this)
+                expiredIndicators.release(this)
                 updateThread {
                     activeIndicators.remove(this)
                 }

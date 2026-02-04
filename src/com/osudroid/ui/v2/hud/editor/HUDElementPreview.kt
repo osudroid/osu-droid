@@ -9,10 +9,10 @@ import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.hud.HUDElementSkinData
-import com.reco1l.andengine.component.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Size
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 import kotlin.math.min
@@ -21,7 +21,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
 
 
     private val label = UIText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
+        fontSize = FontSize.SM
         anchor = Anchor.BottomLeft
         origin = Anchor.BottomLeft
         text = element.name
@@ -29,16 +29,13 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
     }
 
     init {
-        width = FillParent
+        width = Size.Full
         height = 120f
         padding = Vec4(12f)
         scaleCenterX = 0.5f
         scaleCenterY = 0.5f
-
-        background = UIBox().apply {
-            color = Color4(0xFF363653)
-            cornerRadius = 12f
-        }
+        backgroundColor = Color4(0xFF363653)
+        radius = 12f
 
         attachChild(element)
         attachChild(label)
