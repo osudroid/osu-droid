@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.Log
 import com.reco1l.andengine.buffered.Buffer
-import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.IBuffer
 import com.reco1l.andengine.component.UIComponent
 import org.anddev.andengine.opengl.font.Font
@@ -35,21 +34,13 @@ class UIResourceManager(private val context: Context) {
         }
 
         val buffer = bufferSupplier()
-        UIEngine.current.apply {
-            buffers[bufferKey] = buffer
-        }
+        buffers[bufferKey] = buffer
 
         return buffer
     }
 
-    fun subscribeToBuffer(buffer: IBuffer, component: UIComponent, sharingMode: BufferSharingMode = BufferSharingMode.Dynamic) {
+    fun subscribeToBuffer(buffer: IBuffer, component: UIComponent) {
         val subscribers = bufferSubscribers.getOrPut(buffer) { mutableListOf() }
-        if (subscribers.size > 1) {
-            buffer.sharingMode = sharingMode
-        } else {
-            buffer.sharingMode = BufferSharingMode.Off
-        }
-
         if (subscribers.none { it.get() === component }) {
             subscribers.add(WeakReference(component))
         }
@@ -65,13 +56,9 @@ class UIResourceManager(private val context: Context) {
 
             buffers.remove(bufferKey)
             bufferSubscribers.remove(buffer)
-            UIEngine.current.apply {
-                if (buffer is Buffer) {
-                    buffer.unloadFromActiveBufferObjectManager()
-                }
+            if (buffer is Buffer) {
+                buffer.unloadFromActiveBufferObjectManager()
             }
-        } else if (subscribers.size == 1) {
-            buffer.sharingMode = BufferSharingMode.Off
         }
     }
 

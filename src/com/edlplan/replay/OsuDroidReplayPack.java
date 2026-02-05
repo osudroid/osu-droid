@@ -95,20 +95,22 @@ public class OsuDroidReplayPack {
     }
 
     public static ReplayEntry unpack(InputStream raw) throws IOException, JSONException {
-        ZipInputStream inputStream = new ZipInputStream(raw);
         ReplayEntry entry = new ReplayEntry();
         Map<String, byte[]> zipEntryMap = new HashMap<>();
-        for (ZipEntry zipEntry = inputStream.getNextEntry(); zipEntry != null; zipEntry = inputStream.getNextEntry()) {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int l;
-            while ((l = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, l);
+
+        try (var inputStream = new ZipInputStream(raw)) {
+            for (ZipEntry zipEntry = inputStream.getNextEntry(); zipEntry != null; zipEntry = inputStream.getNextEntry()) {
+                try (var byteArrayOutputStream = new ByteArrayOutputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int l;
+                    while ((l = inputStream.read(buffer)) != -1) {
+                        byteArrayOutputStream.write(buffer, 0, l);
+                    }
+                    zipEntryMap.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+                    System.out.println("解压文件：" + zipEntry.getName() + " size: " + zipEntryMap.get(zipEntry.getName()).length);
+                }
             }
-            zipEntryMap.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
-            System.out.println("解压文件：" + zipEntry.getName() + " size: " + zipEntryMap.get(zipEntry.getName()).length);
         }
-        inputStream.close();
 
         var json = new JSONObject(new String(zipEntryMap.get("entry.json")));
         int version = json.getInt("version");

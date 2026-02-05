@@ -24,7 +24,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                requestNewBuffer()
+                requestBufferUpdate()
             }
         }
 
@@ -71,21 +71,14 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         GLHelper.lineWidth(gl, lineWidth)
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestNewBuffer()
+    override fun createBuffer(): CircleVertexBuffer {
+        val segments = calculateArcResolution(width, height)
+        return CircleVertexBuffer(segments, paintStyle)
     }
 
-    override fun onCreateBuffer(): CircleVertexBuffer {
-
-        val buffer = buffer
+    override fun generateBufferCacheKey(): String {
         val segments = calculateArcResolution(width, height)
-
-        if (buffer?.segments == segments && buffer.paintStyle == paintStyle) {
-            return buffer
-        }
-
-        return CircleVertexBuffer(segments, paintStyle)
+        return "CircleVBO@$segments,$paintStyle"
     }
 
     override fun onUpdateBuffer() {

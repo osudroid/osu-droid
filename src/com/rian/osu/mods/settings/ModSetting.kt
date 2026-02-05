@@ -111,6 +111,21 @@ abstract class ModSetting<T>(
 }
 
 /**
+ * An interface for [ModSetting]s whose value is constrained to a range of values.
+ */
+interface IRangeConstrainedModSetting<T : Comparable<T>> {
+    /**
+     * The minimum value of this [IRangeConstrainedModSetting].
+     */
+    var minValue: T
+
+    /**
+     * The maximum value of this [IRangeConstrainedModSetting].
+     */
+    var maxValue: T
+}
+
+/**
  * Represents a [Mod] specific setting whose value is constrained to a range of values.
  */
 abstract class RangeConstrainedModSetting<T : Comparable<T>>(
@@ -134,7 +149,7 @@ abstract class RangeConstrainedModSetting<T : Comparable<T>>(
      */
     orderPosition: Int? = null
 
-) : ModSetting<T>(name, key, valueFormatter, defaultValue, orderPosition) {
+) : ModSetting<T>(name, key, valueFormatter, defaultValue, orderPosition), IRangeConstrainedModSetting<T> {
     final override var defaultValue
         get() = super.defaultValue
         set(value) {
@@ -143,10 +158,7 @@ abstract class RangeConstrainedModSetting<T : Comparable<T>>(
             super.defaultValue = value
         }
 
-    /**
-     * The minimum value of this [RangeConstrainedModSetting].
-     */
-    var minValue = minValue
+    final override var minValue = minValue
         set(value) {
             if (field != value) {
                 require(value <= maxValue) { "minValue cannot be greater maxValue." }
@@ -158,10 +170,7 @@ abstract class RangeConstrainedModSetting<T : Comparable<T>>(
             }
         }
 
-    /**
-     * The maximum value of this [RangeConstrainedModSetting].
-     */
-    var maxValue = maxValue
+    final override var maxValue = maxValue
         set(value) {
             if (field != value) {
                 require(value >= minValue) { "maxValue cannot be less than minValue." }
@@ -236,7 +245,7 @@ abstract class NullableRangeConstrainedModSetting<T>(
      */
     orderPosition: Int? = null
 
-) : ModSetting<T?>(name, key, valueFormatter, defaultValue, orderPosition) where T : Comparable<T> {
+) : ModSetting<T?>(name, key, valueFormatter, defaultValue, orderPosition), IRangeConstrainedModSetting<T> where T : Comparable<T> {
     final override var defaultValue
         get() = super.defaultValue
         set(value) {
@@ -247,10 +256,7 @@ abstract class NullableRangeConstrainedModSetting<T>(
             super.defaultValue = value
         }
 
-    /**
-     * The minimum value of this [NullableRangeConstrainedModSetting].
-     */
-    var minValue = minValue
+    final override var minValue = minValue
         set(value) {
             require(value <= maxValue) { "minValue cannot be greater maxValue." }
 
@@ -262,10 +268,7 @@ abstract class NullableRangeConstrainedModSetting<T>(
             }
         }
 
-    /**
-     * The maximum value of this [NullableRangeConstrainedModSetting].
-     */
-    var maxValue = maxValue
+    final override var maxValue = maxValue
         set(value) {
             require(value >= minValue) { "maxValue cannot be less than minValue." }
 

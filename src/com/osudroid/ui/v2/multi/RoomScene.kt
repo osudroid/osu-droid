@@ -536,7 +536,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         modsIndicator.mods = room.mods.values
     }
 
-    private fun updatePlayerList() {
+    fun updatePlayerList() {
 
         val shouldReload = currentPlayers.size != room.playersMap.size
             || !currentPlayers.all { room.playersMap.containsKey(it) }
