@@ -13,8 +13,6 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.StarRatingBadge
-import com.osudroid.multiplayer.RoomScene
-import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.songselect.*
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.text.FontAwesomeIcon

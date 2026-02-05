@@ -17,18 +17,7 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
-            }
-        }
-
-    /**
-     * The radius of the sheared corner of the wedge.
-     */
-    var radius = 32f
-        set(value) {
-            if (field != value) {
-                field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
@@ -39,7 +28,7 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer(BufferInvalidationFlag.Instance)
+                requestNewBuffer()
             }
         }
 
@@ -107,7 +96,7 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Instance)
+        requestNewBuffer()
     }
 
     override fun beginDraw(gl: GL10) {

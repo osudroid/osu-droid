@@ -5,10 +5,9 @@ import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.*
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
-import com.reco1l.andengine.component.UIComponent.Companion.MatchContent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import com.rian.osu.beatmap.parser.*
@@ -52,27 +51,23 @@ object SongSelect : UIScene() {
         ResourceManager.getInstance().loadHighQualityAsset("random", "random.png")
 
         backgroundSprite = sprite {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             scaleType = ScaleType.Crop
             color *= 0.4f
         }
 
-        flexContainer {
-            width = FillParent
-            height = FillParent
+        fillContainer {
+            width = Size.Full
+            height = Size.Full
 
             // Left side
             linearContainer {
-                height = FillParent
+                width = Size.Full
+                height = Size.Full
                 orientation = Orientation.Vertical
                 spacing = 4f
-
-                flexRules {
-                    grow = 1f
-                    basis = 0f
-                }
 
                 +beatmapInfoWedge
                 +leaderboard
@@ -80,11 +75,9 @@ object SongSelect : UIScene() {
 
             // Right side
             container {
-                height = FillParent
-                flexRules {
-                    grow = 1f
-                    basis = 0f
-                }
+                width = Size.Full
+                height = Size.Full
+
                 +beatmapCarrousel
                 +filterBar
             }
@@ -116,7 +109,6 @@ object SongSelect : UIScene() {
                     text = "Mods"
                     leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
                     onActionUp = { ModMenu.show() }
-                    autoSizeTrailingIcon = Axes.Y
                 }
 
                 textButton {
@@ -244,9 +236,8 @@ object SongSelect : UIScene() {
             } else {
                 trailingIcon = ModsIndicator().apply {
                     iconSize = 28f
-                    mods = ModMenu.enabledMods.serializeMods()
+                    mods = ModMenu.enabledMods.values
                 }
-                trailingIcon?.width = MatchContent
             }
         }
     }

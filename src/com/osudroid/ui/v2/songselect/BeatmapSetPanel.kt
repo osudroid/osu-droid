@@ -11,6 +11,7 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -26,7 +27,7 @@ import kotlin.random.*
 class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableComponent<BeatmapSetModel>(), IPanelContainer<BeatmapPanel> {
 
     override val isRecyclable: Boolean
-        get() = !isPressed && !isExpanded && !button.run { isAnimating || background!!.isAnimating || foreground!!.isAnimating }
+        get() = !isPressed && !isExpanded && !button.run { isAnimating }
 
     /**
      * The currently selected beatmap panel.
@@ -81,10 +82,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
             if (event.isActionDown) {
-                background?.apply {
+                /*background?.apply {
                     clearModifiers(ModifierType.Color)
                     colorTo(Color4.White, 0.1f).eased(Easing.Out)
-                }
+                }*/
             }
 
             if (event.isActionUp) {
@@ -92,10 +93,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             }
 
             if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-                background?.apply {
+                /*background?.apply {
                     clearModifiers(ModifierType.Color)
                     colorTo(Theme.current.accentColor * 0.4f, 0.2f)
-                }
+                }*/
             }
             return true
         }
@@ -110,60 +111,53 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     init {
         orientation = Orientation.Vertical
-        width = FillParent
+        width = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
         spacing = 4f
 
         +button.apply {
             orientation = Orientation.Vertical
-            width = FillParent
+            width = Size.Full
             anchor = Anchor.TopRight
             origin = Anchor.TopRight
             padding = Vec4(14f)
             minHeight = 100f
-
+/*
             background = if (Config.isSafeBeatmapBg())
                 UIBox().apply {
                     cornerRadius = 14f
-                    applyTheme = { color = it.accentColor * 0.175f }
+                    style = { color = it.accentColor * 0.175f }
                 }
             else
                 UIShapedSprite().apply {
-                    buffer = sharedSpriteVBO
                     shape = UIBox().apply {
                         cornerRadius = 14f
-                        buffer = sharedBackgroundVBO
                     }
 
-                    applyTheme = {
+                    style = {
                         color = it.accentColor * 0.4f
                     }
-                }
+                }*/
 
 
-            foreground = UIBox().apply {
+            /*foreground = UIBox().apply {
                 paintStyle = PaintStyle.Outline
                 cornerRadius = 14f
                 lineWidth = 2f
-                buffer = sharedForegroundVBO
-                applyTheme = {
+                style = {
                     color = it.accentColor * 0.2f
                 }
-            }
+            }*/
 
             titleText = text {
-                font = ResourceManager.getInstance().getFont("smallFont")
                 text = "Unknown"
-                applyTheme = { color = it.accentColor }
-                buffer = sharedTextCB
+                style = { color = it.accentColor }
             }
 
             artistText = text {
-                font = ResourceManager.getInstance().getFont("xs")
                 text = "Unknown"
-                applyTheme = { color = it.accentColor * 0.8f }
-                buffer = sharedTextCB
+                style = { color = it.accentColor * 0.8f }
             }
 
             linearContainer {
@@ -174,14 +168,12 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                 statusBadge = badge {
                     text = "Unknown"
                     sizeVariant = SizeVariant.Small
-                    textEntity.buffer = sharedTextCB
-                    (background as UIBox).buffer = sharedBadgeBackgroundVBO
                 }
             }
         }
 
         +panelContainer.apply {
-            width = FillParent
+            width = Size.Full
             orientation = Orientation.Vertical
             spacing = 4f
 
@@ -200,7 +192,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             if (data.coverTexture == null && !data.isLoadingCover) {
                 loadCover(data)
             } else if (data.coverTexture != null) {
-                (button.background as UIShapedSprite).textureRegion = data.coverTexture
+                //(button.background as UIShapedSprite).textureRegion = data.coverTexture
             }
         }
     }
@@ -247,7 +239,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         model.isLoadingCover = false
 
         if (isBound) {
-            (button.background as UIShapedSprite).textureRegion = model.coverTexture
+            //(button.background as UIShapedSprite).textureRegion = model.coverTexture
         }
     }
 
@@ -284,21 +276,20 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
         panelContainer.apply {
             boundData?.beatmapSetInfo?.beatmaps?.forEach { +BeatmapPanel(this@BeatmapSetPanel, it) }
-            onHandleInvalidations(false)
 
             isVisible = true
             clearModifiers(ModifierType.SizeY, ModifierType.Alpha)
             fadeIn(0.2f)
-            sizeToY(contentHeight + padding.vertical, 0.2f).then {
+            sizeToY(contentHeight + padding.vertical, 0.2f).after {
                 beatmapCarrousel.autoScrollToSelectedPanel = true
             }
         }
 
-        (button.foreground as UIBox).apply {
+        /*(button.foreground as UIBox).apply {
             lineWidth = 4f
             clearModifiers(ModifierType.Color)
             colorTo(Theme.current.accentColor, 0.1f)
-        }
+        }*/
     }
 
     fun collapse() {
@@ -318,17 +309,17 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         panelContainer.apply {
             clearModifiers(ModifierType.SizeY, ModifierType.Alpha)
             fadeOut(0.1f)
-            sizeToY(0f, 0.1f).then {
+            sizeToY(0f, 0.1f).after {
                 isVisible = false
                 detachChildren()
             }
         }
 
-        (button.foreground as UIBox).apply {
+        /*(button.foreground as UIBox).apply {
             lineWidth = 2f
             clearModifiers(ModifierType.Color)
             colorTo(Theme.current.accentColor * 0.3f, 0.1f)
-        }
+        }*/
     }
 
 
@@ -338,15 +329,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     companion object {
-
         private val coverLoadScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         private val coverCacheDirectory = File(GlobalManager.getInstance().mainActivity.cacheDir, "covers")
-
-        private val sharedTextCB = CompoundBuffer(UIText.TextTextureBuffer(256), UIText.TextVertexBuffer(256)).asSharedDynamically()
-        private val sharedBackgroundVBO = UIBox.BoxVBO(14f, UICircle.approximateSegments(14f, 14f, 90f), PaintStyle.Fill).asSharedStatically()
-        private val sharedForegroundVBO = UIBox.BoxVBO(14f, UICircle.approximateSegments(14f, 14f, 90f), PaintStyle.Outline).asSharedStatically()
-        private val sharedBadgeBackgroundVBO = UIBox.BoxVBO(6f, UICircle.approximateSegments(6f, 6f, 90f), PaintStyle.Fill).asSharedStatically()
-        private val sharedSpriteVBO = UISprite.SpriteVBO().asSharedDynamically()
     }
 
 }

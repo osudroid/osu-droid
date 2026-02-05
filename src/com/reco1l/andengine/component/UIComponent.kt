@@ -412,6 +412,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Other properties
 
+    val isAnimating
+        get() = mEntityModifiers.size > 1
+
     /**
      * Whether the entity should be culled when it is outside the parent's bounds.
      */

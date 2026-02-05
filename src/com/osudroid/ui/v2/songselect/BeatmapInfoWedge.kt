@@ -8,6 +8,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -23,7 +24,7 @@ import ru.nsu.ccfit.zuev.osu.game.*
 import java.text.*
 import java.util.*
 
-class BeatmapInfoWedge : UILinearContainer() {
+class BeatmapInfoWedge : UIContainer() {
 
 
     private lateinit var titleText: UIText
@@ -46,134 +47,134 @@ class BeatmapInfoWedge : UILinearContainer() {
 
 
     init {
-        width = FillParent
-        orientation = Orientation.Vertical
+        width = Size.Full
         translationX = -2f
         translationY = -2f
-        padding = Vec4(60f, 18f, 50f, 18f)
-        spacing = 6f
 
-        background = UIWedge().apply {
-            applyTheme = {
+        +UIWedge().apply {
+            style = {
                 color = it.accentColor * 0.1f
                 alpha = 0.75f
             }
         }
 
-        foreground = UIWedge().apply {
+        linearContainer {
+            width = Size.Full
+            orientation = Orientation.Vertical
+            padding = Vec4(60f, 18f, 50f, 18f)
+            spacing = 6f
+
+            fillContainer {
+                orientation = Orientation.Horizontal
+                spacing = 10f
+                width = Size.Full
+
+                linearContainer {
+                    width = Size.Full
+                    orientation = Orientation.Vertical
+
+                    artistText = text {
+                        text = "Unknown"
+                        style = { color = it.accentColor * 0.9f}
+                    }
+
+                    titleText = text {
+                        width = Size.Full
+                        text = "No selected beatmap"
+                        style = { color = it.accentColor }
+                        clipToBounds = true
+                    }
+
+                    versionText = text {
+                        text = "Unknown"
+                        style = { color = it.accentColor * 0.8f}
+                    }
+                }
+
+                starsText = badge {
+                    text = "0.00"
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
+                }
+            }
+
+            linearContainer {
+                orientation = Orientation.Horizontal
+                spacing = 8f
+
+                lengthText = compoundText {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
+                    text = "00:00"
+                    style = { color = it.accentColor }
+                }
+
+                bpmText = compoundText {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
+                    text = "0"
+                    style = { color = it.accentColor }
+                }
+            }
+
+            linearContainer {
+                orientation = Orientation.Vertical
+                spacing = 4f
+
+                linearContainer {
+                    orientation = Orientation.Horizontal
+                    spacing = 4f
+
+                    circlesBadge = labeledBadge {
+                        label = "Circles"
+                        value = "0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                    slidersBadge = labeledBadge {
+                        label = "Sliders"
+                        value = "0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                    spinnersBadge = labeledBadge {
+                        label = "Spinners"
+                        value = "0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                }
+
+                linearContainer {
+                    orientation = Orientation.Horizontal
+                    spacing = 2f
+
+                    arText = labeledBadge {
+                        label = "AR"
+                        value = "00.0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                    odText = labeledBadge {
+                        label = "OD"
+                        value = "00.0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                    csText = labeledBadge {
+                        label = "CS"
+                        value = "00.0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                    hpText = labeledBadge {
+                        label = "HP"
+                        value = "00.0"
+                        sizeVariant = SizeVariant.Small
+                    }
+                }
+            }
+        }
+
+        +UIWedge().apply {
             paintStyle = PaintStyle.Outline
             lineWidth = 4f
-            applyTheme = {
+            style = {
                 color = it.accentColor * 0.2f
             }
         }
 
-        flexContainer {
-            width = FillParent
-
-            linearContainer {
-                flexRules {
-                    grow = 1f
-                }
-                orientation = Orientation.Vertical
-
-                artistText = text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.9f}
-                }
-
-                titleText = text {
-                    width = FillParent
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    text = "No selected beatmap"
-                    applyTheme = { color = it.accentColor }
-                    clipToBounds = true
-                }
-
-                versionText = text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.8f}
-                }
-            }
-
-            starsText = badge {
-                text = "0.00"
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
-            }
-        }
-
-        linearContainer {
-            orientation = Orientation.Horizontal
-            spacing = 8f
-
-            lengthText = compoundText {
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
-                text = "00:00"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
-            }
-
-            bpmText = compoundText {
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
-                text = "0"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
-            }
-        }
-
-        linearContainer {
-            orientation = Orientation.Vertical
-            spacing = 4f
-
-            linearContainer {
-                orientation = Orientation.Horizontal
-                spacing = 4f
-
-                circlesBadge = labeledBadge {
-                    label = "Circles"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
-                }
-                slidersBadge = labeledBadge {
-                    label = "Sliders"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
-                }
-                spinnersBadge = labeledBadge {
-                    label = "Spinners"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
-                }
-            }
-
-            linearContainer {
-                orientation = Orientation.Horizontal
-                spacing = 2f
-
-                arText = labeledBadge {
-                    label = "AR"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                odText = labeledBadge {
-                    label = "OD"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                csText = labeledBadge {
-                    label = "CS"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                hpText = labeledBadge {
-                    label = "HP"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-            }
-        }
     }
 
 
@@ -255,7 +256,7 @@ class BeatmapInfoWedge : UILinearContainer() {
         starsText.apply {
             text = value.roundBy(2).toString()
             color = if (value >= 6.5) Color4(0xFFFFD966) else Color4.Black.copy(alpha = 0.75f)
-            background?.color = OsuColors.getStarRatingColor(value)
+            backgroundColor = OsuColors.getStarRatingColor(value)
         }
     }
 

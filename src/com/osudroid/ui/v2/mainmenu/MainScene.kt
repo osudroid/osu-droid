@@ -11,6 +11,7 @@ import com.osudroid.multiplayer.*
 import com.osudroid.resources.R
 import com.osudroid.ui.v1.*
 import com.osudroid.ui.v2.multi.*
+import com.osudroid.ui.v2.songselect.SongSelect
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -183,9 +184,7 @@ object MainScene : UIScene() {
                                     BeatmapListing().show()
                                 } else {
                                     GlobalManager.getInstance().songService.isGaming = true
-                                    GlobalManager.getInstance().songMenu.reload()
-                                    GlobalManager.getInstance().songMenu.show()
-                                    GlobalManager.getInstance().songMenu.select()
+                                    UIEngine.current.scene = SongSelect
                                 }
                             }
                         }

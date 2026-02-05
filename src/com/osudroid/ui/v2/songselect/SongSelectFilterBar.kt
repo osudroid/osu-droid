@@ -2,21 +2,23 @@ package com.osudroid.ui.v2.songselect
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class SongSelectFilterBar : UIFlexContainer() {
+class SongSelectFilterBar : UIFillContainer() {
 
     init {
         ResourceManager.getInstance().loadHighQualityAsset("filters", "filters.png")
         ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
 
-        width = FillParent
+        width = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
         padding = Vec4(32f, 16f)
-        gap = 14f
+        spacing = 14f
 
         /*onSubmit = {
             SongSelect.loadBeatmaps(
@@ -26,12 +28,11 @@ class SongSelectFilterBar : UIFlexContainer() {
         }*/
 
         iconButton {
-            icon = ResourceManager.getInstance().getTexture("filters")
+            icon = UISprite(ResourceManager.getInstance().getTexture("filters"))
         }
 
         container {
-            height = FillParent
-            flexRules { grow = 1f }
+            height = Size.Full
 
             +object : UITextInput("") {
 
@@ -39,8 +40,8 @@ class SongSelectFilterBar : UIFlexContainer() {
 
                 init {
                     key = "query"
-                    width = FillParent
-                    height = FillParent
+                    width = Size.Full
+                    height = Size.Full
                 }
 
                 override fun onValueChanged() {
@@ -64,13 +65,13 @@ class SongSelectFilterBar : UIFlexContainer() {
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
                 textureRegion = ResourceManager.getInstance().getTexture("search-small")
-                applyTheme = { color = it.accentColor }
+                style = { color = it.accentColor }
             }
         }
 
 
         /*flexContainer {
-            width = FillParent
+            width = Size.Full
             gap = 8f
 
             iconButton {

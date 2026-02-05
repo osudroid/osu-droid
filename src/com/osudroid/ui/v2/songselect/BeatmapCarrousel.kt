@@ -4,6 +4,7 @@ import com.osudroid.data.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.framework.math.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
@@ -45,14 +46,14 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
 
     init {
         scrollAxes = Axes.Y
-        width = FillParent
-        height = FillParent
+        width = Size.Full
+        height = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
 
         componentWrapper.apply {
             orientation = Orientation.Vertical
-            width = FillParent
+            width = Size.Full
             spacing = -2f
             padding = Vec4(0f, 200f)
             translationX = 14f

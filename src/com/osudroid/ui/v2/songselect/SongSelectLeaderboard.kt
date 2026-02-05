@@ -13,6 +13,7 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.*
@@ -52,26 +53,26 @@ class SongSelectLeaderboard : UILinearContainer() {
     init {
         ResourceManager.getInstance().loadHighQualityAsset("info", "info.png")
 
-        height = FillParent
-        width = FillParent
+        height = Size.Full
+        width = Size.Full
         orientation = Orientation.Vertical
         padding = Vec4(80f, 0f, 80f + 16f, 0f)
         spacing = 8f
 
         +UITabSelector().apply {
-            width = FillParent
+            width = Size.Full
             addButton("Local") { leaderboardType = Local }
             addButton("Global") { leaderboardType = Global }
             selectedTab = 0
         }
 
         container {
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
 
             +overlayContainer.apply {
-                width = FillParent
-                height = FillParent
+                width = Size.Full
+                height = Size.Full
                 orientation = Orientation.Vertical
                 spacing = 8f
                 padding = Vec4(24f)
@@ -79,8 +80,8 @@ class SongSelectLeaderboard : UILinearContainer() {
             }
 
             +scoresContainer.apply {
-                width = FillParent
-                height = FillParent
+                width = Size.Full
+                height = Size.Full
                 scrollAxes = Axes.Y
                 clipToBounds = true
                 alpha = 0f
@@ -89,7 +90,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                 componentWrapper.apply {
                     orientation = Orientation.Vertical
-                    width = FillParent
+                    width = Size.Full
                     spacing = 4f
                     padding = Vec4(0f, 0f, 0f, 90f)
                 }
@@ -106,7 +107,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
         adverseContainer.apply {
             clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
-            fadeOut(0.2f).then {
+            fadeOut(0.2f).after {
                 isVisible = false
             }
         }
@@ -136,14 +137,13 @@ class SongSelectLeaderboard : UILinearContainer() {
                 width = 32f
                 height = 32f
                 textureRegion = ResourceManager.getInstance().getTexture("info")
-                applyTheme = { color = it.accentColor }
+                style = { color = it.accentColor }
             }
 
             text {
                 anchor = Anchor.TopCenter
                 origin = Anchor.TopCenter
-                font = ResourceManager.getInstance().getFont("smallFont")
-                applyTheme = { color = it.accentColor }
+                style = { color = it.accentColor }
                 text = message
             }
         }
@@ -165,8 +165,7 @@ class SongSelectLeaderboard : UILinearContainer() {
             text {
                 anchor = Anchor.TopCenter
                 origin = Anchor.TopCenter
-                font = ResourceManager.getInstance().getFont("smallFont")
-                applyTheme = { color = it.accentColor }
+                style = { color = it.accentColor }
                 text = "Loading scores..."
             }
         }
@@ -249,32 +248,20 @@ class SongSelectLeaderboard : UILinearContainer() {
 
 
         init {
-            width = FillParent
+            width = Size.Full
             orientation = Orientation.Horizontal
             padding = Vec4(8f)
             spacing = 8f
 
-            background = UIBox().apply {
-                cornerRadius = 12f
-                applyTheme = {
-                    color = it.accentColor * 0.1f
-                    alpha = 0.75f
-                }
-                buffer = sharedBackgroundVBO
-            }
-
-            foreground = UIBox().apply {
-                paintStyle = PaintStyle.Outline
-                cornerRadius = 12f
-                lineWidth = 2f
-                applyTheme = {
-                    color = it.accentColor * 0.2f
-                }
-                buffer = sharedForegroundVBO
+            style = {
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.75f)
+                radius = 12f
+                borderWidth = 2f
+                borderColor = it.accentColor * 0.2f
             }
 
             container {
-                width = FillParent
+                width = Size.Full
 
                 linearContainer {
                     anchor = Anchor.CenterLeft
@@ -287,8 +274,7 @@ class SongSelectLeaderboard : UILinearContainer() {
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         alignment = Anchor.Center
-                        font = ResourceManager.getInstance().getFont("xs")
-                        applyTheme = { color = it.accentColor }
+                        style = { color = it.accentColor }
                         buffer = sharedTextCB
                         text = ""
                     }
@@ -311,8 +297,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                         +nameText.apply {
                             text = "Unknown Player"
-                            applyTheme = { color = it.accentColor }
-                            font = ResourceManager.getInstance().getFont("xs")
+                            style = { color = it.accentColor }
                             buffer = sharedTextCB
                         }
 
@@ -333,8 +318,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                         val metricText = UIText().apply {
                             text = placeholder
-                            font = ResourceManager.getInstance().getFont("xs")
-                            applyTheme = { color = it.accentColor }
+                            style = { color = it.accentColor }
                             buffer = sharedTextCB
                         }
 
@@ -344,8 +328,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                             text {
                                 text = name.uppercase()
-                                font = ResourceManager.getInstance().getFont("xxs")
-                                applyTheme = { color = it.accentColor * 0.8f }
+                                style = { color = it.accentColor * 0.8f }
                                 buffer = sharedTextCB
                             }
                             +metricText
@@ -366,7 +349,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
         override fun onBind(data: BeatmapScoreModel) {
             nameText.text = data.playerName
-            modsIndicator.mods = data.mods
+            //modsIndicator.mods = data.mods
 
             if (avatarSprite != null) {
                 avatarSprite.textureRegion = ResourceManager.getInstance().getTextureIfLoaded(data.avatarUrl ?: "offline-avatar")
