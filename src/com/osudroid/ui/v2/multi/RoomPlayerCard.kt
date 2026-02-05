@@ -15,6 +15,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.UIText
 import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.pct
 import com.reco1l.andengine.theme.rem
@@ -129,8 +130,10 @@ class RoomPlayerCard : UILinearContainer() {
 
                     modDisplay = UIText().apply {
                         minHeight = 18f // Force to take space even if no mods are enabled
-                        font = ResourceManager.getInstance().getFont("xs")
-                        applyTheme = { color = it.accentColor * 0.8f }
+                        style += {
+                            fontSize = FontSize.XS
+                            color = it.accentColor * 0.8f
+                        }
                     }
 
                     innerContainer += modDisplay!!
