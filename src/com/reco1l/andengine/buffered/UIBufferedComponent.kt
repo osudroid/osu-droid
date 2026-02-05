@@ -80,11 +80,9 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
     protected abstract fun onUpdateBuffer()
 
 
-    @Deprecated(message = "Requesting explicitly new buffer instance is no longer allowed", replaceWith = ReplaceWith("requestBufferUpdate()"))
-    fun requestNewBuffer() {
-        needsBufferUpdate = true
-    }
-
+    /**
+     * Requests the buffer to be updated.
+     */
     fun requestBufferUpdate() {
         needsBufferUpdate = true
     }
@@ -95,7 +93,7 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        requestNewBuffer()
+        requestBufferUpdate()
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {

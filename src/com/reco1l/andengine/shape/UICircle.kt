@@ -71,11 +71,6 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         GLHelper.lineWidth(gl, lineWidth)
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
-
     override fun createBuffer(): CircleVertexBuffer {
         val segments = calculateArcResolution(width, height)
         return CircleVertexBuffer(segments, paintStyle)

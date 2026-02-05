@@ -118,12 +118,6 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
-
-
     override fun createBuffer(): SpriteVBO {
         return SpriteVBO()
     }

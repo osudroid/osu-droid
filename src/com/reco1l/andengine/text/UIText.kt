@@ -225,7 +225,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         if (wrapText) {
             invalidate(InvalidationFlag.Content)
         }
-        requestBufferUpdate()
+        super.onSizeChanged()
     }
 
     private fun wrapLine(line: String, font: Font, maxWidth: Int, outputLines: MutableList<String>, outputWidths: MutableList<Int>) {

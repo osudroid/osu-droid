@@ -32,24 +32,16 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
     var lineWidth = 1f
 
 
-    private val coercedRadius
-        get() = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
-
     private val segments
         get() = if (radius > 0f) calculateArcResolution(radius, radius, 90f) else 0
 
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
-
     override fun createBuffer(): BoxVBO {
-        return BoxVBO(coercedRadius, segments, paintStyle)
+        return BoxVBO(radius, segments, paintStyle)
     }
 
     override fun generateBufferCacheKey(): String {
-        return "BoxVBO@$width,$height,$coercedRadius,$segments,$paintStyle"
+        return "BoxVBO@$width,$height,$radius,$segments,$paintStyle"
     }
 
     override fun onUpdateBuffer() {
@@ -97,6 +89,8 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
             if (paintStyle == Fill) {
                 putVertex(position++, width / 2f, height / 2f)
             }
+
+            val radius = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
 
             // [1]
             position = addArc(position, radius, radius, -90f, 0f, radius, radius, segments)

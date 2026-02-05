@@ -8,6 +8,7 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
+import com.rian.osu.math.Precision
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -73,7 +74,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             else -> rawWidth
         }.coerceAtMost(maxWidth).coerceAtLeast(minWidth)
         set(value) {
-            if (rawWidth != value) {
+            if (!Precision.almostEquals(rawWidth, value)) {
                 rawWidth = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -121,7 +122,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             else -> rawHeight
         }.coerceAtMost(maxHeight).coerceAtLeast(minHeight)
         set(value) {
-            if (rawHeight != value) {
+            if (!Precision.almostEquals(rawHeight, value)) {
                 rawHeight = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -141,7 +142,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var contentWidth = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -152,7 +153,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var contentHeight = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -401,7 +402,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      * The corner radius of this component.
      */
     var radius = 0f
-        get() = field.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         set(value) {
             if (field != value) {
                 field = value

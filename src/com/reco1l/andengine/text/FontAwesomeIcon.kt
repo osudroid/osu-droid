@@ -103,11 +103,6 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         requestBufferUpdate()
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
-
     override fun createBuffer(): CompoundBuffer {
         return CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
     }

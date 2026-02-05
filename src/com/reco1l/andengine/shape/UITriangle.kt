@@ -23,11 +23,6 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
     var lineWidth = 1f
 
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
-
     override fun createBuffer(): TriangleVBO {
         return TriangleVBO()
     }

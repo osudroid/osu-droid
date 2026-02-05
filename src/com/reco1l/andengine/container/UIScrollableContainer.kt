@@ -146,6 +146,7 @@ open class UIScrollableContainer : UIContainer() {
         height = 6f
         alpha = 0.5f
         radius = 3f
+        allowBufferCache = false
     }
         set(value) {
             if (field != value) {
@@ -163,6 +164,7 @@ open class UIScrollableContainer : UIContainer() {
         width = 6f
         alpha = 0.5f
         radius = 3f
+        allowBufferCache = false
     }
         set(value) {
             if (field != value) {
