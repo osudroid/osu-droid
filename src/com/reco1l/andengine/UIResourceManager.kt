@@ -36,8 +36,6 @@ class UIResourceManager(private val context: Context) {
         val buffer = bufferSupplier()
         buffers[bufferKey] = buffer
 
-        Log.d("UIResourceManager", "Loading buffer: $bufferKey")
-
         return buffer
     }
 
@@ -61,8 +59,6 @@ class UIResourceManager(private val context: Context) {
             if (buffer is Buffer) {
                 buffer.unloadFromActiveBufferObjectManager()
             }
-
-            Log.d("UIResourceManager", "Unloading buffer: $bufferKey")
         }
     }
 
