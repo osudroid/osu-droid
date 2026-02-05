@@ -9,6 +9,7 @@ import com.rian.osu.mods.settings.*
 sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
     ModSettingComponent<V, Float>(mod, setting) {
 
+    @Suppress("UNCHECKED_CAST")
     final override fun update() {
         val slider = (control as FormSlider).control
 
@@ -18,19 +19,17 @@ sealed class ModSettingSlider<V : Number?>(mod: Mod, setting: ModSetting<V>) :
         val valueChanged = control.onValueChanged
         control.onValueChanged = null
 
-        slider.precision = when (setting) {
-            is FloatModSetting -> setting.precision
-            is NullableFloatModSetting -> setting.precision
-            else -> slider.precision
+        if (setting is IModSettingWithPrecision) {
+            slider.precision = setting.precision
         }
 
-        if (setting is RangeConstrainedModSetting<V>) {
-            slider.min = convertSettingValue(setting.minValue)
-            slider.max = convertSettingValue(setting.maxValue)
+        if (setting is IRangeConstrainedModSetting<*>) {
+            slider.min = convertSettingValue(setting.minValue as V)
+            slider.max = convertSettingValue(setting.maxValue as V)
         }
 
-        if (setting is NumberModSetting<V>) {
-            slider.step = convertSettingValue(setting.step)
+        if (setting is INumberModSetting<*>) {
+            slider.step = convertSettingValue(setting.step as V)
         }
 
         control.onValueChanged = valueChanged
