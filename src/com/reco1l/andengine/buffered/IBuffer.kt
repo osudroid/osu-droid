@@ -5,13 +5,6 @@ import javax.microedition.khronos.opengles.GL10
 
 interface IBuffer {
 
-
-    /**
-     * Determines whether the buffer is shared between multiple entities and how it should be handled.
-     */
-    var sharingMode: BufferSharingMode
-
-
     /**
      * Called before drawing the buffer.
      */
@@ -49,23 +42,10 @@ abstract class Buffer(
     isManaged: Boolean = true
 ) : BufferObject(capacity, bufferUsage, isManaged), IBuffer {
 
-    override var sharingMode = BufferSharingMode.Off
-
     override fun finalize() {
         if (isManaged) {
             unloadFromActiveBufferObjectManager()
         }
     }
 
-}
-
-
-fun <T : IBuffer> T.asSharedStatically(): T {
-    sharingMode = BufferSharingMode.Static
-    return this
-}
-
-fun <T : IBuffer> T.asSharedDynamically(): T {
-    sharingMode = BufferSharingMode.Dynamic
-    return this
 }

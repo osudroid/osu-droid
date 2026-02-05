@@ -124,8 +124,12 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    override fun onCreateBuffer(): SpriteVBO {
-        return buffer ?: SpriteVBO()
+    override fun createBuffer(): SpriteVBO {
+        return SpriteVBO()
+    }
+
+    override fun generateBufferCacheKey(): String {
+        return "SpriteVBO@$width,$height,$scaleType"
     }
 
     override fun onUpdateBuffer() {

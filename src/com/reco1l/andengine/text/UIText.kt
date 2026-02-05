@@ -32,7 +32,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 currentLength = value.codePointCount(0, value.length)
 
                 if (currentLength > previousLength) {
-                    requestNewBuffer()
+                    requestBufferUpdate()
                 }
 
                 invalidate(InvalidationFlag.Content)
@@ -291,23 +291,14 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return if (highest == n) n else highest shl 1
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-
-        val currentLength = currentLength
+    override fun createBuffer(): CompoundBuffer {
         val capacity = nextPowerOfTwo(currentLength)
+        return UITextCompoundBuffer(capacity)
+    }
 
-        val bufferKey = "UITextVBO@$capacity,$fontSize$fontFamily"
-        val newBuffer = UIEngine.current.resources.getOrStoreBuffer(bufferKey) {
-            UITextCompoundBuffer(capacity)
-        } as CompoundBuffer
-
-        val oldBuffer = buffer
-        if (oldBuffer != null) {
-            UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
-        }
-
-        UIEngine.current.resources.subscribeToBuffer(newBuffer, this)
-        return newBuffer
+    override fun generateBufferCacheKey(): String {
+        val capacity = nextPowerOfTwo(currentLength)
+        return "UITextVBO@$capacity,$fontSize,$fontFamily"
     }
 
     override fun onUpdateBuffer() {

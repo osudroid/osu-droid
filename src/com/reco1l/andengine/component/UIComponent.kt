@@ -22,6 +22,7 @@ import org.anddev.andengine.util.*
 import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -400,6 +401,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      * The corner radius of this component.
      */
     var radius = 0f
+        get() = field.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         set(value) {
             if (field != value) {
                 field = value

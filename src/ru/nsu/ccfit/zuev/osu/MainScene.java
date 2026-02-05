@@ -188,7 +188,7 @@ public class MainScene implements IUpdateHandler {
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
                 setPosition(10f, Config.getRES_HEIGHT() - getHeight() - 10f);
                 setColor(0f, 0f, 0f, 0.5f); // Black
-                setCornerRadius(12f);
+                setRadius(12f);
             }
 
             public boolean onAreaTouched(TouchEvent event, float localX, float localY) {

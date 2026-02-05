@@ -132,8 +132,12 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
     }
 
-    override fun onCreateBuffer(): TextureTextVertexBuffer {
+    override fun createBuffer(): TextureTextVertexBuffer {
         return TextureTextVertexBuffer()
+    }
+
+    override fun generateBufferCacheKey(): String {
+        return "TextureTextVBO@${textureRegions.size}"
     }
 
     override fun onUpdateBuffer() {

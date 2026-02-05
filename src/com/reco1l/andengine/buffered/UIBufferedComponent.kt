@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.shape.Shape.*
@@ -10,7 +11,7 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * An entity that uses a buffer to draw itself.
  */
-abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
+abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
     /**
      * The buffer itself.
@@ -23,6 +24,15 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             }
         }
 
+    /**
+     * Whether to allow the buffer cache.
+     */
+    var allowBufferCache = true
+
+    /**
+     * Whether to allow the buffer to be updated dynamically.
+     */
+    var allowBufferDynamicUpdate = true
 
     /**
      * The blend information of the entity.
@@ -41,16 +51,13 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
 
     /**
-     * Indicates whether a new buffer needs to be created.
-     */
-    protected var needsNewBuffer = true
-        private set
-
-    /**
      * Indicates whether the buffer needs to be updated.
      */
     protected var needsBufferUpdate = true
         private set
+
+
+    private var bufferCacheKey: String? = null
 
 
     fun setBlendFunction(source: Int, destination: Int) {
@@ -60,19 +67,22 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Buffer lifecycle
 
+    protected abstract fun generateBufferCacheKey(): String
+
     /**
      * Called when the buffer needs to be built.
      */
-    protected abstract fun onCreateBuffer(): T?
+    protected abstract fun createBuffer(): T
 
     /**
      * Called when the buffer needs to be updated.
      */
-    abstract fun onUpdateBuffer()
+    protected abstract fun onUpdateBuffer()
 
 
+    @Deprecated(message = "Requesting explicitly new buffer instance is no longer allowed", replaceWith = ReplaceWith("requestBufferUpdate()"))
     fun requestNewBuffer() {
-        needsNewBuffer = true
+        needsBufferUpdate = true
     }
 
     fun requestBufferUpdate() {
@@ -88,30 +98,43 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         requestNewBuffer()
     }
 
-    override fun onHandleInvalidations() {
-
-        if (needsNewBuffer) {
-            needsNewBuffer = false
-            buffer = onCreateBuffer()
-            requestBufferUpdate()
-        }
-
-        super.onHandleInvalidations()
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
         if (needsBufferUpdate) {
             needsBufferUpdate = false
 
-            val buffer = buffer
+            val cacheKey = generateBufferCacheKey()
 
-            // If the buffer is shared and its sharing mode is dynamic, we
-            // need to update it before drawing every frame, this might be
-            // CPU intensive, but the memory consumption is lower.
-            if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
-                updateBuffer()
+            if (bufferCacheKey != cacheKey) {
+
+                if (allowBufferCache) {
+                    val newBuffer = UIEngine.current.resources.getOrStoreBuffer(cacheKey) { createBuffer() }
+
+                    val oldBuffer = buffer
+                    if (oldBuffer != null) {
+                        UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
+                    }
+
+                    UIEngine.current.resources.subscribeToBuffer(newBuffer, this)
+
+                    @Suppress("UNCHECKED_CAST")
+                    buffer = newBuffer as T?
+                } else {
+                    if (!allowBufferDynamicUpdate || buffer == null) {
+                        buffer = createBuffer()
+                    }
+                }
+
+                bufferCacheKey = cacheKey
             }
+
+            onUpdateBuffer()
+            buffer?.invalidateOnHardware()
         }
+
+        super.onManagedDraw(gl, camera)
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {
@@ -163,18 +186,9 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         GLHelper.enableBlend(gl)
         GLHelper.blendFunction(gl, sourceFactor, destinationFactor)
 
-        // If it's a shared buffer, we might need to update it before drawing.
-        if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
-            updateBuffer()
-        }
-
         buffer?.beginDraw(gl)
     }
 
-    private fun updateBuffer() {
-        onUpdateBuffer()
-        buffer?.invalidateOnHardware()
-    }
 
     protected open fun onDeclarePointers(gl: GL10) {
         buffer?.declarePointers(gl, this)

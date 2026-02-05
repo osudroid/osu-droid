@@ -43,7 +43,7 @@ class RoomPlayerCard : UILinearContainer() {
             style = {
                 width = 0.025f.pct
                 height = Size.Full
-                cornerRadius = 2f.rem
+                radius = 2f.rem
             }
         }
 

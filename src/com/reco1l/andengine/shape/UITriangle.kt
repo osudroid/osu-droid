@@ -28,8 +28,12 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         requestBufferUpdate()
     }
 
-    override fun onCreateBuffer(): TriangleVBO {
+    override fun createBuffer(): TriangleVBO {
         return TriangleVBO()
+    }
+
+    override fun generateBufferCacheKey(): String {
+        return "TriangleVBO@$width,$height"
     }
 
     override fun onUpdateBuffer() {
