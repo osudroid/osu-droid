@@ -55,6 +55,11 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
             }
         }
 
+
+    private val segments
+        get() = calculateArcResolution(width, height)
+
+
     /**
      * Sets the portion of the circle to be drawn starting from the start angle.
      *
@@ -72,12 +77,14 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
     }
 
     override fun createBuffer(): CircleVertexBuffer {
-        val segments = calculateArcResolution(width, height)
         return CircleVertexBuffer(segments, paintStyle)
     }
 
+    override fun canReuseBuffer(buffer: CircleVertexBuffer): Boolean {
+        return buffer.segments == segments && buffer.paintStyle == paintStyle
+    }
+
     override fun generateBufferCacheKey(): String {
-        val segments = calculateArcResolution(width, height)
         return "CircleVBO@$segments,$paintStyle"
     }
 
@@ -124,14 +131,6 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
             val anglePerSegment = min(5f, 360f / averageRadius)
             val segments = (abs(arcAngle) / anglePerSegment).toInt()
             return max(3, segments)
-        }
-
-        @Deprecated(
-            message = "Use calculateArcResolution instead",
-            replaceWith = ReplaceWith("calculateArcResolution(width, height, maximumAngle)")
-        )
-        fun approximateSegments(width: Float, height: Float, maximumAngle: Float = 360f): Int {
-            return calculateArcResolution(width, height, maximumAngle)
         }
 
     }

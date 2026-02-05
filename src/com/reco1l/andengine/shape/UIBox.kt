@@ -32,16 +32,23 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
     var lineWidth = 1f
 
 
+    private val safeRadius
+        get() = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+
     private val segments
-        get() = if (radius > 0f) calculateArcResolution(radius, radius, 90f) else 0
+        get() = if (safeRadius > 0f) calculateArcResolution(safeRadius, safeRadius, 90f) else 0
 
 
     override fun createBuffer(): BoxVBO {
-        return BoxVBO(radius, segments, paintStyle)
+        return BoxVBO(segments, paintStyle)
+    }
+
+    override fun canReuseBuffer(buffer: BoxVBO): Boolean {
+        return buffer.segments == segments && buffer.paintStyle == paintStyle
     }
 
     override fun generateBufferCacheKey(): String {
-        return "BoxVBO@$width,$height,$radius,$segments,$paintStyle"
+        return "BoxVBO@$width,$height,$segments,$paintStyle"
     }
 
     override fun onUpdateBuffer() {
@@ -58,7 +65,6 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
 
 
     class BoxVBO(
-        val radius: Float,
         val segments: Int,
         val paintStyle: PaintStyle
     ) : VertexBuffer(
@@ -90,7 +96,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
                 putVertex(position++, width / 2f, height / 2f)
             }
 
-            val radius = radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+            val radius = entity.radius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
 
             // [1]
             position = addArc(position, radius, radius, -90f, 0f, radius, radius, segments)

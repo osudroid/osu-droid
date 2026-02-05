@@ -401,7 +401,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     /**
      * The corner radius of this component.
      */
-    var radius = 0f
+    open var radius = 0f
         set(value) {
             if (field != value) {
                 field = value

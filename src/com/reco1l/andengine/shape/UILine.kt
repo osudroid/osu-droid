@@ -44,6 +44,10 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         return LineVertexBuffer()
     }
 
+    override fun canReuseBuffer(buffer: LineVertexBuffer): Boolean {
+        return true
+    }
+
     override fun generateBufferCacheKey(): String {
         return "LineVBO@$fromPoint,$toPoint"
     }
