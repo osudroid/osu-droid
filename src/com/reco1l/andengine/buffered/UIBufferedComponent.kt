@@ -13,10 +13,19 @@ import javax.microedition.khronos.opengles.GL10
  */
 abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
+    override var radius: Float
+        get() = super.radius
+        set(value) {
+            if (super.radius != value) {
+                super.radius = value
+                requestBufferUpdate()
+            }
+        }
+
     /**
      * The buffer itself.
      */
-    open var buffer: T? = null
+    var buffer: T? = null
         set(value) {
             if (field != value) {
                 field?.finalize()
@@ -28,11 +37,6 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
      * Whether to allow the buffer cache.
      */
     var allowBufferCache = true
-
-    /**
-     * Whether to allow the buffer to be updated dynamically.
-     */
-    var allowBufferDynamicUpdate = true
 
     /**
      * The blend information of the entity.
@@ -70,7 +74,18 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
     protected abstract fun generateBufferCacheKey(): String
 
     /**
-     * Called when the buffer needs to be built.
+     * Determines if the current buffer can be reused instead of creating a new one.
+     *
+     * Override this method to implement custom buffer reuse logic based on buffer properties.
+     * Return `true` if the existing buffer is compatible and can be reused, `false` otherwise.
+     *
+     * @param buffer The current buffer to check for reusability
+     * @return `true` if the buffer can be reused, `false` if a new buffer should be created
+     */
+    protected open fun canReuseBuffer(buffer: T): Boolean = false
+
+    /**
+     * Called when a new buffer needs to be created.
      */
     protected abstract fun createBuffer(): T
 
@@ -96,7 +111,8 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         requestBufferUpdate()
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onHandleInvalidations() {
+        super.onHandleInvalidations()
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
@@ -105,13 +121,19 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
             val cacheKey = generateBufferCacheKey()
 
-            if (bufferCacheKey != cacheKey) {
-
-                if (allowBufferCache) {
-                    val newBuffer = UIEngine.current.resources.getOrStoreBuffer(cacheKey) { createBuffer() }
+            if (allowBufferCache) {
+                if (bufferCacheKey != cacheKey) {
+                    val newBuffer = UIEngine.current.resources.getOrStoreBuffer(cacheKey) {
+                        val currentBuffer = buffer
+                        if (currentBuffer != null && canReuseBuffer(currentBuffer)) {
+                            currentBuffer
+                        } else {
+                            createBuffer()
+                        }
+                    }
 
                     val oldBuffer = buffer
-                    if (oldBuffer != null) {
+                    if (oldBuffer != null && oldBuffer !== newBuffer) {
                         UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
                     }
 
@@ -119,20 +141,18 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
                     @Suppress("UNCHECKED_CAST")
                     buffer = newBuffer as T?
-                } else {
-                    if (!allowBufferDynamicUpdate || buffer == null) {
-                        buffer = createBuffer()
-                    }
+                    bufferCacheKey = cacheKey
                 }
-
-                bufferCacheKey = cacheKey
+            } else {
+                val currentBuffer = buffer
+                if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
+                    buffer = createBuffer()
+                }
             }
 
             onUpdateBuffer()
             buffer?.invalidateOnHardware()
         }
-
-        super.onManagedDraw(gl, camera)
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {

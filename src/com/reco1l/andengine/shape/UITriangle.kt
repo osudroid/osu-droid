@@ -27,6 +27,10 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         return TriangleVBO()
     }
 
+    override fun canReuseBuffer(buffer: TriangleVBO): Boolean {
+        return true
+    }
+
     override fun generateBufferCacheKey(): String {
         return "TriangleVBO@$width,$height"
     }

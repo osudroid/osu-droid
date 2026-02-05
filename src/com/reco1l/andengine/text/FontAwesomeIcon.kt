@@ -107,6 +107,10 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         return CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
     }
 
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        return true
+    }
+
     override fun generateBufferCacheKey(): String {
         return "IconVBO@$iconSize,$iconVariant,$icon"
     }

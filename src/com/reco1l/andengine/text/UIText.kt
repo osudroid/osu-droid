@@ -296,6 +296,12 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return UITextCompoundBuffer(capacity)
     }
 
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        val capacity = nextPowerOfTwo(currentLength)
+        val vertexBuffer = buffer.getFirstOf<TextVertexBuffer>()
+        return vertexBuffer.vertexCount == capacity * VERTICES_PER_CHARACTER
+    }
+
     override fun generateBufferCacheKey(): String {
         val capacity = nextPowerOfTwo(currentLength)
         return "UITextVBO@$capacity,$fontSize,$fontFamily"
