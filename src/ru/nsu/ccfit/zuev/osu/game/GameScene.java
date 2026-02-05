@@ -2189,12 +2189,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         VibratorManager.INSTANCE.sliderVibration();
 
+        // Whole slider was missed.
         if (score == 0) {
             createHitEffect(judgementPos, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
         }
 
+        // Nested object was missed.
         if (score == -1) {
             if (stat.getCombo() > 30) {
                 var sound = ResourceManager.getInstance().getCustomSound("combobreak", 1);
@@ -2211,46 +2213,45 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         String scoreName = "hit0";
-        switch (score) {
-            case 300:
-                scoreName = registerHit(id, 300, endCombo, incrementCombo);
-                break;
-            case 100:
-                scoreName = registerHit(id, 100, endCombo, incrementCombo);
-                break;
-            case 50:
-                scoreName = registerHit(id, 50, endCombo, incrementCombo);
-                break;
-            case 30:
-                scoreName = "sliderpoint30";
-                stat.registerHit(30, false, false);
-                break;
-            case 10:
-                scoreName = "sliderpoint10";
-                stat.registerHit(10, false, false);
-                stat.addSliderTickHit();
-                break;
-        }
 
-        if (score > 10) {
-            switch (type) {
-                case GameObjectListener.SLIDER_START:
+        switch (type) {
+            case GameObjectListener.SLIDER_START:
+                if (incrementCombo) {
+                    scoreName = "sliderpoint30";
+                    stat.registerHit(30, false, false);
                     stat.addSliderHeadHit();
                     createBurstEffectSliderStart(judgementPos, color);
                     if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
                     }
-                    break;
-                case GameObjectListener.SLIDER_END:
+                }
+                break;
+
+            case GameObjectListener.SLIDER_REPEAT:
+                if (incrementCombo) {
+                    scoreName = "sliderpoint30";
+                    stat.registerHit(30, false, false);
+                    stat.addSliderRepeatHit();
+                }
+                break;
+
+            case GameObjectListener.SLIDER_TICK:
+                if (incrementCombo) {
+                    scoreName = "sliderpoint10";
+                    stat.registerHit(10, false, false);
+                    stat.addSliderTickHit();
+                }
+                break;
+
+            case GameObjectListener.SLIDER_END:
+                // Slider end hit is tied to the final result of the slider.
+                scoreName = registerHit(id, score, endCombo, incrementCombo);
+
+                if (incrementCombo) {
                     stat.addSliderEndHit();
                     createBurstEffectSliderEnd(judgementPos, color);
-                    break;
-                case GameObjectListener.SLIDER_REPEAT:
-                    stat.addSliderRepeatHit();
-                    break;
-                default:
-                    createBurstEffect(judgementPos, color);
-            }
+                }
+                break;
         }
 
         createHitEffect(judgementPos, scoreName, color);

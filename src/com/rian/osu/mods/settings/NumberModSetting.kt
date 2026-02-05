@@ -6,6 +6,18 @@ import kotlin.math.roundToLong
 import kotlinx.serialization.json.*
 
 /**
+ * An interface for [ModSetting]s that represent numeric values with step increments.
+ */
+interface INumberModSetting<T> where T : Number, T : Comparable<T> {
+    /**
+     * The step increment for this [INumberModSetting].
+     *
+     * If set to 0, no stepping is applied.
+     */
+    var step: T
+}
+
+/**
  * A [ModSetting] that represents a numeric value with range constraints and step increments.
  */
 open class NumberModSetting<T>(
@@ -32,13 +44,8 @@ open class NumberModSetting<T>(
     minValue,
     maxValue,
     orderPosition
-) where T : Number, T : Comparable<T> {
-    /**
-     * The step increment for this [NumberModSetting].
-     *
-     * If set to 0, no stepping is applied.
-     */
-    var step = step
+), INumberModSetting<T> where T : Number, T : Comparable<T> {
+    final override var step = step
         set(value) {
             if (field != value) {
                 if (value.toDouble() < 0) {
@@ -120,13 +127,8 @@ open class NullableNumberModSetting<T>(
     minValue,
     maxValue,
     orderPosition
-) where T : Number, T : Comparable<T> {
-    /**
-     * The step increment for this [NullableNumberModSetting].
-     *
-     * If set to 0, no stepping is applied.
-     */
-    var step = step
+), INumberModSetting<T> where T : Number, T : Comparable<T> {
+    final override var step = step
         set(value) {
             if (field != value) {
                 if (value.toDouble() < 0) {
