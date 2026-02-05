@@ -65,6 +65,7 @@ class TrianglesDispenser : UIComponent() {
             width = triangleMinSize
             color = Colors.White
             scaleCenter = Anchor.Center
+            allowBufferCache = false
         })
     }
 

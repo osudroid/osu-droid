@@ -57,6 +57,7 @@ class RadialVisualizer : UIComponent() {
             color = Colors.White
             anchor = Anchor.Center
             origin = Anchor.BottomCenter
+            allowBufferCache = false
         })
     }
 

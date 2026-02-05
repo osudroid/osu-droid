@@ -40,6 +40,7 @@ class RippleVisualizer : UIComponent() {
             origin = Anchor.Center
             paintStyle = PaintStyle.Outline
             lineWidth = rippleThickness
+            allowBufferCache = false
         })
 
         RythimManager.addOnBeatChangeListener(referenceToThis) {
