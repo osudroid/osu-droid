@@ -8,6 +8,9 @@ import javax.microedition.khronos.opengles.GL10
  */
 class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
 
+    override var sharingMode = BufferSharingMode.Off
+
+
     inline fun <reified T : Buffer> getFirstOf(): T {
         return buffers.first { it is T } as T
     }

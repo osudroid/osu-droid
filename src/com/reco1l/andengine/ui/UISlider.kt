@@ -101,7 +101,6 @@ open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         depthInfo = DepthInfo.Default
-        allowBufferCache = false
         style = {
             radius = Radius.LG
         }
