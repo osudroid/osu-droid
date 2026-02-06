@@ -47,10 +47,6 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         return buffer.segments == segments && buffer.paintStyle == paintStyle
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "BoxVBO@$width,$height,$segments,$paintStyle"
-    }
-
     override fun onUpdateBuffer() {
         buffer?.update(this)
     }

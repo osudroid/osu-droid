@@ -140,10 +140,6 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         return true
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "TextureTextVBO@${textureRegions.size}"
-    }
-
     override fun onUpdateBuffer() {
         // Nothing to do here, buffer is updated in `doDraw`.
     }
