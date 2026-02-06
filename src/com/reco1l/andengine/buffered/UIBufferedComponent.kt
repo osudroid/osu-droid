@@ -61,9 +61,6 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         private set
 
 
-    private var bufferCacheKey: String? = null
-
-
     fun setBlendFunction(source: Int, destination: Int) {
         blendInfo = BlendInfo(source, destination)
     }
@@ -119,39 +116,19 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         if (needsBufferUpdate) {
             needsBufferUpdate = false
 
-            val cacheKey = generateBufferCacheKey()
-
-            if (allowBufferCache) {
-                if (bufferCacheKey != cacheKey) {
-                    val newBuffer = UIEngine.current.resources.getOrStoreBuffer(cacheKey) {
-                        val currentBuffer = buffer
-                        if (currentBuffer != null && canReuseBuffer(currentBuffer)) {
-                            currentBuffer
-                        } else {
-                            createBuffer()
-                        }
-                    }
-
-                    val oldBuffer = buffer
-                    if (oldBuffer != null && oldBuffer !== newBuffer) {
-                        UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
-                    }
-
-                    UIEngine.current.resources.subscribeToBuffer(newBuffer, this)
-
-                    @Suppress("UNCHECKED_CAST")
-                    buffer = newBuffer as T?
-                    bufferCacheKey = cacheKey
-                }
-            } else {
-                val currentBuffer = buffer
-                if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
-                    buffer = createBuffer()
-                }
+            val currentBuffer = buffer
+            if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
+                buffer = createBuffer()
             }
 
-            onUpdateBuffer()
-            buffer?.invalidateOnHardware()
+            val buffer = buffer
+
+            // If the buffer is shared and its sharing mode is dynamic, we
+            // need to update it before drawing every frame, this might be
+            // CPU intensive, but the memory consumption is lower.
+            if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
+                updateBuffer()
+            }
         }
     }
 
@@ -204,9 +181,18 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         GLHelper.enableBlend(gl)
         GLHelper.blendFunction(gl, sourceFactor, destinationFactor)
 
+        // If it's a shared buffer, we might need to update it before drawing.
+        if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
+            updateBuffer()
+        }
+
         buffer?.beginDraw(gl)
     }
 
+    private fun updateBuffer() {
+        onUpdateBuffer()
+        buffer?.invalidateOnHardware()
+    }
 
     protected open fun onDeclarePointers(gl: GL10) {
         buffer?.declarePointers(gl, this)
