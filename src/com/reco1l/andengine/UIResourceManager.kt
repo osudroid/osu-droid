@@ -21,58 +21,6 @@ class UIResourceManager(private val context: Context) {
     private val fonts = mutableMapOf<String, Font>()
     private val fontSubscribers = mutableMapOf<Font, MutableList<WeakReference<UIComponent>>>()
 
-    private val buffers = mutableMapOf<String, IBuffer>()
-    private val bufferSubscribers = mutableMapOf<IBuffer, MutableList<WeakReference<UIComponent>>>()
-
-
-    //region Buffers
-
-    fun getOrStoreBuffer(bufferKey: String, bufferSupplier: () -> IBuffer): IBuffer {
-
-        val fetchedBuffer = buffers[bufferKey]
-        if (fetchedBuffer != null) {
-            return fetchedBuffer
-        }
-
-        val buffer = bufferSupplier()
-        buffers[bufferKey] = buffer
-
-        return buffer
-    }
-
-    fun subscribeToBuffer(buffer: IBuffer, component: UIComponent, sharingMode: BufferSharingMode = BufferSharingMode.Dynamic) {
-        val subscribers = bufferSubscribers.getOrPut(buffer) { mutableListOf() }
-        if (subscribers.size > 1) {
-            buffer.sharingMode = sharingMode
-        } else {
-            buffer.sharingMode = BufferSharingMode.Off
-        }
-
-        if (subscribers.none { it.get() === component }) {
-            subscribers.add(WeakReference(component))
-        }
-    }
-
-    fun unsubscribeFromBuffer(buffer: IBuffer, component: UIComponent) {
-
-        val subscribers = bufferSubscribers[buffer] ?: return
-        subscribers.removeAll { it.get() === component || it.get() == null }
-
-        if (subscribers.isEmpty()) {
-            val bufferKey = buffers.entries.find { it.value == buffer }?.key
-
-            buffers.remove(bufferKey)
-            bufferSubscribers.remove(buffer)
-            if (buffer is Buffer) {
-                buffer.unloadFromActiveBufferObjectManager()
-            }
-        } else if (subscribers.size == 1) {
-            buffer.sharingMode = BufferSharingMode.Off
-        }
-    }
-
-    //endregion
-
     //region Fonts
 
     fun getOrStoreFont(size: Float, family: String): Font {
