@@ -5,7 +5,6 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.FontSize
-import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.IconVariant
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -104,13 +103,12 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         requestBufferUpdate()
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
+    override fun createBuffer(): CompoundBuffer {
+        return CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        return buffer ?: CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        return true
     }
 
     override fun onUpdateBuffer() {

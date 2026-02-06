@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.mainmenu
 import com.edlplan.framework.easing.Easing
 import com.osudroid.RythimManager
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.theme.Colors
@@ -57,6 +58,7 @@ class RadialVisualizer : UIComponent() {
             color = Colors.White
             anchor = Anchor.Center
             origin = Anchor.BottomCenter
+            bufferSharingMode = BufferSharingMode.Dynamic
         })
     }
 
@@ -102,7 +104,6 @@ class RadialVisualizer : UIComponent() {
     override fun onDrawChildren(gl: GL10, camera: Camera) {
         val bars = bars
 
-        val maxBarHeight = visualizerRadius * 2f
         val baseBarHeight = visualizerRadius
 
         bars.fastForEachIndexed { index, barInfo ->
@@ -110,7 +111,8 @@ class RadialVisualizer : UIComponent() {
             val angle = (index.toFloat() / bars.size) * 2f * PI.toFloat()
 
             barBox.width = barThickness
-            barBox.height = baseBarHeight + maxBarHeight * barInfo.currentHeight.coerceIn(0f, 1f)
+            barBox.height = baseBarHeight
+            barBox.scaleY = 1f + 2f * barInfo.currentHeight.coerceIn(0f, 1f)
             barBox.rotation = Math.toDegrees(angle.toDouble()).toFloat()
 
             barBox.onDraw(gl, camera)

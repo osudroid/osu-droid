@@ -1,6 +1,7 @@
 package com.osudroid
 
 import android.content.*
+import android.net.*
 import android.util.*
 import androidx.core.content.*
 import com.osudroid.resources.R
@@ -40,19 +41,8 @@ object UpdateManager: IFileRequestObserver
                 .addButton("Yes") {
                     it.dismiss()
 
-                    val changelogFile = File(activity.cacheDir, "changelog.html")
-
-                    // Copying the changelog file to the cache directory.
-                    activity.assets.open("app/changelog.html").use { i ->
-                        changelogFile.outputStream().use { o -> i.copyTo(o) }
-                    }
-
-                    val changelogUri = FileProvider.getUriForFile(activity, "${BuildConfig.APPLICATION_ID}.fileProvider", changelogFile)
-
-                    GlobalManager.getInstance().mainActivity.startActivity(Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(changelogUri, "text/html")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    })
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"))
+                    GlobalManager.getInstance().mainActivity.startActivity(intent)
                 }
                 .addButton("No", clickListener = MessageDialog::dismiss)
                 .show()

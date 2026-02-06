@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2.mainmenu
 
 import android.content.*
-import android.net.Uri
+import android.net.*
 import android.util.*
 import androidx.core.content.*
 import com.edlplan.framework.easing.*
@@ -16,12 +16,12 @@ import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -116,6 +116,7 @@ object MainScene : UIScene() {
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
                 scaleCenter = Anchor.Center
+                rotationCenter = Anchor.Center
                 style = {
                     width = 16f.rem
                     height = 16f.rem
@@ -123,29 +124,6 @@ object MainScene : UIScene() {
 
                 onActionUp = {
                     playClickEffect()
-
-                    menuContainer.apply {
-                        clearModifiers(ModifierType.SizeX, ModifierType.Alpha)
-
-                        if (isMenuExpanded) {
-                            sizeToX(0f, 0.2f, Easing.OutQuint)
-                            fadeOut(0.2f, Easing.OutQuint)
-                        } else {
-                            sizeToX(intrinsicWidth, 0.2f, Easing.OutQuint)
-                            fadeIn(0.2f, Easing.OutQuint)
-                        }
-                    }
-
-                    menuGradientBox.apply {
-                        clearModifiers(ModifierType.Alpha)
-
-                        if (isMenuExpanded) {
-                            fadeOut(0.4f, Easing.OutQuint)
-                        } else {
-                            fadeIn(0.4f, Easing.OutQuint)
-                        }
-                    }
-
                     isMenuExpanded = !isMenuExpanded
                 }
 
@@ -228,7 +206,24 @@ object MainScene : UIScene() {
 
                     +MenuButton(Icon.ArrowRightFromBracket, "Exit").apply {
                         onActionUp = {
-                            childScene = SettingsMenu()
+                            UIMessageDialog().apply {
+                                title = "Exit game"
+                                text = "Are you sure you want to exit?"
+                                addButton {
+                                    text = "Yes"
+                                    onActionUp = {
+                                        hide()
+                                        exit()
+                                    }
+                                }
+
+                                addButton {
+                                    text = "No"
+                                    onActionUp = {
+                                        hide()
+                                    }
+                                }
+                            }.show()
                         }
                     }
 
@@ -317,6 +312,35 @@ object MainScene : UIScene() {
         }
     }
 
+
+    private fun exit() {
+        isMenuExpanded = false
+
+        MusicManager.stop()
+        ResourceManager.getInstance().getSound("seeya")?.play()
+
+        background.fadeOut(0.4f)
+
+        logo.playEffects = false
+        logo.scaleTo(0.5f, 3f)
+        logo.rotateTo(-15f, 3f)
+
+        leftFlash.detachSelf()
+        rightFlash.detachSelf()
+
+        box {
+            width = Size.Full
+            height = Size.Full
+            color = Colors.Black
+            alpha = 0f
+
+            fadeIn(3f).after {
+                GlobalManager.getInstance().mainActivity.finish()
+            }
+        }
+    }
+
+
     override fun onAttached() {
         super.onAttached()
 
@@ -334,18 +358,25 @@ object MainScene : UIScene() {
 
         logo.setScale(Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), logo.scaleX, if (isMenuExpanded) 1f else 1.3f, 0f, 0.1f))
 
+        // Music button
         val mightShowMusicButton = isMenuExpanded || System.currentTimeMillis() - lastMusicChange < 3000
 
         musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         musicButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.translationX, if (mightShowMusicButton) 0f else 8f.srem, 0f, 0.05f)
         musicButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.alpha, if (mightShowMusicButton) 1f else 0f, 0f, 0.05f)
 
-        playerButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.translationX, if (isMenuExpanded) 0f else (-8f).srem, 0f, 0.05f)
-        playerButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.alpha, if (isMenuExpanded) 1f else 0f, 0f, 0.05f)
-
+        // Beat animations
         val beatLengthSeconds = RythimManager.beatLength.toFloat() / 1000f * (if (RythimManager.isKiai) 1f else RythimManager.beatSignature.toFloat())
         leftFlash.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, beatLengthSeconds), leftFlash.alpha, 0f, 0f, beatLengthSeconds)
         rightFlash.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, beatLengthSeconds), rightFlash.alpha, 0f, 0f, beatLengthSeconds)
+
+        // Menu expansion animations
+        menuContainer.width = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.2f), menuContainer.width, if (isMenuExpanded) menuContainer.intrinsicWidth else 0f, 0f, 0.2f, Easing.OutQuint)
+        menuContainer.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.2f), menuContainer.alpha, if (isMenuExpanded) 1f else 0f, 0f, 0.2f, Easing.OutQuint)
+        menuGradientBox.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.4f), menuGradientBox.alpha, if (isMenuExpanded) 1f else 0f, 0f, 0.4f, Easing.OutQuint)
+
+        playerButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.translationX, if (isMenuExpanded) 0f else (-8f).srem, 0f, 0.05f)
+        playerButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), playerButton.alpha, if (isMenuExpanded) 1f else 0f, 0f, 0.05f)
 
         super.onManagedUpdate(deltaTimeSec)
     }

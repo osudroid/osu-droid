@@ -2,6 +2,15 @@ package com.rian.osu.mods.settings
 
 import com.rian.osu.math.*
 
+interface IModSettingWithPrecision {
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    var precision: Int?
+}
+
 /**
  * A [ModSetting] that represents a [Float] value with range constraints.
  */
@@ -26,13 +35,8 @@ open class FloatModSetting(
     if (precision != null) step.preciseRoundBy(precision) else step,
     orderPosition,
     useManualInput
-) {
-    /**
-     * The number of decimal places to round the value to.
-     *
-     * When set to `null`, the value will not be rounded.
-     */
-    var precision = precision
+), IModSettingWithPrecision {
+    override var precision = precision
         set(value) {
             if (field != value) {
                 require(value == null || value >= 0) { "precision must be greater than or equal to 0." }
@@ -94,13 +98,8 @@ open class NullableFloatModSetting(
     if (precision != null) step.preciseRoundBy(precision) else step,
     orderPosition,
     useManualInput
-) {
-    /**
-     * The number of decimal places to round the value to.
-     *
-     * When set to `null`, the value will not be rounded.
-     */
-    var precision = precision
+), IModSettingWithPrecision {
+    override var precision = precision
         set(value) {
             if (value != null && value < 0) {
                 throw IllegalArgumentException("precision must be greater than or equal to 0.")

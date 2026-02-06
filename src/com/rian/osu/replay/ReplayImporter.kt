@@ -109,9 +109,11 @@ object ReplayImporter {
     }
 
     private fun importEdr(file: File) {
-        val entry = OsuDroidReplayPack.unpack(file.inputStream()).apply {
-            // Ensure the replay file does not conflict existing replays.
-            scoreInfo.replayFilename = scoreInfo.replayFilename.substringBeforeLast('.') + System.currentTimeMillis() + ".odr"
+        val entry = file.inputStream().use {
+            OsuDroidReplayPack.unpack(it).apply {
+                // Ensure the replay file does not conflict existing replays.
+                scoreInfo.replayFilename = scoreInfo.replayFilename.substringBeforeLast('.') + System.currentTimeMillis() + ".odr"
+            }
         }
 
         val replayFile = File(entry.scoreInfo.replayPath)

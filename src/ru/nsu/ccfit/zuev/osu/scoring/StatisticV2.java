@@ -110,14 +110,14 @@ public class StatisticV2 implements Serializable {
         hit100 = Integer.parseInt(params[7]);
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
+
         if (params.length >= 11) {
             time = Long.parseLong(params[10]);
         }
-        if (params.length >= 13) {
-            playerName = params[12];
-        }
 
-        sliderTickHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
+        sliderHeadHits = params.length >= 12 ? Integer.parseInt(params[11]) : -1;
+        sliderTickHits = params.length >= 13 ? Integer.parseInt(params[12]) : -1;
+        sliderRepeatHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
         sliderEndHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
 
         if (originalDifficulty != null) {

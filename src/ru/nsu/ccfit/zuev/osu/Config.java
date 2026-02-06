@@ -77,6 +77,7 @@ public class Config {
         videoEnabled,
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
+        preferModAcronymInMultiplayer,
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
         dimHitObjects,
@@ -246,6 +247,7 @@ public class Config {
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
         submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
+        preferModAcronymInMultiplayer = prefs.getBoolean("player_preferModAcronym", false);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -751,6 +753,14 @@ public class Config {
 
     public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
         Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
+    }
+
+    public static boolean isPreferModAcronymInMultiplayer() {
+        return preferModAcronymInMultiplayer;
+    }
+
+    public static void setPreferModAcronymInMultiplayer(boolean preferModAcronymInMultiplayer) {
+        Config.preferModAcronymInMultiplayer = preferModAcronymInMultiplayer;
     }
 
     public static boolean isKeepBackgroundAspectRatio() {

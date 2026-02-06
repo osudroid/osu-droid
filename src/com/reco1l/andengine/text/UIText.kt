@@ -32,7 +32,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 currentLength = value.codePointCount(0, value.length)
 
                 if (currentLength > previousLength) {
-                    requestNewBuffer()
+                    requestBufferUpdate()
                 }
 
                 invalidate(InvalidationFlag.Content)
@@ -225,7 +225,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         if (wrapText) {
             invalidate(InvalidationFlag.Content)
         }
-        requestBufferUpdate()
+        super.onSizeChanged()
     }
 
     private fun wrapLine(line: String, font: Font, maxWidth: Int, outputLines: MutableList<String>, outputWidths: MutableList<Int>) {
@@ -291,23 +291,15 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return if (highest == n) n else highest shl 1
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-
-        val currentLength = currentLength
+    override fun createBuffer(): CompoundBuffer {
         val capacity = nextPowerOfTwo(currentLength)
+        return UITextCompoundBuffer(capacity)
+    }
 
-        val bufferKey = "UITextVBO@$capacity,$fontSize$fontFamily"
-        val newBuffer = UIEngine.current.resources.getOrStoreBuffer(bufferKey) {
-            UITextCompoundBuffer(capacity)
-        } as CompoundBuffer
-
-        val oldBuffer = buffer
-        if (oldBuffer != null) {
-            UIEngine.current.resources.unsubscribeFromBuffer(oldBuffer, this)
-        }
-
-        UIEngine.current.resources.subscribeToBuffer(newBuffer, this)
-        return newBuffer
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        val capacity = nextPowerOfTwo(currentLength)
+        val vertexBuffer = buffer.getFirstOf<TextVertexBuffer>()
+        return vertexBuffer.vertexCount == capacity * VERTICES_PER_CHARACTER
     }
 
     override fun onUpdateBuffer() {

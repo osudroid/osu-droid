@@ -2,12 +2,12 @@ package com.osudroid.ui.v2.mainmenu
 
 import com.osudroid.RythimManager
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UICircle
 import com.reco1l.andengine.theme.Colors
-import com.reco1l.andengine.theme.rem
-import com.reco1l.toolkt.kotlin.fastForEachIndexed
+import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.Camera
 import java.lang.ref.WeakReference
 import javax.microedition.khronos.opengles.GL10
@@ -32,6 +32,12 @@ class RippleVisualizer : UIComponent() {
 
     private var activeRipples = mutableListOf<RippleInfo>()
 
+    /**
+     * The base size of the ripple relative to the largest dimension.
+     */
+    private val baseRippleSize: Float
+        get() = max(width, height)
+
 
     init {
         attachChild(ripple.apply {
@@ -40,7 +46,20 @@ class RippleVisualizer : UIComponent() {
             origin = Anchor.Center
             paintStyle = PaintStyle.Outline
             lineWidth = rippleThickness
+            bufferSharingMode = BufferSharingMode.Dynamic
         })
+    }
+
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        ripple.width = baseRippleSize
+        ripple.height = baseRippleSize
+    }
+
+    override fun onAttached() {
+        super.onAttached()
+        ripple.width = baseRippleSize
+        ripple.height = baseRippleSize
 
         RythimManager.addOnBeatChangeListener(referenceToThis) {
             if (RythimManager.isKiai) {
@@ -57,7 +76,7 @@ class RippleVisualizer : UIComponent() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        activeRipples.fastForEachIndexed { index, info ->
+        activeRipples.fastForEach { info ->
             info.update(deltaTimeSec)
         }
         activeRipples.removeAll { it.alpha <= 0f }
@@ -66,12 +85,8 @@ class RippleVisualizer : UIComponent() {
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
-        val baseSize = max(width, height)
-
-        activeRipples.fastForEachIndexed { index, info ->
-            val size = baseSize + (baseSize / 3) * info.size
-            ripple.width = size
-            ripple.height = size
+        activeRipples.fastForEach { info ->
+            ripple.setScale(1f + info.scale)
             ripple.alpha = info.alpha
             ripple.onDraw(gl, camera)
         }
@@ -83,7 +98,7 @@ class RippleVisualizer : UIComponent() {
 
 
     data class RippleInfo(
-        var size: Float,
+        var scale: Float,
         var alpha: Float
     ) {
 
@@ -95,9 +110,9 @@ class RippleVisualizer : UIComponent() {
             alpha -= fadeRate * deltaTimeSec
 
             // The velocity is proportional to the alpha value
-            velocity = max(0f, alpha * (if (RythimManager.isKiai) 3f else 1.5f))
+            velocity = max(0f, alpha * (if (RythimManager.isKiai) 1f else 0.5f))
 
-            size += velocity * deltaTimeSec
+            scale += velocity * deltaTimeSec
         }
     }
 
