@@ -34,11 +34,6 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         }
 
     /**
-     * Whether to allow the buffer cache.
-     */
-    var allowBufferCache = true
-
-    /**
      * The blend information of the entity.
      */
     var blendInfo = BlendInfo.Mixture
@@ -54,11 +49,7 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
     var clearInfo = ClearInfo.None
 
 
-    /**
-     * Indicates whether the buffer needs to be updated.
-     */
-    protected var needsBufferUpdate = true
-        private set
+    private var needsBufferUpdate = true
 
 
     fun setBlendFunction(source: Int, destination: Int) {
@@ -67,8 +58,6 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
 
     //region Buffer lifecycle
-
-    protected abstract fun generateBufferCacheKey(): String
 
     /**
      * Determines if the current buffer can be reused instead of creating a new one.

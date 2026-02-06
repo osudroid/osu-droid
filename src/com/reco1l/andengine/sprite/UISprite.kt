@@ -126,10 +126,6 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         return true
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "SpriteVBO@$width,$height,$scaleType"
-    }
-
     override fun onUpdateBuffer() {
         buffer?.update(this)
     }

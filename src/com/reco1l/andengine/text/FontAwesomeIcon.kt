@@ -111,10 +111,6 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         return true
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "IconVBO@$iconSize,$iconVariant,$icon"
-    }
-
     override fun onUpdateBuffer() {
         val font = font
         val letter = font?.getLetter(icon.toChar())

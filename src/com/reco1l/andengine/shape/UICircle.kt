@@ -84,10 +84,6 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         return buffer.segments == segments && buffer.paintStyle == paintStyle
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "CircleVBO@$segments,$paintStyle"
-    }
-
     override fun onUpdateBuffer() {
         buffer?.update(this)
     }

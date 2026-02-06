@@ -302,11 +302,6 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return vertexBuffer.vertexCount == capacity * VERTICES_PER_CHARACTER
     }
 
-    override fun generateBufferCacheKey(): String {
-        val capacity = nextPowerOfTwo(currentLength)
-        return "UITextVBO@$capacity,$fontSize,$fontFamily"
-    }
-
     override fun onUpdateBuffer() {
         buffer?.getFirstOf<TextTextureBuffer>()?.update(font, lines)
         buffer?.getFirstOf<TextVertexBuffer>()?.update(this, font, lines, linesWidth)

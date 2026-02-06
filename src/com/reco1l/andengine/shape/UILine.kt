@@ -48,10 +48,6 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         return true
     }
 
-    override fun generateBufferCacheKey(): String {
-        return "LineVBO@$fromPoint,$toPoint"
-    }
-
     override fun onUpdateBuffer() {
         buffer?.update(this)
     }
