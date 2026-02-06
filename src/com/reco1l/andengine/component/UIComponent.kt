@@ -410,6 +410,18 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             }
         }
 
+    /**
+     * The box used to draw the background of this component.
+     */
+    protected var background: UIBox? = null
+        private set
+
+    /**
+     * The box used to draw the border of this component.
+     */
+    protected var border: UIBox? = null
+        private set
+
     //endregion
 
     //region Other properties
@@ -427,8 +439,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
 
     private var invalidationFlags = InvalidationFlag.All
-    private var background: UIBox? = null
-    private var border: UIBox? = null
 
     private val inputBindings = arrayOfNulls<UIComponent>(10)
 

@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import android.opengl.GLES10
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -18,6 +19,30 @@ import kotlin.math.*
  */
 @Suppress("LeakingThis")
 open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<SpriteVBO>() {
+
+    override var radius: Float
+        get() = super.radius
+        set(value) {
+            if (super.radius != value) {
+                super.radius = value
+                requestBufferUpdate()
+
+                if (value > 0f) {
+                    background?.apply {
+                        clearInfo = ClearInfo.ClearDepthBuffer
+                        depthInfo = DepthInfo(test = true, mask = true, function = GLES10.GL_ALWAYS)
+                    }
+                    depthInfo = DepthInfo(test = true, mask = true, function = GLES10.GL_EQUAL)
+                } else {
+                    background?.apply {
+                        clearInfo = ClearInfo.None
+                        depthInfo = DepthInfo.None
+                    }
+                    depthInfo = DepthInfo.None
+                }
+            }
+        }
+
 
     /**
      * Whether the texture should be flipped horizontally.
