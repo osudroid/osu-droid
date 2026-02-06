@@ -48,6 +48,15 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
      */
     var clearInfo = ClearInfo.None
 
+    /**
+     * The buffer sharing mode
+     */
+    var bufferSharingMode = BufferSharingMode.Off
+        set(value) {
+            field = value
+            buffer?.sharingMode = value
+        }
+
 
     private var needsBufferUpdate = true
 
@@ -111,6 +120,7 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
             }
 
             val buffer = buffer
+            buffer?.sharingMode = bufferSharingMode
 
             // If the buffer is shared and its sharing mode is dynamic, we
             // need to update it before drawing every frame, this might be
