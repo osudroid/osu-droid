@@ -3,6 +3,7 @@ package com.osudroid.ui.v2
 import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.theme.FontSize
 import com.rian.osu.mods.*
 
 class ModsIndicator : UILinearContainer() {
@@ -48,7 +49,7 @@ class ModsIndicator : UILinearContainer() {
     /**
      * The size of the mod icons in this indicator.
      */
-    var iconSize = 42f
+    var iconSize = FontSize.MD
         set(value) {
             if (field != value) {
                 field = value
@@ -63,7 +64,10 @@ class ModsIndicator : UILinearContainer() {
 
     init {
         orientation = Orientation.Horizontal
-        spacing = -5f
+        style = {
+            iconSize = FontSize.MD
+            spacing = -5f
+        }
     }
 
 }

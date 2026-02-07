@@ -36,7 +36,6 @@ abstract class VertexBuffer(
 
     //endregion
 
-
     //region Elements
 
     fun addQuad(index: Int, fromX: Float, fromY: Float, toX: Float, toY: Float): Int {

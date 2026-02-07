@@ -1097,7 +1097,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // Attach the block area to the HUD so that it does not get scaled with the playfield.
                 var areaBox = new UIBox() {
                     {
-                        setCornerRadius(2f);
+                        setRadius(2f);
                         setColor(30f / 255f, 30f / 255f, 41f / 255f);
                         setAlpha(0.15f);
 

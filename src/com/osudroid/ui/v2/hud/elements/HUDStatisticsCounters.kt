@@ -5,6 +5,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.osudroid.ui.v2.hud.HUDElement
+import com.reco1l.andengine.theme.FontSize
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -14,7 +15,7 @@ import ru.nsu.ccfit.zuev.skins.*
 sealed class HUDStatisticCounter(label: String) : HUDElement() {
 
     protected val labelText = UIText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
+        fontSize = FontSize.SM
         text = label
     }
 

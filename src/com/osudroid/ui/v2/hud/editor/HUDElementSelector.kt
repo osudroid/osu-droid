@@ -12,10 +12,11 @@ import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Size
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.reflect.full.primaryConstructor
@@ -35,15 +36,12 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
     private val elementList = UIScrollableContainer().apply {
 
         scrollAxes = Axes.Y
-        height = FillParent
+        height = Size.Full
         width = SELECTOR_WIDTH
-
-        background = UIBox().apply {
-            color = Color4(0xFF1E1E2E)
-        }
+        backgroundColor = Color4(0xFF1E1E2E)
 
         attachChild(UILinearContainer().apply {
-            width = FillParent
+            width = Size.Full
             padding = Vec4(16f)
             spacing = 12f
             orientation = Orientation.Vertical
@@ -57,7 +55,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
 
 
     init {
-        height = FillParent
+        height = Size.Full
 
         x = -SELECTOR_WIDTH
 
@@ -65,10 +63,8 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
         attachChild(object : UIContainer() {
 
             init {
-                background = UIBox().apply {
-                    cornerRadius = BUTTON_RADIUS
-                    color = Color4(0xFF181825)
-                }
+                backgroundColor = Color4(0xFF181825)
+                radius = BUTTON_RADIUS
 
                 setSize(BUTTON_WIDTH, 150f)
                 x = SELECTOR_WIDTH - BUTTON_RADIUS
@@ -80,7 +76,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
                     rotation = -90f
                     anchor = Anchor.Center
                     origin = Anchor.Center
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    fontSize = FontSize.SM
                     text = "Elements"
 
                     x = BUTTON_RADIUS / 2
