@@ -4,7 +4,6 @@ import androidx.annotation.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.UICircle.*
-import com.reco1l.toolkt.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
@@ -25,7 +24,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-                requestNewBuffer()
+                requestBufferUpdate()
             }
         }
 
@@ -56,6 +55,11 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
             }
         }
 
+
+    private val segments
+        get() = calculateArcResolution(width, height)
+
+
     /**
      * Sets the portion of the circle to be drawn starting from the start angle.
      *
@@ -72,21 +76,12 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         GLHelper.lineWidth(gl, lineWidth)
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestNewBuffer()
+    override fun createBuffer(): CircleVertexBuffer {
+        return CircleVertexBuffer(segments, paintStyle)
     }
 
-    override fun onCreateBuffer(): CircleVertexBuffer {
-
-        val buffer = buffer
-        val segments = approximateSegments(width, height)
-
-        if (buffer?.segments == segments && buffer.paintStyle == paintStyle) {
-            return buffer
-        }
-
-        return CircleVertexBuffer(segments, paintStyle)
+    override fun canReuseBuffer(buffer: CircleVertexBuffer): Boolean {
+        return buffer.segments == segments && buffer.paintStyle == paintStyle
     }
 
     override fun onUpdateBuffer() {
@@ -122,12 +117,17 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
 
     companion object {
 
-        fun approximateSegments(width: Float, height: Float, maximumAngle: Float = 360f): Int {
+        /**
+         * Calculates the number of segments needed to render a smooth arc.
+         */
+        fun calculateArcResolution(width: Float, height: Float, arcAngle: Float = 360f): Int {
             val averageRadius = (width + height) / 4f
-            val minSegmentAngle = min(5f, 360f / averageRadius.toRadians())
-            return max(3, (maximumAngle / minSegmentAngle).toInt())
+
+            // We use 5 degrees as the maximum angle between segments for visual smoothness.
+            val anglePerSegment = min(5f, 360f / averageRadius)
+            val segments = (abs(arcAngle) / anglePerSegment).toInt()
+            return max(3, segments)
         }
 
     }
 }
-

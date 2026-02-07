@@ -6,6 +6,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import java.io.File;
 
 import com.un4seen.bass.BASS;
@@ -166,6 +168,14 @@ public class SongService extends Service {
             return audioFunc.getSpectrum();
         }
         return new float[0];
+    }
+
+    @Nullable
+    public float[] getAudioFFT(int resolution) {
+        if (audioFunc != null) {
+            return audioFunc.getAudioFFT(resolution);
+        }
+        return null;
     }
 
     public float getVolume() {

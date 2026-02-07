@@ -1,10 +1,13 @@
 package com.reco1l.andengine.ui
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.container.*
+import com.reco1l.andengine.modifier.ModifierType
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
 import com.reco1l.framework.*
-import com.reco1l.framework.math.*
 import org.anddev.andengine.engine.camera.*
 import javax.microedition.khronos.opengles.*
 
@@ -19,40 +22,25 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
     /**
      * The button that toggles the dropdown menu.
      */
-    val button = object : UITextButton() {
-
-        init {
-            width = FillParent
-            alignment = Anchor.CenterLeft
-            content.textEntity.clipToBounds = true
-            onActionUp = {
-                if (dropdown.isExpanded) {
-                    dropdown.hide()
-                } else {
-                    dropdown.show()
-                }
-            }
-
-            trailingIcon = UIContainer().apply {
-                padding = Vec4(12f, 0f)
-
-                triangle {
-                    width = 14f
-                    height = 8f
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    color = Color4.White
-                    alpha = 0.25f
-                    rotationCenter = Anchor.Center
-                    rotation = 180f
-                }
+    val button = UITextButton().apply {
+        width = Size.Full
+        alignment = Anchor.CenterLeft
+        onActionUp = {
+            if (dropdown.isExpanded) {
+                dropdown.hide()
+            } else {
+                dropdown.show()
             }
         }
-
-        override fun onThemeChanged(theme: Theme) {
-            super.onThemeChanged(theme)
-            background?.color = theme.accentColor * 0.25f
+        style += {
+            backgroundColor = it.accentColor * 0.25f
         }
+
+        trailingIcon = FontAwesomeIcon(Icon.ChevronDown).apply {
+            rotation = 0f
+            alpha = 0.5f
+        }
+        trailingIcon?.rotationCenter = Anchor.Center
     }
 
     /**
@@ -99,10 +87,21 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
         +button.apply {
             text = placeholder
         }
+
+        val chevronIcon = button.trailingIcon as FontAwesomeIcon
+
+        dropdown.onExpand = {
+            chevronIcon.clearModifiers(ModifierType.Rotation)
+            chevronIcon.rotateTo(180f, 0.4f).eased(Easing.OutBounce)
+        }
+
+        dropdown.onCollapse = {
+            chevronIcon.clearModifiers(ModifierType.Rotation)
+            chevronIcon.rotateTo(0f, 0.4f).eased(Easing.OutBounce)
+        }
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
-        button.content.textEntity.width = width - button.padding.horizontal - button.trailingIcon!!.width
 
         if (listChanged) {
             listChanged = false
@@ -145,17 +144,11 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
             }
 
         }
+
+        updateTrigger()
     }
 
-    override fun onValueChanged() {
-        super.onValueChanged()
-
-        if (value.isEmpty()) {
-            button.text = placeholder
-            dropdown.forEachButton { it.isSelected = false }
-            return
-        }
-
+    private fun updateTrigger() {
         when (selectionMode) {
 
             SelectionMode.Single -> {
@@ -167,6 +160,18 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
                 button.text = options.filter { o -> o.value in value }.joinToString { it.text }
             }
         }
+    }
+
+    override fun onValueChanged() {
+        super.onValueChanged()
+
+        if (value.isEmpty()) {
+            button.text = placeholder
+            dropdown.forEachButton { it.isSelected = false }
+            return
+        }
+
+        updateTrigger()
 
         buttons.forEach { (option, button) ->
             button.isSelected = option.value in value

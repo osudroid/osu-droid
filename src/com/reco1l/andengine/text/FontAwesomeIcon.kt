@@ -4,7 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.IconVariant
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -12,6 +12,7 @@ import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
 import kotlin.math.*
+import com.reco1l.andengine.theme.Size
 
 /**
  * A text entity that can be displayed on the screen.
@@ -43,7 +44,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
     /**
      * The size of the icon font.
      */
-    var iconSize = 24f
+    var iconSize = FontSize.SM
         set(value) {
             if (field != value) {
                 field = value
@@ -81,8 +82,8 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
 
 
     init {
-        width = MatchContent
-        height = MatchContent
+        width = Size.Auto
+        height = Size.Auto
     }
 
 
@@ -102,13 +103,12 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         requestBufferUpdate()
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
+    override fun createBuffer(): CompoundBuffer {
+        return CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        return buffer ?: CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        return true
     }
 
     override fun onUpdateBuffer() {

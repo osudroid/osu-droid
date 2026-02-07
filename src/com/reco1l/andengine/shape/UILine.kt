@@ -1,6 +1,5 @@
 package com.reco1l.andengine.shape
 
-import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
@@ -41,8 +40,12 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         }
 
 
-    override fun onCreateBuffer(): LineVertexBuffer {
+    override fun createBuffer(): LineVertexBuffer {
         return LineVertexBuffer()
+    }
+
+    override fun canReuseBuffer(buffer: LineVertexBuffer): Boolean {
+        return true
     }
 
     override fun onUpdateBuffer() {
