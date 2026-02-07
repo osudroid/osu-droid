@@ -1,8 +1,6 @@
 package com.osudroid.ui.v2.settings
 
-import android.util.Log
 import androidx.annotation.ArrayRes
-import androidx.annotation.StringRes
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
@@ -16,30 +14,21 @@ import com.reco1l.andengine.text
 import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.Size
-import com.reco1l.andengine.theme.pct
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.ColorVariant
 import com.reco1l.andengine.ui.SizeVariant
 import com.reco1l.andengine.ui.UISelect
-import com.reco1l.andengine.ui.form.FormCheckbox
 import com.reco1l.andengine.ui.form.FormControl
-import com.reco1l.andengine.ui.form.FormInput
-import com.reco1l.andengine.ui.form.FormSelect
 import com.reco1l.andengine.box
-import com.reco1l.andengine.clickableContainer
+import com.reco1l.andengine.component.CullingMode
 import com.reco1l.andengine.component.UIComponent
-import com.reco1l.andengine.component.paddingBottom
-import com.reco1l.andengine.component.paddingTop
-import com.reco1l.andengine.compoundText
 import com.reco1l.andengine.container.UIScrollableContainer
+import com.reco1l.andengine.textButton
 import com.reco1l.andengine.theme.Colors
-import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Radius
-import com.reco1l.andengine.theme.vw
-import com.reco1l.andengine.ui.UIIconButton
+import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.andengine.ui.form.FloatPreferenceSlider
-import com.reco1l.andengine.ui.form.IntPreferenceSlider
 import com.reco1l.andengine.ui.form.PreferenceCheckbox
 import com.reco1l.andengine.ui.form.PreferenceInput
 import com.reco1l.andengine.ui.form.PreferenceSelect
@@ -182,50 +171,58 @@ class SettingsMenu : UIScene() {
 
     private var selectedSection = Section.General
 
-    private lateinit var sectionButtonsContainer: UILinearContainer
     private lateinit var sectionContainer: UILinearContainer
 
 
     init {
-        isBackgroundEnabled = false
-
-        clickableContainer {
+        fillContainer {
             width = Size.Full
             height = Size.Full
-            backgroundColor = Colors.Black.copy(alpha = 0.25f)
-
-            onActionUp = {
-                back()
+            orientation = Orientation.Horizontal
+            style = {
+                backgroundColor = it.accentColor * 0.105f
+                spacing = 2f.srem
             }
-        }
 
-        clickableContainer {
-            height = Size.Full
-
-            fillContainer {
+            // Sections
+            scrollableContainer {
+                scrollAxes = Axes.Y
                 height = Size.Full
-                orientation = Orientation.Horizontal
                 style = {
-                    width = 0.6f.vw
-                    backgroundColor = it.accentColor * 0.105f
-                    spacing = 2f.srem
+                    padding = Vec4(
+                        UIEngine.current.safeArea.x + 2f.srem,
+                        2f.srem,
+                        2f.srem,
+                        2f.srem
+                    )
+                    backgroundColor = it.accentColor * 0.120f
                 }
 
-                // Sections
-                scrollableContainer {
-                    scrollAxes = Axes.Y
-                    height = Size.Full
+                linearContainer {
+                    orientation = Orientation.Vertical
                     style = {
-                        padding = Vec4(
-                            UIEngine.current.safeArea.x + 2f.srem,
-                            2f.srem,
-                            2f.srem,
-                            2f.srem
-                        )
-                        backgroundColor = it.accentColor * 0.120f
+                        spacing = 2f.srem
                     }
 
-                    sectionButtonsContainer = linearContainer {
+                    textButton {
+                        text = "Back"
+                        leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
+                        sizeVariant = SizeVariant.Large
+                        colorVariant = ColorVariant.Tertiary
+                        onActionUp = {
+                            back()
+                        }
+                    }
+
+                    box {
+                        height = 2f
+                        style = {
+                            width = 12f.rem
+                            color = it.accentColor.copy(alpha = 0.1f)
+                        }
+                    }
+
+                    linearContainer {
                         orientation = Orientation.Vertical
 
                         +SectionButton(Section.General, Icon.Gears, generalSection)
@@ -237,44 +234,33 @@ class SettingsMenu : UIScene() {
                         +SectionButton(Section.Advanced, Icon.ScrewdriverWrench, advancedSection)
                     }
                 }
+            }
 
-                scrollableContainer {
-                    scrollAxes = Axes.Y
+            scrollableContainer {
+                scrollAxes = Axes.Y
+                width = Size.Full
+                height = Size.Full
+
+                sectionContainer = linearContainer {
+                    orientation = Orientation.Vertical
                     width = Size.Full
-                    height = Size.Full
-
-                    sectionContainer = linearContainer {
-                        orientation = Orientation.Vertical
-                        width = Size.Full
-                        style = {
-                            spacing = 4f.srem
-                            padding = Vec4(4f.srem)
-                        }
+                    style = {
+                        spacing = 4f.srem
+                        padding = Vec4(16f.srem, 4f.srem)
                     }
                 }
             }
         }
 
-        generateSection(Section.General, Icon.Gears, generalSection)
+        generateSection(generalSection)
     }
 
-    fun generateSection(section: Section, icon: Int, content: List<CategoryInfo>) {
+    fun generateSection(content: List<CategoryInfo>) {
         sectionContainer.alpha = 0f
         sectionContainer.detachChildren()
         (sectionContainer.parent as UIScrollableContainer).scrollY = 0f
 
         sectionContainer.apply {
-
-            compoundText {
-                fontSize = FontSize.LG
-                text = section.name
-                leadingIcon = FontAwesomeIcon(icon)
-                style = {
-                    color = it.accentColor
-                    spacing = 2f.srem
-                    padding = Vec4(2f.srem)
-                }
-            }
 
             content.forEach { category ->
 
@@ -315,12 +301,6 @@ class SettingsMenu : UIScene() {
                                         val context = GlobalManager.getInstance().mainActivity
                                         val entriesArray = context.resources.getStringArray(option.entries)
                                         val valuesArray = context.resources.getStringArray(option.entryValues)
-
-                                        Log.i("SettingsMenu", "entriesArray: ${entriesArray.contentToString()}")
-                                        Log.i("SettingsMenu", "valuesArray: ${valuesArray.contentToString()}")
-                                        Log.i("SettingsMenu", "value ${this.value}")
-                                        Log.i("SettingsMenu", "initialValue: ${this.initialValue}")
-
 
                                         if (entriesArray.size == valuesArray.size) {
                                             options = entriesArray.mapIndexed { index, entry ->
@@ -381,6 +361,8 @@ class SettingsMenu : UIScene() {
                         }
 
                         control.width = Size.Full
+                        control.cullingMode = CullingMode.CameraBounds
+
                         option.onAttach(control)
                         +control
                     }
@@ -398,17 +380,21 @@ class SettingsMenu : UIScene() {
     }
 
 
-    inner class SectionButton(private val section: Section, iconVal: Int, content: List<CategoryInfo> = listOf()) : UIIconButton() {
+    inner class SectionButton(private val section: Section, iconVal: Int, content: List<CategoryInfo> = listOf()) : UITextButton() {
         init {
-            width = Size.Full
-            icon = FontAwesomeIcon(iconVal)
+            leadingIcon = FontAwesomeIcon(iconVal)
             sizeVariant = SizeVariant.Large
             colorVariant = ColorVariant.Tertiary
+            alignment = Anchor.CenterLeft
+            text = section.name
+            style += {
+                width = 12f.rem
+            }
 
             onActionUp = {
                 if (selectedSection != section) {
                     selectedSection = section
-                    generateSection(section, iconVal, content)
+                    generateSection(content)
                 }
             }
         }

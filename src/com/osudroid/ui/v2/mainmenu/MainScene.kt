@@ -200,7 +200,7 @@ object MainScene : UIScene() {
 
                     +MenuButton(Icon.Gear, "Settings").apply {
                         onActionUp = {
-                            mainThread { SettingsFragment().show() }
+                            setChildScene(SettingsMenu(), modalDraw = true, modalUpdate = true, modalTouch = true)
                         }
                     }
 
@@ -309,6 +309,8 @@ object MainScene : UIScene() {
             } else {
                 background.textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             }
+
+            musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         }
     }
 
@@ -349,7 +351,10 @@ object MainScene : UIScene() {
                 MusicManager.currentBeatmap = LibraryManager.getLibrary().random().beatmaps.random()
             }
             MusicManager.load()
-            //MusicManager.play()
+            MusicManager.play()
+
+            musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
+            lastMusicChange = System.currentTimeMillis()
         }
     }
 
@@ -361,7 +366,6 @@ object MainScene : UIScene() {
         // Music button
         val mightShowMusicButton = isMenuExpanded || System.currentTimeMillis() - lastMusicChange < 3000
 
-        musicButton.text = "${MusicManager.currentBeatmap?.titleText} - ${MusicManager.currentBeatmap?.artistText}"
         musicButton.translationX = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.translationX, if (mightShowMusicButton) 0f else 8f.srem, 0f, 0.05f)
         musicButton.alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.05f), musicButton.alpha, if (mightShowMusicButton) 1f else 0f, 0f, 0.05f)
 
@@ -384,8 +388,6 @@ object MainScene : UIScene() {
 
 class MenuButton(icon: Int, title: String) : UIButton() {
 
-    private lateinit var iconComponent: FontAwesomeIcon
-
     init {
         style += {
             width = 16f.rem
@@ -406,8 +408,6 @@ class MenuButton(icon: Int, title: String) : UIButton() {
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
                 scaleCenter = Anchor.Center
-
-                iconComponent = this
             }
 
             text {
@@ -418,20 +418,6 @@ class MenuButton(icon: Int, title: String) : UIButton() {
                 }
             }
         }
-    }
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-        val beatLengthSeconds = RythimManager.beatLength.toFloat() / 1000f
-
-        if (RythimManager.beatElapsed / 1000f < beatLengthSeconds * 0.75f) {
-            val threeQuarts = beatLengthSeconds * 0.75f
-            iconComponent.setScale(Interpolation.floatAt(deltaTimeSec.coerceIn(0f, threeQuarts), iconComponent.scaleX, 1f, 0f, threeQuarts))
-        } else {
-            val oneQuart = beatLengthSeconds * 0.25f
-            iconComponent.setScale(Interpolation.floatAt(deltaTimeSec.coerceIn(0f, oneQuart), iconComponent.scaleX, 0.9f, 0f, oneQuart))
-        }
-
-        super.onManagedUpdate(deltaTimeSec)
     }
 
 }
