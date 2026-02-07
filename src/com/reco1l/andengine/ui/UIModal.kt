@@ -4,12 +4,15 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
+import com.reco1l.andengine.theme.srem
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
-import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
 open class UIModal(
@@ -22,13 +25,13 @@ open class UIModal(
         origin = Anchor.Center
         clipToBounds = true
         scaleCenter = Anchor.Center
+        style = {
+            backgroundColor = it.accentColor * 0.15f
+            radius = Radius.LG
+        }
     }
 
 ) : UIComponent() {
-
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        card.background?.color = theme.accentColor * 0.15f
-    }
 
 
     /**
@@ -43,20 +46,18 @@ open class UIModal(
 
 
     init {
-        width = FillParent
-        height = FillParent
+        style = {
+            backgroundColor = Color4.Black.copy(alpha = 0.3f)
+        }
+
+        width = Size.Full
+        height = Size.Full
 
         isVisible = false
         alpha = 0f
 
         card.scaleX = 0.9f
         card.scaleY = 0.9f
-        card.background = UIBox().apply { cornerRadius = 16f }
-
-        background = UIBox().apply {
-            color = Color4.Black
-            alpha = 0.3f
-        }
 
         attachChild(card)
     }
@@ -173,20 +174,24 @@ open class UIModal(
 
 abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = UILinearContainer().apply {
     orientation = Orientation.Vertical
+    style = {
+        backgroundColor = it.accentColor * 0.15f
+        radius = Radius.XL
+    }
 }) {
 
     val titleEntity = UIText().apply {
-        width = FillParent
-        font = ResourceManager.getInstance().getFont("smallFont")
+        width = Size.Full
         alignment = Anchor.Center
-        padding = Vec4(0f, 16f)
 
-        applyTheme = { theme ->
-            color = theme.accentColor * 0.7f
+        style = {
+            color = it.accentColor * 0.7f
+            fontSize = FontSize.SM
+            padding = Vec4(3f.srem)
         }
     }
 
-    val buttonLayout: UIFlexContainer
+    val buttonLayout: UIFillContainer
 
 
     /**
@@ -199,30 +204,38 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
         detachOnHide = true
 
         card.apply {
-            relativeSizeAxes = Axes.X
-            width = 0.5f
+            width = 0.5f.pct
             anchor = Anchor.Center
             origin = Anchor.Center
 
             +titleEntity
 
             box {
-                width = FillParent
-                height = 1f
-                applyTheme = {
-                    color = it.accentColor
-                    alpha = 0.1f
+                width = Size.Full
+                height = 2f
+                style = {
+                    color = it.accentColor.copy(alpha = 0.1f)
                 }
             }
 
             +innerContent
 
-            buttonLayout = flexContainer {
-                width = FillParent
+            box {
+                width = Size.Full
+                height = 2f
+                style = {
+                    color = it.accentColor.copy(alpha = 0.1f)
+                }
+            }
+
+            buttonLayout = fillContainer {
+                width = Size.Full
                 anchor = Anchor.TopCenter
                 origin = Anchor.TopCenter
-                padding = Vec4(24f)
-                gap = 12f
+                style = {
+                    padding = Vec4(3f.srem)
+                    spacing = 3f.srem
+                }
             }
         }
     }
@@ -235,7 +248,7 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
     fun addButton(button: UIButton) {
         buttonLayout.apply {
             attachChild(button.apply {
-                flexRules { grow = 1f }
+                width = Size.Full
             })
         }
 
@@ -244,13 +257,13 @@ abstract class UIDialog<T : UIComponent>(val innerContent: T) : UIModal(card = U
 
 open class UIMessageDialog : UIDialog<UIText>(
     innerContent = UIText().apply {
-        width = FillParent
-        font = ResourceManager.getInstance().getFont("smallFont")
+        width = Size.Full
+        fontSize = FontSize.SM
         alignment = Anchor.Center
         padding = Vec4(24f)
 
-        applyTheme = { theme ->
-            color = theme.accentColor
+        style = {
+            color = it.accentColor
         }
     }
 ) {

@@ -29,7 +29,6 @@ class HUDPPCounter : HUDElement() {
     init {
         value = 0.0
         attachChild(sprite)
-        onContentChanged()
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {

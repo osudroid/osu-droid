@@ -89,8 +89,6 @@ class HUDHealthBar : HUDElement() {
         fillClear.width = 0f
         fillClear.height = fill.height
         fillClear.setPosition(fill.x + fill.width, fill.y)
-
-        onContentChanged()
     }
 
 

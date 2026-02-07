@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
+import androidx.annotation.Nullable;
+
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
 
@@ -145,6 +147,43 @@ public class BassAudioFunc {
         float[] spectrum = new float[resSize];
         buffer.asFloatBuffer().get(spectrum);
         return spectrum;
+    }
+
+    @Nullable
+    public float[] getAudioFFT(int resolution) {
+        float[] rawFFT = getSpectrum();
+
+        if (rawFFT == null || resolution <= 0) {
+            return null;
+        }
+
+        float[] fft = new float[resolution];
+        int fftSize = rawFFT.length;
+
+        int l = 0;
+        for (int i = 0; i < resolution; i++) {
+
+            // We use logarithmic for better visual representation of audio spectrum in lower frequencies
+            int r = (int) Math.pow(2.0, i * 9.0 / (resolution - 1));
+
+            if (r <= l) {
+                r = l + 1;
+            }
+            if (r > fftSize - 1) {
+                r = fftSize - 1;
+            }
+
+            float peak = 0;
+            for (int j = l; j < r; j++) {
+                if (rawFFT[j] > peak) {
+                    peak = rawFFT[j];
+                }
+            }
+            fft[i] = peak;
+            l = r;
+        }
+
+        return fft;
     }
 
     private void doClear() {

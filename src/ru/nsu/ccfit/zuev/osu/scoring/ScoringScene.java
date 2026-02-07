@@ -7,6 +7,7 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
+import com.osudroid.ui.v2.songselect.SongSelect;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.container.UIContainer;
@@ -633,8 +634,7 @@ public class ScoringScene {
             return;
         }
         replayMusic();
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-        GlobalManager.getInstance().getSongMenu().updateScore();
+        SongSelect.INSTANCE.show();
         setReplayID(-1);
     }
 
