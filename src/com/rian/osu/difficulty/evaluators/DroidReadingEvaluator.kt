@@ -180,8 +180,7 @@ object DroidReadingEvaluator {
      */
     private fun calculateCurrentVisibleObjectsDensity(current: DroidDifficultyHitObject): Double {
         var visibleObjectCount = 0.0
-        var index = 0
-        var next = current.next(index) as? DroidDifficultyHitObject
+        var next = current.next(0) as? DroidDifficultyHitObject
 
         while (next != null) {
             val timeDifference = next.startTime - current.startTime
@@ -193,6 +192,7 @@ object DroidReadingEvaluator {
             }
 
             if (next.isOverlapping(true)) {
+                next = next.next(0) as? DroidDifficultyHitObject
                 continue
             }
 
@@ -200,7 +200,7 @@ object DroidReadingEvaluator {
 
             visibleObjectCount += next.opacityAt(current.obj.startTime, EMPTY_MODS) * timeNerfFactor
 
-            next = current.next(++index) as? DroidDifficultyHitObject
+            next = next.next(0) as? DroidDifficultyHitObject
         }
 
         return visibleObjectCount
