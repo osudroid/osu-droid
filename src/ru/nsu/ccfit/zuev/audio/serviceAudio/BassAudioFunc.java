@@ -183,6 +183,11 @@ public class BassAudioFunc {
             l = r;
         }
 
+        // Update cache
+        cachedFFT = fft;
+        lastFFTUpdateTime = currentTime;
+        lastFFTResolution = resolution;
+
         return fft;
     }
 
