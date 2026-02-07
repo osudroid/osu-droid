@@ -3,7 +3,6 @@ package com.osudroid.ui.v2.mainmenu
 import com.edlplan.framework.easing.Easing
 import com.osudroid.RythimManager
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.theme.Colors
@@ -12,11 +11,12 @@ import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.Theme
 import com.reco1l.framework.Interpolation
 import com.reco1l.toolkt.MathF
+import com.reco1l.toolkt.kotlin.fastForEach
 import com.reco1l.toolkt.kotlin.fastForEachIndexed
+import com.reco1l.toolkt.toDegrees
 import org.anddev.andengine.engine.camera.Camera
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.PI
 import kotlin.math.min
 
 class RadialVisualizer : UIComponent() {
@@ -48,7 +48,6 @@ class RadialVisualizer : UIComponent() {
     private val songService = GlobalManager.getInstance().songService
 
     private var bars = mutableListOf<BarInfo>()
-    private var visualizerRadius = 0f
     private var shiftIndex = 0
 
 
@@ -58,13 +57,13 @@ class RadialVisualizer : UIComponent() {
             color = Colors.White
             anchor = Anchor.Center
             origin = Anchor.BottomCenter
-            bufferSharingMode = BufferSharingMode.Dynamic
+            ignoreInvlidations = true
         })
     }
 
 
     private fun initializeBars() {
-        visualizerRadius = min(width, height) / 2f
+        val visualizerRadius = min(width, height) / 2f
         
         // Circumference = 2 * PI * radius
         val circumference = 2f * MathF.PI * visualizerRadius
@@ -74,6 +73,8 @@ class RadialVisualizer : UIComponent() {
             // Preserve existing bar heights if possible
             if (i < bars.size) bars[i] else BarInfo()
         }
+
+        barBox.height = visualizerRadius
     }
 
 
@@ -102,30 +103,23 @@ class RadialVisualizer : UIComponent() {
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
-        val bars = bars
 
-        val baseBarHeight = visualizerRadius
+        val bars = bars
+        val barsSize = bars.size
+        val angleStep = (2f * MathF.PI) / barsSize
+
+        barBox.onHandleInvalidations()
 
         bars.fastForEachIndexed { index, barInfo ->
-
-            val angle = (index.toFloat() / bars.size) * 2f * PI.toFloat()
-
-            barBox.width = barThickness
-            barBox.height = baseBarHeight
+            val angle = index * angleStep
             barBox.scaleY = 1f + 2f * barInfo.currentHeight.coerceIn(0f, 1f)
-            barBox.rotation = Math.toDegrees(angle.toDouble()).toFloat()
-
+            barBox.rotation = angle.toDegrees()
             barBox.onDraw(gl, camera)
         }
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-        super.onManagedDraw(gl, camera)
-    }
-
 
     data class BarInfo(
-        // Heights are in relative units (0 to 1)
         var targetHeight: Float = 0f,
         var currentHeight: Float = 0f
     ) {

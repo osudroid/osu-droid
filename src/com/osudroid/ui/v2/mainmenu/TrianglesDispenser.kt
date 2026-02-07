@@ -71,7 +71,7 @@ class TrianglesDispenser : UIComponent() {
         attachChild(triangle.apply {
             color = Colors.White
             scaleCenter = Anchor.Center
-            bufferSharingMode = BufferSharingMode.Dynamic
+            ignoreInvlidations = true
         })
     }
 
@@ -104,6 +104,8 @@ class TrianglesDispenser : UIComponent() {
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
+        triangle.onHandleInvalidations()
+
         activeTriangles.fastForEach { info ->
             triangle.setScale(info.scale)
             triangle.y = info.y

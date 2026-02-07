@@ -46,7 +46,7 @@ class RippleVisualizer : UIComponent() {
             origin = Anchor.Center
             paintStyle = PaintStyle.Outline
             lineWidth = rippleThickness
-            bufferSharingMode = BufferSharingMode.Dynamic
+            ignoreInvlidations = true
         })
     }
 
@@ -85,6 +85,8 @@ class RippleVisualizer : UIComponent() {
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
+        ripple.onHandleInvalidations()
+
         activeRipples.fastForEach { info ->
             ripple.setScale(1f + info.scale)
             ripple.alpha = info.alpha

@@ -447,6 +447,11 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     //region Invalidation
 
     /**
+     * Whether to ignore invalidations.
+     */
+    var ignoreInvlidations = false
+
+    /**
      * Adds the given flag to the invalidation list. Depending on each flag it will trigger a different action.
      *
      * @see InvalidationFlag
@@ -791,7 +796,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
-        onHandleInvalidations()
+        if (!ignoreInvlidations) {
+            onHandleInvalidations()
+        }
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)
