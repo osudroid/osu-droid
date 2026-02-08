@@ -5,6 +5,7 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.framework.math.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
@@ -17,15 +18,6 @@ import kotlin.math.*
  */
 @Suppress("LeakingThis")
 open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<SpriteVBO>() {
-
-    override var contentWidth: Float
-        get() = textureRegion?.width?.toFloat() ?: 0f
-        set(_) = Unit
-
-    override var contentHeight: Float
-        get() = textureRegion?.height?.toFloat() ?: 0f
-        set(_) = Unit
-
 
     /**
      * Whether the texture should be flipped horizontally.
@@ -105,12 +97,16 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
 
     init {
-        width = MatchContent
-        height = MatchContent
+        width = Size.Auto
+        height = Size.Auto
 
         onTextureRegionChanged()
     }
 
+    override fun onContentChanged() {
+        contentWidth = textureRegion?.width?.toFloat() ?: 0f
+        contentHeight = textureRegion?.height?.toFloat() ?: 0f
+    }
 
     open fun onTextureRegionChanged() {
         val textureRegion = textureRegion ?: return
@@ -176,7 +172,10 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
                     quadHeight = textureHeight * scale
                 }
 
-                Stretch -> Unit
+                Stretch -> {
+                    quadWidth = entity.width
+                    quadHeight = entity.height
+                }
             }
 
             val x = (entity.width - quadWidth) * entity.gravity.x

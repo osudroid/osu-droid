@@ -1,11 +1,13 @@
 package com.reco1l.andengine.component
 
 import androidx.annotation.*
-import com.reco1l.andengine.component.AttachmentMode.*
+import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec2
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
@@ -15,113 +17,80 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
 //region Size related properties
 
-fun IEntity?.getWidth() = when (this) {
-    is UIComponent -> width
-    is CameraScene -> camera?.widthRaw ?: 0f
-    is IShape -> width
-    is Scene -> Config.getRES_WIDTH().toFloat()
-    else -> 0f
-}
+/**
+ * @see UIComponent.width
+ */
+val IEntity.width
+    get() = when (this) {
+        is UIComponent -> width
+        is CameraScene -> camera?.widthRaw ?: 0f
+        is IShape -> width
+        is Scene -> Config.getRES_WIDTH().toFloat()
+        else -> 0f
+    }
 
-fun IEntity?.getHeight() = when (this) {
-    is UIComponent -> height
-    is CameraScene -> camera?.heightRaw ?: 0f
-    is IShape -> height
-    is Scene -> Config.getRES_HEIGHT().toFloat()
-    else -> 0f
-}
+/**
+ * @see UIComponent.height
+ */
+val IEntity.height
+    get() = when (this) {
+        is UIComponent -> height
+        is CameraScene -> camera?.heightRaw ?: 0f
+        is IShape -> height
+        is Scene -> Config.getRES_HEIGHT().toFloat()
+        else -> 0f
+    }
 
 
 /**
- * The size of the entity.
+ * Wraps [width] and [height] into a [Vec2].
  */
 var UIComponent.size: Vec2
     get() = Vec2(width, height)
     set(value) = setSize(value.x, value.y)
 
 /**
- * The content size of the entity.
+ * @see UIComponent.padding
  */
-val UIComponent.contentSize: Vec2
-    get() = Vec2(contentWidth, contentHeight)
-
-/**
- * The position of the content in the x-axis of the entity.
- */
-val IEntity?.contentX: Float
-    get() = if (this is UIComponent) padding.left else 0f
-
-/**
- * The position of the content in the y-axis of the entity.
- */
-val IEntity?.contentY: Float
-    get() = if (this is UIComponent) padding.top else 0f
-
-/**
- * The size with transformations applied.
- */
-val UIComponent.transformedSize: Vec2
-    get() = Vec2(transformedWidth, transformedHeight)
-
-/**
- * The width with transformations applied.
- */
-val UIComponent.transformedWidth: Float
-    get() = width * scaleX
-
-/**
- * The height with transformations applied.
- */
-val UIComponent.transformedHeight: Float
-    get() = height * scaleY
-
-/**
- * The size minus padding of the entity.
- */
-val UIComponent.innerSize: Vec2
-    get() = Vec2(innerWidth, innerHeight)
+val IEntity?.padding: Vec4
+    get() = if (this is UIComponent) padding else Vec4.Zero
 
 /**
  * The width minus padding of the entity.
  */
-val IEntity?.innerWidth: Float
-    get() = if (this is UIComponent) width - padding.horizontal else getWidth()
+val IEntity.innerWidth: Float
+    get() = if (this is UIComponent) innerWidth else width - padding.horizontal
 
 /**
  * The height minus padding of the entity.
  */
-val IEntity?.innerHeight: Float
-    get() = if (this is UIComponent) height - padding.vertical else getHeight()
+val IEntity.innerHeight: Float
+    get() = if (this is UIComponent) innerHeight else height - padding.vertical
 
 //endregion
 
 //region Position related properties
 
 /**
- * The absolute position of the entity in the parent coordinate system.
- * This takes into account the anchor and origin but not transformations.
+ * Wraps [absoluteX] and [absoluteY] into a [Vec2].
  */
-val UIComponent.absolutePosition: Vec2
+val IEntity.absolutePosition: Vec2
     get() = Vec2(absoluteX, absoluteY)
 
-/**
- * The absolute position of the X axis of the entity in the parent coordinate system.
- * This takes into account the anchor and origin.
- */
+/** @see UIComponent.absoluteX */
 val IEntity.absoluteX: Float
-    get() = if (this is UIComponent) (if (attachmentMode == Child) parent.contentX else 0f) + anchorPositionX - originPositionX + x + translationX else x
+    get() = if (this is UIComponent) absoluteX else x
 
 /**
- * The absolute position of the Y axis of the entity in the parent coordinate system.
- * This takes into account the anchor and origin but not transformations.
+ * @see UIComponent.absoluteY
  */
 val IEntity.absoluteY: Float
-    get() = if (this is UIComponent) (if (attachmentMode == Child) parent.contentY else 0f) + anchorPositionY - originPositionY + y + translationY else y
+    get() = if (this is UIComponent) absoluteY else y
 
 /**
- * The position of the entity. This does not take into account the anchor and origin.
+ * Wraps [IEntity.getX] and [IEntity.getY] into a [Vec2].
  */
-var UIComponent.position
+var IEntity.position
     get() = Vec2(x, y)
     set(value) = setPosition(value.x, value.y)
 
@@ -131,36 +100,6 @@ var UIComponent.position
 val UIComponent.anchorPosition: Vec2
     get() = Vec2(anchorPositionX, anchorPositionY)
 
-/**
- * The anchor position of the entity in the X axis.
- */
-val UIComponent.anchorPositionX: Float
-    get() = parent.innerWidth * anchor.x
-
-/**
- * The anchor position of the entity in the Y axis.
- */
-val UIComponent.anchorPositionY: Float
-    get() = parent.innerHeight * anchor.y
-
-
-/**
- * The origin position of the entity.
- */
-val UIComponent.originPosition: Vec2
-    get() = Vec2(originPositionX, originPositionY)
-
-/**
- * The origin position of the entity in the X axis.
- */
-val UIComponent.originPositionX: Float
-    get() = width * origin.x
-
-/**
- * The origin position of the entity in the Y axis.
- */
-val UIComponent.originPositionY: Float
-    get() = height * origin.y
 
 //endregion
 
@@ -231,25 +170,11 @@ var IEntity.color4
 
 //endregion
 
-
 //region Utilities
-
-/**
- * Traverses the parent hierarchy of the entity to find the first scene it belongs to.
- */
-fun IEntity.getParentScene(): Scene? {
-    return if (this is Scene) this else parent?.getParentScene()
-}
 
 inline fun IEntity.forEach(block: (IEntity) -> Unit) {
     for (i in 0 until childCount) {
         block(getChild(i))
-    }
-}
-
-inline fun IEntity.forEachIndexed(block: (Int, IEntity) -> Unit) {
-    for (i in 0 until childCount) {
-        block(i, getChild(i))
     }
 }
 

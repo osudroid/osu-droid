@@ -8,6 +8,8 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -23,9 +25,8 @@ class HUDBackButton : HUDElement() {
         textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
         anchor = Anchor.Center
         origin = Anchor.Center
-
-        relativeSizeAxes = Axes.Both
-        setSize(0.6f, 0.6f)
+        width = 0.6f.pct
+        height = 0.6f.pct
     }
 
     private val backCircle = UICircle().apply {
@@ -35,8 +36,8 @@ class HUDBackButton : HUDElement() {
         color = Color4.White
         depthInfo = DepthInfo.Default
 
-        relativeSizeAxes = Axes.Both
-        setSize(1f, 1f)
+        width = Size.Full
+        height = Size.Full
     }
 
     private val frontCircle = UICircle().apply {
@@ -46,8 +47,8 @@ class HUDBackButton : HUDElement() {
         clearInfo = ClearInfo.ClearDepthBuffer
         depthInfo = DepthInfo.Less
 
-        relativeSizeAxes = Axes.Both
-        setSize(0.95f, 0.95f)
+        width = 0.95f.pct
+        height = 0.95f.pct
     }
 
 

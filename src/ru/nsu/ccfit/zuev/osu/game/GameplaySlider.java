@@ -355,8 +355,8 @@ public class GameplaySlider extends GameObject {
         superPath = renderPath;
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
         sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
-        sliderBody.setBorderColor(borderColor);
+        sliderBody.setTrackBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+        sliderBody.setTrackBorderColor(borderColor);
 
         // Head circle not being visible means Traceable is applied to this slider
         if (GameHelper.isTraceable() && !headCirclePiece.isVisible()) {

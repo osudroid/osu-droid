@@ -14,6 +14,11 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.UIText
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -27,16 +32,18 @@ class RoomPlayerCard : UILinearContainer() {
     private val playerButton: RoomPlayerButton
 
     init {
-        width = FillParent
+        width = Size.Full
         orientation = Orientation.Horizontal
-        padding = Vec4(12f)
-        spacing = 12f
+        style = {
+            spacing = 4f.srem
+        }
 
         teamColorBar = UIBox().apply {
-            relativeSizeAxes = Axes.X
-            width = 0.025f
-            height = FillParent
-            cornerRadius = 12f
+            style = {
+                width = 0.025f.pct
+                height = Size.Full
+                cornerRadius = 2f.rem
+            }
         }
 
         playerButton = RoomPlayerButton()
@@ -52,8 +59,8 @@ class RoomPlayerCard : UILinearContainer() {
             }
 
             teamColorBar.color = when (player.team) {
-                Blue -> Color4("#1E62E8") * 0.8f
-                Red -> Color4("#E34444") * 0.8f
+                Blue -> Colors.Blue400 * 0.8f
+                Red -> Colors.Red400 * 0.8f
                 null -> Theme.current.accentColor * 0.6f
             }
         } else if (teamColorBar.hasParent()) {
@@ -70,26 +77,16 @@ class RoomPlayerCard : UILinearContainer() {
         private var modDisplay: UIComponent? = null
 
 
-        override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-            color = theme.accentColor
-            alpha = if (isEnabled) 1f else 0.5f
-        }
-
-
         init {
-            width = FillParent
-            orientation = Orientation.Horizontal
-            spacing = 6f
+            width = Size.Full
+            clipToBounds = false
 
-            background = UIBox().apply {
-                cornerRadius = 12f
-                color = Theme.current.accentColor * 0.15f
-                alpha = 0.5f
-            }
-
-            foreground = UIBox().apply {
-                cornerRadius = 12f
-                paintStyle = PaintStyle.Outline
+            style = {
+                color = it.accentColor
+                alpha = if (isEnabled) 1f else 0.5f
+                borderWidth = 2f
+                padding = Vec4(2f.srem)
+                backgroundColor = Theme.current.accentColor * 0.1f
             }
 
             innerContainer = linearContainer {
@@ -101,7 +98,7 @@ class RoomPlayerCard : UILinearContainer() {
                     spacing = 4f
 
                     nameText = text {
-                        applyTheme = { color = it.accentColor }
+                        style = { color = it.accentColor }
                     }
 
                     missingIndicator = sprite {
@@ -117,10 +114,10 @@ class RoomPlayerCard : UILinearContainer() {
 
 
         fun updateState(room: Room, player: RoomPlayer) {
-            foreground!!.color = when (player.status) {
+            borderColor = when (player.status) {
                 Playing -> Theme.current.accentColor
-                Ready -> Color4("#A0FFA0")
-                NotReady, MissingBeatmap -> Color4("#FFA0A0")
+                Ready -> Colors.Green200
+                NotReady, MissingBeatmap -> Colors.Red200
             }
 
             nameText.text = player.name
@@ -157,7 +154,9 @@ class RoomPlayerCard : UILinearContainer() {
 
             onActionLongPress = {
                 UIDropdown(this@RoomPlayerButton).apply dropdown@{
-                    maxWidth = 260f
+                    style = {
+                        maxWidth = 24f.rem
+                    }
 
                     addButton {
                         setText(R.string.multiplayer_room_player_menu_view_profile)
@@ -197,7 +196,7 @@ class RoomPlayerCard : UILinearContainer() {
 
                             addButton {
                                 setText(R.string.multiplayer_room_player_menu_kick)
-                                applyTheme = {
+                                style = {
                                     color = Color4("#FFBFBF")
                                 }
                                 onActionUp = {
