@@ -1,8 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.component.UIComponent.Companion.MatchContent
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -16,7 +14,11 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.utils.updateThread
-import com.reco1l.andengine.component.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
@@ -80,44 +82,32 @@ object ModMenu : UIScene() {
     init {
         isBackgroundEnabled = false
 
-        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
-        ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
-        ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
-        ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
-
-        customizationMenu = ModCustomizationMenu()
-
-        attachChild(UIFlexContainer().apply {
-            width = FillParent
-            height = FillParent
-            direction = FlexDirection.Column
-            justifyContent = JustifyContent.SpaceBetween
-            background = UIBox().apply {
-                applyTheme = {
-                    color = it.accentColor * 0.1f
-                    alpha = 0.9f
-                }
+        attachChild(UIFillContainer().apply {
+            width = Size.Full
+            height = Size.Full
+            orientation = Orientation.Vertical
+            style = {
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
             }
 
             +UIContainer().apply {
-                width = FillParent
-                height = MatchContent
-                padding = Vec4(60f, 12f)
+                width = Size.Full
+                height = Size.Auto
+                style = {
+                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
+                }
 
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     +UITextButton().apply {
                         text = "Back"
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                            width = 28f
-                            height = 28f
-                        }
+                        leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             back()
@@ -128,11 +118,7 @@ object ModMenu : UIScene() {
                     customizeButton = UITextButton().apply {
                         text = "Customize"
                         isEnabled = false
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("tune")
-                            width = 28f
-                            height = 28f
-                        }
+                        leadingIcon = FontAwesomeIcon(Icon.Wrench)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             if (customizationMenu.isVisible) {
@@ -148,14 +134,11 @@ object ModMenu : UIScene() {
 
                     +UITextButton().apply {
                         text = "Clear"
-                        applyTheme = {}
-                        color = Color4(0xFFFFBFBF)
-                        background?.color = Color4(0xFF342121)
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("backspace")
-                            width = 28f
-                            height = 28f
+                        style += {
+                            color = Color4(0xFFFFBFBF)
+                            backgroundColor = Color4(0xFF342121)
                         }
+                        leadingIcon = FontAwesomeIcon(Icon.DeleteLeft)
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             clear()
@@ -164,12 +147,14 @@ object ModMenu : UIScene() {
                     }
 
                     +UIScrollableContainer().apply {
-                        width = 340f
-                        height = MatchContent
+                        height = Size.Auto
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         scrollAxes = Axes.X
                         clipToBounds = true
+                        style = {
+                            width = 12f.rem
+                        }
 
                         selectedModsIndicator = ModsIndicator()
                         +selectedModsIndicator
@@ -179,11 +164,9 @@ object ModMenu : UIScene() {
                 +UIContainer().apply {
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
-                    height = FillParent
 
                     searchInput = ModMenuSearchInput().apply {
-                        width = 400f
-                        height = FillParent
+                        width = 18f.rem
                         onSearchTermUpdate = { searchTerm ->
                             modSections.fastForEach { it.onSearchTermUpdate(searchTerm) }
 
@@ -195,28 +178,35 @@ object ModMenu : UIScene() {
 
                     +searchInput
 
-                    +UISprite().apply {
-                        textureRegion = ResourceManager.getInstance().getTexture("search-small")
-                        size = Vec2(52f, 28f)
+                    container {
                         anchor = Anchor.CenterRight
                         origin = Anchor.CenterRight
-                        applyTheme = { color = it.accentColor }
+                        style = {
+                            padding = Vec4(2f.srem, 0f)
+                        }
+
+                        +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                            style = {
+                                color = it.accentColor
+                            }
+                        }
                     }
                 }
             }
 
             +UIScrollableContainer().apply {
-                width = FillParent
-                height = FillParent
+                width = Size.Full
+                height = Size.Full
                 scrollAxes = Axes.X
-                flexRules { grow = 1f }
 
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
-                    width = MatchContent
-                    height = FillParent
-                    spacing = 16f
-                    padding = Vec4(60f, 0f)
+                    width = Size.Auto
+                    height = Size.Full
+                    style = {
+                        spacing = 2f.srem
+                        padding = UIEngine.current.safeArea
+                    }
 
                     modPresetsSection = ModMenuPresetsSection()
                     +modPresetsSection
@@ -242,21 +232,22 @@ object ModMenu : UIScene() {
             }
 
             +UIContainer().apply {
-                width = FillParent
-                height = MatchContent
-                padding = Vec4(60f, 12f)
-
-                onUpdateTick = {
-                    val buttonHeight = Multiplayer.roomScene?.chat?.buttonHeight ?: 0f
-
-                    paddingBottom = if (Multiplayer.isConnected) buttonHeight + 12f else 12f
+                width = Size.Full
+                height = Size.Auto
+                style = {
+                    padding = UIEngine.current.safeArea.copy(
+                        y = 2f.srem,
+                        w = 2f.srem + (Multiplayer.roomScene?.chat?.buttonHeight ?: 0f)
+                    )
                 }
 
                 +UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     arBadge = labeledBadge {
                         label = "AR"
@@ -288,16 +279,18 @@ object ModMenu : UIScene() {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
-                    spacing = 10f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     starRatingBadge = StarRatingBadge()
                     +starRatingBadge
 
                     rankedBadge = badge {
                         text = "Ranked"
-                        background!!.color = Color4(0xFF83DF6B)
+                        backgroundColor = Color4(0xFF342121)
                         color = Color4(0xFF161622)
-                        applyTheme = {}
+                        style = {}
                     }
 
                     scoreMultiplierBadge = labeledBadge {
@@ -309,6 +302,7 @@ object ModMenu : UIScene() {
         })
 
         // Customizations menu
+        customizationMenu = ModCustomizationMenu(customizeButton)
         attachChild(customizationMenu)
 
         modPresetsSection.loadPresets()
@@ -566,8 +560,7 @@ object ModMenu : UIScene() {
             clearEntityModifiers()
             colorTo(if (isRanked) Color4(0xFF161622) else Theme.current.accentColor, 0.1f)
 
-            background!!.clearEntityModifiers()
-            background!!.colorTo(if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
+            backgroundColor = if (isRanked) Color4(0xFF83DF6B) else Theme.current.accentColor * 0.15f
         }
 
         modToggles.fastForEach {
@@ -648,13 +641,13 @@ object ModMenu : UIScene() {
 
         val newText = if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 
-        if (valueEntity.text == newText) {
+        if (valueComponent.text == newText) {
             return
         }
-        valueEntity.text = newText
+        valueComponent.text = newText
 
-        valueEntity.clearEntityModifiers()
-        valueEntity.colorTo(Color4(when {
+        valueComponent.clearEntityModifiers()
+        valueComponent.colorTo(Color4(when {
             initialValue < finalValue -> 0xFFF78383
             initialValue > finalValue -> 0xFF40CF5D
             else -> 0xFFFFFFFF

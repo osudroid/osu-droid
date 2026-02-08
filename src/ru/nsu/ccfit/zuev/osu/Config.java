@@ -275,17 +275,10 @@ public class Config {
         Activity activity = (Activity) context;
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        int width = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        int height = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        RES_WIDTH = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        RES_HEIGHT = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
 
-        // Tries to emulate the original behavior, the game was designed for 1280x720
-        // resolution, so we try to approximate the scale factor.
-        float ratio = 1280f / width;
-
-        RES_WIDTH = (int) (width * ratio);
-        RES_HEIGHT = (int) (height * ratio);
-
-        Log.v("Config", "Display size: " + width + "x" + height + "\nViewport size: " + RES_WIDTH + "x" + RES_HEIGHT);
+        Log.v("Config", "Display size: " + RES_WIDTH + "x" + RES_HEIGHT);
     }
 
     public static boolean isEnableStoryboard() {
@@ -392,16 +385,8 @@ public class Config {
         return RES_WIDTH;
     }
 
-    public static void setRES_WIDTH(final int rES_WIDTH) {
-        RES_WIDTH = rES_WIDTH;
-    }
-
     public static int getRES_HEIGHT() {
         return RES_HEIGHT;
-    }
-
-    public static void setRES_HEIGHT(final int rES_HEIGHT) {
-        RES_HEIGHT = rES_HEIGHT;
     }
 
     public static boolean isDELETE_OSZ() {

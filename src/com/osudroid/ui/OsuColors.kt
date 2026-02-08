@@ -51,7 +51,7 @@ object OsuColors {
         val sr = ceil(point).toFloat().roundBy(2)
 
         if (sr < 0.1f) {
-            return Color4(0xAAAAAA)
+            return Color4(0xFFAAAAAA)
         }
 
         return starRatingColorSpectrum.get(sr)

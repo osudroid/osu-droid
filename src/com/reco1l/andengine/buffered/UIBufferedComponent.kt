@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.shape.Shape.*
@@ -10,19 +11,27 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * An entity that uses a buffer to draw itself.
  */
-abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
+abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
+
+    override var radius: Float
+        get() = super.radius
+        set(value) {
+            if (super.radius != value) {
+                super.radius = value
+                requestBufferUpdate()
+            }
+        }
 
     /**
      * The buffer itself.
      */
-    open var buffer: T? = null
+    var buffer: T? = null
         set(value) {
             if (field != value) {
                 field?.finalize()
                 field = value
             }
         }
-
 
     /**
      * The blend information of the entity.
@@ -40,17 +49,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     var clearInfo = ClearInfo.None
 
 
-    /**
-     * Indicates whether a new buffer needs to be created.
-     */
-    protected var needsNewBuffer = true
-        private set
-
-    /**
-     * Indicates whether the buffer needs to be updated.
-     */
-    protected var needsBufferUpdate = true
-        private set
+    private var needsBufferUpdate = true
 
 
     fun setBlendFunction(source: Int, destination: Int) {
@@ -61,20 +60,30 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     //region Buffer lifecycle
 
     /**
-     * Called when the buffer needs to be built.
+     * Determines if the current buffer can be reused instead of creating a new one.
+     *
+     * Override this method to implement custom buffer reuse logic based on buffer properties.
+     * Return `true` if the existing buffer is compatible and can be reused, `false` otherwise.
+     *
+     * @param buffer The current buffer to check for reusability
+     * @return `true` if the buffer can be reused, `false` if a new buffer should be created
      */
-    protected abstract fun onCreateBuffer(): T?
+    protected open fun canReuseBuffer(buffer: T): Boolean = false
+
+    /**
+     * Called when a new buffer needs to be created.
+     */
+    protected abstract fun createBuffer(): T
 
     /**
      * Called when the buffer needs to be updated.
      */
-    abstract fun onUpdateBuffer()
+    protected abstract fun onUpdateBuffer()
 
 
-    fun requestNewBuffer() {
-        needsNewBuffer = true
-    }
-
+    /**
+     * Requests the buffer to be updated.
+     */
     fun requestBufferUpdate() {
         needsBufferUpdate = true
     }
@@ -83,20 +92,23 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Draw pipeline
 
-    override fun onHandleInvalidations(restoreFlags: Boolean) {
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        requestBufferUpdate()
+    }
 
-        if (needsNewBuffer) {
-            needsNewBuffer = false
-            buffer = onCreateBuffer()
-            requestBufferUpdate()
-        }
-
-        super.onHandleInvalidations(restoreFlags)
+    override fun onHandleInvalidations() {
+        super.onHandleInvalidations()
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
         if (needsBufferUpdate) {
             needsBufferUpdate = false
+
+            val currentBuffer = buffer
+            if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
+                buffer = createBuffer()
+            }
 
             val buffer = buffer
 

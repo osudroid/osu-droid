@@ -4,14 +4,10 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
 
 open class CircularProgressBar : UIContainer() {
-
-    override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
-        trackCircle.color = theme.accentColor.copy(alpha = trackCircle.alpha)
-        rotatingCircle.color = theme.accentColor
-    }
-
 
     /**
      * The progress of the circular progress bar, from 0 to 1. If set to -1, the progress bar will
@@ -26,27 +22,34 @@ open class CircularProgressBar : UIContainer() {
         }
 
     private val trackCircle = circle {
-        width = FillParent
-        height = FillParent
+        width = Size.Full
+        height = Size.Full
         paintStyle = PaintStyle.Outline
         lineWidth = 4f
-        applyTheme = {
+        style = {
             color = Theme.current.accentColor
             alpha = 0.3f
         }
     }
 
     private val rotatingCircle = circle {
-        relativeSizeAxes = Axes.Both
-        width = 0.85f
-        height = 0.85f
+        width = 0.85f.pct
+        height = 0.85f.pct
         anchor = Anchor.Center
         origin = Anchor.Center
         rotationCenter = Anchor.Center
         setPortion(0.1f)
-        applyTheme = {
+        style = {
             color = Theme.current.accentColor
             alpha = 0.3f
+        }
+    }
+
+
+    init {
+        style = {
+            trackCircle.color = it.accentColor.copy(alpha = trackCircle.alpha)
+            rotatingCircle.color = it.accentColor
         }
     }
 
