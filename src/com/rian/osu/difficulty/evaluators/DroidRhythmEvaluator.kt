@@ -51,11 +51,15 @@ object DroidRhythmEvaluator {
         val validPrevious = mutableListOf<DroidDifficultyHitObject>()
 
         for (i in 0 until historicalNoteCount) {
-            (current.previous(i) as DroidDifficultyHitObject?)?.apply {
-                if (!isOverlapping(false)) {
-                    validPrevious.add(this)
-                }
-            } ?: break
+            val prev = current.previous(i) as? DroidDifficultyHitObject ?: break
+
+            if (!prev.isOverlapping(false)) {
+                validPrevious.add(prev)
+            }
+        }
+
+        if (validPrevious.size < 3) {
+            return 1.0
         }
 
         while (
@@ -71,7 +75,6 @@ object DroidRhythmEvaluator {
         for (i in rhythmStart downTo 1) {
             val currentObject = validPrevious[i - 1]
 
-            // Scale note 0 to 1 from history to now.
             // Scale note 0 to 1 from history to now.
             val timeDecay = (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
             val noteDecay = (historicalNoteCount - i).toDouble() / historicalNoteCount
