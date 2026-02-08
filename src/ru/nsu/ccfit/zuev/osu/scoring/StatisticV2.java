@@ -689,7 +689,9 @@ public class StatisticV2 implements Serializable {
         hit300k = 0;
         hit100k = 0;
         misses = 0;
+        sliderHeadHits = 0;
         sliderTickHits = 0;
+        sliderRepeatHits = 0;
         sliderEndHits = 0;
         scoreMaxCombo = 0;
         currentCombo = 0;
