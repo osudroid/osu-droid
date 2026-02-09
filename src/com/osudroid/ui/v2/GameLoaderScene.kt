@@ -13,6 +13,7 @@ import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.theme.vw
 import com.reco1l.andengine.ui.*
@@ -134,9 +135,11 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                     }
 
                     +CircularProgressBar().apply {
-                    width = 32f
-                    height = 32f
-                }
+                        style = {
+                            width = 2.15f.rem
+                            height = 2.15f.rem
+                        }
+                    }
 
                     if (!Multiplayer.isMultiplayer) {
                         textButton {
@@ -190,7 +193,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
                     // This is used instead of getBackgroundBrightness to directly obtain the
                     // updated value from the brightness slider.
-                    val backgroundBrightness = Config.getInt("bgbrightness", 25)
+                    val backgroundBrightness = Config.getFloat("bgbrightness", 0.25f)
 
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
 
@@ -235,7 +238,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 width = Size.Full
                 orientation = Orientation.Vertical
                 style = {
-                    spacing = 4f.srem
+                    spacing = 2f.srem
                 }
 
                 collapsibleCard {
@@ -243,6 +246,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                     title = "Beatmap"
 
                     content.apply {
+
                         val offsetSlider = FormSlider().apply {
                             label = StringTable.get(com.osudroid.resources.R.string.opt_category_offset)
                             control.min = -250f
@@ -262,7 +266,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                             anchor = Anchor.TopCenter
                             origin = Anchor.TopCenter
                             style = {
-                                spacing = 3f.srem
+                                spacing = 2f.srem
                                 padding = Vec4(2f.srem)
                             }
 
@@ -296,18 +300,18 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
                     content.apply {
 
-                        +IntPreferenceSlider("bgbrightness", 25).apply {
+                        +FloatPreferenceSlider("bgbrightness", 0.25f).apply {
                             label = StringTable.get(com.osudroid.resources.R.string.opt_bgbrightness_title)
                             control.min = 0f
-                            control.max = 100f
+                            control.max = 1f
                             control.onStopDragging = {
                                 if (!isStarting) {
                                     dimBox.fadeTo(0.7f, 0.1f)
                                 }
                             }
-                            valueFormatter = { "${it.roundToInt()}%" }
+                            valueFormatter = { "${(it * 100f).roundToInt()}%" }
                             onValueChanged = {
-                                Config.setBackgroundBrightness(it / 100f)
+                                Config.setBackgroundBrightness(it)
 
                                 // Storyboard and video should not be enabled if the background brightness is too low,
                                 // so we trigger a reload when changing brightness.
@@ -315,7 +319,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                                 gameScene.loadVideo(beatmapInfo)
 
                                 if (!isStarting) {
-                                    dimBox.alpha = 1f - it / 100f
+                                    dimBox.alpha = 1f - it
                                 }
                             }
                         }

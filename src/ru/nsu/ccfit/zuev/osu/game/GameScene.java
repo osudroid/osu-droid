@@ -386,7 +386,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
 
         if (!isStoryboardEnabled) {
@@ -449,7 +449,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
         var videoFilename = playableBeatmap.getEvents().videoFilename;
         videoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
 
@@ -492,7 +492,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void applyBackground() {
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
 
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
         float playfieldSize = Config.getPlayfieldSize();
