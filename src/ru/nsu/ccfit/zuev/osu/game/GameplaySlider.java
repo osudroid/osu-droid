@@ -17,6 +17,7 @@ import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
 import com.reco1l.framework.Color4;
+import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -54,6 +55,7 @@ public class GameplaySlider extends GameObject {
     private StatisticV2 stat;
     private GameObjectListener listener;
     private SliderPath path;
+    private HitWindow hitWindow;
     private double elapsedSpanTime;
     private float timePreempt;
     private double duration;
@@ -192,6 +194,7 @@ public class GameplaySlider extends GameObject {
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
+        hitWindow = beatmapSlider.getHead().hitWindow;
         trackingCursorId = -1;
         isTracking = false;
 
@@ -610,7 +613,6 @@ public class GameplaySlider extends GameObject {
     }
 
     private void onSpanFinish() {
-        var hitWindow = beatmapSlider.getHead().hitWindow;
         if (hitWindow == null) {
             return;
         }
@@ -698,8 +700,7 @@ public class GameplaySlider extends GameObject {
 
         if (!startHit) {
             // Slider head was never hit - miss the entire slider before the end.
-            // Add 0.013s to maintain pre-version 1.8 behavior where the slider head is judged 13ms after the 50 hit window in this case.
-            onSliderHeadHit(hitWindow.getMehWindow() / 1000 + 0.013);
+            onSliderHeadHit(getLateHitOffset());
         }
 
         // Calculating score
@@ -902,7 +903,7 @@ public class GameplaySlider extends GameObject {
                         }
                     } else {
                         // If it's too late, mark this hit missing.
-                        onSliderHeadHit(elapsedTime);
+                        onSliderHeadHit(getLateHitOffset());
                     }
                 } else if (elapsedSpanTime >= 0) {
                     onSliderHeadHit(0);
@@ -1045,8 +1046,6 @@ public class GameplaySlider extends GameObject {
     private void onSliderHeadHit(double hitOffset) {
         // Reference: https://github.com/ppy/osu/blob/bca42e9d24f1b8e433f63db8dbf5d36d8b811b36/osu.Game.Rulesets.Osu/Objects/Drawables/SliderInputManager.cs#L78
         // The reference does not fully represent the cases below as they are mixed with replay handling.
-        var hitWindow = beatmapSlider.getHead().hitWindow;
-
         if (startHit || hitWindow == null) {
             return;
         }
@@ -1179,9 +1178,13 @@ public class GameplaySlider extends GameObject {
     }
 
     private float getLateHitThreshold() {
-        var hitWindow = beatmapSlider.getHead().hitWindow;
-
         return (float) (hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, duration) : duration);
+    }
+
+    private double getLateHitOffset() {
+        // Add 0.013s to maintain pre-version 1.8 behavior where the slider head is judged 13ms after the 50 hit window.
+        // This also ensures that hit accuracy truncation in replay does not affect the late hit judgement.
+        return (hitWindow.getMehWindow() + 13) / 1000.0;
     }
 
     private double getGameplayPassedTimeMilliseconds() {
