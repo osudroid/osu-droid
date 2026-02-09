@@ -1,15 +1,39 @@
 package com.osudroid.ui.v2.settings
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.text.InputType
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.preference.PreferenceManager
+import com.acivev.VibratorManager
+import com.edlplan.ui.fragment.LoadingFragment
+import com.google.android.material.snackbar.Snackbar
+import com.osudroid.UpdateManager
+import com.osudroid.data.DatabaseManager
+import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.resources.R
+import com.osudroid.utils.async
+import com.osudroid.utils.mainThread
 import com.reco1l.andengine.ui.UISelect
-import com.reco1l.andengine.ui.form.FormSlider
+import com.reco1l.andengine.ui.form.PreferenceInput
 import com.reco1l.andengine.ui.form.PreferenceSelect
-import com.reco1l.osu.ui.Option
+import com.rian.osu.mods.ModAutoplay
+import com.rian.osu.utils.ModHashMap
+import kotlinx.coroutines.Job
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.ConfigBackup
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
+import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
+import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
+import java.io.File
 
 
 val generalSection = listOf(
@@ -34,7 +58,15 @@ val generalSection = listOf(
                 title = R.string.difficulty_algorithm_title,
                 summary = R.string.difficulty_algorithm_summary,
                 entries = R.array.difficulty_algorithm_names,
-                entryValues = R.array.difficulty_algorithm_values
+                entryValues = R.array.difficulty_algorithm_values,
+                onChange = { value ->
+                    if (Multiplayer.isMultiplayer) {
+                        @Suppress("UNCHECKED_CAST")
+                        val newValue = (value as List<String>)[0]
+                        Config.setString("difficultyAlgorithm", newValue)
+                        Multiplayer.roomScene?.updateBeatmapInfo()
+                    }
+                }
             )
         )
     ),
@@ -52,13 +84,20 @@ val generalSection = listOf(
                 type = OptionType.Input,
                 key = "onlinePassword",
                 title = R.string.opt_password_title,
-                summary = R.string.opt_password_summary
+                summary = R.string.opt_password_summary,
+                onAttach = {
+                    (it as PreferenceInput).control.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                }
             ),
             OptionInfo(
                 type = OptionType.Button,
                 key = "registerAcc",
                 title = R.string.opt_register_title,
-                summary = R.string.opt_register_summary
+                summary = R.string.opt_register_summary,
+                onClick = {
+                    val context = GlobalManager.getInstance().mainActivity
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REGISTER_URL)))
+                }
             )
         )
     ),
@@ -82,7 +121,10 @@ val generalSection = listOf(
                 type = OptionType.Button,
                 key = "update",
                 title = R.string.opt_update_title,
-                summary = R.string.opt_update_summary
+                summary = R.string.opt_update_summary,
+                onClick = {
+                    UpdateManager.checkNewUpdates(false)
+                }
             )
         )
     ),
@@ -94,13 +136,37 @@ val generalSection = listOf(
                 type = OptionType.Button,
                 key = "backup",
                 title = R.string.opt_config_backup_title,
-                summary = R.string.opt_config_backup_summary
+                summary = R.string.opt_config_backup_summary,
+                onClick = {
+                    val success = ConfigBackup.exportPreferences()
+                    ToastLogger.showText(
+                        if (success) R.string.config_backup_info_success else R.string.config_backup_info_fail,
+                        true
+                    )
+                }
             ),
             OptionInfo(
                 type = OptionType.Button,
                 key = "restore",
                 title = R.string.opt_config_backup_restore_title,
-                summary = R.string.opt_config_backup_restore_summary
+                summary = R.string.opt_config_backup_restore_summary,
+                onClick = {
+                    val context = GlobalManager.getInstance().mainActivity
+                    val success = ConfigBackup.importPreferences()
+
+                    if (success) {
+                        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                        GlobalManager.getInstance().songService.volume = prefs.getInt("bgmvolume", 100) / 100f
+
+                        loadSkin(context, prefs.getString("skinPath", "")!!).invokeOnCompletion {
+                            mainThread {
+                                ToastLogger.showText(R.string.config_backup_restore_info_success, true)
+                            }
+                        }
+                    } else {
+                        ToastLogger.showText(R.string.config_backup_restore_info_fail, true)
+                    }
+                }
             )
         )
     ),
@@ -175,13 +241,43 @@ val gameplaySection = listOf(
                 title = R.string.opt_skinpath_title,
                 summary = R.string.opt_skinpath_summary,
                 entries = R.array.placeholder_array,
-                entryValues = R.array.placeholder_array
+                entryValues = R.array.placeholder_array,
+                onAttach = {
+                    val skinMain = File(Config.getSkinTopPath())
+                    val skins = Config.getSkins().map { skin ->
+                        UISelect.Option(skin.value, skin.key)
+                    }.toMutableList()
+                    skins.add(0, UISelect.Option(skinMain.path, skinMain.name + " (Default)"))
+
+                    (it as PreferenceSelect).options = skins
+                },
+                onChange = { value ->
+                    @Suppress("UNCHECKED_CAST")
+                    val newValue = (value as List<String>)[0]
+                    val context = GlobalManager.getInstance().mainActivity
+                    loadSkin(context, newValue)
+                }
             ),
             OptionInfo(
                 type = OptionType.Button,
                 key = "hud_editor",
                 title = R.string.opt_hudEditor_title,
-                summary = R.string.opt_hudEditor_summary
+                summary = R.string.opt_hudEditor_summary,
+                onClick = {
+                    val global = GlobalManager.getInstance()
+                    val selectedBeatmap = global.selectedBeatmap
+
+                    if (LibraryManager.getSizeOfBeatmaps() == 0 || selectedBeatmap == null) {
+                        ToastLogger.showText("Cannot enter HUD editor with empty beatmap library!", true)
+                    } else {
+                        val modMap = ModHashMap().apply {
+                            put(ModAutoplay::class)
+                        }
+
+                        global.gameScene.setOldScene(global.mainScene.scene)
+                        global.gameScene.startGame(selectedBeatmap, null, modMap, true)
+                    }
+                }
             ),
             OptionInfo(
                 type = OptionType.Select,
@@ -455,7 +551,11 @@ val audioSection = listOf(
                 min = 0f,
                 max = 1f,
                 step = 0.01f,
-                valueFormatter = { "${(it * 100f).toInt()}%" }
+                valueFormatter = { "${(it * 100f).toInt()}%" },
+                onChange = { value ->
+                    val floatValue = value as Float
+                    GlobalManager.getInstance().songService.volume = floatValue
+                }
             ),
             OptionInfo(
                 type = OptionType.Slider,
@@ -466,7 +566,16 @@ val audioSection = listOf(
                 min = 0f,
                 max = 1f,
                 step = 0.01f,
-                valueFormatter = { "${(it * 100f).toInt()}%" }
+                valueFormatter = { "${(it * 100f).toInt()}%" },
+                onChange = { value ->
+                    val floatValue = value as Float
+                    // Set the configuration now as the sound below depends on this value.
+                    Config.setSoundVolume(floatValue)
+
+                    // Use the sound when the osu! cookie is clicked since it is guaranteed to be available and not
+                    // skinnable (which means the player cannot silence it via skins).
+                    ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false)?.play()
+                }
             )
         )
     ),
@@ -603,13 +712,20 @@ val librarySection = listOf(
                 type = OptionType.Button,
                 key = "clear_beatmap_cache",
                 title = R.string.opt_clear_title,
-                summary = R.string.opt_clear_summary
+                summary = R.string.opt_clear_summary,
+                onClick = {
+                    LibraryManager.clearDatabase()
+                    ToastLogger.showText(StringTable.get(R.string.library_cleared), true)
+                }
             ),
             OptionInfo(
                 type = OptionType.Button,
                 key = "clear_properties",
                 title = R.string.opt_clearprops_title,
-                summary = R.string.opt_clearprops_summary
+                summary = R.string.opt_clearprops_summary,
+                onClick = {
+                    DatabaseManager.beatmapOptionsTable.deleteAll()
+                }
             )
         )
     )
@@ -623,7 +739,10 @@ val inputSection = listOf(
                 type = OptionType.Button,
                 key = "block_areas",
                 title = R.string.block_area_preference_title,
-                summary = R.string.block_area_preference_summary
+                summary = R.string.block_area_preference_summary,
+                onClick = {
+                    com.osudroid.ui.v1.BlockAreaEditorFragment().show()
+                }
             ),
             OptionInfo(
                 type = OptionType.Slider,
@@ -653,19 +772,28 @@ val inputSection = listOf(
                 type = OptionType.Checkbox,
                 key = "vibrationCircle",
                 title = "Circle",
-                defaultValue = false
+                defaultValue = false,
+                onChange = { value ->
+                    VibratorManager.isCircleVibrationEnabled = value as Boolean
+                }
             ),
             OptionInfo(
                 type = OptionType.Checkbox,
                 key = "vibrationSlider",
                 title = "Slider",
-                defaultValue = false
+                defaultValue = false,
+                onChange = { value ->
+                    VibratorManager.isSliderVibrationEnabled = value as Boolean
+                }
             ),
             OptionInfo(
                 type = OptionType.Checkbox,
                 key = "vibrationSpinner",
                 title = "Spinner",
-                defaultValue = false
+                defaultValue = false,
+                onChange = { value ->
+                    VibratorManager.isSpinnerVibrationEnabled = value as Boolean
+                }
             ),
             OptionInfo(
                 type = OptionType.Slider,
@@ -676,7 +804,11 @@ val inputSection = listOf(
                 min = 0.01f,
                 max = 2.55f,
                 step = 0.01f,
-                valueFormatter = { "${((it / 2.55f) * 100f).toInt()}%" }
+                valueFormatter = { "${((it / 2.55f) * 100f).toInt()}%" },
+                onChange = { value ->
+                    val floatValue = value as Float
+                    VibratorManager.intensity = (floatValue * 100).toInt()
+                }
             )
         )
     ),
@@ -709,7 +841,24 @@ val advancedSection = listOf(
                 type = OptionType.Input,
                 key = "skinTopPath",
                 title = R.string.opt_skin_top_path_title,
-                summary = R.string.opt_skin_top_path_summary
+                summary = R.string.opt_skin_top_path_summary,
+                onChange = { value ->
+                    val newValue = value as String
+
+                    if (newValue.trim { it <= ' ' }.isEmpty()) {
+                        Config.loadConfig(GlobalManager.getInstance().mainActivity)
+                        return@OptionInfo
+                    }
+
+                    val file = File(newValue)
+
+                    if (!file.exists() && !file.mkdirs()) {
+                        ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true)
+                        return@OptionInfo
+                    }
+
+                    Config.loadConfig(GlobalManager.getInstance().mainActivity)
+                }
             ),
             OptionInfo(
                 type = OptionType.Input,
@@ -729,7 +878,12 @@ val advancedSection = listOf(
                 key = "forceMaxRefreshRate",
                 title = R.string.opt_force_max_refresh_rate_title,
                 summary = R.string.opt_force_max_refresh_rate_summary,
-                defaultValue = false
+                defaultValue = false,
+                onAttach = { component ->
+                    // Obtaining supported refresh rates is only available on Android 12 and above.
+                    // See https://developer.android.com/reference/android/view/Display.Mode#getAlternativeRefreshRates().
+                    component.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                }
             ),
             OptionInfo(
                 type = OptionType.Checkbox,
@@ -742,4 +896,30 @@ val advancedSection = listOf(
     )
 )
 
+// Constants
+const val REGISTER_URL: String = "https://${OnlineManager.hostname}/user/?action=register"
 
+// Helper functions
+fun loadSkin(context: Context, path: String): Job {
+    val loading = LoadingFragment()
+
+    loading.isDismissOnBackPress = false
+    loading.show()
+
+    return async {
+        BeatmapSkinManager.getInstance().clearSkin()
+        Config.setSkinPath(path)
+        ResourceManager.getInstance().loadSkin(path)
+        GlobalManager.getInstance().engine.textureManager.reloadTextures()
+
+        mainThread {
+            loading.dismiss()
+            context.startActivity(Intent(context, MainActivity::class.java))
+            Snackbar.make(
+                GlobalManager.getInstance().mainActivity.window.decorView,
+                R.string.message_loaded_skin,
+                1500
+            ).show()
+        }
+    }
+}
