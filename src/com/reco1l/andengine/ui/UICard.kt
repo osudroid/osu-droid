@@ -23,6 +23,9 @@ open class UICard(
         orientation = Orientation.Vertical
         width = Size.Full
         clipToBounds = true
+        style = {
+            padding = Vec4(2f.srem)
+        }
     },
 
 ) : UILinearContainer() {
@@ -59,13 +62,13 @@ open class UICard(
         orientation = Orientation.Vertical
         style = {
             backgroundColor = it.accentColor * 0.15f
-            radius = Radius.MD
+            radius = Radius.XL
         }
 
         +titleBar.apply {
             width = Size.Full
             style = {
-                padding = Vec4(2.25f.srem)
+                padding = Vec4(4f.srem, 3f.srem)
             }
 
             +UIText().apply {
@@ -136,7 +139,7 @@ open class UICard(
 
             content.clearModifiers(ModifierType.SizeY)
             content.isVisible = true
-            content.sizeToY(content.contentHeight, if (immediate) 0f else 0.1f)
+            content.sizeToY(content.intrinsicHeight, if (immediate) 0f else 0.1f)
 
             onExpandStatusChange?.invoke(true)
         }
