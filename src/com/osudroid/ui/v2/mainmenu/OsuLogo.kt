@@ -13,16 +13,14 @@ import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UICircle
 import com.reco1l.andengine.shape.UIGradientBox
-import com.reco1l.andengine.text
-import com.reco1l.andengine.text.UIText
+import com.reco1l.andengine.sprite
 import com.reco1l.andengine.theme.Colors
-import com.reco1l.andengine.theme.Fonts
 import com.reco1l.andengine.theme.Size
-import com.reco1l.andengine.theme.pct
 import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.ui.UIClickableContainer
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.rgb
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
 
@@ -32,7 +30,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
     var playEffects = withExternalEffects
 
 
-    private lateinit var osuText: UIText
     private lateinit var inputFeedbackCircle: UICircle
 
     private val bounceContainer: UIContainer
@@ -75,12 +72,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             circle {
                 width = Size.Full
                 height = Size.Full
-                color = Colors.White
-            }
-
-            circle {
-                width = 0.9f.pct
-                height = 0.9f.pct
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 color = OSU_COLOR
@@ -89,8 +80,8 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             }
 
             +TrianglesDispenser().apply {
-                width = 0.9f.pct
-                height = 0.9f.pct
+                width = Size.Full
+                height = Size.Full
                 triangle.apply {
                     depthInfo = DepthInfo(test = true, mask = true, function = GLES10.GL_EQUAL)
                     paintStyle = PaintStyle.Outline
@@ -108,8 +99,8 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
             }
 
             +UIGradientBox().apply {
-                width = 0.9f.pct
-                height = 0.9f.pct
+                width = Size.Full
+                height = Size.Full
                 colorStart = Colors.Transparent
                 colorEnd = Colors.Black
                 gradientAngle = 90f
@@ -119,12 +110,14 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
                 depthInfo = DepthInfo(test = true, mask = true, function = GLES10.GL_EQUAL)
             }
 
-            osuText = text {
-                text = "OSU!"
-                fontFamily = Fonts.TorusBold
-                color = Colors.White
+            sprite {
+                textureRegion = ResourceManager.getInstance().getTexture("logo")
+                width = Size.Full
+                height = Size.Full
                 anchor = Anchor.Center
                 origin = Anchor.Center
+
+                setScale(1.075f)
             }
 
             inputFeedbackCircle = circle {
@@ -142,7 +135,6 @@ class OsuLogo(withExternalEffects: Boolean = true) : UIClickableContainer() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        osuText.fontSize = height * 0.295f
 
         if (playEffects) {
             val beatLengthSeconds = RythimManager.beatLength.toFloat() / 1000f

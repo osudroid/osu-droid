@@ -144,7 +144,7 @@ object MainScene : UIScene() {
                 +CarrouselLinearContainer(logo).apply {
                     orientation = Orientation.Vertical
                     style = {
-                        spacing = 3f.srem
+                        spacing = 1.15f.srem
                         padding = Vec4(0f, 8f.rem)
                     }
 
@@ -388,7 +388,7 @@ class MenuButton(icon: Int, title: String) : UIButton() {
     init {
         style += {
             width = 16f.rem
-            radius = Radius.XL
+            radius = 0.65f.rem
             backgroundColor = backgroundColor.copy(alpha = 0.6f)
             padding = Vec4(6f.srem)
         }
