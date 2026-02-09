@@ -358,11 +358,6 @@ public class Replay {
 
             var objReplayData = objectData[i];
 
-            // Skip if the object data somehow does not have tickSet.
-            if (objReplayData.tickSet == null) {
-                continue;
-            }
-
             // Miss result means all slider nested hit objects were missed.
             if (objReplayData.result == ResultType.MISS.getId()) {
                 continue;
@@ -397,19 +392,21 @@ public class Replay {
                 stat.addSliderHeadHit();
             }
 
-            for (int j = 1; j < slider.getNestedHitObjects().size(); ++j) {
-                if (!objReplayData.tickSet.get(j - 1)) {
-                    continue;
-                }
+            if (objReplayData.tickSet != null) {
+                for (int j = 1; j < slider.getNestedHitObjects().size(); ++j) {
+                    if (!objReplayData.tickSet.get(j - 1)) {
+                        continue;
+                    }
 
-                var nestedObject = slider.getNestedHitObjects().get(j);
+                    var nestedObject = slider.getNestedHitObjects().get(j);
 
-                if (nestedObject instanceof SliderTick) {
-                    stat.addSliderHeadHit();
-                } else if (nestedObject instanceof SliderRepeat) {
-                    stat.addSliderRepeatHit();
-                } else {
-                    stat.addSliderEndHit();
+                    if (nestedObject instanceof SliderTick) {
+                        stat.addSliderHeadHit();
+                    } else if (nestedObject instanceof SliderRepeat) {
+                        stat.addSliderRepeatHit();
+                    } else {
+                        stat.addSliderEndHit();
+                    }
                 }
             }
         }
