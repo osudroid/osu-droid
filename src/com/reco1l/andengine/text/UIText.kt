@@ -299,7 +299,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
     override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
         val capacity = nextPowerOfTwo(currentLength)
         val vertexBuffer = buffer.getFirstOf<TextVertexBuffer>()
-        return vertexBuffer.vertexCount == capacity * VERTICES_PER_CHARACTER
+        return vertexBuffer.vertexCount >= capacity * VERTICES_PER_CHARACTER
     }
 
     override fun onUpdateBuffer() {

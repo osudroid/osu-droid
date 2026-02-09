@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import com.reco1l.andengine.UIEngine
+import android.util.Log
 import com.reco1l.andengine.component.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.shape.Shape.*
@@ -26,12 +26,33 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
      * The buffer itself.
      */
     var buffer: T? = null
+        get() = bufferReference?.get() ?: field
         set(value) {
-            if (field != value) {
-                field?.finalize()
-                field = value
+            val current = bufferReference?.get() ?: field
+            if (current != value) {
+                current?.finalize()
+                bufferReference?.set(value) ?: run { field = value }
             }
         }
+
+    /**
+     * A mutable reference to a shared buffer. This allows multiple components to share
+     * the same buffer instance. When the buffer is updated via [buffer], all components
+     * that share this reference will see the change.
+     *
+     * To share a buffer between components, create a single [MutableReference] instance
+     * and assign it to all components that should share the buffer:
+     *
+     * ```kotlin
+     * val sharedRef = MutableReference<MyBuffer>(null)
+     * component1.bufferReference = sharedRef
+     * component2.bufferReference = sharedRef
+     *
+     * // Now when you set the buffer on one component, all components see it
+     * component1.buffer = myBuffer // component2 will also use myBuffer
+     * ```
+     */
+    var bufferReference: MutableReference<T?>? = null
 
     /**
      * The blend information of the entity.
@@ -97,8 +118,8 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
         requestBufferUpdate()
     }
 
-    override fun onHandleInvalidations() {
-        super.onHandleInvalidations()
+    override fun onHandleInvalidations(flags: Int) {
+        super.onHandleInvalidations(flags)
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
@@ -107,6 +128,9 @@ abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
 
             val currentBuffer = buffer
             if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
+                if (currentBuffer != null) {
+                    Log.d("UIBufferedComponent", "Cannot reuse buffer, creating a new one. Type: ${currentBuffer::class}")
+                }
                 buffer = createBuffer()
             }
 
