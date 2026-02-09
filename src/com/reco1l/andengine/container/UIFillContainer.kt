@@ -51,9 +51,17 @@ open class UIFillContainer : UILinearContainer() {
         }
 
         val totalSpacing = spacing * (visibleCount - 1)
+        val allChildrenAreFull = (totalWeight == visibleCount.toFloat())
+
+        // When all children are Full, divide container evenly instead of distributing free space
         val freeSpace = when (orientation) {
             Orientation.Horizontal -> innerWidth - totalWidth - totalSpacing
             Orientation.Vertical -> innerHeight - totalHeight - totalSpacing
+        }
+
+        val evenSize = when (orientation) {
+            Orientation.Horizontal -> (innerWidth - totalSpacing) / totalWeight
+            Orientation.Vertical -> (innerHeight - totalSpacing) / totalWeight
         }
 
         // Second pass - place items, distribute remaining space according to weights
@@ -74,7 +82,7 @@ open class UIFillContainer : UILinearContainer() {
 
                 Orientation.Horizontal -> {
                     if (child.rawWidth == Size.Full) {
-                        val assignedWidth = child.intrinsicWidth + extraSpace
+                        val assignedWidth = if (allChildrenAreFull) evenSize else child.intrinsicWidth + extraSpace
                         child.minWidth = assignedWidth
                         child.maxWidth = assignedWidth
                     }
@@ -86,7 +94,7 @@ open class UIFillContainer : UILinearContainer() {
 
                 Orientation.Vertical -> {
                     if (child.rawHeight == Size.Full) {
-                        val assignedHeight = child.intrinsicHeight + extraSpace
+                        val assignedHeight = if (allChildrenAreFull) evenSize else child.intrinsicHeight + extraSpace
                         child.minHeight = assignedHeight
                         child.maxHeight = assignedHeight
                     }
