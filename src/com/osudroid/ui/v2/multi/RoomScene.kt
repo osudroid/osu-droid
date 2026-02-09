@@ -358,7 +358,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 textButton {
                     leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
                     setText(R.string.multiplayer_room_leave)
-                    onActionUp = { back() }
+                    onActionUp = { leaveDialog.show() }
                 }
 
                 modsButton = textButton {
