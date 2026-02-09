@@ -28,6 +28,11 @@ public class BassAudioFunc {
      */
     private float frequency;
 
+    private static final long FFT_UPDATE_INTERVAL_MS = 96;
+    private float[] cachedFFT = null;
+    private long lastFFTUpdateTime = 0;
+    private int lastFFTResolution = -1;
+
     public BassAudioFunc() {
     }
 
@@ -151,10 +156,22 @@ public class BassAudioFunc {
 
     @Nullable
     public float[] getAudioFFT(int resolution) {
+        long currentTime = System.currentTimeMillis();
+
+        // Return cached result if:
+        // 1. We have a cached result
+        // 2. The resolution hasn't changed
+        // 3. Not enough time has passed since last update
+        if (cachedFFT != null
+            && lastFFTResolution == resolution
+            && (currentTime - lastFFTUpdateTime) < FFT_UPDATE_INTERVAL_MS) {
+            return cachedFFT;
+        }
+
         float[] rawFFT = getSpectrum();
 
         if (rawFFT == null || resolution <= 0) {
-            return null;
+            return null; // Return last valid result if spectrum unavailable
         }
 
         float[] fft = new float[resolution];
@@ -183,6 +200,11 @@ public class BassAudioFunc {
             l = r;
         }
 
+        // Update cache
+        cachedFFT = fft;
+        lastFFTUpdateTime = currentTime;
+        lastFFTResolution = resolution;
+
         return fft;
     }
 
@@ -191,6 +213,11 @@ public class BassAudioFunc {
             BASS.BASS_ChannelStop(channel);
         }
         BASS.BASS_StreamFree(channel);
+
+        // Clear FFT cache when audio changes
+        cachedFFT = null;
+        lastFFTUpdateTime = 0;
+        lastFFTResolution = -1;
     }
 
     public void setLoop(boolean isLoop) {

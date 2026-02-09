@@ -77,6 +77,7 @@ public class Config {
         videoEnabled,
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
+        preferModAcronymInMultiplayer,
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
         dimHitObjects,
@@ -140,29 +141,41 @@ public class Config {
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
 
         measureDisplaySize();
-        setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
-        playfieldHorizontalPosition = prefs.getInt("playfieldHorizontalPosition", 50) / 100f;
-        playfieldVerticalPosition = prefs.getInt("playfieldVerticalPosition", 50) / 100f;
 
         animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
         animateComboText = prefs.getBoolean("animateComboText", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
         snakingOutSliders = prefs.getBoolean("snakingOutSliders", true);
 
+        // The new settings menu forcefully use Float-based sliders/seekbars.
+        // This will prevent crashes when using older versions settings.
         try {
-            offset = prefs.getInt("offset", 0);
-            backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
-            soundVolume = prefs.getInt("soundvolume", 100) / 100f;
-            bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
-            cursorSize = prefs.getInt("cursorSize", 50) / 100f;
-        }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
+            setPlayfieldSize(prefs.getFloat("playfieldSize", 1f));
+            playfieldHorizontalPosition = prefs.getFloat("playfieldHorizontalPosition", 0.5f);
+            playfieldVerticalPosition = prefs.getFloat("playfieldVerticalPosition", 0.5f);
+
+            offset = prefs.getFloat("offset", 0f);
+            minimumGameplaySynchronizationTime = (int) prefs.getFloat("gameAudioSynchronizationThreshold", 20f);
+
+            backgroundBrightness = prefs.getFloat("bgbrightness", 0.25f);
+            soundVolume = prefs.getFloat("soundvolume", 1f);
+            bgmVolume = prefs.getFloat("bgmvolume", 1f);
+            cursorSize = prefs.getFloat("cursorSize", 0.5f);
+
+            backButtonPressTime = (int) prefs.getFloat("back_button_press_time", 300f);
+        } catch (RuntimeException e) {
             prefs.edit()
-                .putInt("offset", 0)
-                .putInt("bgbrightness", 25)
-                .putInt("soundvolume", 100)
-                .putInt("bgmvolume", 100)
-                .putInt("cursorSize", 50)
-                .commit();
+                    .putFloat("playfieldSize", 1f)
+                    .putFloat("playfieldHorizontalPosition", 0.5f)
+                    .putFloat("playfieldVerticalPosition", 0.5f)
+                    .putFloat("offset", 0f)
+                    .putFloat("gameAudioSynchronizationThreshold", 20f)
+                    .putFloat("bgbrightness", 0.25f)
+                    .putFloat("soundvolume", 1f)
+                    .putFloat("bgmvolume", 1f)
+                    .putFloat("cursorSize", 0.5f)
+                    .putFloat("back_button_press_time", 300f)
+                    .commit();
             Config.loadConfig(context);
             return;
         }
@@ -230,12 +243,11 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
-        minimumGameplaySynchronizationTime = prefs.getInt("gameAudioSynchronizationThreshold", 20);
-        backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
         submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
+        preferModAcronymInMultiplayer = prefs.getBoolean("player_preferModAcronym", false);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -741,6 +753,14 @@ public class Config {
 
     public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
         Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
+    }
+
+    public static boolean isPreferModAcronymInMultiplayer() {
+        return preferModAcronymInMultiplayer;
+    }
+
+    public static void setPreferModAcronymInMultiplayer(boolean preferModAcronymInMultiplayer) {
+        Config.preferModAcronymInMultiplayer = preferModAcronymInMultiplayer;
     }
 
     public static boolean isKeepBackgroundAspectRatio() {

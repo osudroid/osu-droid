@@ -70,4 +70,9 @@
 
     <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider and spinner lock</string>
     <string name="opt_remove_sliderlock_spinnerlock_summary">[UNRANKED] Allow circles and sliders to be hittable when another slider or spinner is currently active.</string>
+
+    <string name="mp_room_category_lobby">Lobby</string>
+
+    <string name="mp_room_prefer_mod_acronym_title">Prefer mod acronyms over icons</string>
+    <string name="mp_room_prefer_mod_acronym_summary">Replace mod icons in player cards with mod acronyms</string>
 </resources>

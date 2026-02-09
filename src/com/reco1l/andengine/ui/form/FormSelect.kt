@@ -5,10 +5,11 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
+import ru.nsu.ccfit.zuev.osu.Config
 
 open class FormSelect<T : Any>(initialValues: List<T> = emptyList()) : FormControl<List<T>, UISelect<T>>(initialValues) {
 
-    final override val control = UISelect<T>().apply {
+    final override val control = UISelect(initialValues).apply {
         width = Size.Full
     }
 
@@ -42,4 +43,14 @@ open class FormSelect<T : Any>(initialValues: List<T> = emptyList()) : FormContr
         +control
     }
 
+}
+
+
+class PreferenceSelect(private val preferenceKey: String, fallback: List<String> = emptyList()) : FormSelect<String>(
+    initialValues = Config.getString(preferenceKey, fallback.joinToString { it }).split(',')
+) {
+    override fun onControlValueChanged() {
+        Config.setString(preferenceKey, value.joinToString { it })
+        super.onControlValueChanged()
+    }
 }

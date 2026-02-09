@@ -263,6 +263,7 @@ class SettingsFragment : SettingsFragment() {
             GlobalManager.getInstance().songService.isGaming = false
         } else if (Multiplayer.isConnected) {
             Multiplayer.roomScene?.chat?.show()
+            Multiplayer.roomScene?.updatePlayerList()
         }
 
         GlobalManager.getInstance().songService.volume = Config.getBgmVolume()

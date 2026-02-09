@@ -88,17 +88,17 @@ open class UIButton : UIClickableContainer(), ISizeVariable, IColorVariable {
             when (sizeVariant) {
                 SizeVariant.Small -> {
                     height = 1f.rem
-                    padding = Vec4(1.25f.srem, 0f)
+                    padding = Vec4(1.25f.srem, 1f.srem)
                     radius = Radius.MD
                 }
                 SizeVariant.Medium -> {
                     height = 2.5f.rem
-                    padding = Vec4(2.5f.srem, 0f)
+                    padding = Vec4(2.5f.srem, 1.25f.srem)
                     radius = Radius.LG
                 }
                 SizeVariant.Large -> {
                     height = 3f.rem
-                    padding = Vec4(3f.srem, 0f)
+                    padding = Vec4(3f.srem, 1.5f.srem)
                     radius = Radius.LG
                 }
             }
@@ -125,7 +125,7 @@ open class UIButton : UIClickableContainer(), ISizeVariable, IColorVariable {
     open fun processTouchFeedback(event: TouchEvent) {
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(0.9f, 0.3f).eased(Easing.Out)
+            scaleTo(0.95f, 0.3f).eased(Easing.Out)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
@@ -157,14 +157,14 @@ open class UITextButton : UIButton() {
             when (sizeVariant) {
                 SizeVariant.Small -> {
                     fontSize = FontSize.XS
-                    spacing = 0.5f.srem
+                    spacing = 0.15f.srem
                 }
                 SizeVariant.Medium -> {
                     fontSize = FontSize.MD
                     spacing = 2f.srem
                 }
                 SizeVariant.Large -> {
-                    fontSize = FontSize.LG
+                    fontSize = FontSize.MD
                     spacing = 2.5f.srem
                 }
             }

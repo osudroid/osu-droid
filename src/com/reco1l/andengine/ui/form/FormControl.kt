@@ -1,16 +1,20 @@
 package com.reco1l.andengine.ui.form
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Colors
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 
@@ -18,7 +22,7 @@ import org.anddev.andengine.input.touch.*
  * Represents a form control that is used to change the value of a property.
  */
 @Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
-abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearContainer() {
+abstract class FormControl<V : Any, C: UIControl<V>>(val initialValue: V): UILinearContainer() {
 
     /**
      * The control that is used to change the value.
@@ -53,16 +57,16 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
     /**
      * The button that is used to reset the value of the control to its default value.
      */
-    open val resetButton = UITextButton().apply {
+    open val resetButton = UIIconButton().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         scaleCenter = Anchor.Center
-        text = "Reset"
-        leadingIcon = FontAwesomeIcon(Icon.RotateLeft)
-        colorVariant = ColorVariant.Primary
+        icon = FontAwesomeIcon(Icon.RotateLeft)
+        colorVariant = ColorVariant.Secondary
         sizeVariant = SizeVariant.Small
 
         alpha = 0f
+        isVisible = false
         translationX = -10f
 
         onActionUp = {
@@ -127,10 +131,14 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
     var showResetButton = true
 
 
+    private var isPressed = false
+
+
     init {
         width = Size.Full
         style = {
             padding = Vec4(2f.srem)
+            radius = Radius.LG
         }
     }
 
@@ -182,6 +190,8 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
             resetButton.isVisible = false
         }
 
+        backgroundColor = Interpolation.colorAt(deltaTimeSec.coerceIn(0f, 0.2f), backgroundColor, if (isPressed) Theme.current.accentColor.copy(alpha = 0.1f) else Colors.Transparent, 0f, 0.2f, Easing.OutQuart)
+
         super.onManagedUpdate(deltaTimeSec)
     }
 
@@ -189,6 +199,9 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
         if (!isEnabled) {
             return true
         }
+
+        isPressed = event.isActionDown
+
         return super.onAreaTouched(event, localX, localY)
     }
 

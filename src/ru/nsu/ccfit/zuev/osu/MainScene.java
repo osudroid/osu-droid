@@ -3,9 +3,8 @@ package ru.nsu.ccfit.zuev.osu;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.util.Log;
-
-import androidx.core.content.FileProvider;
 
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
@@ -56,8 +55,6 @@ import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.TimerTask;
@@ -191,7 +188,7 @@ public class MainScene implements IUpdateHandler {
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
                 setPosition(10f, Config.getRES_HEIGHT() - getHeight() - 10f);
                 setColor(0f, 0f, 0f, 0.5f); // Black
-                setCornerRadius(12f);
+                setRadius(12f);
             }
 
             public boolean onAreaTouched(TouchEvent event, float localX, float localY) {
@@ -216,28 +213,7 @@ public class MainScene implements IUpdateHandler {
                             dialog.dismiss();
 
                             try {
-                                var changelogFile = new File(context.getCacheDir(), "changelog.html");
-
-                                // Copy the changelog file to cache directory using Java's try-with-resources
-                                try (var inputStream = context.getAssets().open("app/changelog.html");
-                                     var outputStream = new FileOutputStream(changelogFile)) {
-                                    byte[] buffer = new byte[1024];
-                                    int length;
-                                    while ((length = inputStream.read(buffer)) > 0) {
-                                        outputStream.write(buffer, 0, length);
-                                    }
-                                }
-
-                                var changelogUri = FileProvider.getUriForFile(
-                                        context,
-                                        BuildConfig.APPLICATION_ID + ".fileProvider",
-                                        changelogFile
-                                );
-
-                                var intent = new Intent(Intent.ACTION_VIEW);
-                                intent.setDataAndType(changelogUri, "text/html");
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
+                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"));
                                 context.startActivity(intent);
                             } catch (Exception e) {
                                 android.util.Log.e("MainScene", "Failed to load changelog", e);

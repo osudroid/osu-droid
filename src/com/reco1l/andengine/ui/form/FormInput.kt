@@ -5,9 +5,10 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
+import ru.nsu.ccfit.zuev.osu.Config
 
 @Suppress("LeakingThis")
-open class FormInput(private val initialValue: String = "") : FormControl<String, UITextInput>(initialValue) {
+open class FormInput(initialValue: String = "") : FormControl<String, UITextInput>(initialValue) {
 
     final override val control = createControl().apply {
         width = Size.Full
@@ -51,4 +52,11 @@ open class FloatFormInput(
     val maxValue: Float? = Float.MAX_VALUE
 ) : FormInput(initialValue?.toString() ?: "") {
     override fun createControl() = FloatTextInput(defaultValue.toFloatOrNull(), minValue, maxValue)
+}
+
+class PreferenceInput(private val preferenceKey: String, fallback: String): FormInput(Config.getString(preferenceKey, fallback)) {
+    override fun onControlValueChanged() {
+        Config.setString(preferenceKey, value)
+        super.onControlValueChanged()
+    }
 }

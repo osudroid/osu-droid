@@ -24,7 +24,7 @@ open class ModMenuSection(name: String, private val toggles: List<UIButton> = li
         height = Size.Full
         cullingMode = CullingMode.CameraBounds
         style = {
-            width = 12f.rem
+            width = 14f.rem
             backgroundColor = it.accentColor * 0.1f
             radius = Radius.LG
         }

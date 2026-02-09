@@ -15,6 +15,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.UIText
 import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.theme.pct
 import com.reco1l.andengine.theme.rem
@@ -22,6 +23,7 @@ import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -41,7 +43,7 @@ class RoomPlayerCard : UILinearContainer() {
             style = {
                 width = 0.025f.pct
                 height = Size.Full
-                cornerRadius = 2f.rem
+                radius = 2f.rem
             }
         }
 
@@ -70,8 +72,10 @@ class RoomPlayerCard : UILinearContainer() {
     private class RoomPlayerButton : UIButton() {
 
         private lateinit var nameText: UIText
-        private lateinit var modsIndicator: ModsIndicator
         private lateinit var missingIndicator: UISprite
+
+        private val innerContainer: UILinearContainer
+        private var modDisplay: UIComponent? = null
 
 
         init {
@@ -86,7 +90,7 @@ class RoomPlayerCard : UILinearContainer() {
                 backgroundColor = Theme.current.accentColor * 0.1f
             }
 
-            linearContainer {
+            innerContainer = linearContainer {
                 orientation = Orientation.Vertical
                 inheritAncestorsColor = false
 
@@ -105,12 +109,6 @@ class RoomPlayerCard : UILinearContainer() {
                         size = Vec2(18f)
                     }
                 }
-
-                +ModsIndicator().apply {
-                    minHeight = 18f // Force to take space even if no mods are enabled
-                    iconSize = 18f
-                    modsIndicator = this
-                }
             }
 
         }
@@ -125,7 +123,37 @@ class RoomPlayerCard : UILinearContainer() {
 
             nameText.text = player.name
             missingIndicator.isVisible = player.status == MissingBeatmap
-            modsIndicator.mods = if (room.gameplaySettings.isFreeMod) player.mods.values else null
+
+            if (Config.isPreferModAcronymInMultiplayer()) {
+                if (modDisplay !is UIText) {
+                    modDisplay?.detachSelf()
+
+                    modDisplay = UIText().apply {
+                        minHeight = 18f // Force to take space even if no mods are enabled
+                        style += {
+                            fontSize = FontSize.XS
+                            color = it.accentColor * 0.8f
+                        }
+                    }
+
+                    innerContainer += modDisplay!!
+                }
+
+                (modDisplay as UIText).text = player.mods.toDisplayModString()
+            } else {
+                if (modDisplay !is ModsIndicator) {
+                    modDisplay?.detachSelf()
+
+                    modDisplay = ModsIndicator().apply {
+                        minHeight = 18f // Force to take space even if no mods are enabled
+                        iconSize = 18f
+                    }
+
+                    innerContainer += modDisplay!!
+                }
+
+                (modDisplay as ModsIndicator).mods = if (room.gameplaySettings.isFreeMod) player.mods.values else null
+            }
 
             onActionLongPress = {
                 UIDropdown(this@RoomPlayerButton).apply dropdown@{

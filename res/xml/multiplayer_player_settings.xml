@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/mp_room_category_teams">
+    <PreferenceCategory android:title="@string/mp_room_category_lobby">
 
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/mp_team_names"
@@ -10,7 +10,14 @@
             android:key="player_team"
             android:summary="@string/mp_room_category_teams_summary"
             android:title="@string/mp_room_category_teams_title"
-            app:layout="@layout/settings_preference_bottom" />
+            app:layout="@layout/settings_preference" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="player_preferModAcronym"
+            android:summary="@string/mp_room_prefer_mod_acronym_summary"
+            android:title="@string/mp_room_prefer_mod_acronym_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 

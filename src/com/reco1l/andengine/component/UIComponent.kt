@@ -8,6 +8,7 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
+import com.rian.osu.math.Precision
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -22,6 +23,7 @@ import org.anddev.andengine.util.*
 import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -72,7 +74,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             else -> rawWidth
         }.coerceAtMost(maxWidth).coerceAtLeast(minWidth)
         set(value) {
-            if (rawWidth != value) {
+            if (!Precision.almostEquals(rawWidth, value)) {
                 rawWidth = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -120,7 +122,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             else -> rawHeight
         }.coerceAtMost(maxHeight).coerceAtLeast(minHeight)
         set(value) {
-            if (rawHeight != value) {
+            if (!Precision.almostEquals(rawHeight, value)) {
                 rawHeight = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -140,7 +142,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var contentWidth = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -151,7 +153,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var contentHeight = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
@@ -212,14 +214,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     //region Position related properties
 
     fun setX(value: Float) {
-        if (mX != value) {
+        if (!Precision.almostEquals(mX, value)) {
             mX = value
             invalidate(InvalidationFlag.Position)
         }
     }
 
     fun setY(value: Float) {
-        if (mY != value) {
+        if (!Precision.almostEquals(mY, value)) {
             mY = value
             invalidate(InvalidationFlag.Position)
         }
@@ -257,7 +259,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var translationX = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Transformations)
             }
@@ -269,7 +271,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var translationY = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Transformations)
             }
@@ -399,7 +401,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     /**
      * The corner radius of this component.
      */
-    var radius = 0f
+    open var radius = 0f
         set(value) {
             if (field != value) {
                 field = value
@@ -407,6 +409,18 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
                 border?.radius = value
             }
         }
+
+    /**
+     * The box used to draw the background of this component.
+     */
+    protected var background: UIBox? = null
+        private set
+
+    /**
+     * The box used to draw the border of this component.
+     */
+    protected var border: UIBox? = null
+        private set
 
     //endregion
 
@@ -428,14 +442,17 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
 
     private var invalidationFlags = InvalidationFlag.All
-    private var background: UIBox? = null
-    private var border: UIBox? = null
 
     private val inputBindings = arrayOfNulls<UIComponent>(10)
 
     //endregion
 
     //region Invalidation
+
+    /**
+     * Whether to ignore invalidations.
+     */
+    var ignoreInvlidations = false
 
     /**
      * Adds the given flag to the invalidation list. Depending on each flag it will trigger a different action.
@@ -607,7 +624,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      * Sets the position of the entity.
      */
     override fun setPosition(x: Float, y: Float) {
-        if (mX != x || mY != y) {
+        if (!Precision.almostEquals(mX, x) || !Precision.almostEquals(mY, y)) {
             mX = x
             mY = y
             invalidate(InvalidationFlag.Position)
@@ -724,23 +741,28 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     /**
      * Called when invalidations needs to be run.
      */
-    open fun onHandleInvalidations() {
+    open fun onHandleInvalidations(flags: Int = this.invalidationFlags) {
 
-        val flags = invalidationFlags
+        if (flags != 0) {
+            //Log.d("UIComponent", "${this::class.simpleName}: ${InvalidationFlag.toString(invalidationFlags)}")
+        }
 
+        val parent = parent as? UIComponent
         var propagateToChildrenFlags = 0
         var propagateToParentFlags = 0
 
         if (flags and InvalidationFlag.Content != 0) {
             onContentChanged()
-            propagateToChildrenFlags = InvalidationFlag.Content
             propagateToParentFlags = InvalidationFlag.Content
         }
 
         if (flags and InvalidationFlag.Size != 0) {
             onSizeChanged()
             propagateToChildrenFlags = InvalidationFlag.Content
-            propagateToParentFlags = InvalidationFlag.Content
+
+            if (parent?.rawWidth == Size.Auto || parent?.rawHeight == Size.Auto) {
+                propagateToParentFlags = InvalidationFlag.Content
+            }
         }
 
         if (flags and InvalidationFlag.Position != 0) {
@@ -764,14 +786,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         if (propagateToParentFlags != 0) {
             val parent = parent
             if (parent is UIComponent) {
-                parent.invalidate(propagateToParentFlags)
+                parent.onHandleInvalidations(propagateToParentFlags)
             }
         }
 
         if (propagateToChildrenFlags != 0) {
             forEach { child ->
                 if (child is UIComponent) {
-                    child.invalidate(propagateToChildrenFlags)
+                    child.onHandleInvalidations(propagateToChildrenFlags)
                 }
             }
         }
@@ -782,7 +804,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
-        onHandleInvalidations()
+        if (!ignoreInvlidations) {
+            onHandleInvalidations()
+        }
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)
@@ -906,7 +930,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     override fun setScaleY(pScaleY: Float) = setScale(mScaleX, pScaleY)
     override fun setScale(pScale: Float) = setScale(pScale, pScale)
     override fun setScale(pScaleX: Float, pScaleY: Float) {
-        if (mScaleX != pScaleX || mScaleY != pScaleY) {
+        if (!Precision.almostEquals(mScaleX, pScaleX) || !Precision.almostEquals(mScaleY, pScaleY)) {
             mScaleX = pScaleX
             mScaleY = pScaleY
             invalidate(InvalidationFlag.Transformations)

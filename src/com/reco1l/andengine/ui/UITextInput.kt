@@ -87,6 +87,58 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
      */
     var placeholder by placeholderEntity::text
 
+    /**
+     * The input type for the text field. This controls the keyboard type and input behavior.
+     *
+     * Common values include:
+     * - [InputType.TYPE_CLASS_TEXT] or [InputType.TYPE_TEXT_VARIATION_PASSWORD] for passwords
+     * - [InputType.TYPE_CLASS_NUMBER] for numbers
+     * - [InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS] for emails
+     *
+     * @see InputType
+     */
+    var inputType: Int
+        get() = internalEditText.inputType
+        set(value) {
+            internalEditText.inputType = value
+            updateVisuals()
+        }
+
+
+    /**
+     * Checks if the current input type is a password field.
+     */
+    private fun isPasswordField(): Boolean {
+        val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val inputClass = inputType and InputType.TYPE_MASK_CLASS
+
+        return when {
+            // Text password
+            inputClass == InputType.TYPE_CLASS_TEXT &&
+            (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+             variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+             variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) -> true
+
+            // Number password
+            inputClass == InputType.TYPE_CLASS_NUMBER &&
+            variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD -> true
+
+            else -> false
+        }
+    }
+
+    /**
+     * Returns the display text based on whether this is a password field or not.
+     */
+    private fun getDisplayText(text: String): String {
+        return if (isPasswordField()) {
+            // Replace each character with a bullet point
+            "•".repeat(text.codePointCount(0, text.length))
+        } else {
+            text
+        }
+    }
+
 
     private var cursorFading = false
     private var elapsedTimeSec = 0f
@@ -365,7 +417,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     }
 
     private fun updateVisuals() {
-        textComponent.text = value
+        textComponent.text = getDisplayText(value)
         placeholderEntity.isVisible = value.isEmpty()
     }
 

@@ -1,13 +1,13 @@
 package com.osudroid.ui.v2.mainmenu
 
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.component.scaleCenter
 import com.reco1l.andengine.shape.UITriangle
 import com.reco1l.andengine.theme.Colors
 import com.reco1l.framework.Color4
 import com.reco1l.toolkt.kotlin.fastForEach
-import com.reco1l.toolkt.kotlin.fastForEachIndexed
 import org.anddev.andengine.engine.camera.Camera
 import javax.microedition.khronos.opengles.GL10
 import kotlin.random.Random
@@ -15,12 +15,12 @@ import kotlin.random.Random
 class TrianglesDispenser : UIComponent() {
 
     /**
-     * The min size of triangles relative to the dispenser size.
+     * The minimum scale factor for triangles.
      */
     var triangleMinSize = 0.2f
 
     /**
-     * The max size of triangles relative to the dispenser size.
+     * The maximum scale factor for triangles.
      */
     var triangleMaxSize = 0.4f
 
@@ -55,6 +55,13 @@ class TrianglesDispenser : UIComponent() {
     val triangle = UITriangle()
 
 
+    /**
+     * The base size of the triangle shape relative to the dispenser height.
+     */
+    private val triangleBaseSize: Float
+        get() = height * 0.6f
+
+
     private var activeTriangles = mutableListOf<TriangleInfo>()
 
     private var spawnTimer = 0f
@@ -62,10 +69,16 @@ class TrianglesDispenser : UIComponent() {
 
     init {
         attachChild(triangle.apply {
-            width = triangleMinSize
             color = Colors.White
             scaleCenter = Anchor.Center
+            ignoreInvlidations = true
         })
+    }
+
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        triangle.width = triangleBaseSize
+        triangle.height = triangleBaseSize
     }
 
 
@@ -85,16 +98,16 @@ class TrianglesDispenser : UIComponent() {
             info.update(deltaTimeSec)
         }
 
-        // Remove triangles that went off screen (above the dispenser)
-        activeTriangles.removeAll { it.y < -it.size }
+        activeTriangles.removeAll { it.y < -(triangleBaseSize * it.scale) }
 
         super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
-        activeTriangles.fastForEachIndexed { index, info ->
-            triangle.width = info.size
-            triangle.height = info.size
+        triangle.onHandleInvalidations()
+
+        activeTriangles.fastForEach { info ->
+            triangle.setScale(info.scale)
             triangle.y = info.y
             triangle.x = info.x
             triangle.color = info.color
@@ -109,7 +122,7 @@ class TrianglesDispenser : UIComponent() {
 
 
     private fun spawnTriangle() {
-        val size = height * Random.nextFloat().let {
+        val scale = Random.nextFloat().let {
             triangleMinSize + it * (triangleMaxSize - triangleMinSize)
         }
 
@@ -119,18 +132,18 @@ class TrianglesDispenser : UIComponent() {
 
         val color = colorPalette.random()
         val x = Random.nextFloat() * width
-        val y = height + size
+        val y = height + triangleBaseSize * scale
 
         val rotation = if (Random.nextBoolean()) 0f else 180f
 
-        activeTriangles.add(TriangleInfo(x, y, size, velocity, color, rotation))
+        activeTriangles.add(TriangleInfo(x, y, scale, velocity, color, rotation))
     }
 
 
     data class TriangleInfo(
         var x: Float,
         var y: Float,
-        var size: Float,
+        var scale: Float,
         var velocity: Float,
         var color: Color4,
         var rotation: Float,

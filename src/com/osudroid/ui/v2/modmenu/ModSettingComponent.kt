@@ -10,7 +10,7 @@ import com.rian.osu.mods.settings.ModSetting
 /**
  * Interface for a component that controls a [ModSetting].
  */
-interface IModSettingComponent<V : Any?> {
+interface IModSettingComponent<V> {
     /**
      * The [Mod] that this [IModSettingComponent] belongs to.
      */
@@ -40,7 +40,7 @@ interface IModSettingComponent<V : Any?> {
  * @param TSettingValue The type of the value in the [ModSetting].
  * @param TControlValue The type of the value in the [FormControl] that is used to display this [ModSettingComponent].
  */
-sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
+sealed class ModSettingComponent<TSettingValue, TControlValue : Any>(
     final override val mod: Mod,
     final override val setting: ModSetting<TSettingValue>
 ) : UIContainer(), IModSettingComponent<TSettingValue> {
@@ -62,11 +62,7 @@ sealed class ModSettingComponent<TSettingValue : Any?, TControlValue : Any>(
         }
     }
 
-    final override var isEnabled
-        get() = control.isEnabled
-        set(value) {
-            control.isEnabled = value
-        }
+    final override var isEnabled by control::isEnabled
 
     init {
         width = Size.Full

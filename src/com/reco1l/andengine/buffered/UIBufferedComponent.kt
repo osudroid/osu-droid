@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import android.util.Log
 import com.reco1l.andengine.component.*
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.shape.Shape.*
@@ -10,19 +11,48 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * An entity that uses a buffer to draw itself.
  */
-abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
+abstract class UIBufferedComponent<T : IBuffer> : UIComponent() {
+
+    override var radius: Float
+        get() = super.radius
+        set(value) {
+            if (super.radius != value) {
+                super.radius = value
+                requestBufferUpdate()
+            }
+        }
 
     /**
      * The buffer itself.
      */
-    open var buffer: T? = null
+    var buffer: T? = null
+        get() = bufferReference?.get() ?: field
         set(value) {
-            if (field != value) {
-                field?.finalize()
-                field = value
+            val current = bufferReference?.get() ?: field
+            if (current != value) {
+                current?.finalize()
+                bufferReference?.set(value) ?: run { field = value }
             }
         }
 
+    /**
+     * A mutable reference to a shared buffer. This allows multiple components to share
+     * the same buffer instance. When the buffer is updated via [buffer], all components
+     * that share this reference will see the change.
+     *
+     * To share a buffer between components, create a single [MutableReference] instance
+     * and assign it to all components that should share the buffer:
+     *
+     * ```kotlin
+     * val sharedRef = MutableReference<MyBuffer>(null)
+     * component1.bufferReference = sharedRef
+     * component2.bufferReference = sharedRef
+     *
+     * // Now when you set the buffer on one component, all components see it
+     * component1.buffer = myBuffer // component2 will also use myBuffer
+     * ```
+     */
+    var bufferReference: MutableReference<T?>? = null
 
     /**
      * The blend information of the entity.
@@ -39,18 +69,17 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      */
     var clearInfo = ClearInfo.None
 
-
     /**
-     * Indicates whether a new buffer needs to be created.
+     * The buffer sharing mode
      */
-    protected var needsNewBuffer = true
-        private set
+    var bufferSharingMode = BufferSharingMode.Off
+        set(value) {
+            field = value
+            buffer?.sharingMode = value
+        }
 
-    /**
-     * Indicates whether the buffer needs to be updated.
-     */
-    protected var needsBufferUpdate = true
-        private set
+
+    private var needsBufferUpdate = true
 
 
     fun setBlendFunction(source: Int, destination: Int) {
@@ -61,20 +90,30 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     //region Buffer lifecycle
 
     /**
-     * Called when the buffer needs to be built.
+     * Determines if the current buffer can be reused instead of creating a new one.
+     *
+     * Override this method to implement custom buffer reuse logic based on buffer properties.
+     * Return `true` if the existing buffer is compatible and can be reused, `false` otherwise.
+     *
+     * @param buffer The current buffer to check for reusability
+     * @return `true` if the buffer can be reused, `false` if a new buffer should be created
      */
-    protected abstract fun onCreateBuffer(): T?
+    protected open fun canReuseBuffer(buffer: T): Boolean = false
+
+    /**
+     * Called when a new buffer needs to be created.
+     */
+    protected abstract fun createBuffer(): T
 
     /**
      * Called when the buffer needs to be updated.
      */
-    abstract fun onUpdateBuffer()
+    protected abstract fun onUpdateBuffer()
 
 
-    fun requestNewBuffer() {
-        needsNewBuffer = true
-    }
-
+    /**
+     * Requests the buffer to be updated.
+     */
     fun requestBufferUpdate() {
         needsBufferUpdate = true
     }
@@ -85,25 +124,27 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        requestNewBuffer()
+        requestBufferUpdate()
     }
 
-    override fun onHandleInvalidations() {
-
-        if (needsNewBuffer) {
-            needsNewBuffer = false
-            buffer = onCreateBuffer()
-            requestBufferUpdate()
-        }
-
-        super.onHandleInvalidations()
+    override fun onHandleInvalidations(flags: Int) {
+        super.onHandleInvalidations(flags)
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.
         if (needsBufferUpdate) {
             needsBufferUpdate = false
 
+            val currentBuffer = buffer
+            if (currentBuffer == null || !canReuseBuffer(currentBuffer)) {
+                if (currentBuffer != null) {
+                    Log.d("UIBufferedComponent", "Cannot reuse buffer, creating a new one. Type: ${currentBuffer::class}")
+                }
+                buffer = createBuffer()
+            }
+
             val buffer = buffer
+            buffer?.sharingMode = bufferSharingMode
 
             // If the buffer is shared and its sharing mode is dynamic, we
             // need to update it before drawing every frame, this might be

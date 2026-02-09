@@ -144,17 +144,11 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
             }
 
         }
+
+        updateTrigger()
     }
 
-    override fun onValueChanged() {
-        super.onValueChanged()
-
-        if (value.isEmpty()) {
-            button.text = placeholder
-            dropdown.forEachButton { it.isSelected = false }
-            return
-        }
-
+    private fun updateTrigger() {
         when (selectionMode) {
 
             SelectionMode.Single -> {
@@ -166,6 +160,18 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
                 button.text = options.filter { o -> o.value in value }.joinToString { it.text }
             }
         }
+    }
+
+    override fun onValueChanged() {
+        super.onValueChanged()
+
+        if (value.isEmpty()) {
+            button.text = placeholder
+            dropdown.forEachButton { it.isSelected = false }
+            return
+        }
+
+        updateTrigger()
 
         buttons.forEach { (option, button) ->
             button.isSelected = option.value in value

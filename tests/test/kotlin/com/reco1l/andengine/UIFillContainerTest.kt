@@ -31,10 +31,11 @@ class UIFillContainerTest {
                 component2 = this
             }
 
+            onHandleInvalidations()
         }
 
-        assertEquals(component1.width, 100f / 2)
-        assertEquals(component2.width, 100f / 2)
+        assertEquals(100f / 2, component1.width)
+        assertEquals(100f / 2, component2.width)
     }
 
 }
