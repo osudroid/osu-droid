@@ -13,7 +13,6 @@ import androidx.room.Update
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
-import org.json.JSONException
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -143,7 +142,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
 
     @JvmOverloads
-    @Throws(JSONException::class)
+    @Throws(IllegalArgumentException::class)
     fun toStatisticV2(difficulty: BeatmapDifficulty? = null) = StatisticV2().also {
 
         it.playerName = playerName
