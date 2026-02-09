@@ -125,7 +125,7 @@ open class UIButton : UIClickableContainer(), ISizeVariable, IColorVariable {
     open fun processTouchFeedback(event: TouchEvent) {
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(0.9f, 0.3f).eased(Easing.Out)
+            scaleTo(0.95f, 0.3f).eased(Easing.Out)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
