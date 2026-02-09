@@ -22,6 +22,7 @@ import com.reco1l.andengine.ui.form.FormControl
 import com.reco1l.andengine.box
 import com.reco1l.andengine.component.CullingMode
 import com.reco1l.andengine.component.UIComponent
+import com.reco1l.andengine.container
 import com.reco1l.andengine.container.UIScrollableContainer
 import com.reco1l.andengine.textButton
 import com.reco1l.andengine.theme.FontSize
@@ -246,7 +247,7 @@ class SettingsMenu : UIScene() {
                     width = Size.Full
                     style = {
                         spacing = 4f.srem
-                        padding = Vec4(16f.srem, 4f.srem)
+                        padding = Vec4(14f.srem, 4f.srem)
                     }
                 }
             }
@@ -267,9 +268,6 @@ class SettingsMenu : UIScene() {
                 linearContainer {
                     orientation = Orientation.Vertical
                     width = Size.Full
-                    style = {
-                        spacing = 4f.srem
-                    }
 
                     text {
                         width = Size.Full
@@ -278,7 +276,7 @@ class SettingsMenu : UIScene() {
                             fontFamily = Fonts.TorusBold
                             fontSize = FontSize.LG
                             color = it.accentColor * 0.9f
-                            padding = Vec4(0f, 2f.srem)
+                            padding = Vec4(2f.srem)
                         }
                     }
 
@@ -349,30 +347,38 @@ class SettingsMenu : UIScene() {
                         if (control is FormControl<*, *>) {
                             control.key = option.key
                             control.label = title
-                            control.style += {
-                                padding = Vec4.Zero
-                            }
                             control.onValueChanged = option.onChange
+                            +control
                         } else if (control is UITextButton) {
                             control.text = title
                             control.colorVariant = ColorVariant.Primary
                             control.onActionUp = option.onClick
+
+                            container {
+                                width = Size.Full
+                                style = { padding = Vec4(2f.srem) }
+                                +control
+                            }
                         }
 
                         control.width = Size.Full
                         control.cullingMode = CullingMode.CameraBounds
 
                         option.onAttach(control)
-                        +control
                     }
                 }
 
                 if (index != content.size - 1) {
-                    box {
+                    container {
                         width = Size.Full
-                        height = 2f
-                        style = {
-                            color = it.accentColor.copy(alpha = 0.1f)
+                        style = { padding = Vec4(2f.srem, 0f) }
+
+                        box {
+                            width = Size.Full
+                            height = 2f
+                            style = {
+                                color = it.accentColor.copy(alpha = 0.1f)
+                            }
                         }
                     }
                 }
