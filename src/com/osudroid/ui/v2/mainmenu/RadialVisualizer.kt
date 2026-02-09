@@ -49,7 +49,7 @@ class RadialVisualizer : UIComponent() {
 
     private var bars = mutableListOf<BarInfo>()
     private var visualizerRadius = 0f
-    private var shiftIndex = 0
+    private var shiftOffset = 0f
 
 
     init {
@@ -90,12 +90,41 @@ class RadialVisualizer : UIComponent() {
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         val fft = songService.getAudioFFT(bars.size / 6)
-        val shiftStep = if (RythimManager.isKiai) 40 else 20
 
-        shiftIndex = (shiftIndex + (shiftStep * deltaTimeSec).toInt()) % (bars.size / 6)
+        // Synchronize rotation speed with the beat
+        val beatLength = RythimManager.beatLength
+        val rotationsPerBeat = if (RythimManager.isKiai) 0.25f else 0.1f
+
+        // Calculate rotation speed based on BPM
+        // rotationsPerSecond = rotationsPerBeat * beatsPerSecond
+        val rotationsPerSecond = if (beatLength > 0) {
+            rotationsPerBeat * (1000f / beatLength.toFloat())
+        } else {
+            0f
+        }
+
+        val fftSize = fft?.size ?: 1
+
+        // Accumulate rotation over time (doesn't reset each beat)
+        shiftOffset += rotationsPerSecond * fftSize * deltaTimeSec
+
+        // Keep offset in reasonable range
+        if (shiftOffset >= fftSize) {
+            shiftOffset %= fftSize.toFloat()
+        }
 
         bars.fastForEachIndexed { index, barInfo ->
-            barInfo.targetHeight = fft?.getOrNull((shiftIndex + index) % fft.size)?.let { it * magnitudeMultiplier } ?: 0f
+            val exactIndex = (shiftOffset + index) % fftSize
+            val fftIndex1 = exactIndex.toInt()
+            val fftIndex2 = (fftIndex1 + 1) % fftSize
+            val fraction = exactIndex - fftIndex1
+
+            // Interpolate between two consecutive FFT values for smooth transition
+            val value1 = fft?.getOrNull(fftIndex1) ?: 0f
+            val value2 = fft?.getOrNull(fftIndex2) ?: 0f
+            val interpolatedValue = value1 * (1f - fraction) + value2 * fraction
+
+            barInfo.targetHeight = interpolatedValue * magnitudeMultiplier
             barInfo.update(deltaTimeSec)
         }
         super.onManagedUpdate(deltaTimeSec)
