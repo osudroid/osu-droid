@@ -24,8 +24,8 @@ import com.reco1l.andengine.component.CullingMode
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.container.UIScrollableContainer
 import com.reco1l.andengine.textButton
-import com.reco1l.andengine.theme.Colors
-import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Fonts
 import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.andengine.ui.form.FloatPreferenceSlider
@@ -190,10 +190,10 @@ class SettingsMenu : UIScene() {
                 height = Size.Full
                 style = {
                     padding = Vec4(
-                        UIEngine.current.safeArea.x + 2f.srem,
-                        2f.srem,
-                        2f.srem,
-                        2f.srem
+                        UIEngine.current.safeArea.x + 4f.srem,
+                        4f.srem,
+                        4f.srem,
+                        4f.srem
                     )
                     backgroundColor = it.accentColor * 0.120f
                 }
@@ -262,7 +262,7 @@ class SettingsMenu : UIScene() {
 
         sectionContainer.apply {
 
-            content.forEach { category ->
+            content.forEachIndexed { index, category ->
 
                 linearContainer {
                     orientation = Orientation.Vertical
@@ -273,12 +273,11 @@ class SettingsMenu : UIScene() {
 
                     text {
                         width = Size.Full
-                        alignment = Anchor.Center
                         text = category.title
                         style = {
-                            radius = Radius.XL
+                            fontFamily = Fonts.TorusBold
+                            fontSize = FontSize.LG
                             color = it.accentColor * 0.9f
-                            backgroundColor = it.accentColor * 0.115f
                             padding = Vec4(0f, 2f.srem)
                         }
                     }
@@ -365,6 +364,16 @@ class SettingsMenu : UIScene() {
 
                         option.onAttach(control)
                         +control
+                    }
+                }
+
+                if (index != content.size - 1) {
+                    box {
+                        width = Size.Full
+                        height = 2f
+                        style = {
+                            color = it.accentColor.copy(alpha = 0.1f)
+                        }
                     }
                 }
 
