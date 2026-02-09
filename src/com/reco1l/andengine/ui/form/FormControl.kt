@@ -1,23 +1,28 @@
 package com.reco1l.andengine.ui.form
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
-import com.reco1l.framework.*
+import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
  * Represents a form control that is used to change the value of a property.
  */
 @Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
-abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearContainer() {
+abstract class FormControl<V : Any, C: UIControl<V>>(val initialValue: V): UILinearContainer() {
 
     /**
      * The control that is used to change the value.
@@ -41,35 +46,28 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
      * The text that is displayed as the label of the control.
      */
     open val labelText = UIText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
-        applyTheme = { color = it.accentColor }
+        style = {
+            fontSize = FontSize.SM
+            color = it.accentColor
+        }
     }
 
     /**
      * The button that is used to reset the value of the control to its default value.
      */
-    open val resetButton = UITextButton().apply {
+    open val resetButton = UIIconButton().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         scaleCenter = Anchor.Center
-        font = ResourceManager.getInstance().getFont("xs")
-        text = "Reset"
-        padding = Vec4(4f, 0f, 8f, 0f)
-        content.spacing = -2f
-        leadingIcon = UISprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture("reset")
-            width = 16f
-            height = 16f
-        }
+        icon = FontAwesomeIcon(Icon.RotateLeft)
+        colorVariant = ColorVariant.Secondary
+        sizeVariant = SizeVariant.Small
 
-        isVisible = false
         alpha = 0f
+        isVisible = false
         translationX = -10f
-
-        // We want to have a highlitghted color.
-        isSelected = true
 
         onActionUp = {
             if (this@FormControl.isVisible) {
@@ -133,12 +131,14 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
     var showResetButton = true
 
 
+    private var isPressed = false
+
+
     init {
-        width = FillParent
-        padding = Vec4(24f, 8f)
-        background = UIBox().apply {
-            color = Color4.White
-            alpha = 0f
+        width = Size.Full
+        style = {
+            padding = Vec4(2f.srem)
+            radius = Radius.LG
         }
     }
 
@@ -190,26 +190,19 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
             resetButton.isVisible = false
         }
 
+        backgroundColor = Interpolation.colorAt(deltaTimeSec.coerceIn(0f, 0.2f), backgroundColor, if (isPressed) Theme.current.accentColor.copy(alpha = 0.1f) else Colors.Transparent, 0f, 0.2f, Easing.OutQuart)
+
         super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
         if (!isEnabled) {
             return true
         }
 
-        val consumed = super.onAreaTouched(event, localX, localY)
+        isPressed = event.isActionDown
 
-        if (!consumed && event.isActionUp) {
-            background!!.clearModifiers(ModifierType.Sequence)
-            background!!.beginSequence {
-                fadeTo(0.2f)
-                fadeOut(0.2f)
-            }
-        }
-
-        return consumed
+        return super.onAreaTouched(event, localX, localY)
     }
 
 }

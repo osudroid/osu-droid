@@ -24,6 +24,11 @@ abstract class UIControl<T : Any>(initialValue: T) : UIContainer() {
             }
         }
 
+    /**
+     * A callback that is invoked when the value of the control changes.
+     */
+    var onValueChange: ((T) -> Unit)? = null
+
 
     //region Callbacks
 
@@ -36,6 +41,8 @@ abstract class UIControl<T : Any>(initialValue: T) : UIContainer() {
      * The callback that is called when the value of the control changes.
      */
     open fun onValueChanged() {
+        onValueChange?.invoke(value)
+
         var parent = parent
         while (parent != null) {
             if (parent is FormControl<*, *>) {

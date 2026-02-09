@@ -6,6 +6,9 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.util.Log
+import com.reco1l.andengine.buffered.Buffer
+import com.reco1l.andengine.buffered.BufferSharingMode
+import com.reco1l.andengine.buffered.IBuffer
 import com.reco1l.andengine.component.UIComponent
 import org.anddev.andengine.opengl.font.Font
 import org.anddev.andengine.opengl.texture.TextureOptions
@@ -18,6 +21,7 @@ class UIResourceManager(private val context: Context) {
     private val fonts = mutableMapOf<String, Font>()
     private val fontSubscribers = mutableMapOf<Font, MutableList<WeakReference<UIComponent>>>()
 
+    //region Fonts
 
     fun getOrStoreFont(size: Float, family: String): Font {
 
@@ -73,5 +77,7 @@ class UIResourceManager(private val context: Context) {
             }
         }
     }
+
+    //endregion
 
 }

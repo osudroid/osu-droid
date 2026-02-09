@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
+import androidx.annotation.Nullable;
+
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
 
@@ -25,6 +27,11 @@ public class BassAudioFunc {
      * The channel's frequency, in Hz.
      */
     private float frequency;
+
+    private static final long FFT_UPDATE_INTERVAL_MS = 96;
+    private float[] cachedFFT = null;
+    private long lastFFTUpdateTime = 0;
+    private int lastFFTResolution = -1;
 
     public BassAudioFunc() {
     }
@@ -147,11 +154,70 @@ public class BassAudioFunc {
         return spectrum;
     }
 
+    @Nullable
+    public float[] getAudioFFT(int resolution) {
+        long currentTime = System.currentTimeMillis();
+
+        // Return cached result if:
+        // 1. We have a cached result
+        // 2. The resolution hasn't changed
+        // 3. Not enough time has passed since last update
+        if (cachedFFT != null
+            && lastFFTResolution == resolution
+            && (currentTime - lastFFTUpdateTime) < FFT_UPDATE_INTERVAL_MS) {
+            return cachedFFT;
+        }
+
+        float[] rawFFT = getSpectrum();
+
+        if (rawFFT == null || resolution <= 0) {
+            return null; // Return last valid result if spectrum unavailable
+        }
+
+        float[] fft = new float[resolution];
+        int fftSize = rawFFT.length;
+
+        int l = 0;
+        for (int i = 0; i < resolution; i++) {
+
+            // We use logarithmic for better visual representation of audio spectrum in lower frequencies
+            int r = (int) Math.pow(2.0, i * 9.0 / (resolution - 1));
+
+            if (r <= l) {
+                r = l + 1;
+            }
+            if (r > fftSize - 1) {
+                r = fftSize - 1;
+            }
+
+            float peak = 0;
+            for (int j = l; j < r; j++) {
+                if (rawFFT[j] > peak) {
+                    peak = rawFFT[j];
+                }
+            }
+            fft[i] = peak;
+            l = r;
+        }
+
+        // Update cache
+        cachedFFT = fft;
+        lastFFTUpdateTime = currentTime;
+        lastFFTResolution = resolution;
+
+        return fft;
+    }
+
     private void doClear() {
         if (channel != 0 && BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PLAYING) {
             BASS.BASS_ChannelStop(channel);
         }
         BASS.BASS_StreamFree(channel);
+
+        // Clear FFT cache when audio changes
+        cachedFFT = null;
+        lastFFTUpdateTime = 0;
+        lastFFTResolution = -1;
     }
 
     public void setLoop(boolean isLoop) {

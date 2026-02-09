@@ -124,11 +124,11 @@ public class SliderBody extends UIContainer {
     }
 
 
-    public void setBorderWidth(float value) {
+    public void setTrackBorderWidth(float value) {
         borderWidth = value;
     }
 
-    public void setBorderColor(Color4 color) {
+    public void setTrackBorderColor(Color4 color) {
         border.setColor(color);
     }
 

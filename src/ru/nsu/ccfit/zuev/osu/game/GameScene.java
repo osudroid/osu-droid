@@ -386,7 +386,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
 
         if (!isStoryboardEnabled) {
@@ -449,7 +449,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
         var videoFilename = playableBeatmap.getEvents().videoFilename;
         videoEnabled = brightness > 0.02f && Config.getBoolean("enableVideo", false) && videoFilename != null;
 
@@ -492,7 +492,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void applyBackground() {
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
-        float brightness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getFloat("bgbrightness", 0.25f);
 
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
         float playfieldSize = Config.getPlayfieldSize();
@@ -1097,7 +1097,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // Attach the block area to the HUD so that it does not get scaled with the playfield.
                 var areaBox = new UIBox() {
                     {
-                        setCornerRadius(2f);
+                        setRadius(2f);
                         setColor(30f / 255f, 30f / 255f, 41f / 255f);
                         setAlpha(0.15f);
 

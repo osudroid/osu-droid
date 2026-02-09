@@ -2,58 +2,69 @@ package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 @Suppress("LeakingThis")
 open class FormSlider(initialValue: Float = 0f) : FormControl<Float, UISlider>(initialValue) {
 
     override val control = UISlider(initialValue).apply {
-        width = FillParent
+        width = Size.Full
     }
 
     override val valueText = UIText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
-        anchor = Anchor.CenterRight
-        origin = Anchor.CenterRight
-        padding = Vec4(6f, 0f)
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
         alignment = Anchor.Center
-        applyTheme = { color = it.accentColor }
-
-        background = UIBox().apply {
-            color = Color4.Black
-            alpha = 0.1f
-            cornerRadius = 8f
+        style = {
+            fontSize = FontSize.XS
+            padding = Vec4(2f.srem, 1f.srem)
+            color = it.accentColor
+            backgroundColor = Color4.Black.copy(alpha = 0.1f)
+            radius = Radius.MD
         }
     }
 
 
     init {
         orientation = Orientation.Vertical
-        spacing = 12f
-
-        linearContainer {
-            width = FillParent
-            padding = Vec4(0f, 12f)
-            spacing = 12f
-            +labelText
-            +resetButton
-
-            container {
-                width = FillParent
-                +valueText
-            }
+        style += {
+            spacing = 2f.srem
         }
+
+        fillContainer {
+            width = Size.Full
+
+            linearContainer {
+                width = Size.Full
+                style = {
+                    spacing = 2f.srem
+                }
+                +labelText
+                +resetButton
+            }
+
+            +valueText
+        }
+
         +control
     }
 }
 
-class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(Config.getFloat(preferenceKey, fallbackValue)) {
+class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(
+    initialValue = try {
+        Config.getFloat(preferenceKey, fallbackValue)
+    } catch (_: Exception) {
+        fallbackValue
+    }
+) {
     override fun onControlValueChanged() {
         Config.setFloat(preferenceKey, control.value)
         super.onControlValueChanged()

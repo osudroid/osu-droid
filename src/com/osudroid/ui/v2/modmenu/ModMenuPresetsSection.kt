@@ -8,11 +8,14 @@ import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.utils.*
-import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuPresetsSection : ModMenuSection("Presets") {
 
@@ -23,12 +26,14 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
 
     init {
-        width = 300f
+        style = {
+            width = 9f.rem
+        }
 
         addButton = UITextButton().apply {
-            width = FillParent
+            width = Size.Full
             text = "Add preset"
-            leadingIcon = UISprite(ResourceManager.getInstance().getTexture("plus"))
+            leadingIcon = FontAwesomeIcon(Icon.Plus)
             onActionUp = {
                 ModPresetsForm(this@ModMenuPresetsSection).show()
             }
@@ -91,7 +96,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
         init {
             orientation = Orientation.Vertical
             spacing = 8f
-            width = FillParent
+            width = Size.Full
             cullingMode = CullingMode.CameraBounds
 
             onActionUp = {
@@ -138,7 +143,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
             text {
                 text = preset.name
-                font = ResourceManager.getInstance().getFont("smallFont")
+                fontSize = FontSize.SM
             }
 
             +ModsIndicator().apply {
