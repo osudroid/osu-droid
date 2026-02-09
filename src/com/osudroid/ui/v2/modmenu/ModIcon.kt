@@ -19,6 +19,9 @@ import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 
+
+private val spriteBufferRef = MutableReference<UISprite.SpriteVBO?>(null)
+
 /**
  * The icon for a mod in the mod menu.
  */
@@ -63,6 +66,8 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
                 attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
                     width = Size.Full
                     height = Size.Full
+                    bufferReference = spriteBufferRef
+                    bufferSharingMode = BufferSharingMode.Dynamic
                 })
             } else {
                 backgroundColor = Theme.current.accentColor * 0.1f

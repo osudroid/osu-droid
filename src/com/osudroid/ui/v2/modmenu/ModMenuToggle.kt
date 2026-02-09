@@ -7,6 +7,7 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.FontSize
 import com.reco1l.andengine.theme.Size
@@ -16,6 +17,10 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.*
+
+
+private val backgroundBufferRef = MutableReference<UIBox.BoxVBO?>(null)
+private val textBufferRef = MutableReference<CompoundBuffer?>(null)
 
 class ModMenuToggle(var mod: Mod) : UIButton() {
 
@@ -34,6 +39,10 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
         width = Size.Full
         style += {
             padding = Vec4(3f.srem, 2f.srem)
+        }
+        background?.apply {
+            bufferReference = backgroundBufferRef
+            bufferSharingMode = BufferSharingMode.Static
         }
 
         fillContainer {
@@ -60,12 +69,16 @@ class ModMenuToggle(var mod: Mod) : UIButton() {
 
                 text {
                     text = mod.name
+                    bufferReference = textBufferRef
+                    bufferSharingMode = BufferSharingMode.Dynamic
                 }
 
                 text {
                     width = Size.Full
                     text = mod.description
                     clipToBounds = true
+                    bufferReference = textBufferRef
+                    bufferSharingMode = BufferSharingMode.Dynamic
                     style = {
                         fontSize = FontSize.XS
                         alpha = 0.75f

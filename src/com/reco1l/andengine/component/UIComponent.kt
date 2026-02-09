@@ -214,14 +214,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     //region Position related properties
 
     fun setX(value: Float) {
-        if (mX != value) {
+        if (!Precision.almostEquals(mX, value)) {
             mX = value
             invalidate(InvalidationFlag.Position)
         }
     }
 
     fun setY(value: Float) {
-        if (mY != value) {
+        if (!Precision.almostEquals(mY, value)) {
             mY = value
             invalidate(InvalidationFlag.Position)
         }
@@ -259,7 +259,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var translationX = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Transformations)
             }
@@ -271,7 +271,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var translationY = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
                 invalidate(InvalidationFlag.Transformations)
             }
@@ -616,7 +616,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      * Sets the position of the entity.
      */
     override fun setPosition(x: Float, y: Float) {
-        if (mX != x || mY != y) {
+        if (!Precision.almostEquals(mX, x) || !Precision.almostEquals(mY, y)) {
             mX = x
             mY = y
             invalidate(InvalidationFlag.Position)
@@ -733,23 +733,28 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     /**
      * Called when invalidations needs to be run.
      */
-    open fun onHandleInvalidations() {
+    open fun onHandleInvalidations(flags: Int = this.invalidationFlags) {
 
-        val flags = invalidationFlags
+        if (flags != 0) {
+            //Log.d("UIComponent", "${this::class.simpleName}: ${InvalidationFlag.toString(invalidationFlags)}")
+        }
 
+        val parent = parent as? UIComponent
         var propagateToChildrenFlags = 0
         var propagateToParentFlags = 0
 
         if (flags and InvalidationFlag.Content != 0) {
             onContentChanged()
-            propagateToChildrenFlags = InvalidationFlag.Content
             propagateToParentFlags = InvalidationFlag.Content
         }
 
         if (flags and InvalidationFlag.Size != 0) {
             onSizeChanged()
             propagateToChildrenFlags = InvalidationFlag.Content
-            propagateToParentFlags = InvalidationFlag.Content
+
+            if (parent?.rawWidth == Size.Auto || parent?.rawHeight == Size.Auto) {
+                propagateToParentFlags = InvalidationFlag.Content
+            }
         }
 
         if (flags and InvalidationFlag.Position != 0) {
@@ -773,14 +778,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         if (propagateToParentFlags != 0) {
             val parent = parent
             if (parent is UIComponent) {
-                parent.invalidate(propagateToParentFlags)
+                parent.onHandleInvalidations(propagateToParentFlags)
             }
         }
 
         if (propagateToChildrenFlags != 0) {
             forEach { child ->
                 if (child is UIComponent) {
-                    child.invalidate(propagateToChildrenFlags)
+                    child.onHandleInvalidations(propagateToChildrenFlags)
                 }
             }
         }
@@ -915,7 +920,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     override fun setScaleY(pScaleY: Float) = setScale(mScaleX, pScaleY)
     override fun setScale(pScale: Float) = setScale(pScale, pScale)
     override fun setScale(pScaleX: Float, pScaleY: Float) {
-        if (mScaleX != pScaleX || mScaleY != pScaleY) {
+        if (!Precision.almostEquals(mScaleX, pScaleX) || !Precision.almostEquals(mScaleY, pScaleY)) {
             mScaleX = pScaleX
             mScaleY = pScaleY
             invalidate(InvalidationFlag.Transformations)
