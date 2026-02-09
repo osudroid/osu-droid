@@ -346,6 +346,7 @@ public class Replay {
         var hitWindow = stat.getMod().contains(ModPrecise.class)
             ? new PreciseDroidHitWindow(difficulty.od)
             : new DroidHitWindow(difficulty.od);
+        float mehWindow = hitWindow.getMehWindow();
 
         var objects = beatmap.getHitObjects().objects;
 
@@ -387,8 +388,18 @@ public class Replay {
 
             // For other results, we need to individually check judgement for each nested object.
             // Slider head is unique in that the result is not stored in tickSet, but in the form of hit offset.
-            if (-hitWindow.getMehWindow() <= objReplayData.accuracy &&
-                    objReplayData.accuracy <= Math.min(hitWindow.getMehWindow(), slider.getDuration())) {
+            // Logic borrowed from GameplaySlider.onSliderHeadHit().
+            short accuracy = objReplayData.accuracy;
+            double sliderDuration = slider.getDuration();
+
+            if (replayVersion >= 6 || mehWindow <= sliderDuration) {
+                if (-mehWindow <= accuracy && accuracy <= Math.min(mehWindow, sliderDuration)) {
+                    stat.addSliderHeadHit();
+                }
+            } else if (accuracy <= sliderDuration) {
+                // In replays older than version 6, when the 50 hit window is longer than the duration of the slider,
+                // the slider head is considered to *not* exist if it was not hit until the slider is over.
+                // It is a very weird behavior, but that's what it actually was...
                 stat.addSliderHeadHit();
             }
 
