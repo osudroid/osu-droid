@@ -3,37 +3,39 @@ package com.osudroid.ui.v2.modmenu
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
-import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class ModMenuSection(name: String, private val toggles: List<UIButton> = listOf()) : UILinearContainer() {
+open class ModMenuSection(name: String, private val toggles: List<UIButton> = listOf()) : UIFillContainer() {
 
     protected val toggleContainer: UILinearContainer
 
 
     init {
         orientation = Orientation.Vertical
-        width = 340f
-        height = FillParent
+        height = Size.Full
         cullingMode = CullingMode.CameraBounds
-
-        background = UIBox().apply {
-            applyTheme = { color = it.accentColor * 0.1f }
-            cornerRadius = 16f
+        style = {
+            width = 14f.rem
+            backgroundColor = it.accentColor * 0.1f
+            radius = Radius.LG
         }
 
         +UIText().apply {
-            width = FillParent
-            text = name
+            width = Size.Full
+            text = name.uppercase()
             alignment = Anchor.Center
-            font = ResourceManager.getInstance().getFont("smallFont")
-            padding = Vec4(12f)
-            applyTheme = {
+            style = {
+                fontSize = FontSize.XS
+                padding = Vec4(3f.srem)
                 color = it.accentColor
                 alpha = 0.75f
             }
@@ -41,18 +43,20 @@ open class ModMenuSection(name: String, private val toggles: List<UIButton> = li
 
         +UIScrollableContainer().apply {
             scrollAxes = Axes.Y
-            width = FillParent
-            height = FillParent
+            width = Size.Full
+            height = Size.Full
             clipToBounds = true
 
             +UILinearContainer().apply {
-                width = FillParent
+                width = Size.Full
                 orientation = Orientation.Vertical
-                padding = Vec4(12f, 0f, 12f, 12f)
-                spacing = 16f
-                toggleContainer = this
+                style = {
+                    padding = Vec4(2f.srem, 0f, 2f.srem, 2f.srem)
+                    spacing = 2f.srem
+                }
 
                 toggles.fastForEach { +it }
+                toggleContainer = this
             }
         }
 

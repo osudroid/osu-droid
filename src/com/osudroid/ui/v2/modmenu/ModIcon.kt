@@ -1,22 +1,26 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
-import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.Color4
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
+
+
+private val spriteBufferRef = MutableReference<UISprite.SpriteVBO?>(null)
 
 /**
  * The icon for a mod in the mod menu.
@@ -45,7 +49,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
             acronymText.setScale(height * 0.6f / acronymText.contentHeight)
         }
 
-        (background as? UIBox)?.cornerRadius = height * 0.2f
+        radius = height * 0.2f
 
         super.onManagedDraw(gl, camera)
     }
@@ -57,24 +61,23 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
             val texture = fetchTextureRegion()
 
             if (texture != null) {
-                background = null
+                backgroundColor = Color4.Transparent
 
                 attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
-                    width = FillParent
-                    height = FillParent
-                    buffer = sharedSpriteVBO
+                    width = Size.Full
+                    height = Size.Full
+                    bufferReference = spriteBufferRef
+                    bufferSharingMode = BufferSharingMode.Dynamic
                 })
             } else {
-                background = UIBox().apply {
-                    applyTheme = { color = it.accentColor * 0.1f }
-                }
+                backgroundColor = Theme.current.accentColor * 0.1f
 
                 attachChild(UIText().apply {
                     anchor = Anchor.Center
                     origin = Anchor.Center
                     text = mod.acronym
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    applyTheme = { color = it.accentColor }
+                    fontSize = FontSize.SM
+                    style = { color = it.accentColor }
                 })
             }
 
@@ -88,8 +91,4 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
         shouldUpdateTexture = true
     }
 
-
-    companion object {
-        private val sharedSpriteVBO = UISprite.SpriteVBO().asSharedDynamically()
-    }
 }

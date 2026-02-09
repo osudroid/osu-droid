@@ -58,14 +58,3 @@ abstract class Buffer(
     }
 
 }
-
-
-fun <T : IBuffer> T.asSharedStatically(): T {
-    sharingMode = BufferSharingMode.Static
-    return this
-}
-
-fun <T : IBuffer> T.asSharedDynamically(): T {
-    sharingMode = BufferSharingMode.Dynamic
-    return this
-}
