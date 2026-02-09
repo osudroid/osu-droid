@@ -78,7 +78,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
     /**
      * Removes a hit object from this beatmap.
      *
-     * @param `object` The hit object to remove.
+     * @param obj The hit object to remove.
      * @return Whether the hit object was successfully removed.
      */
     open fun remove(obj: HitObject): Boolean {
