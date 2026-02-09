@@ -397,7 +397,7 @@ public class Replay {
                 stat.addSliderHeadHit();
             }
 
-            for (int j = 1; i < slider.getNestedHitObjects().size(); ++j) {
+            for (int j = 1; j < slider.getNestedHitObjects().size(); ++j) {
                 if (!objReplayData.tickSet.get(j - 1)) {
                     continue;
                 }
