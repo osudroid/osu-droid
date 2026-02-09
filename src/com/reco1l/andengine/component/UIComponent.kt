@@ -6,7 +6,9 @@ import com.osudroid.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.theme.Size
 import com.reco1l.andengine.ui.*
+import com.rian.osu.math.Precision
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -20,7 +22,8 @@ import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.util.*
 import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
-import kotlin.math.*
+import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -28,59 +31,25 @@ import kotlin.math.*
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
-
-    //region Axes properties
-
-    /**
-     * Determines which axes for the size of the entity are relative w.r.t the parent.
-     *
-     * * If the value is [Axes.None], the unit for both [width] and [height] will be absolute.
-     * * If the value is [Axes.X], the unit for [width] will be relative meanwhile [height] will remain as absolute.
-     * * If the value is [Axes.Y], the unit for [height] will be relative meanwhile [width] will remain as absolute.
-     * * If the value is [Axes.Both], both [width] and [height] will be relative.
-     *
-     * Relative values are calculated as a percentage of the parent's size minus its padding, that is, values passed
-     * to [width] or [height] will be treated as a percentage (values from 0 to 1).
-     */
-    open var relativeSizeAxes = Axes.None
-
-    /**
-     * Determines which axes for the position of the entity are relative w.r.t the parent.
-     *
-     * * If the value is [Axes.None], the unit for both [x][setX] and [y][setY] will be absolute.
-     * * If the value is [Axes.X], the unit for [x][setX] will be relative meanwhile [y][setY] will remain as absolute.
-     * * If the value is [Axes.Y], the unit for [y][setY] will be relative meanwhile [x][setX] will remain as absolute.
-     * * If the value is [Axes.Both], both [x][setX] and [y][setY] will be relative.
-     *
-     * Relative values are calculated as a percentage of the parent's size minus its padding, that is, values passed
-     * to [x][setX] or [y][setY] will be treated as a percentage (values from 0 to 1).
-     */
-    open var relativePositionAxes = Axes.None
-
-    //endregion
+abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Size related properties
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun computeSizeValue(value: Float, padding: Float, position: Float, isRelative: Boolean, contentSize: Float, containerSize: Float): Float {
-        return when (value) {
-            MatchContent -> contentSize + padding
-            FillParent -> containerSize - position
-            FitParent -> min(contentSize + padding, containerSize - position)
-
-            else -> if (isRelative) value * containerSize else value
-        }
-    }
+    /**
+     * Whether the component can shrink below its intrinsic size. By default it
+     * is true in order to pair default CSS's `flex-shrink` behavior.
+     */
+    var shrink = true
 
     /**
      * The minimum width of the entity.
      */
     var minWidth = 0f
+        get() = if (shrink) field else max(intrinsicWidth, field)
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
 
@@ -91,36 +60,45 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
+
     /**
      * The width of the entity.
      */
-    var width: Float = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.horizontal,
-            position = x,
-            isRelative = relativeSizeAxes.isHorizontal,
-            contentSize = contentWidth,
-            containerSize = parent.innerWidth,
-        ).coerceAtMost(maxWidth).coerceAtLeast(minWidth)
+    var width: Float
+        get() = when (rawWidth) {
+            Size.Auto -> intrinsicWidth
+            in Size.relativeSizeRange -> (parent?.innerWidth ?: 0f) * (rawWidth - Size.relativeSizeRange.start)
+            else -> rawWidth
+        }.coerceAtMost(maxWidth).coerceAtLeast(minWidth)
         set(value) {
-            if (field != value) {
-                field = value
-                invalidate(InvalidationFlag.Size)
+            if (!Precision.almostEquals(rawWidth, value)) {
+                rawWidth = value
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
+
+    /**
+     * Represents the width specified without any kind of calculation or constraint applied.
+     * * If the value is `-1` it means the width is set to [Size.Auto].
+     * * If the value is between `-2` and `-3` it means the width is set to a percentage value.
+     *
+     * @see Size
+     */
+    var rawWidth = 0f
+        private set
 
     /**
      * The minimum height of the entity.
      */
     var minHeight = 0f
+        get() = if (shrink) field else max(intrinsicHeight, field)
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
     /**
@@ -130,86 +108,120 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.Size)
-            }
-        }
-    /**
-     * The height of the entity.
-     */
-    var height = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.vertical,
-            position = y,
-            isRelative = relativeSizeAxes.isVertical,
-            contentSize = contentHeight,
-            containerSize = parent.innerHeight,
-        ).coerceAtMost(maxHeight).coerceAtLeast(minHeight)
-        set(value) {
-            if (field != value) {
-                field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
 
     /**
+     * The height of the entity.
+     */
+    var height: Float
+        get() = when (rawHeight) {
+            Size.Auto -> intrinsicHeight
+            in Size.relativeSizeRange -> (parent?.innerHeight ?: 0f) * (rawHeight - Size.relativeSizeRange.start)
+            else -> rawHeight
+        }.coerceAtMost(maxHeight).coerceAtLeast(minHeight)
+        set(value) {
+            if (!Precision.almostEquals(rawHeight, value)) {
+                rawHeight = value
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
+            }
+        }
+
+    /**
+     * Represents the height specified without any kind of calculation or constraint applied.
+     * * If the value is `-1` it means the height is set to [Size.Auto].
+     * * If the value is between `-2` and `-3` it means the height is set to a percentage value.
+     * @see Size
+     */
+    var rawHeight = 0f
+        private set
+
+    /**
      * The width of the content inside the entity.
      */
-    open var contentWidth = 0f
+    var contentWidth = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
 
     /**
      * The height of the content inside the entity.
      */
-    open var contentHeight = 0f
+    var contentHeight = 0f
         protected set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
 
     /**
      * The padding of the entity.
      */
-    open var padding = Vec4.Zero
+    var padding = Vec4.Zero
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.Size)
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
+
+
+    /**
+     * The inner width of the component, which is the width minus the horizontal padding.
+     * It can be equivalent to [contentWidth] if the component's width is set to [Size.Auto].
+     */
+    val innerWidth
+        get() = max(0f, width - padding.horizontal)
+
+    /**
+     * The inner height of the component, which is the height minus the vertical padding.
+     * It can be equivalent to [contentHeight] if the component's height is set to [Size.Auto].
+     */
+    val innerHeight
+        get() = max(0f, height - padding.vertical)
+
+    /**
+     * The intrinsic width of the entity, which is the content width plus the horizontal padding.
+     */
+    val intrinsicWidth
+        get() = max(contentWidth + padding.horizontal, 0f)
+
+    /**
+     * The intrinsic height of the entity, which is the content height plus the vertical padding.
+     */
+    val intrinsicHeight
+        get() = max(contentHeight + padding.vertical, 0f)
+
+    /**
+     * The width of this component with transformations applied.
+     */
+    val transformedWidth
+        get() = width * scaleX
+
+    /**
+     * The height of this component with transformations applied.
+     */
+    val transformedHeight
+        get() = height * scaleY
 
     //endregion
 
     //region Position related properties
 
-    override fun getX(): Float {
-        if (relativePositionAxes.isHorizontal) {
-            return mX * parent.innerWidth
-        }
-        return mX
-    }
     fun setX(value: Float) {
-        if (mX != value) {
+        if (!Precision.almostEquals(mX, value)) {
             mX = value
             invalidate(InvalidationFlag.Position)
         }
     }
 
-    override fun getY(): Float {
-        if (relativePositionAxes.isVertical) {
-            return mY * parent.innerHeight
-        }
-        return mY
-    }
     fun setY(value: Float) {
-        if (mY != value) {
+        if (!Precision.almostEquals(mY, value)) {
             mY = value
             invalidate(InvalidationFlag.Position)
         }
@@ -218,7 +230,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Where the entity should be anchored in the parent.
      */
-    open var anchor = Anchor.TopLeft
+    var anchor = Anchor.TopLeft
         set(value) {
             if (field != value) {
                 field = value
@@ -229,11 +241,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Where the entity's origin should be.
      */
-    open var origin = Anchor.TopLeft
+    var origin = Anchor.TopLeft
         set(value) {
             if (field != value) {
                 field = value
-
                 mRotationCenterX = value.x
                 mRotationCenterY = value.y
                 mScaleCenterX = value.x
@@ -243,71 +254,96 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
 
     /**
-     * The translation in the X axis.
+     * The translation in the X axis, translation does not trigger any kind of invalidation
+     * nor re-layout of the parent container. It is considered as a transformation.
      */
-    open var translationX = 0f
+    var translationX = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
-                invalidate(InvalidationFlag.Position)
+                invalidate(InvalidationFlag.Transformations)
             }
         }
 
     /**
-     * The translation in the Y axis.
+     * The translation in the Y axis, translation does not trigger any kind of invalidation
+     * nor re-layout of the parent container. It is considered as a transformation.
      */
-    open var translationY = 0f
+    var translationY = 0f
         set(value) {
-            if (field != value) {
+            if (!Precision.almostEquals(field, value)) {
                 field = value
-                invalidate(InvalidationFlag.Position)
+                invalidate(InvalidationFlag.Transformations)
             }
         }
+
+    /**
+     * The calculated anchor position for the X axis in the parent's coordinate system.
+     * This will be always 0 if the component has no parent.
+     */
+    val anchorPositionX
+        get() = (parent?.innerWidth ?: 0f) * anchor.x
+
+    /**
+     * The calculated anchor position for the Y axis in the parent's coordinate system.
+     * This will be always 0 if the component has no parent.
+     */
+    val anchorPositionY
+        get() = (parent?.innerHeight ?: 0f) * anchor.y
+
+    /**
+     * The calculated origin position for the X axis in the component's coordinate system.
+     */
+    val originPositionX
+        get() = width * origin.x
+
+    /**
+     * The calculated origin position for the Y axis in the component's coordinate system.
+     */
+    val originPositionY
+        get() = height * origin.y
+
+    /**
+     * The absolute position for the X axis of the entity taking into account the
+     * anchor and origin in the parent's coordinate system.
+     */
+    val absoluteX
+        get() = (if (attachmentMode == AttachmentMode.Child) parent.padding.left else 0f) + anchorPositionX - originPositionX + x + translationX
+
+    /**
+     * The absolute position for the Y axis of the entity taking into account the
+     * anchor and origin in the parent's coordinate system.
+     */
+    val absoluteY
+        get() = (if (attachmentMode == AttachmentMode.Child) parent.padding.top else 0f) + anchorPositionY - originPositionY + y + translationY
+
 
     //endregion
 
     //region Cosmetic properties
 
-    override var applyTheme: UIComponent.(theme: Theme) -> Unit = {}
-
     /**
-     * The background entity. This entity will be drawn before the entity children and will not be
-     * affected by padding.
+     * The style of this component.
      */
-    open var background: UIComponent? = null
+    var style: StyleApplier = {}
         set(value) {
             if (field != value) {
-                if (value?.parent != null) {
-                    Log.e("UIComponent", "The background entity is already attached to another entity.")
-                    return
-                }
-                field?.detachSelf()
                 field = value
-                field?.setParent(this, AttachmentMode.Decorator)
+                applyStyle()
             }
         }
 
     /**
-     * The foreground entity. This entity will be drawn after the entity children and will not be
-     * affected by padding.
+     * Applies the current style to the component.
      */
-    open var foreground: UIComponent? = null
-        set(value) {
-            if (field != value) {
-                if (value?.parent != null) {
-                    Log.e("UIComponent", "The foreground entity is already attached to another entity.")
-                    return
-                }
-                field?.detachSelf()
-                field = value
-                field?.setParent(this, AttachmentMode.Decorator)
-            }
-        }
+    fun applyStyle() {
+        onStyle(Theme.current)
+    }
 
     /**
      * The color of the entity boxed in a [Color4] object.
      */
-    open var color: Color4
+    var color: Color4
         get() = Color4(mRed, mGreen, mBlue, mAlpha)
         set(value) {
             mRed = value.red
@@ -319,33 +355,76 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Whether the entity's color should be multiplied by the color of its ancestor entities.
      */
-    open var inheritAncestorsColor = true
+    var inheritAncestorsColor = true
 
     /**
      * Whether the entity should clip its children.
      */
-    open var clipToBounds = false
+    var clipToBounds = false
+
+    /**
+     * The background color of this component.
+     */
+    var backgroundColor
+        get() = background?.color ?: Color4.Transparent
+        set(value) {
+            if (background?.color != value) {
+                initializeBackground()
+                background!!.color = value
+            }
+        }
+
+    /**
+     * The border color of this component.
+     */
+    var borderColor
+        get() = border?.color ?: Color4.Transparent
+        set(value) {
+            if (border?.color != value) {
+                initializeBorder()
+                border!!.color = value
+            }
+        }
+
+    /**
+     * The border width of this component.
+     */
+    var borderWidth
+        get() = border?.lineWidth ?: 0f
+        set(value) {
+            if (border?.lineWidth != value) {
+                initializeBorder()
+                border!!.lineWidth = value
+            }
+        }
+
+    /**
+     * The corner radius of this component.
+     */
+    open var radius = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                background?.radius = value
+                border?.radius = value
+            }
+        }
+
+    /**
+     * The box used to draw the background of this component.
+     */
+    protected var background: UIBox? = null
+        private set
+
+    /**
+     * The box used to draw the border of this component.
+     */
+    protected var border: UIBox? = null
+        private set
 
     //endregion
 
-    //region State properties
-
-    /**
-     * Whether the component is currently animating.
-     */
-    val isAnimating
-        get() = !mEntityModifiers.isNullOrEmpty()
-
-    /**
-     * The modifier pool used to manage the modifiers of this entity. By default [UniversalModifier.GlobalPool].
-     */
-    var modifierPool = UniversalModifier.GlobalPool
-
-    /**
-     * The mode in which the entity is attached to its parent.
-     */
-    var attachmentMode = AttachmentMode.None
-        private set
+    //region Other properties
 
     /**
      * Whether the entity should be culled when it is outside the parent's bounds.
@@ -353,16 +432,15 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     var cullingMode = CullingMode.Disabled
 
     /**
-     * The current invalidation flags. Indicates which properties were updated and need to be handled.
-     *
-     * @see InvalidationFlag
+     * The mode in which the entity is attached to its parent.
      */
-    protected var invalidationFlags = InvalidationFlag.Position or InvalidationFlag.Size
+    var attachmentMode = AttachmentMode.None
+        private set
 
-    /**
-     * The input bindings of the entity. This is used to handle touch events.
-     */
-    protected val inputBindings = arrayOfNulls<ITouchArea>(10)
+
+    private var invalidationFlags = InvalidationFlag.All
+
+    private val inputBindings = arrayOfNulls<UIComponent>(10)
 
     //endregion
 
@@ -377,14 +455,26 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         invalidationFlags = invalidationFlags or flag
     }
 
-    //endregion
+    private fun initializeBackground() {
+        if (background == null) {
+            background = UIBox().apply {
+                setParent(this@UIComponent, AttachmentMode.Decorator)
+                radius = this@UIComponent.radius
+                color = Color4.Transparent
+            }
+        }
+    }
 
-    //region Events
-
-    /**
-     * Called every update thread tick, avoid heavy operations here.
-     */
-    var onUpdateTick: OnUpdateEvent? = null
+    private fun initializeBorder() {
+        if (border == null) {
+            border = UIBox().apply {
+                setParent(this@UIComponent, AttachmentMode.Decorator)
+                paintStyle = PaintStyle.Outline
+                radius = this@UIComponent.radius
+                color = Color4.Transparent
+            }
+        }
+    }
 
     //endregion
 
@@ -393,7 +483,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Called when the content of the entity has changed. This usually is called when a child is added or removed.
      */
-    protected open fun onContentChanged() {}
+    open fun onContentChanged() {}
 
 
     override fun detachSelf(): Boolean {
@@ -428,6 +518,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
 
         if (attachmentMode == AttachmentMode.Decorator) {
+            // Set color-inheritance to false for decorators by default, but allowing to
+            // change this after attaching if needed.
+            inheritAncestorsColor = false
+
             if (entity == null) {
                 onDetached()
             } else {
@@ -444,7 +538,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when a child is attached to this entity.
      */
     open fun onChildAttached(child: IEntity) {
-        onContentChanged()
+        invalidate(InvalidationFlag.Content)
     }
 
     /**
@@ -454,16 +548,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         invalidate(InvalidationFlag.Content)
     }
 
-    override fun setVisible(value: Boolean) {
-        if (mVisible != value) {
-            mVisible = value
-            invalidate(InvalidationFlag.Size)
-        }
-    }
-
     override fun onAttached() {
-        onThemeChanged(Theme.current)
-        onHandleInvalidations(false)
+        applyStyle()
     }
 
     //endregion
@@ -471,35 +557,16 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     //region Size
 
     /**
-     * Called when the size of a child entity changes.
-     */
-    open fun onChildSizeChanged(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
-    /**
      * Called when the size of this entity changes.
      */
-    open fun onSizeChanged() {
-        (parent as? UIComponent)?.onChildSizeChanged(this)
-    }
+    open fun onSizeChanged() {}
 
     /**
      * Sets the size of the entity.
      */
-    open fun setSize(x: Float, y: Float) {
+    fun setSize(x: Float, y: Float) {
         width = x
         height = y
-    }
-
-    @Deprecated("Keeping this for the current usages.", ReplaceWith("transformedWidth"))
-    fun getWidthScaled(): Float {
-        return width * scaleX
-    }
-
-    @Deprecated("Keeping this for the current usages.", ReplaceWith("transformedHeight"))
-    fun getHeightScaled(): Float {
-        return height * scaleY
     }
 
     //endregion
@@ -522,6 +589,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
             CullingMode.ParentBounds -> {
 
+                val parent = parent
                 if (parent !is UIComponent && parent !is UIScene) {
                     return false
                 }
@@ -531,7 +599,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                 val x2 = x1 + width
                 val y2 = y1 + height
 
-                return x2 < 0f || y2 < 0f || x1 > parent.getWidth() || y1 > parent.getHeight()
+                return x2 < 0f || y2 < 0f || x1 > parent.width || y1 > parent.height
             }
 
             else -> return false
@@ -540,25 +608,19 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     }
 
     /**
-     * Called when the position of a child entity changes.
-     */
-    open fun onChildPositionChanged(child: IEntity) {
-        invalidate(InvalidationFlag.Content)
-    }
-
-    /**
      * Called when the position of this entity changes.
      */
-    open fun onPositionChanged() {
-        (parent as? UIComponent)?.onChildPositionChanged(this)
-    }
+    open fun onPositionChanged() {}
 
     /**
      * Sets the position of the entity.
      */
     override fun setPosition(x: Float, y: Float) {
-        setX(x)
-        setY(y)
+        if (!Precision.almostEquals(mX, x) || !Precision.almostEquals(mY, y)) {
+            mX = x
+            mY = y
+            invalidate(InvalidationFlag.Position)
+        }
     }
 
     //endregion
@@ -600,32 +662,30 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
     }
 
-    open fun onApplyColor(gl: GL10) {
+    fun onApplyColor(gl: GL10) {
 
         var red = mRed
         var green = mGreen
         var blue = mBlue
         var alpha = mAlpha
         var parent = parent
-        var multiplyColor = inheritAncestorsColor
+        var inheritColor = inheritAncestorsColor
 
         while (parent != null) {
 
-            // If this entity is a decoration we only multiply the alpha.
-            if (attachmentMode == AttachmentMode.Child && multiplyColor) {
+            if (inheritColor) {
                 red *= parent.red
                 green *= parent.green
                 blue *= parent.blue
             }
             alpha *= parent.alpha
 
-            // We'll assume at this point there's no need to keep multiplying.
-            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+            if (red == 0f && green == 0f && blue == 0f || alpha == 0f) {
                 break
             }
 
             if (parent is UIComponent && !parent.inheritAncestorsColor) {
-                multiplyColor = false
+                inheritColor = false
             }
 
             parent = parent.parent
@@ -639,15 +699,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         val isCulled = isCulled(camera)
 
         if (!isVisible || isCulled) {
-            // We're going to still handle invalidations flags even if the entity is not visible
-            // because some of them like size-related flags might change the parent's layout.
-            onHandleInvalidations()
-
-            mChildren?.fastForEach { child ->
-                if (child is UIComponent) {
-                    onHandleInvalidations()
-                }
-            }
             return
         }
 
@@ -678,79 +729,92 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
     }
 
+
     /**
-     * Called when an invalidation flag should be processed.
+     * Called when invalidations needs to be run.
      */
-    protected open fun processInvalidationFlag(flag: Int) {
-        when (flag) {
-            InvalidationFlag.Position -> onPositionChanged()
-            InvalidationFlag.Content -> onContentChanged()
-            InvalidationFlag.Size -> onSizeChanged()
-            InvalidationFlag.Transformations -> onInvalidateTransformations()
-            InvalidationFlag.InputBindings -> onInvalidateInputBindings()
-        }
-    }
+    open fun onHandleInvalidations(flags: Int = this.invalidationFlags) {
 
-    open fun onHandleInvalidations(restoreFlags: Boolean = true) {
-
-        val flags = invalidationFlags
-
-        if (flags == 0) {
-            return
+        if (flags != 0) {
+            //Log.d("UIComponent", "${this::class.simpleName}: ${InvalidationFlag.toString(invalidationFlags)}")
         }
 
-        operator fun Int.contains(flag: Int): Boolean {
-            return flags and flag != 0
+        val parent = parent as? UIComponent
+        var propagateToChildrenFlags = 0
+        var propagateToParentFlags = 0
+
+        if (flags and InvalidationFlag.Content != 0) {
+            onContentChanged()
+            propagateToParentFlags = InvalidationFlag.Content
         }
 
-        if (InvalidationFlag.Size in flags) {
-            processInvalidationFlag(InvalidationFlag.Size)
+        if (flags and InvalidationFlag.Size != 0) {
+            onSizeChanged()
+            propagateToChildrenFlags = InvalidationFlag.Content
+
+            if (parent?.rawWidth == Size.Auto || parent?.rawHeight == Size.Auto) {
+                propagateToParentFlags = InvalidationFlag.Content
+            }
         }
 
-        if (InvalidationFlag.Content in flags) {
-            processInvalidationFlag(InvalidationFlag.Content)
+        if (flags and InvalidationFlag.Position != 0) {
+            onPositionChanged()
+            propagateToParentFlags = InvalidationFlag.Content
         }
 
-        if (InvalidationFlag.Position in flags) {
-            processInvalidationFlag(InvalidationFlag.Position)
+        // Transformations have and special case since they are affected by position and size changes as well
+        // but not always, as an example scale and rotation do not trigger Position or Size flags but they're
+        // still transformations.
+        if (flags and InvalidationFlag.Transformations != 0 || flags and InvalidationFlag.Position != 0 || flags and InvalidationFlag.Size != 0) {
+            onInvalidateTransformations()
+            propagateToChildrenFlags = propagateToChildrenFlags or InvalidationFlag.Transformations
         }
 
-        if (InvalidationFlag.Transformations in flags || InvalidationFlag.Size in flags || InvalidationFlag.Position in flags) {
-            processInvalidationFlag(InvalidationFlag.Transformations)
+        if (flags and InvalidationFlag.InputBindings != 0) {
+            onInvalidateInputBindings()
+            propagateToChildrenFlags = propagateToChildrenFlags or InvalidationFlag.InputBindings
         }
 
-        if (InvalidationFlag.InputBindings in flags) {
-            processInvalidationFlag(InvalidationFlag.InputBindings)
+        if (propagateToParentFlags != 0) {
+            val parent = parent
+            if (parent is UIComponent) {
+                parent.onHandleInvalidations(propagateToParentFlags)
+            }
         }
 
-        // During the invalidation process the flags could be changed.
-        if (this.invalidationFlags == flags && restoreFlags) {
-            this.invalidationFlags = 0
+        if (propagateToChildrenFlags != 0) {
+            forEach { child ->
+                if (child is UIComponent) {
+                    child.onHandleInvalidations(propagateToChildrenFlags)
+                }
+            }
         }
 
-        background?.onHandleInvalidations()
-        foreground?.onHandleInvalidations()
+        if (invalidationFlags == flags) {
+            invalidationFlags = 0
+        }
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
-
         onHandleInvalidations()
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)
 
         background?.setSize(width, height)
+        background?.onHandleInvalidations()
         background?.onDraw(gl, camera)
 
         doDraw(gl, camera)
         onDrawChildren(gl, camera)
 
-        foreground?.setSize(width, height)
-        foreground?.onDraw(gl, camera)
+        border?.setSize(width, height)
+        border?.onHandleInvalidations()
+        border?.onDraw(gl, camera)
 
-
-        if (BuildSettings.SHOW_ENTITY_BOUNDARIES && DEBUG_FOREGROUND != this) {
+        if (BuildSettings.SHOW_ENTITY_BOUNDARIES && DEBUG_FOREGROUND != this && attachmentMode != AttachmentMode.Decorator) {
             DEBUG_FOREGROUND.setSize(width, height)
+            DEBUG_FOREGROUND.onHandleInvalidations()
             DEBUG_FOREGROUND.onDraw(gl, camera)
         }
 
@@ -774,11 +838,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        onUpdateTick?.invoke(deltaTimeSec)
-
         background?.onManagedUpdate(deltaTimeSec)
-        foreground?.onManagedUpdate(deltaTimeSec)
+        border?.onManagedUpdate(deltaTimeSec)
 
         super.onManagedUpdate(deltaTimeSec)
     }
@@ -825,12 +886,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         // This recreates and calculates the transformation matrices.
         localToParentTransformation
         parentToLocalTransformation
-
-        mChildren?.fastForEach {
-            if (it is UIComponent) {
-                it.onInvalidateTransformations()
-            }
-        }
     }
 
 
@@ -865,7 +920,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     override fun setScaleY(pScaleY: Float) = setScale(mScaleX, pScaleY)
     override fun setScale(pScale: Float) = setScale(pScale, pScale)
     override fun setScale(pScaleX: Float, pScaleY: Float) {
-        if (mScaleX != pScaleX || mScaleY != pScaleY) {
+        if (!Precision.almostEquals(mScaleX, pScaleX) || !Precision.almostEquals(mScaleY, pScaleY)) {
             mScaleX = pScaleX
             mScaleY = pScaleY
             invalidate(InvalidationFlag.Transformations)
@@ -950,7 +1005,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     override fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
-        val modifier = modifierPool.acquire() ?: UniversalModifier(modifierPool)
+        val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
         modifier.setToDefault()
         modifier.parent = this
         modifier.block()
@@ -988,12 +1043,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             }
         }
         inputBindings.fill(null)
-
-        mChildren?.fastForEach { child ->
-            if (child is UIComponent) {
-                child.onInvalidateInputBindings()
-            }
-        }
     }
 
     /**
@@ -1021,7 +1070,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
-                if (child is ITouchArea && child.contains(localX, localY)) {
+                if (child is UIComponent && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child
                         return true
@@ -1039,44 +1088,27 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //region Cosmetic functions
 
-    open fun onThemeChanged(theme: Theme) {
-        background?.onThemeChanged(theme)
-        foreground?.onThemeChanged(theme)
+    open fun onStyle(theme: Theme) {
+        background?.onStyle(theme)
+        border?.onStyle(theme)
 
-        applyTheme(theme)
+        style(theme)
     }
 
     //endregion
 
 
-    @Suppress("ConstPropertyName")
     companion object {
-
-        /**
-         * The width and height of the entity will match the content size without any constraints.
-         */
-        const val MatchContent = -1f
-
-        /**
-         * The width and height of the entity will match the parent's inner size.
-         */
-        const val FillParent = -2f
-
-        /**
-         * The width and height of the entity will match the content size but will be constrained to the parent's inner size.
-         */
-        const val FitParent = -3f
-
-
-        private val VERTICES_WRAPPER = FloatArray(8)
 
         private val DEBUG_FOREGROUND by lazy {
             UIBox().apply {
                 paintStyle = PaintStyle.Outline
                 color = Color4.White
-                lineWidth = 1f
+                lineWidth = 2f
             }
         }
+
+        private val VERTICES_WRAPPER = FloatArray(8)
     }
 
 }

@@ -7,16 +7,24 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.utils.updateThread
 import com.osudroid.resources.R.string
+import com.osudroid.ui.v2.mainmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.*
-import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import kotlin.coroutines.cancellation.CancellationException
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
@@ -44,47 +52,47 @@ class LobbyScene : UIScene() {
 
 
     init {
-        ResourceManager.getInstance().loadHighQualityAsset("refresh", "refresh.png")
-        ResourceManager.getInstance().loadHighQualityAsset("search-small", "search-small.png")
+        sprite {
+            width = Size.Full
+            height = Size.Full
+            scaleType = ScaleType.Crop
+            textureRegion = ResourceManager.getInstance().getTexture("menu-background")
 
-        linearContainer {
+            if (!Config.isSafeBeatmapBg()) {
+                textureRegion = ResourceManager.getInstance().getTexture("::background") ?: textureRegion
+            }
+        }
+
+        fillContainer {
             orientation = Orientation.Vertical
-            width = FillParent
-            height = FillParent
-            padding = Vec4(80f, 0f)
-
-            background = UISprite().apply {
-                scaleType = ScaleType.Crop
-                textureRegion = ResourceManager.getInstance().getTexture("menu-background")
-
-                if (!Config.isSafeBeatmapBg()) {
-                    textureRegion = ResourceManager.getInstance().getTexture("::background") ?: textureRegion
-                }
-
-                foreground = UIBox().apply {
-                    applyTheme = {
-                        color = it.accentColor * 0.1f
-                        alpha = 0.9f
-                    }
-                }
+            width = Size.Full
+            height = Size.Full
+            style = {
+                padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 2f.srem)
+                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
+                spacing = 4f.srem
             }
 
             container {
-                width = FillParent
-                padding = Vec4(0f, 20f)
+                width = Size.Full
+                style = {
+                    padding = Vec4(0f, 4f.srem)
+                }
 
                 linearContainer {
                     orientation = Orientation.Horizontal
-                    spacing = 12f
+                    style = {
+                        spacing = 2f.srem
+                    }
 
                     textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("back-arrow"))
+                        leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
                         setText(string.multiplayer_lobby_back)
                         onActionUp = { back() }
                     }
 
                     textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("plus"))
+                        leadingIcon = FontAwesomeIcon(Icon.Plus)
                         setText(string.multiplayer_lobby_create_room)
                         onActionUp = {
                             RoomCreateDialog(this@LobbyScene).show()
@@ -92,7 +100,7 @@ class LobbyScene : UIScene() {
                     }
 
                     refreshButton = textButton {
-                        leadingIcon = UISprite(ResourceManager.getInstance().getTexture("refresh"))
+                        leadingIcon = FontAwesomeIcon(Icon.Rotate)
                         setText(string.multiplayer_lobby_refresh)
                         onActionUp = { shouldFetch = true }
                     }
@@ -101,61 +109,66 @@ class LobbyScene : UIScene() {
                 container {
                     anchor = Anchor.TopRight
                     origin = Anchor.TopRight
-                    height = FillParent
+                    height = Size.Full
 
-                    +object : UITextInput("") {
-
-                        init {
-                            key = "search"
-                            width = 500f
-                            height = FillParent
-                            placeholder = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.multiplayer_lobby_search_rooms)
-                        }
-
-                        override fun onValueChanged() {
-                            super.onValueChanged()
+                    +UITextInput("").apply {
+                        key = "search"
+                        height = Size.Full
+                        placeholder = StringTable.get(ru.nsu.ccfit.zuev.osuplus.R.string.multiplayer_lobby_search_rooms)
+                        onValueChange = { value ->
                             searchQuery = value
                         }
-
+                        style = {
+                            width = 13f.rem
+                        }
                     }
 
-                    sprite {
-                        textureRegion = ResourceManager.getInstance().getTexture("search-small")
-                        size = Vec2(52f, 28f)
+                    container {
                         anchor = Anchor.CenterRight
                         origin = Anchor.CenterRight
-                        applyTheme = { color = it.accentColor }
+                        style = { padding = Vec4(2f.srem, 0f) }
+                        +FontAwesomeIcon(Icon.MagnifyingGlass).apply {
+                            style = {
+                                color = it.accentColor
+                            }
+                        }
                     }
                 }
             }
 
             container {
-                width = FillParent
-                height = FillParent
+                width = Size.Full
+                height = Size.Full
 
                 messageContainer = linearContainer {
                     orientation = Orientation.Vertical
-                    spacing = 8f
                     anchor = Anchor.Center
                     origin = Anchor.Center
+                    style = {
+                        spacing = 2f.srem
+                    }
                 }
 
                 scrollableContainer {
                     scrollAxes = Axes.Y
-                    width = FillParent
-                    height = FillParent
+                    width = Size.Full
+                    height = Size.Full
                     clipToBounds = true
 
                     roomContainer = linearContainer {
+                        width = Size.Full
                         orientation = Orientation.Vertical
-                        spacing = 8f
-                        width = FillParent
                         scaleCenter = Anchor.Center
+
+                        style = {
+                            spacing = 1.5f.srem
+                        }
                     }
                 }
             }
 
         }
+
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -222,8 +235,10 @@ class LobbyScene : UIScene() {
                     detachChildren()
 
                     text {
-                        font = ResourceManager.getInstance().getFont("smallFont")
-                        applyTheme = { color = it.accentColor }
+                        style = {
+                            fontSize = FontSize.SM
+                            color = it.accentColor
+                        }
                         setText(string.multiplayer_lobby_fetch_error)
                     }
                 }
@@ -238,7 +253,10 @@ class LobbyScene : UIScene() {
                 +CircularProgressBar().apply {
                     anchor = Anchor.Center
                     origin = Anchor.Center
-                    size = Vec2(48f, 48f)
+                    style = {
+                        width = 3f.rem
+                        height = 3f.rem
+                    }
                 }
             }
 
@@ -263,8 +281,10 @@ class LobbyScene : UIScene() {
                         detachChildren()
 
                         text {
-                            font = ResourceManager.getInstance().getFont("smallFont")
-                            applyTheme = { color = it.accentColor }
+                            style = {
+                                fontSize = FontSize.SM
+                                color = it.accentColor
+                            }
                             setText(if (searchQuery.isNullOrEmpty()) string.multiplayer_lobby_no_rooms else string.multiplayer_lobby_no_results)
                         }
                     }
@@ -281,8 +301,7 @@ class LobbyScene : UIScene() {
     override fun back() {
         Multiplayer.isMultiplayer = false
         GlobalManager.getInstance().songService.isGaming = false
-
-        GlobalManager.getInstance().mainScene.show()
+        MainScene.show()
     }
 
 

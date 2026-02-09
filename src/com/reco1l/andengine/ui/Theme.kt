@@ -8,13 +8,11 @@ import com.reco1l.framework.*
  * A theme is a set of colors and styles that can be applied to an entity.
  */
 data class Theme(
-
     /**
      * The accent color of the theme.
      */
-    val accentColor: Color4 = Color4(0xFFC2CAFF),
-
-    ) {
+    val accentColor: Color4 = Color4(0xFFC2CAFF)
+) {
     companion object {
 
         /**
@@ -31,10 +29,11 @@ data class Theme(
     }
 }
 
-interface IThemeable {
+typealias StyleApplier = UIComponent.(theme: Theme) -> Unit
 
-    /**
-     * Called when the theme is changed. This is used to apply the theme to the entity.
-     */
-    var applyTheme: UIComponent.(theme: Theme) -> Unit
+operator fun StyleApplier?.plus(other: StyleApplier): StyleApplier {
+    return { theme ->
+        this@plus?.invoke(this, theme)
+        other.invoke(this, theme)
+    }
 }

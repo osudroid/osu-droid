@@ -4,11 +4,14 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
-import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
 open class UICard(
@@ -18,7 +21,7 @@ open class UICard(
      */
     val content: UIContainer = UILinearContainer().apply {
         orientation = Orientation.Vertical
-        width = FillParent
+        width = Size.Full
         clipToBounds = true
     },
 
@@ -54,41 +57,42 @@ open class UICard(
 
     init {
         orientation = Orientation.Vertical
-        background = UIBox().apply {
-            cornerRadius = 14f
-            applyTheme = { color = it.accentColor * 0.15f }
+        style = {
+            backgroundColor = it.accentColor * 0.15f
+            radius = Radius.MD
         }
 
         +titleBar.apply {
-            width = FillParent
-            padding = Vec4(12f, 8f)
-
-            +UIText().apply {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                anchor = Anchor.CenterLeft
-                origin = Anchor.CenterLeft
-                applyTheme = { color = it.accentColor }
+            width = Size.Full
+            style = {
+                padding = Vec4(2.25f.srem)
             }
 
-            +UITriangle().apply {
+            +UIText().apply {
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                style = {
+                    color = it.accentColor
+                    fontSize = FontSize.SM
+                }
+            }
+
+            +FontAwesomeIcon(Icon.ChevronDown).apply {
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
                 rotationCenter = Anchor.Center
-                width = 16f
-                height = 12f
-                applyTheme = {
+                style = {
                     color = it.accentColor
                     alpha = 0.5f
                 }
             }
         }
 
-        +UIBox().apply {
-            width = FillParent
-            height = 1f
-            applyTheme = {
-                color = it.accentColor
-                alpha = 0.025f
+        box {
+            width = Size.Full
+            height = 2f
+            style = {
+                color = it.accentColor.copy(alpha = 0.1f)
             }
         }
 
@@ -104,7 +108,7 @@ open class UICard(
     @JvmOverloads
     fun collapse(immediate: Boolean = false) {
         if (content.isVisible) {
-            val triangle = titleBar.firstOf<UITriangle>()
+            val triangle = titleBar.firstOf<FontAwesomeIcon>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(180f, if (immediate) 0f else 0.1f)
 
@@ -126,7 +130,7 @@ open class UICard(
     @JvmOverloads
     fun expand(immediate: Boolean = false) {
         if (!content.isVisible) {
-            val triangle = titleBar.firstOf<UITriangle>()
+            val triangle = titleBar.firstOf<FontAwesomeIcon>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(0f, if (immediate) 0f else 0.1f)
 

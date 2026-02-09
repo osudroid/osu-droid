@@ -4,11 +4,12 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.container.*
+import com.reco1l.andengine.theme.FontSize
+import com.reco1l.andengine.theme.Fonts
+import com.reco1l.andengine.theme.Size
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
-import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
@@ -28,10 +29,10 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 field = value
 
                 val previousLength = currentLength
-                currentLength = value.length
+                currentLength = value.codePointCount(0, value.length)
 
                 if (currentLength > previousLength) {
-                    requestNewBuffer()
+                    requestBufferUpdate()
                 }
 
                 invalidate(InvalidationFlag.Content)
@@ -39,16 +40,54 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         }
 
     /**
-     * The font to use for this text.
-     * It must be already loaded and ready to use before setting it.
+     * The font used to render the text.
      */
-    var font: Font? = ResourceManager.getInstance().getFont("smallFont")
-        set(value) {
+    var font: Font? = null
+        private set(value) {
             if (field != value) {
                 field = value
                 invalidate(InvalidationFlag.Content)
             }
         }
+
+    /**
+     * The font family to use for this text.
+     */
+    var fontFamily = Fonts.NunitoMedium
+        set(value) {
+            if (field != value) {
+                field = value
+                fontSettingsChanged = true
+            }
+        }
+
+    /**
+     * The font size to use for this text.
+     */
+    var fontSize = FontSize.SM
+        set(value) {
+            if (field != value) {
+                field = value
+                fontSettingsChanged = true
+            }
+        }
+
+    /**
+     * Called when the font settings (font size or family) change.
+     */
+    var onFontSettingsChange: () -> Unit = {
+        val oldFont = font
+
+        if (oldFont != null) {
+            UIEngine.current.resources.unsubscribeFromFont(oldFont, this)
+        }
+
+        val newFont = UIEngine.current.resources.getOrStoreFont(fontSize, fontFamily)
+        font = newFont
+        UIEngine.current.resources.subscribeToFont(newFont, this)
+
+        invalidate(InvalidationFlag.Content)
+    }
 
     /**
      * The alignment of the text.
@@ -65,6 +104,12 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
      * Which axes to scroll the text automatically when it overflows.
      */
     var autoScrollAxes = Axes.X
+        set(value) {
+            if (field != value) {
+                field = value
+                clipToBounds = value != Axes.None
+            }
+        }
 
     /**
      * The speed of the auto scroll animation in pixels per second.
@@ -76,27 +121,56 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
      */
     var autoScrollTimeout = 3f
 
+    /**
+     * Whether to wrap text that exceeds the width of the component.
+     */
+    var wrapText = false
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Content)
+            }
+        }
+
+
+    protected open val textViewportWidth: Float
+        get() = innerWidth
+
+    protected open val textViewportHeight: Float
+        get() = innerHeight
+
+    protected open val textViewportX: Float
+        get() = padding.left
+
+    protected open val textViewportY: Float
+        get() = padding.top
+
 
     private var currentLength = 0
-
     private var scrollX = 0f
     private var scrollY = 0f
     private var scrollXTimeoutElapsed = 0f
     private var scrollYTimeoutElapsed = 0f
-
+    private var fontSettingsChanged = true
 
     private var lines: List<String>? = null
     private var linesWidth: IntArray? = null
 
 
     init {
-        width = MatchContent
-        height = MatchContent
-        invalidate(InvalidationFlag.Content)
+        width = Size.Auto
+        height = Size.Auto
+
+        clipToBounds = true
+
+        style = {
+            fontSize = FontSize.SM
+        }
     }
 
 
     override fun onContentChanged() {
+
         val text = text
         val font = font
 
@@ -108,31 +182,124 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             return
         }
 
-        lines = text.split('\n')
-        linesWidth = IntArray(lines!!.size) { i -> lines!![i].sumOf { char -> font.getLetter(char).mAdvance } }
+        val originalLines = text.split('\n')
 
-        contentWidth = linesWidth!!.max().toFloat()
+        if (wrapText && width > 0f && rawWidth != Size.Auto) {
+            val wrappedLines = mutableListOf<String>()
+            val wrappedLinesWidth = mutableListOf<Int>()
+
+            originalLines.forEach { originalLine ->
+                wrapLine(originalLine, font, width.toInt(), wrappedLines, wrappedLinesWidth)
+            }
+
+            lines = wrappedLines
+            linesWidth = wrappedLinesWidth.toIntArray()
+        } else {
+            lines = originalLines
+
+            linesWidth = IntArray(lines!!.size) { i ->
+                val line = lines!![i]
+                var width = 0
+                var charIndex = 0
+
+                while (charIndex < line.length) {
+                    val codePoint = line.codePointAt(charIndex)
+                    val charCount = Character.charCount(codePoint)
+
+                    val characterString = line.substring(charIndex, charIndex + charCount)
+
+                    width += font.getLetter(characterString).mAdvance
+                    charIndex += charCount
+                }
+                width
+            }
+        }
+
+        contentWidth = if (linesWidth!!.isNotEmpty()) linesWidth!!.max().toFloat() else 0f
         contentHeight = (lines!!.size * font.lineHeight + (lines!!.size - 1) * font.lineGap).toFloat()
 
         requestBufferUpdate()
     }
 
     override fun onSizeChanged() {
+        if (wrapText) {
+            invalidate(InvalidationFlag.Content)
+        }
         super.onSizeChanged()
-        requestBufferUpdate()
     }
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        val currentLength = currentLength
-        val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
-
-        if (currentBuffer == null || currentLength > currentBuffer.length) {
-            return CompoundBuffer(
-                TextTextureBuffer(currentLength),
-                TextVertexBuffer(currentLength)
-            )
+    private fun wrapLine(line: String, font: Font, maxWidth: Int, outputLines: MutableList<String>, outputWidths: MutableList<Int>) {
+        if (line.isEmpty()) {
+            outputLines.add("")
+            outputWidths.add(0)
+            return
         }
-        return buffer!!
+
+        var currentLineStart = 0
+        var currentWidth = 0
+        var lastSpaceIndex = -1
+        var lastSpaceWidth = 0
+        var charIndex = 0
+
+        while (charIndex < line.length) {
+            val codePoint = line.codePointAt(charIndex)
+            val charCount = Character.charCount(codePoint)
+            val characterString = line.substring(charIndex, charIndex + charCount)
+
+            val letterAdvance = font.getLetter(characterString).mAdvance
+            val newWidth = currentWidth + letterAdvance
+
+            if (characterString == " ") {
+                lastSpaceIndex = charIndex
+                lastSpaceWidth = currentWidth
+            }
+
+            if (newWidth > maxWidth && currentWidth > 0) {
+                if (lastSpaceIndex > currentLineStart) {
+                    outputLines.add(line.substring(currentLineStart, lastSpaceIndex))
+                    outputWidths.add(lastSpaceWidth)
+                    currentLineStart = lastSpaceIndex + 1
+                    charIndex = currentLineStart
+                    currentWidth = 0
+                    lastSpaceIndex = -1
+                    lastSpaceWidth = 0
+                    continue
+                } else {
+                    outputLines.add(line.substring(currentLineStart, charIndex))
+                    outputWidths.add(currentWidth)
+                    currentLineStart = charIndex
+                    currentWidth = 0
+                    lastSpaceIndex = -1
+                    lastSpaceWidth = 0
+                    continue
+                }
+            }
+
+            currentWidth = newWidth
+            charIndex += charCount
+        }
+
+        if (currentLineStart < line.length) {
+            outputLines.add(line.substring(currentLineStart))
+            outputWidths.add(currentWidth)
+        }
+    }
+
+    private fun nextPowerOfTwo(n: Int): Int {
+        if (n <= 0) return 1
+        val highest = n.takeHighestOneBit()
+        return if (highest == n) n else highest shl 1
+    }
+
+    override fun createBuffer(): CompoundBuffer {
+        val capacity = nextPowerOfTwo(currentLength)
+        return UITextCompoundBuffer(capacity)
+    }
+
+    override fun canReuseBuffer(buffer: CompoundBuffer): Boolean {
+        val capacity = nextPowerOfTwo(currentLength)
+        val vertexBuffer = buffer.getFirstOf<TextVertexBuffer>()
+        return vertexBuffer.vertexCount >= capacity * VERTICES_PER_CHARACTER
     }
 
     override fun onUpdateBuffer() {
@@ -157,6 +324,14 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         super.onApplyTransformations(gl, camera)
     }
 
+
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+        if (fontSettingsChanged) {
+            fontSettingsChanged = false
+            onFontSettingsChange()
+        }
+        super.onManagedDraw(gl, camera)
+    }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
@@ -209,6 +384,14 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
     }
 
 
+    override fun finalize() {
+        super.finalize()
+
+        val font = font ?: return
+        UIEngine.current.resources.unsubscribeFromFont(font, this)
+    }
+
+
     //region Buffers
 
     class TextVertexBuffer(val length: Int) : VertexBuffer(
@@ -218,7 +401,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
+        fun update(component: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
 
             if (font == null || lines == null || linesWidth == null) {
                 mFloatBuffer.clear()
@@ -230,11 +413,16 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
             lines.fastForEachIndexed { lineIndex, line ->
 
-                var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
-                val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
+                var lineX =  component.textViewportX + component.textViewportWidth * component.alignment.x - linesWidth[lineIndex] * component.alignment.x
+                val lineY = component.textViewportY + component.textViewportHeight * component.alignment.y - lines.size * lineHeight * component.alignment.y + lineIndex * lineHeight
 
-                line.forEach { character ->
-                    val letter = font.getLetter(character)
+                var charIndex = 0
+                while (charIndex < line.length) {
+                    val codePoint = line.codePointAt(charIndex)
+                    val charCount = Character.charCount(codePoint)
+                    val characterString = line.substring(charIndex, charIndex + charCount)
+
+                    val letter = font.getLetter(characterString)
 
                     val letterX = lineX + letter.mWidth
                     val letterY = lineY + font.lineHeight
@@ -251,6 +439,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                     setPosition(0)
 
                     lineX += letter.mAdvance
+                    charIndex += charCount
                 }
             }
         }
@@ -278,9 +467,13 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             setPosition(0)
 
             lines.fastForEach { line ->
-                line.forEach { character ->
+                var charIndex = 0
+                while (charIndex < line.length) {
+                    val codePoint = line.codePointAt(charIndex)
+                    val charCount = Character.charCount(codePoint)
 
-                    val letter = font.getLetter(character)
+                    val characterString = line.substring(charIndex, charIndex + charCount)
+                    val letter = font.getLetter(characterString)
 
                     val letterTextureX = letter.mTextureX
                     val letterTextureY = letter.mTextureY
@@ -293,6 +486,8 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                     putVertex(letterTextureX2, letterTextureY2)
                     putVertex(letterTextureX2, letterTextureY)
                     putVertex(letterTextureX, letterTextureY)
+                    
+                    charIndex += charCount
                 }
             }
 
@@ -314,31 +509,18 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 /**
  * A compound text entity that can be displayed with leading and trailing icons.
  */
-open class CompoundText : UIContainer() {
+open class CompoundText : UIText() {
 
     /**
-     * The text entity.
+     * The spacing between the icons and the text.
      */
-    val textEntity = UIText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-    }
-
-
     var spacing = 0f
-
-    //region Shortcuts
-
-    var text by textEntity::text
-
-    var font by textEntity::font
-
-    var alignment by textEntity::alignment
-
-    //endregion
-
-    //region Icons
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Content)
+            }
+        }
 
     /**
      * The leading icon.
@@ -346,13 +528,9 @@ open class CompoundText : UIContainer() {
     var leadingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
-                field?.detachSelf()
                 field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value, 0)
-                }
+                value?.setParent(this, AttachmentMode.Child)
+                invalidate(InvalidationFlag.Content)
             }
         }
 
@@ -362,83 +540,67 @@ open class CompoundText : UIContainer() {
     var trailingIcon: UIComponent? = null
         set(value) {
             if (field != value) {
-                field?.detachSelf()
                 field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value)
-                }
+                value?.setParent(this, AttachmentMode.Child)
+                invalidate(InvalidationFlag.Content)
             }
         }
 
-
     /**
-     * Which leading icon's size axes should match the text size.
+     * The width of the text without icons.
      */
-    var autoSizeLeadingIcon = Axes.Both
-
-    /**
-     * Which trailing icon's size axes should match the text size.
-     */
-    var autoSizeTrailingIcon = Axes.Both
+    var textWidth = 0f
+        private set
 
 
-    /**
-     * Called when one of the icons changes.
-     */
-    open var onIconChange: (UIComponent) -> Unit = { icon ->
-        val anchor = if (icon === leadingIcon) Anchor.CenterLeft else Anchor.CenterRight
-        icon.anchor = anchor
-        icon.origin = anchor
-    }
+    override val textViewportX: Float
+        get() = padding.left + (leadingIcon?.let { it.width + spacing } ?: 0f)
 
-    //endregion
+    override val textViewportWidth: Float
+        get() = innerWidth - (leadingIcon?.let { it.width + spacing } ?: 0f) - (trailingIcon?.let { it.width + spacing } ?: 0f)
+
 
     override fun onContentChanged() {
-        contentWidth = textEntity.contentWidth + (leadingIcon?.let { it.width + spacing } ?: 0f) + (trailingIcon?.let { it.width + spacing } ?: 0f)
-        contentHeight = textEntity.height
-    }
-
-
-    init {
-        +textEntity
-    }
-
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
+        super.onContentChanged()
+        textWidth = contentWidth
 
         val leadingIcon = leadingIcon
         val trailingIcon = trailingIcon
 
-        val iconSize = textEntity.height
+        var totalWidth = 0f
 
         if (leadingIcon != null) {
-            if (autoSizeLeadingIcon.isHorizontal) {
-                leadingIcon.width = iconSize
-            }
-            if (autoSizeLeadingIcon.isVertical) {
-                leadingIcon.height = iconSize
-            }
+            leadingIcon.anchor = Anchor.CenterLeft
+            leadingIcon.origin = Anchor.CenterLeft
+            leadingIcon.setSize(fontSize, fontSize)
+
+            totalWidth += leadingIcon.width + spacing
         }
+
+        totalWidth += textWidth
 
         if (trailingIcon != null) {
-            if (autoSizeTrailingIcon.isHorizontal) {
-                trailingIcon.width = iconSize
-            }
-            if (autoSizeTrailingIcon.isVertical) {
-                trailingIcon.height = iconSize
-            }
+            trailingIcon.anchor = Anchor.CenterLeft
+            trailingIcon.origin = Anchor.CenterLeft
+            trailingIcon.x = totalWidth + spacing
+            trailingIcon.setSize(fontSize, fontSize)
+
+            totalWidth += spacing + trailingIcon.width
         }
 
+        contentWidth = totalWidth
 
-        val leadingIconSize = leadingIcon?.let { it.width + spacing } ?: 0f
-        val trailingIconSize = trailingIcon?.let { it.width + spacing } ?: 0f
+        // Move trailing icon to the end.
+        if (width > intrinsicWidth) {
+            trailingIcon?.x = innerWidth - trailingIcon.width
+        }
 
-        textEntity.x = leadingIconSize
-        textEntity.width = width - leadingIconSize - trailingIconSize
+        requestBufferUpdate()
+    }
 
-        super.onManagedUpdate(deltaTimeSec)
+    override fun onDrawChildren(gl: GL10, camera: Camera) {
+        leadingIcon?.onDraw(gl, camera)
+        trailingIcon?.onDraw(gl, camera)
     }
 }
 

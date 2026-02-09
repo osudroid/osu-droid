@@ -14,6 +14,11 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.pct
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -46,14 +51,7 @@ class RoomChat : UILinearContainer() {
     private val timestampFormat = SimpleDateFormat("HH:mm:ss")
 
     private val button = ChatButton()
-    private val body = UILinearContainer()
-
-    //region Buffers
-    private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
-    private val messagePlayerTagBuffer = UITextCompoundBuffer(32).asSharedDynamically()
-    private val messageTextBuffer = UITextCompoundBuffer(128).asSharedDynamically()
-    private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
-    //endregion
+    private val body: UIFillContainer
 
     private lateinit var input: UITextInput
     private lateinit var messageContainer: UILinearContainer
@@ -70,58 +68,59 @@ class RoomChat : UILinearContainer() {
 
 
     init {
-        width = FillParent
+        width = Size.Full
         orientation = Orientation.Vertical
         anchor = Anchor.BottomCenter
         origin = Anchor.BottomCenter
-        background = UIBox().apply {
-            applyTheme = {
-                color = it.accentColor * 0.1f
-                alpha = 0.9f
-            }
+        style = {
+            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.9f)
+            y = if (isExpanded) 0f else BODY_HEIGHT.rem
         }
 
         +button
-        +body.apply {
-            width = FillParent
-            height = 0f
+
+        body = fillContainer {
+            width = Size.Full
             orientation = Orientation.Vertical
+            style = {
+                height = BODY_HEIGHT.rem
+            }
 
             scrollableContainer {
-                width = FillParent
-                height = body_height - 84f // Input height based of button height plus padding
+                width = Size.Full
+                height = Size.Full
                 scrollAxes = Axes.Y
                 clipToBounds = true
 
                 messageContainer = linearContainer {
-                    width = FillParent
+                    width = Size.Full
                     orientation = Orientation.Vertical
 
-                    repeat(max_messages) {
+                    repeat(MAX_MESSAGES) {
                         attachChild(MessageComponent())
                     }
                 }
             }
 
-            flexContainer {
-                width = FillParent
-                padding = Vec4(80f, 12f)
-                gap = 8f
+            fillContainer {
+                width = Size.Full
+                style = {
+                    spacing = 2f.srem
+                    padding = UIEngine.current.safeArea.copy(y = 2f.srem, w = 3f.srem)
+                }
 
                 +UITextInput("").apply {
-                    height = FillParent
+                    width = Size.Full
+                    height = Size.Full
                     placeholder = "Type a message..."
                     onConfirm = { sendMessage() }
-                    flexRules {
-                        grow = 1f
-                    }
 
                     input = this
                 }
 
                 textButton {
-                    trailingIcon = UISprite(ResourceManager.getInstance().getTexture("send"))
-                    isSelected = true
+                    trailingIcon = FontAwesomeIcon(Icon.PaperPlane)
+                    colorVariant = ColorVariant.Primary
                     setText(R.string.multiplayer_room_chat_send)
                     onActionUp = { sendMessage() }
                 }
@@ -157,7 +156,7 @@ class RoomChat : UILinearContainer() {
         }
 
         messages.add(message)
-        if (messages.size > max_messages) {
+        if (messages.size > MAX_MESSAGES) {
             messages.pollFirst()
         }
 
@@ -179,20 +178,16 @@ class RoomChat : UILinearContainer() {
     fun expand() {
         if (!isExpanded) {
             isExpanded = true
-            body.apply {
-                clearModifiers(ModifierType.SizeY)
-                sizeToY(body_height, 0.4f).eased(Easing.OutExpo)
-            }
+            clearModifiers(ModifierType.SizeY)
+            moveToY(0f, 0.4f).eased(Easing.OutExpo)
         }
     }
 
     fun collapse() {
         if (isExpanded) {
             isExpanded = false
-            body.apply {
-                clearModifiers(ModifierType.SizeY)
-                sizeToY(0f, 0.4f).eased(Easing.OutExpo)
-            }
+            clearModifiers(ModifierType.SizeY)
+            moveToY(BODY_HEIGHT.rem, 0.4f).eased(Easing.OutExpo)
         }
     }
 
@@ -223,7 +218,7 @@ class RoomChat : UILinearContainer() {
         if (messagesChanged) {
             messagesChanged = false
 
-            for (i in max_messages - 1 downTo 0) {
+            for (i in MAX_MESSAGES - 1 downTo 0) {
                 val messageComponent = messageContainer.getChild(i) as MessageComponent
                 messageComponent.message = if (i < messages.size) messages[i] else null
             }
@@ -253,34 +248,32 @@ class RoomChat : UILinearContainer() {
     }
 
 
-    inner class ChatButton : UILinearContainer() {
+    inner class ChatButton : UIFillContainer() {
 
         private lateinit var tagText: UIText
         private lateinit var messageText: UIText
 
 
         init {
-            width = FillParent
+            width = Size.Full
             orientation = Orientation.Horizontal
-            padding = Vec4(80f, 18f)
-            spacing = 12f
-            background = UIBox().apply {
-                applyTheme = {
-                    color = it.accentColor * 0.15f
-                    alpha = 0.5f
-                }
+            style = {
+                height = 2.85f.rem
+                spacing = 2f.srem
+                backgroundColor = (it.accentColor * 0.15f).copy(alpha = 0.5f)
+                padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
             }
 
-            sprite {
-                textureRegion = ResourceManager.getInstance().getTexture("chat")
+            +FontAwesomeIcon(Icon.Message).apply {
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                applyTheme = { color = it.accentColor }
-                size = Vec2(28f)
+                style = { color = it.accentColor }
             }
 
             linearContainer {
-                width = FillParent
+                width = Size.Full
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
                 orientation = Orientation.Horizontal
 
                 tagText = text {
@@ -291,10 +284,10 @@ class RoomChat : UILinearContainer() {
                 }
 
                 messageText = text {
-                    width = FillParent
+                    width = Size.Full
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    applyTheme = { color = it.accentColor }
+                    style = { color = it.accentColor }
                 }
             }
         }
@@ -348,17 +341,13 @@ class RoomChat : UILinearContainer() {
 
 
         init {
-            width = FillParent
-            padding = Vec4(80f, 0f)
-            spacing = 12f
+            width = Size.Full
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
-            background = UIBox().apply {
-                buffer = messageBackgroundBuffer
-                applyTheme = {
-                    color = it.accentColor * 0.09f
-                    alpha = 0f
-                }
+            style = {
+                backgroundColor = (it.accentColor * 0.09f).copy(alpha = 0f)
+                padding = UIEngine.current.safeArea.copy(y = 0f, w = 0f)
+                spacing = 2f.srem
             }
         }
 
@@ -373,12 +362,11 @@ class RoomChat : UILinearContainer() {
                 val message = message ?: return
                 val messageIndex = messages.indexOf(message)
 
-                background!!.alpha = if (messageIndex % 2 == 0) 0.5f else 0f
+                backgroundColor = backgroundColor.copy(alpha = if (messageIndex % 2 == 0) 0.5f else 0f)
 
                 if (message is SystemMessage) {
                     text {
-                        buffer = messageTextBuffer
-                        width = FillParent
+                        width = Size.Full
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         text = message.content
@@ -392,23 +380,23 @@ class RoomChat : UILinearContainer() {
                         || messages[messageIndex - 1] !is PlayerMessage
                         || (messages[messageIndex - 1] as PlayerMessage).player.id != message.player.id
 
-                    flexContainer {
-                        relativeSizeAxes = Axes.X
-                        width = 0.25f
+                    container {
+                        width = 0.25f.pct
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
-                        direction = FlexDirection.Row
-                        justifyContent = JustifyContent.SpaceBetween
+                        orientation = Orientation.Horizontal
 
                         text {
-                            buffer = messageTimestampBuffer
-                            applyTheme = { color = it.accentColor * 0.5f }
+                            anchor = Anchor.CenterLeft
+                            origin = Anchor.CenterLeft
+                            style = { color = it.accentColor * 0.5f }
                             text = timestampFormat.format(message.time)
                         }
 
                         if (showSender) {
                             text {
-                                buffer = messagePlayerTagBuffer
+                                anchor = Anchor.CenterRight
+                                origin = Anchor.CenterRight
                                 color = getPlayerTagColor(message.player)
                                 text = message.player.name
                             }
@@ -416,9 +404,8 @@ class RoomChat : UILinearContainer() {
                     }
 
                     text {
-                        buffer = messageTextBuffer
-                        width = FillParent
-                        applyTheme = { color = it.accentColor }
+                        width = Size.Full
+                        style = { color = it.accentColor }
                         text = message.content
                     }
                 } else {
@@ -434,8 +421,8 @@ class RoomChat : UILinearContainer() {
 
 
     companion object {
-        private const val max_messages = 50
-        private const val body_height = 420f
+        private const val MAX_MESSAGES = 50
+        private const val BODY_HEIGHT = 18f
     }
 }
 

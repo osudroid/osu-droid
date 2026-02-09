@@ -38,11 +38,6 @@ class HUDComboCounter : HUDElement() {
     private var current = 0
 
 
-    init {
-        onContentChanged()
-    }
-
-
     fun setCombo(value: Int) {
 
         if (current == value) {
