@@ -71,10 +71,10 @@ abstract class PerformanceCalculator<
         get() = if (totalHits > 0) (countGreat * 6.0 + countOk * 2 + countMeh) / (totalHits * 6) else 1.0
 
     /**
-     * The total hits that can be done in the beatmap.
+     * The total hits that were done.
      */
     protected val totalHits
-        get() = difficultyAttributes.let { it.hitCircleCount + it.sliderCount + it.spinnerCount }
+        get() = countGreat + countOk + countMeh + countMiss
 
     /**
      * The total imperfect hits that were done.
