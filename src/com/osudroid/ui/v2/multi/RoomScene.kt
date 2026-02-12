@@ -57,6 +57,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
+import org.anddev.andengine.input.touch.TouchEvent
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -705,6 +706,18 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         invalidateStatus()
         chat.show()
+    }
+
+    override fun onSceneTouchEvent(pSceneTouchEvent: TouchEvent?): Boolean {
+        if (super.onSceneTouchEvent(pSceneTouchEvent)) {
+            return true
+        }
+
+        if (chat.isExpanded) {
+            chat.collapse()
+        }
+
+        return false
     }
 
 

@@ -41,6 +41,16 @@ class RoomChat : UILinearContainer() {
     val buttonHeight
         get() = button.height
 
+    /**
+     * Whether the chat is currently expanded.
+     */
+    var isExpanded = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                button.updateState()
+            }
+        }
 
     private val messages = LinkedList<Message>()
     private val timestampFormat = SimpleDateFormat("HH:mm:ss")
@@ -59,14 +69,6 @@ class RoomChat : UILinearContainer() {
     private lateinit var messageContainer: UILinearContainer
 
     private var messagesChanged = false
-
-    private var isExpanded = false
-        set(value) {
-            if (field != value) {
-                field = value
-                button.updateState()
-            }
-        }
 
 
     init {
