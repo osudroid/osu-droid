@@ -268,7 +268,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //region Cosmetic properties
 
-    override var applyTheme: UIComponent.(theme: Theme) -> Unit = {}
+    override var applyTheme: ThemeApplier = {}
 
     /**
      * The background entity. This entity will be drawn before the entity children and will not be
@@ -1081,4 +1081,20 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
 }
 
+/**
+ * A function that applies a [Theme] to a [UIComponent].
+ */
+typealias ThemeApplier = UIComponent.(theme: Theme) -> Unit
 
+/**
+ * Combines two [ThemeApplier]s into one.
+ *
+ * The original [ThemeApplier] will be applied first if present, followed by [other].
+ *
+ * @param other The other [ThemeApplier] to combine with.
+ * @return A new [ThemeApplier] that applies both the original and the other [ThemeApplier].
+ */
+operator fun ThemeApplier?.plus(other: ThemeApplier): ThemeApplier = { theme ->
+    this@plus?.invoke(this, theme)
+    other.invoke(this, theme)
+}
