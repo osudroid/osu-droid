@@ -298,7 +298,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                                 cornerRadius = 12f
                                 applyTheme = {
                                     color = it.accentColor * 0.1f
-                                    alpha = 0.5f
+                                    alpha = 0.6f
                                 }
                             }
                             foreground = UIBox().apply {
@@ -319,7 +319,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                                 cornerRadius = 12f
                                 applyTheme = {
                                     color = it.accentColor * 0.1f
-                                    alpha = 0.5f
+                                    alpha = 0.6f
                                 }
                             }
                             foreground = UIBox().apply {
