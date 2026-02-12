@@ -271,7 +271,8 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
                         scrollableContainer {
                             width = FillParent
-                            height = FillParent
+                            relativeSizeAxes = Axes.Y
+                            height = 0.75f
                             scrollAxes = Axes.Y
                             clipToBounds = true
 
@@ -353,7 +354,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 origin = Anchor.BottomLeft
                 anchor = Anchor.BottomLeft
                 spacing = 8f
-                padding = Vec4(0f, 12f)
 
                 textButton {
                     leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
