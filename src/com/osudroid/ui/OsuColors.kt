@@ -75,6 +75,7 @@ object OsuColors {
     val red = Color4(0xFFED1121)
     val blue = Color4(0xFF66CCFF)
 
+    val redLight = Color4(0xFFED7787)
     val redDark = Color4(0xFFBA0011)
 
     val purple = Color4(0xFF8866EE)

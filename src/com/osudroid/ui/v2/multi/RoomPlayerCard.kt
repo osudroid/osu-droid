@@ -7,13 +7,17 @@ import com.osudroid.multiplayer.api.data.*
 import com.osudroid.multiplayer.api.data.PlayerStatus.*
 import com.osudroid.multiplayer.api.data.RoomTeam.Blue
 import com.osudroid.multiplayer.api.data.RoomTeam.Red
+import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.text.CompoundText
+import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.text.UIText
+import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -63,12 +67,19 @@ class RoomPlayerCard : UILinearContainer() {
 
     private class RoomPlayerButton : UIButton() {
 
-        private lateinit var nameText: UIText
+        private lateinit var nameText: CompoundText
         private lateinit var missingIndicator: UISprite
 
         private val innerContainer: UILinearContainer
         private var modDisplay: UIComponent? = null
 
+        private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
+            applyTheme = { color = it.accentColor }
+        }
+
+        private val mutedIcon = FontAwesomeIcon(Icon.MicrophoneSlash).apply {
+            applyTheme = { color = OsuColors.redLight }
+        }
 
         override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
             color = theme.accentColor
@@ -100,7 +111,7 @@ class RoomPlayerCard : UILinearContainer() {
                     orientation = Orientation.Horizontal
                     spacing = 4f
 
-                    nameText = text {
+                    nameText = compoundText {
                         applyTheme = { color = it.accentColor }
                     }
 
@@ -124,6 +135,22 @@ class RoomPlayerCard : UILinearContainer() {
             }
 
             nameText.text = player.name
+            nameText.spacing = 6f
+            nameText.trailingIcon = when {
+                player.id == room.host && player.isMuted -> UILinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    spacing = 6f
+
+                    +hostIcon
+                    +mutedIcon
+                }
+
+                player.id == room.host -> hostIcon
+                player.isMuted -> mutedIcon
+
+                else -> null
+            }
+
             missingIndicator.isVisible = player.status == MissingBeatmap
 
             if (Config.isPreferModAcronymInMultiplayer()) {
