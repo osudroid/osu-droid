@@ -16,6 +16,7 @@ import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.multiplayer.api.data.RoomTeam
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.BeatmapInfoLayout
 import com.osudroid.ui.v2.GameLoaderScene
@@ -29,6 +30,7 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.badge
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
+import com.reco1l.andengine.component.plus
 import com.reco1l.andengine.component.setText
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.JustifyContent
@@ -358,6 +360,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 textButton {
                     leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
                     setText(R.string.multiplayer_room_leave)
+
+                    applyTheme += {
+                        background?.color = OsuColors.redDark * 0.75f
+                    }
+
                     onActionUp = { leaveDialog.show() }
                 }
 
