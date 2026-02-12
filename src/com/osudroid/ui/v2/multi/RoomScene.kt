@@ -941,6 +941,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         if (uid == Multiplayer.player!!.id) {
             isWaitingForModsChange = false
+            updateBeatmapInfo()
         }
     }
 
