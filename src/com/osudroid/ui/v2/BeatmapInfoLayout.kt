@@ -22,9 +22,10 @@ class BeatmapInfoLayout : UILinearContainer() {
 
     private lateinit var titleText: UIText
     private lateinit var artistText: UIText
+    private lateinit var creatorText: UIText
 
-    private lateinit var lengthText: CompoundText
-    private lateinit var bpmText: CompoundText
+    private lateinit var lengthBadge: UIBadge
+    private lateinit var bpmBadge: UIBadge
 
     private lateinit var arText: UILabeledBadge
     private lateinit var csText: UILabeledBadge
@@ -56,7 +57,7 @@ class BeatmapInfoLayout : UILinearContainer() {
                 artistText = text {
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.9f}
+                    applyTheme = { color = it.accentColor * 0.9f }
                 }
 
                 titleText = text {
@@ -70,31 +71,18 @@ class BeatmapInfoLayout : UILinearContainer() {
                 versionText = text {
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = "Unknown"
-                    applyTheme = { color = it.accentColor * 0.8f}
+                    applyTheme = { color = it.accentColor * 0.8f }
+                }
+
+                creatorText = text {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    text = "Unknown"
+                    applyTheme = { color = it.accentColor * 0.8f }
                 }
             }
 
             starRatingBadge = StarRatingBadge()
             +starRatingBadge
-        }
-
-        linearContainer {
-            orientation = Orientation.Horizontal
-            spacing = 8f
-
-            lengthText = compoundText {
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
-                text = "00:00"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
-            }
-
-            bpmText = compoundText {
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
-                text = "0"
-                applyTheme = { color = it.accentColor }
-                font = ResourceManager.getInstance().getFont("xs")
-            }
         }
 
         linearContainer {
@@ -118,6 +106,11 @@ class BeatmapInfoLayout : UILinearContainer() {
                 spinnersBadge = labeledBadge {
                     label = "Spinners"
                     value = "0"
+                    sizeVariant = SizeVariant.Small
+                }
+                lengthBadge = badge {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
+                    text = "00:00"
                     sizeVariant = SizeVariant.Small
                 }
             }
@@ -146,6 +139,12 @@ class BeatmapInfoLayout : UILinearContainer() {
                     value = "0.00"
                     sizeVariant = SizeVariant.Small
                 }
+                bpmBadge = badge {
+                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
+                    text = "0"
+                    font = ResourceManager.getInstance().getFont("xs")
+                    sizeVariant = SizeVariant.Small
+                }
             }
         }
     }
@@ -154,6 +153,7 @@ class BeatmapInfoLayout : UILinearContainer() {
     fun setBeatmapInfo(beatmapInfo: BeatmapInfo?) {
         titleText.text = beatmapInfo?.titleText ?: "No selected beatmap"
         artistText.text = beatmapInfo?.artistText ?: "Unknown"
+        creatorText.text = "Mapped by ${beatmapInfo?.creator ?: "Unknown"}"
         versionText.text = beatmapInfo?.version ?: "Unknown"
         setDifficultyStatistics(beatmapInfo)
     }
@@ -161,6 +161,7 @@ class BeatmapInfoLayout : UILinearContainer() {
     fun setBeatmapInfo(roomBeatmap: RoomBeatmap?) {
         titleText.text = roomBeatmap?.title ?: "No selected beatmap"
         artistText.text = roomBeatmap?.artist ?: "Unknown"
+        creatorText.text = "Mapped by ${roomBeatmap?.creator ?: "Unknown"}"
         versionText.text = roomBeatmap?.version ?: "Unknown"
         setDifficultyStatistics(null)
     }
@@ -180,8 +181,8 @@ class BeatmapInfoLayout : UILinearContainer() {
             csText.value = "0.00"
             hpText.value = "0.00"
             starRatingBadge.rating = 0.0
-            bpmText.text = "0"
-            lengthText.text = "00:00"
+            bpmBadge.text = "0"
+            lengthBadge.text = "00:00"
             return
         }
 
@@ -199,9 +200,9 @@ class BeatmapInfoLayout : UILinearContainer() {
 
         val sdf = SimpleDateFormat(if (length > 3600 * 1000) "HH:mm:ss" else "mm:ss")
         sdf.timeZone = TimeZone.getTimeZone("GMT+0")
-        lengthText.text = sdf.format(length)
+        lengthBadge.text = sdf.format(length)
 
-        bpmText.text = if (minBpm == maxBpm) commonBpm.toString() else "$minBpm-$maxBpm ($commonBpm)"
+        bpmBadge.text = if (minBpm == maxBpm) commonBpm.toString() else "$minBpm-$maxBpm ($commonBpm)"
 
         // Round to 2 decimal places.
         arText.value = difficulty.ar.roundBy(2).toString()
