@@ -117,7 +117,7 @@ class BeatmapInfoLayout : UILinearContainer() {
 
             linearContainer {
                 orientation = Orientation.Horizontal
-                spacing = 2f
+                spacing = 4f
 
                 arText = labeledBadge {
                     label = "AR"
