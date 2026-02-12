@@ -4,7 +4,6 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.IconVariant
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -144,7 +143,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
 
     //region Buffers
 
-    class IconVertexBuffer() : VertexBuffer(
+    class IconVertexBuffer : VertexBuffer(
         drawTopology = GL_TRIANGLES,
         vertexCount = VERTICES_PER_CHARACTER,
         vertexSize = VERTEX_2D,
@@ -176,7 +175,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
             putVertex(i++, letterX, letterY)
             putVertex(i++, letterX, letterY)
             putVertex(i++, letterX, lineY)
-            putVertex(i++, lineX, lineY)
+            putVertex(i, lineX, lineY)
 
 
             setPosition(0)
@@ -188,7 +187,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
     }
 
 
-    class IconTextureBuffer() : TextureCoordinatesBuffer(
+    class IconTextureBuffer : TextureCoordinatesBuffer(
         vertexCount = VERTICES_PER_CHARACTER,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
