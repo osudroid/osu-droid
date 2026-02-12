@@ -53,6 +53,7 @@ import com.reco1l.andengine.ui.UIBadge
 import com.reco1l.andengine.ui.UILabeledBadge
 import com.reco1l.andengine.ui.UIMessageDialog
 import com.reco1l.andengine.ui.UITextButton
+import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
@@ -374,11 +375,9 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                 textButton {
                     leadingIcon = UISprite(ResourceManager.getInstance().getTexture("logout"))
                     setText(R.string.multiplayer_room_leave)
-
-                    applyTheme += {
-                        background?.color = OsuColors.redDark * 0.75f
-                    }
-
+                    color = Color4(0xFFFFBFBF)
+                    background?.color = Color4(0xFF342121)
+                    applyTheme = {}
                     onActionUp = { leaveDialog.show() }
                 }
 
