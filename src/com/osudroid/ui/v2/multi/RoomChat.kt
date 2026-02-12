@@ -70,8 +70,14 @@ class RoomChat : UILinearContainer() {
 
     private var messagesChanged = false
 
+    private val overlay
+        get() = UIEngine.current.overlay
 
     init {
+        // At any given time, there should be only one chat instance in the overlay.
+        // Two or more instances of these can present after a player successfully reconnects.
+        overlay.detachChildren { it is RoomChat }
+
         width = FillParent
         orientation = Orientation.Vertical
         anchor = Anchor.BottomCenter
@@ -170,7 +176,7 @@ class RoomChat : UILinearContainer() {
 
     fun show() {
         if (!hasParent()) {
-            UIEngine.current.overlay.attachChild(this)
+            overlay.attachChild(this)
         }
     }
 
