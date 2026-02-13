@@ -1,33 +1,49 @@
 package com.osudroid.ui.v2.songselect
 
 import android.graphics.*
-import com.edlplan.framework.easing.*
+import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.buffered.BufferSharingMode
+import com.reco1l.andengine.buffered.CompoundBuffer
+import com.reco1l.andengine.buffered.MutableReference
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
-import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.Fonts
+import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.graphics.*
-import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.*
-import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import java.io.File
 import kotlin.random.*
 
 
+private val textBufferRef = MutableReference<CompoundBuffer?>(null)
+private val coverBufferRef = MutableReference<UISprite.SpriteVBO?>(null)
+private val buttonBufferRef = MutableReference<UIBox.BoxVBO?>(null)
+
 class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableComponent<BeatmapSetModel>(), IPanelContainer<BeatmapPanel> {
 
     override val isRecyclable: Boolean
-        get() = !isPressed && !isExpanded && !button.run { isAnimating }
+        get() = !button.isPressed && !isExpanded && !isTransitioning
+
+
+    /**
+     * The local position for the currently selected panel.
+     */
+    val selectedPanelY: Float
+        get() = panelsContainer.absoluteY + (selectedPanel?.let { it.absoluteY + it.height / 2f } ?: 0f)
+
 
     /**
      * The currently selected beatmap panel.
@@ -41,7 +57,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     SongSelect.onBeatmapSelected(value?.beatmapInfo)
                 }
 
-                panelContainer.forEach { panel -> panel as BeatmapPanel
+                panelsContainer.forEach { panel ->
+                    panel as BeatmapPanel
                     if (panel != value) {
                         panel.collapse()
                     } else {
@@ -55,7 +72,6 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             }
         }
 
-
     /**
      * Whether the panel is expanded or not.
      */
@@ -64,122 +80,120 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     /**
-     * The local position for the currently selected panel.
-     */
-    val selectedPanelY: Float
-        get() = panelContainer.absoluteY + (selectedPanel?.let { it.absoluteY + it.height / 2f } ?: 0f)
-
-    /**
      * The container for the beatmap panels.
      */
-    val panelContainer = UILinearContainer()
+    lateinit var panelsContainer: UILinearContainer
 
     /**
-     * The button that represents the beatmap set
+     * The button itself.
      */
-    val button = object : UILinearContainer() {
+    lateinit var button: UIClickableContainer
 
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
-            if (event.isActionDown) {
-                /*background?.apply {
-                    clearModifiers(ModifierType.Color)
-                    colorTo(Color4.White, 0.1f).eased(Easing.Out)
-                }*/
+    private var isTransitioning = false
+        set(value) {
+            if (field != value) {
+                field = value
+                Log.d("BeatmapSetPanel", "Transitioning: $value")
             }
-
-            if (event.isActionUp) {
-                select()
-            }
-
-            if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-                /*background?.apply {
-                    clearModifiers(ModifierType.Color)
-                    colorTo(Theme.current.accentColor * 0.4f, 0.2f)
-                }*/
-            }
-            return true
         }
 
-    }
-
-
-    private val titleText: UIText
-    private val artistText: UIText
-    private lateinit var statusBadge: UIBadge
+    private lateinit var cover: UISprite
+    private lateinit var titleText: UIText
+    private lateinit var artistText: UIText
 
 
     init {
-        orientation = Orientation.Vertical
         width = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
-        spacing = 4f
 
-        +button.apply {
+        linearContainer {
             orientation = Orientation.Vertical
             width = Size.Full
-            anchor = Anchor.TopRight
-            origin = Anchor.TopRight
-            padding = Vec4(14f)
-            minHeight = 100f
-/*
-            background = if (Config.isSafeBeatmapBg())
-                UIBox().apply {
-                    cornerRadius = 14f
-                    style = { color = it.accentColor * 0.175f }
+            style = {
+                spacing = 1f.srem
+            }
+
+            button = clickableContainer {
+                width = Size.Full
+                anchor = Anchor.TopRight
+                origin = Anchor.TopRight
+                onActionUp = {
+                    // This will prevent race condition, during transition panelsContainer might
+                    // get cleared and since the select() method is based on beatmap indices
+                    // it might fail to find the corresponding BeatmapPanel causing a IOOBE.
+                    if (!isTransitioning) {
+                        select()
+                    }
                 }
-            else
-                UIShapedSprite().apply {
-                    shape = UIBox().apply {
-                        cornerRadius = 14f
-                    }
-
-                    style = {
-                        color = it.accentColor * 0.4f
-                    }
-                }*/
-
-
-            /*foreground = UIBox().apply {
-                paintStyle = PaintStyle.Outline
-                cornerRadius = 14f
-                lineWidth = 2f
                 style = {
-                    color = it.accentColor * 0.2f
+                    borderColor = it.accentColor.copy(alpha = 0.3f)
+                    borderWidth = 0.25f.srem
+                    minHeight = 4.5f.rem
+                    radius = Radius.XL
                 }
-            }*/
 
-            titleText = text {
-                text = "Unknown"
-                style = { color = it.accentColor }
+                cover = sprite {
+                    width = Size.Full
+                    height = Size.Full
+                    scaleType = ScaleType.Crop
+                    bufferSharingMode = BufferSharingMode.Dynamic
+                    bufferReference = coverBufferRef
+                    style = {
+                        backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.5f)
+                        radius = Radius.XL
+                    }
+                }
+
+                box {
+                    width = Size.Full
+                    height = Size.Full
+                    color = Colors.Black.copy(alpha = 0.6f)
+                    bufferSharingMode = BufferSharingMode.Dynamic
+                    bufferReference = buttonBufferRef
+                    style = {
+                        radius = Radius.XL
+                    }
+                }
+
+                linearContainer {
+                    orientation = Orientation.Vertical
+                    width = Size.Full
+                    style = {
+                        padding = Vec4(2.5f.srem)
+                    }
+
+                    titleText = text {
+                        text = "Unknown"
+                        style = {
+                            fontFamily = Fonts.TorusBold
+                            color = it.accentColor
+                        }
+                        bufferSharingMode = BufferSharingMode.Dynamic
+                        bufferReference = textBufferRef
+                    }
+
+                    artistText = text {
+                        text = "Unknown"
+                        style = { color = it.accentColor * 0.8f }
+                        bufferSharingMode = BufferSharingMode.Dynamic
+                        bufferReference = textBufferRef
+                    }
+
+                }
+
             }
 
-            artistText = text {
-                text = "Unknown"
-                style = { color = it.accentColor * 0.8f }
-            }
-
-            linearContainer {
-                orientation = Orientation.Horizontal
-                spacing = 10f
-                padding = Vec4(0f, 6f, 0f, 0f)
-
-                statusBadge = badge {
-                    text = "Unknown"
-                    sizeVariant = SizeVariant.Small
+            panelsContainer = linearContainer {
+                orientation = Orientation.Vertical
+                width = Size.Full
+                height = 0f
+                alpha = 0f
+                style = {
+                    spacing = 1f.srem
                 }
             }
-        }
-
-        +panelContainer.apply {
-            width = Size.Full
-            orientation = Orientation.Vertical
-            spacing = 4f
-
-            alpha = 0f
-            height = 0f
-            isVisible = false
         }
     }
 
@@ -192,7 +206,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             if (data.coverTexture == null && !data.isLoadingCover) {
                 loadCover(data)
             } else if (data.coverTexture != null) {
-                //(button.background as UIShapedSprite).textureRegion = data.coverTexture
+                cover.textureRegion = data.coverTexture
             }
         }
     }
@@ -239,87 +253,77 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         model.isLoadingCover = false
 
         if (isBound) {
-            //(button.background as UIShapedSprite).textureRegion = model.coverTexture
+            cover.textureRegion = model.coverTexture
         }
-    }
-
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-        panelContainer.maxHeight = panelContainer.contentHeight
-        super.onManagedUpdate(deltaTimeSec)
     }
 
 
     fun select(beatmapIndex: Int = 0) {
         beatmapCarrousel.selectedPanel = this
-        selectedPanel = panelContainer[beatmapIndex]
+        selectedPanel = panelsContainer[beatmapIndex]
     }
 
     fun selectRandom() {
         beatmapCarrousel.selectedPanel = this
-        selectedPanel = panelContainer[Random.nextInt(panelContainer.childCount - 1)]
+        selectedPanel = panelsContainer[Random.nextInt(panelsContainer.childCount - 1)]
     }
 
 
-    fun expand() {
-        if (isExpanded) {
-            return
-        }
-        isExpanded = true
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        padding = Vec4(0f, 12f)
+        val buttonContainerTargetWidth = if (isExpanded) width + 2f.rem else width
+        val buttonContainerTargetBorderColor = if (isExpanded) Theme.current.accentColor else Theme.current.accentColor.copy(alpha = 0.3f)
+        val buttonContainerTargetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
 
         button.apply {
-            clearModifiers(ModifierType.SizeX)
-            sizeToX(parent.innerWidth + 100f, 0.1f)
+            width = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, width, buttonContainerTargetWidth, 0.5f)
+            borderColor = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderColor, buttonContainerTargetBorderColor)
+            borderWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderWidth, buttonContainerTargetBorderWidth, 0.5f)
         }
 
-        panelContainer.apply {
-            boundData?.beatmapSetInfo?.beatmaps?.forEach { +BeatmapPanel(this@BeatmapSetPanel, it) }
+        val panelContainerTargetHeight = if (isExpanded) panelsContainer.intrinsicHeight else 0f
+        val panelContainerTargetAlpha = if (isExpanded) 1f else 0f
 
-            isVisible = true
-            clearModifiers(ModifierType.SizeY, ModifierType.Alpha)
-            fadeIn(0.2f)
-            sizeToY(contentHeight + padding.vertical, 0.2f).after {
-                beatmapCarrousel.autoScrollToSelectedPanel = true
+        panelsContainer.apply {
+            height = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, height, panelContainerTargetHeight, 0.5f)
+            alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, alpha, panelContainerTargetAlpha, 0.1f)
+        }
+
+        isTransitioning = button.width != buttonContainerTargetWidth
+            || button.borderColor != buttonContainerTargetBorderColor
+            || button.borderWidth != buttonContainerTargetBorderWidth
+            || panelsContainer.height != panelContainerTargetHeight
+            || panelsContainer.alpha != panelContainerTargetAlpha
+
+        if (!isExpanded && !isTransitioning && panelsContainer.childCount > 0) {
+            panelsContainer.detachChildren()
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
+    fun expand() {
+        val data = boundData
+
+        if (data == null) {
+            Log.w("BeatmapSetPanel", "Cannot expand panel without bound data!")
+            return
+        }
+
+        if (!isExpanded) {
+            isExpanded = true
+
+            data.beatmapSetInfo.beatmaps.forEach {
+                panelsContainer.attachChild(BeatmapPanel(this@BeatmapSetPanel, it))
             }
         }
-
-        /*(button.foreground as UIBox).apply {
-            lineWidth = 4f
-            clearModifiers(ModifierType.Color)
-            colorTo(Theme.current.accentColor, 0.1f)
-        }*/
     }
 
     fun collapse() {
-        if (!isExpanded) {
-            return
+        if (isExpanded) {
+            isExpanded = false
+            selectedPanel = null
         }
-        isExpanded = false
-
-        padding = Vec4.Zero
-        selectedPanel = null
-
-        button.apply {
-            clearModifiers(ModifierType.SizeX)
-            sizeToX(parent.innerWidth, 0.1f)
-        }
-
-        panelContainer.apply {
-            clearModifiers(ModifierType.SizeY, ModifierType.Alpha)
-            fadeOut(0.1f)
-            sizeToY(0f, 0.1f).after {
-                isVisible = false
-                detachChildren()
-            }
-        }
-
-        /*(button.foreground as UIBox).apply {
-            lineWidth = 2f
-            clearModifiers(ModifierType.Color)
-            colorTo(Theme.current.accentColor * 0.3f, 0.1f)
-        }*/
     }
 
 

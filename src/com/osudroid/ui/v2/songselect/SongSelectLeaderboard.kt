@@ -14,6 +14,8 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.*
@@ -56,8 +58,14 @@ class SongSelectLeaderboard : UILinearContainer() {
         height = Size.Full
         width = Size.Full
         orientation = Orientation.Vertical
-        padding = Vec4(80f, 0f, 80f + 16f, 0f)
-        spacing = 8f
+        style = {
+            padding = Vec4(
+                UIEngine.current.safeArea.x + 4f.srem,
+                0f,
+                8f.srem + 2f.srem, // The shear size
+                0f,
+            )
+        }
 
         +UITabSelector().apply {
             width = Size.Full
@@ -234,13 +242,15 @@ class SongSelectLeaderboard : UILinearContainer() {
     class LeaderboardItem(withAvatars: Boolean) : RecyclableComponent<BeatmapScoreModel>() {
 
         override val isRecyclable: Boolean
-            get() = !isPressed
+            get() = !button.isPressed
 
 
+        private val button: UIButton
         private val nameText = UIText()
         private val rankText = UIText()
         private val modsIndicator = ModsIndicator()
-        private val avatarSprite = if (withAvatars) UIShapedSprite() else null
+
+        private val avatarSprite = if (withAvatars) UISprite() else null
 
         private lateinit var scoreText: UIText
         private lateinit var maxComboText: UIText
@@ -249,101 +259,110 @@ class SongSelectLeaderboard : UILinearContainer() {
 
         init {
             width = Size.Full
-            orientation = Orientation.Horizontal
-            padding = Vec4(8f)
-            spacing = 8f
 
-            style = {
-                backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.75f)
-                radius = 12f
-                borderWidth = 2f
-                borderColor = it.accentColor * 0.2f
-            }
-
-            container {
+            +UIButton().apply {
                 width = Size.Full
+                button = this
 
                 linearContainer {
-                    anchor = Anchor.CenterLeft
-                    origin = Anchor.CenterLeft
+                    width = Size.Full
+
                     orientation = Orientation.Horizontal
+                    padding = Vec4(8f)
                     spacing = 8f
 
-                    +rankText.apply {
-                        width = 18f
-                        anchor = Anchor.CenterLeft
-                        origin = Anchor.CenterLeft
-                        alignment = Anchor.Center
-                        style = { color = it.accentColor }
-                        buffer = sharedTextCB
-                        text = ""
+                    style = {
+                        backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.75f)
+                        radius = 12f
+                        borderWidth = 2f
+                        borderColor = it.accentColor * 0.2f
                     }
 
-                    if (withAvatars) {
-                        +avatarSprite!!.apply {
-                            width = 32f
-                            height = 32f
+                    container {
+                        width = Size.Full
+
+                        linearContainer {
                             anchor = Anchor.CenterLeft
                             origin = Anchor.CenterLeft
-                            shape = UIBox().apply { cornerRadius = 12f - 4f }
-                            textureRegion = ResourceManager.getInstance().getTexture("offline-avatar")
-                            buffer = sharedSpriteVBO
-                        }
-                    }
+                            orientation = Orientation.Horizontal
+                            spacing = 8f
 
-                    linearContainer {
-                        orientation = Orientation.Vertical
-                        spacing = 2f
+                            +rankText.apply {
+                                width = 18f
+                                anchor = Anchor.CenterLeft
+                                origin = Anchor.CenterLeft
+                                alignment = Anchor.Center
+                                style = { color = it.accentColor }
+                                //buffer = sharedTextCB
+                                text = ""
+                            }
 
-                        +nameText.apply {
-                            text = "Unknown Player"
-                            style = { color = it.accentColor }
-                            buffer = sharedTextCB
-                        }
+                            if (withAvatars) {
+                                +avatarSprite!!.apply {
+                                    width = 32f
+                                    height = 32f
+                                    anchor = Anchor.CenterLeft
+                                    origin = Anchor.CenterLeft
+                                    radius = 12f - 4f
+                                    textureRegion = ResourceManager.getInstance().getTexture("offline-avatar")
+                                    //buffer = sharedSpriteVBO
+                                }
+                            }
 
-                        +modsIndicator.apply {
-                            iconSize = 16f
-                        }
-                    }
+                            linearContainer {
+                                orientation = Orientation.Vertical
+                                spacing = 2f
 
-                }
+                                +nameText.apply {
+                                    text = "Unknown Player"
+                                    style = { color = it.accentColor }
+                                    //buffer = sharedTextCB
+                                }
 
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    spacing = 8f
-                    anchor = Anchor.CenterRight
-                    origin = Anchor.CenterRight
+                                +modsIndicator.apply {
+                                    iconSize = 16f
+                                }
+                            }
 
-                    fun MetricText(name: String, placeholder: String): UIText {
-
-                        val metricText = UIText().apply {
-                            text = placeholder
-                            style = { color = it.accentColor }
-                            buffer = sharedTextCB
                         }
 
                         linearContainer {
-                            orientation = Orientation.Vertical
-                            spacing = -2f
+                            orientation = Orientation.Horizontal
+                            spacing = 8f
+                            anchor = Anchor.CenterRight
+                            origin = Anchor.CenterRight
 
-                            text {
-                                text = name.uppercase()
-                                style = { color = it.accentColor * 0.8f }
-                                buffer = sharedTextCB
+                            fun MetricText(name: String, placeholder: String): UIText {
+
+                                val metricText = UIText().apply {
+                                    text = placeholder
+                                    style = { color = it.accentColor }
+                                    //buffer = sharedTextCB
+                                }
+
+                                linearContainer {
+                                    orientation = Orientation.Vertical
+                                    spacing = -2f
+
+                                    text {
+                                        text = name.uppercase()
+                                        style = { color = it.accentColor * 0.8f }
+                                        //buffer = sharedTextCB
+                                    }
+                                    +metricText
+                                }
+
+                                return metricText
                             }
-                            +metricText
+
+                            scoreText = MetricText("Score", "0,000,000,000")
+                            maxComboText = MetricText("Max combo", "00000x")
+                            accuracyText = MetricText("Accuracy", "000.00%")
                         }
 
-                        return metricText
                     }
-
-                    scoreText = MetricText("Score", "0,000,000,000")
-                    maxComboText = MetricText("Max combo", "00000x")
-                    accuracyText = MetricText("Accuracy", "000.00%")
                 }
-
             }
-
         }
 
 
@@ -362,13 +381,6 @@ class SongSelectLeaderboard : UILinearContainer() {
             rankText.text = if (data.rank > 0) data.rank.toString() else ""
         }
 
-
-        companion object {
-            private val sharedTextCB = CompoundBuffer(UIText.TextTextureBuffer(128), UIText.TextVertexBuffer(128)).asSharedDynamically()
-            private val sharedBackgroundVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill).asSharedStatically()
-            private val sharedForegroundVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Outline).asSharedStatically()
-            private val sharedSpriteVBO = UISprite.SpriteVBO().asSharedDynamically()
-        }
 
     }
 

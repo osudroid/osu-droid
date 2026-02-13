@@ -2,12 +2,18 @@ package com.osudroid.ui.v2.songselect
 
 import com.osudroid.data.*
 import com.osudroid.ui.v2.*
+import com.osudroid.ui.v2.mainmenu.MainScene
 import com.osudroid.ui.v2.modmenu.*
 import com.osudroid.utils.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.scaleCenter
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import com.rian.osu.beatmap.parser.*
@@ -30,7 +36,7 @@ object SongSelect : UIScene() {
         private set
 
 
-    private val beatmapLoadingScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val beatmapLoadingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val filterBar = SongSelectFilterBar()
     private val leaderboard = SongSelectLeaderboard()
@@ -67,7 +73,9 @@ object SongSelect : UIScene() {
                 width = Size.Full
                 height = Size.Full
                 orientation = Orientation.Vertical
-                spacing = 4f
+                style = {
+                    spacing = 2f.srem
+                }
 
                 +beatmapInfoWedge
                 +leaderboard
@@ -78,7 +86,12 @@ object SongSelect : UIScene() {
                 width = Size.Full
                 height = Size.Full
 
-                +beatmapCarrousel
+                +beatmapCarrousel.apply {
+                    setScale(0.8f)
+                    scaleCenter = Anchor.Center
+                    borderWidth = 4f
+                    borderColor = Colors.White
+                }
                 +filterBar
             }
         }
@@ -87,36 +100,33 @@ object SongSelect : UIScene() {
             orientation = Orientation.Horizontal
             anchor = Anchor.BottomLeft
             origin = Anchor.BottomLeft
-            padding = Vec4(60f, 0f, 0f, 16f)
-            spacing = 16f
+            style = {
+                padding = Vec4(UIEngine.current.safeArea.x + 2f.srem, 4f.srem)
+                spacing = 2f.srem
+            }
 
-            +UITextButton().apply {
+            textButton {
                 text = "Back"
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("back-arrow"))
+                leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
 
                 onActionUp = {
-                    GlobalManager.getInstance().mainScene.show()
+                    UIEngine.current.scene = MainScene
                 }
             }
 
-            linearContainer {
-                orientation = Orientation.Horizontal
-                spacing = 4f
+            modsButton = textButton {
+                text = "Mods"
+                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
+                onActionUp = { ModMenu.show() }
+            }
 
-                modsButton = textButton {
-                    text = "Mods"
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
-                    onActionUp = { ModMenu.show() }
-                }
-
-                textButton {
-                    text = "Random"
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("random"))
-                    onActionUp = {
-                        beatmapCarrousel.applyComponent(beatmapCarrousel.data.random()) { selectRandom() }
-                    }
+            textButton {
+                text = "Random"
+                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("random"))
+                onActionUp = {
+                    beatmapCarrousel.applyComponent(beatmapCarrousel.data.random()) { selectRandom() }
                 }
             }
         }
@@ -270,7 +280,8 @@ object SongSelect : UIScene() {
             val model = beatmapCarrousel.data.find { it.beatmapSetInfo.directory == currentBeatmapInfo?.setDirectory } ?: return@updateThread
 
             beatmapCarrousel.applyComponent(model) {
-                select(model.beatmapSetInfo.beatmaps.indexOf(currentBeatmapInfo))
+                val beatmapInfoIndex = model.beatmapSetInfo.beatmaps.indexOfFirst { it.path == currentBeatmapInfo?.path }
+                select(beatmapInfoIndex)
             }
         }
     }

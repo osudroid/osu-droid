@@ -2,6 +2,7 @@ package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIWedge.*
+import com.reco1l.andengine.theme.srem
 import com.reco1l.toolkt.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
@@ -13,11 +14,11 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
     /**
      * The shear of the wedge.
      */
-    var shear = 80f
+    var shear = 8f.srem
         set(value) {
             if (field != value) {
                 field = value
-                requestNewBuffer()
+                requestBufferUpdate()
             }
         }
 
@@ -28,7 +29,7 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
         set(value) {
             if (field != value) {
                 field = value
-                requestNewBuffer()
+                requestBufferUpdate()
             }
         }
 
@@ -47,6 +48,10 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
         val dx = x2 - x1
         val dy = y2 - y1
         return atan2(dy, dx).toDegrees()
+    }
+
+    private fun getArcsSegments(): Int {
+        return if (radius > 0f) UICircle.calculateArcResolution(radius, radius, getWedgeAngle()) else 0
     }
 
 
@@ -78,15 +83,12 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
         }
     }
 
-    override fun onCreateBuffer(): WedgeVBO {
-        val wedgeAngle = getWedgeAngle()
-        val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, wedgeAngle) else 0
+    override fun canReuseBuffer(buffer: WedgeVBO): Boolean {
+        return buffer.segments == getArcsSegments() && buffer.shear == shear && buffer.radius == radius && buffer.style == paintStyle
+    }
 
-        val buffer = buffer
-        if (buffer?.segments == segments && buffer.shear == shear && buffer.radius == radius && buffer.style == paintStyle) {
-            return buffer
-        }
-
+    override fun createBuffer(): WedgeVBO {
+        val segments = getArcsSegments()
         return WedgeVBO(segments, shear, radius, paintStyle)
     }
 
@@ -96,7 +98,7 @@ class UIWedge : UIBufferedComponent<WedgeVBO>() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        requestNewBuffer()
+        requestBufferUpdate()
     }
 
     override fun beginDraw(gl: GL10) {

@@ -1,98 +1,95 @@
 package com.osudroid.ui.v2.songselect
 
-import com.edlplan.framework.easing.*
 import com.osudroid.data.*
-import com.osudroid.ui.*
+import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.sprite.*
-import com.reco1l.andengine.text.*
-import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
+
+private val textBufferRef = MutableReference<CompoundBuffer?>(null)
+private val backgroundBufferRef = MutableReference<UIBox.BoxVBO?>(null)
+
+
 
 @Suppress("LeakingThis")
 open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatmapInfo: BeatmapInfo) : UIContainer() {
 
-    private val foreground: UIBox
+    private var isExpanded = false
+
 
     init {
         width = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
         style = {
-            radius = 14f
-            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.75f)
+            radius = Radius.XL
+            backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.6f)
+            borderColor = it.accentColor.copy(alpha = 0.3f)
+            borderWidth = 0.25f.srem
+        }
+        background?.apply {
+            bufferSharingMode = BufferSharingMode.Dynamic
+            bufferReference = backgroundBufferRef
         }
 
         linearContainer {
             orientation = Orientation.Horizontal
-            padding = Vec4(12f, 24f)
-            spacing = 10f
+            style = {
+                padding = Vec4(4f.srem)
+                spacing = 2f.srem
+            }
 
-            badge {
-                val starRating = beatmapInfo.getStarRating()
-
-                text = starRating.roundBy(2).toString()
-                anchor = Anchor.CenterLeft
-                origin = Anchor.CenterLeft
-                leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
+            +StarRatingBadge().apply {
+                rating = beatmapInfo.getStarRating().toDouble()
                 sizeVariant = SizeVariant.Small
-                color = if (starRating >= 6.5) Color4(0xFFFFD966) else Color4.Black.copy(alpha = 0.75f)
-                style = {}
-                backgroundColor = OsuColors.getStarRatingColor(starRating.toDouble())
+                applyColorsInstantly()
             }
 
             text {
                 text = beatmapInfo.version
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                style = { color = it.accentColor }
+                bufferSharingMode = BufferSharingMode.Dynamic
+                bufferReference = textBufferRef
+                style = {
+                    color = it.accentColor
+                    fontFamily = Fonts.TorusBold
+                }
             }
 
         }
 
-        foreground = box {
-            paintStyle = PaintStyle.Outline
-            cornerRadius = 14f
-            lineWidth = 2f
-            style = {
-                color = it.accentColor * 0.2f
-            }
-        }
+    }
 
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        val targetBorderColor = if (isExpanded) Theme.current.accentColor else Theme.current.accentColor.copy(alpha = 0.3f)
+        val targetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
+        val targetWidth = if (isExpanded) parent.innerWidth + 2f.rem else parent.innerWidth
+
+        borderColor = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderColor, targetBorderColor)
+        borderWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderWidth, targetBorderWidth, 0.5f)
+        width = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, width, targetWidth, 0.5f)
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
     fun expand() {
-        clearModifiers(ModifierType.SizeX)
-        sizeToX(parent.innerWidth + 130f, 0.1f)
-
-        (foreground as UIBox).apply {
-            lineWidth = 4f
-            clearModifiers(ModifierType.Color)
-            colorTo(Theme.current.accentColor, 0.1f)
-        }
+        isExpanded = true
     }
 
     fun collapse() {
-        clearModifiers(ModifierType.SizeX)
-        sizeToX(parent.innerWidth, 0.1f)
-
-        (foreground as UIBox).apply {
-            lineWidth = 2f
-            clearModifiers(ModifierType.Color)
-            colorTo(Theme.current.accentColor * 0.3f, 0.1f)
-        }
+        isExpanded = false
     }
 
 

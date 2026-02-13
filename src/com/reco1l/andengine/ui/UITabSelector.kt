@@ -1,22 +1,24 @@
 package com.reco1l.andengine.ui
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.srem
+import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.*
 
-class UITabSelector : UIFillContainer() {
+class UITabSelector : UIContainer() {
 
 
     /**
      * The currently selected tab index.
      */
     var selectedTab: Int?
-        get() {
-            return if (selectedButton == null) null else buttonsContainer.getChildIndex(selectedButton)
-        }
+        get() = if (selectedButton == null) null else buttonsContainer.getChildIndex(selectedButton)
         set(value) {
             selectedButton = if (value == null) null else buttonsContainer.getChild(value) as UITextButton
         }
@@ -26,43 +28,31 @@ class UITabSelector : UIFillContainer() {
     private val buttonsContainer: UILinearContainer
 
     private var selectedButton: UITextButton? = null
-        set(value) {
-            if (field != value) {
-                field = value
-
-                selectionIndicator.clearModifiers(ModifierType.MoveXY, ModifierType.SizeXY)
-
-                if (value != null) {
-                    if (!selectionIndicator.isVisible) {
-                        selectionIndicator.setSize(value.width, value.height)
-                    } else {
-                        selectionIndicator.sizeTo(value.width, value.height, 0.1f)
-                    }
-
-                    selectionIndicator.isVisible = true
-                    selectionIndicator.moveTo(value.x, value.y, 0.1f)
-                } else {
-                    selectionIndicator.isVisible = false
-                }
-            }
-        }
 
 
     init {
-        padding = Vec4(4f)
         style = {
+            padding = Vec4(1f.srem)
             backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.25f)
-        }
-
-        buttonsContainer = linearContainer {
-            spacing = 8f
+            radius = Radius.LG
         }
 
         selectionIndicator = box {
-            cornerRadius = 12f
-            isVisible = false
-            style = { color = it.accentColor * 0.2f }
+            alpha = 0f
+            height = Size.Full
+            style = {
+                color = it.accentColor * 0.2f
+                radius = Radius.LG
+            }
         }
+
+        buttonsContainer = fillContainer {
+            width = Size.Full
+            style = {
+                spacing = 1f.srem
+            }
+        }
+
     }
 
 
@@ -70,8 +60,8 @@ class UITabSelector : UIFillContainer() {
         buttonsContainer.attachChild(UITextButton().apply {
             width = Size.Full
             text = name
-            padding = Vec4(12f, 8f)
             alignment = Anchor.Center
+            sizeVariant = SizeVariant.Small
             colorVariant = ColorVariant.Tertiary
             onActionUp = {
                 selectedButton = this
@@ -83,10 +73,21 @@ class UITabSelector : UIFillContainer() {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        val selectedButton = selectedButton
-        if (selectedButton != null) {
-            selectionIndicator.setSize(selectedButton.width, selectedButton.height)
+        selectionIndicator.apply {
+            val selectedButton = selectedButton
+
+            if (selectedButton != null) {
+
+                alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), alpha, 1f, 0f, 0.1f)
+                width = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), width, selectedButton.width, 0f, 0.1f)
+                x = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.2f), x, selectedButton.x, 0f, 0.2f, Easing.OutQuint)
+
+            } else {
+                alpha = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.1f), alpha, 0f, 0f, 0.1f)
+            }
         }
+
+
 
         super.onManagedUpdate(deltaTimeSec)
     }

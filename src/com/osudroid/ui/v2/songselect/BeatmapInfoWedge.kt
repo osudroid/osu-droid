@@ -8,7 +8,12 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.Fonts
+import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Radius
 import com.reco1l.andengine.theme.Size
+import com.reco1l.andengine.theme.rem
+import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -52,17 +57,28 @@ class BeatmapInfoWedge : UIContainer() {
         translationY = -2f
 
         +UIWedge().apply {
+            width = Size.Full
+            height = Size.Full
+
             style = {
                 color = it.accentColor * 0.1f
                 alpha = 0.75f
+                radius = 0.75f.rem
             }
         }
 
         linearContainer {
             width = Size.Full
             orientation = Orientation.Vertical
-            padding = Vec4(60f, 18f, 50f, 18f)
-            spacing = 6f
+            style = {
+                padding = Vec4(
+                    UIEngine.current.safeArea.x + 4f.srem,
+                    4f.srem,
+                    4f.srem,
+                    4f.srem,
+                )
+                spacing = 1.5f.srem
+            }
 
             fillContainer {
                 orientation = Orientation.Horizontal
@@ -75,13 +91,19 @@ class BeatmapInfoWedge : UIContainer() {
 
                     artistText = text {
                         text = "Unknown"
-                        style = { color = it.accentColor * 0.9f}
+                        style = {
+                            color = it.accentColor * 0.8f
+                            fontFamily = Fonts.TorusBold
+                        }
                     }
 
                     titleText = text {
                         width = Size.Full
                         text = "No selected beatmap"
-                        style = { color = it.accentColor }
+                        style = {
+                            color = it.accentColor
+                            fontFamily = Fonts.TorusBold
+                        }
                         clipToBounds = true
                     }
 
@@ -93,34 +115,42 @@ class BeatmapInfoWedge : UIContainer() {
 
                 starsText = badge {
                     text = "0.00"
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
+                    leadingIcon = FontAwesomeIcon(Icon.Star)
                 }
             }
 
             linearContainer {
                 orientation = Orientation.Horizontal
-                spacing = 8f
-
-                lengthText = compoundText {
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("clock"))
-                    text = "00:00"
-                    style = { color = it.accentColor }
+                style = {
+                    spacing = 2f.srem
                 }
 
-                bpmText = compoundText {
-                    leadingIcon = UISprite(ResourceManager.getInstance().getTexture("bpm"))
+                lengthText = badge {
+                    leadingIcon = FontAwesomeIcon(Icon.Clock)
+                    text = "00:00"
+                    colorVariant = ColorVariant.Tertiary
+                    sizeVariant = SizeVariant.Small
+                }
+
+                bpmText = badge {
+                    leadingIcon = FontAwesomeIcon(Icon.HeartPulse)
                     text = "0"
-                    style = { color = it.accentColor }
+                    colorVariant = ColorVariant.Tertiary
+                    sizeVariant = SizeVariant.Small
                 }
             }
 
             linearContainer {
                 orientation = Orientation.Vertical
-                spacing = 4f
+                style = {
+                    spacing = 1f.srem
+                }
 
                 linearContainer {
                     orientation = Orientation.Horizontal
-                    spacing = 4f
+                    style = {
+                        spacing = 1f.srem
+                    }
 
                     circlesBadge = labeledBadge {
                         label = "Circles"
@@ -141,7 +171,9 @@ class BeatmapInfoWedge : UIContainer() {
 
                 linearContainer {
                     orientation = Orientation.Horizontal
-                    spacing = 2f
+                    style = {
+                        spacing = 1f.srem
+                    }
 
                     arText = labeledBadge {
                         label = "AR"
@@ -168,10 +200,13 @@ class BeatmapInfoWedge : UIContainer() {
         }
 
         +UIWedge().apply {
+            width = Size.Full
+            height = Size.Full
             paintStyle = PaintStyle.Outline
-            lineWidth = 4f
+            lineWidth = 2f
             style = {
                 color = it.accentColor * 0.2f
+                radius = 0.75f.rem
             }
         }
 

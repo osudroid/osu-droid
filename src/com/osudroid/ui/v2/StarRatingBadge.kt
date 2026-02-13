@@ -54,4 +54,9 @@ class StarRatingBadge : UIBadge() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
+
+    fun applyColorsInstantly() {
+        backgroundColor = ratingColor
+        color = textColor
+    }
 }

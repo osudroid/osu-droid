@@ -16,7 +16,11 @@ class BeatmapSetModel(
     val beatmapSetInfo: BeatmapSetInfo,
     var coverTexture: TextureRegion? = null,
     var isLoadingCover: Boolean = false,
-)
+) {
+    override fun toString(): String {
+        return beatmapSetInfo.path
+    }
+}
 
 class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>(), IPanelContainer<BeatmapSetPanel> {
 
@@ -78,7 +82,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         component.button.translationX = SHEAR * (1f - mainPanelYPercentage)
 
         if (selectedPanel == component) {
-            component.panelContainer.forEach { panel -> panel as BeatmapPanel
+            component.panelsContainer.forEach { panel -> panel as BeatmapPanel
                 val panelYPercentage = getPositionPercentage(buttonAbsoluteY + panel.absoluteY, panel.height, scrollY, height)
 
                 panel.translationX = -component.translationX + SHEAR * (1f - panelYPercentage)
