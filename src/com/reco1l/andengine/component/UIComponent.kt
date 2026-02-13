@@ -24,6 +24,7 @@ import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.reflect.full.superclasses
 
 
 /**
@@ -744,7 +745,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     open fun onHandleInvalidations(flags: Int = this.invalidationFlags) {
 
         if (flags != 0) {
-            //Log.d("UIComponent", "${this::class.simpleName}: ${InvalidationFlag.toString(invalidationFlags)}")
+            // Log.d("UIComponent", "${this::class.let { it.simpleName ?: it.superclasses[0].simpleName }}: ${InvalidationFlag.toString(invalidationFlags)}")
         }
 
         val parent = parent as? UIComponent
@@ -758,11 +759,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (flags and InvalidationFlag.Size != 0) {
             onSizeChanged()
-            propagateToChildrenFlags = InvalidationFlag.Content
-
-            if (parent?.rawWidth == Size.Auto || parent?.rawHeight == Size.Auto) {
-                propagateToParentFlags = InvalidationFlag.Content
-            }
+            propagateToChildrenFlags = InvalidationFlag.Size
+            propagateToParentFlags = InvalidationFlag.Content
         }
 
         if (flags and InvalidationFlag.Position != 0) {
