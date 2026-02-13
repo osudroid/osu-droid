@@ -1,6 +1,7 @@
 package com.reco1l.framework
 
 import com.edlplan.framework.easing.*
+import com.rian.osu.math.Precision
 
 object Interpolation {
 
@@ -41,6 +42,17 @@ object Interpolation {
         return start + t * (end - start)
     }
 
+    fun floatLerp(deltaTime: Float, duration: Float, start: Float, end: Float, easing: Easing = Easing.None): Float {
+        return floatAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
+    }
+
+    fun floatLerpWithSnap(deltaTime: Float, duration: Float, start: Float, end: Float, snapBy: Float = 0f, easing: Easing = Easing.None): Float {
+        if (Precision.almostEquals(start, end, snapBy)) {
+            return end
+        }
+        return floatAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
+    }
+
 
     fun colorAt(time: Float, start: Color4, end: Color4, startTime: Float, endTime: Float, easing: Easing = Easing.None): Color4 {
         val r = floatAt(time, start.red, end.red, startTime, endTime, easing)
@@ -48,6 +60,10 @@ object Interpolation {
         val b = floatAt(time, start.blue, end.blue, startTime, endTime, easing)
         val a = floatAt(time, start.alpha, end.alpha, startTime, endTime, easing)
         return Color4(r, g, b, a)
+    }
+
+    fun colorLerp(deltaTime: Float, duration: Float, start: Color4, end: Color4, easing: Easing = Easing.None): Color4 {
+        return colorAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
     }
 
 }
