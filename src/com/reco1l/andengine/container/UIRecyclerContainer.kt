@@ -7,6 +7,7 @@ import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.input.touch.*
 import java.util.LinkedList
+import java.util.concurrent.ConcurrentHashMap
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
@@ -22,7 +23,7 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
      * This contains those components that are inside of the container's bounds or the container's visible area,
      * and those that are not recyclable determined by [isRecyclable][RecyclableComponent.isRecyclable] property.
      */
-    val boundComponents = mutableMapOf<T, C>()
+    val boundComponents: MutableMap<T, C> = ConcurrentHashMap()
 
     /**
      * The component wrapper.
@@ -46,7 +47,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
 
     var orientation by componentWrapper::orientation
-
     var spacing by componentWrapper::spacing
 
 
@@ -70,15 +70,15 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
     private fun createComponentForPool(): C? {
         val component = onCreateComponent?.invoke() ?: return null
+        component.isVisible = false
+
         componentPool.offer(component)
         componentWrapper.attachChild(component)
-
-        Log.v("UIRecyclerContainer", "Created new component for pool, pool size: ${componentPool.size}, bound components: ${boundComponents.size}")
+        Log.i("UIRecyclerContainer", "Created new component for the pool: ${component::class}")
         return component
     }
 
-
-    private fun fetchComponent(data: T): C {
+    private fun fetchComponentOrFallback(data: T): C {
         return boundComponents[data]
             ?: componentPool.peek()
             ?: createComponentForPool()
@@ -87,7 +87,9 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
     private fun unbindComponent(data: T, component: C) {
         if (component.boundData != null) {
+            Log.i("UIRecyclerContainer", "Unbinding component for data: ${component.boundData}")
             component.boundData = null
+            component.isVisible = false
             component.onRecycle()
 
             boundComponents.remove(data)
@@ -98,19 +100,22 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
     private fun bindComponent(data: T, component: C) {
         if (component.boundData != data) {
+            Log.i("UIRecyclerContainer", "Binding component for data: $data")
             component.boundData = data
+            component.isVisible = true
             component.onBind(data)
+
             componentPool.remove(component)
             boundComponents[data] = component
             Log.v("UIRecyclerContainer", "Binding component, pool size: ${componentPool.size}, bound components: ${boundComponents.size}")
         }
     }
 
-    private fun isOutOfView(component: C): Boolean {
+    private fun isInContainerBounds(component: C): Boolean {
         // Override the culling check to be straightforward
         // with the carrousel and panels making it fast.
 
-        val windowSize: Float
+        val containerSize: Float
         val currentScroll: Float
         val positionOnContainer: Float
         val componentSize: Float
@@ -118,21 +123,21 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
         when (orientation) {
 
             Vertical -> {
-                windowSize = height
+                containerSize = height
                 currentScroll = scrollY
                 positionOnContainer = component.absoluteY - currentScroll
                 componentSize = component.height
             }
 
             Horizontal -> {
-                windowSize = width
+                containerSize = width
                 currentScroll = scrollX
                 positionOnContainer = component.absoluteX - currentScroll
                 componentSize = component.width
             }
         }
 
-        return positionOnContainer + componentSize < 0f || positionOnContainer > windowSize
+        return positionOnContainer + componentSize > 0f && positionOnContainer < containerSize
     }
 
 
@@ -143,7 +148,7 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
      * and bind it to the data avoiding it to be recycled.
      */
     fun applyComponent(data: T, block: C.(data: T) -> Unit): C {
-        val component = fetchComponent(data)
+        val component = fetchComponentOrFallback(data)
         bindComponent(data, component)
         component.block(data)
         return component
@@ -163,12 +168,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
     override fun attachChild(pEntity: IEntity?, pIndex: Int): Boolean {
         throw UnsupportedOperationException("RecyclableContainer does not support attaching children directly.")
     }
-
-
-    override fun onScrollChanged() {
-        componentWrapper.onScrollChanged()
-    }
-
 
     /**
      * A wrapper for recyclable components.
@@ -190,7 +189,7 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
             for (i in dataList.indices) {
 
                 val data = dataList[i]
-                val component = fetchComponent(data)
+                val component = fetchComponentOrFallback(data)
 
                 when (orientation) {
                     Horizontal -> {
@@ -216,22 +215,21 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
                     }
                 }
 
-                if (isOutOfView(component) && component.isRecyclable) {
-                    unbindComponent(data, component)
-                    continue
+                if (isInContainerBounds(component)) {
+                    if (component.isRecyclable && component.boundData != data) {
+                        bindComponent(data, component)
+                    }
+                } else {
+                    if (component.isRecyclable && component.boundData != null) {
+                        unbindComponent(data, component)
+                    }
                 }
-
-                bindComponent(data, component)
             }
 
             this.contentWidth = contentWidth
             this.contentHeight = contentHeight
         }
 
-        fun onScrollChanged() {
-            Log.v("UIRecyclerContainer", "onScrollChanged called, invalidating content.")
-            invalidate(InvalidationFlag.Content)
-        }
 
         override fun onDrawChildren(gl: GL10, camera: Camera) {
             for (component in boundComponents.values) {
@@ -256,7 +254,7 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
 }
 
-abstract class RecyclableComponent<T : Any> : UILinearContainer() {
+abstract class RecyclableComponent<T : Any> : UIContainer() {
 
     /**
      * The current bound data for the component.
@@ -280,14 +278,6 @@ abstract class RecyclableComponent<T : Any> : UILinearContainer() {
      */
     abstract val isRecyclable: Boolean
 
-
-    /**
-     * Whether the component is currently pressed.
-     */
-    protected var isPressed = false
-        private set
-
-
     /**
      * Binds the data to the component.
      */
@@ -300,16 +290,14 @@ abstract class RecyclableComponent<T : Any> : UILinearContainer() {
     open fun onRecycle() = Unit
 
 
+    override fun contains(x: Float, y: Float): Boolean {
+        return isBound && super.contains(x, y)
+    }
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        if (event.isActionDown) {
-            isPressed = true
+        if (!isBound) {
+            return false
         }
-
-        if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-            isPressed = false
-        }
-
         return super.onAreaTouched(event, localX, localY)
     }
 }
