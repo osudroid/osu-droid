@@ -209,7 +209,7 @@ public class GameplayHitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (listener.isObjectHittable(this)) {
+        } else if (!autoPlay && listener.isObjectHittable(this)) {
             var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
 
             if (hittingCursor != null) {
