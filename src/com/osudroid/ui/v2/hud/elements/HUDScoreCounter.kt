@@ -2,6 +2,7 @@ package com.osudroid.ui.v2.hud.elements
 
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.SpriteFont
+import com.rian.framework.RollingIntCounter
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.DecimalFormat
@@ -21,6 +22,10 @@ class HUDScoreCounter : HUDElement() {
             }
         }
 
+    private val counter = RollingIntCounter(0).apply {
+        rollingDuration = 1000f
+    }
+
     init {
         sprite.spacing = -OsuSkin.get().scoreOverlap
         sprite.text = format.format(0)
@@ -30,7 +35,9 @@ class HUDScoreCounter : HUDElement() {
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
-        value = game.stat.totalScoreWithMultiplier
+        counter.update(secondsElapsed * 1000)
+        counter.targetValue = game.stat.totalScoreWithMultiplier
+        value = counter.currentValue
     }
 
 }
