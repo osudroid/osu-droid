@@ -14,6 +14,7 @@ import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
+import org.anddev.andengine.engine.camera.Camera
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
@@ -169,16 +170,19 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
     }
 
 
+    override fun onTouchHUD(camera: Camera, event: TouchEvent): Boolean {
+
+        if (checkFocusedEntityBounds(event)) {
+            return true
+        }
+
+        return super.onTouchHUD(camera, event)
+    }
+
+
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {
 
-        val focusedEntity = focusedEntity
-        if (focusedEntity != null) {
-            val (left, top) = focusedEntity.convertLocalToSceneCoordinates(0f, 0f)
-            val (right, bottom) = focusedEntity.convertLocalToSceneCoordinates(focusedEntity.width, focusedEntity.height)
-
-            if (event.x < left || event.x > right || event.y < top || event.y > bottom) {
-                (focusedEntity as IFocusable).blur()
-            }
+        if (checkFocusedEntityBounds(event)) {
             return true
         }
 
@@ -192,6 +196,28 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
         scene?.onAttached()
     }
 
+    /**
+     * Checks whether a [TouchEvent] is outside the bounds of [focusedEntity] and blurs [focusedEntity] if so.
+     *
+     * @param event The [TouchEvent] to check against the [focusedEntity]'s bounds.
+     * @return `true` if [focusedEntity] exists and was blurred, `false` otherwise.
+     */
+    private fun checkFocusedEntityBounds(event: TouchEvent): Boolean {
+        val focusedEntity = focusedEntity
+
+        if (focusedEntity != null) {
+            val (left, top) = focusedEntity.convertLocalToSceneCoordinates(0f, 0f)
+            val (right, bottom) = focusedEntity.convertLocalToSceneCoordinates(focusedEntity.width, focusedEntity.height)
+
+            if (event.x < left || event.x > right || event.y < top || event.y > bottom) {
+                (focusedEntity as IFocusable).blur()
+            }
+
+            return true
+        }
+
+        return false
+    }
 
     companion object {
 
