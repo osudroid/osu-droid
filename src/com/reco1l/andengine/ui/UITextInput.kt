@@ -324,7 +324,14 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
                 KEYCODE_DPAD_LEFT -> caretPosition = max(0, caretPosition - 1)
                 KEYCODE_DPAD_RIGHT -> caretPosition = min(value.length, caretPosition + 1)
 
-                else -> appendCharacter(event.unicodeChar.toChar())
+                else -> {
+                    val unicodeChar = event.unicodeChar
+
+                    // Key event might not have a Unicode character (e.g. shift key), in that case we ignore it.
+                    if (unicodeChar != 0) {
+                        appendCharacter(unicodeChar.toChar())
+                    }
+                }
             }
         }
 
