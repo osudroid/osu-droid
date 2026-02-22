@@ -697,6 +697,34 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
+    public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+        if (this.mEngine == null) {
+            return false;
+        }
+
+        if (AccessibilityDetector.isIllegalServiceDetected()) {
+            return false;
+        }
+
+        if (GlobalManager.getInstance().getEngine() == null) {
+            return super.onKeyMultiple(keyCode, repeatCount, event);
+        }
+
+        var action = event.getAction();
+
+        // See:
+        // - https://stackoverflow.com/a/7232186
+        // - https://developer.android.com/reference/android/view/KeyEvent#ACTION_MULTIPLE
+        // For now, we are only interested in using this for input to support characters that require multiple key
+        // presses to be inputted.
+        if (action == KeyEvent.ACTION_MULTIPLE && UIEngine.getCurrent().onKeyPress(keyCode, event)) {
+            return true;
+        }
+
+        return super.onKeyMultiple(keyCode, repeatCount, event);
+    }
+
+    @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {
         if (this.mEngine == null) {
             return false;
