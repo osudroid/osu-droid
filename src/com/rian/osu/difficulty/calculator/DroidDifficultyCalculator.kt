@@ -1,9 +1,11 @@
 package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.PlayableBeatmap
-import com.rian.osu.beatmap.StandardHitWindow
+import com.rian.osu.beatmap.PreciseDroidHitWindow
+import com.rian.osu.beatmap.UnadjustedStandardHitWindow
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
@@ -42,11 +44,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         hitCircleCount = beatmap.hitObjects.circleCount
         sliderCount = beatmap.hitObjects.sliderCount
         spinnerCount = beatmap.hitObjects.spinnerCount
-
-        // Weird cast of greatWindow, but necessary for difficulty calculation parity
-        val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
-
-        overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
+        overallDifficulty = beatmap.difficulty.od.toDouble()
 
         populateAimAttributes(skills, forReplay)
         populateTapAttributes(skills, objects, forReplay)
@@ -278,7 +276,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         readingDifficultNoteCount = reading.countTopWeightedNotes()
 
         // Consider accuracy difficulty.
-        val ratingMultiplier = 0.75 + max(0.0, overallDifficulty).pow(2.2) / 800
+        val greatWindow =
+            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(overallDifficulty.toFloat()).greatWindow
+            else DroidHitWindow(overallDifficulty.toFloat()).greatWindow
+
+        val standardOverallDifficulty = UnadjustedStandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toDouble()
+        val ratingMultiplier = 0.75 + max(0.0, standardOverallDifficulty).pow(2.2) / 800
 
         readingDifficulty *= sqrt(ratingMultiplier)
     }

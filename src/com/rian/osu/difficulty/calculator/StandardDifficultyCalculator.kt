@@ -188,7 +188,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
             val hitWindow = StandardHitWindow(overallDifficulty)
             val greatWindow = hitWindow.greatWindow.toDouble() / clockRate
 
-            return StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
+            return (79.5 - greatWindow) / 6
         }
     }
 }

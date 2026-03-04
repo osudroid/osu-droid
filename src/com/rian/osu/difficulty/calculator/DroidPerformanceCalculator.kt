@@ -3,7 +3,6 @@ package com.rian.osu.difficulty.calculator
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
 import com.rian.osu.difficulty.skills.DroidAim
@@ -333,7 +332,7 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val hitWindow = getConvertedHitWindow()
+        val hitWindow = getHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -407,7 +406,7 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val hitWindow = getConvertedHitWindow()
+        val hitWindow = getHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -497,15 +496,8 @@ class DroidPerformanceCalculator(
         return Interpolation.linear(adjustedTapValue, tapValue, t) / tapValue
     }
 
-    private fun getConvertedHitWindow(): HitWindow {
-        var od = difficultyAttributes.overallDifficulty.toFloat()
-        val hitWindow = StandardHitWindow(od)
-        val realGreatWindow = hitWindow.greatWindow * difficultyAttributes.clockRate.toFloat()
-
-        // Obtain the good and meh hit window for osu!droid.
-        od =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
+    private fun getHitWindow(): HitWindow {
+        val od = difficultyAttributes.overallDifficulty.toFloat()
 
         return if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
     }

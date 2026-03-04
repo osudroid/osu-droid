@@ -2,6 +2,7 @@ package com.rian.osu.difficulty.attributes
 
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.mods.IModApplicableToTrackRate
 import com.rian.osu.mods.Mod
 
 /**
@@ -31,9 +32,9 @@ class StandardDifficultyAttributes : DifficultyAttributes() {
     var speedTopWeightedSliderFactor = 0.0
 
     /**
-     * The perceived approach rate inclusive of rate-adjusting [Mod]s (DT/HT/etc.).
+     * The perceived approach rate **exclusive** of [IModApplicableToTrackRate] [Mod]s (DT/HT/etc.).
      *
-     * Rate-adjusting [Mod]s don't directly affect the approach rate difficulty value, but have a perceived effect as a result of adjusting audio timing.
+     * [IModApplicableToTrackRate] [Mod]s don't directly affect the approach rate difficulty value, but have a perceived effect as a result of adjusting audio timing.
      */
     @JvmField
     var approachRate = 0.0
