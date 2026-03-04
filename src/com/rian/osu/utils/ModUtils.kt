@@ -273,7 +273,7 @@ object ModUtils {
         val greatWindow = hitWindow.greatWindow / trackRate
 
         difficulty.od =
-            if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+            if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
     }
 }

@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.DroidHitWindow
-import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
@@ -496,11 +495,9 @@ class DroidPerformanceCalculator(
         return Interpolation.linear(adjustedTapValue, tapValue, t) / tapValue
     }
 
-    private fun getHitWindow(): HitWindow {
-        val od = difficultyAttributes.overallDifficulty.toFloat()
-
-        return if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-    }
+    private fun getHitWindow() =
+        if (isPrecise) PreciseDroidHitWindow(difficultyAttributes.overallDifficulty)
+        else DroidHitWindow(difficultyAttributes.overallDifficulty)
 
     private fun calculateEffectiveMissCount() = difficultyAttributes.run {
         var missCount = countMiss.toDouble()

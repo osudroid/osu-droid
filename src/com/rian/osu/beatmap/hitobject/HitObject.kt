@@ -365,7 +365,7 @@ abstract class HitObject(
         }
 
         if (hitWindow != null) {
-            hitWindow!!.overallDifficulty = difficulty.od
+            hitWindow!!.overallDifficulty = difficulty.od.toDouble()
         }
 
         timePreempt = BeatmapDifficulty.difficultyRangeInt(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN).toDouble()
@@ -466,8 +466,8 @@ abstract class HitObject(
      * @returns The created [HitWindow].
      */
     protected open fun createHitWindow(mode: GameMode): HitWindow? = when (mode) {
-        GameMode.Droid -> DroidHitWindow()
-        GameMode.Standard -> StandardHitWindow()
+        GameMode.Droid -> DroidHitWindow(null)
+        GameMode.Standard -> StandardHitWindow(null)
     }
 
     companion object {

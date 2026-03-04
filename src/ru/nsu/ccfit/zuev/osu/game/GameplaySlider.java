@@ -1054,7 +1054,7 @@ public class GameplaySlider extends GameObject {
 
         // Override hit offset with replay data when available.
         firstHitAccuracy = replayObjectData != null ? replayObjectData.accuracy : (int) (hitOffset * 1000);
-        float mehWindow = hitWindow.getMehWindow() / 1000;
+        double mehWindow = hitWindow.getMehWindow() / 1000;
 
         if (replayObjectData == null || GameHelper.getReplayVersion() >= 6 || mehWindow <= duration) {
             if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
@@ -1177,8 +1177,8 @@ public class GameplaySlider extends GameObject {
         }
     }
 
-    private float getLateHitThreshold() {
-        return (float) (hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, duration) : duration);
+    private double getLateHitThreshold() {
+        return hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, duration) : duration;
     }
 
     private double getLateHitOffset() {

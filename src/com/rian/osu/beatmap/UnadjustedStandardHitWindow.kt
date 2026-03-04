@@ -7,10 +7,18 @@ package com.rian.osu.beatmap
  */
 class UnadjustedStandardHitWindow@JvmOverloads constructor(
     /**
-     * The overall difficulty of this [StandardHitWindow]. Defaults to 5.
+     * The overall difficulty of this [UnadjustedStandardHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float? = 5f
+    overallDifficulty: Double? = 5.0
 ) : HitWindow(overallDifficulty) {
+    /**
+     * Creates a new [UnadjustedStandardHitWindow] with the specified overall difficulty.
+     * The overall difficulty will be converted to a [Double].
+     *
+     * @param overallDifficulty The overall difficulty of this [UnadjustedStandardHitWindow]. Defaults to 5.
+     */
+    constructor(overallDifficulty: Float? = 5f) : this(overallDifficulty?.toDouble())
+
     override val greatWindow
         get() = 80 - 6 * overallDifficulty
 
@@ -28,7 +36,7 @@ class UnadjustedStandardHitWindow@JvmOverloads constructor(
          * @return The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow300ToOverallDifficulty(value: Float) = (80 - value) / 6
+        fun hitWindow300ToOverallDifficulty(value: Double) = (80 - value) / 6
 
         /**
          * Calculates the overall difficulty value of an ok hit window.
@@ -37,7 +45,7 @@ class UnadjustedStandardHitWindow@JvmOverloads constructor(
          * @returns The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow100ToOverallDifficulty(value: Float) = (140 - value) / 8
+        fun hitWindow100ToOverallDifficulty(value: Double) = (140 - value) / 8
 
         /**
          * Calculates the overall difficulty value of a meh hit window.
@@ -46,6 +54,6 @@ class UnadjustedStandardHitWindow@JvmOverloads constructor(
          * @returns The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow50ToOverallDifficulty(value: Float) = (200 - value) / 10
+        fun hitWindow50ToOverallDifficulty(value: Double) = (200 - value) / 10
     }
 }

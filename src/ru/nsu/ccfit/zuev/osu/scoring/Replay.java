@@ -346,7 +346,7 @@ public class Replay {
         var hitWindow = stat.getMod().contains(ModPrecise.class)
             ? new PreciseDroidHitWindow(difficulty.od)
             : new DroidHitWindow(difficulty.od);
-        float mehWindow = hitWindow.getMehWindow();
+        double mehWindow = hitWindow.getMehWindow();
 
         var objects = beatmap.getHitObjects().objects;
 

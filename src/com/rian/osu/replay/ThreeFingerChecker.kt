@@ -153,7 +153,7 @@ class ThreeFingerChecker(
 
             if (objectBefore is HitCircle) {
                 timeBefore +=
-                    if (objectBeforeData.result != ResultType.MISS.id) objectBeforeData.accuracy.toFloat()
+                    if (objectBeforeData.result != ResultType.MISS.id) objectBeforeData.accuracy.toDouble()
                     else beatmap.hitWindow.mehWindow
             }
 
@@ -205,7 +205,7 @@ class ThreeFingerChecker(
                 else -> beatmap.hitWindow.mehWindow
             }
         } else if (lastObject is Slider) {
-            lastObjectHitWindow = lastObjectHitWindow.coerceAtMost(lastObject.spanDuration.toFloat())
+            lastObjectHitWindow = lastObjectHitWindow.coerceAtMost(lastObject.spanDuration)
         }
 
         // These hit time uses hit window length as threshold.
@@ -283,7 +283,7 @@ class ThreeFingerChecker(
 
         // Check for slider breaks and treat them as misses.
         if (obj is Slider && (-beatmap.hitWindow.mehWindow > objData.accuracy ||
-                objData.accuracy > min(beatmap.hitWindow.mehWindow.toDouble(), obj.duration))) {
+                objData.accuracy > min(beatmap.hitWindow.mehWindow, obj.duration))) {
             return -1
         }
 
@@ -382,7 +382,7 @@ class ThreeFingerChecker(
         val mehWindow = beatmap.hitWindow.mehWindow
 
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && (-mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), obj.duration))) {
+        if (obj is Slider && (-mehWindow > objData.accuracy || objData.accuracy > min(mehWindow, obj.duration))) {
             return -1
         }
 

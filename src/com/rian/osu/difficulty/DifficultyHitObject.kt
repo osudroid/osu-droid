@@ -148,7 +148,7 @@ abstract class DifficultyHitObject(
      * The full great window of the [HitObject].
      */
     @JvmField
-    val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200f) * 2 / clockRate
+    val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200.0) * 2 / clockRate
 
     /**
      * Selective bonus for beatmaps with higher circle size.

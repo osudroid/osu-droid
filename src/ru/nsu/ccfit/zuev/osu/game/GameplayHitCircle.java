@@ -193,7 +193,7 @@ public class GameplayHitCircle extends GameObject {
             return;
         }
 
-        float mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
+        double mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
 
         // If we have clicked circle
         if (replayObjectData != null) {

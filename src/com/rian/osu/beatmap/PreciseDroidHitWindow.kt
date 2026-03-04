@@ -9,8 +9,16 @@ class PreciseDroidHitWindow @JvmOverloads constructor(
     /**
      * The overall difficulty of this [PreciseDroidHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float? = 5f
+    overallDifficulty: Double? = 5.0
 ) : HitWindow(overallDifficulty) {
+    /**
+     * Creates a new [PreciseDroidHitWindow] with the specified overall difficulty.
+     * The overall difficulty will be converted to a [Double].
+     *
+     * @param overallDifficulty The overall difficulty of this [PreciseDroidHitWindow]. Defaults to 5.
+     */
+    constructor(overallDifficulty: Float? = 5f) : this(overallDifficulty?.toDouble())
+
     override val greatWindow
         get() = 55 + 6 * (5 - overallDifficulty)
 
@@ -28,7 +36,7 @@ class PreciseDroidHitWindow @JvmOverloads constructor(
          * @return The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow300ToOverallDifficulty(value: Float) = 5 - (value - 55) / 6
+        fun hitWindow300ToOverallDifficulty(value: Double) = 5 - (value - 55) / 6
 
         /**
          * Calculates the overall difficulty value of an ok hit window.
@@ -37,7 +45,7 @@ class PreciseDroidHitWindow @JvmOverloads constructor(
          * @returns The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow100ToOverallDifficulty(value: Float) = 5 - (value - 120) / 8
+        fun hitWindow100ToOverallDifficulty(value: Double) = 5 - (value - 120) / 8
 
         /**
          * Calculates the overall difficulty value of a meh hit window.
@@ -46,6 +54,6 @@ class PreciseDroidHitWindow @JvmOverloads constructor(
          * @returns The overall difficulty value.
          */
         @JvmStatic
-        fun hitWindow50ToOverallDifficulty(value: Float) = 5 - (value - 180) / 10
+        fun hitWindow50ToOverallDifficulty(value: Double) = 5 - (value - 180) / 10
     }
 }

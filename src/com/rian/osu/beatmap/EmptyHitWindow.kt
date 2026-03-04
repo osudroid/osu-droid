@@ -6,7 +6,7 @@ package com.rian.osu.beatmap
  * No time values are provided (meaning instantaneous hit or miss).
  */
 class EmptyHitWindow : HitWindow(null) {
-    override val greatWindow = 0f
-    override val okWindow = 0f
-    override val mehWindow = 0f
+    override val greatWindow = 0.0
+    override val okWindow = 0.0
+    override val mehWindow = 0.0
 }

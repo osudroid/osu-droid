@@ -39,8 +39,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         hitCircleCount = beatmap.hitObjects.circleCount
         sliderCount = beatmap.hitObjects.sliderCount
         spinnerCount = beatmap.hitObjects.spinnerCount
-        approachRate = calculateRateAdjustedApproachRate(beatmap.difficulty.ar.toDouble(), clockRate)
-        overallDifficulty = calculateRateAdjustedOverallDifficulty(beatmap.difficulty.od, clockRate)
+        approachRate = beatmap.difficulty.ar.toDouble()
+        overallDifficulty = beatmap.difficulty.od.toDouble()
 
         val aim = skills.find<StandardAim> { it.withSliders }
         val aimNoSlider = skills.find<StandardAim> { !it.withSliders }
@@ -184,9 +184,9 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         }
 
         @JvmStatic
-        fun calculateRateAdjustedOverallDifficulty(overallDifficulty: Float, clockRate: Double): Double {
+        fun calculateRateAdjustedOverallDifficulty(overallDifficulty: Double, clockRate: Double): Double {
             val hitWindow = StandardHitWindow(overallDifficulty)
-            val greatWindow = hitWindow.greatWindow.toDouble() / clockRate
+            val greatWindow = hitWindow.greatWindow / clockRate
 
             return (79.5 - greatWindow) / 6
         }

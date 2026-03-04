@@ -52,7 +52,7 @@ class HUDHitErrorMeter : HUDElement() {
             anchor = Anchor.Center
             origin = Anchor.Center
             color = okColor
-            setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow), BAR_HEIGHT)
+            setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
 
             depthInfo = DepthInfo.Default
         }
@@ -60,7 +60,7 @@ class HUDHitErrorMeter : HUDElement() {
         val greatWindow = UIBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
-            setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
+            setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
             color = greatColor
 
             clearInfo = ClearInfo.ClearDepthBuffer
@@ -94,7 +94,7 @@ class HUDHitErrorMeter : HUDElement() {
 
         val indicator = expiredIndicators.acquire() ?: Indicator(0f, 0f, Color4.White)
 
-        indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow)
+        indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow.toFloat())
         indicator.alpha = 1f
         indicator.color = when {
             abs(accuracyMs) <= hitWindow.greatWindow -> greatColor

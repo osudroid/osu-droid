@@ -68,14 +68,14 @@ class StandardPerformanceCalculator(
                 min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
         }
 
-        val hitWindow = StandardHitWindow(od.toFloat())
+        val hitWindow = StandardHitWindow(od)
 
         greatWindow = hitWindow.greatWindow / difficultyAttributes.clockRate
         okWindow = hitWindow.okWindow / difficultyAttributes.clockRate
         mehWindow = hitWindow.mehWindow / difficultyAttributes.clockRate
 
         approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(difficultyAttributes.approachRate, difficultyAttributes.clockRate)
-        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od.toFloat(), difficultyAttributes.clockRate)
+        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od, difficultyAttributes.clockRate)
 
         speedDeviation = calculateSpeedDeviation()
 

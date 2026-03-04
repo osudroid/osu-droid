@@ -16,7 +16,7 @@ public abstract class GameObject {
      * The maximum allowable time difference from the start time of an object
      * to its hit time to be considered a hit, in seconds.
      */
-    protected static final float objectHittableRange = HitWindow.MISS_WINDOW / 1000;
+    protected static final float objectHittableRange = (float) HitWindow.MISS_WINDOW / 1000;
 
     protected boolean endsCombo;
     protected boolean autoPlay = false;

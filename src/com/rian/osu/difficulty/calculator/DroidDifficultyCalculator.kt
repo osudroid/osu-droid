@@ -277,10 +277,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         // Consider accuracy difficulty.
         val greatWindow =
-            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(overallDifficulty.toFloat()).greatWindow
-            else DroidHitWindow(overallDifficulty.toFloat()).greatWindow
+            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(overallDifficulty).greatWindow
+            else DroidHitWindow(overallDifficulty).greatWindow
 
-        val standardOverallDifficulty = UnadjustedStandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toDouble()
+        val standardOverallDifficulty = UnadjustedStandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
         val ratingMultiplier = 0.75 + max(0.0, standardOverallDifficulty).pow(2.2) / 800
 
         readingDifficulty *= sqrt(ratingMultiplier)
