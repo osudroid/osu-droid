@@ -8,22 +8,22 @@ class LRUCacheTest {
     fun `Test LRU cache`() {
         val cache = LRUCache<Int, Int>(3)
 
-        cache.put(1, 1)
-        cache.put(2, 2)
-        cache.put(3, 3)
+        cache[1] = 1
+        cache[2] = 2
+        cache[3] = 3
 
         Assert.assertEquals(1, cache.get(1))
         Assert.assertEquals(2, cache.get(2))
         Assert.assertEquals(3, cache.get(3))
 
-        cache.put(4, 4)
+        cache[4] = 4
 
         Assert.assertNull(cache.get(1))
         Assert.assertEquals(2, cache.get(2))
         Assert.assertEquals(3, cache.get(3))
         Assert.assertEquals(4, cache.get(4))
 
-        cache.put(5, 5)
+        cache[5] = 5
 
         Assert.assertNull(cache.get(1))
         Assert.assertNull(cache.get(2))

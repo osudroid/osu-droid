@@ -85,8 +85,46 @@ class ModUtilsTest {
 
     @Test
     fun `Test applying mods to beatmap difficulty`() {
-        fun test(original: BeatmapDifficulty, expected: BeatmapDifficulty, mode: GameMode, vararg mods: Mod) {
-            ModUtils.applyModsToBeatmapDifficulty(original, mode, mods.toList())
+        data class Case(
+            val original: BeatmapDifficulty,
+            val expected: BeatmapDifficulty,
+            val mode: GameMode,
+            val mods: List<Mod>
+        )
+
+        listOf(
+            Case(
+                BeatmapDifficulty(cs = 5f),
+                BeatmapDifficulty(cs = 5f),
+                GameMode.Standard,
+                listOf(ModAutoplay())
+            ),
+            Case(
+                BeatmapDifficulty(ar = 9f),
+                BeatmapDifficulty(cs = 6.5f, ar = 10f, od = 7f, hp = 7f),
+                GameMode.Standard,
+                listOf(ModHardRock())
+            ),
+            Case(
+                BeatmapDifficulty(ar = 9f, od = 9f),
+                BeatmapDifficulty(ar = 9f, od = 9f),
+                GameMode.Standard,
+                listOf(ModDoubleTime())
+            ),
+            Case(
+                BeatmapDifficulty(ar = 9f, od = 9f),
+                BeatmapDifficulty(cs = 6.5f, ar = 10f, od = 10f, hp = 7f),
+                GameMode.Standard,
+                listOf(ModDoubleTime(), ModHardRock())
+            ),
+            Case(
+                BeatmapDifficulty(od = 10f),
+                BeatmapDifficulty(od = 10f),
+                GameMode.Droid,
+                listOf(ModPrecise())
+            )
+        ).forEach { (original, expected, mode, mods) ->
+            ModUtils.applyModsToBeatmapDifficulty(original, mode, mods)
 
             Assert.assertEquals(expected.difficultyCS, original.difficultyCS, 1e-2f)
             Assert.assertEquals(expected.gameplayCS, original.gameplayCS, 1e-2f)
@@ -94,30 +132,6 @@ class ModUtilsTest {
             Assert.assertEquals(expected.od, original.od, 1e-2f)
             Assert.assertEquals(expected.hp, original.hp, 1e-2f)
         }
-
-        test(BeatmapDifficulty(cs = 5f), BeatmapDifficulty(cs = 5f), GameMode.Standard, ModAutoplay())
-
-        test(
-            BeatmapDifficulty(ar = 9f),
-            BeatmapDifficulty(cs = 6.5f, ar = 10f, od = 7f, hp = 7f),
-            GameMode.Standard,
-            ModHardRock()
-        )
-
-        test(
-            BeatmapDifficulty(ar = 9f, od = 9f), BeatmapDifficulty(ar = 9f, od = 9f), GameMode.Standard,
-            ModDoubleTime()
-        )
-
-        test(
-            BeatmapDifficulty(ar = 9f, od = 9f),
-            BeatmapDifficulty(cs = 6.5f, ar = 10f, od = 10f, hp = 7f),
-            GameMode.Standard,
-            ModDoubleTime(),
-            ModHardRock()
-        )
-
-        test(BeatmapDifficulty(od = 10f), BeatmapDifficulty(od = 10f), GameMode.Droid, ModPrecise())
     }
 
     @Test

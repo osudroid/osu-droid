@@ -102,35 +102,39 @@ class ControlPointManagerTest {
 
     @Test
     fun `Test control point search`() {
+        data class Case(val time: Double, val expectedTime: Double, val expectedSpeedMultiplier: Double)
+
         val manager = DifficultyControlPointManager()
         manager.add(createControlPoint(speedMultiplier = 0.9))
 
-        manager.controlPointAt(0.0).let {
-            Assert.assertEquals(0.0, it.time, 0.0)
-            Assert.assertEquals(1.0, it.speedMultiplier, 0.0)
+        fun test(case: Case) {
+            manager.controlPointAt(case.time).let {
+                Assert.assertEquals(
+                    "Invalid expected time at ${case.expectedTime}",
+                    case.expectedTime,
+                    it.time,
+                    0.0
+                )
+
+                Assert.assertEquals(
+                    "Invalid expected speed multiplier at ${case.expectedTime}",
+                    case.expectedSpeedMultiplier,
+                    it.speedMultiplier,
+                    0.0
+                )
+            }
         }
 
-        manager.controlPointAt(1000.0).let {
-            Assert.assertEquals(1000.0, it.time, 0.0)
-            Assert.assertEquals(0.9, it.speedMultiplier, 0.0)
-        }
-
-        manager.controlPointAt(3000.0).let {
-            Assert.assertEquals(1000.0, it.time, 0.0)
-            Assert.assertEquals(0.9, it.speedMultiplier, 0.0)
-        }
-
-        manager.controlPointAt(7000.0).let {
-            Assert.assertEquals(1000.0, it.time, 0.0)
-            Assert.assertEquals(0.9, it.speedMultiplier, 0.0)
-        }
+        listOf(
+            Case(0.0, 0.0, 1.0),
+            Case(1000.0, 1000.0, 0.9),
+            Case(3000.0, 1000.0, 0.9),
+            Case(7000.0, 1000.0, 0.9)
+        ).forEach { test(it) }
 
         Assert.assertTrue(manager.add(createControlPoint(5000.0)))
 
-        manager.controlPointAt(7000.0).let {
-            Assert.assertEquals(5000.0, it.time, 0.0)
-            Assert.assertEquals(0.5, it.speedMultiplier, 0.0)
-        }
+        test(Case(7000.0, 5000.0, 0.5))
     }
 
     private fun createControlPoint(time: Double = 1000.0, speedMultiplier: Double = 0.5) =

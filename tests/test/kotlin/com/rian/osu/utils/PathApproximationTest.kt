@@ -30,7 +30,7 @@ class PathApproximationTest {
     @Test
     fun `Test perfect curve approximation with small side triangle`() {
         val controlPoints = listOf(Vector2(0), Vector2(1e-5f, 0f), Vector2(0f, 1e-5f))
-        val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
+        val approximatedControlPoints = PathApproximation.approximateCircularArc(controlPoints)
 
         testControlPointsValidity(approximatedControlPoints)
     }
@@ -38,7 +38,7 @@ class PathApproximationTest {
     @Test
     fun `Test perfect curve approximation radius smaller than tolerance`() {
         val controlPoints = listOf(Vector2(0), Vector2(0.05f, 0f), Vector2(0f, 0.05f))
-        val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
+        val approximatedControlPoints = PathApproximation.approximateCircularArc(controlPoints)
 
         testControlPointsValidity(approximatedControlPoints)
     }
@@ -46,7 +46,7 @@ class PathApproximationTest {
     @Test
     fun `Test regular perfect curve approximation`() {
         val controlPoints = listOf(Vector2(0), Vector2(-25, 25), Vector2(58, 39))
-        val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
+        val approximatedControlPoints = PathApproximation.approximateCircularArc(controlPoints)
 
         testControlPointsValidity(approximatedControlPoints)
     }

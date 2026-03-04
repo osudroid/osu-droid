@@ -2,30 +2,33 @@ package com.rian.osu.beatmap
 
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class PreciseDroidHitWindowTest : HitWindowTest() {
-    @Test
-    fun `Test hit window`() {
-        testHitWindowValues(10.0, 25.0, 80.0, 130.0)
-        testHitWindowValues(8.2, 35.8, 94.4, 148.0)
-        testHitWindowValues(6.5, 46.0, 108.0, 165.0)
-        testHitWindowValues(3.7, 62.8, 130.4, 193.0)
-        testHitWindowValues(-1.6, 94.6, 172.8, 246.0)
+@RunWith(Parameterized::class)
+class PreciseDroidHitWindowTest(
+    od: Double, greatWindow: Double, okWindow: Double, mehWindow: Double
+) : HitWindowTest(od, greatWindow, okWindow, mehWindow) {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "OD={0}, Great={1}ms, Ok={2}ms, Meh={3}ms")
+        fun data() = listOf(
+            arrayOf(10.0, 25.0, 80.0, 130.0),
+            arrayOf(8.2, 35.8, 94.4, 148.0),
+            arrayOf(6.5, 46.0, 108.0, 165.0),
+            arrayOf(3.7, 62.8, 130.4, 193.0),
+            arrayOf(-1.6, 94.6, 172.8, 246.0)
+        )
     }
 
     @Test
-    fun `Test hit window to OD conversion`() {
-        fun testConversion(od: Double, greatWindow: Double, okWindow: Double, mehWindow: Double) {
-            Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow), 1e-2)
-            Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow100ToOverallDifficulty(okWindow), 1e-2)
-            Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow50ToOverallDifficulty(mehWindow), 1e-2)
-        }
+    fun `Test hit window`() = testHitWindow()
 
-        testConversion(10.0, 25.0, 80.0, 130.0)
-        testConversion(8.2, 35.8, 94.4, 148.0)
-        testConversion(6.5, 46.0, 108.0, 165.0)
-        testConversion(3.7, 62.8, 130.4, 193.0)
-        testConversion(-1.6, 94.6, 172.8, 246.0)
+    @Test
+    fun `Test hit window to OD conversion`() {
+        Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow), 1e-2)
+        Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow100ToOverallDifficulty(okWindow), 1e-2)
+        Assert.assertEquals(od, PreciseDroidHitWindow.hitWindow50ToOverallDifficulty(mehWindow), 1e-2)
     }
 
     override fun createHitWindow(od: Double) = PreciseDroidHitWindow(od)

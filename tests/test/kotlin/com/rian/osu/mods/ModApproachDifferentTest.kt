@@ -9,23 +9,23 @@ class ModApproachDifferentTest {
     fun `Test animation style`() {
         val mod = ModApproachDifferent()
 
-        fun test(style: ModApproachDifferent.AnimationStyle, easing: Easing) {
+        listOf(
+            ModApproachDifferent.AnimationStyle.Linear to Easing.None,
+            ModApproachDifferent.AnimationStyle.Gravity to Easing.InBack,
+            ModApproachDifferent.AnimationStyle.InOut1 to Easing.InOutCubic,
+            ModApproachDifferent.AnimationStyle.InOut2 to Easing.InOutQuint,
+            ModApproachDifferent.AnimationStyle.Accelerate1 to Easing.In,
+            ModApproachDifferent.AnimationStyle.Accelerate2 to Easing.InCubic,
+            ModApproachDifferent.AnimationStyle.Accelerate3 to Easing.InQuint,
+            ModApproachDifferent.AnimationStyle.Decelerate1 to Easing.Out,
+            ModApproachDifferent.AnimationStyle.Decelerate2 to Easing.OutCubic,
+            ModApproachDifferent.AnimationStyle.Decelerate3 to Easing.OutQuint,
+            ModApproachDifferent.AnimationStyle.BounceIn to Easing.InBounce,
+            ModApproachDifferent.AnimationStyle.BounceOut to Easing.OutBounce,
+            ModApproachDifferent.AnimationStyle.BounceInOut to Easing.InOutBounce
+        ).forEach { (style, expectedEasing) ->
             mod.style = style
-            Assert.assertEquals(easing, mod.easing)
+            Assert.assertEquals("Easing mismatch for style $style", expectedEasing, mod.easing)
         }
-
-        test(ModApproachDifferent.AnimationStyle.Linear, Easing.None)
-        test(ModApproachDifferent.AnimationStyle.Gravity, Easing.InBack)
-        test(ModApproachDifferent.AnimationStyle.InOut1, Easing.InOutCubic)
-        test(ModApproachDifferent.AnimationStyle.InOut2, Easing.InOutQuint)
-        test(ModApproachDifferent.AnimationStyle.Accelerate1, Easing.In)
-        test(ModApproachDifferent.AnimationStyle.Accelerate2, Easing.InCubic)
-        test(ModApproachDifferent.AnimationStyle.Accelerate3, Easing.InQuint)
-        test(ModApproachDifferent.AnimationStyle.Decelerate1, Easing.Out)
-        test(ModApproachDifferent.AnimationStyle.Decelerate2, Easing.OutCubic)
-        test(ModApproachDifferent.AnimationStyle.Decelerate3, Easing.OutQuint)
-        test(ModApproachDifferent.AnimationStyle.BounceIn, Easing.InBounce)
-        test(ModApproachDifferent.AnimationStyle.BounceOut, Easing.OutBounce)
-        test(ModApproachDifferent.AnimationStyle.BounceInOut, Easing.InOutBounce)
     }
 }

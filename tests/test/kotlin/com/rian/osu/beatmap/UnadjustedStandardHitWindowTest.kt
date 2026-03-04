@@ -2,30 +2,33 @@ package com.rian.osu.beatmap
 
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class UnadjustedStandardHitWindowTest : HitWindowTest() {
-    @Test
-    fun `Test hit window`() {
-        testHitWindowValues(10.0, 20.0, 60.0, 100.0)
-        testHitWindowValues(8.2, 30.8, 74.4, 118.0)
-        testHitWindowValues(6.5, 41.0, 88.0, 135.0)
-        testHitWindowValues(3.7, 57.8, 110.4, 163.0)
-        testHitWindowValues(-1.6, 89.6, 152.8, 216.0)
+@RunWith(Parameterized::class)
+class UnadjustedStandardHitWindowTest(
+    od: Double, greatWindow: Double, okWindow: Double, mehWindow: Double
+) : HitWindowTest(od, greatWindow, okWindow, mehWindow) {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "OD={0}, Great={1}ms, OK={2}ms, Meh={3}ms")
+        fun data() = arrayOf(
+            arrayOf(10.0, 20.0, 60.0, 100.0),
+            arrayOf(8.2, 30.8, 74.4, 118.0),
+            arrayOf(6.5, 41.0, 88.0, 135.0),
+            arrayOf(3.7, 57.8, 110.4, 163.0),
+            arrayOf(-1.6, 89.6, 152.8, 216.0)
+        )
     }
 
     @Test
-    fun `Test hit window to OD conversion`() {
-        fun testConversion(od: Double, greatWindow: Double, okWindow: Double, mehWindow: Double) {
-            Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow), 1e-2)
-            Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow100ToOverallDifficulty(okWindow), 1e-2)
-            Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow50ToOverallDifficulty(mehWindow), 1e-2)
-        }
+    fun `Test hit window`() = testHitWindow()
 
-        testConversion(10.0, 20.0, 60.0, 100.0)
-        testConversion(8.2, 30.8, 74.4, 118.0)
-        testConversion(6.5, 41.0, 88.0, 135.0)
-        testConversion(3.7, 57.8, 110.4, 163.0)
-        testConversion(-1.6, 89.6, 152.8, 216.0)
+    @Test
+    fun `Test hit window to OD conversion`() {
+        Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow), 1e-2)
+        Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow100ToOverallDifficulty(okWindow), 1e-2)
+        Assert.assertEquals(od, UnadjustedStandardHitWindow.hitWindow50ToOverallDifficulty(mehWindow), 1e-2)
     }
 
     override fun createHitWindow(od: Double) = UnadjustedStandardHitWindow(od)

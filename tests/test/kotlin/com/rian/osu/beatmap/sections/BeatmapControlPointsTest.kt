@@ -7,19 +7,25 @@ import org.junit.Test
 class BeatmapControlPointsTest {
     @Test
     fun `Test closest beat divisor`() {
-        BeatmapControlPoints().apply {
+        data class Case(val beatDivisor: Int, val time: Double)
+
+        val controlPoints = BeatmapControlPoints().apply {
             timing.add(TimingControlPoint(1000.0, 500.0, 4))
             timing.add(TimingControlPoint(3250.0, 500.0, 4))
             timing.add(TimingControlPoint(5750.0, 500.0, 4))
+        }
 
-            Assert.assertEquals(1, getClosestBeatDivisor(0.0))
-            Assert.assertEquals(4, getClosestBeatDivisor(1125.0))
-            Assert.assertEquals(1, getClosestBeatDivisor(1500.0))
-            Assert.assertEquals(2, getClosestBeatDivisor(3500.0))
-            Assert.assertEquals(1, getClosestBeatDivisor(4250.0))
-            Assert.assertEquals(2, getClosestBeatDivisor(5000.0))
-            Assert.assertEquals(2, getClosestBeatDivisor(6000.0))
-            Assert.assertEquals(1, getClosestBeatDivisor(6250.0))
+        listOf(
+            Case(1, 0.0),
+            Case(4, 1125.0),
+            Case(1, 1500.0),
+            Case(2, 3500.0),
+            Case(1, 4250.0),
+            Case(2, 5000.0),
+            Case(2, 6000.0),
+            Case(1, 6250.0)
+        ).forEach { (beatDivisor, time) ->
+            Assert.assertEquals("Invalid beat divisor for $time", beatDivisor, controlPoints.getClosestBeatDivisor(time))
         }
     }
 }

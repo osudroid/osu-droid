@@ -5,18 +5,24 @@ import org.junit.Assert
 import org.junit.Test
 
 class Vector2Test {
+    private fun assertVectorEquals(expected: Vector2, actual: Vector2, context: String = "", delta: Float = 1e-2f) {
+        val message = if (context.isNotEmpty()) "Vectors differ in $context | " else ""
+
+        Assert.assertEquals("${message}X mismatch", expected.x, actual.x, delta)
+        Assert.assertEquals("${message}Y mismatch", expected.y, actual.y, delta)
+    }
+
     @Test
     fun `Test multiplication`() {
-        fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
-            val finalVec = vec1 * vec2
+        data class Case(val v1: Vector2, val v2: Vector2, val result: Vector2)
 
-            Assert.assertEquals(result.x, finalVec.x, 1e-2f)
-            Assert.assertEquals(result.y, finalVec.y, 1e-2f)
+        listOf(
+            Case(Vector2(2), Vector2(4), Vector2(8)),
+            Case(Vector2(3, 4), Vector2(6, 5), Vector2(18, 20)),
+            Case(Vector2(2.5f, 10f), Vector2(8f, 7.5f), Vector2(20, 75))
+        ).forEach { (v1, v2, result) ->
+            assertVectorEquals(result, v1 * v2, "v1 * v2")
         }
-
-        test(Vector2(2), Vector2(4), Vector2(8))
-        test(Vector2(3, 4), Vector2(6, 5), Vector2(18, 20))
-        test(Vector2(2.5f, 10f), Vector2(8f, 7.5f), Vector2(20, 75))
     }
 
     @Test
@@ -24,94 +30,123 @@ class Vector2Test {
         val vec = Vector2(10)
 
         Assert.assertThrows(ArithmeticException::class.java) { vec / 0 }
-        Assert.assertEquals(vec / 1, vec)
-        Assert.assertEquals(vec / 2, Vector2(5))
-        Assert.assertEquals(vec / 0.5, Vector2(20))
-        Assert.assertEquals(vec / 2.5, Vector2(4))
-        Assert.assertEquals(vec / 25, Vector2(0.4f))
+
+        listOf(
+            1f to vec,
+            2f to Vector2(5),
+            0.5f to Vector2(20),
+            2.5f to Vector2(4),
+            25f to Vector2(0.4f)
+        ).forEach { (divisor, expected) ->
+            assertVectorEquals(expected, vec / divisor, "vec / $divisor")
+        }
     }
 
     @Test
     fun `Test addition`() {
-        fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
-            val finalVec = vec1 + vec2
+        data class Case(val v1: Vector2, val v2: Vector2, val result: Vector2)
 
-            Assert.assertEquals(result.x, finalVec.x, 1e-2f)
-            Assert.assertEquals(result.y, finalVec.y, 1e-2f)
+        listOf(
+            Case(Vector2(1), Vector2(2), Vector2(3)),
+            Case(Vector2(5), Vector2(-1, 1), Vector2(4, 6)),
+            Case(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), Vector2(11.25f, -3.5f)),
+        ).forEach { (v1, v2, result) ->
+            assertVectorEquals(result, v1 + v2, "v1 + v2")
         }
-
-        test(Vector2(1), Vector2(2), Vector2(3))
-        test(Vector2(5), Vector2(-1, 1), Vector2(4, 6))
-        test(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), Vector2(11.25f, -3.5f))
     }
 
     @Test
     fun `Test subtraction`() {
-        fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
-            val finalVec = vec1 - vec2
+        data class Case(val v1: Vector2, val v2: Vector2, val result: Vector2)
 
-            Assert.assertEquals(result.x, finalVec.x, 1e-2f)
-            Assert.assertEquals(result.y, finalVec.y, 1e-2f)
+        listOf(
+            Case(Vector2(5), Vector2(-1, 1), Vector2(6, 4)),
+            Case(Vector2(1), Vector2(2), Vector2(-1)),
+            Case(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), Vector2(13.75f, -6.5f))
+        ).forEach { (v1, v2, result) ->
+            assertVectorEquals(result, v1 - v2, "v1 - v2")
         }
-
-        test(Vector2(1), Vector2(2), Vector2(-1))
-        test(Vector2(5), Vector2(-1, 1), Vector2(6, 4))
-        test(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), Vector2(13.75f, -6.5f))
     }
 
     @Test
     fun `Test length`() {
-        fun test(vec: Vector2, result: Float) = Assert.assertEquals(result, vec.length, 1e-2f)
-
-        test(Vector2(1, 1), sqrt(2f))
-        test(Vector2(2, 1), sqrt(5f))
-        test(Vector2(-4, 6), sqrt(52f))
-        test(Vector2(13, -12), sqrt(313f))
-        test(Vector2(-3, -5), sqrt(34f))
+        listOf(
+            Vector2(1, 1) to sqrt(2f),
+            Vector2(2, 1) to sqrt(5f),
+            Vector2(-4, 6) to sqrt(52f),
+            Vector2(13, -12) to sqrt(313f),
+            Vector2(-3, -5) to sqrt(34f)
+        ).forEach { (vec, result) ->
+            Assert.assertEquals(
+                "Invalid length for $vec",
+                result,
+                vec.length,
+                1e-2f
+            )
+        }
     }
 
     @Test
     fun `Test dot multiplication`() {
-        fun test(vec1: Vector2, vec2: Vector2, result: Float) = Assert.assertEquals(result, vec1.dot(vec2), 1e-2f)
+        data class Case(val v1: Vector2, val v2: Vector2, val result: Float)
 
-        test(Vector2(2), Vector2(4), 16f)
-        test(Vector2(3, 2), Vector2(1, -3), -3f)
-        test(Vector2(5, -2), Vector2(4, -4), 28f)
-        test(Vector2(-0.5f, 4f), Vector2(2, 6), 23f)
-        test(Vector2(-2, -5), Vector2(-4, 2), -2f)
+        listOf(
+            Case(Vector2(2), Vector2(4), 16f),
+            Case(Vector2(3, 2), Vector2(1, -3), -3f),
+            Case(Vector2(5, -2), Vector2(4, -4), 28f),
+            Case(Vector2(-0.5f, 4f), Vector2(2, 6), 23f),
+            Case(Vector2(-2, -5), Vector2(-4, 2), -2f)
+        ).forEach { (v1, v2, result) ->
+            Assert.assertEquals(
+                "Invalid dot product for $v1 and $v2",
+                result,
+                v1.dot(v2),
+                1e-2f
+            )
+        }
     }
 
     @Test
     fun `Test scaling`() {
         val vec = Vector2(10)
 
-        Assert.assertEquals(vec * 1, vec)
-        Assert.assertEquals(vec * 0.5f, Vector2(5))
-        Assert.assertEquals(vec * 2.5f, Vector2(25))
+        listOf(
+            1f to vec,
+            0.5f to Vector2(5),
+            2.5f to Vector2(25)
+        ).forEach { (scalar, result) ->
+            assertVectorEquals(result, vec * scalar, "vec * $scalar")
+        }
     }
 
     @Test
     fun `Test distance`() {
-        fun test(vec1: Vector2, vec2: Vector2, result: Float) =
-            Assert.assertEquals(result, vec1.getDistance(vec2), 1e-2f)
+        data class Case(val v1: Vector2, val v2: Vector2, val result: Float)
 
-        test(Vector2(1), Vector2(2), sqrt(2f))
-        test(Vector2(5), Vector2(-1, 1), sqrt(52f))
-        test(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), sqrt(231.3125f))
+        listOf(
+            Case(Vector2(1), Vector2(2), sqrt(2f)),
+            Case(Vector2(5), Vector2(-1, 1), sqrt(52f)),
+            Case(Vector2(12.5f, -5f), Vector2(-1.25f, 1.5f), sqrt(231.3125f))
+        ).forEach { (v1, v2, result) ->
+            Assert.assertEquals(
+                "Invalid distance between $v1 and $v2",
+                result,
+                v1.getDistance(v2),
+                1e-2f
+            )
+        }
     }
 
     @Test
     fun `Test normalization`() {
-        fun test(vec: Vector2, result: Vector2) {
+        listOf(
+            Vector2(10) to Vector2(0.71f),
+            Vector2(15) to Vector2(0.71f),
+            Vector2(10, 20) to Vector2(0.45f, 0.89f)
+        ).forEach { (vec, result) ->
             vec.normalize()
-
-            Assert.assertEquals(result.x, vec.x, 1e-2f)
-            Assert.assertEquals(result.y, vec.y, 1e-2f)
+            assertVectorEquals(result, vec, "normalized $vec")
         }
-
-        test(Vector2(10), Vector2(0.71f))
-        test(Vector2(15), Vector2(0.71f))
-        test(Vector2(10, 20), Vector2(0.45f, 0.89f))
     }
 
     @Test
