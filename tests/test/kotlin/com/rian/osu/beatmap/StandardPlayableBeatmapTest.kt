@@ -125,9 +125,9 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     @Test
     fun `Test hit window`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap().apply {
-            Assert.assertEquals(49.5f, hitWindow.greatWindow, 0f)
-            Assert.assertEquals(99.5f, hitWindow.okWindow, 0f)
-            Assert.assertEquals(149.5f, hitWindow.mehWindow, 0f)
+            Assert.assertEquals(49.5, hitWindow.greatWindow, 0.0)
+            Assert.assertEquals(99.5, hitWindow.okWindow, 0.0)
+            Assert.assertEquals(149.5, hitWindow.mehWindow, 0.0)
         }
     }
 }

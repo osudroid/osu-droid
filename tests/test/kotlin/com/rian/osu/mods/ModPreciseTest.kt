@@ -22,7 +22,7 @@ class ModPreciseTest {
             ModPrecise().applyToHitObject(GameMode.Droid, this, listOf())
 
             Assert.assertTrue(hitWindow is PreciseDroidHitWindow)
-            Assert.assertEquals(5f, hitWindow!!.overallDifficulty, 0f)
+            Assert.assertEquals(5.0, hitWindow!!.overallDifficulty, 0.0)
         }
     }
 
@@ -43,7 +43,7 @@ class ModPreciseTest {
             // Ensure that the hit window is not applied to the slider itself
             Assert.assertTrue(hitWindow is EmptyHitWindow)
             Assert.assertTrue(head.hitWindow is PreciseDroidHitWindow)
-            Assert.assertEquals(5f, head.hitWindow!!.overallDifficulty, 0f)
+            Assert.assertEquals(5.0, head.hitWindow!!.overallDifficulty, 0.0)
         }
     }
 

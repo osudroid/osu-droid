@@ -5,12 +5,12 @@ import org.junit.Test
 class StandardHitWindowTest : HitWindowTest() {
     @Test
     fun `Test hit window`() {
-        testHitWindowValues(10f, 19.5f, 59.5f, 99.5f)
-        testHitWindowValues(8.2f, 29.5f, 73.5f, 117.5f)
-        testHitWindowValues(6.5f, 40.5f, 87.5f, 134.5f)
-        testHitWindowValues(3.7f, 56.5f, 109.5f, 162.5f)
-        testHitWindowValues(-1.6f, 88.5f, 151.5f, 215.5f)
+        testHitWindowValues(10.0, 19.5, 59.5, 99.5)
+        testHitWindowValues(8.2, 29.5, 73.5, 117.5)
+        testHitWindowValues(6.5, 40.5, 87.5, 134.5)
+        testHitWindowValues(3.7, 56.5, 109.5, 162.5)
+        testHitWindowValues(-1.6, 88.5, 151.5, 215.5)
     }
 
-    override fun createHitWindow(od: Float) = StandardHitWindow(od)
+    override fun createHitWindow(od: Double) = StandardHitWindow(od)
 }

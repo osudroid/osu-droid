@@ -132,9 +132,9 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
     @Test
     fun `Test hit window`() {
         createBasePlayableBeatmap(GameMode.Droid).createDroidPlayableBeatmap().apply {
-            Assert.assertEquals(75f, hitWindow.greatWindow, 0f)
-            Assert.assertEquals(150f, hitWindow.okWindow, 0f)
-            Assert.assertEquals(250f, hitWindow.mehWindow, 0f)
+            Assert.assertEquals(75.0, hitWindow.greatWindow, 0.0)
+            Assert.assertEquals(150.0, hitWindow.okWindow, 0.0)
+            Assert.assertEquals(250.0, hitWindow.mehWindow, 0.0)
         }
     }
 }

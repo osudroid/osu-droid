@@ -5,9 +5,9 @@ import org.junit.Test
 class EmptyHitWindowTest : HitWindowTest() {
     @Test
     fun `Test hit window`() {
-        testHitWindowValues(5f, 0f, 0f, 0f)
-        testHitWindowValues(8f, 0f, 0f, 0f)
+        testHitWindowValues(5.0, 0.0, 0.0, 0.0)
+        testHitWindowValues(8.0, 0.0, 0.0, 0.0)
     }
 
-    override fun createHitWindow(od: Float) = EmptyHitWindow()
+    override fun createHitWindow(od: Double) = EmptyHitWindow()
 }
