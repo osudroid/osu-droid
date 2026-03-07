@@ -58,7 +58,8 @@ class BeatmapProcessor @JvmOverloads constructor(
             return@run
         }
 
-        // Recount slider ticks as nested hit objects are only generated after HitObject.applyDefaults.
+        // Recount nested hit object counts as they are only generated after HitObject.applyDefaults.
+        sliderRepeatCount = 0
         sliderTickCount = 0
 
         forEach {
