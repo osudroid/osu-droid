@@ -4,6 +4,8 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -39,10 +41,24 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
         }
 
         if (hitObject is Slider) {
-            // Freezing slider ticks doesn't play well with snaking sliders, and slider repeats will not layer
-            // correctly if its preempt is changed.
-            applyFadeInAdjustment(hitObject.head)
-            applyFadeInAdjustment(hitObject.tail)
+            hitObject.nestedHitObjects.forEach {
+                when (it) {
+                    is SliderTick -> {
+                        // Freezing slider ticks doesn't play well with snaking sliders.
+                    }
+
+                    is SliderRepeat -> {
+                        // Any more than 2 repeats will not layer correctly if its preempt is changed.
+                        if (it.spanIndex > 1) {
+                            return@forEach
+                        }
+
+                        applyFadeInAdjustment(it)
+                    }
+
+                    else -> applyFadeInAdjustment(it)
+                }
+            }
         }
     }
 }
