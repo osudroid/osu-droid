@@ -64,7 +64,7 @@ open class UIScrollableContainer : UIContainer() {
             val scroll = when {
                 Precision.almostEquals(value, 0f) -> 0f
                 Precision.almostEquals(value, maxScrollX) -> maxScrollX
-                else -> value
+                else -> value.toInt().toFloat()
             }
 
             if (field != scroll) {
@@ -81,7 +81,7 @@ open class UIScrollableContainer : UIContainer() {
             val scroll = when {
                 Precision.almostEquals(value, 0f) -> 0f
                 Precision.almostEquals(value, maxScrollY) -> maxScrollY
-                else -> value
+                else -> value.toInt().toFloat()
             }
 
             if (field != scroll) {
@@ -313,7 +313,7 @@ open class UIScrollableContainer : UIContainer() {
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
         firstChild?.also { child ->
-            if (child.x != -scrollX || child.y != -scrollY) {
+            if (!Precision.almostEquals(child.x, -scrollX) || !Precision.almostEquals(child.y, -scrollY)) {
                 child.setPosition(-scrollX, -scrollY)
                 onScrollChanged()
             }

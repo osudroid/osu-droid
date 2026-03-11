@@ -14,6 +14,7 @@ import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
+import ru.nsu.ccfit.zuev.osu.Config
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
@@ -25,7 +26,11 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
      * The root font size in pixels, adjusted for display density.
      */
     val rootFontSize
-        get() = CSS_BASE_ROOT_FONT_SIZE * displayDensity * fontScale
+        get() = if (Config.getBoolean("use_legacy_resolution_policy", true))
+            CSS_BASE_ROOT_FONT_SIZE * fontScale * (1f + legacyResolutionPolicyScaleRatio)
+        else
+            CSS_BASE_ROOT_FONT_SIZE * displayDensity * fontScale
+
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
@@ -42,6 +47,15 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
      * may be obscured by notches, rounded corners, etc.
      */
     var safeArea = Vec4.Zero
+        set(value) {
+            if (field != value) {
+                field = if (Config.getBoolean("use_legacy_resolution_policy", true)) {
+                    value / (1f + legacyResolutionPolicyScaleRatio)
+                } else {
+                    value
+                }
+            }
+        }
 
     /**
      * The current font scale factor. Changing this will scale all UI elements accordingly.
@@ -224,6 +238,11 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
     companion object {
 
         private const val CSS_BASE_ROOT_FONT_SIZE = 16f
+
+
+        @JvmStatic
+        var   legacyResolutionPolicyScaleRatio = 0f
+
 
         @JvmStatic
         lateinit var current: UIEngine

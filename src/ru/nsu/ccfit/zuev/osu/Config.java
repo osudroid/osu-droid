@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.osudroid.multiplayer.Multiplayer;
+import com.reco1l.andengine.UIEngine;
 import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
 
@@ -275,10 +276,24 @@ public class Config {
         Activity activity = (Activity) context;
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        RES_WIDTH = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        RES_HEIGHT = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        int width = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        int height = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
 
-        Log.v("Config", "Display size: " + RES_WIDTH + "x" + RES_HEIGHT);
+        if (getBoolean("use_legacy_resolution_policy", true)) {
+            // Tries to emulate the original behavior, the game was designed for 1280x720
+            // resolution, so we try to approximate the scale factor.
+            float ratio = 1280f / width;
+
+            RES_WIDTH = (int) (width * ratio);
+            RES_HEIGHT = (int) (height * ratio);
+
+            UIEngine.setLegacyResolutionPolicyScaleRatio(ratio);
+        } else {
+            RES_WIDTH = width;
+            RES_HEIGHT = height;
+        }
+
+        Log.v("Config", "Viewport size: " + RES_WIDTH + "x" + RES_HEIGHT + " Display size: " + width + "x" + height);
     }
 
     public static boolean isEnableStoryboard() {

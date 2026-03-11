@@ -23,7 +23,6 @@ import org.anddev.andengine.util.*
 import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.max
-import kotlin.math.min
 
 
 /**
@@ -41,6 +40,60 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var shrink = true
 
+
+    /**
+     * Represents the unprocessed width, works as a backing field for [width].
+     */
+    var rawWidth = 0f
+        private set
+
+    /**
+     * Represents the unprocessed height, works as a backing field for [height].
+     */
+    var rawHeight = 0f
+        private set
+
+
+    /**
+     * The width of the entity.
+     */
+    var width: Float
+        get() = let {
+            if (rawWidth == Size.Auto)
+                return@let intrinsicWidth
+
+            if (rawWidth >= Size.relativeSizeRange.start && rawWidth <= Size.relativeSizeRange.endInclusive)
+                return@let (parent?.innerWidth ?: 0f) * (rawWidth - Size.relativeSizeRange.start)
+
+            return@let rawWidth
+        }.coerceAtMost(maxWidth).coerceAtLeast(minWidth)
+        set(value) {
+            if (!Precision.almostEquals(rawWidth, value)) {
+                rawWidth = value
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
+            }
+        }
+
+    /**
+     * The height of the entity.
+     */
+    var height: Float
+        get() = let {
+            if (rawHeight == Size.Auto)
+                return@let intrinsicHeight
+
+            if (rawHeight >= Size.relativeSizeRange.start && rawHeight <= Size.relativeSizeRange.endInclusive)
+                return@let (parent?.innerHeight ?: 0f) * (rawHeight - Size.relativeSizeRange.start)
+
+            return@let rawHeight
+        }.coerceAtMost(maxHeight).coerceAtLeast(minHeight)
+        set(value) {
+            if (!Precision.almostEquals(rawHeight, value)) {
+                rawHeight = value
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
+            }
+        }
+
     /**
      * The minimum width of the entity.
      */
@@ -54,6 +107,19 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
     /**
+     * The minimum height of the entity.
+     */
+    var minHeight = 0f
+        get() = if (shrink) field else max(intrinsicHeight, field)
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
+            }
+        }
+
+
+    /**
      * The maximum width of the entity.
      */
     var maxWidth = Float.MAX_VALUE
@@ -65,43 +131,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
     /**
-     * The width of the entity.
-     */
-    var width: Float
-        get() = when (rawWidth) {
-            Size.Auto -> intrinsicWidth
-            in Size.relativeSizeRange -> (parent?.innerWidth ?: 0f) * (rawWidth - Size.relativeSizeRange.start)
-            else -> rawWidth
-        }.coerceAtMost(maxWidth).coerceAtLeast(minWidth)
-        set(value) {
-            if (!Precision.almostEquals(rawWidth, value)) {
-                rawWidth = value
-                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
-            }
-        }
-
-    /**
-     * Represents the width specified without any kind of calculation or constraint applied.
-     * * If the value is `-1` it means the width is set to [Size.Auto].
-     * * If the value is between `-2` and `-3` it means the width is set to a percentage value.
-     *
-     * @see Size
-     */
-    var rawWidth = 0f
-        private set
-
-    /**
-     * The minimum height of the entity.
-     */
-    var minHeight = 0f
-        get() = if (shrink) field else max(intrinsicHeight, field)
-        set(value) {
-            if (field != value) {
-                field = value
-                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
-            }
-        }
-    /**
      * The maximum height of the entity.
      */
     var maxHeight = Float.MAX_VALUE
@@ -112,30 +141,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             }
         }
 
-    /**
-     * The height of the entity.
-     */
-    var height: Float
-        get() = when (rawHeight) {
-            Size.Auto -> intrinsicHeight
-            in Size.relativeSizeRange -> (parent?.innerHeight ?: 0f) * (rawHeight - Size.relativeSizeRange.start)
-            else -> rawHeight
-        }.coerceAtMost(maxHeight).coerceAtLeast(minHeight)
-        set(value) {
-            if (!Precision.almostEquals(rawHeight, value)) {
-                rawHeight = value
-                invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
-            }
-        }
-
-    /**
-     * Represents the height specified without any kind of calculation or constraint applied.
-     * * If the value is `-1` it means the height is set to [Size.Auto].
-     * * If the value is between `-2` and `-3` it means the height is set to a percentage value.
-     * @see Size
-     */
-    var rawHeight = 0f
-        private set
 
     /**
      * The width of the content inside the entity.
@@ -158,6 +163,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
                 invalidate(InvalidationFlag.Content or InvalidationFlag.Size)
             }
         }
+
 
     /**
      * The padding of the entity.
@@ -410,9 +416,24 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
             }
         }
 
+    /**
+     * The box used to draw the background of this component.
+     */
+    protected var background: UIBox? = null
+        private set
+
+    /**
+     * The box used to draw the border of this component.
+     */
+    protected var border: UIBox? = null
+        private set
+
     //endregion
 
     //region Other properties
+
+    val isAnimating
+        get() = mEntityModifiers.size > 1
 
     /**
      * Whether the entity should be culled when it is outside the parent's bounds.
@@ -427,14 +448,17 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
 
     private var invalidationFlags = InvalidationFlag.All
-    private var background: UIBox? = null
-    private var border: UIBox? = null
 
     private val inputBindings = arrayOfNulls<UIComponent>(10)
 
     //endregion
 
     //region Invalidation
+
+    /**
+     * Whether to ignore invalidations.
+     */
+    var ignoreInvlidations = false
 
     /**
      * Adds the given flag to the invalidation list. Depending on each flag it will trigger a different action.
@@ -725,10 +749,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     open fun onHandleInvalidations(flags: Int = this.invalidationFlags) {
 
-        if (flags != 0) {
-            //Log.d("UIComponent", "${this::class.simpleName}: ${InvalidationFlag.toString(invalidationFlags)}")
-        }
-
         val parent = parent as? UIComponent
         var propagateToChildrenFlags = 0
         var propagateToParentFlags = 0
@@ -740,11 +760,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (flags and InvalidationFlag.Size != 0) {
             onSizeChanged()
-            propagateToChildrenFlags = InvalidationFlag.Content
-
-            if (parent?.rawWidth == Size.Auto || parent?.rawHeight == Size.Auto) {
-                propagateToParentFlags = InvalidationFlag.Content
-            }
+            propagateToChildrenFlags = InvalidationFlag.Size
+            propagateToParentFlags = InvalidationFlag.Content
         }
 
         if (flags and InvalidationFlag.Position != 0) {
@@ -786,7 +803,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
-        onHandleInvalidations()
+        if (!ignoreInvlidations) {
+            onHandleInvalidations()
+        }
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)
@@ -1078,7 +1097,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Cosmetic functions
 
-    fun onStyle(theme: Theme) {
+    open fun onStyle(theme: Theme) {
         background?.onStyle(theme)
         border?.onStyle(theme)
 
