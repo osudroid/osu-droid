@@ -27,7 +27,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
     init {
         style = {
-            width = 9f.rem
+            width = 12f.rem
         }
 
         addButton = UITextButton().apply {
