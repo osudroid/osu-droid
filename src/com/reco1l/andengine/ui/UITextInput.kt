@@ -108,6 +108,13 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor, 0.1f)
 
+        ViewCompat.setOnApplyWindowInsetsListener(UIEngine.current.context.window.decorView) { _, insets ->
+            if (isFocused && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                blur()
+            }
+
+            return@setOnApplyWindowInsetsListener insets
+        }
     }
 
     override fun onBlur() {
