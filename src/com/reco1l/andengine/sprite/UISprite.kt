@@ -104,16 +104,19 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
     override fun onContentChanged() {
-        contentWidth = textureRegion?.width?.toFloat() ?: 0f
-        contentHeight = textureRegion?.height?.toFloat() ?: 0f
+        // Content size updated when texture region is changed.
     }
 
     open fun onTextureRegionChanged() {
-        val textureRegion = textureRegion ?: return
-        textureRegion.setTexturePosition(textureX, textureY)
-        textureRegion.isFlippedVertical = flippedVertical
-        textureRegion.isFlippedHorizontal = flippedHorizontal
-        blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        val textureRegion = textureRegion
+
+        textureRegion?.setTexturePosition(textureX, textureY)
+        textureRegion?.isFlippedVertical = flippedVertical
+        textureRegion?.isFlippedHorizontal = flippedHorizontal
+        contentWidth = textureRegion?.width?.toFloat() ?: 0f
+        contentHeight = textureRegion?.height?.toFloat() ?: 0f
+
+        blendInfo = if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) BlendInfo.PreMultiply else BlendInfo.Mixture
         requestBufferUpdate()
     }
 
