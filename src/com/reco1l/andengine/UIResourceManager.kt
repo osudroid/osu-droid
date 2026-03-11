@@ -16,6 +16,9 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.anddev.andengine.opengl.util.GLHelper
 import java.lang.ref.WeakReference
 
+// Use the device's maximum supported texture size, capped at 4096 to avoid excessive memory usage.
+private val FONT_TEXTURE_SIZE get() = GLHelper.GlMaxTextureWidth.coerceAtMost(4096).coerceAtLeast(1024)
+
 class UIResourceManager(private val context: Context) {
 
     private val fonts = mutableMapOf<String, Font>()
@@ -32,13 +35,9 @@ class UIResourceManager(private val context: Context) {
             return fetchedFont
         }
 
-        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
+        //Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
 
-        val texture = BitmapTextureAtlas(
-            GLHelper.GlMaxTextureWidth / 2,
-            GLHelper.GlMaxTextureWidth / 2,
-            TextureOptions.BILINEAR_PREMULTIPLYALPHA
-        )
+        val texture = BitmapTextureAtlas(FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
         val font = Font(texture, typeface, size, true, Color.WHITE)
 
@@ -66,7 +65,7 @@ class UIResourceManager(private val context: Context) {
 
         if (subscribers.isEmpty()) {
             val fontKey = fonts.entries.find { it.value == font }?.key
-            Log.i("UIResourceManager", "Unloading font: $fontKey")
+            //Log.i("UIResourceManager", "Unloading font: $fontKey")
 
             fonts.remove(fontKey)
             fontSubscribers.remove(font)
