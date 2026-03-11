@@ -827,7 +827,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             replay.setStat(replayStat);
 
             replaying = replay.load(replayFilePath, true);
-            if (!replaying) {
+
+            // In older versions, replay uploads are separated from scores, which means that they may not be uploaded
+            // for reasons independent of score uploads (e.g., network failure). When this happens, replays may be very
+            // off such that it causes gameplay to appear very wrong (e.g., a score has Hard Rock/Mirror mod while its
+            // replay does not). While this can theoretically happen to any score data (not just mods), checking for
+            // mods for the time being is enough to dislodge major inconsistencies in gameplay.
+            if (!replaying || replay.getStat().getMod() != mods) {
                 ToastLogger.showText(com.osudroid.resources.R.string.replay_invalid, true);
                 return false;
             }
