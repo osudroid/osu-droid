@@ -973,6 +973,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return CompletableFuture.completedFuture(Unit.INSTANCE);
         }
 
+        var gameLoadingJob = this.gameLoadingJob;
+        var storyboardLoadingJob = this.storyboardLoadingJob;
+        var videoLoadingJob = this.videoLoadingJob;
+
         return Execution.stopAsync(gameLoadingJob)
                 .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
                 .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob));
