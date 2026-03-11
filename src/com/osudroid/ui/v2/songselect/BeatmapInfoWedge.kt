@@ -2,6 +2,7 @@ package com.osudroid.ui.v2.songselect
 
 import com.osudroid.data.*
 import com.osudroid.ui.*
+import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.ui.v2.modmenu.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
@@ -28,6 +29,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.*
 import java.text.*
 import java.util.*
+import kotlin.math.roundToInt
 
 class BeatmapInfoWedge : UIContainer() {
 
@@ -47,7 +49,7 @@ class BeatmapInfoWedge : UIContainer() {
     private lateinit var slidersBadge: UILabeledBadge
     private lateinit var spinnersBadge: UILabeledBadge
 
-    private lateinit var starsText: CompoundText
+    private lateinit var starsText: StarRatingBadge
     private lateinit var versionText: UIText
 
 
@@ -112,11 +114,8 @@ class BeatmapInfoWedge : UIContainer() {
                         style = { color = it.accentColor * 0.8f}
                     }
                 }
-
-                starsText = badge {
-                    text = "0.00"
-                    leadingIcon = FontAwesomeIcon(Icon.Star)
-                }
+                starsText = StarRatingBadge()
+                +starsText
             }
 
             linearContainer {
@@ -234,9 +233,9 @@ class BeatmapInfoWedge : UIContainer() {
             odText.value = "00.0"
             csText.value = "00.0"
             hpText.value = "00.0"
-            starsText.text = "0.00"
             bpmText.text = "0"
             lengthText.text = "00:00"
+            starsText.rating = 0.0
             return
         }
 
@@ -265,9 +264,9 @@ class BeatmapInfoWedge : UIContainer() {
         difficulty.od = GameHelper.Round(difficulty.od.toDouble(), 2)
         difficulty.hp = GameHelper.Round(difficulty.hp.toDouble(), 2)
 
-        val minBpm = Math.round(beatmapInfo.bpmMin * totalSpeedMultiplier)
-        val maxBpm = Math.round(beatmapInfo.bpmMax * totalSpeedMultiplier)
-        val commonBpm = Math.round(beatmapInfo.mostCommonBPM * totalSpeedMultiplier)
+        val minBpm = (beatmapInfo.bpmMin * totalSpeedMultiplier).roundToInt()
+        val maxBpm = (beatmapInfo.bpmMax * totalSpeedMultiplier).roundToInt()
+        val commonBpm = (beatmapInfo.mostCommonBPM * totalSpeedMultiplier).roundToInt()
         val length = (beatmapInfo.length / totalSpeedMultiplier).toLong()
 
         val sdf = SimpleDateFormat(if (length > 3600 * 1000) "HH:mm:ss" else "mm:ss")
@@ -288,11 +287,7 @@ class BeatmapInfoWedge : UIContainer() {
      * Change the displayed star rating.
      */
     fun setStarRatingDisplay(value: Double) {
-        starsText.apply {
-            text = value.roundBy(2).toString()
-            color = if (value >= 6.5) Color4(0xFFFFD966) else Color4.Black.copy(alpha = 0.75f)
-            backgroundColor = OsuColors.getStarRatingColor(value)
-        }
+        starsText.rating = value
     }
 
 

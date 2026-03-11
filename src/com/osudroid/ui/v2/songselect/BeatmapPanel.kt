@@ -17,8 +17,7 @@ import ru.nsu.ccfit.zuev.osu.*
 
 private val textBufferRef = MutableReference<CompoundBuffer?>(null)
 private val backgroundBufferRef = MutableReference<UIBox.BoxVBO?>(null)
-
-
+private val foregroundBufferRef = MutableReference<UIBox.BoxVBO?>(null)
 
 @Suppress("LeakingThis")
 open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatmapInfo: BeatmapInfo) : UIContainer() {
@@ -30,6 +29,7 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
         width = Size.Full
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
+        cullingMode = CullingMode.CameraBounds
         style = {
             radius = Radius.XL
             backgroundColor = (it.accentColor * 0.1f).copy(alpha = 0.6f)
@@ -39,6 +39,10 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
         background?.apply {
             bufferSharingMode = BufferSharingMode.Dynamic
             bufferReference = backgroundBufferRef
+        }
+        border?.apply {
+            bufferSharingMode = BufferSharingMode.Dynamic
+            bufferReference = foregroundBufferRef
         }
 
         linearContainer {
@@ -74,7 +78,7 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
 
         val targetBorderColor = if (isExpanded) Theme.current.accentColor else Theme.current.accentColor.copy(alpha = 0.3f)
         val targetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
-        val targetWidth = if (isExpanded) parent.innerWidth + 2f.rem else parent.innerWidth
+        val targetWidth = if (isExpanded) parent.innerWidth + 3f.rem else parent.innerWidth
 
         borderColor = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderColor, targetBorderColor)
         borderWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderWidth, targetBorderWidth, 0.5f)

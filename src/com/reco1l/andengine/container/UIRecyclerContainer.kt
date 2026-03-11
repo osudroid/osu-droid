@@ -23,7 +23,7 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
      * This contains those components that are inside of the container's bounds or the container's visible area,
      * and those that are not recyclable determined by [isRecyclable][RecyclableComponent.isRecyclable] property.
      */
-    val boundComponents: MutableMap<T, C> = ConcurrentHashMap()
+    val boundComponents: MutableMap<T, C> = HashMap()
 
     /**
      * The component wrapper.
@@ -70,7 +70,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
     private fun createComponentForPool(): C? {
         val component = onCreateComponent?.invoke() ?: return null
-        component.isVisible = false
 
         componentPool.offer(component)
         componentWrapper.attachChild(component)
@@ -89,7 +88,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
         if (component.boundData != null) {
             Log.i("UIRecyclerContainer", "Unbinding component for data: ${component.boundData}")
             component.boundData = null
-            component.isVisible = false
             component.onRecycle()
 
             boundComponents.remove(data)
@@ -102,7 +100,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
         if (component.boundData != data) {
             Log.i("UIRecyclerContainer", "Binding component for data: $data")
             component.boundData = data
-            component.isVisible = true
             component.onBind(data)
 
             componentPool.remove(component)
@@ -158,6 +155,10 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
     protected open fun onDrawComponent(gl: GL10, camera: Camera, component: C) {
         // Override this method to customize how components are drawn.
         component.onDraw(gl, camera)
+    }
+
+    override fun onScrollChanged() {
+        componentWrapper.invalidate(InvalidationFlag.Content)
     }
 
 
@@ -237,6 +238,15 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
             }
         }
 
+        override fun onManagedUpdate(deltaTimeSec: Float) {
+            mChildrenIgnoreUpdate = true
+            super.onManagedUpdate(deltaTimeSec)
+
+            for (component in boundComponents.values) {
+                component.onUpdate(deltaTimeSec)
+            }
+        }
+
         override fun attachChild(entity: IEntity) {
             if (entity !is RecyclableComponent<*>) {
                 throw IllegalArgumentException("Entity must be a RecyclableComponent.")
@@ -300,4 +310,5 @@ abstract class RecyclableComponent<T : Any> : UIContainer() {
         }
         return super.onAreaTouched(event, localX, localY)
     }
+
 }

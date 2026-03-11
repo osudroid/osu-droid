@@ -30,7 +30,8 @@ import kotlin.random.*
 
 private val textBufferRef = MutableReference<CompoundBuffer?>(null)
 private val coverBufferRef = MutableReference<UISprite.SpriteVBO?>(null)
-private val buttonBufferRef = MutableReference<UIBox.BoxVBO?>(null)
+private val buttonBackgroundBufferRef = MutableReference<UIBox.BoxVBO?>(null)
+private val buttonBorderBufferRef = MutableReference<UIBox.BoxVBO?>(null)
 
 class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableComponent<BeatmapSetModel>(), IPanelContainer<BeatmapPanel> {
 
@@ -132,6 +133,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     borderWidth = 0.25f.srem
                     minHeight = 4.5f.rem
                     radius = Radius.XL
+                    border?.apply {
+                        bufferSharingMode = BufferSharingMode.Dynamic
+                        bufferReference = buttonBorderBufferRef
+                    }
                 }
 
                 cover = sprite {
@@ -151,7 +156,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     height = Size.Full
                     color = Colors.Black.copy(alpha = 0.6f)
                     bufferSharingMode = BufferSharingMode.Dynamic
-                    bufferReference = buttonBufferRef
+                    bufferReference = buttonBackgroundBufferRef
                     style = {
                         radius = Radius.XL
                     }
@@ -202,13 +207,6 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         titleText.text = data.beatmapSetInfo.beatmaps.getOrNull(0)?.titleText ?: "Unknown"
         artistText.text = data.beatmapSetInfo.beatmaps.getOrNull(0)?.artistText ?: "Unknown"
 
-        if (!Config.isSafeBeatmapBg()) {
-            if (data.coverTexture == null && !data.isLoadingCover) {
-                loadCover(data)
-            } else if (data.coverTexture != null) {
-                cover.textureRegion = data.coverTexture
-            }
-        }
     }
 
     private fun loadCover(model: BeatmapSetModel) = coverLoadScope.launch {
@@ -313,7 +311,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         if (!isExpanded) {
             isExpanded = true
 
-            data.beatmapSetInfo.beatmaps.forEach {
+            data.beatmapSetInfo.beatmaps.sortedBy { it.droidStarRating }.forEach {
                 panelsContainer.attachChild(BeatmapPanel(this@BeatmapSetPanel, it))
             }
         }
