@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.edlplan.framework.easing.Easing;
+import com.edlplan.framework.math.FMath;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -256,7 +257,7 @@ public class GameplayHitCircle extends GameObject {
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
+            approachCircle.setAlpha(1 - FMath.clamp((passedTime - timePreempt) / 0.05f, 0, 1));
 
             // If passed too much time, counting it as miss
             if (passedTime > timePreempt + mehWindow) {

@@ -887,10 +887,10 @@ public class GameplaySlider extends GameObject {
         }
         elapsedSpanTime += dt;
 
+        double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
+
         // If the slider head is not judged yet
         if (!startHit) {
-            double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
-
             if (replayObjectData == null) {
                 if (!autoPlay) {
                     if (elapsedTime <= getLateHitThreshold()) {
@@ -977,9 +977,6 @@ public class GameplaySlider extends GameObject {
         float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         if (!ball.hasParent()) {
-            approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
-
             ball.setFrameTime(1f / ((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
@@ -992,6 +989,14 @@ public class GameplaySlider extends GameObject {
 
             scene.attachChild(ball);
             scene.attachChild(followCircle);
+        }
+
+        approachCircle.clearEntityModifiers();
+
+        if (startHit) {
+            approachCircle.setAlpha(0);
+        } else {
+            approachCircle.setAlpha(1 - FMath.clamp((float) elapsedTime / 0.05f, 0, 1));
         }
 
         final float percentage = FMath.clamp((float) (elapsedSpanTime / spanDuration), 0, 1);
