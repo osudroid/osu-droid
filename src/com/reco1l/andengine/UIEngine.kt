@@ -211,9 +211,8 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
 
             if (event.x < left || event.x > right || event.y < top || event.y > bottom) {
                 (focusedEntity as IFocusable).blur()
+                return true
             }
-
-            return true
         }
 
         return false
