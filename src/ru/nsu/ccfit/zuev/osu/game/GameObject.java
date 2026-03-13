@@ -12,12 +12,6 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public abstract class GameObject {
-    /**
-     * The maximum allowable time difference from the start time of an object
-     * to its hit time to be considered a hit, in seconds.
-     */
-    protected static final float objectHittableRange = (float) HitWindow.MISS_WINDOW / 1000;
-
     protected boolean endsCombo;
     protected boolean autoPlay = false;
     protected float hitTime = 0;
@@ -193,7 +187,9 @@ public abstract class GameObject {
             return false;
         }
 
-        return cursorEvent.getHitTime() / 1000 >= hitTime - objectHittableRange;
+        float hittableRange = GameHelper.isAutopilot() ? 0.2f : (float) HitWindow.MISS_WINDOW / 1000;
+
+        return cursorEvent.getHitTime() / 1000 >= hitTime - hittableRange;
     }
 
     /**

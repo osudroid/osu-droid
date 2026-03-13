@@ -7,6 +7,7 @@ import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
+import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -121,7 +122,7 @@ public class GameplayHitCircle extends GameObject {
         if (Config.isDimHitObjects() && circlePiece.isVisible()) {
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = timePreempt - objectHittableRange;
+            var dimDelaySec = timePreempt - (float) HitWindow.MISS_WINDOW / 1000;
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);

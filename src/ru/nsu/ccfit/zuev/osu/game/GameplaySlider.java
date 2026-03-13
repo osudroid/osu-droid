@@ -390,7 +390,7 @@ public class GameplaySlider extends GameObject {
         if (Config.isDimHitObjects()) {
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = timePreempt - objectHittableRange;
+            var dimDelaySec = timePreempt - (float) HitWindow.MISS_WINDOW / 1000;
             var colorDim = 195f / 255f;
 
             if (headCirclePiece.isVisible()) {
