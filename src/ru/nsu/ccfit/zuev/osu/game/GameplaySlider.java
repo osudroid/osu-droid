@@ -895,7 +895,7 @@ public class GameplaySlider extends GameObject {
                 if (!autoPlay) {
                     if (elapsedTime <= getLateHitThreshold()) {
                         if (listener.isObjectHittable(this)) {
-                            var hittingCursor = getHittingCursor(listener, beatmapSlider, elapsedTime);
+                            var hittingCursor = getHittingCursor(listener, beatmapSlider.getHead(), elapsedTime);
 
                             if (hittingCursor != null) {
                                 onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);

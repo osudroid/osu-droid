@@ -4,6 +4,7 @@ import android.graphics.PointF;
 
 import androidx.annotation.Nullable;
 
+import com.edlplan.framework.math.FMath;
 import com.osudroid.game.CursorEvent;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.hitobject.HitObject;
@@ -79,7 +80,7 @@ public abstract class GameObject {
                 while (cursor.latestProcessedDownEventIndex < size) {
                     var event = events.get(cursor.latestProcessedDownEventIndex++);
 
-                    if (canHit(event)) {
+                    if (canHit(event, hitObject.hitWindow)) {
                         return event;
                     }
                 }
@@ -108,7 +109,7 @@ public abstract class GameObject {
                         boolean isHit = isHit(hitObject, event);
 
                         // Case 1
-                        if (event.isActionDown() && isHit && canHit(event)) {
+                        if (event.isActionDown() && isHit && canHit(event, hitObject.hitWindow)) {
                             return event;
                         }
 
@@ -145,7 +146,7 @@ public abstract class GameObject {
             while (cursor.latestProcessedDownEventIndex < downEventsSize) {
                 var downEvent = downEvents.get(cursor.latestProcessedDownEventIndex++);
 
-                if (!canHit(downEvent)) {
+                if (!canHit(downEvent, hitObject.hitWindow)) {
                     continue;
                 }
 
@@ -180,14 +181,17 @@ public abstract class GameObject {
      * Determines whether a {@link CursorEvent} can hit this {@link GameObject}.
      *
      * @param cursorEvent The {@link CursorEvent} to check.
+     * @param hitWindow The {@link HitWindow} of this {@link GameObject}.
      * @return {@code true} if the {@link CursorEvent} can hit this {@link GameObject}, {@code false} otherwise.
      */
-    private boolean canHit(CursorEvent cursorEvent) {
+    private boolean canHit(CursorEvent cursorEvent, HitWindow hitWindow) {
         if (cursorEvent.isActionUp()) {
             return false;
         }
 
-        float hittableRange = GameHelper.isAutopilot() ? 0.2f : (float) HitWindow.MISS_WINDOW / 1000;
+        float hittableRange = GameHelper.isAutopilot()
+            ? (float) FMath.clamp(hitWindow.getMehWindow() + 100, 200, HitWindow.MISS_WINDOW) / 1000
+            : (float) HitWindow.MISS_WINDOW / 1000;
 
         return cursorEvent.getHitTime() / 1000 >= hitTime - hittableRange;
     }
