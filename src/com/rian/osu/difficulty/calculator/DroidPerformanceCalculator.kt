@@ -93,7 +93,7 @@ class DroidPerformanceCalculator(
     override fun processParameters(parameters: DroidPerformanceCalculationParameters?) = parameters?.let {
         super.processParameters(it)
 
-        sliderCheesePenalty = it.sliderCheesePenalty.copy()
+        it.sliderCheesePenalty.copyTo(sliderCheesePenalty)
         tapPenalty = it.tapPenalty
     } ?: resetDefaults()
 
@@ -101,7 +101,7 @@ class DroidPerformanceCalculator(
         super.resetDefaults()
 
         effectiveMissCount = 0.0
-        sliderCheesePenalty = SliderCheesePenalty()
+        sliderCheesePenalty.reset()
         tapPenalty = 1.0
     }
 
