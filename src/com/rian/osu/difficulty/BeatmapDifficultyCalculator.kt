@@ -19,7 +19,6 @@ import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
-import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -46,46 +45,23 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDroidPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
         DroidPerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this, GameMode.Droid)
+            it.populate(beatmap, this)
         }
     }
 
     /**
-     * Constructs a [PerformanceCalculationParameters] from an [IBeatmap] and [StatisticV2].
+     * Constructs a [StandardPerformanceCalculationParameters] from an [IBeatmap] and [StatisticV2].
      *
-     * @param beatmap The [IBeatmap] to construct the [PerformanceCalculationParameters] from.
-     * @param stat The [StatisticV2] to construct the [PerformanceCalculationParameters] from.
-     * @return The [PerformanceCalculationParameters] representing the [StatisticV2],
+     * @param beatmap The [IBeatmap] to construct the [StandardPerformanceCalculationParameters] from.
+     * @param stat The [StatisticV2] to construct the [StandardPerformanceCalculationParameters] from.
+     * @return The [StandardPerformanceCalculationParameters] representing the [StatisticV2],
      * `null` if the [StatisticV2] instance is `null`.
      */
     @JvmStatic
     fun constructStandardPerformanceParameters(beatmap: IBeatmap, stat: StatisticV2?) = stat?.run {
-        PerformanceCalculationParameters().also {
-            populateParameters(it, beatmap, this, GameMode.Standard)
+        StandardPerformanceCalculationParameters().also {
+            it.populate(beatmap, this)
         }
-    }
-
-    private fun populateParameters(parameters: PerformanceCalculationParameters, beatmap: IBeatmap, stat: StatisticV2, mode: GameMode) {
-        parameters.maxCombo = stat.getScoreMaxCombo()
-        parameters.countGreat = stat.hit300
-        parameters.countOk = stat.hit100
-        parameters.countMeh = stat.hit50
-        parameters.countMiss = stat.misses
-
-        parameters.comboBreakingSliderNestedMisses = when (mode) {
-            GameMode.Droid -> if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
-                beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
-                    (stat.sliderHeadHits + stat.sliderTickHits + stat.sliderRepeatHits)
-            } else null
-
-            GameMode.Standard -> if (stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
-                beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
-                    (stat.sliderTickHits + stat.sliderRepeatHits)
-            } else null
-        }
-
-        parameters.nonComboBreakingSliderNestedMisses =
-            if (stat.sliderEndHits >= 0) beatmap.hitObjects.sliderCount - stat.sliderEndHits else null
     }
 
     /**
@@ -388,7 +364,7 @@ object BeatmapDifficultyCalculator {
     @JvmOverloads
     fun calculateStandardPerformance(
         attributes: StandardDifficultyAttributes,
-        parameters: PerformanceCalculationParameters? = null
+        parameters: StandardPerformanceCalculationParameters? = null
     ) = StandardPerformanceCalculator(attributes).calculate(parameters)
 
     /**
@@ -432,7 +408,7 @@ object BeatmapDifficultyCalculator {
         attributes: StandardDifficultyAttributes,
         replayMovements: List<MoveArray>,
         replayObjectData: Array<ReplayObjectData>,
-        parameters: PerformanceCalculationParameters? = null
+        parameters: StandardPerformanceCalculationParameters? = null
     ) = calculateStandardPerformance(
             beatmap.createStandardPlayableBeatmap(attributes.mods),
             attributes, replayMovements, replayObjectData, parameters
@@ -457,10 +433,10 @@ object BeatmapDifficultyCalculator {
         attributes: StandardDifficultyAttributes,
         replayMovements: List<MoveArray>,
         replayObjectData: Array<ReplayObjectData>,
-        parameters: PerformanceCalculationParameters? = null
+        parameters: StandardPerformanceCalculationParameters? = null
     ): StandardPerformanceAttributes {
         val actualParameters =
-            (parameters ?: PerformanceCalculationParameters()).also {
+            (parameters ?: StandardPerformanceCalculationParameters()).also {
                 it.populateNestedSliderObjectParameters(beatmap, replayObjectData)
             }
 
@@ -491,44 +467,6 @@ object BeatmapDifficultyCalculator {
      */
     private fun addCache(beatmap: IBeatmap, attributes: StandardDifficultyAttributes) =
         difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(attributes) }
-
-    private fun PerformanceCalculationParameters.populateNestedSliderObjectParameters(
-        beatmap: IBeatmap,
-        replayObjectData: Array<ReplayObjectData>,
-        scope: CoroutineScope? = null
-    ) {
-        nonComboBreakingSliderNestedMisses = 0
-        comboBreakingSliderNestedMisses = 0
-
-        val objects = beatmap.hitObjects.objects
-
-        for (i in objects.indices) {
-            scope?.ensureActive()
-
-            val obj = objects[i] as? Slider ?: continue
-            val objData = replayObjectData.getOrNull(i)
-
-            if (objData?.tickSet == null) {
-                // No object data - assume all slider ticks and the end were dropped.
-                nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
-                comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + obj.nestedHitObjects.size - 2 - obj.repeatCount
-                continue
-            }
-
-            for (j in 1 until obj.nestedHitObjects.size) {
-                scope?.ensureActive()
-
-                if (objData.tickSet[j - 1]) {
-                    continue
-                }
-
-                when (obj.nestedHitObjects[j]) {
-                    is SliderTick -> comboBreakingSliderNestedMisses = (comboBreakingSliderNestedMisses ?: 0) + 1
-                    is SliderTail -> nonComboBreakingSliderNestedMisses = (nonComboBreakingSliderNestedMisses ?: 0) + 1
-                }
-            }
-        }
-    }
 
     /**
      * Adds a cache to the difficulty cache.

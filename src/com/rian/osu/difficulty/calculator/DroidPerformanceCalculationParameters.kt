@@ -1,6 +1,9 @@
 package com.rian.osu.difficulty.calculator
 
+import com.rian.osu.GameMode
+import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.replay.SliderCheesePenalty
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 /**
  * A class for specifying parameters for osu!droid performance calculation.
@@ -17,4 +20,13 @@ class DroidPerformanceCalculationParameters : PerformanceCalculationParameters()
      */
     @JvmField
     var sliderCheesePenalty = SliderCheesePenalty()
+
+    override fun populate(beatmap: IBeatmap, stat: StatisticV2) {
+        super.populate(beatmap, stat)
+
+        comboBreakingSliderNestedMisses = if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
+            beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+                    (stat.sliderHeadHits + stat.sliderTickHits + stat.sliderRepeatHits)
+        } else null
+    }
 }
