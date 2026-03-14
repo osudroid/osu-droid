@@ -134,7 +134,7 @@ class DroidPerformanceCalculator(
         aimValue *= sliderCheesePenalty.aim
 
         // Scale the aim value with deviation.
-        aimValue *= 1.025 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.475)
+        aimValue *= 1.025 * ErrorFunction.erfFast(25 / (sqrt(2.0) * deviation)).pow(0.475)
 
         // OD 7 SS stays the same.
         aimValue *= 0.98 + 7.0.pow(2) / 2500
@@ -163,7 +163,7 @@ class DroidPerformanceCalculator(
             (1 + 1 / (1 + exp(-(normalizedDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM))))
 
         // Scale the tap value with tap deviation.
-        tapValue *= 1.05 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.6)
+        tapValue *= 1.05 * ErrorFunction.erfFast(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.6)
 
         // Additional scaling for tap value based on average BPM and how "vibroable" the beatmap is.
         // Higher BPMs require more precise tapping. When the deviation is too high,
@@ -226,7 +226,7 @@ class DroidPerformanceCalculator(
         flashlightValue *= sliderCheesePenalty.flashlight
 
         // Scale the flashlight value with deviation.
-        flashlightValue *= ErrorFunction.erf(50 / (sqrt(2.0) * deviation))
+        flashlightValue *= ErrorFunction.erfFast(50 / (sqrt(2.0) * deviation))
 
         flashlightValue
     }
@@ -241,7 +241,7 @@ class DroidPerformanceCalculator(
         readingValue *= calculateDeviationBasedLengthScaling(punishForMemorization = true)
 
         // Scale the visual value with deviation.
-        readingValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation))
+        readingValue *= 1.05 * ErrorFunction.erfFast(25 / (sqrt(2.0) * deviation))
 
         // OD 5 SS stays the same.
         readingValue *= 0.98 + 5.0.pow(2) / 2500
@@ -262,7 +262,7 @@ class DroidPerformanceCalculator(
         val noMissProportion = totalHits / (totalHits + 1.0)
 
         // Aim deviation-based scale.
-        ErrorFunction.erfInv(missProportion) / ErrorFunction.erfInv(noMissProportion) *
+        ErrorFunction.erfInvFast(missProportion) / ErrorFunction.erfInvFast(noMissProportion) *
             // Cheesing-based scale (i.e. 50% misses is deliberately only hitting each other
             // note, 90% misses is deliberately only hitting 1 note every 10 notes).
             missProportion.pow(8)
@@ -293,15 +293,15 @@ class DroidPerformanceCalculator(
         // scores and take it as the player's "real" proportion.
         fun retryProportion(proportion: Double, notes: Double, tries: Double) = proportion +
             sqrt(2 * proportion * (1 - proportion) / notes) *
-            ErrorFunction.erfInv(1 / tries - 1)
+            ErrorFunction.erfInvFast(1 / tries - 1)
 
         // Using the proportion, we calculate the deviation based off that proportion and again
         // compared to the hit deviation for proportion `(n - 0.5) / n`.
         var multiplier = max(
             0.0,
-            ErrorFunction.erfInv(
+            ErrorFunction.erfInvFast(
                 retryProportion(calculateProportion(objectCount), objectCount, max(1.0, benchmarkNotes / objectCount))
-            ) / ErrorFunction.erfInv(calculateProportion(benchmarkNotes))
+            ) / ErrorFunction.erfInvFast(calculateProportion(benchmarkNotes))
         )
 
         // Punish for memorization if needed.
@@ -355,11 +355,11 @@ class DroidPerformanceCalculator(
 
             // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
             // Begin with the normal distribution first.
-            var deviationOnAccuracyObjects = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityAccuracyObjects))
+            var deviationOnAccuracyObjects = greatWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(greatProbabilityAccuracyObjects))
 
             deviationOnAccuracyObjects *=
                 sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnAccuracyObjects).pow(2)) /
-                    (deviationOnAccuracyObjects * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnAccuracyObjects))))
+                    (deviationOnAccuracyObjects * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviationOnAccuracyObjects))))
 
             // Then compute the variance for 50s.
             val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
@@ -391,7 +391,7 @@ class DroidPerformanceCalculator(
 
         val greatProbabilitySlider = greatCountSliders / (sliderCount + 1.0)
 
-        mehWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilitySlider))
+        mehWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(greatProbabilitySlider))
     }
 
     /**
@@ -441,12 +441,12 @@ class DroidPerformanceCalculator(
         // Tested max precision for the deviation calculation.
         if (pLowerBound > 0.01) {
             // Compute the deviation assuming greats and oks are normally distributed.
-            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(pLowerBound))
+            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(pLowerBound))
 
             // Subtract the deviation provided by tails that land outside the ok hit window from the deviation computed above.
             // This is equivalent to calculating the deviation of a normal distribution truncated at +-okHitWindow.
             val okHitWindowTailAmount = sqrt(2 / Math.PI) * okWindow *
-                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviation)))
+                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviation)))
 
             deviation *= sqrt(1 - okHitWindowTailAmount)
         } else {

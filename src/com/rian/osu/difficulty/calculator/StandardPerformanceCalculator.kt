@@ -294,12 +294,12 @@ class StandardPerformanceCalculator(
         // Tested max precision for the deviation calculation.
         if (pLowerBound > 0.01) {
             // Compute the deviation assuming greats and oks are normally distributed.
-            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(pLowerBound))
+            deviation = greatWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(pLowerBound))
 
             // Subtract the deviation provided by tails that land outside the ok hit window from the deviation computed above.
             // This is equivalent to calculating the deviation of a normal distribution truncated at +-okHitWindow.
             val okHitWindowTailAmount = sqrt(2 / Math.PI) * okWindow *
-                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviation)))
+                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviation)))
 
             deviation *= sqrt(1 - okHitWindowTailAmount)
         } else {

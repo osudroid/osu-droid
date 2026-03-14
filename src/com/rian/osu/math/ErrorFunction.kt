@@ -1,7 +1,10 @@
 package com.rian.osu.math
 
+import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
@@ -421,7 +424,8 @@ object ErrorFunction {
      * @param x The value to evaluate.
      * @return The error function evaluated at [x], or:
      * - `1` if [x] is [Double.POSITIVE_INFINITY];
-     * - `-1` if [x] is [Double.NEGATIVE_INFINITY].
+     * - `-1` if [x] is [Double.NEGATIVE_INFINITY];
+     * - [Double.NaN] if [x] is [Double.NaN].
      */
     fun erf(x: Double) = when {
         x == 0.0 -> 0.0
@@ -432,12 +436,45 @@ object ErrorFunction {
     }
 
     /**
+     * Calculates the error function.
+     *
+     * Unlike [erf], this implementation uses a faster but more rough estimation. If accuracy is desired, consider
+     * using [erf].
+     *
+     * @param x The value to evaluate.
+     * @return The error function evaluated at [x], or:
+     * - `1` if [x] is [Double.POSITIVE_INFINITY];
+     * - `-1` if [x] is [Double.NEGATIVE_INFINITY];
+     * - [Double.NaN] if [x] is [Double.NaN].
+     */
+    fun erfFast(x: Double) = when {
+        x == 0.0 -> 0.0
+        x == Double.POSITIVE_INFINITY -> 1.0
+        x == Double.NEGATIVE_INFINITY -> -1.0
+        x.isNaN() -> Double.NaN
+        else -> {
+            // Constants for approximation (Abramowitz and Stegun formula 7.1.26)
+            val t = 1 / (1 + 0.3275911 * abs(x))
+            val tau = t * (0.254829592
+                    + t * (-0.284496736
+                    + t * (1.421413741
+                    + t * (-1.453152027
+                    + t * 1.061405429))))
+
+            val erf = 1 - tau * exp(-x * x)
+
+            if (x >= 0) erf else -erf
+        }
+    }
+
+    /**
      * Calculates the complementary error function.
      *
      * @param x The value to evaluate.
      * @return The complementary error function evaluated at [x], or:
      * - `0` if [x] is [Double.POSITIVE_INFINITY];
-     * - `2` if [x] is [Double.NEGATIVE_INFINITY].
+     * - `2` if [x] is [Double.NEGATIVE_INFINITY];
+     * - [Double.NaN] if [x] is [Double.NaN].
      */
     fun erfc(x: Double) = when {
         x == 0.0 -> 1.0
@@ -448,12 +485,27 @@ object ErrorFunction {
     }
 
     /**
+     * Calculates the complementary error function.
+     *
+     * Unlike [erfc], this implementation uses a faster but more rough estimation. If accuracy is desired, consider
+     * using [erfc].
+     *
+     * @param x The value to evaluate.
+     * @return The complementary error function evaluated at [x], or:
+     * - `0` if [x] is [Double.POSITIVE_INFINITY];
+     * - `2` if [x] is [Double.NEGATIVE_INFINITY];
+     * - [Double.NaN] if [x] is [Double.NaN].
+     */
+    fun erfcFast(x: Double) = 1 - erfFast(x)
+
+    /**
      * Calculates the inverse error function evaluated at [z].
      *
      * @param z The value to evaluate.
      * @return The inverse error function evaluated at [z], or:
      * - [Double.POSITIVE_INFINITY] if [z]` >= 1`;
-     * - [Double.NEGATIVE_INFINITY] if [z]` <= -1`.
+     * - [Double.NEGATIVE_INFINITY] if [z]` <= -1`;
+     * - [Double.NaN] if [z] is [Double.NaN].
      */
     fun erfInv(z: Double) = when {
         z == 0.0 -> 0.0
@@ -480,6 +532,40 @@ object ErrorFunction {
     }
 
     /**
+     * Calculates the inverse error function evaluated at [z].
+     *
+     * Unlike [erfInv], this implementation uses a faster but more rough estimation. If accuracy is desired, consider
+     * using [erfInv].
+     *
+     * @param z The value to evaluate.
+     * @return The inverse error function evaluated at [z], or:
+     * - [Double.POSITIVE_INFINITY] if [z]` >= 1`;
+     * - [Double.NEGATIVE_INFINITY] if [z]` <= -1`.
+     * - [Double.NaN] if [z] is [Double.NaN].
+     */
+    fun erfInvFast(z: Double) = when {
+        z == 0.0 -> 0.0
+        z >= 1 -> Double.POSITIVE_INFINITY
+        z <= -1 -> Double.NEGATIVE_INFINITY
+        z.isNaN() -> Double.NaN
+        else -> {
+            val a = 0.147
+            val sign = sign(z)
+            val absZ = abs(z)
+
+            val ln = ln(1 - absZ * absZ)
+            val t1 = 2 / (Math.PI * a) + ln / 2
+            val t2 = ln / a
+            val baseApprox = sqrt(t1 * t1 - t2) - t1
+
+            // Correction reduces max error from -0.005 to -0.00045.
+            val c = if (absZ >= 0.85) ((absZ - 0.85) / 0.293).pow(8) else 0.0
+
+            sign * (sqrt(baseApprox) + c)
+        }
+    }
+
+    /**
      * Calculates the complementary inverse error function evaluated at [z].
      *
      * This implementation has been tested against the arbitrary precision mpmath library
@@ -488,7 +574,8 @@ object ErrorFunction {
      * @param z The value to evaluate.
      * @returns The complementary inverse error function evaluated at [z], or:
      * - [Double.POSITIVE_INFINITY] if [z]` <= 0`;
-     * - [Double.NEGATIVE_INFINITY] if [z]` >= -2`.
+     * - [Double.NEGATIVE_INFINITY] if [z]` >= -2`;
+     * - [Double.NaN] if [z] is [Double.NaN].
      */
     fun erfcInv(z: Double) = when {
         z <= 0 -> Double.POSITIVE_INFINITY
@@ -512,6 +599,20 @@ object ErrorFunction {
             erfInvImp(p, q, s)
         }
     }
+
+    /**
+     * Calculates the complementary inverse error function evaluated at [z].
+     *
+     * Unlike [erfcInv], this implementation uses a faster but more rough estimation. If accuracy is desired, consider
+     * using [erfcInv].
+     *
+     * @param z The value to evaluate.
+     * @returns The complementary inverse error function evaluated at [z], or:
+     * - [Double.POSITIVE_INFINITY] if [z]` <= 0`;
+     * - [Double.NEGATIVE_INFINITY] if [z]` >= -2`;
+     * - [Double.NaN] if [z] is [Double.NaN].
+     */
+    fun erfcInvFast(z: Double) = erfInvFast(1 - z)
 
     /**
      * The implementation of the error function.
