@@ -99,6 +99,14 @@ public class GameplayHitCircle extends GameObject {
             ));
         } else if (circlePiece.isVisible()) {
             circlePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+
+            float okWindow = (float) beatmapCircle.hitWindow.getOkWindow() / 1000;
+            float lateMissFadeTime = (float) beatmapCircle.hitWindow.getMehWindow() / 1000 - okWindow;
+
+            circlePiece.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(timePreempt + okWindow),
+                Modifiers.fadeOut(lateMissFadeTime)
+            ));
         }
 
         if (approachCircle.isVisible()) {

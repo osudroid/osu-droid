@@ -8,6 +8,7 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
@@ -95,6 +96,7 @@ public class GameplaySlider extends GameObject {
     private boolean preStageFinish = false;
 
     private final SliderBody sliderBody;
+    private UniversalModifier sliderHeadLateMissFadeModifier;
 
     /**
      * The absolute slider's path end position.
@@ -304,6 +306,16 @@ public class GameplaySlider extends GameObject {
 
         } else {
             headCirclePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+
+            float okWindow = (float) hitWindow.getOkWindow() / 1000;
+            float lateMissFadeTime = (float) hitWindow.getMehWindow() / 1000 - okWindow;
+
+            sliderHeadLateMissFadeModifier = Modifiers.sequence(
+                Modifiers.delay(timePreempt + okWindow),
+                Modifiers.fadeOut(lateMissFadeTime)
+            );
+
+            headCirclePiece.registerEntityModifier(sliderHeadLateMissFadeModifier);
 
             tailCirclePiece.registerEntityModifier(Modifiers.sequence(
                     Modifiers.delay(fadeInDelay),
@@ -600,6 +612,7 @@ public class GameplaySlider extends GameObject {
 
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
+        sliderHeadLateMissFadeModifier = null;
 
         startArrow.clearEntityModifiers();
         endArrow.clearEntityModifiers();
@@ -1170,6 +1183,10 @@ public class GameplaySlider extends GameObject {
         }
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
+            if (sliderHeadLateMissFadeModifier != null) {
+                headCirclePiece.unregisterEntityModifier(sliderHeadLateMissFadeModifier);
+            }
+
             // Change the head circle to the end circle piece.
             headCirclePiece.hideNumber();
             headCirclePiece.setCircleTextureRegion(sliderEndCircleTexture);
