@@ -1212,13 +1212,13 @@ public class GameplaySlider extends GameObject {
         } else if (headCirclePiece.isVisible()) {
             headCirclePiece.clearEntityModifiers();
 
-            if (hitOffset >= -mehWindow) {
+            if (hitOffset >= -mehWindow || headCirclePiece.getAlpha() == 0) {
                 headCirclePiece.detachSelf();
             } else {
                 // Slider head is hit too early - slowly fade it.
                 isHeadCircleAnimating = true;
 
-                headCirclePiece.registerEntityModifier(Modifiers.fadeOut(0.1f, e -> {
+                headCirclePiece.registerEntityModifier(Modifiers.alpha(0.1f, headCirclePiece.getAlpha(), 0, e -> {
                     isHeadCircleAnimating = false;
                     Execution.updateThread(headCirclePiece::detachSelf);
                 }));
