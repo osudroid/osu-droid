@@ -16,6 +16,8 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
+import java.util.ArrayList;
+
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -50,7 +52,7 @@ public class GameplaySpinner extends GameObject {
     protected boolean spinnable;
 
     protected final boolean isSpinnerFrequencyModulate;
-    protected GameplayHitSampleInfo[] hitSamples;
+    protected final ArrayList<GameplayHitSampleInfo> hitSamples = new ArrayList<>(5);
     protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
     protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
 
@@ -366,9 +368,9 @@ public class GameplaySpinner extends GameObject {
 
     protected void reloadHitSounds() {
         var parsedSamples = beatmapSpinner.getSamples();
-        hitSamples = new GameplayHitSampleInfo[parsedSamples.size()];
+        hitSamples.ensureCapacity(parsedSamples.size());
 
-        for (int i = 0; i < hitSamples.length; ++i) {
+        for (int i = 0, size = parsedSamples.size(); i < size; ++i) {
             var gameplaySample = GameplayHitSampleInfo.pool.obtain();
             gameplaySample.init(parsedSamples.get(i));
 
@@ -376,7 +378,7 @@ public class GameplaySpinner extends GameObject {
                 gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
             }
 
-            hitSamples[i] = gameplaySample;
+            hitSamples.add(gameplaySample);
         }
 
         spinnerSpinSample.reset();
@@ -420,13 +422,13 @@ public class GameplaySpinner extends GameObject {
             listener.playHitSamples(hitSamples);
         }
 
-        for (int i = 0; i < hitSamples.length; ++i) {
-            var sample = hitSamples[i];
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            var sample = hitSamples.get(i);
             sample.reset();
             GameplayHitSampleInfo.pool.free(sample);
-        }
 
-        hitSamples = null;
+            hitSamples.remove(i);
+        }
     }
 
     @Override

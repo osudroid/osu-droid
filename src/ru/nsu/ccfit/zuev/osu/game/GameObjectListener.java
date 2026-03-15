@@ -7,6 +7,7 @@ import com.reco1l.framework.Color4;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 
 import java.util.BitSet;
+import java.util.List;
 
 public interface GameObjectListener {
 
@@ -41,5 +42,5 @@ public interface GameObjectListener {
 
     void onUpdatedAutoCursor(float pX, float pY);
 
-    void playHitSamples(GameplayHitSampleInfo[] samples);
+    void playHitSamples(List<GameplayHitSampleInfo> samples);
 }

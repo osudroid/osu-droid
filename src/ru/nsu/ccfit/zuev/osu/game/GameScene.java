@@ -2389,7 +2389,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     @Override
-    public void playHitSamples(GameplayHitSampleInfo[] samples) {
+    public void playHitSamples(List<GameplayHitSampleInfo> samples) {
         float volume = 1;
         var muted = GameHelper.getMuted();
 
@@ -2397,8 +2397,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             volume = muted.volumeAt(stat.getCombo());
         }
 
-        for (int i = 0; i < samples.length; ++i) {
-            var sample = samples[i];
+        for (int i = 0, size = samples.size(); i < size; ++i) {
+            var sample = samples.get(i);
             sample.setVolume(volume);
             sample.play();
         }

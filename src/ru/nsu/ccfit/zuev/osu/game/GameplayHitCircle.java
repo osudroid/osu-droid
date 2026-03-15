@@ -15,6 +15,8 @@ import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
 
+import java.util.ArrayList;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -31,7 +33,7 @@ public class GameplayHitCircle extends GameObject {
     private float timePreempt;
     private boolean kiai;
     private boolean successfulHit;
-    private GameplayHitSampleInfo[] hitSamples;
+    private final ArrayList<GameplayHitSampleInfo> hitSamples = new ArrayList<>(5);
 
     /**
      * The circle piece that represents the circle body and overlay.
@@ -149,7 +151,7 @@ public class GameplayHitCircle extends GameObject {
 
         // Initialize samples
         var parsedSamples = beatmapCircle.getSamples();
-        hitSamples = new GameplayHitSampleInfo[parsedSamples.size()];
+        hitSamples.ensureCapacity(parsedSamples.size());
 
         for (int i = 0, size = parsedSamples.size(); i < size; i++) {
             var gameplaySample = GameplayHitSampleInfo.pool.obtain();
@@ -159,7 +161,7 @@ public class GameplayHitCircle extends GameObject {
                 gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
             }
 
-            hitSamples[i] = gameplaySample;
+            hitSamples.add(gameplaySample);
         }
 
         scene.attachChild(circlePiece, 0);
@@ -171,12 +173,14 @@ public class GameplayHitCircle extends GameObject {
             return;
         }
 
-        for (int i = 0; i < hitSamples.length; ++i) {
-            hitSamples[i].reset();
-            GameplayHitSampleInfo.pool.free(hitSamples[i]);
-        }
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            var sample = hitSamples.get(i);
 
-        hitSamples = null;
+            sample.reset();
+            GameplayHitSampleInfo.pool.free(sample);
+
+            hitSamples.remove(i);
+        }
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
