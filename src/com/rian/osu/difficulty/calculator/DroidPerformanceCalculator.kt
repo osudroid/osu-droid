@@ -331,7 +331,6 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val hitWindow = getHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -405,7 +404,6 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val hitWindow = getHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -495,9 +493,10 @@ class DroidPerformanceCalculator(
         return Interpolation.linear(adjustedTapValue, tapValue, t) / tapValue
     }
 
-    private fun getHitWindow() =
+    private val hitWindow by lazy {
         if (isPrecise) PreciseDroidHitWindow(difficultyAttributes.overallDifficulty)
         else DroidHitWindow(difficultyAttributes.overallDifficulty)
+    }
 
     private fun calculateEffectiveMissCount() = difficultyAttributes.run {
         var missCount = countMiss.toDouble()
