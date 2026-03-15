@@ -1,7 +1,5 @@
 package com.rian.osu.ui
 
-import android.content.Context
-import android.view.WindowManager
 import com.reco1l.framework.Color4
 import com.rian.osu.math.Interpolation.dampContinuously
 import kotlin.math.min
@@ -17,7 +15,12 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
  *
  * @param font The [Font] that will be used to display the current frame rate.
  */
-class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
+class FPSCounter(font: Font) : ChangeableText(
+    0f,
+    0f,
+    font,
+    "${getGlobal().mainActivity.refreshRate.roundToInt()}/${getGlobal().mainActivity.refreshRate.roundToInt()} FPS"
+) {
     //region Counting logic
 
     /**
@@ -50,9 +53,6 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
     var averageFps = 0f
         private set
 
-    @Suppress("DEPRECATION")
-    private val deviceDisplay = (getGlobal().mainActivity.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
-
     private val spikeTime = 0.02f
     private val dampTime = 0.1f
 
@@ -79,8 +79,7 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
             timeSinceLastAverageFpsCalculation = 0f
             framesSinceLastAverageFpsCalculation = 0
 
-            // This should not belong here, but let's do it anyway to prevent excessive locks.
-            maximumFps = deviceDisplay.refreshRate
+            maximumFps = getGlobal().mainActivity.refreshRate
         }
 
         framesSinceLastAverageFpsCalculation++
