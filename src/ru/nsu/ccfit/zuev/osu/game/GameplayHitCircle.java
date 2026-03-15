@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -29,6 +30,7 @@ public class GameplayHitCircle extends GameObject {
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
+    private boolean successfulHit;
     private GameplayHitSampleInfo[] hitSamples;
 
     /**
@@ -61,6 +63,7 @@ public class GameplayHitCircle extends GameObject {
         hitTime = (float) beatmapCircle.startTime / 1000;
         passedTime = secPassed - (hitTime - timePreempt);
         startHit = false;
+        successfulHit = false;
         kiai = GameHelper.isKiai();
         this.comboColor = comboColor;
 
@@ -177,12 +180,19 @@ public class GameplayHitCircle extends GameObject {
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
-
-        // Detach all objects
-        circlePiece.detachSelf();
         approachCircle.detachSelf();
+
+        if (successfulHit) {
+            circlePiece.detachSelf();
+            GameObjectPool.getInstance().putCircle(this);
+        } else {
+            circlePiece.registerEntityModifier(Modifiers.fadeOut(0.1f, e -> Execution.updateThread(() -> {
+                circlePiece.detachSelf();
+                GameObjectPool.getInstance().putCircle(this);
+            })));
+        }
+
         listener.removeObject(this);
-        GameObjectPool.getInstance().putCircle(this);
         scene = null;
     }
 
@@ -210,10 +220,11 @@ public class GameplayHitCircle extends GameObject {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 startHit = true;
+                successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
-                if (Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow) {
+                if (successfulHit) {
                     playHitSamples();
                 }
                 removeFromScene();
@@ -226,10 +237,11 @@ public class GameplayHitCircle extends GameObject {
                 double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
                 listener.registerAccuracy(hitOffset);
                 startHit = true;
+                successfulHit = Math.abs(hitOffset) <= mehWindow;
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
-                if (Math.abs(hitOffset) <= mehWindow) {
+                if (successfulHit) {
                     playHitSamples();
                 }
                 removeFromScene();
