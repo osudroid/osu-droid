@@ -186,7 +186,7 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.clearEntityModifiers();
         approachCircle.detachSelf();
 
-        if (successfulHit) {
+        if (successfulHit || !circlePiece.isVisible()) {
             circlePiece.detachSelf();
             GameObjectPool.getInstance().putCircle(this);
         } else {
