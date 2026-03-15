@@ -19,9 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -100,7 +98,6 @@ public class MainActivity extends BaseGameActivity implements
     public ServiceConnection connection;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
     private boolean willReplay = false;
@@ -540,10 +537,6 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
-    }
-
-    public Handler getHandler() {
-        return handler;
     }
 
     public FirebaseAnalytics getAnalytics() {
