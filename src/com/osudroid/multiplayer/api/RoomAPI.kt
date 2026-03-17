@@ -15,6 +15,7 @@ import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
 import com.osudroid.ui.v2.multi.RoomScene
+import com.osudroid.utils.updateThread
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -54,19 +55,19 @@ object RoomAPI {
         val json = it[0] as? JSONObject
         val beatmap = parseBeatmap(json)
 
-        roomEventListener?.onRoomBeatmapChange(beatmap)
+        updateThread { roomEventListener?.onRoomBeatmapChange(beatmap) }
     }
 
     private val hostChanged = Listener {
-
         Multiplayer.log("RECEIVED: hostChanged -> ${it.contentToString()}")
-        roomEventListener?.onRoomHostChange((it[0] as String).toLong())
+
+        updateThread { roomEventListener?.onRoomHostChange((it[0] as String).toLong()) }
     }
 
     private val playerKicked = Listener {
-
         Multiplayer.log("RECEIVED: playerKicked -> ${it.contentToString()}")
-        playerEventListener?.onPlayerKick((it[0] as String).toLong())
+
+        updateThread { playerEventListener?.onPlayerKick((it[0] as String).toLong()) }
     }
 
     private val playerModsChanged = Listener {
@@ -75,21 +76,23 @@ object RoomAPI {
         val id = (it[0] as String).toLong()
         val mods = it[1] as JSONArray
 
-        playerEventListener?.onPlayerModsChange(id, RoomMods(mods))
+        updateThread { playerEventListener?.onPlayerModsChange(id, RoomMods(mods)) }
     }
 
     private val roomModsChanged = Listener {
         Multiplayer.log("RECEIVED: roomModsChanged -> ${it.contentToString()}")
 
         val mods = it[0] as JSONArray
-        roomEventListener?.onRoomModsChange(RoomMods(mods))
+
+        updateThread { roomEventListener?.onRoomModsChange(RoomMods(mods)) }
     }
 
     private val roomGameplaySettingsChanged = Listener {
         Multiplayer.log("RECEIVED: roomGameplaySettingsChanged -> ${it.contentToString()}")
 
         val json = it[0] as JSONObject
-        roomEventListener?.onRoomGameplaySettingsChange(parseGameplaySettings(json))
+
+        updateThread { roomEventListener?.onRoomGameplaySettingsChange(parseGameplaySettings(json)) }
     }
 
     private val playerStatusChanged = Listener {
@@ -98,21 +101,23 @@ object RoomAPI {
         val id = (it[0] as String).toLong()
         val status = PlayerStatus[it[1] as Int]
 
-        playerEventListener?.onPlayerStatusChange(id, status)
+        updateThread { playerEventListener?.onPlayerStatusChange(id, status) }
     }
 
     private val teamModeChanged = Listener {
         Multiplayer.log("RECEIVED: teamModeChanged -> ${it.contentToString()}")
 
         val mode = TeamMode[it[0] as Int]
-        roomEventListener?.onRoomTeamModeChange(mode)
+
+        updateThread { roomEventListener?.onRoomTeamModeChange(mode) }
     }
 
     private val winConditionChanged = Listener {
         Multiplayer.log("RECEIVED: winConditionChanged -> ${it.contentToString()}")
 
         val condition = WinCondition.from(it[0] as Int)
-        roomEventListener?.onRoomWinConditionChange(condition)
+
+        updateThread { roomEventListener?.onRoomWinConditionChange(condition) }
     }
 
     private val teamChanged = Listener {
@@ -121,32 +126,36 @@ object RoomAPI {
         val id = (it[0] as String).toLong()
         val team = if (it[1] == null) null else RoomTeam[it[1] as Int]
 
-        playerEventListener?.onPlayerTeamChange(id, team)
+        updateThread { playerEventListener?.onPlayerTeamChange(id, team) }
     }
 
     private val roomNameChanged = Listener {
-
         Multiplayer.log("RECEIVED: roomNameChanged -> ${it.contentToString()}")
-        roomEventListener?.onRoomNameChange(it[0] as String)
+
+        updateThread { roomEventListener?.onRoomNameChange(it[0] as String) }
     }
 
     private val maxPlayersChanged = Listener {
-
         Multiplayer.log("RECEIVED: maxPlayersChanged -> ${it.contentToString()}")
-        roomEventListener?.onRoomMaxPlayersChange((it[0] as String).toInt())
+
+        updateThread { roomEventListener?.onRoomMaxPlayersChange((it[0] as String).toInt()) }
     }
 
     private val playBeatmap = Listener {
-
         Multiplayer.log("RECEIVED: playBeatmap -> ${it.contentToString()}")
-        roomEventListener?.onRoomMatchPlay()
+
+        updateThread { roomEventListener?.onRoomMatchPlay() }
     }
 
     private val chatMessage = Listener {
 
         //Multiplayer.log("RECEIVED: chatMessage -> ${it.contentToString()}")
+        val uid = (it[0] as? String)?.toLongOrNull()
+        val message = it[1] as String
 
-        roomEventListener?.onRoomChatMessage((it[0] as? String)?.toLongOrNull(), it[1] as String)
+        updateThread {
+            roomEventListener?.onRoomChatMessage(uid, message)
+        }
     }
 
     private val liveScoreData = Listener {
@@ -154,7 +163,7 @@ object RoomAPI {
         val json = it[0] as JSONArray
 
         //Multiplayer.log("RECEIVED: liveScoreData -> ${it.contentToString()}")
-        roomEventListener?.onRoomLiveLeaderboard(json)
+        updateThread { roomEventListener?.onRoomLiveLeaderboard(json) }
     }
 
     // Server-to-client events
@@ -226,40 +235,41 @@ object RoomAPI {
         val json = it[0] as JSONObject
         val player = parsePlayer(json)
 
-        playerEventListener?.onPlayerJoin(player)
+        updateThread { playerEventListener?.onPlayerJoin(player) }
     }
 
     private val playerLeft = Listener {
-
         Multiplayer.log("RECEIVED: playerLeft -> ${it.contentToString()}")
-        playerEventListener?.onPlayerLeft((it[0] as String).toLong())
+
+        updateThread { playerEventListener?.onPlayerLeft((it[0] as String).toLong()) }
     }
 
     private val allPlayersBeatmapLoadComplete = Listener {
-
         Multiplayer.log("RECEIVED: allPlayersBeatmapLoadComplete")
-        roomEventListener?.onRoomMatchStart()
+
+        updateThread { roomEventListener?.onRoomMatchStart() }
     }
 
     private val allPlayersSkipRequested = Listener {
-
         Multiplayer.log("RECEIVED: allPlayersSkipRequested")
-        roomEventListener?.onRoomMatchSkip()
+
+        updateThread { roomEventListener?.onRoomMatchSkip() }
     }
 
     private val allPlayersScoreSubmitted = Listener {
-
         val array = it[0] as JSONArray
 
         Multiplayer.log("RECEIVED: allPlayersScoreSubmitted\n${array.toString(3)}")
-        roomEventListener?.onRoomFinalLeaderboard(array)
+
+        updateThread { roomEventListener?.onRoomFinalLeaderboard(array) }
     }
 
     private val error = Listener {
         Multiplayer.log("RECEIVED: error -> ${it.contentToString()}")
 
         val error = it[0] as String
-        roomEventListener?.onServerError(error)
+
+        updateThread { roomEventListener?.onServerError(error) }
     }
 
     // Default listeners
@@ -267,7 +277,7 @@ object RoomAPI {
     private val connectError = Listener {
         Multiplayer.log("RECEIVED: connect_error -> ${it.contentToString()}")
 
-        roomEventListener?.onRoomConnectFail(it[0].toString())
+        updateThread { roomEventListener?.onRoomConnectFail(it[0].toString()) }
 
         socket?.off()
         socket = null
@@ -278,11 +288,13 @@ object RoomAPI {
 
         val reason = it.getOrNull(0) as? String
 
-        roomEventListener?.onRoomDisconnect(
-            reason = reason,
-            // Socket was manually disconnected by either server or client.
-            byUser = reason == "io server disconnect" || reason == "io client disconnect"
-        )
+        updateThread {
+            roomEventListener?.onRoomDisconnect(
+                reason = reason,
+                // Socket was manually disconnected by either server or client.
+                byUser = reason == "io server disconnect" || reason == "io client disconnect"
+            )
+        }
     }
 
 
