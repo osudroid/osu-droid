@@ -1,13 +1,16 @@
 package com.osudroid.multiplayer
 
 import android.util.Log
-import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
+import com.reco1l.toolkt.kotlin.fromDate
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.TimeZone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.MainActivity
 
 /**
  * Logger for multiplayer events.
@@ -27,6 +30,14 @@ class MultiplayerLogger : AutoCloseable {
         }
     }.bufferedWriter()
 
+    private val timestampFormat = SimpleDateFormat("HH:mm:ss").apply {
+        timeZone = TimeZone.getTimeZone("GMT+0")
+    }
+
+    init {
+        write("[${"yyyy/MM/dd hh:mm:ss".fromDate()}] Client ${MainActivity.versionName} started.")
+    }
+
     /**
      * Logs a message to the log file.
      *
@@ -37,7 +48,7 @@ class MultiplayerLogger : AutoCloseable {
             return
         }
 
-        val timestamp = "hh:mm:ss".formatTimeMilliseconds(System.currentTimeMillis())
+        val timestamp = timestampFormat.format(System.currentTimeMillis())
 
         Log.i("Multiplayer", text)
         write("\n[$timestamp] $text")
@@ -53,7 +64,7 @@ class MultiplayerLogger : AutoCloseable {
             return
         }
 
-        val time = "hh:mm:ss".formatTimeMilliseconds(System.currentTimeMillis())
+        val time = timestampFormat.format(System.currentTimeMillis())
         val stacktrace = Log.getStackTraceString(e)
 
         Log.e("Multiplayer", "An exception has been thrown.", e)

@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.*
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
@@ -88,11 +87,6 @@ object Multiplayer {
     private var lastAttemptResponseTimeMS = 0L
 
     private var isWaitingAttemptResponse = false
-
-
-    init {
-        logger.log("[${"yyyy/MM/dd hh:mm:ss".fromDate()}] Client ${MainActivity.versionName} started.")
-    }
 
 
     //region Connection
