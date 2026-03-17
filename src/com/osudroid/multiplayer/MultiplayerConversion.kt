@@ -2,7 +2,6 @@
 
 package com.osudroid.multiplayer
 
-import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.utils.ModUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem

@@ -1,7 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
-import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*

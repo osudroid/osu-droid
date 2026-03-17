@@ -5,9 +5,6 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.beatmap.StandardPlayableBeatmap
-import com.rian.osu.beatmap.hitobject.Slider
-import com.rian.osu.beatmap.hitobject.sliderobject.SliderTail
-import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.difficulty.calculator.*
 import com.rian.osu.mods.Mod
@@ -20,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ensureActive
 
 private val droidDifficultyCalculator = DroidDifficultyCalculator()
 private val standardDifficultyCalculator = StandardDifficultyCalculator()

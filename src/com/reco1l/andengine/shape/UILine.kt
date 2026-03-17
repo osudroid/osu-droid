@@ -1,6 +1,5 @@
 package com.reco1l.andengine.shape
 
-import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
