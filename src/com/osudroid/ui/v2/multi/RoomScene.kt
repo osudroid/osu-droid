@@ -55,7 +55,6 @@ import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
-import org.anddev.andengine.engine.camera.SmoothCamera
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -684,12 +683,6 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     }
 
     override fun show() {
-
-        (GlobalManager.getInstance().camera as SmoothCamera).apply {
-            setZoomFactorDirect(1f)
-            setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f)
-        }
-
         if (!Multiplayer.isConnected) {
             back()
             return
