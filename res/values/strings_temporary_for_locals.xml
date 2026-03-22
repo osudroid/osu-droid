@@ -78,4 +78,7 @@
 
     <string name="opt_prefer_no_video_downloads_title">Prefer downloads without video</string>
     <string name="opt_prefer_no_video_downloads_summary">Prefer downloading beatmaps without video in beatmap downloader if the selected beatmap mirror supports it</string>
+
+    <string name="multi_mode_window_alert_title">Multi-window Mode</string>
+    <string name="multi_mode_window_alert_message">osu!droid does not support multi-window mode. Please switch back to single-window mode to continue playing.</string>
 </resources>

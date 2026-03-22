@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -31,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
@@ -51,6 +53,7 @@ import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
+import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -109,6 +112,7 @@ public class MainActivity extends BaseGameActivity implements
     private DisplayManager.DisplayListener displayListener;
     private float currentRefreshRate = 60;
     private float maxRefreshRate = 60;
+    private MessageDialog multiWindowAlert;
 
     // Multiplayer
     private Uri roomInviteLink;
@@ -635,6 +639,11 @@ public class MainActivity extends BaseGameActivity implements
             return;
         }
 
+        if (isInMultiWindowMode()) {
+            showMultiModeWindowAlert();
+            return;
+        }
+
         var gameScene = GlobalManager.getInstance().getGameScene();
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
@@ -723,6 +732,17 @@ public class MainActivity extends BaseGameActivity implements
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode, @NonNull Configuration newConfig) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+
+        if (isInMultiWindowMode) {
+            showMultiModeWindowAlert();
+        } else {
+            hideMultiModeWindowAlert();
+        }
     }
 
     @Override
@@ -931,4 +951,24 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    private void showMultiModeWindowAlert() {
+        if (multiWindowAlert == null) {
+            multiWindowAlert = new MessageDialog()
+                .setTitle(getString(R.string.multi_mode_window_alert_title))
+                .setMessage(getString(R.string.multi_mode_window_alert_message))
+                .setAllowDismiss(false)
+                .addButton(getString(com.osudroid.resources.R.string.accessibility_detector_exit), (d) -> {
+                    finish();
+                    return null;
+                });
+        }
+
+        multiWindowAlert.show();
+    }
+
+    private void hideMultiModeWindowAlert() {
+        if (multiWindowAlert != null) {
+            multiWindowAlert.dismiss();
+        }
+    }
 }
