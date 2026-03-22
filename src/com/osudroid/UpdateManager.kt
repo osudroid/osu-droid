@@ -91,7 +91,7 @@ object UpdateManager: IFileRequestObserver
 
                             progressDialog = ProgressDialog().apply {
                                 indeterminate = true
-                                allowDismiss = false
+                                setAllowDismiss(false)
                                 max = 100
                                 title = "Downloading update"
                                 message = StringTable.format(R.string.update_info_downloading, 0)

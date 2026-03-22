@@ -135,6 +135,7 @@ open class MessageDialog : BaseFragment() {
      * Whether the dialog is cancelable or not.
      */
     var allowDismiss = true
+        private set
 
     /**
      * The function to be called when the dialog is dismissed.
