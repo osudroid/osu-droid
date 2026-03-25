@@ -3262,7 +3262,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             private void applyRawPointerFastPath(final Camera camera) {
-                if (replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                if (!Config.isHighPrecisionInput() || replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
                     return;
                 }
 
