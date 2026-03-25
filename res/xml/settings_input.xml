@@ -10,6 +10,13 @@
             android:summary="@string/block_area_preference_summary"
             app:layout="@layout/settings_preference" />
 
+        <CheckBoxPreference
+            android:key="highPrecisionInput"
+            android:defaultValue="false"
+            android:title="@string/opt_highPrecisionInput_title"
+            android:summary="@string/opt_highPrecisionInput_summary"
+            app:layout="@layout/settings_preference_checkbox" />
+
         <SeekBarPreference
             android:defaultValue="300"
             android:key="back_button_press_time"
