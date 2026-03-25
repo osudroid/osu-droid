@@ -3,7 +3,7 @@ package com.osudroid.data
 import android.content.Context
 import android.util.Log
 import androidx.room.*
-import com.reco1l.toolkt.data.iterator
+import com.reco1l.framework.iterator
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.*

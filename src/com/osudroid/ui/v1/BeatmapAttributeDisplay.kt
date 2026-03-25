@@ -11,8 +11,7 @@ import com.reco1l.andengine.text.UIText
 import com.reco1l.andengine.ui.UIModal
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
-import com.reco1l.toolkt.kotlin.fastForEach
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.HitWindow
@@ -149,7 +148,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
             +UILinearContainer().apply {
                 orientation = Orientation.Vertical
 
-                metrics.fastForEach { metric ->
+                metrics.forEach { metric ->
                     +UIText().apply {
                         font = ResourceManager.getInstance().getFont("smallFont")
                         text = "${metric.name}: ${metric.value}"
@@ -170,7 +169,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
                         }
                     }
 
-                    additionalInfo.fastForEach { info ->
+                    additionalInfo.forEach { info ->
                         +UIText().apply {
                             font = ResourceManager.getInstance().getFont("smallFont")
                             text = info

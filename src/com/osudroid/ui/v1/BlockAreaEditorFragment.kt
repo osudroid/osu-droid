@@ -12,8 +12,7 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.osudroid.data.BlockArea
 import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.removeSelf
+import com.reco1l.framework.android.dp
 import com.rian.osu.math.Vector2
 import ru.nsu.ccfit.zuev.osuplus.R
 
@@ -98,7 +97,7 @@ class BlockAreaEditorFragment : BaseFragment() {
                     DatabaseManager.blockAreaTable.deleteAll()
 
                     blockAreaItems.forEach {
-                        it.itemView.removeSelf()
+                        (it.itemView.parent as? ViewGroup)?.removeView(it.itemView)
                     }
 
                     resetButton.isEnabled = false
@@ -172,7 +171,7 @@ class BlockAreaEditorFragment : BaseFragment() {
             }
 
             remove.setOnClickListener {
-                itemView.removeSelf()
+                (itemView.parent as? ViewGroup)?.removeView(itemView)
                 DatabaseManager.blockAreaTable.delete(data)
                 blockAreaItems.remove(this)
                 resetButton.isEnabled = blockAreaItems.isNotEmpty()

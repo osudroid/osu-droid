@@ -19,8 +19,8 @@ import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.osudroid.utils.mainThread
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
 import org.anddev.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.StringTable

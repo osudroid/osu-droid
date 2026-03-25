@@ -5,7 +5,6 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -228,7 +227,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             val lineHeight = font.lineHeight + font.lineGap
             var i = 0
 
-            lines.fastForEachIndexed { lineIndex, line ->
+            lines.forEachIndexed { lineIndex, line ->
 
                 var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
                 val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
@@ -277,7 +276,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
             setPosition(0)
 
-            lines.fastForEach { line ->
+            lines.forEach { line ->
                 line.forEach { character ->
 
                     val letter = font.getLetter(character)

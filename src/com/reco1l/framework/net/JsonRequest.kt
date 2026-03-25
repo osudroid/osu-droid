@@ -1,7 +1,6 @@
 package com.reco1l.framework.net
 
 import android.util.Log
-import com.reco1l.toolkt.kotlin.isBetween
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Response
@@ -43,7 +42,7 @@ class JsonObjectRequest(url: HttpUrl) : JsonRequest<JSONObject>(url) {
 
     override fun onCreateResponseJson(responseBody: String): JSONObject {
 
-        if (!responseBody.isBetween('{' to '}')) {
+        if (!responseBody.startsWith('{') || !responseBody.endsWith('}')) {
             throw JSONException("Response is not a JSON object:\n$responseBody")
         }
 
@@ -65,7 +64,7 @@ class JsonArrayRequest(url: HttpUrl) : JsonRequest<JSONArray>(url) {
 
     override fun onCreateResponseJson(responseBody: String): JSONArray {
 
-        if (!responseBody.isBetween('[' to ']')) {
+        if (!responseBody.startsWith('[') || !responseBody.endsWith(']')) {
             throw JSONException("Response is not a JSON array:\n$responseBody")
         }
 

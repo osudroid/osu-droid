@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import com.reco1l.toolkt.*
+import com.rian.osu.math.toRadians
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 import javax.microedition.khronos.opengles.GL11

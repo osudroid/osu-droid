@@ -9,7 +9,6 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import com.rian.osu.mods.settings.*
 import kotlin.reflect.KClass
@@ -68,14 +67,14 @@ class ModCustomizationMenu : UIModal(
     //region Component lifecycle
 
     fun updateComponents() {
-        modSettingComponents.fastForEach { it.update() }
+        modSettingComponents.forEach { it.update() }
     }
 
     fun updateComponentEnabledStates() {
         val room = Multiplayer.room
         val isHost = Multiplayer.isRoomHost
 
-        modSettingComponents.fastForEach {
+        modSettingComponents.forEach {
             it.isEnabled = if (room != null) {
                 it.mod.isValidForMultiplayer && (isHost || (room.gameplaySettings.isFreeMod && it.mod.isValidForMultiplayerAsFreeMod))
             } else {
@@ -163,7 +162,7 @@ class ModCustomizationMenu : UIModal(
                 }
             }
 
-            mod.settings.fastForEach { +ModSettingComponent(mod, it) }
+            mod.settings.forEach { +ModSettingComponent(mod, it) }
         }
     }
 }

@@ -6,7 +6,6 @@ import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import javax.microedition.khronos.opengles.*
@@ -110,7 +109,7 @@ class HUDHitErrorMeter : HUDElement() {
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
         super.onDrawChildren(gl, camera)
-        activeIndicators.fastForEach {
+        activeIndicators.forEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
@@ -119,7 +118,7 @@ class HUDHitErrorMeter : HUDElement() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        activeIndicators.fastForEach(Indicator::update)
+        activeIndicators.forEach(Indicator::update)
         super.onManagedUpdate(deltaTimeSec)
     }
 

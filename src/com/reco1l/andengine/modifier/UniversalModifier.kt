@@ -7,7 +7,6 @@ import com.osudroid.utils.IPoolable
 import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.modifier.*
 import org.anddev.andengine.util.modifier.*
@@ -54,7 +53,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             var totalDuration = 0f
 
-            value?.fastForEach {
+            value?.forEach {
                 if (type == Sequence) {
                     totalDuration += it.duration
                 } else {
@@ -93,7 +92,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     private fun clearNestedModifiers() {
-        modifiers?.fastForEach { it.onUnregister() }
+        modifiers?.forEach { it.onUnregister() }
         modifiers = null
     }
 
@@ -207,7 +206,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     override fun reset() {
         elapsedSec = -1f
-        modifiers?.fastForEach { it.reset() }
+        modifiers?.forEach { it.reset() }
     }
 
 
@@ -235,7 +234,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     fun eased(value: Easing): UniversalModifier {
 
         if (type.isCompoundModifier) {
-            modifiers?.fastForEach { it.eased(value) }
+            modifiers?.forEach { it.eased(value) }
         } else {
             easing = value
         }

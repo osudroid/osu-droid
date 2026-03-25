@@ -22,6 +22,7 @@ import com.osudroid.ui.v2.GameLoaderScene
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
+import com.osudroid.utils.runSafe
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
@@ -53,7 +54,6 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config

@@ -12,8 +12,8 @@ import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
 import com.reco1l.andengine.Anchor
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
-import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.reflect.KClass
 
 data class HUDSkinData(val elements: List<HUDElementSkinData>) {
@@ -99,14 +99,14 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
         @JvmStatic
         fun writeToJSON(data: HUDSkinData) = JSONArray().apply {
             data.elements.forEach {
-                putObject {
+                put(JSONObject().apply {
                     put("type", HUDElements[it.type].name)
                     put("x", it.position.x)
                     put("y", it.position.y)
                     put("anchor", Anchor.getName(it.anchor))
                     put("origin", Anchor.getName(it.origin))
                     put("scale", it.scale)
-                }
+                })
             }
         }
 

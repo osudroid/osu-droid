@@ -1,6 +1,6 @@
 package com.rian.osu.mods
 
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.rian.osu.mods.settings.*
 import kotlin.reflect.KProperty
 
