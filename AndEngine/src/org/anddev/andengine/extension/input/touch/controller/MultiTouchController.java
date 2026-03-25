@@ -79,7 +79,7 @@ public class MultiTouchController extends BaseTouchController {
 
 	private boolean onHandleTouchMove(final MotionEvent pMotionEvent) {
 		boolean handled = false;
-        // BEGIN osu!droid modified - process historical coordinates in time order
+        // BEGIN osu!droid modified - process historical coordinates in time order and update raw pointer state
         // See: https://developer.android.com/reference/android/view/MotionEvent#batching
         final int pointerCount = pMotionEvent.getPointerCount();
 
@@ -98,9 +98,9 @@ public class MultiTouchController extends BaseTouchController {
 
 //        for(int i = pMotionEvent.getPointerCount() - 1; i >= 0; i--) {
         for (int i = pointerCount - 1; i >= 0; i--) {
-			final int pointerIndex = i;
-			final int pointerID = pMotionEvent.getPointerId(pointerIndex);
-			final boolean handledInner = this.fireTouchEvent(pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
+            final int pointerID = pMotionEvent.getPointerId(i);
+			updateRawPointer(pointerID, pMotionEvent.getX(i), pMotionEvent.getY(i), true, pMotionEvent.getEventTime());
+			final boolean handledInner = this.fireTouchEvent(pMotionEvent.getX(i), pMotionEvent.getY(i), MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
 			handled = handled || handledInner;
 		}
         // END osu!droid modified
@@ -110,6 +110,10 @@ public class MultiTouchController extends BaseTouchController {
 	private boolean onHandleTouchAction(final int pAction, final MotionEvent pMotionEvent) {
 		final int pointerIndex = this.getPointerIndex(pMotionEvent);
 		final int pointerID = pMotionEvent.getPointerId(pointerIndex);
+		// BEGIN osu!droid modified - update raw pointer state
+		updateRawPointer(pointerID, pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction == MotionEvent.ACTION_DOWN, pMotionEvent.getEventTime());
+		// END osu!droid modified
+
 		return this.fireTouchEvent(pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction, pointerID, pMotionEvent);
 	}
 
