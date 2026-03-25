@@ -1296,10 +1296,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            // Enable historical event processing for more frequent ACTION_MOVE reports.
+            // Enable historical event processing for more frequent ACTION_MOVE reports depending on user configuration.
             var touchOptions = new TouchOptions();
             touchOptions.setRunOnUpdateThread(true);
-            touchOptions.setProcessHistoricalEvents(true);
+            touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
             engine.getTouchController().applyTouchOptions(touchOptions);
         }
 
@@ -3210,7 +3210,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (timeDifference <= 0.1f * speedMultiplier) {
                         float minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime() * speedMultiplier / 1000;
                         // Sync gameplay with audio if the difference is too large.
-                        if (timeDifference >= minimumSynchronizationTime) {
+                        if (!isGameOver && timeDifference >= minimumSynchronizationTime) {
                             if (minimumSynchronizationTime > 0) {
                                 Log.i("GameScene",
                                         "Synchronizing gameplay time with audio time at " +
