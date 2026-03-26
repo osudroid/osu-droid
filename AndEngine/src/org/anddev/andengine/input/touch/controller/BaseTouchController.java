@@ -178,6 +178,12 @@ public abstract class BaseTouchController implements ITouchController  {
 	protected final void clearRawPointer(final int id) {
 		updateRawPointer(id, 0f, 0f, false, 0L);
 	}
+
+	protected final void clearAllRawPointers() {
+		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
+			clearRawPointer(i);
+		}
+	}
 	// END osu!droid modified
 
 	// ===========================================================

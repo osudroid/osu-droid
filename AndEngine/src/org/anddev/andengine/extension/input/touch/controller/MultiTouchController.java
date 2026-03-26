@@ -110,8 +110,13 @@ public class MultiTouchController extends BaseTouchController {
 	private boolean onHandleTouchAction(final int pAction, final MotionEvent pMotionEvent) {
 		final int pointerIndex = this.getPointerIndex(pMotionEvent);
 		final int pointerID = pMotionEvent.getPointerId(pointerIndex);
+
 		// BEGIN osu!droid modified - update raw pointer state
-		updateRawPointer(pointerID, pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction == MotionEvent.ACTION_DOWN, pMotionEvent.getEventTime());
+		if (pAction == MotionEvent.ACTION_CANCEL || pAction == MotionEvent.ACTION_OUTSIDE) {
+			clearAllRawPointers();
+		} else {
+			updateRawPointer(pointerID, pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction == MotionEvent.ACTION_DOWN, pMotionEvent.getEventTime());
+		}
 		// END osu!droid modified
 
 		return this.fireTouchEvent(pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction, pointerID, pMotionEvent);
