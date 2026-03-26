@@ -28,6 +28,7 @@ public abstract class BaseTouchController implements ITouchController  {
 	// BEGIN osu!droid modified - raw pointer for events without having to wait for an update tick
 	private static final int RAW_POINTER_CAPACITY = 10;
 
+	private boolean mUseRawPointer;
 	private final float[] mRawPointerX = new float[RAW_POINTER_CAPACITY];
 	private final float[] mRawPointerY = new float[RAW_POINTER_CAPACITY];
 	private final boolean[] mRawPointerDown = new boolean[RAW_POINTER_CAPACITY];
@@ -129,6 +130,7 @@ public abstract class BaseTouchController implements ITouchController  {
 	@Override
 	public void applyTouchOptions(final TouchOptions pTouchOptions) {
 		this.mRunOnUpdateThread = pTouchOptions.isRunOnUpdateThread();
+		this.mUseRawPointer = pTouchOptions.isUseRawPointer();
 	}
 
 	// BEGIN osu!droid modified - raw pointer getters and setters
@@ -163,7 +165,7 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	protected final void updateRawPointer(final int id, final float x, final float y, final boolean down, final long eventTime) {
-		if (id < 0 || id >= RAW_POINTER_CAPACITY) {
+		if (!this.mUseRawPointer || id < 0 || id >= RAW_POINTER_CAPACITY) {
 			return;
 		}
 
@@ -180,8 +182,10 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	protected final void clearAllRawPointers() {
-		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
-			clearRawPointer(i);
+		if (this.mUseRawPointer) {
+			for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
+				clearRawPointer(i);
+			}
 		}
 	}
 	// END osu!droid modified
