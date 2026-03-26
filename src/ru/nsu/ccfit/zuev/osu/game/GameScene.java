@@ -2534,7 +2534,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void removeAllCursors() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemClock.uptimeMillis();
         float offset = previousFrameTime > 0
                 ? (currentTime - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
