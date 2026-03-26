@@ -2526,6 +2526,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.addUp(eventTime, id);
             }
 
+        } else if (event.isActionCancel() || event.isActionOutside()) {
+            removeAllCursors();
         } else {
             return false;
         }
@@ -2533,7 +2535,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void removeAllCursors() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemClock.uptimeMillis();
         float offset = previousFrameTime > 0
                 ? (currentTime - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
