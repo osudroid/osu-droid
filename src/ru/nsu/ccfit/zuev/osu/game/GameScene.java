@@ -2525,6 +2525,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 replay.addUp(eventTime, id);
             }
 
+        } else if (event.isActionCancel() || event.isActionOutside()) {
+            removeAllCursors();
         } else {
             return false;
         }
