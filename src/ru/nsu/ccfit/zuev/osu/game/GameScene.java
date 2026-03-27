@@ -3289,6 +3289,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return;
                 }
 
+                // Use update thread's active state to determine visibility of the sprites to respect the maximum
+                // active cursor limitation.
                 int count = Math.min(Math.min(getCursorsCount(), sprites.length), touchController.getRawPointerCapacity());
                 int updatePathActiveCount = 0;
 
