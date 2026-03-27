@@ -241,6 +241,7 @@ class SettingsFragment : SettingsFragment() {
     override fun onBindPreferences() = when(section) {
 
         Section.General -> handleGeneralSectionPreferences()
+        Section.Graphics -> handleGraphicsSectionPreferences()
         Section.Gameplay -> handleGameplaySectionPreferences()
         Section.Audio -> handleAudioSectionPreferences()
         Section.Library -> handleLibrarySectionPreferences()
@@ -248,9 +249,6 @@ class SettingsFragment : SettingsFragment() {
         Section.Input -> handleInputSectionPreferences()
         Section.Player -> handlePlayerSectionPreferences()
         Section.Room -> handleRoomSectionPreferences()
-
-        else -> Unit
-
     }
 
 
@@ -379,7 +377,7 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private fun handleGameplaySectionPreferences() {
+    private fun handleGraphicsSectionPreferences() {
         findPreference<SelectPreference>("skinPath")!!.apply {
 
             val skinMain = File(Config.getSkinTopPath())
@@ -420,7 +418,10 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+    }
 
+
+    private fun handleGameplaySectionPreferences() {
         val playfieldAreaDisplay = PlayfieldAreaDisplay()
 
         findPreference<SeekBarPreference>("playfieldSize")!!.apply {
