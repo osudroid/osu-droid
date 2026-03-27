@@ -634,7 +634,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Ensure that only relevant mods are applied.
         mods.values().removeIf(m -> !m.isRelevant());
 
-        boolean differentPlayableBeatmap = shouldParseBeatmap || lastMods == null || !lastMods.equals(mods);
+        boolean differentMods = lastMods == null || !lastMods.equals(mods);
+        boolean differentPlayableBeatmap = shouldParseBeatmap || differentMods;
 
         var playableBeatmap = differentPlayableBeatmap
             ? parsedBeatmap.createDroidPlayableBeatmap(mods.values())
@@ -840,7 +841,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // off such that it causes gameplay to appear very wrong (e.g., a score has Hard Rock/Mirror mod while its
             // replay does not). While this can theoretically happen to any score data (not just mods), checking for
             // mods for the time being is enough to dislodge major inconsistencies in gameplay.
-            if (!replaying || replay.getStat().getMod() != mods) {
+            if (!replaying || !replay.getStat().getMod().equals(mods)) {
                 ToastLogger.showText(com.osudroid.resources.R.string.replay_invalid, true);
                 return false;
             }
@@ -861,7 +862,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 case droid -> {
                     performanceCalculationParameters = new DroidPerformanceCalculationParameters();
 
-                    if (droidTimedDifficultyAttributes == null || mods != lastMods) {
+                    if (droidTimedDifficultyAttributes == null || differentMods) {
                         droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
                     }
                 }
@@ -869,7 +870,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 case standard -> {
                     performanceCalculationParameters = new StandardPerformanceCalculationParameters();
 
-                    if (standardTimedDifficultyAttributes == null || mods != lastMods) {
+                    if (standardTimedDifficultyAttributes == null || differentMods) {
                         standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
                             parsedBeatmap, mods.values(), scope
                         );
@@ -881,7 +882,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         sliderIndex = 0;
 
         // Mod changes may require recalculating slider paths (i.e. Hard Rock)
-        if (sliderPaths == null || sliderRenderPaths == null || mods != lastMods) {
+        if (sliderPaths == null || sliderRenderPaths == null || differentMods) {
             calculateAllSliderPaths(scope);
         }
 
