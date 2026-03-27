@@ -36,6 +36,7 @@ public interface ITouchController extends IUpdateHandler {
 	long getRawPointerEventTime(int pointerId);
 	int getRawPointerCapacity();
 	void clearRawPointers();
+	void resetRawPointers();
 	boolean isUseRawPointers();
 	// END osu!droid modified
 

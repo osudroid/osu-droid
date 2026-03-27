@@ -174,6 +174,17 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	@Override
+	public void resetRawPointers() {
+		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
+			this.mRawPointerVersion.set(i, 0);
+			this.mRawPointerX[i] = 0f;
+			this.mRawPointerY[i] = 0f;
+			this.mRawPointerDown[i] = false;
+			this.mRawPointerEventTime[i] = 0L;
+		}
+	}
+
+	@Override
 	public boolean isUseRawPointers() {
 		return this.mUseRawPointer;
 	}
