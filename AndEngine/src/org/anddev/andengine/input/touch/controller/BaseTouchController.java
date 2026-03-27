@@ -173,6 +173,11 @@ public abstract class BaseTouchController implements ITouchController  {
 		}
 	}
 
+	@Override
+	public boolean isUseRawPointers() {
+		return this.mUseRawPointer;
+	}
+
 	protected final void updateRawPointer(final int id, final float x, final float y, final boolean down, final long eventTime) {
 		if (!this.mUseRawPointer || id < 0 || id >= RAW_POINTER_CAPACITY) {
 			return;

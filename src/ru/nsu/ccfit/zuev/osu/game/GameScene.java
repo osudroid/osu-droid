@@ -3273,13 +3273,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             private void applyRawPointerFastPath(final Camera camera) {
-                if (!Config.isHighPrecisionInput() || replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                var touchController = engine.getTouchController();
+
+                if (touchController == null || !touchController.isUseRawPointers()) {
                     return;
                 }
 
-                var touchController = engine.getTouchController();
-
-                if (touchController == null) {
+                if (replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
                     return;
                 }
 
