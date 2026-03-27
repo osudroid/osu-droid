@@ -164,6 +164,15 @@ public abstract class BaseTouchController implements ITouchController  {
 		return RAW_POINTER_CAPACITY;
 	}
 
+	@Override
+	public void clearRawPointers() {
+		if (this.mUseRawPointer) {
+			for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
+				clearRawPointer(i);
+			}
+		}
+	}
+
 	protected final void updateRawPointer(final int id, final float x, final float y, final boolean down, final long eventTime) {
 		if (!this.mUseRawPointer || id < 0 || id >= RAW_POINTER_CAPACITY) {
 			return;
@@ -179,14 +188,6 @@ public abstract class BaseTouchController implements ITouchController  {
 
 	protected final void clearRawPointer(final int id) {
 		updateRawPointer(id, 0f, 0f, false, 0L);
-	}
-
-	protected final void clearAllRawPointers() {
-		if (this.mUseRawPointer) {
-			for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
-				clearRawPointer(i);
-			}
-		}
 	}
 	// END osu!droid modified
 

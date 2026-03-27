@@ -1,7 +1,6 @@
 package org.anddev.andengine.extension.input.touch.controller;
 
 import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.controller.BaseTouchController;
 
 import android.view.MotionEvent;
@@ -113,7 +112,7 @@ public class MultiTouchController extends BaseTouchController {
 
 		// BEGIN osu!droid modified - update raw pointer state
 		if (pAction == MotionEvent.ACTION_CANCEL || pAction == MotionEvent.ACTION_OUTSIDE) {
-			clearAllRawPointers();
+			clearRawPointers();
 		} else {
 			updateRawPointer(pointerID, pMotionEvent.getX(pointerIndex), pMotionEvent.getY(pointerIndex), pAction == MotionEvent.ACTION_DOWN, pMotionEvent.getEventTime());
 		}
