@@ -2047,7 +2047,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var touchOptions = new TouchOptions();
         touchOptions.setRunOnUpdateThread(true);
         touchOptions.setProcessHistoricalEvents(false);
-        engine.getTouchController().applyTouchOptions(touchOptions);
+        touchOptions.setUseRawPointer(false);
+
+        var touchController = engine.getTouchController();
+        touchController.applyTouchOptions(touchOptions);
+        touchController.clearRawPointers();
 
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
