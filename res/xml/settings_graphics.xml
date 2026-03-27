@@ -43,7 +43,7 @@
             android:title="@string/opt_showcursor_title"
             app:layout="@layout/settings_preference_checkbox" />
 
-        <SeekBarPreference
+        <com.rian.osu.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="cursorSize"
             android:max="300"
