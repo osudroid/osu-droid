@@ -32,6 +32,7 @@ import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.Cameras;
 import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.shape.PaintStyle;
@@ -135,6 +136,7 @@ import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
+    private final int maximumActiveCursorCount = 3;
     private final UIEngine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     public String audioFilePath = null;
@@ -1298,7 +1300,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var touchOptions = new TouchOptions();
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
-            engine.getTouchController().applyTouchOptions(touchOptions);
+            touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
+
+            var touchController = engine.getTouchController();
+            touchController.applyTouchOptions(touchOptions);
+            touchController.resetRawPointers();
         }
 
         // Disable screen dimming
@@ -1838,6 +1844,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var touchOptions = new TouchOptions();
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(false);
+            touchOptions.setUseRawPointer(false);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
@@ -2040,7 +2047,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var touchOptions = new TouchOptions();
         touchOptions.setRunOnUpdateThread(true);
         touchOptions.setProcessHistoricalEvents(false);
-        engine.getTouchController().applyTouchOptions(touchOptions);
+        touchOptions.setUseRawPointer(false);
+
+        var touchController = engine.getTouchController();
+        touchController.applyTouchOptions(touchOptions);
+        touchController.resetRawPointers();
 
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
@@ -2455,7 +2466,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 return true;
             }
 
-            final int maximumActiveCursorCount = 3;
             int activeCursorCount = 0;
 
             for (int i = 0; i < cursors.length; ++i) {
@@ -3169,7 +3179,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private UIScene createMainScene() {
         return new UIScene() {
+            // Reused buffer to avoid allocations.
+            private final float[] fastPathSurfaceCoords = new float[2];
+
+            // Stable fallback cache per pointer (surface space).
+            private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
+            private final float[] fastPathLastStableX = new float[CursorCount];
+            private final float[] fastPathLastStableY = new float[CursorCount];
+
             private boolean isInterpolating;
+
+            @Override
+            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                applyRawPointerFastPath(pCamera);
+
+                super.onManagedDraw(pGL, pCamera);
+            }
 
             @Override
             protected void onManagedUpdate(float secElapsed) {
@@ -3245,6 +3270,103 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 super.onManagedUpdate(dt);
+            }
+
+            private void applyRawPointerFastPath(final Camera camera) {
+                var touchController = engine.getTouchController();
+
+                if (touchController == null || !touchController.isUseRawPointers()) {
+                    return;
+                }
+
+                if (replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                    return;
+                }
+
+                var sprites = cursorSprites;
+
+                if (sprites == null) {
+                    return;
+                }
+
+                // Use update thread's active state to determine visibility of the sprites to respect the maximum
+                // active cursor limitation.
+                int count = Math.min(Math.min(getCursorsCount(), sprites.length), touchController.getRawPointerCapacity());
+                int updatePathActiveCount = 0;
+
+                for (int i = 0; i < count; ++i) {
+                    var sprite = sprites[i];
+
+                    if (sprite == null) {
+                        continue;
+                    }
+
+                    var cursor = cursors[i];
+                    boolean isUpdatePathDown = cursor != null && cursor.isMouseDown();
+
+                    sprite.setShowing(isUpdatePathDown);
+
+                    if (!isUpdatePathDown) {
+                        fastPathHasStableSnapshot[i] = false;
+                        continue;
+                    }
+
+                    if (updatePathActiveCount >= maximumActiveCursorCount) {
+                        continue;
+                    }
+
+                    ++updatePathActiveCount;
+
+                    if (tryReadRawPointer(i)) {
+                        fastPathLastStableX[i] = fastPathSurfaceCoords[0];
+                        fastPathLastStableY[i] = fastPathSurfaceCoords[1];
+                        fastPathHasStableSnapshot[i] = true;
+                    } else if (fastPathHasStableSnapshot[i]) {
+                        // Revert to latest stable coordinates if read fails.
+                        fastPathSurfaceCoords[0] = fastPathLastStableX[i];
+                        fastPathSurfaceCoords[1] = fastPathLastStableY[i];
+                    } else {
+                        // No stable sample yet. Keep update thread position.
+                        continue;
+                    }
+
+                    // Per underlying implementation, this is thread-safe since the camera is never rotated (thus the
+                    // shared array is never used). When this is not the case, this must be revisited.
+                    float[] sceneCoords = Cameras.convertSurfaceToSceneCoordinates(camera, fastPathSurfaceCoords);
+
+                    sprite.setPosition(sceneCoords[0], sceneCoords[1]);
+                }
+            }
+
+            private boolean tryReadRawPointer(int pointerId) {
+                var touchController = engine.getTouchController();
+
+                if (touchController == null) {
+                    return false;
+                }
+
+                for (int attempt = 0; attempt < 2; ++attempt) {
+                    int versionBefore = touchController.getRawPointerVersion(pointerId);
+
+                    // An odd version means the main thread is updating this pointer, so we wait.
+                    if ((versionBefore & 1) != 0) {
+                        continue;
+                    }
+
+                    float x = touchController.getRawPointerSurfaceX(pointerId);
+                    float y = touchController.getRawPointerSurfaceY(pointerId);
+
+                    int versionAfter = touchController.getRawPointerVersion(pointerId);
+
+                    if (versionBefore == versionAfter && (versionAfter & 1) == 0) {
+                        // Successfully read a consistent snapshot.
+                        fastPathSurfaceCoords[0] = x;
+                        fastPathSurfaceCoords[1] = y;
+                        return true;
+                    }
+                }
+
+                return false;
             }
         };
     }

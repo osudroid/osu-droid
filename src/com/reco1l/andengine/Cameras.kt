@@ -1,3 +1,5 @@
+@file:JvmName("Cameras")
+
 package com.reco1l.andengine
 
 import org.anddev.andengine.engine.camera.*
