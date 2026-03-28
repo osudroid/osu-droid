@@ -24,15 +24,12 @@
 
     <PreferenceCategory android:title="@string/opt_category_offset">
 
-        <com.rian.osu.ui.EditableSeekBarPreference
-            android:defaultValue="0"
-            android:key="offset"
-            android:max="500"
-            android:summary="@string/opt_offset_summary"
-            android:title="@string/opt_offset_title"
-            app:min="-500"
-            app:showSeekBarValue="true"
-            app:layout="@layout/settings_preference_seekbar" />
+
+        <Preference
+            android:key="offset_calibration"
+            android:title="@string/opt_offset_calibration_title"
+            android:summary="@string/opt_offset_calibration_summary"
+            />
 
         <com.rian.osu.ui.EditableSeekBarPreference
             android:defaultValue="20"

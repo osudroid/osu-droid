@@ -478,6 +478,19 @@ class SettingsFragment : SettingsFragment() {
                 true
             }
         }
+
+        findPreference<Preference>("offset_calibration")!!.setOnPreferenceClickListener {
+            val self = this
+            GlobalManager.getInstance().engine.runOnUpdateThread {
+                // When Back or SET is pressed in the calibration scene it will
+                // call this lambda on the main thread, re-opening settings
+                // exactly where the user left off (Audio section).
+                com.osudroid.ui.v2.CalibrationScene.onClosed = { self.show() }
+                com.osudroid.ui.v2.CalibrationScene.show()
+            }
+            dismiss()
+            true
+        }
     }
 
 

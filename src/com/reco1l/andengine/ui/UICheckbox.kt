@@ -8,7 +8,7 @@ import com.reco1l.andengine.shape.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {
+open class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {
 
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         if (value) {

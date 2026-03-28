@@ -84,4 +84,28 @@
 
     <string name="multi_mode_window_alert_title">Multi-window Mode</string>
     <string name="multi_mode_window_alert_message">osu!droid does not support multi-window mode. Please switch back to single-window mode to continue playing.</string>
+
+
+    <!--  Calibration Offset    -->
+    <string name="opt_offset_calibration_title">Offset Calibration</string>
+    <string name="opt_offset_calibration_summary">Tap along with a metronome to measure your device\'s audio latency</string>
+
+    <string name="opt_offset_calibration_tap_hint">TAP ALONG WITH THE BEAT</string>
+    <string name="opt_offset_calibration_calibration">CALIBRATION</string>
+    <string name="opt_offset_calibration_offset">OFFSET</string>
+    <string name="opt_offset_calibration_reset">RESET</string>
+    <string name="opt_offset_calibration_set">SET</string>
+    <string name="opt_offset_calibration_settings">SETTINGS</string>
+    <string name="opt_offset_calibration_judgement_perfect">PERFECT</string>
+    <string name="opt_offset_calibration_judgement_good">GOOD</string>
+    <string name="opt_offset_calibration_judgement_meh">MEH</string>
+    <string name="opt_offset_calibration_judgement_miss">MISS</string>
+    <string name="opt_offset_calibration_streak">Keep going! %sx combo</string>
+    <string name="opt_offset_calibration_streak_combo">%sx combo</string>
+    <string name="opt_offset_calibration_feedback_perfect">Perfect!</string>
+    <string name="opt_offset_calibration_feedback_late">Late</string>
+    <string name="opt_offset_calibration_feedback_early">Early</string>
+    <string name="opt_offset_calibration_feedback_tap_count">taps</string>
+
+
 </resources>
