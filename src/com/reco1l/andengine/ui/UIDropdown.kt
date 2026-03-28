@@ -12,14 +12,16 @@ import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
+import org.anddev.andengine.entity.scene.Scene
 
 class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
+    private var currentScene: Scene? = null
 
     /**
      * Whether the dropdown menu is currently expanded or not.
      */
-    val isExpanded: Boolean
-        get() = wrapper.hasParent()
+    val isExpanded
+        get() = currentScene != null
 
 
     private val wrapper = object : UIContainer() {
@@ -64,13 +66,18 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (isExpanded) {
-            var minWidth = trigger.width
+            if (currentScene == UIEngine.current.scene) {
+                var minWidth = trigger.width
 
-            optionsContainer.forEach { it as UITextButton
-                minWidth = max(minWidth, it.contentWidth + it.padding.horizontal)
+                optionsContainer.forEach { it as UITextButton
+                    minWidth = max(minWidth, it.contentWidth + it.padding.horizontal)
+                }
+
+                optionsContainer.minWidth = minWidth
+            } else {
+                // Scene was changed - hide the dropdown.
+                hide()
             }
-
-            optionsContainer.minWidth = minWidth
         }
 
         super.onManagedUpdate(deltaTimeSec)
@@ -165,17 +172,16 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
             wrapper.detachSelf()
 
-            val scene = UIEngine.current.scene
-            if (scene.hasChildScene()) {
-                scene.childScene.attachChild(wrapper)
-            } else {
-                scene.attachChild(wrapper)
-            }
+            // Workaround to ensure that the wrapper is always on the top while also ensuring that it does not leak
+            // across scenes.
+            currentScene = UIEngine.current.scene
+            UIEngine.current.overlay.attachChild(wrapper, 0)
         }
     }
 
     fun hide() {
         if (isExpanded) {
+            currentScene = null
             clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
             scaleTo(0.9f, 0.2f)
             fadeTo(0f, 0.2f).after {
