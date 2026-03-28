@@ -27,8 +27,8 @@
 
         <Preference
             android:key="offset_calibration"
-            android:title="Offset Calibration"
-            android:summary="Tap along with a metronome to measure your device's audio latency"
+            android:title="@string/opt_offset_calibration_title"
+            android:summary="@string/opt_offset_calibration_summary"
             />
 
         <com.rian.osu.ui.EditableSeekBarPreference
