@@ -570,7 +570,7 @@ public class GameplaySlider extends GameObject {
 
             // If the animation is enabled, at this point it will be still animating.
             if (!Config.isAnimateFollowCircle() || !isFollowCircleAnimating) {
-                poolObject();
+                Execution.updateThread(this::poolObject);
             }
         } else {
             sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f, e -> {

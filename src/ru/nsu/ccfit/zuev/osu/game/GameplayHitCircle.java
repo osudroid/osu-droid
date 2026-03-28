@@ -188,7 +188,8 @@ public class GameplayHitCircle extends GameObject {
 
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
             circlePiece.detachSelf();
-            GameObjectPool.getInstance().putCircle(this);
+
+            Execution.updateThread(() -> GameObjectPool.getInstance().putCircle(this));
         } else {
             circlePiece.registerEntityModifier(Modifiers.alpha(0.1f, circlePiece.getAlpha(), 0, e -> Execution.updateThread(() -> {
                 circlePiece.detachSelf();

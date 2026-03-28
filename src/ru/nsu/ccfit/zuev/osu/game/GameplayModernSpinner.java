@@ -283,7 +283,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.detachChild(bonusScore);
 
         listener.removeObject(GameplayModernSpinner.this);
-        GameObjectPool.getInstance().putSpinner(this);
+
+        Execution.updateThread(() -> GameObjectPool.getInstance().putSpinner(this));
 
         int score = 0;
         if (replayObjectData != null) {
