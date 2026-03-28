@@ -73,7 +73,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="displayPlayfieldBorder"
             android:title="@string/opt_display_playfield_border_title"
