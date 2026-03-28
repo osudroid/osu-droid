@@ -10,6 +10,11 @@ import ru.nsu.ccfit.zuev.osu.*
 
 class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {
 
+    /**
+     * Called whenever the value changes (by user interaction or programmatically).
+     */
+    var onChange: ((Boolean) -> Unit)? = null
+
     override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
         if (value) {
             background?.color = theme.accentColor * 0.5f
@@ -60,6 +65,7 @@ class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValu
         }
 
         checkSprite.fadeIn(0.2f)
+        onChange?.invoke(value)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
