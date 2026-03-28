@@ -31,9 +31,14 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         }
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+            if (!event.isActionDown) {
+                return super.onAreaTouched(event, localX, localY)
+            }
+
             if (!super.onAreaTouched(event, localX, localY) && !this@UIDropdown.contains(localX, localY)) {
                 hide()
             }
+
             return true
         }
     }
