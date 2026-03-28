@@ -4,6 +4,7 @@ import android.text.InputType
 import androidx.annotation.IdRes
 import com.edlplan.framework.easing.Easing
 import com.osudroid.utils.mainThread
+import com.osudroid.utils.standardDeviation
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.box
@@ -584,7 +585,7 @@ object CalibrationScene : UIModal(
             tapOffsets.removeAt(0)
         }
 
-        pendingOffset = tapOffsets.average().roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
+        pendingOffset = tapOffsets.standardDeviation().roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
 
         val judgement = when {
             absErr < judgementHitWindow.greatWindow -> Judgement.PERFECT
