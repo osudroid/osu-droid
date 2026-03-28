@@ -17,6 +17,7 @@ import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.*
 import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osuplus.R.string
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -522,7 +523,7 @@ object CalibrationScene : UIModal(
                     width       = FillParent
 
                     +UIText().apply {
-                        text       = "High Precision Input"
+                        text       = string.opt_highPrecisionInput_title.toString()
                         font       = ResourceManager.getInstance().getFont("smallFont")
                         alignment  = Anchor.CenterLeft
                         anchor     = Anchor.CenterLeft; origin = Anchor.CenterLeft
@@ -541,7 +542,7 @@ object CalibrationScene : UIModal(
 
                 // Description below the row
                 +UIText().apply {
-                    text       = "Uses more touch samples for\nmore accurate offset measurement."
+                    text       = string.opt_offset_calibration_settings_highPrecisionInput_summary.toString()
                     font       = ResourceManager.getInstance().getFont("smallFont")
                     width      = FillParent
                     alignment  = Anchor.TopLeft
@@ -610,18 +611,18 @@ object CalibrationScene : UIModal(
     }
 
     // osu! hit windows mapped to calibration labels
-    private enum class Judgement(val label: String, val color: Color4) {
-        PERFECT("PERFECT", Color4(0xFF6ECFFF)),
-        GOOD   ("GOOD",    Color4(0xFF64DC28)),
-        MEH    ("MEH",     Color4(0xFFc8b46e)),
-        MISS   ("MISS",    Color4(0xFFFF4444))
+    private enum class Judgement(val label: Int, val color: Color4) {
+        PERFECT(string.opt_offset_calibration_judgement_perfect, Color4(0xFF6ECFFF)),
+        GOOD   (string.opt_offset_calibration_judgement_good,    Color4(0xFF64DC28)),
+        MEH    (string.opt_offset_calibration_judgement_meh,     Color4(0xFFc8b46e)),
+        MISS   (string.opt_offset_calibration_judgement_miss,    Color4(0xFFFF4444))
     }
 
     /** Pop-in judgement badge above the hit circle: scale 0.7 → 1.1 → fade out. */
     private fun showJudgement(j: Judgement) {
         if (!::judgementText.isInitialized) return
         judgementText.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
-        judgementText.text  = j.label
+        judgementText.text  = j.label.toString()
         judgementText.color = j.color
         judgementText.setScale(0.7f)
         judgementText.alpha = 1f
@@ -657,7 +658,7 @@ object CalibrationScene : UIModal(
         if (!::streakText.isInitialized) return
         when {
             streak >= 10 -> {
-                streakText.text  = "Keep Going! $streak combo"
+                streakText.text  = string.opt_offset_calibration_streak.toString()
                 streakText.color = Color4(0xFFFFAA00)
                 // tiny pulse on milestone
                 if (judgement != null && streak % 10 == 0) {
@@ -668,7 +669,7 @@ object CalibrationScene : UIModal(
                 }
             }
             streak >= 3  -> {
-                streakText.text  = "$streak combo"
+                streakText.text  = string.opt_offset_calibration_streak_combo.toString()
                 streakText.color = Color4(0xFF88FF88)
             }
             else -> streakText.text = ""
@@ -718,8 +719,8 @@ object CalibrationScene : UIModal(
     private fun showOffsetInputDialog() {
         GlobalManager.getInstance().mainActivity.runOnUiThread {
             PromptDialog().apply {
-                setTitle("Global Offset")
-                setMessage("Music offset in ms (positive values mean objects appear earlier)")
+                setTitle(getString(com.osudroid.resources.R.string.opt_offset_title))
+                setMessage(getString(com.osudroid.resources.R.string.opt_offset_summary))
                 setInput(pendingOffset.toString())
                 setInputType(InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED)
 

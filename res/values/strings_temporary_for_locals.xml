@@ -90,5 +90,19 @@
     <string name="opt_offset_calibration_title">Offset Calibration</string>
     <string name="opt_offset_calibration_summary">Tap along with a metronome to measure your device\'s audio latency</string>
 
+    <string name="opt_offset_calibration_tap_hint">TAP ALONG WITH THE BEAT</string>
+    <string name="opt_offset_calibration_calibration">CALIBRATION</string>
+    <string name="opt_offset_calibration_reset">RESET</string>
+    <string name="opt_offset_calibration_set">SET</string>
+    <string name="opt_offset_calibration_settings">SETTINGS</string>
+    <string name="opt_offset_calibration_settings_highPrecisionInput_summary">Uses more touch samples for more accurate offset measurement.</string>
+    <string name="opt_offset_calibration_judgement_perfect">PERFECT</string>
+    <string name="opt_offset_calibration_judgement_good">GOOD</string>
+    <string name="opt_offset_calibration_judgement_meh">MEH</string>
+    <string name="opt_offset_calibration_judgement_miss">MISS</string>
+    <string name="opt_offset_calibration_streak">Keep Going! %s Combo</string>
+    <string name="opt_offset_calibration_streak_combo">%s combo</string>
+    <string name="opt_offset_calibration_"></string>
+
 
 </resources>
