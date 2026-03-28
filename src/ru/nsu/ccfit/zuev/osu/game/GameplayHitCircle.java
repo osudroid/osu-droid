@@ -278,6 +278,8 @@ public class GameplayHitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
+            startHit = true;
+            successfulHit = true;
             playHitSamples();
             removeFromScene();
         } else {
