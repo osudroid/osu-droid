@@ -47,6 +47,8 @@ import com.osudroid.utils.async
 import com.osudroid.utils.mainThread
 import com.reco1l.framework.asTimeInterpolator
 import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.ui.v2.CalibrationScene
+import com.osudroid.utils.updateThread
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference
@@ -479,15 +481,22 @@ class SettingsFragment : SettingsFragment() {
             }
         }
 
+        val offsetPreference = findPreference<SeekBarPreference>("offset")!!
+
         findPreference<Preference>("offset_calibration")!!.setOnPreferenceClickListener {
             val self = this
-            GlobalManager.getInstance().engine.runOnUpdateThread {
+
+            CalibrationScene.OFFSET_MIN = offsetPreference.min
+            CalibrationScene.OFFSET_MAX = offsetPreference.max
+
+            updateThread {
                 // When Back or SET is pressed in the calibration scene it will
                 // call this lambda on the main thread, re-opening settings
                 // exactly where the user left off (Audio section).
-                com.osudroid.ui.v2.CalibrationScene.onClosed = { self.show() }
-                com.osudroid.ui.v2.CalibrationScene.show()
+                CalibrationScene.onClosed = { self.show() }
+                CalibrationScene.show()
             }
+
             dismiss()
             true
         }

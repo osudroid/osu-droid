@@ -56,14 +56,15 @@ object CalibrationScene : UIModal(
         scaleCenter = Anchor.Center
     }
 ) {
+    var OFFSET_MIN = -500
+    var OFFSET_MAX = 500
+
     private const val APPROACH_SCALE_START = 3f
     private const val CIRCLE_DIAMETER = 130f
     private const val STEP_MS = 1
     private const val STEP_MS_LONG = 10
     private const val STEP_BPM = 1
     private const val STEP_BPM_LONG = 10
-    private const val OFFSET_MIN = -500
-    private const val OFFSET_MAX = 500
     private const val MAX_TAP_SAMPLES = 20
 
     private var currentBpm = 60
