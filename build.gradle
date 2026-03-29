@@ -202,7 +202,6 @@ dependencies {
 
     // Tools
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
-    implementation 'com.github.Reco1I:Toolkt:1.0.24'
     implementation 'commons-io:commons-io:2.18.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'

@@ -9,7 +9,7 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
-import com.reco1l.toolkt.*
+import com.reco1l.framework.math.roundBy
 import com.rian.osu.*
 import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
 import com.rian.osu.utils.ModUtils.calculateRateWithMods

@@ -1,7 +1,6 @@
 package com.rian.osu.beatmap.parser
 
 import android.util.Log
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapProcessor
@@ -164,7 +163,7 @@ class BeatmapParser {
 
         processor.preProcess()
 
-        beatmap.hitObjects.objects.fastForEach {
+        beatmap.hitObjects.objects.forEach {
             scope?.ensureActive()
 
             it.applyDefaults(beatmap.controlPoints, beatmap.difficulty, mode, scope)

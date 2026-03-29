@@ -1,6 +1,5 @@
 package com.rian.osu.utils
 
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -244,7 +243,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
      * Converts this [ModHashMap] to its legacy mod string representation.
      */
     fun toLegacyModString() = buildString {
-        modStringOrder.fastForEach {
+        modStringOrder.forEach {
             if (it::class in this@ModHashMap) {
                 for ((k, v) in LegacyModConverter.legacyStorableMods) {
                     if (v.isInstance(this@ModHashMap[it::class])) {
@@ -267,9 +266,9 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
      */
     @JvmOverloads
     fun toDisplayModString(includeNonUserPlayable: Boolean = true) = buildString {
-        modStringOrder.fastForEach {
+        modStringOrder.forEach {
             if (!includeNonUserPlayable && !it.isUserPlayable) {
-                return@fastForEach
+                return@forEach
             }
 
             if (it::class in this@ModHashMap) {

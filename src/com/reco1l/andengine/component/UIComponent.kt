@@ -9,7 +9,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -643,7 +642,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             // because some of them like size-related flags might change the parent's layout.
             onHandleInvalidations()
 
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 if (child is UIComponent) {
                     onHandleInvalidations()
                 }
@@ -826,7 +825,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         localToParentTransformation
         parentToLocalTransformation
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             if (it is UIComponent) {
                 it.onInvalidateTransformations()
             }
@@ -982,14 +981,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Called when input bindings are invalidated and needs to be removed.
      */
     open fun onInvalidateInputBindings() {
-        inputBindings.fastForEachIndexed { index, binding ->
+        inputBindings.forEachIndexed { index, binding ->
             if (binding != null) {
                 propagateTouchEvent(MotionEvent.ACTION_CANCEL, index)
             }
         }
         inputBindings.fill(null)
 
-        mChildren?.fastForEach { child ->
+        mChildren?.forEach { child ->
             if (child is UIComponent) {
                 child.onInvalidateInputBindings()
             }

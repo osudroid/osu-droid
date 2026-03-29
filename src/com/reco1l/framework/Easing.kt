@@ -3,9 +3,10 @@ package com.reco1l.framework
 import android.animation.TimeInterpolator
 import com.edlplan.framework.easing.*
 import com.edlplan.framework.easing.Easing.*
-import com.reco1l.toolkt.*
 import kotlin.math.*
 
+
+private const val floatPi = Math.PI.toFloat()
 
 // Extracted from com.edlplan.framework.easing.EasingManager
 
@@ -67,15 +68,15 @@ fun Easing.interpolate(value: Float): Float {
         }
 
         InSine -> {
-            1f - cos(n * MathF.PI * 0.5f)
+            1f - cos(n * floatPi * 0.5f)
         }
 
         OutSine -> {
-            sin(n * MathF.PI * 0.5f)
+            sin(n * floatPi * 0.5f)
         }
 
         InOutSine -> {
-            0.5f - 0.5f * cos(MathF.PI * n)
+            0.5f - 0.5f * cos(floatPi * n)
         }
 
         InExpo -> {
@@ -107,26 +108,26 @@ fun Easing.interpolate(value: Float): Float {
         }
 
         InElastic -> {
-            -(2f.pow(-10f + 10f * n)) * sin((1f - 0.3f / 4f - n) * (2f * MathF.PI / 0.3f))
+            -(2f.pow(-10f + 10f * n)) * sin((1f - 0.3f / 4f - n) * (2f * floatPi / 0.3f))
         }
 
         OutElastic -> {
-            2f.pow(-10f * n) * sin((n - 0.3f / 4f) * (2f * MathF.PI / 0.3f)) + 1f
+            2f.pow(-10f * n) * sin((n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
         }
 
         OutElasticHalf -> {
-            2f.pow(-10 * n) * sin((0.5f * n - 0.3f / 4f) * (2f * MathF.PI / 0.3f)) + 1f
+            2f.pow(-10 * n) * sin((0.5f * n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
         }
 
         OutElasticQuarter -> {
-            2f.pow(-10f * n) * sin((0.25f * n - 0.3f / 4f) * (2f * MathF.PI / 0.3f)) + 1f
+            2f.pow(-10f * n) * sin((0.25f * n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
         }
 
         InOutElastic -> {
             if (let { n *= 2f; n } < 1f) {
-                -0.5f * 2f.pow(-10f + 10f * n) * sin((1f - 0.3f / 4f * 1.5f - n) * (2f * MathF.PI / 0.3f) / 1.5f)
+                -0.5f * 2f.pow(-10f + 10f * n) * sin((1f - 0.3f / 4f * 1.5f - n) * (2f * floatPi / 0.3f) / 1.5f)
             } else {
-                0.5f * 2f.pow(-10f * --n) * sin((n - 0.3f / 4f * 1.5f) * (2f * MathF.PI / 0.3f) / 1.5f) + 1f
+                0.5f * 2f.pow(-10f * --n) * sin((n - 0.3f / 4f * 1.5f) * (2f * floatPi / 0.3f) / 1.5f) + 1f
             }
         }
 

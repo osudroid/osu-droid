@@ -7,7 +7,6 @@ import android.graphics.Bitmap.CompressFormat
 import android.graphics.Bitmap.Config
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -45,14 +44,12 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
 
     }.takeUnless { it.isEmpty() }?.toTypedArray()
 
-
-    putObject("Cursor") {
-
+    put("Cursor", JSONObject().apply {
         put("rotateCursor", ini.get<Boolean>("General", "CursorRotate") != false)
         put("rotateCursorTrail", ini.get<Boolean>("General", "CursorTrailRotate") != false)
-    }
+    })
 
-    putObject("ComboColor") {
+    put("ComboColor", JSONObject().apply {
 
         parseComboColors(ini)?.also {
 
@@ -61,9 +58,9 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
             put("colors", array)
             put("forceOverride", true)
         }
-    }
+    })
 
-    putObject("Slider") {
+    put("Slider", JSONObject().apply {
 
         ini.get<IntArray?>("Colours", "SliderTrackOverride")?.also { trackColor ->
 
@@ -87,16 +84,16 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
         }
 
         put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]) ?: "#FFFFFF")
-    }
+    })
 
-    putObject("Color") {
+    put("Color", JSONObject().apply {
 
         put("MenuItemSelectedTextColor", convertToHex(ini["Colours", "SongSelectActiveText"]) ?: "#FFFFFF")
         put("MenuItemDefaultTextColor", convertToHex(ini["Colours", "SongSelectInactiveText"]) ?: "#000000")
         put("MenuItemDefaultColor", "#EB4999") // Matching osu! stable inactive color.
-    }
+    })
 
-    putObject("Fonts") {
+    put("Fonts", JSONObject().apply {
 
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
         put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
@@ -104,41 +101,41 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
         put("scoreOverlap", ini["Fonts", "ScoreOverlap"] ?: 0)
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
         put("comboOverlap", ini["Fonts", "ComboOverlap"] ?: 0)
-    }
+    })
 
-    putObject("Utils") {
+    put("Utils", JSONObject().apply {
         put("comboTextScale", 0.8f)
         put("animationFramerate", ini["General", "AnimationFramerate"] ?: -1f)
         put("layeredHitSounds", ini.get<Boolean>("General", "LayeredHitSounds") != false)
         put("sliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") != false)
         put("spinnerFrequencyModulate", ini.get<Boolean>("General", "SpinnerFrequencyModulate") != false)
-    }
+    })
 
-    putObject("Layout") {
+    put("Layout", JSONObject().apply {
 
         put("useNewLayout", true)
 
-        putObject("BackButton") {
+        put("BackButton", JSONObject().apply {
             put("scaleWhenHold", false)
-        }
+        })
 
         // In osu!droid's default skin, these buttons are cut in the bottom, which makes them smaller
         // (see https://github.com/osudroid/osu-droid/commit/7bc5040ce426760c2f3ea04b7209e4ded8e78524).
         // To account for this behavior in osu! skins, we need to offset by them 16 pixels downwards.
         // A negative value is used as the origin and anchor of these buttons are in the bottom-left
         // corner (see SkinLayout).
-        putObject("ModsButton") {
+        put("ModsButton", JSONObject().apply {
             put("y", -16)
-        }
+        })
 
-        putObject("OptionsButton") {
+        put("OptionsButton", JSONObject().apply {
             put("y", -16)
-        }
+        })
 
-        putObject("RandomButton") {
+        put("RandomButton", JSONObject().apply {
             put("y", -16)
-        }
-    }
+        })
+    })
 }
 
 

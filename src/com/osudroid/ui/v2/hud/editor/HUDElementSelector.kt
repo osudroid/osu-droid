@@ -12,7 +12,6 @@ import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -134,27 +133,27 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
     //region Gameplay Events
 
     override fun onNoteHit(statistics: StatisticV2) {
-        elements.fastForEach { it.onNoteHit(statistics) }
+        elements.forEach { it.onNoteHit(statistics) }
     }
 
     override fun onBreakStateChange(isBreak: Boolean) {
-        elements.fastForEach { it.onBreakStateChange(isBreak) }
+        elements.forEach { it.onBreakStateChange(isBreak) }
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
-        elements.fastForEach { it.onGameplayUpdate(gameScene, secondsElapsed) }
+        elements.forEach { it.onGameplayUpdate(gameScene, secondsElapsed) }
     }
 
     override fun onGameplayTouchDown(time: Float) {
-        elements.fastForEach { it.onGameplayTouchDown(time) }
+        elements.forEach { it.onGameplayTouchDown(time) }
     }
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {
-        elements.fastForEach { it.onHitObjectLifetimeStart(obj) }
+        elements.forEach { it.onHitObjectLifetimeStart(obj) }
     }
 
     override fun onAccuracyRegister(accuracy: Float) {
-        elements.fastForEach { it.onAccuracyRegister(accuracy) }
+        elements.forEach { it.onAccuracyRegister(accuracy) }
     }
 
     //endregion

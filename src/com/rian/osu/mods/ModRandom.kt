@@ -1,6 +1,6 @@
 package com.rian.osu.mods
 
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider

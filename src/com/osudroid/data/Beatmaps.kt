@@ -2,7 +2,6 @@ package com.osudroid.data
 
 import android.util.*
 import androidx.room.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
@@ -382,7 +381,7 @@ data class BeatmapInfo(
         // have the ability to calculate slider durations in this context.
         val lastTime = beatmap.hitObjects.objects.lastOrNull()?.endTime ?: timingPoints.lastOrNull()?.time ?: 0.0
 
-        timingPoints.fastForEachIndexed { i, t ->
+        timingPoints.forEachIndexed { i, t ->
             scope?.ensureActive()
 
             val bpm = t.bpm.toFloat()
@@ -396,7 +395,7 @@ data class BeatmapInfo(
                     bpmOverallDuration = 0.0
                 }
 
-                return@fastForEachIndexed
+                return@forEachIndexed
             }
 
             // osu!stable forced the first control point to start at 0.

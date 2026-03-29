@@ -7,8 +7,8 @@ import android.widget.TextView
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.net.FileRequest
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class DownloadFragment : LoadingFragment() {

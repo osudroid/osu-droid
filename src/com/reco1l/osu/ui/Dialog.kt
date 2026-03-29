@@ -15,13 +15,12 @@ import androidx.core.view.isVisible
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.fontColor
-import com.reco1l.toolkt.animation.cancelAnimators
-import com.reco1l.toolkt.animation.toAlpha
-import com.reco1l.toolkt.animation.toScaleX
-import com.reco1l.toolkt.animation.toScaleY
+import com.reco1l.framework.android.cancelAnimators
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
+import com.reco1l.framework.android.toAlpha
+import com.reco1l.framework.android.toScaleX
+import com.reco1l.framework.android.toScaleY
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
@@ -122,7 +121,7 @@ open class MessageDialog : BaseFragment() {
                     buttonView.gravity = CENTER
                     buttonView.background = requireContext().getDrawable(R.drawable.ripple)
                     buttonView.text = button.text
-                    buttonView.fontColor = button.tint
+                    buttonView.setTextColor(button.tint)
                     buttonView.compoundDrawablePadding = 0
                     buttonView.setOnClickListener { button.clickListener(this@MessageDialog) }
 

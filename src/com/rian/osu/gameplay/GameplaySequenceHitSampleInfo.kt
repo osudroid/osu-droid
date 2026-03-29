@@ -1,6 +1,5 @@
 package com.rian.osu.gameplay
 
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.hitobject.HitSampleInfo
 import com.rian.osu.beatmap.hitobject.SequenceHitSampleInfo
 
@@ -13,21 +12,21 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.frequency = value }
+            samples?.forEach { it.second.frequency = value }
         }
 
     override var isLooping = false
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.isLooping = value }
+            samples?.forEach { it.second.isLooping = value }
         }
 
     override var volume = 1f
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.volume = value }
+            samples?.forEach { it.second.volume = value }
         }
 
     private var index = 0
@@ -89,7 +88,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
     fun stopAll() {
         hasSamplePlaying = false
 
-        samples?.fastForEach { it.second.stop() }
+        samples?.forEach { it.second.stop() }
     }
 
     /**
@@ -127,7 +126,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
             stopAll()
         }
 
-        samples?.fastForEach {
+        samples?.forEach {
             it.second.reset()
             GameplayHitSampleInfo.pool.free(it.second)
         }

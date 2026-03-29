@@ -8,8 +8,6 @@ import com.osudroid.multiplayer.api.data.RoomStatus
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.Multiplayer
-import com.reco1l.toolkt.data.*
-import com.reco1l.toolkt.kotlin.*
 import io.socket.client.*
 import io.socket.emitter.*
 import org.json.*
@@ -76,7 +74,7 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
 
         val (key, arguments) = responseEvent
 
-        listeners(key).fastForEach {
+        listeners(key).forEach {
             it.call(*arguments)
         }
 
@@ -102,28 +100,26 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
             put("status", RoomStatus.Idle.ordinal)
             put("beatmap", null)
 
-            putObject("host") {
+            put("host", JSONObject().apply {
                 put("id", uid)
-            }
+            })
 
             put("mods", JSONArray())
 
-            putObject("gameplaySettings") {
+            put("gameplaySettings", JSONObject().apply {
                 put("isFreeMod", true)
                 put("isRemoveSliderLock", false)
-            }
+            })
 
-            putArray("players") {
-
-                putObject {
+            put("players", JSONArray().apply {
+                put(JSONObject().apply {
                     put("id", uid)
                     put("username", Config.getOnlineUsername())
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)
                     put("mods", JSONArray())
-                }
-
-            }
+                })
+            })
 
         })
 

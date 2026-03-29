@@ -2,7 +2,6 @@ package com.osudroid.beatmaps
 
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.BeatmapSetInfo
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.parser.BeatmapParser
 import com.rian.osu.GameMode
@@ -121,7 +120,7 @@ object BeatmapCache {
      */
     @JvmStatic
     fun invalidate(beatmapSetInfo: BeatmapSetInfo) = lock.withLock {
-        beatmapSetInfo.beatmaps.fastForEach {
+        beatmapSetInfo.beatmaps.forEach {
             droidCache.remove(it.md5)
             standardCache.remove(it.md5)
         }

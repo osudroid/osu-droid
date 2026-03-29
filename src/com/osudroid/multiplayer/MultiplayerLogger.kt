@@ -1,7 +1,7 @@
 package com.osudroid.multiplayer
 
+import android.text.format.DateFormat
 import android.util.Log
-import com.reco1l.toolkt.kotlin.fromDate
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.TimeZone
@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
+import java.util.Date
 
 /**
  * Logger for multiplayer events.
@@ -35,7 +36,7 @@ class MultiplayerLogger : AutoCloseable {
     }
 
     init {
-        write("[${"yyyy/MM/dd hh:mm:ss".fromDate()}] Client ${MainActivity.versionName} started.")
+        write("[${DateFormat.format("yyyy/MM/dd hh:mm:ss", Date())}] Client ${MainActivity.versionName} started.")
     }
 
     /**
