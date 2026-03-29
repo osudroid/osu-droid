@@ -634,8 +634,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Ensure that only relevant mods are applied.
         mods.values().removeIf(m -> !m.isRelevant());
 
-        boolean differentMods = lastMods == null || !lastMods.equals(mods);
-        boolean differentPlayableBeatmap = shouldParseBeatmap || differentMods;
+        boolean differentPlayableBeatmap = shouldParseBeatmap || lastMods == null || !lastMods.equals(mods);
 
         var playableBeatmap = differentPlayableBeatmap
             ? parsedBeatmap.createDroidPlayableBeatmap(mods.values())
@@ -862,7 +861,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 case droid -> {
                     performanceCalculationParameters = new DroidPerformanceCalculationParameters();
 
-                    if (droidTimedDifficultyAttributes == null || differentMods) {
+                    if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
                         droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
                     }
                 }
@@ -870,7 +869,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 case standard -> {
                     performanceCalculationParameters = new StandardPerformanceCalculationParameters();
 
-                    if (standardTimedDifficultyAttributes == null || differentMods) {
+                    if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
                         standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
                             parsedBeatmap, mods.values(), scope
                         );
