@@ -3,10 +3,13 @@ package com.osudroid.ui.v2
 import android.text.InputType
 import androidx.annotation.IdRes
 import com.edlplan.framework.easing.Easing
+import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.standardDeviation
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.UIEngine
+import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.box
 import com.reco1l.andengine.circle
 import com.reco1l.andengine.component.scaleCenter
@@ -46,18 +49,9 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R.string
 
-object CalibrationScene : UIModal(
-    card = UIContainer().apply {
-        width = FillParent
-        height = FillParent
-        anchor = Anchor.TopLeft
-        origin = Anchor.TopLeft
-        clipToBounds = false
-        scaleCenter = Anchor.Center
-    }
-) {
-    var OFFSET_MIN = -500
-    var OFFSET_MAX = 500
+object CalibrationScene : UIScene() {
+    internal var OFFSET_MIN = -500
+    internal var OFFSET_MAX = 500
 
     private const val APPROACH_SCALE_START = 3f
     private const val CIRCLE_DIAMETER = 130f
@@ -83,14 +77,14 @@ object CalibrationScene : UIModal(
 
     /**
      * Invoked on the main thread after the overlay closes (Back or SET).
-     * Set by the caller so it can re-show itself (e.g. Settings → Audio).
+     * Set by the caller so that the current settings can re-show itself (e.g. Settings → Audio).
      */
-    internal var onClosed: (() -> Unit)? = null
+    internal var settingsFragment: SettingsFragment? = null
 
     private lateinit var approachCircle: UICircle
     private lateinit var hitCircleFill: UICircle
     private lateinit var rippleCircle: UICircle
-    private var circleContainer: UIContainer
+    private lateinit var circleContainer: UIContainer
     private lateinit var bpmValueText: UITextButton
     private lateinit var offsetValueText: UITextButton
     private lateinit var tapFeedbackText: UIText
@@ -98,393 +92,18 @@ object CalibrationScene : UIModal(
     private lateinit var streakText: UIText
     private lateinit var highPrecisionToggle: UICheckbox
 
+    private val modal = CalibrationModal()
+
     init {
-        staticBackdrop = true
+        isBackgroundEnabled = false
 
-        background = UIBox().apply {
-            applyTheme = { color = it.accentColor * 0.08f }
-        }
-
-        card.setScale(1f)
-        card.background = null
-
-        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
-
-        val tapAreaSize = CIRCLE_DIAMETER * APPROACH_SCALE_START
-
-        card.apply {
-            textButton {
-                anchor = Anchor.TopLeft
-                origin = Anchor.TopLeft
-                translationX = 60f
-                translationY = 12f
-                text = "Back"
-                leadingIcon = UISprite().apply {
-                    textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                    width = 28f
-                    height = 28f
-                }
-                onActionUp = {
-                    playShortClickConfirmSound()
-                    hide()
-                }
-                onActionCancel = { playShortClickSound() }
-            }
-
-            circleContainer = object : UIContainer() {
-                override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-                    if (event.isActionDown) {
-                        val cx = tapAreaSize / 2f
-                        val cy = tapAreaSize / 2f
-                        val dx = localX - cx
-                        val dy = localY - cy
-
-                        if (dx * dx + dy * dy <= cx * cx) {
-                            onPlayfieldTap()
-                        }
-                    }
-
-                    return true
-                }
-            }.apply {
-                width = CIRCLE_DIAMETER
-                height = CIRCLE_DIAMETER
-                anchor = Anchor.Center
-                origin = Anchor.Center
-
-                circle {
-                    width = FillParent
-                    height = FillParent
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    applyTheme = { color = it.accentColor * 0.35f }
-                    hitCircleFill = this
-                }
-
-                circle {
-                    width = FillParent
-                    height = FillParent
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    paintStyle = PaintStyle.Outline
-                    lineWidth = 8f
-                    applyTheme = { color = it.accentColor }
-                }
-
-                circle {
-                    width = FillParent
-                    height = FillParent
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    paintStyle = PaintStyle.Outline
-                    lineWidth = 6f
-                    scaleCenter = Anchor.Center
-                    setScale(APPROACH_SCALE_START)
-                    applyTheme = { color = it.accentColor * 0.85f }
-                    approachCircle = this
-                }
-
-                circle {
-                    width = FillParent
-                    height = FillParent
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    paintStyle = PaintStyle.Outline
-                    lineWidth = 6f
-                    scaleCenter = Anchor.Center
-                    alpha = 0f
-                    applyTheme = { color = it.accentColor }
-                    rippleCircle = this
-                }
-            }
-            +circleContainer
-
-            text {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                alignment = Anchor.Center
-                anchor = Anchor.Center
-                origin = Anchor.BottomCenter
-                translationY = -(CIRCLE_DIAMETER / 2 + 20f)
-                scaleCenter = Anchor.Center
-                alpha = 0f
-                judgementText = this
-            }
-
-            text {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                alignment = Anchor.Center
-                anchor = Anchor.Center
-                origin = Anchor.TopCenter
-                translationY = CIRCLE_DIAMETER / 2 + 24f
-                tapFeedbackText = this
-            }
-
-            text {
-                font = ResourceManager.getInstance().getFont("smallFont")
-                alignment = Anchor.Center
-                anchor = Anchor.Center
-                origin = Anchor.TopCenter
-                translationY = CIRCLE_DIAMETER / 2 + 56f
-                scaleCenter = Anchor.Center
-                streakText = this
-            }
-
-            text {
-                setText(string.opt_offset_calibration_tap_hint)
-                font = ResourceManager.getInstance().getFont("smallFont")
-                alignment = Anchor.BottomCenter
-                anchor = Anchor.BottomCenter
-                origin = Anchor.BottomCenter
-                translationY = -28f
-                applyTheme = { color = it.accentColor * 0.45f }
-            }
-
-            flexContainer {
-                width = 300f
-                height = MatchContent
-                anchor = Anchor.CenterRight
-                origin = Anchor.CenterRight
-                translationX = -20f
-                direction = FlexDirection.Column
-                justifyContent = JustifyContent.Center
-                gap = 20f
-                padding = Vec4(24f)
-
-                background = UIBox().apply {
-                    cornerRadius = 16f
-                    applyTheme = { color = it.accentColor * 0.15f }
-                }
-
-                text {
-                    setText(string.opt_offset_calibration_calibration)
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    alignment = Anchor.TopCenter
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    applyTheme = { color = it.accentColor }
-                }
-
-                box {
-                    width = FillParent
-                    height = 1f
-                    applyTheme = { color = it.accentColor * 0.2f }
-                }
-
-                text {
-                    text = "BPM"
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    alignment = Anchor.TopCenter
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    applyTheme = { color = it.accentColor * 0.6f }
-                }
-
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    spacing = 12f
-
-                    textButton {
-                        leadingIcon = FontAwesomeIcon(Icon.CaretDown).apply {
-                            applyTheme = { color = it.accentColor }
-                        }
-                        onActionUp = { changeBpm(-STEP_BPM) }
-                        onActionLongPress = { changeBpm(-STEP_BPM_LONG) }
-                    }
-
-                    textButton {
-                        text = currentBpm.toString()
-                        alignment = Anchor.Center
-                        minWidth = 110f
-                        background = UIBox().apply {
-                            cornerRadius = 8f
-                            applyTheme = { color = it.accentColor * 0.12f }
-                        }
-                        applyTheme = { color = it.accentColor }
-                        onActionUp = { showBpmInputDialog() }
-                        bpmValueText = this
-                    }
-
-                    textButton {
-                        leadingIcon = FontAwesomeIcon(Icon.CaretUp).apply {
-                            applyTheme = { color = it.accentColor }
-                        }
-                        onActionUp = { changeBpm(STEP_BPM) }
-                        onActionLongPress = { changeBpm(STEP_BPM_LONG) }
-                    }
-                }
-
-                box {
-                    width = FillParent
-                    height = 1f
-                    applyTheme = { color = it.accentColor * 0.2f }
-                }
-
-                text {
-                    setText(string.opt_offset_calibration_offset)
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    alignment = Anchor.TopCenter
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    applyTheme = { color = it.accentColor * 0.6f }
-                }
-
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    spacing = 12f
-
-                    textButton {
-                        leadingIcon = FontAwesomeIcon(Icon.CaretDown).apply {
-                            applyTheme = { color = it.accentColor }
-                        }
-                        onActionUp = { changeOffset(-STEP_MS) }
-                        onActionLongPress = { changeOffset(-STEP_MS_LONG) }
-                    }
-
-                    textButton {
-                        text = formatOffset(pendingOffset)
-                        alignment = Anchor.Center
-                        minWidth = 110f
-                        background = UIBox().apply {
-                            cornerRadius = 8f
-                            applyTheme = { color = it.accentColor * 0.12f }
-                        }
-                        applyTheme = { color = it.accentColor }
-                        onActionUp = { showOffsetInputDialog() }
-                        offsetValueText = this
-                    }
-
-                    textButton {
-                        leadingIcon = FontAwesomeIcon(Icon.CaretUp).apply {
-                            applyTheme = { color = it.accentColor }
-                        }
-                        onActionUp = { changeOffset(STEP_MS) }
-                        onActionLongPress = { changeOffset(STEP_MS_LONG) }
-                    }
-                }
-
-                textButton {
-                    setText(string.opt_offset_calibration_set)
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    onActionUp = {
-                        playShortClickConfirmSound()
-                        applyOffset()
-                        hide()
-                    }
-                    onActionCancel = { playShortClickSound() }
-                }
-
-                textButton {
-                    setText(string.opt_offset_calibration_reset)
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    applyTheme = {}
-                    color = Color4(0xFFFFBFBF)
-                    background?.color = Color4(0xFF342121)
-                    onActionUp = {
-                        playShortClickSound()
-                        pendingOffset = 0
-                        successfulTapStreak = 0
-                        tapOffsets.clear()
-                        updateOffsetDisplay()
-                        updateTapFeedback()
-                        updateStreakDisplay()
-                    }
-                    onActionCancel = { playShortClickSound() }
-                }
-
-            }
-
-            flexContainer {
-                width = 400f
-                height = MatchContent
-                anchor = Anchor.BottomLeft
-                origin = Anchor.BottomLeft
-                translationX = 20f
-                translationY = -20f
-                direction = FlexDirection.Column
-                justifyContent = JustifyContent.Center
-                gap = 8f
-                padding = Vec4(14f)
-
-                background = UIBox().apply {
-                    cornerRadius = 16f
-                    applyTheme = { color = it.accentColor * 0.15f }
-                }
-
-                // Header
-                text {
-                    setText(string.opt_offset_calibration_settings)
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    alignment = Anchor.TopCenter
-                    anchor = Anchor.TopCenter
-                    origin = Anchor.TopCenter
-                    applyTheme = { color = it.accentColor }
-                }
-
-                // Divider
-                box {
-                    width = FillParent
-                    height = 1f
-                    applyTheme = { color = it.accentColor * 0.2f }
-                }
-
-                // Setting row: label (left) + ON/OFF toggle (right)
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    anchor = Anchor.TopLeft
-                    origin = Anchor.TopLeft
-                    spacing = 8f
-                    width = FillParent
-
-                    text {
-                        setText(string.opt_highPrecisionInput_title)
-                        font = ResourceManager.getInstance().getFont("smallFont")
-                        alignment = Anchor.CenterLeft
-                        anchor = Anchor.CenterLeft
-                        origin = Anchor.CenterLeft
-                        applyTheme = { color = it.accentColor * 0.9f }
-                    }
-
-                    highPrecisionToggle = object : UICheckbox(Config.isHighPrecisionInput()) {
-                        override fun onValueChanged() {
-                            super.onValueChanged()
-
-                            Config.setBoolean("highPrecisionInput", value)
-                        }
-                    }
-                    +highPrecisionToggle
-                }
-
-                // Description below the row
-                text {
-                    setText(string.opt_highPrecisionInput_summary)
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    width = FillParent
-                    clipToBounds = true
-                    alignment = Anchor.TopLeft
-                    anchor = Anchor.TopLeft
-                    origin = Anchor.TopLeft
-                    applyTheme = { color = it.accentColor * 0.5f }
-                }
-            }
-        }
+        attachChild(modal)
     }
 
-    /** No scale pop for a full-screen overlay – just a clean fade in. */
-    override fun createShowAnimation(): () -> UniversalModifier = {
-        card.setScale(1f)
-        // Backdrop is already opaque (set in onShow); only the card fades in.
-        card.fadeTo(1f, 0.2f)
-    }
+    override fun show() {
+        UIEngine.current.scene.setChildScene(this, false, false, true)
 
-    override fun createHideAnimation(): () -> UniversalModifier = {
-        // Only the card fades out; the opaque backdrop stays solid until onHidden.
-        card.fadeTo(0f, 0.15f)
+        modal.show()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -504,55 +123,6 @@ object CalibrationScene : UIModal(
             beatTimer -= beatInterval
             onBeat()
         }
-    }
-
-    override fun onShow() {
-        pendingOffset = Config.getOffset().toInt()
-        beatTimer = 0f
-        metronomeTime = 0.0
-        successfulTapStreak = 0
-        tapOffsets.clear()
-        updateOffsetDisplay()
-        updateTapFeedback()
-
-        if (::highPrecisionToggle.isInitialized) {
-            highPrecisionToggle.value = Config.isHighPrecisionInput()
-        }
-
-        val songService = GlobalManager.getInstance().songService
-        wasMusicPlaying = songService.status == Status.PLAYING
-
-        if (wasMusicPlaying) {
-            songService.pause()
-        }
-
-        // Make the backdrop INSTANTLY opaque so the main menu is never visible.
-        // The card starts invisible and fades in via createShowAnimation.
-        alpha = 1f
-        card.alpha = 0f
-
-        super.onShow() // attaches to the top-most scene if not already attached
-    }
-
-    // We re-show the settings fragment here so it appears on the Android UI layer
-    // instantly, while the card quietly fades out behind it in the OpenGL layer.
-    override fun onHide() {
-        val callback = onClosed
-        onClosed = null
-
-        if (wasMusicPlaying) {
-            wasMusicPlaying = false
-            GlobalManager.getInstance().songService.play()
-        }
-
-        mainThread { callback?.invoke() }
-    }
-
-    override fun onHidden() {
-        super.onHidden()
-        // Reset modal alpha to 0 so the next onShow() can make the backdrop
-        // opaque again from a clean state.
-        alpha = 0f
     }
 
     // -------------------------------------------------------------------------
@@ -842,5 +412,456 @@ object CalibrationScene : UIModal(
     private fun applyOffset() {
         Config.setOffset(pendingOffset.toFloat())
         Config.setInt("offset", pendingOffset)
+    }
+
+    private class CalibrationModal : UIModal(
+        card = UIContainer().apply {
+            width = FillParent
+            height = FillParent
+            anchor = Anchor.TopLeft
+            origin = Anchor.TopLeft
+            clipToBounds = false
+            scaleCenter = Anchor.Center
+        }
+    ) {
+        init {
+            staticBackdrop = true
+
+            background = UIBox().apply {
+                applyTheme = { color = it.accentColor * 0.08f }
+            }
+
+            card.setScale(1f)
+            card.background = null
+
+            ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
+
+            val tapAreaSize = CIRCLE_DIAMETER * APPROACH_SCALE_START
+
+            card.apply {
+                textButton {
+                    anchor = Anchor.TopLeft
+                    origin = Anchor.TopLeft
+                    translationX = 60f
+                    translationY = 12f
+                    text = "Back"
+                    leadingIcon = UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                        width = 28f
+                        height = 28f
+                    }
+                    onActionUp = {
+                        playShortClickConfirmSound()
+                        hide()
+                    }
+                    onActionCancel = { playShortClickSound() }
+                }
+
+                circleContainer = object : UIContainer() {
+                    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+                        if (event.isActionDown) {
+                            val cx = tapAreaSize / 2f
+                            val cy = tapAreaSize / 2f
+                            val dx = localX - cx
+                            val dy = localY - cy
+
+                            if (dx * dx + dy * dy <= cx * cx) {
+                                onPlayfieldTap()
+                            }
+                        }
+
+                        return true
+                    }
+                }.apply {
+                    width = CIRCLE_DIAMETER
+                    height = CIRCLE_DIAMETER
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+
+                    circle {
+                        width = FillParent
+                        height = FillParent
+                        anchor = Anchor.Center
+                        origin = Anchor.Center
+                        applyTheme = { color = it.accentColor * 0.35f }
+                        hitCircleFill = this
+                    }
+
+                    circle {
+                        width = FillParent
+                        height = FillParent
+                        anchor = Anchor.Center
+                        origin = Anchor.Center
+                        paintStyle = PaintStyle.Outline
+                        lineWidth = 8f
+                        applyTheme = { color = it.accentColor }
+                    }
+
+                    circle {
+                        width = FillParent
+                        height = FillParent
+                        anchor = Anchor.Center
+                        origin = Anchor.Center
+                        paintStyle = PaintStyle.Outline
+                        lineWidth = 6f
+                        scaleCenter = Anchor.Center
+                        setScale(APPROACH_SCALE_START)
+                        applyTheme = { color = it.accentColor * 0.85f }
+                        approachCircle = this
+                    }
+
+                    circle {
+                        width = FillParent
+                        height = FillParent
+                        anchor = Anchor.Center
+                        origin = Anchor.Center
+                        paintStyle = PaintStyle.Outline
+                        lineWidth = 6f
+                        scaleCenter = Anchor.Center
+                        alpha = 0f
+                        applyTheme = { color = it.accentColor }
+                        rippleCircle = this
+                    }
+                }
+                +circleContainer
+
+                text {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    alignment = Anchor.Center
+                    anchor = Anchor.Center
+                    origin = Anchor.BottomCenter
+                    translationY = -(CIRCLE_DIAMETER / 2 + 20f)
+                    scaleCenter = Anchor.Center
+                    alpha = 0f
+                    judgementText = this
+                }
+
+                text {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    alignment = Anchor.Center
+                    anchor = Anchor.Center
+                    origin = Anchor.TopCenter
+                    translationY = CIRCLE_DIAMETER / 2 + 24f
+                    tapFeedbackText = this
+                }
+
+                text {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    alignment = Anchor.Center
+                    anchor = Anchor.Center
+                    origin = Anchor.TopCenter
+                    translationY = CIRCLE_DIAMETER / 2 + 56f
+                    scaleCenter = Anchor.Center
+                    streakText = this
+                }
+
+                text {
+                    setText(string.opt_offset_calibration_tap_hint)
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    alignment = Anchor.BottomCenter
+                    anchor = Anchor.BottomCenter
+                    origin = Anchor.BottomCenter
+                    translationY = -28f
+                    applyTheme = { color = it.accentColor * 0.45f }
+                }
+
+                flexContainer {
+                    width = 300f
+                    height = MatchContent
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    translationX = -20f
+                    direction = FlexDirection.Column
+                    justifyContent = JustifyContent.Center
+                    gap = 20f
+                    padding = Vec4(24f)
+
+                    background = UIBox().apply {
+                        cornerRadius = 16f
+                        applyTheme = { color = it.accentColor * 0.15f }
+                    }
+
+                    text {
+                        setText(string.opt_offset_calibration_calibration)
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        alignment = Anchor.TopCenter
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        applyTheme = { color = it.accentColor }
+                    }
+
+                    box {
+                        width = FillParent
+                        height = 1f
+                        applyTheme = { color = it.accentColor * 0.2f }
+                    }
+
+                    text {
+                        text = "BPM"
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        alignment = Anchor.TopCenter
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        applyTheme = { color = it.accentColor * 0.6f }
+                    }
+
+                    linearContainer {
+                        orientation = Orientation.Horizontal
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        spacing = 12f
+
+                        textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.CaretDown).apply {
+                                applyTheme = { color = it.accentColor }
+                            }
+                            onActionUp = { changeBpm(-STEP_BPM) }
+                            onActionLongPress = { changeBpm(-STEP_BPM_LONG) }
+                        }
+
+                        textButton {
+                            text = currentBpm.toString()
+                            alignment = Anchor.Center
+                            minWidth = 110f
+                            background = UIBox().apply {
+                                cornerRadius = 8f
+                                applyTheme = { color = it.accentColor * 0.12f }
+                            }
+                            applyTheme = { color = it.accentColor }
+                            onActionUp = { showBpmInputDialog() }
+                            bpmValueText = this
+                        }
+
+                        textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.CaretUp).apply {
+                                applyTheme = { color = it.accentColor }
+                            }
+                            onActionUp = { changeBpm(STEP_BPM) }
+                            onActionLongPress = { changeBpm(STEP_BPM_LONG) }
+                        }
+                    }
+
+                    box {
+                        width = FillParent
+                        height = 1f
+                        applyTheme = { color = it.accentColor * 0.2f }
+                    }
+
+                    text {
+                        setText(string.opt_offset_calibration_offset)
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        alignment = Anchor.TopCenter
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        applyTheme = { color = it.accentColor * 0.6f }
+                    }
+
+                    linearContainer {
+                        orientation = Orientation.Horizontal
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        spacing = 12f
+
+                        textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.CaretDown).apply {
+                                applyTheme = { color = it.accentColor }
+                            }
+                            onActionUp = { changeOffset(-STEP_MS) }
+                            onActionLongPress = { changeOffset(-STEP_MS_LONG) }
+                        }
+
+                        textButton {
+                            text = formatOffset(pendingOffset)
+                            alignment = Anchor.Center
+                            minWidth = 110f
+                            background = UIBox().apply {
+                                cornerRadius = 8f
+                                applyTheme = { color = it.accentColor * 0.12f }
+                            }
+                            applyTheme = { color = it.accentColor }
+                            onActionUp = { showOffsetInputDialog() }
+                            offsetValueText = this
+                        }
+
+                        textButton {
+                            leadingIcon = FontAwesomeIcon(Icon.CaretUp).apply {
+                                applyTheme = { color = it.accentColor }
+                            }
+                            onActionUp = { changeOffset(STEP_MS) }
+                            onActionLongPress = { changeOffset(STEP_MS_LONG) }
+                        }
+                    }
+
+                    textButton {
+                        setText(string.opt_offset_calibration_set)
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        onActionUp = {
+                            playShortClickConfirmSound()
+                            applyOffset()
+                            hide()
+                        }
+                        onActionCancel = { playShortClickSound() }
+                    }
+
+                    textButton {
+                        setText(string.opt_offset_calibration_reset)
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        applyTheme = {}
+                        color = Color4(0xFFFFBFBF)
+                        background?.color = Color4(0xFF342121)
+                        onActionUp = {
+                            playShortClickSound()
+                            pendingOffset = 0
+                            successfulTapStreak = 0
+                            tapOffsets.clear()
+                            updateOffsetDisplay()
+                            updateTapFeedback()
+                            updateStreakDisplay()
+                        }
+                        onActionCancel = { playShortClickSound() }
+                    }
+
+                }
+
+                flexContainer {
+                    width = 400f
+                    height = MatchContent
+                    anchor = Anchor.BottomLeft
+                    origin = Anchor.BottomLeft
+                    translationX = 20f
+                    translationY = -20f
+                    direction = FlexDirection.Column
+                    justifyContent = JustifyContent.Center
+                    gap = 8f
+                    padding = Vec4(14f)
+
+                    background = UIBox().apply {
+                        cornerRadius = 16f
+                        applyTheme = { color = it.accentColor * 0.15f }
+                    }
+
+                    // Header
+                    text {
+                        setText(string.opt_offset_calibration_settings)
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        alignment = Anchor.TopCenter
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+                        applyTheme = { color = it.accentColor }
+                    }
+
+                    // Divider
+                    box {
+                        width = FillParent
+                        height = 1f
+                        applyTheme = { color = it.accentColor * 0.2f }
+                    }
+
+                    // Setting row: label (left) + ON/OFF toggle (right)
+                    linearContainer {
+                        orientation = Orientation.Horizontal
+                        anchor = Anchor.TopLeft
+                        origin = Anchor.TopLeft
+                        spacing = 8f
+                        width = FillParent
+
+                        text {
+                            setText(string.opt_highPrecisionInput_title)
+                            font = ResourceManager.getInstance().getFont("smallFont")
+                            alignment = Anchor.CenterLeft
+                            anchor = Anchor.CenterLeft
+                            origin = Anchor.CenterLeft
+                            applyTheme = { color = it.accentColor * 0.9f }
+                        }
+
+                        highPrecisionToggle = object : UICheckbox(Config.isHighPrecisionInput()) {
+                            override fun onValueChanged() {
+                                super.onValueChanged()
+
+                                Config.setBoolean("highPrecisionInput", value)
+                            }
+                        }
+                        +highPrecisionToggle
+                    }
+
+                    // Description below the row
+                    text {
+                        setText(string.opt_highPrecisionInput_summary)
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        width = FillParent
+                        clipToBounds = true
+                        alignment = Anchor.TopLeft
+                        anchor = Anchor.TopLeft
+                        origin = Anchor.TopLeft
+                        applyTheme = { color = it.accentColor * 0.5f }
+                    }
+                }
+            }
+        }
+
+        /** No scale pop for a full-screen overlay – just a clean fade in. */
+        override fun createShowAnimation(): () -> UniversalModifier = {
+            card.setScale(1f)
+            // Backdrop is already opaque (set in onShow); only the card fades in.
+            card.fadeTo(1f, 0.2f)
+        }
+
+        override fun createHideAnimation(): () -> UniversalModifier = {
+            // Only the card fades out; the opaque backdrop stays solid until onHidden.
+            card.fadeTo(0f, 0.15f)
+        }
+
+        override fun onShow() {
+            pendingOffset = Config.getOffset().toInt()
+            beatTimer = 0f
+            metronomeTime = 0.0
+            successfulTapStreak = 0
+            tapOffsets.clear()
+            updateOffsetDisplay()
+            updateTapFeedback()
+
+            if (::highPrecisionToggle.isInitialized) {
+                highPrecisionToggle.value = Config.isHighPrecisionInput()
+            }
+
+            val songService = GlobalManager.getInstance().songService
+            wasMusicPlaying = songService.status == Status.PLAYING
+
+            if (wasMusicPlaying) {
+                songService.pause()
+            }
+
+            // Make the backdrop INSTANTLY opaque so the main menu is never visible.
+            // The card starts invisible and fades in via createShowAnimation.
+            alpha = 1f
+            card.alpha = 0f
+
+            super.onShow() // attaches to the top-most scene if not already attached
+        }
+
+        // We re-show the settings fragment here so it appears on the Android UI layer
+        // instantly, while the card quietly fades out behind it in the OpenGL layer.
+        override fun onHide() {
+            if (wasMusicPlaying) {
+                wasMusicPlaying = false
+                GlobalManager.getInstance().songService.play()
+            }
+
+            mainThread {
+                settingsFragment?.show()
+                settingsFragment = null
+            }
+        }
+
+        override fun onHidden() {
+            super.onHidden()
+            // Reset modal alpha to 0 so the next onShow() can make the backdrop
+            // opaque again from a clean state.
+            alpha = 0f
+
+            back()
+        }
     }
 }
