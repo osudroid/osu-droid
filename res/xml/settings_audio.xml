@@ -28,8 +28,8 @@
         <SeekBarPreference
             android:defaultValue="0"
             android:key="offset"
-            android:min="-500"
-            android:max="500"
+            android:min="-750"
+            android:max="750"
             app:isPreferenceVisible="false"
             android:title="@string/opt_offset_title"
             android:summary="@string/opt_offset_summary"
