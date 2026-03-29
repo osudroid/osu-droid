@@ -484,8 +484,6 @@ class SettingsFragment : SettingsFragment() {
         val offsetPreference = findPreference<SeekBarPreference>("offset")!!
 
         findPreference<Preference>("offset_calibration")!!.setOnPreferenceClickListener {
-            val self = this
-
             CalibrationScene.OFFSET_MIN = offsetPreference.min
             CalibrationScene.OFFSET_MAX = offsetPreference.max
 
@@ -493,11 +491,13 @@ class SettingsFragment : SettingsFragment() {
                 // When Back or SET is pressed in the calibration scene it will
                 // call this lambda on the main thread, re-opening settings
                 // exactly where the user left off (Audio section).
-                CalibrationScene.onClosed = { self.show() }
+                CalibrationScene.settingsFragment = this
                 CalibrationScene.show()
             }
 
-            dismiss()
+            // We only want to dismiss the fragment, not reapply preferences (which is what the override does).
+            super.dismiss()
+
             true
         }
     }
