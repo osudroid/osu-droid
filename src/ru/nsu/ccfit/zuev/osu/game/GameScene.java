@@ -881,8 +881,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         sliderIndex = 0;
 
-        // Mod changes may require recalculating slider paths (i.e. Hard Rock)
-        if (sliderPaths == null || sliderRenderPaths == null || differentMods) {
+        if (sliderPaths == null || sliderRenderPaths == null || differentPlayableBeatmap) {
             calculateAllSliderPaths(scope);
         }
 
