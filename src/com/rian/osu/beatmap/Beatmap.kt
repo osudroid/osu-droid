@@ -88,9 +88,7 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
             return this
         }
 
-        @Suppress("UNCHECKED_CAST")
-        val adjustmentMods =
-            (mods?.filter { it is IModFacilitatesAdjustment } ?: emptyList()) as Iterable<IModFacilitatesAdjustment>
+        val adjustmentMods = mods?.filterIsInstance<IModFacilitatesAdjustment>() ?: emptyList()
 
         mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
             scope?.ensureActive()

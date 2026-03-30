@@ -234,8 +234,7 @@ object ModUtils {
         withRateChange: Boolean = false,
         scope: CoroutineScope? = null
     ) {
-        @Suppress("UNCHECKED_CAST")
-        val adjustmentMods = mods.filter { it is IModFacilitatesAdjustment } as Iterable<IModFacilitatesAdjustment>
+        val adjustmentMods = mods.filterIsInstance<IModFacilitatesAdjustment>()
 
         for (mod in mods) {
             scope?.ensureActive()
