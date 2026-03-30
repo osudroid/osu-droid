@@ -1280,7 +1280,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // Ensure user-defined offset has time to be applied.
         var firstObjectTimePreempt = (float) playableBeatmap.getHitObjects().objects.get(0).timePreempt / 1000;
-        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - totalOffset);
+        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - getRateAdjustedOffset());
         initialElapsedTime = elapsedTime;
 
         if (skipTime <= 1 && Multiplayer.isConnected()) {
@@ -1369,7 +1369,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         final float mSecPassed = elapsedTime * 1000;
 
         if (!isGameOver) {
-            float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
+            float currentSpeedMultiplier = getRateAt(mSecPassed);
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
@@ -1635,7 +1635,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (elapsedTime >= totalOffset && !musicStarted) {
+        if (elapsedTime >= getRateAdjustedOffset() && !musicStarted) {
             musicStarted = true;
 
             Execution.updateThread(() -> {
@@ -1958,18 +1958,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float difference = skipTime - elapsedTime;
         elapsedTime = skipTime;
 
-        int elapsedTimeMs = (int) Math.ceil(elapsedTime * 1000);
+        double elapsedTimeMs = Math.ceil(elapsedTime * 1000);
 
         // Seek times may be negative in forced skips, which are not supported by music and video.
-        int musicSeekTime = Math.max(0, elapsedTimeMs - (int) (totalOffset * 1000));
-        int videoSeekTime = Math.max(0, elapsedTimeMs - (int) (videoOffset * 1000));
+        int musicSeekTime = Math.max(0, (int) (elapsedTimeMs - totalOffset * getRateAt(elapsedTimeMs) * 1000));
+        int videoSeekTime = Math.max(0, (int) (elapsedTimeMs - videoOffset * 1000));
 
         Execution.updateThread(() -> {
             updatePassiveObjects(difference);
 
             var songService = GlobalManager.getInstance().getSongService();
 
-            if (elapsedTime >= totalOffset && !musicStarted) {
+            if (elapsedTime >= getRateAdjustedOffset() && !musicStarted) {
                 songService.play();
                 songService.setVolume(Config.getBgmVolume());
                 musicStarted = true;
@@ -3211,7 +3211,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float maxDt = dt * 2;
 
                     float audioElapsedTime = (float) songService.getPositionPrecise() / 1000;
-                    float gameElapsedTime = elapsedTime - totalOffset;
+                    float gameElapsedTime = elapsedTime - getRateAdjustedOffset();
                     float timeDifference = gameElapsedTime - audioElapsedTime;
 
                     // In some cases, the audio can be behind the gameplay time so far it would cause gameplay to
@@ -3238,7 +3238,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
                 } else if (!musicStarted) {
                     float realElapsedTime = elapsedTime + dt;
-                    float targetElapsedTime = Math.min(realElapsedTime, totalOffset);
+                    float targetElapsedTime = Math.min(realElapsedTime, getRateAdjustedOffset());
                     float newElapsedTime;
 
                     if (isInterpolating) {
@@ -3438,5 +3438,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         return estimatedMaxActiveObjects;
+    }
+
+    private float getRateAt(double time) {
+        return ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, time);
+    }
+
+    private float getRateAdjustedOffset() {
+        return totalOffset * GameHelper.getSpeedMultiplier();
     }
 }
