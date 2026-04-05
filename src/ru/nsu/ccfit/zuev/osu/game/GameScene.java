@@ -658,8 +658,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // TODO skin manager
         BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
 
-        if (shouldParseBeatmap) {
-            var breaks = playableBeatmap.getEvents().breaks;
+        var breaks = playableBeatmap.getEvents().breaks;
+
+        if (shouldParseBeatmap || breakPeriods == null || breakPeriods.length != breaks.size()) {
             breakPeriods = new BreakPeriod[breaks.size()];
             System.arraycopy(breaks.toArray(), 0, breakPeriods, 0, breakPeriods.length);
         }
@@ -679,7 +680,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
-        var firstObject = playableBeatmap.getHitObjects().objects.get(0);
+        var hitObjects = playableBeatmap.getHitObjects().objects;
+        var firstObject = hitObjects.get(0);
         scale = firstObject.getScreenSpaceGameplayScale();
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
@@ -711,12 +713,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         videoStarted = false;
         videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
-        if (shouldParseBeatmap) {
-            objects = new HitObject[playableBeatmap.getHitObjects().objects.size()];
+        if (shouldParseBeatmap || objects == null || objects.length != hitObjects.size()) {
+            objects = new HitObject[hitObjects.size()];
         }
 
-        if (differentPlayableBeatmap) {
-            System.arraycopy(playableBeatmap.getHitObjects().objects.toArray(), 0, objects, 0, objects.length);
+        if (differentPlayableBeatmap || objects[0] == null) {
+            System.arraycopy(hitObjects.toArray(), 0, objects, 0, objects.length);
         }
 
         firstObjectStartTime = (float) firstObject.startTime / 1000;
