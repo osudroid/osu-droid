@@ -820,9 +820,8 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         GlobalManager.getInstance().selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap?.md5)
 
-        updateBeatmapInfo()
-
         if (GlobalManager.getInstance().engine.scene != this) {
+            updateBeatmapInfo()
             isWaitingForBeatmapChange = false
             return
         }
