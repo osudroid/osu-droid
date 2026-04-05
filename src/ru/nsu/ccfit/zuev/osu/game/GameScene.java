@@ -826,8 +826,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         replaying = false;
         replay = new Replay(true);
-        replay.setObjectCount(objects.length);
-        replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
+        replay.setObjectCount(hitObjects.size());
+        replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), playableBeatmap.getMd5());
 
         if (replayFilePath != null) {
             // Replay decoding may be dependent on the used mods, so we must do this.
