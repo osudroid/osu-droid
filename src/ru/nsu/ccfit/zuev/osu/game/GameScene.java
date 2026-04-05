@@ -106,6 +106,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 import javax.microedition.khronos.opengles.GL10;
@@ -203,9 +204,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ProxySprite storyboardOverlayProxy;
 
     public HitWindow hitWindow;
-
-    private Job gameLoadingJob;
     private ModHashMap lastMods;
+
+    private final AtomicInteger loadingRequestId = new AtomicInteger(0);
+    private CompletableFuture<?> loadingPipeline;
+    private Job gameLoadingJob;
 
     private PerformanceCalculationParameters performanceCalculationParameters;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
@@ -945,6 +948,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         mainCursorId = -1;
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
+        final int requestId = loadingRequestId.incrementAndGet();
 
         BeatmapInfo beatmapToUse = beatmapInfo != null ? beatmapInfo : lastBeatmapInfo;
         boolean isRestart = beatmapInfo == null && replayFile == null && mods == null;
@@ -962,40 +966,83 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         ResourceManager.getInstance().getSound("failsound").stop();
 
-        cancelLoading()
+        var pipeline = cancelLoading(false)
                 .thenCompose((ignored) -> DifficultyCalculationManager.stopCalculation())
-                .thenRun(() -> gameLoadingJob = Execution.async((scope) -> {
-                    boolean succeeded = false;
-
-                    try {
-                        succeeded = loadGame(beatmapToUse, rfile, modsToUse, scope);
-
-                        if (succeeded) {
-                            prepareScene();
-                        }
-                    } finally {
-                        if (!succeeded) {
-                            quit();
-                        }
-
-                        gameLoadingJob = null;
+                .thenRun(() -> {
+                    if (requestId != loadingRequestId.get()) {
+                        return;
                     }
-                }));
+
+                    gameLoadingJob = Execution.async((scope) -> {
+                        boolean succeeded = false;
+                        boolean cancelled = false;
+
+                        try {
+                            if (requestId != loadingRequestId.get()) {
+                                return;
+                            }
+
+                            succeeded = loadGame(beatmapToUse, rfile, modsToUse, scope);
+
+                            if (succeeded && requestId == loadingRequestId.get()) {
+                                prepareScene();
+                            }
+                        } catch (CancellationException e) {
+                            cancelled = true;
+                            throw e;
+                        } finally {
+                            if (requestId == loadingRequestId.get()) {
+                                if (!succeeded && !cancelled) {
+                                    quit();
+                                }
+
+                                gameLoadingJob = null;
+                            }
+                        }
+                    });
+                });
+
+        loadingPipeline = pipeline;
+
+        pipeline.whenComplete((ignored, error) -> {
+            if (loadingPipeline == pipeline) {
+                loadingPipeline = null;
+            }
+        });
     }
 
     public CompletableFuture<Unit> cancelLoading() {
+        return cancelLoading(true);
+    }
+
+    private CompletableFuture<Unit> cancelLoading(boolean invalidatePendingStart) {
         // Do not cancel loading in multiplayer.
         if (Multiplayer.isMultiplayer) {
             return CompletableFuture.completedFuture(Unit.INSTANCE);
         }
 
+        if (invalidatePendingStart) {
+            loadingRequestId.incrementAndGet();
+        }
+
         var gameLoadingJob = this.gameLoadingJob;
         var storyboardLoadingJob = this.storyboardLoadingJob;
         var videoLoadingJob = this.videoLoadingJob;
+        var loadingPipeline = this.loadingPipeline;
 
-        return Execution.stopAsync(gameLoadingJob)
+        this.gameLoadingJob = null;
+        this.storyboardLoadingJob = null;
+        this.videoLoadingJob = null;
+
+        var jobCancellation = Execution.stopAsync(gameLoadingJob)
                 .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
                 .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob));
+
+        var pipelineDrain = loadingPipeline != null
+            ? loadingPipeline.exceptionally((error) -> null)
+            : CompletableFuture.completedFuture(Unit.INSTANCE);
+
+        return CompletableFuture.allOf(jobCancellation, pipelineDrain).thenApply((ignored) -> Unit.INSTANCE);
     }
 
     private void prepareScene() {
