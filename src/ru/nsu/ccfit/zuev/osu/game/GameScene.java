@@ -835,6 +835,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             replayStat.setMod(mods);
             replay.setStat(replayStat);
 
+            if (scope != null) {
+                ensureActive(scope.getCoroutineContext());
+            }
+
             replaying = replay.load(replayFilePath, true);
 
             // In older versions, replay uploads are separated from scores, which means that they may not be uploaded
