@@ -2,7 +2,6 @@ package com.rian.osu.utils
 
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
-import com.rian.osu.math.times
 import java.util.*
 import kotlin.math.*
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +18,7 @@ object PathApproximation {
 
     private const val BEZIER_TOLERANCE = 0.25f
     private const val CIRCULAR_ARC_TOLERANCE = 0.1f
+    private const val BEZIER_TOLERANCE_THRESHOLD = BEZIER_TOLERANCE * BEZIER_TOLERANCE * 4
 
     /**
      * Creates a piecewise-linear approximation of a Bézier curve by adaptively repeatedly subdividing
@@ -42,8 +42,8 @@ object PathApproximation {
         // (More specifically, we iteratively and adaptively refine our curve with a
         // depth-first search (https://en.wikipedia.org/wiki/Depth-first_search)
         // over the tree resulting from the subdivisions we make.)
-        val toFlatten = Stack<Array<Vector2?>>()
-        val freeBuffers = Stack<Array<Vector2?>>()
+        val toFlatten = ArrayDeque<Array<Vector2?>>()
+        val freeBuffers = ArrayDeque<Array<Vector2?>>()
 
         scope?.ensureActive()
 
@@ -86,7 +86,7 @@ object PathApproximation {
     }
 
     /**
-     * Creates a piecewise-linear approximation of a Catmull-Rom spline.
+     * Creates a piecewise-linear approximation of a Cspline.
      *
      * @param controlPoints The control points.
      * @param scope The [CoroutineScope] to use for job cancellation.
@@ -94,21 +94,27 @@ object PathApproximation {
      */
     @JvmOverloads
     fun approximateCatmull(controlPoints: List<Vector2>, scope: CoroutineScope? = null): MutableList<Vector2> {
-        val result = mutableListOf<Vector2>()
+        val segmentCount = (controlPoints.size - 1).coerceAtLeast(0)
+        val result = ArrayList<Vector2>(segmentCount * CATMULL_DETAIL * 2)
+        val inverseDetail = 1f / CATMULL_DETAIL
 
         for (i in 0 until controlPoints.size - 1) {
             scope?.ensureActive()
 
             val v1 = if (i > 0) controlPoints[i - 1] else controlPoints[i]
             val v2 = controlPoints[i]
-            val v3 = if (i < controlPoints.size - 1) controlPoints[i + 1] else v2 + v2 - v1
-            val v4 = if (i < controlPoints.size - 2) controlPoints[i + 2] else v3 + v3 - v2
+            val v3 =
+                if (i < controlPoints.size - 1) controlPoints[i + 1]
+                else Vector2(2 * v2.x - v1.x, 2 * v2.y - v1.y)
+            val v4 =
+                if (i < controlPoints.size - 2) controlPoints[i + 2]
+                else Vector2(2 * v3.x - v2.x, 2 * v3.y - v2.y)
 
             for (c in 0 until CATMULL_DETAIL) {
                 scope?.ensureActive()
 
-                result.add(catmullFindPoint(v1, v2, v3, v4, c.toFloat() / CATMULL_DETAIL))
-                result.add(catmullFindPoint(v1, v2, v3, v4, (c + 1).toFloat() / CATMULL_DETAIL))
+                result.add(catmullFindPoint(v1, v2, v3, v4, c * inverseDetail))
+                result.add(catmullFindPoint(v1, v2, v3, v4, (c + 1) * inverseDetail))
             }
         }
 
@@ -139,22 +145,17 @@ object PathApproximation {
         }
 
         // See: https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates_2
-        val d = 2 * (a.x * (b -c).y + b.x * (c - a).y + c.x * (a - b).y)
+        val d = 2 * (a.x * (b.y - a.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y))
         val aSq = a.lengthSquared
         val bSq = b.lengthSquared
         val cSq = c.lengthSquared
 
-        val center = Vector2(
-            aSq * (b - c).y + bSq * (c - a).y + cSq * (a - b).y,
-            aSq * (c - b).x + bSq * (a - c).x + cSq * (b - a).x
-        ) / d
+        val centerX = (aSq * (b.y - c.y) + bSq * (c.y - a.y) + cSq * (a.y - b.y)) / d
+        val centerY = (aSq * (c.x - b.x) + bSq * (a.x - c.x) + cSq * (b.x - a.x)) / d
 
-        val dA = a - center
-        val dC = c - center
-
-        val radius = dA.length
-        val thetaStart = atan2(dA.y.toDouble(), dA.x.toDouble())
-        var thetaEnd = atan2(dC.y.toDouble(), dC.x.toDouble())
+        val radius = hypot(a.x - centerX, a.y - centerY)
+        val thetaStart = atan2((a.y - centerY).toDouble(), (a.x - centerX).toDouble())
+        var thetaEnd = atan2((c.y - centerY).toDouble(), (c.x - centerX).toDouble())
 
         while (thetaEnd < thetaStart) {
             scope?.ensureActive()
@@ -166,10 +167,10 @@ object PathApproximation {
 
         // Decide in which direction to draw the circle, depending on which side of
         // AC B lies.
-        var orthoAtoC = c - a
-        orthoAtoC = Vector2(orthoAtoC.y, -orthoAtoC.x)
+        val orthoX = c.y - a.y
+        val orthoY = -(c.x - a.x)
 
-        if (orthoAtoC.dot(b - a) < 0) {
+        if (orthoX * (b.x - a.x) + orthoY * (b.y - a.y) < 0) {
             direction = -direction
             thetaRange = 2 * Math.PI - thetaRange
         }
@@ -187,16 +188,20 @@ object PathApproximation {
                     .toInt()
             )
 
-        val output = mutableListOf<Vector2>()
+        val output = ArrayList<Vector2>(amountPoints)
 
         for (i in 0 until amountPoints) {
             scope?.ensureActive()
 
             val fraction = i.toDouble() / (amountPoints - 1)
             val theta = thetaStart + direction * fraction * thetaRange
-            val o = Vector2(cos(theta).toFloat(), sin(theta).toFloat()) * radius
 
-            output.add(center + o)
+            output.add(
+                Vector2(
+                    centerX + cos(theta).toFloat() * radius,
+                    centerY + sin(theta).toFloat() * radius
+                )
+            )
         }
 
         return output
@@ -230,9 +235,11 @@ object PathApproximation {
                 val prev = it[i - 1]!!
                 val current = it[i]!!
                 val next = it[i + 1]!!
-                val finalVec = prev - current * 2 + next
+                val dx = prev.x - current.x * 2 + next.x
+                val dy = prev.y - current.y * 2 + next.y
+                val lengthSquared = dx * dx + dy * dy
 
-                if (finalVec.length.pow(2f) > BEZIER_TOLERANCE.pow(2f) * 4) {
+                if (lengthSquared > BEZIER_TOLERANCE_THRESHOLD) {
                     return@let false
                 }
             }
@@ -260,9 +267,9 @@ object PathApproximation {
     ) {
         bezierSubdivide(controlPoints, subdivisionBuffer2, subdivisionBuffer1, subdivisionBuffer1, count, scope)
 
-        for (i in 0 until count - 1) {
+        if (count > 1) {
             scope?.ensureActive()
-            subdivisionBuffer2[count + i] = subdivisionBuffer1[i + 1]
+            System.arraycopy(subdivisionBuffer1, 1, subdivisionBuffer2, count, count - 1)
         }
 
         output.add(controlPoints[0]!!)
@@ -271,7 +278,14 @@ object PathApproximation {
             scope?.ensureActive()
 
             val index = 2 * i
-            val p = 0.25 * (subdivisionBuffer2[index - 1]!! + subdivisionBuffer2[index]!! * 2 + subdivisionBuffer2[index + 1]!!)
+            val prev = subdivisionBuffer2[index - 1]!!
+            val current = subdivisionBuffer2[index]!!
+            val next = subdivisionBuffer2[index + 1]!!
+
+            val p = Vector2(
+                0.25f * (prev.x + current.x * 2 + next.x),
+                0.25f * (prev.y + current.y * 2 + next.y)
+            )
 
             output.add(p)
         }
@@ -306,7 +320,13 @@ object PathApproximation {
 
             for (j in 0 until count - i - 1) {
                 scope?.ensureActive()
-                subdivisionBuffer[j] = (subdivisionBuffer[j]!! + subdivisionBuffer[j + 1]!!) / 2
+                val left = subdivisionBuffer[j]!!
+                val right = subdivisionBuffer[j + 1]!!
+
+                subdivisionBuffer[j] = Vector2(
+                    (left.x + right.x) * 0.5f,
+                    (left.y + right.y) * 0.5f
+                )
             }
         }
     }
@@ -324,8 +344,8 @@ object PathApproximation {
         vec1: Vector2, vec2: Vector2,
         vec3: Vector2, vec4: Vector2, t: Float
     ): Vector2 {
-        val t2 = t.pow(2f)
-        val t3 = t.pow(3f)
+        val t2 = t * t
+        val t3 = t2 * t
 
         return Vector2(
             0.5f *
