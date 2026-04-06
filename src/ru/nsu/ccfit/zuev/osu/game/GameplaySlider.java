@@ -811,27 +811,31 @@ public class GameplaySlider extends GameObject {
         if (autoPlay || replayObjectData != null) {
             trackingCursorId = 0;
             isTracking = true;
-        } else if (hasTrackingCursor()) {
-            // If the slider is being tracked, we only want to check if the tracking cursor is still tracking it.
-            var trackingCursor = listener.getCursor(trackingCursorId);
-            var latestEvent = trackingCursor.getLatestEvent();
-
-            if (latestEvent != null && !latestEvent.isActionUp()) {
-                isTracking = isCursorTracking(position, latestEvent);
-            } else {
-                trackingCursorId = -1;
-                isTracking = false;
-            }
         } else {
-            // Otherwise, we need to check if any cursor is tracking the slider.
-            for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-                var cursor = listener.getCursor(i);
-                var latestEvent = cursor.getLatestEvent();
+            if (trackingCursorId != -1) {
+                // If the slider is being tracked, we only want to check if the tracking cursor is still tracking it.
+                var trackingCursor = listener.getCursor(trackingCursorId);
+                var latestEvent = trackingCursor.getLatestEvent();
 
-                if (latestEvent != null && isCursorTracking(position, latestEvent)) {
-                    trackingCursorId = i;
-                    isTracking = true;
-                    break;
+                if (latestEvent != null && !latestEvent.isActionUp()) {
+                    isTracking = isCursorTracking(position, latestEvent);
+                } else {
+                    trackingCursorId = -1;
+                    isTracking = false;
+                }
+            }
+
+            if (trackingCursorId == -1) {
+                // Check if any cursor is tracking the slider.
+                for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
+                    var cursor = listener.getCursor(i);
+                    var latestEvent = cursor.getLatestEvent();
+
+                    if (latestEvent != null && isCursorTracking(position, latestEvent)) {
+                        trackingCursorId = i;
+                        isTracking = true;
+                        break;
+                    }
                 }
             }
         }
@@ -855,10 +859,6 @@ public class GameplaySlider extends GameObject {
     private boolean isTracking() {
         return isTracking && replayObjectData == null ||
                 replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
-    }
-
-    private boolean hasTrackingCursor() {
-        return trackingCursorId != -1;
     }
 
     private void updateFollowCircleTrackingState() {
