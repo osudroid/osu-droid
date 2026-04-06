@@ -95,6 +95,8 @@ public class GameHelper {
             distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
         }
 
+        float distanceThresholdSquared = distanceThreshold * distanceThreshold;
+
         // Invert the scale to convert from screen pixels to osu!pixels.
         var invertedScale = new Vec2(
             (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
@@ -119,9 +121,12 @@ public class GameHelper {
                 continue;
             }
 
-            float distanceFromLast = vec.copy().minus(renderPath.getLast()).multiple(invertedScale).length();
+            var last = renderPath.getLast();
+            float dx = (vec.x - last.x) * invertedScale.x;
+            float dy = (vec.y - last.y) * invertedScale.y;
+            float distanceFromLastSquared = dx * dx + dy * dy;
 
-            if (distanceFromLast > distanceThreshold || i == sliderPath.anchorCount - 1 ||
+            if (distanceFromLastSquared > distanceThresholdSquared || i == sliderPath.anchorCount - 1 ||
                     (isCatmull && (i + 1) % catmullSegmentLength == 0)) {
                 renderPath.add(vec);
             }
