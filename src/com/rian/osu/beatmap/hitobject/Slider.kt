@@ -400,7 +400,8 @@ class Slider(
                     // that ticks in repeat spans are positioned identically to those in non-repeat spans
                     val distanceProgress = d / length
                     val timeProgress = if (reversed) 1 - distanceProgress else distanceProgress
-                    val tickPosition = position + path.positionAt(distanceProgress)
+                    val pathPosition = path.positionAt(distanceProgress)
+                    val tickPosition = Vector2(position.x + pathPosition.x, position.y + pathPosition.y)
 
                     sliderTicks.add(
                         SliderTick(
@@ -451,8 +452,9 @@ class Slider(
         for (i in 1 until nestedHitObjects.size - 1) {
             val nestedHitObject = nestedHitObjects[i]
             val progress = (nestedHitObject.startTime - startTime) / duration
+            val curvePosition = curvePositionAt(progress)
 
-            nestedHitObject.position = position + curvePositionAt(progress)
+            nestedHitObject.position = Vector2(position.x + curvePosition.x, position.y + curvePosition.y)
         }
     }
 
