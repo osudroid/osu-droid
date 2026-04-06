@@ -68,9 +68,17 @@ class SliderPath @JvmOverloads constructor(
      */
     @JvmOverloads
     fun getPathToProgress(p0: Double, p1: Double, scope: CoroutineScope? = null): MutableList<Vector2> {
-        val path = mutableListOf<Vector2>()
         val d0 = progressToDistance(p0)
         val d1 = progressToDistance(p1)
+
+        val startEstimate = indexOfDistance(d0)
+        val endEstimate = indexOfDistance(d1)
+
+        val estimatedSize =
+            if (endEstimate >= startEstimate) endEstimate - startEstimate + 3
+            else startEstimate - endEstimate + 3
+
+        val path = ArrayList<Vector2>(estimatedSize)
 
         var i = 0
 
