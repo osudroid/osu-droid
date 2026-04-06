@@ -7,7 +7,6 @@ import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.timings.BreakPeriod
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
-import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHardRock
 import kotlin.math.max
@@ -51,6 +50,8 @@ class ThreeFingerChecker(
      */
     private val objectData: Array<ReplayObjectData>
 ) {
+    private val isHardRock = difficultyAttributes.mods.any { it is ModHardRock }
+
     /**
      * A reprocessed [BreakPeriod]s to match right on [HitObject] time.
      *
@@ -298,11 +299,13 @@ class ThreeFingerChecker(
 
         val hitTime = obj.startTime.toFloat() + objData.accuracy
         val objPosition = obj.difficultyStackedPosition
+        val objX = objPosition.x
+        val objY = objPosition.y
 
         // We are maintaining the closest distance to the object.
         // This is because the radius that is calculated is using an estimation.
         // As such, it does not reflect the actual object radius in gameplay.
-        var closestDistance = Float.POSITIVE_INFINITY
+        var closestDistanceSquared = Float.POSITIVE_INFINITY
         var nearestCursorInstanceIndex = -1
 
         // Observe the cursor position at the object's hit time.
@@ -340,28 +343,32 @@ class ThreeFingerChecker(
                         continue
                     }
 
-                    val movementPosition = getMovementPosition(movement)
-                    val prevMovementPosition = getMovementPosition(prevMovement)
+                    val movementX = getMovementX(movement)
+                    val movementY = getMovementY(movement)
+                    val prevMovementX = getMovementX(prevMovement)
+                    val prevMovementY = getMovementY(prevMovement)
 
-                    var distance: Float
+                    var distanceSquared: Float
 
                     when (movement.touchType) {
-                        TouchType.UP ->
-                            distance = prevMovementPosition.getDistance(objPosition)
+                        TouchType.UP -> {
+                            distanceSquared = Vector2.distanceSquared(prevMovementX, prevMovementY, objX, objY)
+                        }
 
                         TouchType.MOVE -> {
                             // Interpolate movement.
                             val t = (hitTime - prevMovement.time) / (movement.time - prevMovement.time)
-                            val position = Interpolation.linear(prevMovementPosition, movementPosition, t)
+                            val x = prevMovementX + (movementX - prevMovementX) * t
+                            val y = prevMovementY + (movementY - prevMovementY) * t
 
-                            distance = position.getDistance(objPosition)
+                            distanceSquared = Vector2.distanceSquared(x, y, objX, objY)
                         }
 
                         else -> continue
                     }
 
-                    if (closestDistance > distance) {
-                        closestDistance = distance
+                    if (closestDistanceSquared > distanceSquared) {
+                        closestDistanceSquared = distanceSquared
                         nearestCursorInstanceIndex = i
                     }
                 }
@@ -424,7 +431,6 @@ class ThreeFingerChecker(
         return nearestCursorInstanceIndex
     }
 
-    private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
-        else Vector2(movement.x, movement.y)
+    private fun getMovementX(movement: ReplayMovement) = movement.x
+    private fun getMovementY(movement: ReplayMovement) = if (isHardRock) 512 - movement.y else movement.y
 }

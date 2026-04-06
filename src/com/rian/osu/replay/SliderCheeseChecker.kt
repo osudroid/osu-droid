@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
-import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHardRock
 import kotlin.math.max
@@ -49,6 +48,7 @@ class SliderCheeseChecker(
     private val objectData: Array<Replay.ReplayObjectData>
 ) {
     private val mehWindow = beatmap.hitWindow.mehWindow
+    private val isHardRock = difficultyAttributes.mods.any { it is ModHardRock }
 
     /**
      * Checks if relevant [Slider]s in the [DroidPlayableBeatmap] are cheesed and computes the penalties.
@@ -80,7 +80,9 @@ class SliderCheeseChecker(
         val cursorLoopIndices = IntArray(cursorGroups.size) { 0 }
 
         val objectRadius = objects.first().difficultyRadius
+        val objectRadiusSquared = objectRadius * objectRadius
         val sliderBallRadius = objectRadius * 2
+        val sliderBallRadiusSquared = sliderBallRadius * sliderBallRadius
 
         // Sort difficult sliders by index so that cursor loop indices work properly.
         for (difficultSlider in difficultyAttributes.difficultSliders.sortedBy { it.index }) {
@@ -100,6 +102,8 @@ class SliderCheeseChecker(
             }
 
             val sliderStartPosition = slider.difficultyStackedPosition
+            val sliderStartX = sliderStartPosition.x
+            val sliderStartY = sliderStartPosition.y
 
             // These time boundaries should consider the delta time between the previous and next
             // object as well as their hit accuracy. However, they are somewhat complicated to
@@ -113,7 +117,7 @@ class SliderCheeseChecker(
 
             for (i in cursorGroups.indices) {
                 val groups = cursorGroups[i]
-                var closestDistance = Float.POSITIVE_INFINITY
+                var closestDistanceSquared = Float.POSITIVE_INFINITY
                 var closestIndex = groups.size
                 var j = cursorLoopIndices[i]
 
@@ -130,14 +134,14 @@ class SliderCheeseChecker(
                     }
 
                     if (group.startTime >= minTimeLimit) {
-                        val distance = getMovementPosition(group.down).getDistance(sliderStartPosition)
+                        val distanceSquared = Vector2.distanceSquared(getMovementX(group.down), getMovementY(group.down), sliderStartX, sliderStartY)
 
-                        if (closestDistance > distance) {
-                            closestDistance = distance
+                        if (closestDistanceSquared > distanceSquared) {
+                            closestDistanceSquared = distanceSquared
                             closestIndex = j
                         }
 
-                        if (closestDistance <= objectRadius) {
+                        if (closestDistanceSquared <= objectRadiusSquared) {
                             break
                         }
                     }
@@ -151,10 +155,16 @@ class SliderCheeseChecker(
                         val movement = movements[k]
                         val prevMovement = movements[k - 1]
 
-                        var distance = Float.POSITIVE_INFINITY
+                        var distanceSquared = Float.POSITIVE_INFINITY
+                        val movementX = getMovementX(movement)
+                        val movementY = getMovementY(movement)
+                        val prevMovementX = getMovementX(prevMovement)
+                        val prevMovementY = getMovementY(prevMovement)
 
                         when (movement.touchType) {
-                            TouchType.UP -> distance = getMovementPosition(prevMovement).getDistance(sliderStartPosition)
+                            TouchType.UP -> {
+                                distanceSquared = Vector2.distanceSquared(prevMovementX, prevMovementY, sliderStartX, sliderStartY)
+                            }
 
                             TouchType.MOVE -> {
                                 var mSecPassed = max(prevMovement.time.toDouble(), minTimeLimit)
@@ -164,21 +174,17 @@ class SliderCheeseChecker(
                                 while (mSecPassed <= maxTime) {
                                     val t = (mSecPassed.toFloat() - prevMovement.time) /
                                         (movement.time - prevMovement.time)
+                                    val interpolatedX = prevMovementX + (movementX - prevMovementX) * t
+                                    val interpolatedY = prevMovementY + (movementY - prevMovementY) * t
 
-                                    val interpolatedPosition = Interpolation.linear(
-                                        getMovementPosition(prevMovement),
-                                        getMovementPosition(movement),
-                                        t
-                                    )
+                                    distanceSquared = Vector2.distanceSquared(interpolatedX, interpolatedY, sliderStartX, sliderStartY)
 
-                                    distance = interpolatedPosition.getDistance(sliderStartPosition)
-
-                                    if (closestDistance > distance) {
-                                        closestDistance = distance
+                                    if (closestDistanceSquared > distanceSquared) {
+                                        closestDistanceSquared = distanceSquared
                                         closestIndex = j
                                     }
 
-                                    if (closestDistance <= objectRadius) {
+                                    if (closestDistanceSquared <= objectRadiusSquared) {
                                         break
                                     }
 
@@ -189,12 +195,12 @@ class SliderCheeseChecker(
                             else -> Unit
                         }
 
-                        if (closestDistance > distance) {
-                            closestDistance = distance
+                        if (closestDistanceSquared > distanceSquared) {
+                            closestDistanceSquared = distanceSquared
                             closestIndex = j
                         }
 
-                        if (closestDistance <= objectRadius) {
+                        if (closestDistanceSquared <= objectRadiusSquared) {
                             break
                         }
                     }
@@ -202,7 +208,7 @@ class SliderCheeseChecker(
                     cursorLoopIndices[i] = ++j
                 }
 
-                closestDistances.add(closestDistance)
+                closestDistances.add(closestDistanceSquared)
                 closestGroupIndices.add(closestIndex)
 
                 if (cursorLoopIndices[i] > 0) {
@@ -212,9 +218,9 @@ class SliderCheeseChecker(
             }
 
             val groupsIndex = closestDistances.indexOf(closestDistances.min())
-            val closestDistance = closestDistances[groupsIndex]
+            val closestDistanceSquared = closestDistances[groupsIndex]
 
-            if (closestDistance > objectRadius) {
+            if (closestDistanceSquared > objectRadiusSquared) {
                 // The closest cursor is outside the slider's head.
                 cheesedDifficultyRatings.add(difficultSlider.difficultyRating)
                 continue
@@ -238,6 +244,8 @@ class SliderCheeseChecker(
 
                 val nestedObject = slider.nestedHitObjects[i]
                 val nestedPosition = nestedObject.difficultyStackedPosition
+                val nestedX = nestedPosition.x
+                val nestedY = nestedPosition.y
 
                 while (occurrenceLoopIndex < movements.size && movements[occurrenceLoopIndex].time < nestedObject.startTime) {
                     ++occurrenceLoopIndex
@@ -249,23 +257,23 @@ class SliderCheeseChecker(
 
                 val movement = movements[occurrenceLoopIndex]
                 val prevMovement = movements[occurrenceLoopIndex - 1]
+                val movementX = getMovementX(movement)
+                val movementY = getMovementY(movement)
+                val prevMovementX = getMovementX(prevMovement)
+                val prevMovementY = getMovementY(prevMovement)
 
                 isCheesed = when (movement.touchType) {
                     TouchType.MOVE -> {
                         // Interpolate cursor position during nested object time.
                         val t = (nestedObject.startTime.toFloat() - prevMovement.time) /
                             (movement.time - prevMovement.time)
+                        val interpolatedX = prevMovementX + (movementX - prevMovementX) * t
+                        val interpolatedY = prevMovementY + (movementY - prevMovementY) * t
 
-                        val interpolatedPosition = Interpolation.linear(
-                            getMovementPosition(prevMovement),
-                            getMovementPosition(movement),
-                            t
-                        )
-
-                        interpolatedPosition.getDistance(nestedPosition) > sliderBallRadius
+                        Vector2.distanceSquared(interpolatedX, interpolatedY, nestedX, nestedY) > sliderBallRadiusSquared
                     }
 
-                    TouchType.UP -> getMovementPosition(prevMovement).getDistance(nestedPosition) > sliderBallRadius
+                    TouchType.UP -> Vector2.distanceSquared(prevMovementX, prevMovementY, nestedX, nestedY) > sliderBallRadiusSquared
 
                     else -> false
                 }
@@ -281,7 +289,7 @@ class SliderCheeseChecker(
 
     private fun computePenalty(factor: Double, ratingSum: Double) = max(factor, (1 - ratingSum * factor).pow(2))
 
-    private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
-        else Vector2(movement.x, movement.y)
+    private fun getMovementX(movement: ReplayMovement) = movement.x
+
+    private fun getMovementY(movement: ReplayMovement) = if (isHardRock) 512 - movement.y else movement.y
 }
