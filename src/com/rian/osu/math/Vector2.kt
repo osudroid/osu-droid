@@ -2,6 +2,7 @@ package com.rian.osu.math
 
 import android.graphics.PointF
 import kotlin.math.hypot
+import kotlin.math.sqrt
 
 /**
  * Represents a two-dimensional vector.
@@ -59,10 +60,16 @@ data class Vector2(
      * Normalizes the vector.
      */
     fun normalize() {
-        val length = length
+        val lengthSquared = lengthSquared
 
-        x /= length
-        y /= length
+        if (lengthSquared == 0f) {
+            return
+        }
+
+        val inverseLength = 1f / sqrt(lengthSquared)
+
+        x *= inverseLength
+        y *= inverseLength
     }
 
     /**
