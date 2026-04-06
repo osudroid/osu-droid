@@ -3482,6 +3482,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (object instanceof HitCircle) {
                 var hitWindow = object.hitWindow;
                 lifetimeEnd = object.startTime + (hitWindow != null ? hitWindow.getMehWindow() : 0);
+            } else if (object instanceof Slider slider) {
+                lifetimeEnd = Math.max(object.startTime + slider.getHead().hitWindow.getMehWindow(), object.getEndTime());
             } else {
                 lifetimeEnd = object.getEndTime();
             }
