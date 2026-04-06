@@ -478,7 +478,7 @@ public class ScoringScene {
                                 difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformanceWithReplayStat(
-                                    playableBeatmap, (StandardDifficultyAttributes) difficultyAttributes, replay.cursorMoves,
+                                    playableBeatmap, (StandardDifficultyAttributes) difficultyAttributes,
                                     replay.objectData, stat
                                 );
                             }
