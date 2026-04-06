@@ -7,6 +7,7 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -368,11 +369,6 @@ class Slider(
     override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 
     private fun createNestedHitObjects(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
-        nestedHitObjects.clear()
-
-        head = SliderHead(startTime, position)
-        nestedHitObjects.add(head)
-
         // A very lenient maximum length of a slider for ticks to be generated.
         // This exists for edge cases such as /b/1573664 where the beatmap has been edited by the user, and should never be reached in normal usage.
         val maxLength = 100000.0
@@ -380,19 +376,30 @@ class Slider(
         val tickDistance = tickDistance.coerceIn(0.0, length)
         val minDistanceFromEnd = velocity * 10
 
+        val tickDistanceLimit = length - minDistanceFromEnd
+        val ticksPerSpan =
+            if (tickDistance == 0.0 || tickDistanceLimit <= 0.0) 0
+            else (ceil(tickDistanceLimit / tickDistance).toInt() - 1).coerceAtLeast(0)
+
+        // Total nested objects: head + tail + repeats + all ticks across spans.
+        nestedHitObjects = ArrayList(2 + (spanCount - 1) + ticksPerSpan * spanCount)
+
+        head = SliderHead(startTime, position)
+        nestedHitObjects.add(head)
+
         for (span in 0 until spanCount) {
             scope?.ensureActive()
 
             if (tickDistance != 0.0) {
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
-                val sliderTicks = mutableListOf<SliderTick>()
+                val sliderTicks = ArrayList<SliderTick>(ticksPerSpan)
 
                 var d = tickDistance
                 while (d <= length) {
                     scope?.ensureActive()
 
-                    if (d >= length - minDistanceFromEnd) {
+                    if (d >= tickDistanceLimit) {
                         break
                     }
 
