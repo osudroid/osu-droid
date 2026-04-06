@@ -1227,7 +1227,14 @@ public class GameplaySlider extends GameObject {
     }
 
     private double getLateHitThreshold() {
-        return hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, duration) : duration;
+        double mehWindow = hitWindow.getMehWindow() / 1000;
+
+        // In replays older than version 7, the slider head's hit window is capped to the slider's duration.
+        if (replayObjectData != null && GameHelper.getReplayVersion() <= 7) {
+            return Math.min(mehWindow, duration);
+        }
+
+        return mehWindow;
     }
 
     private double getLateHitOffset() {
