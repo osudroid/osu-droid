@@ -450,10 +450,11 @@ public class Replay {
         Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
         Version 7: Reworked mod storage to not serialize GameMod, object stacking behavior overhaul, device-independent
                    object scaling
+        Version 8: Slider head hit window is extended to its 50 hit window
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 7;
+        int version = 8;
     }
 
     public static class ReplayObjectData {
