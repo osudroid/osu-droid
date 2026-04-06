@@ -7,7 +7,6 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.collections.forEach
-import kotlin.math.pow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -60,7 +59,7 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
             revertObjectScale(next, beatmap.difficulty)
 
             if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
-                val distanceSquared = next.position.getDistance(current.position).pow(2)
+                val distanceSquared = next.position.getDistanceSquared(current.position)
                 val droidDifficultyScale =
                     CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(current.difficultyScale, true)
 

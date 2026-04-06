@@ -118,8 +118,8 @@ class BeatmapProcessor @JvmOverloads constructor(
                         break
                     }
 
-                    if (stackBaseObject.position.getDistance(objectN.position) < STACK_DISTANCE ||
-                        stackBaseObject is Slider && stackBaseObject.endPosition.getDistance(objectN.position) < STACK_DISTANCE
+                    if (stackBaseObject.position.getDistanceSquared(objectN.position) < STACK_DISTANCE_SQUARED ||
+                        stackBaseObject is Slider && stackBaseObject.endPosition.getDistanceSquared(objectN.position) < STACK_DISTANCE_SQUARED
                     ) {
                         stackBaseIndex = n
 
@@ -194,7 +194,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                     // o==o <- slider is at original location
                     //     o <- hitCircle has stack of -1
                     //      o <- hitCircle has stack of -2
-                    if (objectN is Slider && objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
+                    if (objectN is Slider && objectN.endPosition.getDistanceSquared(objectI.position) < STACK_DISTANCE_SQUARED) {
                         val offset = objectI.difficultyStackHeight - objectN.difficultyStackHeight + 1
 
                         for (j in n + 1..i) {
@@ -203,7 +203,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                             // For each object which was declared under this slider, we will offset it to appear *below* the slider end (rather than above).
                             val objectJ = objects[j]
 
-                            if (objectN.endPosition.getDistance(objectJ.position) < STACK_DISTANCE) {
+                            if (objectN.endPosition.getDistanceSquared(objectJ.position) < STACK_DISTANCE_SQUARED) {
                                 objectJ.difficultyStackHeight -= offset
                                 objectJ.gameplayStackHeight -= offset
                             }
@@ -214,7 +214,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                         break
                     }
 
-                    if (objectN.position.getDistance(objectI.position) < STACK_DISTANCE) {
+                    if (objectN.position.getDistanceSquared(objectI.position) < STACK_DISTANCE_SQUARED) {
                         // Keep processing as if there are no sliders. If we come across a slider, this gets cancelled out.
                         // NOTE: Sliders with start positions stacking are a special case that is also handled here.
                         objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
@@ -238,7 +238,7 @@ class BeatmapProcessor @JvmOverloads constructor(
                         break
                     }
 
-                    if (objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
+                    if (objectN.endPosition.getDistanceSquared(objectI.position) < STACK_DISTANCE_SQUARED) {
                         objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
                         objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
@@ -278,11 +278,11 @@ class BeatmapProcessor @JvmOverloads constructor(
                 // if we use `endTime` here it would result in unexpected stacking.
                 //
                 // Reference: https://github.com/ppy/osu/pull/24188
-                if (objects[j].position.getDistance(currentObject.position) < STACK_DISTANCE) {
+                if (objects[j].position.getDistanceSquared(currentObject.position) < STACK_DISTANCE_SQUARED) {
                     ++currentObject.difficultyStackHeight
                     ++currentObject.gameplayStackHeight
                     startTime = objects[j].startTime
-                } else if (objects[j].position.getDistance(currentObject.endPosition) < STACK_DISTANCE) {
+                } else if (objects[j].position.getDistanceSquared(currentObject.endPosition) < STACK_DISTANCE_SQUARED) {
                     // Case for sliders - bump notes down and right, rather than up and left.
                     ++sliderStack
                     objects[j].difficultyStackHeight -= sliderStack
@@ -295,6 +295,7 @@ class BeatmapProcessor @JvmOverloads constructor(
 
     companion object {
         private const val STACK_DISTANCE = 3
+        private const val STACK_DISTANCE_SQUARED = STACK_DISTANCE * STACK_DISTANCE.toFloat()
 
         /**
          * Truncation of [HitObject.timePreempt] to [Int], as well as keeping the result as [Float], are both done for
