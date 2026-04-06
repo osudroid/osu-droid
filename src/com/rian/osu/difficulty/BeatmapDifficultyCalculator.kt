@@ -316,7 +316,7 @@ object BeatmapDifficultyCalculator {
                 val cursorGroups = createCursorGroups(replay.cursorMoves)
 
                 it.tapPenalty = ThreeFingerChecker(
-                    beatmap, attributes, cursorGroups, replay.objectData
+                    beatmap, attributes, replay.replayVersion, cursorGroups, replay.objectData
                 ).calculatePenalty()
 
                 it.sliderCheesePenalty = SliderCheeseChecker(

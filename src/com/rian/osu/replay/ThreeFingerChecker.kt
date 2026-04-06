@@ -35,6 +35,11 @@ class ThreeFingerChecker(
     val difficultyAttributes: DroidDifficultyAttributes,
 
     /**
+     * The version of the replay.
+     */
+    private val replayVersion: Int,
+
+    /**
      * Cursors that are grouped together in the form of [CursorGroup]s.
      *
      * Each index represents a cursor index.
@@ -85,7 +90,7 @@ class ThreeFingerChecker(
         var penalty = 1.0
 
         for (section in beatmapSections) {
-            val threeFingerCursorCounts = MutableList<Int>(cursorGroups.size - 2) { 0 }
+            val threeFingerCursorCounts = MutableList(cursorGroups.size - 2) { 0 }
 
             for (obj in section.objects) {
                 if (obj.pressingCursorInstanceIndex == -1) {
@@ -282,9 +287,13 @@ class ThreeFingerChecker(
         }
 
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && (-beatmap.hitWindow.mehWindow > objData.accuracy ||
-                objData.accuracy > min(beatmap.hitWindow.mehWindow, obj.duration))) {
-            return -1
+        if (obj is Slider) {
+            val mehWindow = beatmap.hitWindow.mehWindow
+            val lateHitThreshold = if (replayVersion >= 8) mehWindow else min(mehWindow, obj.duration)
+
+            if (-beatmap.hitWindow.mehWindow > objData.accuracy || objData.accuracy > lateHitThreshold) {
+                return -1
+            }
         }
 
         val hitTime = obj.startTime.toFloat() + objData.accuracy
