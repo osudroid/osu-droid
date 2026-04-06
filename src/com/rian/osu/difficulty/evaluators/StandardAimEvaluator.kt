@@ -122,9 +122,10 @@ object StandardAimEvaluator {
                 // If objects just go back and forth through a middle point - don't give as much wide bonus.
                 // Use previous(2) and previous(0) because angles calculation is done prevprev-prev-curr, so any
                 // object's angle's center point is always the previous object.
-                val distance = last2.obj.difficultyStackedPosition.getDistance(last.obj.difficultyStackedPosition)
+                val distanceSquared = last2.obj.difficultyStackedPosition.getDistanceSquared(last.obj.difficultyStackedPosition)
 
-                if (distance < 1) {
+                if (distanceSquared < 1f) {
+                    val distance = sqrt(distanceSquared.toDouble())
                     wideAngleBonus *= 1 - 0.35 * (1 - distance)
                 }
             }
