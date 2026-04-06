@@ -5,7 +5,6 @@ import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModTraceable
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -95,16 +94,18 @@ class DroidDifficultyHitObject(
 
         if (considerDistance) {
             val position = obj.difficultyStackedPosition
-            var distance = previous.obj.difficultyStackedEndPosition.getDistance(position)
+            var distanceSquared = previous.obj.difficultyStackedEndPosition.getDistanceSquared(position)
 
             if (previous.lazyEndPosition != null) {
-                distance = min(
-                    distance,
-                    previous.lazyEndPosition!!.getDistance(position)
+                distanceSquared = minOf(
+                    distanceSquared,
+                    previous.lazyEndPosition!!.getDistanceSquared(position)
                 )
             }
 
-            return distance <= 2 * obj.difficultyRadius
+            val thresholdSquared = (2 * obj.difficultyRadius).toFloat().let { it * it }
+
+            return distanceSquared <= thresholdSquared
         }
 
         return true
