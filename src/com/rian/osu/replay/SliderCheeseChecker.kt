@@ -32,6 +32,11 @@ class SliderCheeseChecker(
     val difficultyAttributes: DroidDifficultyAttributes,
 
     /**
+     * The version of the replay.
+     */
+    private val replayVersion: Int,
+
+    /**
      * Cursors that are grouped together in the form of [CursorGroup]s.
      *
      * Each index represents a cursor index.
@@ -86,9 +91,11 @@ class SliderCheeseChecker(
             val slider = objects[difficultSlider.index] as Slider
             val objData = objectData[difficultSlider.index]
 
+            val lateHitThreshold = if (replayVersion >= 8) mehWindow else min(mehWindow, slider.duration)
+
             // If a miss or slider break occurs, we disregard the check for that slider.
             if (objData.tickSet == null || objData.result == ResultType.MISS.id ||
-                -mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), slider.duration)) {
+                -mehWindow > objData.accuracy || objData.accuracy > lateHitThreshold) {
                 continue
             }
 

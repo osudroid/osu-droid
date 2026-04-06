@@ -17,6 +17,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlinx.coroutines.CoroutineScope
+import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 private val droidDifficultyCalculator = DroidDifficultyCalculator()
 private val standardDifficultyCalculator = StandardDifficultyCalculator()
@@ -235,8 +236,7 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param attributes The [DroidDifficultyAttributes] of the [Beatmap].
-     * @param replayMovements The replay movements of the player.
-     * @param replayObjectData The replay object data of the player.
+     * @param replay The [Replay] to calculate for.
      * @param stat The [StatisticV2] to calculate for.
      * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
      */
@@ -246,10 +246,9 @@ object BeatmapDifficultyCalculator {
     fun calculateDroidPerformance(
         beatmap: Beatmap,
         attributes: DroidDifficultyAttributes,
-        replayMovements: List<MoveArray>,
-        replayObjectData: Array<ReplayObjectData>,
+        replay: Replay,
         stat: StatisticV2? = null
-    ) = calculateDroidPerformance(beatmap, attributes, replayMovements, replayObjectData, constructDroidPerformanceParameters(beatmap, stat))
+    ) = calculateDroidPerformance(beatmap, attributes, replay, constructDroidPerformanceParameters(beatmap, stat))
 
     /**
      * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
@@ -257,8 +256,7 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param attributes The [DroidDifficultyAttributes] of the [Beatmap].
-     * @param replayMovements The replay movements of the player.
-     * @param replayObjectData The replay object data of the player.
+     * @param replay The [Replay] to calculate for.
      * @param parameters The parameters of the calculation. Can be `null`.
      * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the calculation parameters.
      */
@@ -268,12 +266,11 @@ object BeatmapDifficultyCalculator {
     fun calculateDroidPerformance(
         beatmap: Beatmap,
         attributes: DroidDifficultyAttributes,
-        replayMovements: List<MoveArray>,
-        replayObjectData: Array<ReplayObjectData>,
+        replay: Replay,
         parameters: DroidPerformanceCalculationParameters? = null
     ) = calculateDroidPerformance(
             beatmap.createDroidPlayableBeatmap(attributes.mods),
-            attributes, replayMovements, replayObjectData, parameters
+            attributes, replay, parameters
         )
 
     /**
@@ -282,8 +279,7 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [DroidPlayableBeatmap] to calculate.
      * @param attributes The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
-     * @param replayMovements The replay movements of the player.
-     * @param replayObjectData The replay object data of the player.
+     * @param replay The [Replay] to calculate for.
      * @param stat The [StatisticV2] to calculate for.
      * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
      */
@@ -293,10 +289,9 @@ object BeatmapDifficultyCalculator {
     fun calculateDroidPerformance(
         beatmap: DroidPlayableBeatmap,
         attributes: DroidDifficultyAttributes,
-        replayMovements: List<MoveArray>,
-        replayObjectData: Array<ReplayObjectData>,
+        replay: Replay,
         stat: StatisticV2? = null
-    ) = calculateDroidPerformance(beatmap, attributes, replayMovements, replayObjectData, constructDroidPerformanceParameters(beatmap, stat))
+    ) = calculateDroidPerformance(beatmap, attributes, replay, constructDroidPerformanceParameters(beatmap, stat))
 
     /**
      * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
@@ -304,8 +299,7 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [DroidPlayableBeatmap] to calculate.
      * @param attributes The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
-     * @param replayMovements The replay movements of the player.
-     * @param replayObjectData The replay object data of the player.
+     * @param replay The [Replay] to calculate for.
      * @param parameters The parameters of the calculation. Can be `null`.
      * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the calculation parameters.
      */
@@ -315,23 +309,22 @@ object BeatmapDifficultyCalculator {
     fun calculateDroidPerformance(
         beatmap: DroidPlayableBeatmap,
         attributes: DroidDifficultyAttributes,
-        replayMovements: List<MoveArray>,
-        replayObjectData: Array<ReplayObjectData>,
+        replay: Replay,
         parameters: DroidPerformanceCalculationParameters? = null
     ): DroidPerformanceAttributes {
         val actualParameters =
             (parameters ?: DroidPerformanceCalculationParameters()).also {
-                val cursorGroups = createCursorGroups(replayMovements)
+                val cursorGroups = createCursorGroups(replay.cursorMoves)
 
                 it.tapPenalty = ThreeFingerChecker(
-                    beatmap, attributes, cursorGroups, replayObjectData
+                    beatmap, attributes, cursorGroups, replay.objectData
                 ).calculatePenalty()
 
                 it.sliderCheesePenalty = SliderCheeseChecker(
-                    beatmap, attributes, cursorGroups, replayObjectData
+                    beatmap, attributes, replay.replayVersion, cursorGroups, replay.objectData
                 ).calculatePenalty()
 
-                it.populateNestedSliderObjectParameters(beatmap, replayObjectData)
+                it.populateNestedSliderObjectParameters(beatmap, replay.objectData)
             }
 
         return DroidPerformanceCalculator(attributes).calculate(actualParameters)
