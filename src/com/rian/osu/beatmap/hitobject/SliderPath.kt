@@ -5,6 +5,7 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.PathApproximation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlin.math.sqrt
 
 /**
  * Represents the path of a [Slider].
@@ -133,8 +134,7 @@ class SliderPath @JvmOverloads constructor(
         for (i in 0 until calculatedPath.size - 1) {
             scope?.ensureActive()
 
-            val diff = calculatedPath[i + 1] - calculatedPath[i]
-            calculatedLength += diff.length.toDouble()
+            calculatedLength += calculatedPath[i + 1].getDistance(calculatedPath[i]).toDouble()
             cumulativeLength.add(calculatedLength)
         }
 
@@ -167,11 +167,20 @@ class SliderPath @JvmOverloads constructor(
                 return
             }
 
-            // The direction of the segment to shorten or lengthen
-            val dir = calculatedPath[pathEndIndex] - calculatedPath[pathEndIndex - 1]
-            dir.normalize()
+            // The direction of the segment to shorten or lengthen.
+            // Use scalar math to avoid temporary Vector2 allocations in this hot path.
+            val previousPoint = calculatedPath[pathEndIndex - 1]
+            val endPoint = calculatedPath[pathEndIndex]
 
-            calculatedPath[pathEndIndex] = calculatedPath[pathEndIndex - 1] + dir * (expectedDistance - cumulativeLength[cumulativeLength.size - 1]).toFloat()
+            val lengthSquared = endPoint.getDistanceSquared(previousPoint)
+            val inverseLength = if (lengthSquared == 0f) 0f else 1f / sqrt(lengthSquared)
+            val extension = (expectedDistance - cumulativeLength[cumulativeLength.size - 1]).toFloat()
+
+            calculatedPath[pathEndIndex] = Vector2(
+                previousPoint.x + (endPoint.x - previousPoint.x) * inverseLength * extension,
+                previousPoint.y + (endPoint.y - previousPoint.y) * inverseLength * extension
+            )
+
             cumulativeLength.add(expectedDistance)
         }
     }
@@ -221,7 +230,12 @@ class SliderPath @JvmOverloads constructor(
         }
 
         val w = (d - d0) / (d1 - d0)
-        return p0 + (p1 - p0) * w.toFloat()
+        val t = w.toFloat()
+
+        return Vector2(
+            p0.x + (p1.x - p0.x) * t,
+            p0.y + (p1.y - p0.y) * t
+        )
     }
 
     /**
