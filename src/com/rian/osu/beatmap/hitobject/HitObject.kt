@@ -435,12 +435,17 @@ abstract class HitObject(
      * @param position The position in osu!pixels.
      * @return The position in real screen coordinates.
      */
-    protected fun convertPositionToRealCoordinates(position: Vector2) =
-        position *
-        // Scale the position to the actual play field size on screen
-        Vector2(Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat(), Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()) +
-        // Center the position on the screen
-        Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
+    protected fun convertPositionToRealCoordinates(position: Vector2): Vector2 {
+        // Scale the position to the actual playfield size on screen.
+        val xScale = Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat()
+        val yScale = Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()
+
+        // Center the position on the screen.
+        val xOffset = (Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH) / 2f
+        val yOffset = (Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
+
+        return Vector2(position.x * xScale + xOffset, position.y * yScale + yOffset)
+    }
 
     /**
      * Creates a [BankHitSampleInfo] based on the sample settings of the first [BankHitSampleInfo.HIT_NORMAL] sample in [samples].
