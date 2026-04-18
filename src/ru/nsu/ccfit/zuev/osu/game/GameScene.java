@@ -1435,19 +1435,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (replaying) {
+            final float replayTimeMs = elapsedTime * 1000;
+            final float replayCatchUpTimeMs = (elapsedTime + dt / 4) * 1000;
             int cIndex;
+
             for (int i = 0; i < replay.cursorIndex.length; i++) {
-                if (replay.cursorMoves.size() <= i){
+                if (replay.cursorMoves.size() <= i) {
                     break;
                 }
+
+                var moveArray = replay.cursorMoves.get(i);
 
                 cIndex = replay.cursorIndex[i];
                 Replay.ReplayMovement movement = null;
 
                 // Emulating moves
                 while (
-                        cIndex < replay.cursorMoves.get(i).size &&
-                        (movement = replay.cursorMoves.get(i).movements[cIndex]).getTime() <= (elapsedTime + dt / 4) * 1000
+                    cIndex < moveArray.size && (movement = moveArray.movements[cIndex]).getTime() <= replayCatchUpTimeMs
                 ) {
                     var event = CursorEvent.obtain();
 
@@ -1470,11 +1474,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     replay.cursorIndex[i]++;
                     cIndex++;
                 }
+
                 // Interpolating cursor movements
                 if (movement != null && movement.getTouchType() == TouchType.MOVE && replay.lastMoveIndex[i] >= 0) {
                     final int lIndex = replay.lastMoveIndex[i];
-                    final Replay.ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
-                    float t = (elapsedTime * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
+                    final Replay.ReplayMovement lastMovement = moveArray.movements[lIndex];
+                    int movementTime = movement.getTime();
+                    int lastMovementTime = lastMovement.getTime();
+                    int duration = lastMovementTime - movementTime;
+
+                    if (duration == 0) {
+                        continue;
+                    }
+
+                    float t = (replayTimeMs - movementTime) / duration;
 
                     var event = CursorEvent.obtain();
 
