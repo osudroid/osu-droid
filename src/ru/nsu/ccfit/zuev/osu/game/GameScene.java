@@ -1509,7 +1509,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     sprite.setShowing(!latestEvent.isActionUp());
                 }
 
-                if (cursor.getLatestEvent(TouchEvent.ACTION_DOWN) != null) {
+                if (cursor.getLatestDownEvent() != null) {
                     sprite.click();
                 }
             }
@@ -1529,7 +1529,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                     for (int i = 0; i < cursors.length; ++i) {
                         var c = cursors[i];
-                        var latestCursorDownEvent = c.getLatestEvent(TouchEvent.ACTION_DOWN);
+                        var latestCursorDownEvent = c.getLatestDownEvent();
 
                         if (latestCursorDownEvent == null) {
                             continue;
@@ -1548,7 +1548,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 if (mainCursorId != -1) {
                     var cursor = cursors[mainCursorId];
-                    var latestNonUpEvent = cursor.getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
+                    var latestNonUpEvent = cursor.getLatestNonUpEvent();
 
                     if (latestNonUpEvent != null) {
                         flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
@@ -1923,7 +1923,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             skipBtn = null;
         } else if (skipBtn != null) {
             for (int i = 0; i < cursors.length; ++i) {
-                var latestDownEvent = cursors[i].getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
+                var latestDownEvent = cursors[i].getLatestNonUpEvent();
 
                 if (latestDownEvent != null && Utils.squaredDistance(latestDownEvent.position.x, latestDownEvent.position.y,
                         Config.getRES_WIDTH(), Config.getRES_HEIGHT()) < 250 * 250) {
@@ -2265,7 +2265,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
            int nearestCursorId = getNearestCursorId(pos.x, pos.y);
            if (nearestCursorId >= 0) {
                mainCursorId = nearestCursorId;
-               var latestNonUpEvent = cursors[mainCursorId].getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
+               var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
 
                if (latestNonUpEvent != null) {
                    flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
@@ -2307,7 +2307,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
             if (nearestCursorId >= 0) {
                 mainCursorId = nearestCursorId;
-                var latestNonUpEvent = cursors[mainCursorId].getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
+                var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
 
                 if (latestNonUpEvent != null) {
                     flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
@@ -3060,7 +3060,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         int id = -1;
 
         for (int i = 0; i < cursors.length; ++i) {
-            var latestEvent = cursors[i].getLatestEvent(TouchEvent.ACTION_DOWN, TouchEvent.ACTION_MOVE);
+            var latestEvent = cursors[i].getLatestNonUpEvent();
 
             if (latestEvent != null) {
                 float distance = Utils.squaredDistance(pX, pY, latestEvent.position.x, latestEvent.position.y);
