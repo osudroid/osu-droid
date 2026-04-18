@@ -370,8 +370,10 @@ public class SliderBody extends UIContainer {
         if (hint != null && hint.isVisible()) {
             float width = Math.min(hintWidth, backgroundWidth - borderWidth);
 
-            if (!buildFastLayer(hint, cache.hint, width,
-                segmentIndex, segmentStart, cutPoint, segmentTheta)) {
+            if (width <= 0) {
+                clearLayer(hint);
+            } else if (!buildFastLayer(hint, cache.hint, width, segmentIndex, segmentStart, cutPoint,
+                    segmentTheta)) {
                 return false;
             }
         }
@@ -412,8 +414,10 @@ public class SliderBody extends UIContainer {
         if (hint != null && hint.isVisible()) {
             float width = Math.min(hintWidth, backgroundWidth - borderWidth);
 
-            if (!buildFastLayerFromStart(hint, cache.hint, width,
-                segmentIndex, segmentEnd, cutPoint, segmentTheta)) {
+            if (width <= 0) {
+                clearLayer(hint);
+            } else if (!buildFastLayerFromStart(hint, cache.hint, width, segmentIndex, segmentEnd, cutPoint,
+                    segmentTheta)) {
                 return false;
             }
         }
@@ -507,6 +511,15 @@ public class SliderBody extends UIContainer {
         builder.applyVertices(target.getVertices());
         target.setContentSize(builder.maxX, builder.maxY);
         return true;
+    }
+
+    private void clearLayer(UITriangleMesh target) {
+        if (target == null) {
+            return;
+        }
+
+        target.getVertices().length = 0;
+        target.setContentSize(0, 0);
     }
 
     private int getSegmentIndexForEndLength(float length) {
