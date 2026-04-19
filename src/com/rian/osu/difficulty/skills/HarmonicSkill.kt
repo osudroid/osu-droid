@@ -111,4 +111,15 @@ abstract class HarmonicSkill<TObject : DifficultyHitObject>(mods: Iterable<Mod>)
      * @return The difficulty value of [current].
      */
     protected abstract fun objectDifficultyOf(current: TObject): Double
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = 4 * difficulty.pow(3)
+    }
 }
