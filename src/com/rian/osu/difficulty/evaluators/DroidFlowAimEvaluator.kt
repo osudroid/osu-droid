@@ -80,7 +80,7 @@ object DroidFlowAimEvaluator {
         if (currentAngle != null && lastAngle != null) {
             // Acute angles are harder to flow.
             // Square root velocity to ensure acute angle switches in streams are not assessed as harder than snap.
-            difficulty *= sqrt(currentVelocity) * DroidSnapAimEvaluator.calculateAcuteAngleBonus(currentAngle) * overlappedNotesWeight
+            difficulty *= sqrt(currentVelocity) * DroidSnapAimEvaluator.calculateAcuteAngleAcuteness(currentAngle) * overlappedNotesWeight
         }
 
         if (max(currentVelocity, prevVelocity) > 0) {
