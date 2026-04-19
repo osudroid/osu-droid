@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.calculator
 import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes
 import com.rian.osu.difficulty.attributes.StandardPerformanceAttributes
+import com.rian.osu.difficulty.skills.HarmonicSkill
 import com.rian.osu.difficulty.skills.StrainSkill
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.ErrorFunction
@@ -42,6 +43,7 @@ class StandardPerformanceCalculator(
     private var approachRate = 0.0
     private var overallDifficulty = 0.0
 
+    private var aimEstimatedSliderBreaks = 0.0
     private var effectiveMissCount = 0.0
     private var speedDeviation = 0.0
 
@@ -60,7 +62,7 @@ class StandardPerformanceCalculator(
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
             val okMultiplier = 0.75 * max(0.0, if (od > 0) 1 - (od / 13.33).pow(1.8) else 1.0)
-            val mehMultiplier = max(0.0, if (od > 0) 1 - (od / 13.33).pow(5.0) else 1.0)
+            val mehMultiplier = max(0.0, if (od > 0) 1 - (od / 13.33).pow(5) else 1.0)
 
             // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
             // than total hits in specific scenarios (which breaks some calculations),  so we need to clamp it.
@@ -77,14 +79,20 @@ class StandardPerformanceCalculator(
         approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(difficultyAttributes.approachRate, difficultyAttributes.clockRate)
         overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od, difficultyAttributes.clockRate)
 
+        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(difficultyAttributes.aimTopWeightedSliderFactor)
         speedDeviation = calculateSpeedDeviation()
 
         it.effectiveMissCount = effectiveMissCount
+
         it.aim = calculateAimValue()
         it.speed = calculateSpeedValue()
         it.accuracy = calculateAccuracyValue()
         it.flashlight = calculateFlashlightValue()
-        it.total = (it.aim.pow(1.1) + it.speed.pow(1.1) + it.accuracy.pow(1.1) + it.flashlight.pow(1.1)).pow(1 / 1.1) * multiplier
+        it.reading = calculateReadingValue()
+
+        val cognitionValue = StandardDifficultyCalculator.sumCognitionDifficulty(it.reading, it.flashlight)
+
+        it.total = DifficultyCalculationUtils.norm(NORM_EXPONENT, it.aim, it.speed, it.accuracy, cognitionValue) * multiplier
     }
 
     private fun calculateAimValue(): Double {
@@ -117,27 +125,18 @@ class StandardPerformanceCalculator(
         var aimValue = StrainSkill.difficultyToPerformance(aimDifficulty)
 
         // Longer maps are worth more
-        val lengthBonus = 0.95 + 0.4 * min(1.0, totalHits / 2000.0) +
+        val lengthBonus = 0.95 + 0.35 * min(1.0, totalHits / 2000.0) +
                 if (totalHits > 2000) log10(totalHits / 2000.0) * 0.5 else 0.0
 
         aimValue *= lengthBonus
 
-        val aimTopWeightedSliderFactor = difficultyAttributes.aimTopWeightedSliderFactor
-        val aimDifficultStrainCount = difficultyAttributes.aimDifficultStrainCount
-
         if (effectiveMissCount > 0) {
-            val aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(aimTopWeightedSliderFactor)
             val relevantMissCount = min(effectiveMissCount + aimEstimatedSliderBreaks, totalImperfectHits + comboBreakingSliderNestedMisses.toDouble())
-
-            aimValue *= calculateMissPenalty(relevantMissCount, aimDifficultStrainCount)
+            aimValue *= calculateMissPenalty(relevantMissCount, difficultyAttributes.aimDifficultStrainCount)
         }
 
         if (difficultyAttributes.mods.any { it is ModTraceable }) {
-            aimValue *= 1 + StandardRatingCalculator.calculateVisibilityBonus(
-                difficultyAttributes.mods,
-                approachRate,
-                difficultyAttributes.aimSliderFactor
-            )
+            aimValue *= 1 + calculateTraceableBonus(difficultyAttributes.aimSliderFactor)
         }
 
         // Scale the aim value with accuracy.
@@ -153,12 +152,6 @@ class StandardPerformanceCalculator(
 
         var speedValue = StrainSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
 
-        // Longer maps are worth more
-        val lengthBonus = 0.95 + 0.4 * min(1.0, totalHits / 2000.0) +
-                if (totalHits > 2000) log10(totalHits / 2000.0) * 0.5 else 0.0
-
-        speedValue *= lengthBonus
-
         if (effectiveMissCount > 0) {
             val speedEstimatedSliderBreaks = calculateEstimatedSliderBreaks(difficultyAttributes.speedTopWeightedSliderFactor)
             val relevantMissCount = min(effectiveMissCount + speedEstimatedSliderBreaks, totalImperfectHits + comboBreakingSliderNestedMisses.toDouble())
@@ -167,22 +160,20 @@ class StandardPerformanceCalculator(
         }
 
         if (difficultyAttributes.mods.any { it is ModTraceable }) {
-            speedValue *= 1 + StandardRatingCalculator.calculateVisibilityBonus(difficultyAttributes.mods, approachRate)
+            speedValue *= 1 + calculateTraceableBonus()
         }
-
-        // Calculate accuracy assuming the worst case scenario.
-        val relevantTotalDiff = totalHits - difficultyAttributes.speedNoteCount
-        val relevantCountGreat = max(0.0, countGreat - relevantTotalDiff)
-        val relevantCountOk = max(0.0, countOk - max(0.0, relevantTotalDiff - countGreat))
-        val relevantCountMeh = max(0.0, countMeh - max(0.0, relevantTotalDiff - countGreat - countOk))
-        val relevantAccuracy =
-            if (difficultyAttributes.speedNoteCount == 0.0) 0.0
-            else (relevantCountGreat * 6 + relevantCountOk * 2 + relevantCountMeh) / (difficultyAttributes.speedNoteCount * 6)
 
         speedValue *= calculateSpeedHighDeviationNerf()
 
-        // Scale the speed value with accuracy.
-        speedValue *= ((accuracy + relevantAccuracy) / 2).pow((14.5 - overallDifficulty) / 2)
+        // An effective hit window is created based on the speed SR. The higher the speed difficulty, the shorter the hit window.
+        // For example, a speed SR of 4 leads to an effective hit window of 20ms, which is OD 10.
+        val effectiveHitWindow = 20 * (4 / difficultyAttributes.speedDifficulty).pow(0.35)
+
+        // Find the proportion of 300s on speed notes assuming the hit window was the effective hit window.
+        val effectiveAccuracy = ErrorFunction.erfFast(effectiveHitWindow / speedDeviation)
+
+        // Scale speed value by normalized accuracy.
+        speedValue *= effectiveAccuracy.pow(2)
 
         return speedValue
     }
@@ -207,7 +198,7 @@ class StandardPerformanceCalculator(
         var accuracyValue = 1.52163.pow(overallDifficulty) * betterAccuracyPercentage.pow(24.0) * 2.83
 
         // Bonus for many hit circles - it's harder to keep good accuracy up for longer
-        accuracyValue *= min(1.15, (hitObjectWithAccuracyCount / 1000.0).pow(0.3))
+        accuracyValue *= (hitObjectWithAccuracyCount / 1000.0).pow(if (hitObjectWithAccuracyCount < 1000) 0.3 else 0.1)
 
         if (mods.any { it is ModHidden || it is ModTraceable }) {
             // Decrease bonus for AR>10.
@@ -239,6 +230,20 @@ class StandardPerformanceCalculator(
         flashlightValue *= 0.5 + accuracy / 2
 
         flashlightValue
+    }
+
+    private fun calculateReadingValue() = difficultyAttributes.run {
+        var readingValue = HarmonicSkill.difficultyToPerformance(readingDifficulty)
+
+        if (effectiveMissCount > 0) {
+            readingValue *=
+                calculateMissPenalty(effectiveMissCount + aimEstimatedSliderBreaks, readingDifficultNoteCount)
+        }
+
+        // Scale the reading value with accuracy _harshly_.
+        readingValue *= accuracy.pow(3)
+
+        readingValue
     }
 
     /**
@@ -353,7 +358,7 @@ class StandardPerformanceCalculator(
     // to make it more punishing on maps with lower amount of hard sections.
     private fun calculateMissPenalty(missCount: Double, difficultStrainCount: Double) =
         if (missCount == 0.0) 1.0
-        else 0.96 / (missCount / (4 * ln(difficultStrainCount).pow(0.94)) + 1)
+        else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
 
     private fun calculateEstimatedSliderBreaks(topWeightedSliderFactor: Double): Double {
         if (!usingClassicSliderCalculation || countOk == 0) {
@@ -405,12 +410,36 @@ class StandardPerformanceCalculator(
         missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
     }
 
+    private fun calculateTraceableBonus(sliderFactor: Double = 1.0): Double {
+        // We want to reward slider aim less, more so at lower AR.
+        val highApproachRateSliderVisibilityFactor = 0.5 + sliderFactor.pow(6) / 2
+        val lowApproachRateSliderVisibilityFactor = sliderFactor.pow(6)
+
+        var traceableBonus = 0.0275
+
+        // Start from normal curve, rewarding lower AR up to AR7.
+        traceableBonus += 0.025 * (12.0 - max(approachRate, 7.0)) * highApproachRateSliderVisibilityFactor
+
+        // For AR up to 0 - reduce reward for very low ARs when object is visible.
+        if (approachRate < 7) {
+            traceableBonus += 0.025 * (7 - max(approachRate, 0.0)) * lowApproachRateSliderVisibilityFactor
+        }
+
+        // Starting from AR0 - cap values so they won't grow to infinity.
+        if (approachRate < 0) {
+            traceableBonus += 0.025 * (1 - 1.5.pow(approachRate)) * lowApproachRateSliderVisibilityFactor
+        }
+
+        return traceableBonus
+    }
+
     private val comboScalingFactor by lazy {
         if (difficultyAttributes.maxCombo <= 0) 0.0
         else min((scoreMaxCombo.toDouble() / difficultyAttributes.maxCombo).pow(0.8), 1.0)
     }
 
     companion object {
-        const val FINAL_MULTIPLIER = 1.14
+        const val FINAL_MULTIPLIER = 1.12
+        const val NORM_EXPONENT = 1.1
     }
 }
