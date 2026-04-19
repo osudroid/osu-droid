@@ -182,6 +182,7 @@ object StandardAimEvaluator {
     /**
      * Calculates the bonus of acute angles.
      */
-    private fun calculateAcuteAngleBonus(angle: Double) =
+    @JvmStatic
+    fun calculateAcuteAngleBonus(angle: Double) =
         DifficultyCalculationUtils.smoothstep(angle, 140.0.toRadians(), 40.0.toRadians())
 }
