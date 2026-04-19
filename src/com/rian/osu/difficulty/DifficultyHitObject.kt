@@ -181,6 +181,12 @@ abstract class DifficultyHitObject(
     val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200.0) * 2 / clockRate
 
     /**
+     * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
+     */
+    @JvmField
+    val timePreempt = obj.timePreempt / clockRate
+
+    /**
      * Selective bonus for beatmaps with higher circle size.
      */
     abstract val smallCircleBonus: Double

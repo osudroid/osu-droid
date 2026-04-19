@@ -48,12 +48,6 @@ class DroidDifficultyHitObject(
     @JvmField
     var rhythmMultiplier = 1.0
 
-    /**
-     * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
-     */
-    @JvmField
-    val timePreempt = obj.timePreempt / clockRate
-
     override fun previous(backwardsIndex: Int) = if (index - backwardsIndex >= 0) difficultyHitObjects[index - backwardsIndex] else null
 
     override fun next(forwardsIndex: Int) = if (index + forwardsIndex + 2 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 2] else null
