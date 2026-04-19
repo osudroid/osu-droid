@@ -35,6 +35,8 @@ class DroidAim(
      */
     val withSliders: Boolean
 ) : VariableLengthStrainSkill<DroidDifficultyHitObject>(mods) {
+    val sliderVelocities = mutableListOf<DifficultSlider>()
+
     private var currentStrain = 0.0
 
     private val skillMultiplierSnap = 71.0
@@ -94,8 +96,14 @@ class DroidAim(
         currentStrain += totalDifficulty * (1 - decay)
 
         if (current.obj is Slider) {
-            sliderStrains.add(currentStrain)
+            sliderStrains += currentStrain
             maxSliderStrain = max(maxSliderStrain, currentStrain)
+
+            val velocity = current.travelDistance / current.travelTime
+
+            if (velocity > 0) {
+                sliderVelocities += DifficultSlider(current.index + 1, velocity)
+            }
         }
 
         return currentStrain
@@ -210,10 +218,10 @@ class DroidAim(
                     Interpolation.linear(1.0, 10.0, ((time + addedTime) / reducedSectionTime).coerceIn(0.0, 1.0))
                 )
 
-                strains.add(StrainPeak(
+                strains += StrainPeak(
                     value = strain.value * Interpolation.linear(reducedSectionBaseline, 1.0, scale),
                     sectionLength = min(chunkSize, strain.sectionLength - addedTime)
-                ))
+                )
             }
 
             time += strain.sectionLength

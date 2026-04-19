@@ -90,7 +90,7 @@ class StandardAim(
         currentStrain += totalDifficulty * (1 - decay)
 
         if (current.obj is Slider) {
-            sliderStrains.add(currentStrain)
+            sliderStrains += currentStrain
             maxSliderStrain = max(maxSliderStrain, currentStrain)
         }
 
@@ -201,10 +201,10 @@ class StandardAim(
                     Interpolation.linear(1.0, 10.0, ((time + addedTime) / reducedSectionTime).coerceIn(0.0, 1.0))
                 )
 
-                strains.add(StrainPeak(
+                strains += StrainPeak(
                     value = strain.value * Interpolation.linear(reducedSectionBaseline, 1.0, scale),
                     sectionLength = min(chunkSize, strain.sectionLength - addedTime)
-                ))
+                )
             }
 
             time += strain.sectionLength
