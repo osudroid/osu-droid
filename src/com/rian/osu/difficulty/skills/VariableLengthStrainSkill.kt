@@ -98,7 +98,7 @@ abstract class VariableLengthStrainSkill<TObject : DifficultyHitObject>(mods: It
             time = endTime
         }
 
-        return difficulty
+        return difficulty / (1 - decayWeight)
     }
 
     /**
