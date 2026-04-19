@@ -239,4 +239,15 @@ abstract class VariableLengthStrainSkill<TObject : DifficultyHitObject>(mods: It
         // peak level.
         currentSectionPeak = calculateInitialStrain(time, current)
     }
+
+    companion object {
+        /**
+         * Converts a difficulty value to a performance value.
+         *
+         * @param difficulty The difficulty value.
+         * @return The performance value.
+         */
+        @JvmStatic
+        fun difficultyToPerformance(difficulty: Double) = 4 * difficulty.pow(3)
+    }
 }
