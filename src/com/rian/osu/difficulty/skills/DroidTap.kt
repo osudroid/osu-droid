@@ -1,7 +1,9 @@
 package com.rian.osu.difficulty.skills
 
+import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.DroidTapEvaluator
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.max
@@ -26,62 +28,86 @@ class DroidTap(
      * The strain time to cap to.
      */
     val strainTimeCap: Double? = null
-) : DroidStrainSkill(mods) {
-    override val starsPerDouble = 1.1
+) : HarmonicSkill<DroidDifficultyHitObject>(mods) {
+    override val harmonicScale = 20.0
 
-    private var currentStrain = 0.0
+    private var currentDifficulty = 0.0
+    private var maxDifficulty = 0.0
     private var currentRhythm = 0.0
-
-    private val skillMultiplier = 1.375
+    private val skillMultiplier = 1.16
     private val strainDecayBase = 0.3
 
     private val objectDeltaTimes = mutableListOf<Double>()
-    private var maxStrain = 0.0
+    private val sliderDifficulties = mutableListOf<Double>()
 
     /**
      * Gets the amount of notes that are relevant to the difficulty.
      */
     fun relevantNoteCount(): Double {
-        if (objectDifficulties.isEmpty() || maxStrain == 0.0) {
+        if (objectDifficulties.isEmpty() || maxDifficulty == 0.0) {
             return 0.0
         }
 
-        return objectDifficulties.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        return objectDifficulties.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxDifficulty * 12 - 6))) }
     }
 
     /**
      * Gets the delta time relevant to the difficulty.
      */
     fun relevantDeltaTime(): Double {
-        if (objectDifficulties.isEmpty() || maxStrain == 0.0) {
+        if (objectDifficulties.isEmpty() || maxDifficulty == 0.0) {
             return 0.0
         }
 
         return objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
-            acc + d / (1 + exp(-(objectDifficulties[i] / maxStrain * 25 - 20)))
+            acc + d / (1 + exp(-(objectDifficulties[i] / maxDifficulty * 25 - 20)))
         } / objectDifficulties.fold(0.0) { acc, d ->
-            acc + 1 / (1 + exp(-(d / maxStrain * 25 - 20)))
+            acc + 1 / (1 + exp(-(d / maxDifficulty * 25 - 20)))
         }
     }
 
-    override fun strainValueAt(current: DroidDifficultyHitObject): Double {
-        currentStrain *= strainDecay(current.strainTime)
-        currentStrain += DroidTapEvaluator.evaluateDifficultyOf(
-            current, considerCheesability, strainTimeCap
-        ) * skillMultiplier
+    /**
+     * Obtains the amount of sliders that are considered difficult in terms of relative difficulty, weighted by consistency.
+     *
+     * @param difficultyValue The final difficulty value.
+     */
+    fun countTopWeightedSliders(difficultyValue: Double): Double {
+        if (sliderDifficulties.isEmpty() || noteWeightSum == 0.0) {
+            return 0.0
+        }
+
+        // What would the top note be if all note values were identical
+        val consistentTopNote = difficultyValue / noteWeightSum
+
+        if (consistentTopNote == 0.0) {
+            return 0.0
+        }
+
+        // Use a weighted sum of all notes. Constants are arbitrary and give nice values
+        return sliderDifficulties.sumOf {
+            DifficultyCalculationUtils.logistic(it / consistentTopNote, 0.88, 10.0, 1.1)
+        }
+    }
+
+    override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
+        val decay = strainDecay(current.strainTime)
+
+        currentDifficulty *= decay
+        currentDifficulty += DroidTapEvaluator.evaluateDifficultyOf(current, considerCheesability, strainTimeCap) * (1 - decay) * skillMultiplier
 
         currentRhythm = current.rhythmMultiplier
 
-        val totalStrain = currentStrain * currentRhythm
+        val difficulty = currentDifficulty * currentRhythm
 
-        maxStrain = max(maxStrain, totalStrain)
+        maxDifficulty = max(maxDifficulty, difficulty)
         objectDeltaTimes.add(current.deltaTime)
 
-        return totalStrain
-    }
+        if (current.obj is Slider) {
+            sliderDifficulties.add(difficulty)
+        }
 
-    override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =
-        currentStrain * currentRhythm * strainDecay(time - current.previous(0)!!.startTime)
+        return difficulty
+    }
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
 }
