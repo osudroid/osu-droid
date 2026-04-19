@@ -4,7 +4,9 @@ import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes
 import com.rian.osu.difficulty.attributes.StandardPerformanceAttributes
 import com.rian.osu.difficulty.skills.HarmonicSkill
+import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StrainSkill
+import com.rian.osu.difficulty.skills.VariableLengthStrainSkill
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.ErrorFunction
 import com.rian.osu.math.Interpolation
@@ -122,7 +124,7 @@ class StandardPerformanceCalculator(
                         difficultyAttributes.aimSliderFactor
         }
 
-        var aimValue = StrainSkill.difficultyToPerformance(aimDifficulty)
+        var aimValue = VariableLengthStrainSkill.difficultyToPerformance(aimDifficulty)
 
         // Longer maps are worth more
         val lengthBonus = 0.95 + 0.35 * min(1.0, totalHits / 2000.0) +
@@ -150,7 +152,7 @@ class StandardPerformanceCalculator(
             return 0.0
         }
 
-        var speedValue = StrainSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
+        var speedValue = HarmonicSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
 
         if (effectiveMissCount > 0) {
             val speedEstimatedSliderBreaks = calculateEstimatedSliderBreaks(difficultyAttributes.speedTopWeightedSliderFactor)
@@ -217,7 +219,7 @@ class StandardPerformanceCalculator(
             return@run 0.0
         }
 
-        var flashlightValue = flashlightDifficulty.pow(2.0) * 25
+        var flashlightValue = StandardFlashlight.difficultyToPerformance(flashlightDifficulty)
 
         if (effectiveMissCount > 0) {
             // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of misses.
@@ -333,7 +335,7 @@ class StandardPerformanceCalculator(
             return 0.0
         }
 
-        val speedValue = StrainSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
+        val speedValue = HarmonicSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
 
         // Decide a point where the PP value achieved compared to the speed deviation is assumed to be tapped
         // improperly. Any PP above this point is considered "excess" speed difficulty. This is used to cause
