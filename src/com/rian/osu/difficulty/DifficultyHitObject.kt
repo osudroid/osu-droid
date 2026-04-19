@@ -239,10 +239,11 @@ abstract class DifficultyHitObject(
      * Calculates the opacity of the hit object at a given time.
      *
      * @param time The time to calculate the hit object's opacity at.
-     * @param mods The mods used.
+     * @param mods The mods used. Defaults to No Mod.
      * @return The opacity of the hit object at the given time.
      */
-    open fun opacityAt(time: Double, mods: Iterable<Mod>): Double {
+    @JvmOverloads
+    open fun opacityAt(time: Double, mods: Iterable<Mod>? = null): Double {
         if (time > obj.startTime) {
             // Consider a hit object as being invisible when its start time is passed.
             // In reality the hit object will be visible beyond its start time up until its hittable window has passed,
@@ -254,7 +255,7 @@ abstract class DifficultyHitObject(
         val fadeInDuration = obj.timeFadeIn
         val nonHiddenOpacity = ((time - fadeInStartTime) / fadeInDuration).coerceIn(0.0, 1.0)
 
-        if (mods.any { it is ModHidden }) {
+        if (mods?.any { it is ModHidden } == true) {
             val fadeOutStartTime = fadeInStartTime + fadeInDuration
             val fadeOutDuration = obj.timePreempt * ModHidden.FADE_OUT_DURATION_MULTIPLIER
 
