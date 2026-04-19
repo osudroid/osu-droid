@@ -20,12 +20,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var rhythmDifficulty = 0.0
 
     /**
-     * The difficulty corresponding to the reading skill.
-     */
-    @JvmField
-    var readingDifficulty = 0.0
-
-    /**
      * The amount of strains that are considered difficult with respect to the tap skill.
      */
     @JvmField
@@ -36,12 +30,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var flashlightDifficultStrainCount = 0.0
-
-    /**
-     * The amount of notes that are considered difficult with respect to the reading skill.
-     */
-    @JvmField
-    var readingDifficultNoteCount = 0.0
 
     /**
      * The average delta time of speed objects.

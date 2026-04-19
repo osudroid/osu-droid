@@ -11,12 +11,6 @@ class DroidPerformanceAttributes : PerformanceAttributes() {
     var tap = 0.0
 
     /**
-     * The reading performance value.
-     */
-    @JvmField
-    var reading = 0.0
-
-    /**
      * The tap penalty used to penalize the tap performance value.
      */
     @JvmField
