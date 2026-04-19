@@ -21,14 +21,6 @@ abstract class DroidStrainSkill(
      */
     protected abstract val starsPerDouble: Double
 
-    override fun process(current: DroidDifficultyHitObject) {
-        if (current.index < 0) {
-            return
-        }
-
-        super.process(current)
-    }
-
     override fun difficultyValue() = currentStrainPeaks.run {
         // We are reducing the highest strains first to account for extreme difficulty spikes.
         reduceHighestStrainPeaks(this)

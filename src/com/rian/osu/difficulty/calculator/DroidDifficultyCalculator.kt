@@ -214,7 +214,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             val prev = objects[i - 1]
             val prevPrev = objects[i - 2]
 
-            val currentStrain = tapNoCheese.objectStrains[i]
+            val currentStrain = tapNoCheese.objectDifficulties[i]
 
             if (!inSpeedSection && currentStrain >= threeFingerStrainThreshold) {
                 inSpeedSection = true
@@ -246,7 +246,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 possibleThreeFingeredSections.add(HighStrainSection(
                     firstSpeedObjectIndex,
                     lastSpeedObjectIndex,
-                    calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
                 ))
             }
         }

@@ -62,7 +62,6 @@ class DroidAim(
             maxSliderStrain = max(maxSliderStrain, currentStrain)
         }
 
-        objectStrains.add(currentStrain)
         return currentStrain
     }
 

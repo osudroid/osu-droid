@@ -55,7 +55,6 @@ class StandardAim(
             maxSliderStrain = max(maxSliderStrain, currentStrain)
         }
 
-        objectStrains.add(currentStrain)
         return currentStrain
     }
 

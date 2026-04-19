@@ -35,7 +35,6 @@ class DroidFlashlight(
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods, withSliders) * skillMultiplier
 
-        objectStrains.add(currentStrain)
         return currentStrain
     }
 

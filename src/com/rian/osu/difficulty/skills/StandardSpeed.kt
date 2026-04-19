@@ -33,11 +33,11 @@ class StandardSpeed(
      * Calculates the number of clickable objects weighted by difficulty.
      */
     fun relevantNoteCount(): Double {
-        if (objectStrains.isEmpty() || maxStrain == 0.0) {
+        if (objectDifficulties.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
-        return objectStrains.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        return objectDifficulties.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
     fun countTopWeightedSliders() = StrainUtils.countTopWeightedSliders(sliderStrains, difficulty)
@@ -50,7 +50,6 @@ class StandardSpeed(
         val totalStrain = currentStrain * currentRhythm
 
         maxStrain = max(maxStrain, totalStrain)
-        objectStrains.add(totalStrain)
 
         if (current.obj is Slider) {
             sliderStrains.add(totalStrain)

@@ -18,8 +18,6 @@ class DroidReading(
     private val clockRate: Double,
     private val hitObjects: List<HitObject>
 ) : Skill<DroidDifficultyHitObject>(mods) {
-    private val noteDifficulties = mutableListOf<Double>()
-
     private val strainDecayBase = 0.8
     private val skillMultiplier = 2.0
 
@@ -28,11 +26,11 @@ class DroidReading(
     private var difficulty = 0.0
     private var noteWeightSum = 0.0
 
-    override fun process(current: DroidDifficultyHitObject) {
+    override fun processInternal(current: DroidDifficultyHitObject): Double {
         currentNoteDifficulty *= strainDecay(current.deltaTime)
         currentNoteDifficulty += DroidReadingEvaluator.evaluateDifficultyOf(current, clockRate, mods) * skillMultiplier
 
-        noteDifficulties.add(currentNoteDifficulty * current.rhythmMultiplier)
+        return currentNoteDifficulty * current.rhythmMultiplier
     }
 
     override fun difficultyValue(): Double {
@@ -42,7 +40,7 @@ class DroidReading(
 
         // Notes with 0 difficulty are excluded to avoid worst-case time complexity of the following sort (e.g. /b/2351871).
         // These notes will not contribute to the difficulty.
-        val peaks = noteDifficulties.filter { it > 0 }.toMutableList()
+        val peaks = objectDifficulties.filter { it > 0 }.toMutableList()
 
         // Start time at first object.
         val reducedDuration = hitObjects[0].startTime / clockRate + 60 * 1000
@@ -90,7 +88,7 @@ class DroidReading(
      * Returns the number of relevant objects weighted against the top note.
      */
     fun countTopWeightedNotes(): Double {
-        if (noteDifficulties.isEmpty() || difficulty == 0.0 || noteWeightSum == 0.0) {
+        if (objectDifficulties.isEmpty() || difficulty == 0.0 || noteWeightSum == 0.0) {
             return 0.0
         }
 
@@ -98,7 +96,7 @@ class DroidReading(
         val consistentTopNote = difficulty / noteWeightSum
 
         // Use a weighted sum of all notes. Constants are arbitrary and give nice values
-        return noteDifficulties.fold(0.0) { acc, d ->
+        return objectDifficulties.fold(0.0) { acc, d ->
             acc + 1.1 / (1 + exp(-5 * (d / consistentTopNote - 1.15)))
         }
     }

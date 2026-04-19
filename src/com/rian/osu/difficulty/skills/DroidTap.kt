@@ -42,24 +42,24 @@ class DroidTap(
      * Gets the amount of notes that are relevant to the difficulty.
      */
     fun relevantNoteCount(): Double {
-        if (objectStrains.isEmpty() || maxStrain == 0.0) {
+        if (objectDifficulties.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
-        return objectStrains.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        return objectDifficulties.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
     /**
      * Gets the delta time relevant to the difficulty.
      */
     fun relevantDeltaTime(): Double {
-        if (objectStrains.isEmpty() || maxStrain == 0.0) {
+        if (objectDifficulties.isEmpty() || maxStrain == 0.0) {
             return 0.0
         }
 
         return objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
-            acc + d / (1 + exp(-(objectStrains[i] / maxStrain * 25 - 20)))
-        } / objectStrains.fold(0.0) { acc, d ->
+            acc + d / (1 + exp(-(objectDifficulties[i] / maxStrain * 25 - 20)))
+        } / objectDifficulties.fold(0.0) { acc, d ->
             acc + 1 / (1 + exp(-(d / maxStrain * 25 - 20)))
         }
     }
@@ -75,7 +75,6 @@ class DroidTap(
         val totalStrain = currentStrain * currentRhythm
 
         maxStrain = max(maxStrain, totalStrain)
-        objectStrains.add(totalStrain)
         objectDeltaTimes.add(current.deltaTime)
 
         return totalStrain

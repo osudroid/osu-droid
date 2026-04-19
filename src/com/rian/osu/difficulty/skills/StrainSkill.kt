@@ -33,11 +33,6 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     protected open val reducedSectionBaseline = 0.75
 
-    /**
-     * All [DifficultyHitObject] strains.
-     */
-    val objectStrains = mutableListOf<Double>()
-
     protected var difficulty = 0.0
 
     private val strainPeaks = mutableListOf<Double>()
@@ -45,7 +40,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
     private var currentSectionEnd = 0.0
     private val sectionLength = 400
 
-    override fun process(current: TObject) {
+    override fun processInternal(current: TObject): Double {
         // The first object doesn't generate a strain, so we begin with an incremented section end
         if (current.index == 0) {
             currentSectionEnd = calculateCurrentSectionStart(current)
@@ -57,7 +52,11 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
             currentSectionEnd += sectionLength
         }
 
-        currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
+        val strain = strainValueAt(current)
+
+        currentSectionPeak = max(strain, currentSectionPeak)
+
+        return strain
     }
 
     /**
@@ -81,11 +80,11 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         val consistentTopStrain = difficulty / 10
 
         if (consistentTopStrain == 0.0) {
-            return objectStrains.size.toDouble()
+            return objectDifficulties.size.toDouble()
         }
 
         // Use a weighted sum of all strains.
-        return objectStrains.fold(0.0) { acc, strain ->
+        return objectDifficulties.fold(0.0) { acc, strain ->
             acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
         }
     }
