@@ -2,7 +2,7 @@ package com.rian.osu.difficulty.skills
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.StandardDifficultyHitObject
-import com.rian.osu.difficulty.evaluators.StandardAimEvaluator.evaluateDifficultyOf
+import com.rian.osu.difficulty.evaluators.StandardSnapAimEvaluator.evaluateDifficultyOf
 import com.rian.osu.difficulty.utils.StrainUtils
 import com.rian.osu.mods.Mod
 import kotlin.math.exp

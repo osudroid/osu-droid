@@ -3,7 +3,7 @@ package com.rian.osu.difficulty.skills
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultSlider
-import com.rian.osu.difficulty.evaluators.DroidAimEvaluator
+import com.rian.osu.difficulty.evaluators.DroidSnapAimEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.max
@@ -49,7 +49,7 @@ class DroidAim(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplier
+        currentStrain += DroidSnapAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplier
 
         val velocity = current.travelDistance / current.travelTime
 
