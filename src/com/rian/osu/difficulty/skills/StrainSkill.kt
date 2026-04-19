@@ -4,7 +4,6 @@ import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.ceil
-import kotlin.math.exp
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
@@ -65,29 +64,6 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     val currentStrainPeaks
         get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
-
-    /**
-     * Returns the number of strains weighed against the top strain.
-     *
-     * The result is scaled by clock rate as it affects the total number of strains.
-     */
-    fun countTopWeightedStrains(): Double {
-        if (difficulty == 0.0) {
-            return 0.0
-        }
-
-        // This is what the top strain is if all strain values were identical.
-        val consistentTopStrain = difficulty / 10
-
-        if (consistentTopStrain == 0.0) {
-            return objectDifficulties.size.toDouble()
-        }
-
-        // Use a weighted sum of all strains.
-        return objectDifficulties.fold(0.0) { acc, strain ->
-            acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
-        }
-    }
 
     /**
      * Reduces the highest strain peaks to account for extreme difficulty spikes based on
