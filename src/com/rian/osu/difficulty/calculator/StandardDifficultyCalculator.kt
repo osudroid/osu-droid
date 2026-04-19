@@ -125,6 +125,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
             skills.add(StandardFlashlight(mods))
         }
 
+        skills.add(StandardReading(mods, beatmap.speedMultiplier.toDouble(), beatmap.hitObjects.objects))
+
         return skills.toTypedArray()
     }
 
