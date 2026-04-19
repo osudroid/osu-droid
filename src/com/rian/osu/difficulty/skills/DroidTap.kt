@@ -22,12 +22,7 @@ class DroidTap(
      * Whether to consider cheesability.
      */
     @JvmField
-    val considerCheesability: Boolean,
-
-    /**
-     * The strain time to cap to.
-     */
-    val strainTimeCap: Double? = null
+    val considerCheesability: Boolean
 ) : HarmonicSkill<DroidDifficultyHitObject>(mods) {
     override val harmonicScale = 20.0
 
@@ -93,7 +88,7 @@ class DroidTap(
         val decay = strainDecay(current.strainTime)
 
         currentDifficulty *= decay
-        currentDifficulty += DroidTapEvaluator.evaluateDifficultyOf(current, considerCheesability, strainTimeCap) * (1 - decay) * skillMultiplier
+        currentDifficulty += DroidTapEvaluator.evaluateDifficultyOf(current, considerCheesability) * (1 - decay) * skillMultiplier
 
         currentRhythm = current.rhythmMultiplier
 
