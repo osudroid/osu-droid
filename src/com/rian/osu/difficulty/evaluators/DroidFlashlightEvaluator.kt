@@ -36,10 +36,9 @@ object DroidFlashlightEvaluator {
      *
      * @param current The current object.
      * @param mods The mods used.
-     * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -107,7 +106,7 @@ object DroidFlashlightEvaluator {
 
         var sliderBonus = 0.0
 
-        if (current.obj is Slider && withSliders) {
+        if (current.obj is Slider) {
             // Invert the scaling factor to determine the true travel distance independent of circle size.
             val pixelTravelDistance = current.lazyTravelDistance / scalingFactor
 
