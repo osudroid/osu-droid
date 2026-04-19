@@ -67,7 +67,7 @@ class StandardSpeed(
         val decay = strainDecay(current.strainTime)
 
         currentDifficulty *= decay
-        currentDifficulty += StandardSpeedEvaluator.evaluateDifficultyOf(current, mods) * (1 - decay) * skillMultiplier
+        currentDifficulty += StandardSpeedEvaluator.evaluateDifficultyOf(current) * (1 - decay) * skillMultiplier
 
         currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
 
