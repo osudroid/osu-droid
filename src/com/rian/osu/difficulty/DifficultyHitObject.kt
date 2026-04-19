@@ -46,6 +46,12 @@ abstract class DifficultyHitObject(
     val index: Int
 ) {
     /**
+     * The normalized distance from the start position of the previous [HitObject] to the start position of this [HitObject].
+     */
+    @JvmField
+    var jumpDistance = 0.0
+
+    /**
      * The normalized distance from the "lazy" end position of the previous [HitObject] to the start position of this
      * [HitObject].
      *
@@ -117,7 +123,22 @@ abstract class DifficultyHitObject(
      * Calculated as the angle between the circles (current-2, current-1, current).
      */
     @JvmField
-    var angle: Double? = null
+    var angleSigned: Double? = null
+
+    /**
+     * Unsigned angle the player has to take to hit this [HitObject].
+     *
+     * Calculated as the angle between the circles (current-2, current-1, current).
+     */
+    val angle
+        get() = angleSigned?.let { abs(it) }
+
+    /**
+     * Angle of the vector created between current and current-1 normalized to consider
+     * symmetrical vectors in any axis to be the same angle.
+     */
+    @JvmField
+    var normalizedVectorAngle: Double? = null
 
     /**
      * The amount of milliseconds elapsed between this [HitObject] and the last [HitObject].
@@ -131,6 +152,15 @@ abstract class DifficultyHitObject(
     // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
     @JvmField
     val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME.toDouble()) else 0.0
+
+    /**
+     * The amount of milliseconds elapsed between the last [HitObject]'s [endTime] and
+     * this [HitObject]'s [startTime] capped to a minimum of [MIN_DELTA_TIME]ms.
+     */
+    @JvmField
+    val lastObjectEndDeltaTime =
+        if (lastObj != null) max((obj.startTime - lastObj.endTime) / clockRate, MIN_DELTA_TIME.toDouble())
+        else 0.0
 
     /**
      * Adjusted start time of the hit object, taking speed multiplier into account.
@@ -244,7 +274,7 @@ abstract class DifficultyHitObject(
         val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
 
         val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
-        val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(2)
+        val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(5)
 
         return 1 - speedRatio.pow(1 - windowRatio)
     }
@@ -252,13 +282,11 @@ abstract class DifficultyHitObject(
     private fun setDistances(clockRate: Double) {
         if (obj is Slider) {
             // Bonus for repeat sliders until a better per nested object strain system can be achieved.
-            travelDistance = lazyTravelDistance * when (mode) {
-                GameMode.Droid -> (1 + obj.repeatCount / 4.0).pow(1 / 4.0)
-                GameMode.Standard -> (1 + obj.repeatCount / 2.5).pow(1 / 2.5)
-            }
-
+            travelDistance = lazyTravelDistance * max(1.0, obj.repeatCount.toDouble().pow(0.3))
             travelTime = max(lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
         }
+
+        minimumJumpTime = strainTime
 
         // We don't need to calculate either angle or distance when one of the last->curr objects
         // is a spinner or there is no object before the current object.
@@ -269,13 +297,12 @@ abstract class DifficultyHitObject(
         // We will scale distances by this factor, so we can assume a uniform circle size among beatmaps.
         val scalingFactor = NORMALIZED_RADIUS / obj.difficultyRadius.toFloat()
 
-        val lastCursorPosition =
+        var lastCursorPosition =
             if (lastDifficultyObject != null) getEndCursorPosition(lastDifficultyObject)
             else lastObj.difficultyStackedPosition
 
-        lazyJumpDistance =
-            (obj.difficultyStackedPosition * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
-        minimumJumpTime = strainTime
+        jumpDistance = obj.difficultyStackedPosition.getDistance(lastObj.difficultyStackedPosition) * scalingFactor.toDouble()
+        lazyJumpDistance = obj.difficultyStackedPosition.getDistance(lastCursorPosition) * scalingFactor.toDouble()
         minimumJumpDistance = lazyJumpDistance
 
         if (lastObj is Slider && lastDifficultyObject != null) {
@@ -317,6 +344,10 @@ abstract class DifficultyHitObject(
         }
 
         if (lastLastDifficultyObject != null && lastLastDifficultyObject.obj !is Spinner) {
+            if (lastDifficultyObject?.obj is Slider && lastDifficultyObject.travelDistance > 0) {
+                lastCursorPosition = lastDifficultyObject.obj.difficultyStackedPosition
+            }
+
             val lastLastCursorPosition = getEndCursorPosition(lastLastDifficultyObject)
             val v1 = lastLastCursorPosition - lastObj.difficultyStackedPosition
             val v2 = obj.difficultyStackedPosition - lastCursorPosition
@@ -324,8 +355,32 @@ abstract class DifficultyHitObject(
             val dot = v1.dot(v2)
             val det = v1.x * v2.y - v1.y * v2.x
 
-            angle = abs(atan2(det.toDouble(), dot.toDouble()))
+            angleSigned = atan2(det.toDouble(), dot.toDouble())
         }
+    }
+
+    private fun calculateAngle(currentPosition: Vector2, lastPosition: Vector2, lastLastPosition: Vector2): Double {
+        val v1 = lastLastPosition - lastPosition
+        val v2 = currentPosition - lastPosition
+
+        val dot = v1.dot(v2)
+        val det = v1.x * v2.y - v1.y * v2.x
+
+        return atan2(det.toDouble(), dot.toDouble())
+    }
+
+    private fun calculateSliderAngle(lastDifficultyObject: DifficultyHitObject, lastLastCursorPosition: Vector2): Double {
+        var lastLastPosition = lastLastCursorPosition
+        val lastPosition = getEndCursorPosition(lastDifficultyObject)
+
+        if (lastDifficultyObject.obj is Slider && lastDifficultyObject.travelDistance > 0) {
+            val secondLastNested = lastDifficultyObject.obj.nestedHitObjects
+            val secondLastNestedObj = secondLastNested[secondLastNested.size - 2]
+
+            lastLastPosition = secondLastNestedObj.difficultyStackedPosition
+        }
+
+        return calculateAngle(obj.difficultyStackedPosition, lastPosition, lastLastPosition)
     }
 
     private fun computeSliderCursorPosition() {
