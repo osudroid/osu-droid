@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.calculator
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.parser.BeatmapParser
 import com.rian.osu.mods.ModDoubleTime
+import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModNoFail
 import com.rian.osu.mods.ModPrecise
 import org.junit.Assert
@@ -36,12 +37,15 @@ class DroidDifficultyCalculatorTest {
 
         calculator.calculate(beatmap).apply {
             // These results are off by a margin from server-side results due to floating point differences.
-            Assert.assertEquals(2.500529087864304, aimDifficulty, 1e-5)
-            Assert.assertEquals(1.4808324669581225, tapDifficulty, 1e-5)
-            Assert.assertEquals(0.812969288725491, rhythmDifficulty, 1e-5)
-            Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
-            Assert.assertEquals(0.7798882536263991, readingDifficulty, 1e-5)
-            Assert.assertEquals(3.8554857722148643, starRating, 1e-6)
+            Assert.assertEquals(1.8692560291811793, aimDifficulty, 1e-5)
+            Assert.assertEquals(1.4861690081466008, tapDifficulty, 1e-5)
+            Assert.assertEquals(0.5515188197970847, rhythmDifficulty, 1e-5)
+            Assert.assertEquals(0.0801694219632239, readingDifficulty, 1e-5)
+            Assert.assertEquals(3.5819989914995958, starRating, 1e-6)
+        }
+
+        calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
+            Assert.assertEquals(1.487806440934379, flashlightDifficulty, 1e-5)
         }
     }
 }
