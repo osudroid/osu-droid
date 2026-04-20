@@ -356,13 +356,18 @@ abstract class DifficultyHitObject(
             }
 
             val lastLastCursorPosition = getEndCursorPosition(lastLastDifficultyObject)
-            val v1 = lastLastCursorPosition - lastObj.difficultyStackedPosition
-            val v2 = obj.difficultyStackedPosition - lastCursorPosition
 
-            val dot = v1.dot(v2)
-            val det = v1.x * v2.y - v1.y * v2.x
+            val angle = calculateAngle(
+                obj.difficultyStackedPosition,
+                lastCursorPosition,
+                lastLastCursorPosition
+            )
 
-            angleSigned = atan2(det.toDouble(), dot.toDouble())
+            val sliderAngle = calculateSliderAngle(lastDifficultyObject!!, lastLastCursorPosition)
+            val v = obj.difficultyStackedPosition - lastCursorPosition
+
+            normalizedVectorAngle = atan2(abs(v.y.toDouble()), abs(v.x.toDouble()))
+            angleSigned = if (abs(angle) <= abs(sliderAngle)) angle else sliderAngle
         }
     }
 
@@ -377,17 +382,17 @@ abstract class DifficultyHitObject(
     }
 
     private fun calculateSliderAngle(lastDifficultyObject: DifficultyHitObject, lastLastCursorPosition: Vector2): Double {
-        var lastLastPosition = lastLastCursorPosition
-        val lastPosition = getEndCursorPosition(lastDifficultyObject)
+        var lastLastCursorPosition = lastLastCursorPosition
+        val lastCursorPosition = getEndCursorPosition(lastDifficultyObject)
 
         if (lastDifficultyObject.obj is Slider && lastDifficultyObject.travelDistance > 0) {
             val secondLastNested = lastDifficultyObject.obj.nestedHitObjects
             val secondLastNestedObj = secondLastNested[secondLastNested.size - 2]
 
-            lastLastPosition = secondLastNestedObj.difficultyStackedPosition
+            lastLastCursorPosition = secondLastNestedObj.difficultyStackedPosition
         }
 
-        return calculateAngle(obj.difficultyStackedPosition, lastPosition, lastLastPosition)
+        return calculateAngle(obj.difficultyStackedPosition, lastCursorPosition, lastLastCursorPosition)
     }
 
     private fun computeSliderCursorPosition() {
