@@ -67,7 +67,7 @@ class BeatmapProcessor @JvmOverloads constructor(
 
             if (it is Slider) {
                 sliderRepeatCount += it.repeatCount
-                sliderTickCount += it.nestedHitObjects.size - 2 - it.repeatCount
+                sliderTickCount += it.tickCount
             }
 
             // Reset stacking

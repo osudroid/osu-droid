@@ -3,7 +3,6 @@ package com.rian.osu.beatmap.sections
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
-import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 
 /**
  * Contains information about hit objects of a beatmap.
@@ -68,7 +67,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
 
             is Slider -> {
                 ++sliderCount
-                sliderTickCount += obj.nestedHitObjects.count { it is SliderTick }
+                sliderTickCount += obj.tickCount
             }
 
             else -> ++spinnerCount
@@ -90,7 +89,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
 
                 is Slider -> {
                     --sliderCount
-                    sliderTickCount -= obj.nestedHitObjects.count { it is SliderTick }
+                    sliderTickCount -= obj.tickCount
                 }
 
                 else -> --spinnerCount
