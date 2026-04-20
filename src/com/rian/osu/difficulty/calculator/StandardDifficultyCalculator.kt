@@ -30,19 +30,20 @@ import kotlinx.coroutines.ensureActive
  */
 class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatmap, StandardDifficultyHitObject, StandardDifficultyAttributes>() {
     override fun createDifficultyAttributes(
-        beatmap: PlayableBeatmap,
+        beatmap: Beatmap,
+        playableBeatmap: PlayableBeatmap,
         skills: Array<Skill<StandardDifficultyHitObject>>,
         objects: Array<StandardDifficultyHitObject>,
         forReplay: Boolean
     ) = StandardDifficultyAttributes().apply {
-        mods = beatmap.mods.values.toSet()
-        clockRate = beatmap.speedMultiplier.toDouble()
-        maxCombo = beatmap.maxCombo
-        hitCircleCount = beatmap.hitObjects.circleCount
-        sliderCount = beatmap.hitObjects.sliderCount
-        spinnerCount = beatmap.hitObjects.spinnerCount
-        approachRate = beatmap.difficulty.ar.toDouble()
-        overallDifficulty = beatmap.difficulty.od.toDouble()
+        mods = playableBeatmap.mods.values.toSet()
+        clockRate = playableBeatmap.speedMultiplier.toDouble()
+        maxCombo = playableBeatmap.maxCombo
+        hitCircleCount = playableBeatmap.hitObjects.circleCount
+        sliderCount = playableBeatmap.hitObjects.sliderCount
+        spinnerCount = playableBeatmap.hitObjects.spinnerCount
+        approachRate = playableBeatmap.difficulty.ar.toDouble()
+        overallDifficulty = playableBeatmap.difficulty.od.toDouble()
 
         val aim = skills.find<StandardAim> { it.withSliders }
         val aimNoSlider = skills.find<StandardAim> { !it.withSliders }
@@ -85,7 +86,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         readingDifficultNoteCount = reading?.countTopWeightedObjectDifficulties(readingDifficultyValue) ?: 0.0
 
         // Final rating
-        val ratingCalculator = StandardRatingCalculator(beatmap.mods, beatmap.hitObjects.objects.size, overallDifficulty)
+        val ratingCalculator = StandardRatingCalculator(playableBeatmap.mods, playableBeatmap.hitObjects.objects.size, overallDifficulty)
 
         aimDifficulty = ratingCalculator.computeAimRating(aimDifficultyValue)
         speedDifficulty = ratingCalculator.computeSpeedRating(speedDifficultyValue)
