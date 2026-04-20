@@ -62,7 +62,7 @@ class StandardAim(
      * @param difficultyValue The final difficulty value.
      */
     fun countTopWeightedSliders(difficultyValue: Double): Double {
-        if (sliderStrains.isEmpty() || maxSliderStrain == 0.0) {
+        if (sliderStrains.isEmpty()) {
             return 0.0
         }
 
