@@ -871,7 +871,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     performanceCalculationParameters = new DroidPerformanceCalculationParameters();
 
                     if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
+                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
+                            parsedBeatmap, playableBeatmap, scope
+                        );
                     }
                 }
 

@@ -465,7 +465,7 @@ public class ScoringScene {
                             case droid -> {
                                 var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
 
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficultyForReplay(playableBeatmap);
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficultyForReplay(beatmapData, playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, (DroidDifficultyAttributes) difficultyAttributes, replay, stat
@@ -475,7 +475,7 @@ public class ScoringScene {
                             case standard -> {
                                 var playableBeatmap = beatmapData.createStandardPlayableBeatmap(copiedMods.values());
 
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(playableBeatmap);
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformanceWithReplayStat(
                                     playableBeatmap, (StandardDifficultyAttributes) difficultyAttributes,
