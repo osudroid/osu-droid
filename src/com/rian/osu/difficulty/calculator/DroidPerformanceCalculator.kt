@@ -71,17 +71,15 @@ class DroidPerformanceCalculator(
         }
 
         if (attributes.mods.any { m -> m is ModRelax }) {
+            // Relax scaling was made for osu!standard overall difficulty, so we need to obtain it.
+            val hitWindow = hitWindow
+            val greatWindow = hitWindow.greatWindow / attributes.clockRate
+            val od = (79.5 - greatWindow) / 6
+
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-            val okMultiplier = 0.75 * max(
-                0.0,
-                if (attributes.overallDifficulty > 0) 1 - attributes.overallDifficulty / 13.33 else 1.0
-            )
-
-            val mehMultiplier = max(
-                0.0,
-                if (attributes.overallDifficulty > 0) 1 - (attributes.overallDifficulty / 13.33).pow(5) else 1.0
-            )
+            val okMultiplier = 0.75 * max(0.0, if (od > 0) 1 - (od / 13.33).pow(1.8) else 1.0)
+            val mehMultiplier = max(0.0, if (od > 0) 1 - (od / 13.33).pow(5) else 1.0)
 
             // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
             // than total hits in specific scenarios (which breaks some calculations), so we need to clamp it.
