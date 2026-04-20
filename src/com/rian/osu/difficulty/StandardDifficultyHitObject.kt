@@ -36,5 +36,5 @@ class StandardDifficultyHitObject(
     index: Int
 ) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Standard
-    override val smallCircleBonus = max(1.0, 1 + (30 - obj.difficultyRadius) / 40)
+    override val smallCircleBonus = max(1.0, 1 + (30 - obj.difficultyRadius) / 70)
 }
