@@ -39,9 +39,9 @@ object StandardSnapAimEvaluator {
      */
     @JvmStatic
     fun evaluateDifficultyOf(current: StandardDifficultyHitObject, withSliders: Boolean): Double {
-        val last = current.previous(0)!!
+        val last = current.previous(0)
 
-        if (current.obj is Spinner || current.index <= 1 || last.obj is Spinner) {
+        if (current.obj is Spinner || current.index <= 1 || last == null || last.obj is Spinner) {
             return 0.0
         }
 
@@ -126,7 +126,8 @@ object StandardSnapAimEvaluator {
                 DifficultyCalculationUtils.smootherstep(currentAngle, 110.0.toRadians(), 60.0.toRadians()) *
                 DifficultyCalculationUtils.smootherstep(last.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
                 Interpolation.reverseLinear(last.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
-                DifficultyCalculationUtils.smootherstep(lastAngle, 110.0.toRadians(), 60.0.toRadians())
+                DifficultyCalculationUtils.smootherstep(lastAngle, 110.0.toRadians(), 60.0.toRadians()) *
+                WIGGLE_MULTIPLIER
         }
 
         if (max(prevVelocity, currentVelocity) != 0.0) {
