@@ -252,7 +252,9 @@ abstract class DifficultyHitObject(
         }
 
         val fadeInStartTime = obj.startTime - obj.timePreempt
-        val fadeInDuration = obj.timeFadeIn
+
+        // Equal to `HitObject.timeFadeIn` minus any adjustments from the HD mod.
+        val fadeInDuration = 400 * min(1.0, obj.timePreempt / HitObject.PREEMPT_MIN)
         val nonHiddenOpacity = ((time - fadeInStartTime) / fadeInDuration).coerceIn(0.0, 1.0)
 
         if (mods?.any { it is ModHidden } == true) {
