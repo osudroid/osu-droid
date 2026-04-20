@@ -56,12 +56,12 @@ object DroidFlashlightEvaluator {
         var angleRepeatCount = 0.0
 
         for (i in 0 until min(current.index, 10)) {
-            val currentObject = current.previous(i)!!
+            val currentObject = current.previous(i)!! as DroidDifficultyHitObject
 
             cumulativeStrainTime += last.strainTime
 
             // Exclude overlapping objects that can be tapped at once.
-            if (currentObject.obj !is Spinner) {
+            if (currentObject.obj !is Spinner && !currentObject.isOverlapping(false)) {
                 val jumpDistance = current.obj.difficultyStackedPosition
                     .getDistance(currentObject.obj.difficultyStackedEndPosition)
 
@@ -84,7 +84,7 @@ object DroidFlashlightEvaluator {
                 }
             }
 
-            last = currentObject as DroidDifficultyHitObject
+            last = currentObject
         }
 
         result = (smallDistNerf * result).pow(2)
