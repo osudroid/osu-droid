@@ -53,7 +53,14 @@ class StandardPerformanceCalculator(
 
         effectiveMissCount = calculateEffectiveMissCount()
 
-        val od = attributes.overallDifficulty
+        val hitWindow = StandardHitWindow(attributes.overallDifficulty)
+
+        greatWindow = hitWindow.greatWindow / attributes.clockRate
+        okWindow = hitWindow.okWindow / attributes.clockRate
+        mehWindow = hitWindow.mehWindow / attributes.clockRate
+
+        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(attributes.approachRate, attributes.clockRate)
+        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(attributes.overallDifficulty, attributes.clockRate)
 
         if (attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
@@ -62,23 +69,14 @@ class StandardPerformanceCalculator(
         if (attributes.mods.any { m -> m is ModRelax }) {
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-            val okMultiplier = 0.75 * max(0.0, if (od > 0) 1 - (od / 13.33).pow(1.8) else 1.0)
-            val mehMultiplier = max(0.0, if (od > 0) 1 - (od / 13.33).pow(5) else 1.0)
+            val okMultiplier = 0.75 * max(0.0, if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(1.8) else 1.0)
+            val mehMultiplier = max(0.0, if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5) else 1.0)
 
             // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
-            // than total hits in specific scenarios (which breaks some calculations),  so we need to clamp it.
+            // than total hits in specific scenarios (which breaks some calculations), so we need to clamp it.
             effectiveMissCount =
                 min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
         }
-
-        val hitWindow = StandardHitWindow(od)
-
-        greatWindow = hitWindow.greatWindow / attributes.clockRate
-        okWindow = hitWindow.okWindow / attributes.clockRate
-        mehWindow = hitWindow.mehWindow / attributes.clockRate
-
-        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(attributes.approachRate, attributes.clockRate)
-        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od, attributes.clockRate)
 
         aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.aimTopWeightedSliderFactor)
         speedDeviation = calculateSpeedDeviation()
