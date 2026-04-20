@@ -101,8 +101,22 @@ object StandardSnapAimEvaluator {
             // Penalize angle repetition. It is important to do it _before_ multiplying by velocity because we compare raw wideness here.
             wideAngleBonus *= 1 - min(wideAngleBonus, calculateWideAngleAcuteness(lastAngle).pow(3))
 
-            // Apply full wide angle bonus.
-            wideAngleBonus *= velocityInfluence
+            // Rescale velocity for the wide angle bonus.
+            val wideAngleTimeScale = 1.45
+
+            var wideAngleCurrentVelocity = currentDistance / current.strainTime.pow(wideAngleTimeScale)
+            val wideAnglePrevVelocity = prevDistance / last.strainTime.pow(wideAngleTimeScale)
+
+            if (last.obj is Slider && withSliders) {
+                val sliderDistance = last.lazyTravelDistance + current.lazyJumpDistance
+
+                wideAngleCurrentVelocity = max(
+                    wideAngleCurrentVelocity,
+                    sliderDistance / current.strainTime.pow(wideAngleTimeScale)
+                )
+            }
+
+            wideAngleBonus *= min(wideAngleCurrentVelocity, wideAnglePrevVelocity)
 
             if (last2 != null) {
                 // If objects just go back and forth through a middle point - don't give as much wide bonus.
