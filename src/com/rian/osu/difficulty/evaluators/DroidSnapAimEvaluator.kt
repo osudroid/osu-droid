@@ -41,7 +41,7 @@ object DroidSnapAimEvaluator {
     fun evaluateDifficultyOf(current: DroidDifficultyHitObject, withSliders: Boolean): Double {
         val last = current.previous(0)
 
-        if (current.obj is Spinner || current.index <= 1 || last == null || last.obj is Spinner) {
+        if (current.obj is Spinner || current.isOverlapping(true) || current.index <= 1 || last == null || last.obj is Spinner) {
             return 0.0
         }
 
@@ -92,7 +92,7 @@ object DroidSnapAimEvaluator {
                 // Apply acute angle bonus for BPM above 300 1/2.
                 acuteAngleBonus *=
                     velocityInfluence *
-                    DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 400.0) *
+                    DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 450.0) *
                     DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, 0.0, diameter * 2.0)
             }
 
@@ -165,17 +165,17 @@ object DroidSnapAimEvaluator {
 
             // Penalize for rhythm changes.
             velocityChangeBonus *=
-                (min(current.strainTime, last.strainTime) / max(current.strainTime, last.strainTime)).pow(2.0)
+                (min(current.strainTime, last.strainTime) / max(current.strainTime, last.strainTime)).pow(2)
 
             strain += velocityChangeBonus * VELOCITY_CHANGE_MULTIPLIER
         }
 
         if (current.obj is Slider && withSliders) {
             // Reward sliders based on velocity.
-            val sliderBonus = current.travelDistance / current.travelTime
+            var sliderBonus = current.travelDistance / current.travelTime
+            sliderBonus = if (sliderBonus < 1) sliderBonus else sliderBonus.pow(0.75)
 
-            strain +=
-                (if (sliderBonus < 1) sliderBonus else sliderBonus.pow(0.75)) * SLIDER_MULTIPLIER
+            strain += (1 + sliderBonus * SLIDER_MULTIPLIER).pow(1.25) - 1
         }
 
         // Apply high circle size bonus.

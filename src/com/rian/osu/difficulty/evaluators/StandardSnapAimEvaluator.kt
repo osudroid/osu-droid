@@ -165,7 +165,7 @@ object StandardSnapAimEvaluator {
 
             // Penalize for rhythm changes.
             velocityChangeBonus *=
-                (min(current.strainTime, last.strainTime) / max(current.strainTime, last.strainTime)).pow(2.0)
+                (min(current.strainTime, last.strainTime) / max(current.strainTime, last.strainTime)).pow(2)
 
             strain += velocityChangeBonus * VELOCITY_CHANGE_MULTIPLIER
         }
