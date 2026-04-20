@@ -205,6 +205,8 @@ class StandardAim(
                     value = strain.value * Interpolation.linear(reducedSectionBaseline, 1.0, scale),
                     sectionLength = min(chunkSize, strain.sectionLength - addedTime)
                 )
+
+                addedTime += chunkSize
             }
 
             time += strain.sectionLength
