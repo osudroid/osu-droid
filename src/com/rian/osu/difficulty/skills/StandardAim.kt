@@ -101,7 +101,7 @@ class StandardAim(
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
 
     private fun calculateTotalValue(snapDifficulty: Double, agilityDifficulty: Double, flowDifficulty: Double): Double {
-        var currentFlowDifficulty = flowDifficulty
+        var flowDifficulty = flowDifficulty
 
         // We compare flow to combined snap and agility because snap by itself does not have enough difficulty
         // to be above flow on streams. Agility, on the other hand, is supposed to measure the rate of cursor
@@ -114,10 +114,10 @@ class StandardAim(
 
         if (mods.any { it is ModRelax }) {
             combinedSnapDifficulty *= 0.75
-            currentFlowDifficulty *= 0.6
+            flowDifficulty *= 0.6
         }
 
-        val totalDifficulty = combinedSnapDifficulty * pSnap + currentFlowDifficulty * pFlow
+        val totalDifficulty = combinedSnapDifficulty * pSnap + flowDifficulty * pFlow
 
         return totalDifficulty * skillMultiplierTotal
     }
@@ -214,8 +214,9 @@ class StandardAim(
         }
 
         strains.subList(0, strainsToRemove).clear()
+        strains.sortByDescending { it.value }
 
-        return strains.sortedByDescending { it.value }
+        return strains
     }
 
     private fun strainDecay(ms: Double) = 0.2.pow(ms / 1000)
