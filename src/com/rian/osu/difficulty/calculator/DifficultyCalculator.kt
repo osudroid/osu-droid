@@ -53,13 +53,12 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * Calculates the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param playableBeatmap The [PlayableBeatmap] whose difficulty is to be calculated. If not provided, it will be
-     * constructed on fly without [Mod]s.
+     * @param playableBeatmap The [PlayableBeatmap] whose difficulty is to be calculated.
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the difficulty of the [PlayableBeatmap].
      */
     @JvmOverloads
-    fun calculate(beatmap: Beatmap, playableBeatmap: TBeatmap? = null, scope: CoroutineScope? = null): TAttributes {
+    fun calculate(beatmap: Beatmap, playableBeatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
         val playableBeatmap = playableBeatmap ?: createPlayableBeatmap(beatmap, null, scope)
         val skills = createSkills(playableBeatmap, false)
         val objects = createDifficultyHitObjects(playableBeatmap, scope)
@@ -97,8 +96,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return A structure describing the difficulty of the [PlayableBeatmap].
      */
     @JvmOverloads
-    fun calculateForReplay(beatmap: Beatmap, playableBeatmap: TBeatmap? = null, scope: CoroutineScope? = null): TAttributes {
-        val playableBeatmap = playableBeatmap ?: createPlayableBeatmap(beatmap, null, scope)
+    fun calculateForReplay(beatmap: Beatmap, playableBeatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
         val skills = createSkills(playableBeatmap, true)
         val objects = createDifficultyHitObjects(playableBeatmap, scope)
 
@@ -139,15 +137,14 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * representing the difficulty at every relevant time value in the [PlayableBeatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param playableBeatmap The [PlayableBeatmap] whose difficulty is to be calculated. If not provided, it will be
-     * constructed on fly without [Mod]s.
+     * @param playableBeatmap The [PlayableBeatmap] whose difficulty is to be calculated.
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The set of [TimedDifficultyAttributes].
      */
     @JvmOverloads
     fun calculateTimed(
         beatmap: Beatmap,
-        playableBeatmap: TBeatmap? = null,
+        playableBeatmap: TBeatmap,
         scope: CoroutineScope? = null
     ): Array<TimedDifficultyAttributes<TAttributes>> {
         if (beatmap.hitObjects.objects.isEmpty()) {
@@ -155,7 +152,6 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         }
 
         val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(beatmap.hitObjects.objects.size)
-        val playableBeatmap = playableBeatmap ?: createPlayableBeatmap(beatmap, null, scope)
         val skills = createSkills(playableBeatmap, false)
         val progressiveBeatmap = ProgressiveCalculationBeatmap(playableBeatmap)
 
