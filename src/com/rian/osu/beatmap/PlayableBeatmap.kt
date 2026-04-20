@@ -10,13 +10,6 @@ import com.rian.osu.utils.ModUtils
  */
 abstract class PlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
-
-    /**
-     * The [GameMode] this [PlayableBeatmap] was parsed as.
-     */
-    @JvmField
-    val mode: GameMode,
-
     mods: Iterable<Mod>? = null,
 ) : IBeatmap {
     /**

@@ -253,7 +253,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
  */
 private class ProgressiveCalculationBeatmap(
     private val baseBeatmap: PlayableBeatmap
-) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods.values) {
+) : PlayableBeatmap(baseBeatmap, baseBeatmap.mods.values) {
     override var maxCombo = 0
 
     override val hitObjects = object : BeatmapHitObjects() {
