@@ -150,17 +150,24 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val aimNoSlider = skills.find<DroidAim> { !it.withSliders } ?: return
 
         val aimDifficultyValue = aim.difficultyValue()
+        val aimNoSliderDifficultyValue = aimNoSlider.difficultyValue()
 
         aimDifficulty = ratingCalculator.computeAimRating(aimDifficultyValue)
         aimDifficultStrainCount = aim.countTopWeightedStrains(aimDifficultyValue)
         aimDifficultSliderCount = aim.countDifficultSliders()
 
         if (aimDifficulty > 0) {
-            aimSliderFactor = DroidRatingCalculator.calculateMechanicalDifficultyRating(aimNoSlider.difficultyValue()) /
+            aimSliderFactor = DroidRatingCalculator.calculateMechanicalDifficultyRating(aimNoSliderDifficultyValue) /
                 DroidRatingCalculator.calculateMechanicalDifficultyRating(aimDifficultyValue)
         } else {
             aimSliderFactor = 1.0
         }
+
+        val aimNoSliderTopWeightedSliderCount = aimNoSlider.countTopWeightedSliders(aimNoSliderDifficultyValue)
+        val aimNoSliderDifficultStrainCount = aimNoSlider.countTopWeightedStrains(aimNoSliderDifficultyValue)
+
+        aimTopWeightedSliderFactor =
+            aimNoSliderTopWeightedSliderCount / max(1.0, aimNoSliderDifficultStrainCount - aimNoSliderTopWeightedSliderCount)
 
         if (!forReplay) {
             return
