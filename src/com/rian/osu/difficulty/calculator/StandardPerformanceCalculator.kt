@@ -5,7 +5,6 @@ import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes
 import com.rian.osu.difficulty.attributes.StandardPerformanceAttributes
 import com.rian.osu.difficulty.skills.HarmonicSkill
 import com.rian.osu.difficulty.skills.StandardFlashlight
-import com.rian.osu.difficulty.skills.StrainSkill
 import com.rian.osu.difficulty.skills.VariableLengthStrainSkill
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.ErrorFunction
@@ -54,13 +53,13 @@ class StandardPerformanceCalculator(
 
         effectiveMissCount = calculateEffectiveMissCount()
 
-        val od = difficultyAttributes.overallDifficulty
+        val od = attributes.overallDifficulty
 
-        if (difficultyAttributes.mods.any { m -> m is ModNoFail }) {
+        if (attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
         }
 
-        if (difficultyAttributes.mods.any { m -> m is ModRelax }) {
+        if (attributes.mods.any { m -> m is ModRelax }) {
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
             val okMultiplier = 0.75 * max(0.0, if (od > 0) 1 - (od / 13.33).pow(1.8) else 1.0)
@@ -74,14 +73,14 @@ class StandardPerformanceCalculator(
 
         val hitWindow = StandardHitWindow(od)
 
-        greatWindow = hitWindow.greatWindow / difficultyAttributes.clockRate
-        okWindow = hitWindow.okWindow / difficultyAttributes.clockRate
-        mehWindow = hitWindow.mehWindow / difficultyAttributes.clockRate
+        greatWindow = hitWindow.greatWindow / attributes.clockRate
+        okWindow = hitWindow.okWindow / attributes.clockRate
+        mehWindow = hitWindow.mehWindow / attributes.clockRate
 
-        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(difficultyAttributes.approachRate, difficultyAttributes.clockRate)
-        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od, difficultyAttributes.clockRate)
+        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(attributes.approachRate, attributes.clockRate)
+        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(od, attributes.clockRate)
 
-        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(difficultyAttributes.aimTopWeightedSliderFactor)
+        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.aimTopWeightedSliderFactor)
         speedDeviation = calculateSpeedDeviation()
 
         it.effectiveMissCount = effectiveMissCount
@@ -98,13 +97,13 @@ class StandardPerformanceCalculator(
     }
 
     private fun calculateAimValue(): Double {
-        if (difficultyAttributes.mods.any { it is ModAutopilot }) {
+        if (attributes.mods.any { it is ModAutopilot }) {
             return 0.0
         }
 
-        var aimDifficulty = difficultyAttributes.aimDifficulty
-        val aimDifficultSliderCount = difficultyAttributes.aimDifficultSliderCount
-        val maxCombo = difficultyAttributes.maxCombo
+        var aimDifficulty = attributes.aimDifficulty
+        val aimDifficultSliderCount = attributes.aimDifficultSliderCount
+        val maxCombo = attributes.maxCombo
 
         if (aimDifficultSliderCount > 0) {
             val estimateImproperlyFollowedDifficultSliders = if (usingClassicSliderCalculation) {
@@ -119,9 +118,9 @@ class StandardPerformanceCalculator(
             }
 
             aimDifficulty *=
-                (1 - difficultyAttributes.aimSliderFactor) *
+                (1 - attributes.aimSliderFactor) *
                 (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
-                        difficultyAttributes.aimSliderFactor
+                        attributes.aimSliderFactor
         }
 
         var aimValue = VariableLengthStrainSkill.difficultyToPerformance(aimDifficulty)
@@ -134,11 +133,11 @@ class StandardPerformanceCalculator(
 
         if (effectiveMissCount > 0) {
             val relevantMissCount = min(effectiveMissCount + aimEstimatedSliderBreaks, totalImperfectHits + comboBreakingSliderNestedMisses.toDouble())
-            aimValue *= calculateMissPenalty(relevantMissCount, difficultyAttributes.aimDifficultStrainCount)
+            aimValue *= calculateMissPenalty(relevantMissCount, attributes.aimDifficultStrainCount)
         }
 
-        if (difficultyAttributes.mods.any { it is ModTraceable }) {
-            aimValue *= 1 + calculateTraceableBonus(difficultyAttributes.aimSliderFactor)
+        if (attributes.mods.any { it is ModTraceable }) {
+            aimValue *= 1 + calculateTraceableBonus(attributes.aimSliderFactor)
         }
 
         // Scale the aim value with accuracy.
@@ -148,20 +147,20 @@ class StandardPerformanceCalculator(
     }
 
     private fun calculateSpeedValue(): Double {
-        if (difficultyAttributes.mods.any { it is ModRelax } || speedDeviation == Double.POSITIVE_INFINITY) {
+        if (attributes.mods.any { it is ModRelax } || speedDeviation == Double.POSITIVE_INFINITY) {
             return 0.0
         }
 
-        var speedValue = HarmonicSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
+        var speedValue = HarmonicSkill.difficultyToPerformance(attributes.speedDifficulty)
 
         if (effectiveMissCount > 0) {
-            val speedEstimatedSliderBreaks = calculateEstimatedSliderBreaks(difficultyAttributes.speedTopWeightedSliderFactor)
+            val speedEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.speedTopWeightedSliderFactor)
             val relevantMissCount = min(effectiveMissCount + speedEstimatedSliderBreaks, totalImperfectHits + comboBreakingSliderNestedMisses.toDouble())
 
-            speedValue *= calculateMissPenalty(relevantMissCount, difficultyAttributes.speedDifficultStrainCount)
+            speedValue *= calculateMissPenalty(relevantMissCount, attributes.speedDifficultStrainCount)
         }
 
-        if (difficultyAttributes.mods.any { it is ModTraceable }) {
+        if (attributes.mods.any { it is ModTraceable }) {
             speedValue *= 1 + calculateTraceableBonus()
         }
 
@@ -169,7 +168,7 @@ class StandardPerformanceCalculator(
 
         // An effective hit window is created based on the speed SR. The higher the speed difficulty, the shorter the hit window.
         // For example, a speed SR of 4 leads to an effective hit window of 20ms, which is OD 10.
-        val effectiveHitWindow = 20 * (4 / difficultyAttributes.speedDifficulty).pow(0.35)
+        val effectiveHitWindow = 20 * (4 / attributes.speedDifficulty).pow(0.35)
 
         // Find the proportion of 300s on speed notes assuming the hit window was the effective hit window.
         val effectiveAccuracy = ErrorFunction.erfFast(effectiveHitWindow / speedDeviation)
@@ -180,7 +179,7 @@ class StandardPerformanceCalculator(
         return speedValue
     }
 
-    private fun calculateAccuracyValue() = difficultyAttributes.run {
+    private fun calculateAccuracyValue() = attributes.run {
         if (mods.any { it is ModRelax }) {
             return@run 0.0
         }
@@ -214,7 +213,7 @@ class StandardPerformanceCalculator(
         accuracyValue
     }
 
-    private fun calculateFlashlightValue() = difficultyAttributes.run {
+    private fun calculateFlashlightValue() = attributes.run {
         if (mods.none { it is ModFlashlight }) {
             return@run 0.0
         }
@@ -234,7 +233,7 @@ class StandardPerformanceCalculator(
         flashlightValue
     }
 
-    private fun calculateReadingValue() = difficultyAttributes.run {
+    private fun calculateReadingValue() = attributes.run {
         var readingValue = HarmonicSkill.difficultyToPerformance(readingDifficulty)
 
         if (effectiveMissCount > 0) {
@@ -259,8 +258,8 @@ class StandardPerformanceCalculator(
         }
 
         // Calculate accuracy assuming the worst case scenario
-        val speedNoteCount = difficultyAttributes.speedNoteCount +
-            (totalHits - difficultyAttributes.speedNoteCount) * 0.1
+        val speedNoteCount = attributes.speedNoteCount +
+            (totalHits - attributes.speedNoteCount) * 0.1
 
         // Assume worst case: all mistakes were on speed notes
         val relevantCountMiss = min(countMiss.toDouble(), speedNoteCount)
@@ -335,7 +334,7 @@ class StandardPerformanceCalculator(
             return 0.0
         }
 
-        val speedValue = HarmonicSkill.difficultyToPerformance(difficultyAttributes.speedDifficulty)
+        val speedValue = HarmonicSkill.difficultyToPerformance(attributes.speedDifficulty)
 
         // Decide a point where the PP value achieved compared to the speed deviation is assumed to be tapped
         // improperly. Any PP above this point is considered "excess" speed difficulty. This is used to cause
@@ -367,7 +366,7 @@ class StandardPerformanceCalculator(
             return 0.0
         }
 
-        val missedComboPercent = 1 - scoreMaxCombo.toDouble() / difficultyAttributes.maxCombo
+        val missedComboPercent = 1 - scoreMaxCombo.toDouble() / attributes.maxCombo
         var estimatedSliderBreaks = min(countOk.toDouble(), effectiveMissCount * topWeightedSliderFactor)
 
         // Scores with more Oks are more likely to have slider breaks.
@@ -380,7 +379,7 @@ class StandardPerformanceCalculator(
         return estimatedSliderBreaks * okAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
     }
 
-    private fun calculateEffectiveMissCount() = difficultyAttributes.run {
+    private fun calculateEffectiveMissCount() = attributes.run {
         var missCount = countMiss.toDouble()
 
         if (sliderCount > 0) {

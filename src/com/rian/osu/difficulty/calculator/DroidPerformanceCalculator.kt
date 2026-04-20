@@ -4,15 +4,26 @@ import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
-import com.rian.osu.difficulty.skills.DroidAim
 import com.rian.osu.difficulty.skills.DroidFlashlight
-import com.rian.osu.difficulty.skills.DroidReading
-import com.rian.osu.difficulty.skills.StrainSkill
+import com.rian.osu.difficulty.skills.HarmonicSkill
+import com.rian.osu.difficulty.skills.VariableLengthStrainSkill
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.ErrorFunction
 import com.rian.osu.math.Interpolation
-import com.rian.osu.mods.*
+import com.rian.osu.mods.ModAutopilot
+import com.rian.osu.mods.ModFlashlight
+import com.rian.osu.mods.ModNoFail
+import com.rian.osu.mods.ModPrecise
+import com.rian.osu.mods.ModRelax
+import com.rian.osu.mods.ModScoreV2
 import com.rian.osu.replay.SliderCheesePenalty
-import kotlin.math.*
+import kotlin.math.E
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * A performance calculator for calculating osu!droid performance points.
@@ -30,7 +41,9 @@ class DroidPerformanceCalculator(
     private var effectiveMissCount = 0.0
     private var sliderCheesePenalty = SliderCheesePenalty()
     private var tapPenalty = 1.0
+    private var totalScore = 0
 
+    private var aimEstimatedSliderBreaks = 0.0
     private var deviation = 0.0
     private var tapDeviation = 0.0
 
@@ -41,34 +54,43 @@ class DroidPerformanceCalculator(
     override fun createPerformanceAttributes() = DroidPerformanceAttributes().also {
         var multiplier = FINAL_MULTIPLIER
 
-        effectiveMissCount = calculateEffectiveMissCount()
+        if (usingClassicSliderCalculation) {
+            val remainingScore = attributes.maximumScore - totalScore
 
-        difficultyAttributes.run {
-            if (mods.any { m -> m is ModNoFail }) {
-                multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
-            }
+            // If there is less than one miss, let combo-based miss count decide whether this is full combo.
+            val scoreBasedMissCount = max(1.0, (totalScore - remainingScore) / remainingScore.toDouble())
 
-            if (mods.any { m -> m is ModRelax }) {
-                // Graph: https://www.desmos.com/calculator/bc9eybdthb
-                // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-                val okMultiplier = 0.75 * max(
-                    0.0,
-                    if (overallDifficulty > 0) 1 - overallDifficulty / 13.33 else 1.0
-                )
-
-                val mehMultiplier = max(
-                    0.0,
-                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5) else 1.0
-                )
-
-                // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
-                // than total hits in specific scenarios (which breaks some calculations), so we need to clamp it.
-                effectiveMissCount =
-                    min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
-            }
+            // Cap result by very harsh version of combo-based miss count.
+            effectiveMissCount = min(scoreBasedMissCount, calculateMaximumComboBasedMissCount())
+        } else {
+            effectiveMissCount = calculateComboBasedEstimatedMissCount()
         }
 
-        deviation = calculateDeviation()
+        if (attributes.mods.any { m -> m is ModNoFail }) {
+            multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
+        }
+
+        if (attributes.mods.any { m -> m is ModRelax }) {
+            // Graph: https://www.desmos.com/calculator/bc9eybdthb
+            // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
+            val okMultiplier = 0.75 * max(
+                0.0,
+                if (attributes.overallDifficulty > 0) 1 - attributes.overallDifficulty / 13.33 else 1.0
+            )
+
+            val mehMultiplier = max(
+                0.0,
+                if (attributes.overallDifficulty > 0) 1 - (attributes.overallDifficulty / 13.33).pow(5) else 1.0
+            )
+
+            // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
+            // than total hits in specific scenarios (which breaks some calculations), so we need to clamp it.
+            effectiveMissCount =
+                min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
+        }
+
+        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.aimTopWeightedSliderFactor)
+        deviation = calculateAimDeviation()
         tapDeviation = calculateTapDeviation()
 
         it.deviation = deviation
@@ -81,19 +103,17 @@ class DroidPerformanceCalculator(
         it.flashlight = calculateFlashlightValue()
         it.reading = calculateReadingValue()
 
-        it.total = (
-            it.aim.pow(1.1) +
-            it.tap.pow(1.1) +
-            it.accuracy.pow(1.1) +
-            it.flashlight.pow(1.1) +
-            it.reading.pow(1.1)
-        ).pow(1 / 1.1) * multiplier
+        val cognitionValue = DroidDifficultyCalculator.sumCognitionDifficulty(it.reading, it.flashlight)
+
+        it.total = DifficultyCalculationUtils.norm(NORM_EXPONENT, it.aim, it.tap, it.accuracy, cognitionValue) * multiplier
     }
 
     override fun processParameters(parameters: DroidPerformanceCalculationParameters?) = parameters?.let {
         super.processParameters(it)
 
         it.sliderCheesePenalty.copyTo(sliderCheesePenalty)
+
+        totalScore = it.totalScore
         tapPenalty = it.tapPenalty
     } ?: resetDefaults()
 
@@ -102,88 +122,96 @@ class DroidPerformanceCalculator(
 
         effectiveMissCount = 0.0
         sliderCheesePenalty.reset()
+        totalScore = 0
         tapPenalty = 1.0
     }
 
-    private fun calculateAimValue() = difficultyAttributes.run {
-        var aimValue = DroidAim.difficultyToPerformance(aimDifficulty)
+    private fun calculateAimValue(): Double {
+        if (attributes.mods.any { it is ModAutopilot }) {
+            return 0.0
+        }
 
-        aimValue *= min(calculateStrainBasedMissPenalty(aimDifficultStrainCount), proportionalMissPenalty)
+        var aimDifficulty = attributes.aimDifficulty
 
-        // Scale the aim value with estimated full combo deviation.
-        aimValue *= calculateDeviationBasedLengthScaling()
-
-        if (aimDifficultSliderCount > 0) {
+        if (attributes.aimDifficultSliderCount > 0) {
             val estimateImproperlyFollowedDifficultSliders = if (usingClassicSliderCalculation) {
                 // When the score is considered classic (regardless if it was made on old client or not),
                 // we consider all missing combo to be dropped difficult sliders.
-                min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                min(totalImperfectHits, attributes.maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, attributes.aimDifficultSliderCount)
             } else {
                 // We add tick misses here since they too mean that the player didn't follow the slider
                 // properly. However, we aren't adding misses here because missing slider heads has a harsh
                 // penalty by itself and doesn't mean that the rest of the slider wasn't followed properly.
-                (nonComboBreakingSliderNestedMisses + comboBreakingSliderNestedMisses).toDouble().coerceIn(0.0, aimDifficultSliderCount)
+                (nonComboBreakingSliderNestedMisses + comboBreakingSliderNestedMisses).toDouble().coerceIn(0.0, attributes.aimDifficultSliderCount)
             }
 
-            aimValue *=
-                (1 - aimSliderFactor) *
-                (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
-                aimSliderFactor
+            aimDifficulty *= attributes.aimSliderFactor +
+                (1 - attributes.aimSliderFactor) * (1 - estimateImproperlyFollowedDifficultSliders / attributes.aimDifficultSliderCount).pow(3)
         }
+
+        var aimValue = VariableLengthStrainSkill.difficultyToPerformance(aimDifficulty)
+
+        if (effectiveMissCount > 0) {
+            val relevantMissCount = min(
+                effectiveMissCount + aimEstimatedSliderBreaks,
+                totalImperfectHits + comboBreakingSliderNestedMisses.toDouble()
+            )
+
+            aimValue *= min(
+                calculateStrainBasedMissPenalty(relevantMissCount, attributes.aimDifficultStrainCount),
+                proportionalMissPenalty
+            )
+        }
+
+        // Scale the aim value with estimated full combo deviation.
+        aimValue *= calculateDeviationBasedLengthScaling()
 
         aimValue *= sliderCheesePenalty.aim
 
         // Scale the aim value with deviation.
         aimValue *= 1.025 * ErrorFunction.erfFast(25 / (sqrt(2.0) * deviation)).pow(0.475)
 
-        // OD 7 SS stays the same.
-        aimValue *= 0.98 + 7.0.pow(2) / 2500
-
-        aimValue
+        return aimValue
     }
 
-    private fun calculateTapValue() = difficultyAttributes.run {
-        var tapValue = StrainSkill.difficultyToPerformance(tapDifficulty)
+    private fun calculateTapValue(): Double {
+        var tapValue = HarmonicSkill.difficultyToPerformance(attributes.tapDifficulty)
 
-        tapValue *= calculateStrainBasedMissPenalty(tapDifficultStrainCount)
+        if (effectiveMissCount > 0) {
+            val tapEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.tapTopWeightedSliderFactor)
+
+            val relevantMissCount = min(
+                effectiveMissCount + tapEstimatedSliderBreaks,
+                totalImperfectHits + comboBreakingSliderNestedMisses.toDouble()
+            )
+
+            tapValue *= calculateStrainBasedMissPenalty(relevantMissCount, attributes.tapDifficultStrainCount)
+        }
 
         // Scale the tap value with estimated full combo deviation.
         // Consider notes that are difficult to tap with respect to other notes, but
         // also cap the note count to prevent buffing filler patterns.
-        tapValue *= calculateDeviationBasedLengthScaling(min(speedNoteCount, totalHits / 1.45))
+        tapValue *= min(1.0, calculateDeviationBasedLengthScaling(min(attributes.speedNoteCount, totalHits / 1.45)))
 
-        // Normalize the deviation to 300 BPM.
-        val normalizedDeviation = tapDeviation * max(1.0, 50 / averageSpeedDeltaTime)
+        // An effective hit window is created based on the tap SR. The higher the tap difficulty, the shorter the hit window.
+        // For example, a tap SR of 4 leads to an effective hit window of 25ms, which is OD 10 with Precise mod.
+        val effectiveHitWindow = 25 * (4 / attributes.tapDifficulty).pow(1.5)
 
-        // We expect the player to get 7500/x deviation when doubletapping x BPM.
-        // Using this expectation, we penalize score with deviation above 25.
-        val averageBPM = 60000 / 4 / averageSpeedDeltaTime
+        // Find the proportion of 300s on speed notes assuming the hit window was the effective hit window.
+        val effectiveAccuracy = ErrorFunction.erfFast(effectiveHitWindow / tapDeviation)
 
-        val adjustedDeviation = normalizedDeviation *
-            (1 + 1 / (1 + exp(-(normalizedDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM))))
-
-        // Scale the tap value with tap deviation.
-        tapValue *= 1.05 * ErrorFunction.erfFast(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.6)
-
-        // Additional scaling for tap value based on average BPM and how "vibroable" the beatmap is.
-        // Higher BPMs require more precise tapping. When the deviation is too high,
-        // it can be assumed that the player taps invariant to rhythm.
-        // We make the punishment harsher punishment for such scenario.
-        tapValue *= vibroFactor.pow(6) +
-            (1 - vibroFactor.pow(6)) / (1 + exp((tapDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM)))
+        // Scale tap value by normalized accuracy.
+        tapValue *= effectiveAccuracy.pow(2)
 
         tapValue *= calculateTapHighDeviationNerf()
 
         // Scale the tap value with three-fingered penalty.
         tapValue /= tapPenalty
 
-        // OD 8 SS stays the same.
-        tapValue *= 0.95 + 8.0.pow(2) / 750
-
-        tapValue
+        return tapValue
     }
 
-    private fun calculateAccuracyValue() = difficultyAttributes.run {
+    private fun calculateAccuracyValue() = attributes.run {
         if (mods.any { it is ModRelax } || totalSuccessfulHits == 0) {
             return@run 0.0
         }
@@ -195,10 +223,10 @@ class DroidPerformanceCalculator(
             else hitCircleCount
 
         // Bonus for many accuracy objects - it is harder to keep good accuracy up for longer.
-        accuracyValue *= min(1.15, sqrt(ln(1 + (E - 1) * accuracyObjectCount / 1000)))
+        accuracyValue *= (sqrt(ln(1 + (E - 1) * accuracyObjectCount / 1000))).pow(if (accuracyObjectCount < 1000) 0.5 else 0.25)
 
         // Scale the accuracy value with rhythm complexity.
-        accuracyValue *= 1.5 / (1 + exp(-(rhythmDifficulty - 1) / 2))
+        accuracyValue *= DifficultyCalculationUtils.logistic(rhythmDifficulty, 1.0, 0.5, 1.8)
 
         // Penalize accuracy pp after the first miss.
         accuracyValue *= 0.97.pow(max(0.0, effectiveMissCount - 1))
@@ -210,20 +238,17 @@ class DroidPerformanceCalculator(
         accuracyValue
     }
 
-    private fun calculateFlashlightValue() = difficultyAttributes.run {
+    private fun calculateFlashlightValue() = attributes.run {
         if (mods.none { it is ModFlashlight }) {
             return@run 0.0
         }
 
         var flashlightValue = DroidFlashlight.difficultyToPerformance(flashlightDifficulty)
 
-        flashlightValue *= min(calculateStrainBasedMissPenalty(flashlightDifficultStrainCount), proportionalMissPenalty)
-
-        // Account for shorter maps having a higher ratio of 0 combo/100 combo flashlight radius.
-        flashlightValue *= 0.7 + 0.1 * min(1.0, totalHits / 200.0) +
-            if (totalHits > 200) 0.2 * min(1.0, (totalHits - 200) / 200.0) else 0.0
-
-        flashlightValue *= sliderCheesePenalty.flashlight
+        if (effectiveMissCount > 0) {
+            // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of misses.
+            flashlightValue *= 0.97 * (1 - (effectiveMissCount / totalHits).pow(0.775)).pow(effectiveMissCount.pow(0.875))
+        }
 
         // Scale the flashlight value with deviation.
         flashlightValue *= ErrorFunction.erfFast(50 / (sqrt(2.0) * deviation))
@@ -231,34 +256,48 @@ class DroidPerformanceCalculator(
         flashlightValue
     }
 
-    private fun calculateReadingValue() = difficultyAttributes.run {
-        var readingValue = DroidReading.difficultyToPerformance(readingDifficulty)
+    private fun calculateReadingValue() = attributes.run {
+        var readingValue = HarmonicSkill.difficultyToPerformance(readingDifficulty)
 
-        readingValue *= min(calculateStrainBasedMissPenalty(readingDifficultNoteCount), proportionalMissPenalty)
+        if (effectiveMissCount > 0) {
+            readingValue *= min(
+                calculateStrainBasedMissPenalty(
+                    effectiveMissCount + aimEstimatedSliderBreaks,
+                    readingDifficultNoteCount
+                ),
+                proportionalMissPenalty
+            )
+        }
 
         // Scale the visual value with estimated full combo deviation.
         // As visual is easily "bypassable" with memorization, punish for memorization.
-        readingValue *= calculateDeviationBasedLengthScaling(punishForMemorization = true)
+        readingValue *= min(1.0, calculateDeviationBasedLengthScaling(punishForMemorization = true))
 
         // Scale the visual value with deviation.
-        readingValue *= 1.05 * ErrorFunction.erfFast(25 / (sqrt(2.0) * deviation))
-
-        // OD 5 SS stays the same.
-        readingValue *= 0.98 + 5.0.pow(2) / 2500
+        readingValue *= 1.025 * ErrorFunction.erfFast(25 / (sqrt(2.0) * deviation)).pow(1.25)
 
         readingValue
     }
 
-    private fun calculateStrainBasedMissPenalty(difficultStrainCount: Double) =
-        if (effectiveMissCount == 0.0) 1.0
-        else 0.96 / (effectiveMissCount / (4 * ln(difficultStrainCount).pow(0.94)) + 1)
+    private fun calculateStrainBasedMissPenalty(missCount: Double, difficultStrainCount: Double) =
+        if (missCount == 0.0) 1.0
+        else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
 
     private val proportionalMissPenalty by lazy {
         if (effectiveMissCount == 0.0) {
             return@lazy 1.0
         }
 
-        val missProportion = (totalHits - effectiveMissCount) / (totalHits + 1)
+        val relevantMissCount = min(
+            effectiveMissCount + aimEstimatedSliderBreaks,
+            totalImperfectHits + comboBreakingSliderNestedMisses.toDouble()
+        )
+
+        if (relevantMissCount == 0.0) {
+            return@lazy 1.0
+        }
+
+        val missProportion = (totalHits - relevantMissCount) / (totalHits + 1)
         val noMissProportion = totalHits / (totalHits + 1.0)
 
         // Aim deviation-based scale.
@@ -313,115 +352,62 @@ class DroidPerformanceCalculator(
     }
 
     /**
-     * Estimates the player's tap deviation based on the OD, number of circles and sliders,
+     * Estimates the player's deviation based on the OD, number of circles and sliders,
      * and number of 300s, 100s, 50s, and misses, assuming the player's mean hit error is 0.
      *
      * The estimation is consistent in that two SS scores on the same map
      * with the same settings will always return the same deviation.
      *
-     * Under non-ScoreV2 scores, sliders are treated as circles with a 50 hit window.
+     * Sliders are treated as circles with a 50 hit window.
      *
-     * Misses are ignored because they are usually due to mis-aiming, and 50s
+     * Misses are ignored because they are usually due to misaiming, and 50s
      * are grouped with 100s since they are usually due to misreading.
      *
      * Inaccuracies are capped to the number of circles in the map.
      */
-    private fun calculateDeviation() = difficultyAttributes.run {
-        if (totalSuccessfulHits == 0) {
-            return@run Double.POSITIVE_INFINITY
-        }
-
-        val greatWindow = hitWindow.greatWindow / clockRate
-        val okWindow = hitWindow.okWindow / clockRate
-        val mehWindow = hitWindow.mehWindow / clockRate
-
-        // For non-ScoreV2 scores, assume 100s, 50s, and misses happen on circles.
-        // If there are less non-300s on circles than 300s, compute the deviation on circles.
-        val isScoreV2 = mods.any { it is ModScoreV2 }
-        val hitObjectWithAccuracyCount = hitCircleCount + if (isScoreV2) sliderCount else 0
-
-        val missCountAccuracyObjects = min(countMiss, hitObjectWithAccuracyCount)
-        val mehCountAccuracyObjects = min(countMeh, hitObjectWithAccuracyCount - missCountAccuracyObjects)
-        val okCountAccuracyObjects = min(countOk, hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects)
-        val greatCountAccuracyObjects = max(0, hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects - okCountAccuracyObjects)
-
-        if (greatCountAccuracyObjects > 0) {
-            // The probability that a player hits an accuracy object is unknown, but we can estimate it to be
-            // the number of greats on circles divided by the number of circles, and then add one
-            // to the number of circles as a bias correction / bayesian prior.
-            val greatProbabilityAccuracyObjects =
-                greatCountAccuracyObjects / (hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects + 1.0)
-
-            // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
-            // Begin with the normal distribution first.
-            var deviationOnAccuracyObjects = greatWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(greatProbabilityAccuracyObjects))
-
-            deviationOnAccuracyObjects *=
-                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnAccuracyObjects).pow(2)) /
-                    (deviationOnAccuracyObjects * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviationOnAccuracyObjects))))
-
-            // Then compute the variance for 50s.
-            val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
-
-            // Find the total deviation.
-            return@run sqrt(
-                ((greatCountAccuracyObjects + okCountAccuracyObjects) * deviationOnAccuracyObjects.pow(2) + mehCountAccuracyObjects * mehVariance) /
-                    (greatCountAccuracyObjects + okCountAccuracyObjects + mehCountAccuracyObjects)
-            )
-        }
-
-        // If there are more non-300s than there are circles, compute the deviation on sliders instead.
-        // Here, all that matters is whether the slider was missed, since it is impossible
-        // to get a 100 or 50 on a slider by mis-tapping it.
-
-        // For ScoreV2 scores, sliders are already included as accuracy objects, so this part of the computation is invalid.
-        if (isScoreV2) {
-            return@run Double.POSITIVE_INFINITY
-        }
-
-        val missCountSliders = min(sliderCount, countMiss - missCountAccuracyObjects)
-        val greatCountSliders = sliderCount - missCountSliders
-
-        // We only get here if nothing was hit. In this case, there is no estimate for deviation.
-        // Note that this is never negative, so checking if this is only equal to 0 makes sense.
-        if (greatCountSliders == 0) {
-            return@run Double.POSITIVE_INFINITY
-        }
-
-        val greatProbabilitySlider = greatCountSliders / (sliderCount + 1.0)
-
-        mehWindow / (sqrt(2.0) * ErrorFunction.erfInvFast(greatProbabilitySlider))
-    }
+    private fun calculateAimDeviation() =
+        calculateDeviation(countGreat.toDouble(), countOk.toDouble(), countMeh.toDouble())
 
     /**
-     * Does the same as [calculateDeviation], but only for notes and inaccuracies that are relevant to tap difficulty.
+     * Does the same as [calculateAimDeviation], but only for notes and inaccuracies that are relevant to tap difficulty.
      *
      * Treats all difficult speed notes as circles, so this method can sometimes return a lower deviation than [calculateDeviation].
      * This is fine though, since this method is only used to scale tap pp.
      */
-    private fun calculateTapDeviation() = difficultyAttributes.run {
+    private fun calculateTapDeviation(): Double {
         if (totalSuccessfulHits == 0) {
-            return@run Double.POSITIVE_INFINITY
+            return Double.POSITIVE_INFINITY
         }
 
-        val greatWindow = hitWindow.greatWindow / clockRate
-        val okWindow = hitWindow.okWindow / clockRate
-        val mehWindow = hitWindow.mehWindow / clockRate
-
-        // Assume a fixed ratio of non-300s hit in speed notes based on speed note count ratio and OD.
-        // Graph: https://www.desmos.com/calculator/eayyireisv
-        val speedNoteRatio = speedNoteCount / totalHits
-        val nonGreatRatio = 1 - ((exp(sqrt(greatWindow)) + 1).pow(1 - speedNoteRatio) - 1) / exp(sqrt(greatWindow))
+        // Calculate accuracy assuming the worst case scenario.
+        val speedNoteCount = attributes.speedNoteCount + (totalHits - attributes.speedNoteCount) * 0.1
 
         // Assume worst case - all non-300s happened in speed notes.
-        val relevantCountMiss = min(countMiss * nonGreatRatio, speedNoteCount)
-        val relevantCountMeh = min(countMeh * nonGreatRatio, speedNoteCount - relevantCountMiss)
-        val relevantCountOk = min(countOk * nonGreatRatio, speedNoteCount - relevantCountMiss - relevantCountMeh)
+        val relevantCountMiss = min(countMiss.toDouble(), speedNoteCount)
+        val relevantCountMeh = min(countMeh.toDouble(), speedNoteCount - relevantCountMiss)
+        val relevantCountOk = min(countOk.toDouble(), speedNoteCount - relevantCountMiss - relevantCountMeh)
         val relevantCountGreat = max(0.0, speedNoteCount - relevantCountMiss - relevantCountMeh - relevantCountOk)
 
+        return calculateDeviation(relevantCountGreat, relevantCountOk, relevantCountMeh)
+    }
+
+    /**
+     * Estimates the player's tap deviation based on the OD, given number of greats, oks, mehs and misses,
+     * assuming the player's mean hit error is 0. The estimation is consistent in that two SS scores on the
+     * same map with the same settings will always return the same deviation.
+     *
+     * Misses are ignored because they are usually due to misaiming.
+     *
+     * Greats and oks are assumed to follow a normal distribution, whereas mehs are assumed to follow a uniform distribution.
+     */
+    private fun calculateDeviation(relevantCountGreat: Double, relevantCountOk: Double, relevantCountMeh: Double): Double {
         if (relevantCountGreat + relevantCountOk + relevantCountMeh <= 0) {
-            return@run Double.POSITIVE_INFINITY
+            return Double.POSITIVE_INFINITY
         }
+
+        val greatWindow = hitWindow.greatWindow / attributes.clockRate
+        val okWindow = hitWindow.okWindow / attributes.clockRate
+        val mehWindow = hitWindow.mehWindow / attributes.clockRate
 
         // The sample proportion of successful hits.
         val n = max(1.0, relevantCountGreat + relevantCountOk)
@@ -444,7 +430,7 @@ class DroidPerformanceCalculator(
             // Subtract the deviation provided by tails that land outside the ok hit window from the deviation computed above.
             // This is equivalent to calculating the deviation of a normal distribution truncated at +-okHitWindow.
             val okHitWindowTailAmount = sqrt(2 / Math.PI) * okWindow *
-                exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviation)))
+                    exp(-0.5 * (okWindow / deviation).pow(2)) / (deviation * ErrorFunction.erfFast(okWindow / (sqrt(2.0) * deviation)))
 
             deviation *= sqrt(1 - okHitWindowTailAmount)
         } else {
@@ -460,7 +446,7 @@ class DroidPerformanceCalculator(
             ((relevantCountGreat + relevantCountOk) * deviation.pow(2) + relevantCountMeh * mehVariance) / (relevantCountGreat + relevantCountOk + relevantCountMeh)
         )
 
-        return@run deviation
+        return deviation
     }
 
     /**
@@ -473,7 +459,7 @@ class DroidPerformanceCalculator(
             return 0.0
         }
 
-        val tapValue = (5 * max(1.0, difficultyAttributes.tapDifficulty / 0.0675) - 4).pow(3) / 100000
+        val tapValue = (5 * max(1.0, attributes.tapDifficulty / 0.0675) - 4).pow(3) / 100000
 
         // Decide a point where the PP value achieved compared to the tap deviation is assumed to be tapped
         // improperly. Any PP above this point is considered "excess" tap difficulty. This is used to cause
@@ -498,39 +484,119 @@ class DroidPerformanceCalculator(
         else DroidHitWindow(difficultyAttributes.overallDifficulty)
     }
 
-    private fun calculateEffectiveMissCount() = difficultyAttributes.run {
-        var missCount = countMiss.toDouble()
-
-        if (sliderCount > 0) {
-            if (usingClassicSliderCalculation) {
-                // Consider that full combo is maximum combo minus dropped slider tails since
-                // they don't contribute to combo but also don't break it.
-                // In classic scores, we can't know the amount of dropped sliders so we estimate
-                // to 10% of all sliders in the beatmap.
-                val fullComboThreshold = maxCombo - 0.1 * sliderCount
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
-                missCount = min(missCount, totalImperfectHits.toDouble())
-            } else {
-                val fullComboThreshold = maxCombo.toDouble() - nonComboBreakingSliderNestedMisses
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // Combine regular misses with combo-breaking misses because they break combo as well.
-                missCount = min(missCount, comboBreakingSliderNestedMisses + countMiss.toDouble())
-            }
+    private fun calculateEstimatedSliderBreaks(topWeightedSliderFactor: Double): Double {
+        if (!usingClassicSliderCalculation || countOk == 0) {
+            return 0.0
         }
 
-        missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
+        val missedComboPercent = 1 - scoreMaxCombo.toDouble() / attributes.maxCombo
+        var estimatedSliderBreaks = min(countOk.toDouble(), effectiveMissCount * topWeightedSliderFactor)
+
+        // Scores with more Oks are more likely to have slider breaks.
+        val okAdjustment = ((countOk - estimatedSliderBreaks) + 0.5) / countOk
+
+        // There is a low probability of extra slider breaks on effective miss counts close to 1, as score based
+        // calculations are good at indicating if only a single break occurred.
+        estimatedSliderBreaks *= DifficultyCalculationUtils.smoothstep(effectiveMissCount, 1.0, 2.0)
+
+        return estimatedSliderBreaks * okAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
+    }
+
+    private fun calculateMaximumComboBasedMissCount(): Double {
+        var missCount = countMiss.toDouble()
+
+        if (attributes.sliderCount <= 0) {
+            return missCount
+        }
+
+        // If sliders in the beatmap are hard, it's likely for player to drop sliderends.
+        // However, if the beatmap has easy sliders, it's more likely for player to sliderbreak.
+        val likelyMissedSliderEndPortion = 0.04 + 0.06 * min(1.0, attributes.aimTopWeightedSliderFactor).pow(2)
+
+        // Consider that full combo is maximum combo minus dropped slider tails since they don't contribute to combo but also don't break it.
+        // In classic scores, we can't know the amount of dropped sliders so we estimate to 10% of all sliders in the beatmap.
+        val fullComboThreshold =
+            attributes.maxCombo -
+            // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
+            // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
+            // achieve the most accurate result on average.
+            min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+
+        if (scoreMaxCombo < fullComboThreshold) {
+            missCount = (fullComboThreshold / max(1, scoreMaxCombo)).pow(2.5)
+        }
+
+        // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
+        missCount = min(missCount, totalImperfectHits.toDouble())
+
+        // Every slider has *at least* 2 combo attributed in classic mechanics.
+        // If they broke on a slider with a tick, then this still works since they would have lost at least 2 combo (the tick and the end).
+        // Using this as a max means a score that loses 1 combo on a map can't possibly have been a slider break.
+        // It must have been a slider end.
+        val maxPossibleSliderBreaks = min(attributes.sliderCount, (attributes.maxCombo - scoreMaxCombo) / 2)
+        val sliderBreaks = missCount - countMiss
+
+        if (sliderBreaks > maxPossibleSliderBreaks) {
+            missCount = countMiss.toDouble() + maxPossibleSliderBreaks
+        }
+
+        return missCount
+    }
+
+    private fun calculateComboBasedEstimatedMissCount(): Double {
+        var missCount = countMiss.toDouble()
+
+        if (attributes.sliderCount <= 0) {
+            return missCount
+        }
+
+        if (usingClassicSliderCalculation) {
+            // If sliders in the beatmap are hard, it's likely for player to drop sliderends.
+            // However, if the beatmap has easy sliders, it's more likely for player to sliderbreak.
+            val likelyMissedSliderEndPortion = 0.04 + 0.06 * min(1.0, attributes.aimTopWeightedSliderFactor).pow(2)
+
+            // Consider that full combo is maximum combo minus dropped slider tails since they don't contribute to combo but also don't break it.
+            // In classic scores, we can't know the amount of dropped sliders so we estimate to 10% of all sliders in the beatmap.
+            val fullComboThreshold =
+                attributes.maxCombo -
+                // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
+                // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
+                // achieve the most accurate result on average.
+                min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+
+            if (scoreMaxCombo < fullComboThreshold) {
+                missCount = fullComboThreshold / max(1, scoreMaxCombo)
+            }
+
+            // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
+            missCount = min(missCount, totalImperfectHits.toDouble())
+
+            // Every slider has *at least* 2 combo attributed in classic mechanics.
+            // If they broke on a slider with a tick, then this still works since they would have lost at least 2 combo (the tick and the end).
+            // Using this as a max means a score that loses 1 combo on a map can't possibly have been a slider break.
+            // It must have been a slider end.
+            val maxPossibleSliderBreaks = min(attributes.sliderCount, (attributes.maxCombo - scoreMaxCombo) / 2)
+            val sliderBreaks = missCount - countMiss
+
+            if (sliderBreaks > maxPossibleSliderBreaks) {
+                missCount = countMiss.toDouble() + maxPossibleSliderBreaks
+            }
+        } else {
+            val fullComboThreshold = attributes.maxCombo.toDouble() - nonComboBreakingSliderNestedMisses
+
+            if (scoreMaxCombo < fullComboThreshold) {
+                missCount = fullComboThreshold / max(1, scoreMaxCombo)
+            }
+
+            // Combine regular misses with combo-breaking misses because they break combo as well.
+            missCount = min(missCount, comboBreakingSliderNestedMisses + countMiss.toDouble())
+        }
+
+        return missCount
     }
 
     companion object {
         const val FINAL_MULTIPLIER = 1.24
+        const val NORM_EXPONENT = 1.1
     }
 }

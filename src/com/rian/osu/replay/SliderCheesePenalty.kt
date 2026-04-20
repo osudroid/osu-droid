@@ -13,12 +13,6 @@ data class SliderCheesePenalty(
      */
     @JvmField
     var aim: Double = 1.0,
-
-    /**
-     * The penalty for flashlight pp.
-     */
-    @JvmField
-    var flashlight: Double = 1.0,
 ) {
     /**
      * Copies this [SliderCheesePenalty] to another [SliderCheesePenalty].
@@ -27,7 +21,6 @@ data class SliderCheesePenalty(
      */
     fun copyTo(other: SliderCheesePenalty) {
         other.aim = aim
-        other.flashlight = flashlight
     }
 
     /**
@@ -35,6 +28,5 @@ data class SliderCheesePenalty(
      */
     fun reset() {
         aim = 1.0
-        flashlight = 1.0
     }
 }

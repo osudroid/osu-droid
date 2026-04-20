@@ -16,7 +16,7 @@ abstract class PerformanceCalculator<
      * The [DifficultyAttributes] being calculated.
      */
     @JvmField
-    val difficultyAttributes: TDiffAttributes
+    val attributes: TDiffAttributes
 ) {
     /**
      * The maximum combo achieved.
@@ -131,8 +131,8 @@ abstract class PerformanceCalculator<
      * Resets this calculator to its original state.
      */
     protected open fun resetDefaults() {
-        scoreMaxCombo = difficultyAttributes.maxCombo
-        countGreat = difficultyAttributes.hitCircleCount + difficultyAttributes.sliderCount + difficultyAttributes.spinnerCount
+        scoreMaxCombo = attributes.maxCombo
+        countGreat = attributes.hitCircleCount + attributes.sliderCount + attributes.spinnerCount
         countOk = 0
         countMeh = 0
         countMiss = 0

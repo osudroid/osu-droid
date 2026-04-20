@@ -26,16 +26,14 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var tapDifficultStrainCount = 0.0
 
     /**
-     * The amount of strains that are considered difficult with respect to the flashlight skill.
+     * Describes how much of [tapDifficultStrainCount] is contributed to by [HitCircle]s or [Slider]s.
+     *
+     * A value closer to 0 indicates most of [tapDifficultStrainCount] is contributed by [HitCircle]s.
+     *
+     * A value closer to [Double.POSITIVE_INFINITY] indicates most of [tapDifficultStrainCount] is contributed by [Slider]s.
      */
     @JvmField
-    var flashlightDifficultStrainCount = 0.0
-
-    /**
-     * The average delta time of speed objects.
-     */
-    @JvmField
-    var averageSpeedDeltaTime = 0.0
+    var tapTopWeightedSliderFactor = 0.0
 
     /**
      * Possible sections at which the player can use three fingers on.
@@ -50,22 +48,8 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var difficultSliders = mutableListOf<DifficultSlider>()
 
     /**
-     * Describes how much of flashlight difficulty is contributed to by [HitCircle]s or [Slider]s.
-     *
-     * A value closer to 1 indicates most flashlight difficulty is contributed by [HitCircle]s.
-     *
-     * A value closer to 0 indicates most flashlight difficulty is contributed by [Slider]s.
+     * The maximum score obtainable on the beatmap.
      */
     @JvmField
-    var flashlightSliderFactor = 1.0
-
-    /**
-     * Describes how much of tap difficulty is contributed by notes that are "vibroable".
-     *
-     * A value closer to 1 indicates most tap difficulty is contributed by notes that are not "vibroable".
-     *
-     * A value closer to 0 indicates most tap difficulty is contributed by notes that are "vibroable".
-     */
-    @JvmField
-    var vibroFactor = 1.0
+    var maximumScore = 0
 }
