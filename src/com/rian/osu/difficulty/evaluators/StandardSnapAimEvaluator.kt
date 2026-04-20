@@ -13,7 +13,7 @@ import kotlin.math.*
  * An evaluator for calculating osu!standard snap aim skill.
  */
 object StandardSnapAimEvaluator {
-    private const val WIDE_ANGLE_MULTIPLIER = 1.05
+    private const val WIDE_ANGLE_MULTIPLIER = 9.67
     private const val ACUTE_ANGLE_MULTIPLIER = 2.41
     private const val SLIDER_MULTIPLIER = 1.5
     private const val VELOCITY_CHANGE_MULTIPLIER = 0.9
@@ -93,13 +93,13 @@ object StandardSnapAimEvaluator {
                 acuteAngleBonus *=
                     velocityInfluence *
                     DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 400.0) *
-                    DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, 0.0, diameter * 2.0)
+                    DifficultyCalculationUtils.smootherstep(currentDistance, 0.0, diameter * 2.0)
             }
 
             var wideAngleBonus = calculateWideAngleAcuteness(currentAngle)
 
             // Penalize angle repetition. It is important to do it _before_ multiplying by velocity because we compare raw wideness here.
-            wideAngleBonus *= 1 - min(wideAngleBonus, calculateWideAngleAcuteness(lastAngle).pow(3))
+            wideAngleBonus *= 0.25 + 0.75 * (1 - min(wideAngleBonus, calculateWideAngleAcuteness(lastAngle).pow(3)))
 
             // Rescale velocity for the wide angle bonus.
             val wideAngleTimeScale = 1.45
@@ -134,12 +134,12 @@ object StandardSnapAimEvaluator {
 
             // Apply wiggle bonus for jumps that are [radius, 3*diameter] in distance, with < 110 angle
             // https://www.desmos.com/calculator/dp0v0nvowc
-            strain *= velocityInfluence *
-                DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
-                Interpolation.reverseLinear(current.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
+            strain += velocityInfluence *
+                DifficultyCalculationUtils.smootherstep(currentDistance, radius.toDouble(), diameter.toDouble()) *
+                Interpolation.reverseLinear(currentDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
                 DifficultyCalculationUtils.smootherstep(currentAngle, 110.0.toRadians(), 60.0.toRadians()) *
-                DifficultyCalculationUtils.smootherstep(last.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
-                Interpolation.reverseLinear(last.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
+                DifficultyCalculationUtils.smootherstep(prevDistance, radius.toDouble(), diameter.toDouble()) *
+                Interpolation.reverseLinear(prevDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
                 DifficultyCalculationUtils.smootherstep(lastAngle, 110.0.toRadians(), 60.0.toRadians()) *
                 WIGGLE_MULTIPLIER
         }
@@ -147,7 +147,7 @@ object StandardSnapAimEvaluator {
         if (max(prevVelocity, currentVelocity) != 0.0) {
             if (withSliders) {
                 // We want to use the average velocity over the whole object when awarding differences, not the individual jump and slider path velocities.
-                currentVelocity = (current.lazyJumpDistance + last.travelDistance) / current.strainTime
+                currentVelocity = currentDistance / current.strainTime
             }
 
             // Scale with ratio of difference compared to half the max distance.
@@ -172,7 +172,7 @@ object StandardSnapAimEvaluator {
 
         if (current.obj is Slider && withSliders) {
             // Reward sliders based on velocity.
-            val sliderBonus = last.travelDistance / last.travelTime
+            val sliderBonus = current.travelDistance / current.travelTime
 
             strain +=
                 (if (sliderBonus < 1) sliderBonus else sliderBonus.pow(0.75)) * SLIDER_MULTIPLIER

@@ -23,7 +23,6 @@ class StandardSpeed(
 
     private var currentDifficulty = 0.0
     private var maxDifficulty = 0.0
-    private var currentRhythm = 0.0
     private val skillMultiplier = 1.16
     private val strainDecayBase = 0.3
 
@@ -69,7 +68,7 @@ class StandardSpeed(
         currentDifficulty *= decay
         currentDifficulty += StandardSpeedEvaluator.evaluateDifficultyOf(current) * (1 - decay) * skillMultiplier
 
-        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
+        val currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
 
         val difficulty = currentDifficulty * currentRhythm
         maxDifficulty = max(maxDifficulty, difficulty)

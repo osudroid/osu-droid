@@ -39,7 +39,7 @@ object DroidTapEvaluator {
 
         var speedBonus = 1.0
 
-        if (DifficultyCalculationUtils.millisecondsToBPM(current.strainTime) < MIN_SPEED_BONUS) {
+        if (DifficultyCalculationUtils.millisecondsToBPM(current.strainTime) > MIN_SPEED_BONUS) {
             speedBonus += 0.75 * ErrorFunction.erfFast((DifficultyCalculationUtils.bpmToMilliseconds(MIN_SPEED_BONUS) - current.strainTime) / 40).pow(2)
         }
 

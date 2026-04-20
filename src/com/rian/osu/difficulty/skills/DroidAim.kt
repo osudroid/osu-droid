@@ -35,14 +35,14 @@ class DroidAim(
 
     private var currentStrain = 0.0
 
-    private val skillMultiplierSnap = 71.0
+    private val skillMultiplierSnap = 70.9
     private val skillMultiplierAgility = 2.35
-    private val skillMultiplierFlow = 245
+    private val skillMultiplierFlow = 243.0
     private val skillMultiplierTotal = 1.12
-    private val combinedSnapMeanExponent = 1.2
+    private val combinedSnapNormExponent = 1.2
 
     private val reducedSectionTime = 4000.0
-    private val reducedSectionBaseline = 0.727
+    private val reducedStrainBaseline = 0.727
 
     private val sliderStrains = mutableListOf<Double>()
     private var maxSliderStrain = 0.0
@@ -106,7 +106,7 @@ class DroidAim(
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =
-        currentStrain * strainDecay(time - current.previous(0)!!.startTime)
+        currentStrain * strainDecay(time - (current.previous(0)?.startTime ?: 0.0))
 
     private fun calculateTotalValue(snapDifficulty: Double, agilityDifficulty: Double, flowDifficulty: Double): Double {
         var flowDifficulty = flowDifficulty
@@ -115,7 +115,7 @@ class DroidAim(
         // to be above flow on streams. Agility, on the other hand, is supposed to measure the rate of cursor
         // velocity changes while snapping. This means snapping every circle on a stream requires an enormous
         // amount of agility at which point it is easier to flow.
-        var combinedSnapDifficulty = DifficultyCalculationUtils.norm(combinedSnapMeanExponent, snapDifficulty, agilityDifficulty)
+        var combinedSnapDifficulty = DifficultyCalculationUtils.norm(combinedSnapNormExponent, snapDifficulty, agilityDifficulty)
 
         val pSnap = calculateSnapFlowProbability(flowDifficulty / combinedSnapDifficulty)
         val pFlow = 1 - pSnap
@@ -123,7 +123,7 @@ class DroidAim(
         // Invert rating summation to obtain a more accurate TD adjustment.
         val currentSnapDifficulty = (0.02275 * 10.0.pow(0.63)).pow((0.8 - 1) / 0.63) * snapDifficulty.pow(0.8)
 
-        combinedSnapDifficulty = DifficultyCalculationUtils.norm(combinedSnapMeanExponent, currentSnapDifficulty, agilityDifficulty)
+        combinedSnapDifficulty = DifficultyCalculationUtils.norm(combinedSnapNormExponent, currentSnapDifficulty, agilityDifficulty)
 
         if (mods.any { it is ModRelax }) {
             combinedSnapDifficulty *= 0.75
@@ -215,7 +215,7 @@ class DroidAim(
                 )
 
                 strains += StrainPeak(
-                    value = strain.value * Interpolation.linear(reducedSectionBaseline, 1.0, scale),
+                    value = strain.value * Interpolation.linear(reducedStrainBaseline, 1.0, scale),
                     sectionLength = min(chunkSize, strain.sectionLength - addedTime)
                 )
 

@@ -28,11 +28,9 @@ class DroidTap(
 
     private var currentDifficulty = 0.0
     private var maxDifficulty = 0.0
-    private var currentRhythm = 0.0
     private val skillMultiplier = 1.16
     private val strainDecayBase = 0.3
 
-    private val objectDeltaTimes = mutableListOf<Double>()
     private val sliderDifficulties = mutableListOf<Double>()
 
     /**
@@ -44,21 +42,6 @@ class DroidTap(
         }
 
         return objectDifficulties.fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxDifficulty * 12 - 6))) }
-    }
-
-    /**
-     * Gets the delta time relevant to the difficulty.
-     */
-    fun relevantDeltaTime(): Double {
-        if (objectDifficulties.isEmpty() || maxDifficulty == 0.0) {
-            return 0.0
-        }
-
-        return objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
-            acc + d / (1 + exp(-(objectDifficulties[i] / maxDifficulty * 25 - 20)))
-        } / objectDifficulties.fold(0.0) { acc, d ->
-            acc + 1 / (1 + exp(-(d / maxDifficulty * 25 - 20)))
-        }
     }
 
     /**
@@ -90,12 +73,10 @@ class DroidTap(
         currentDifficulty *= decay
         currentDifficulty += DroidTapEvaluator.evaluateDifficultyOf(current, considerCheesability) * (1 - decay) * skillMultiplier
 
-        currentRhythm = current.rhythmMultiplier
+        val currentRhythm = current.rhythmMultiplier
 
         val difficulty = currentDifficulty * currentRhythm
-
         maxDifficulty = max(maxDifficulty, difficulty)
-        objectDeltaTimes.add(current.deltaTime)
 
         if (current.obj is Slider) {
             sliderDifficulties.add(difficulty)

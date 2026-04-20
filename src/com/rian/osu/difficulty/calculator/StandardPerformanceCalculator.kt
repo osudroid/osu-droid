@@ -51,7 +51,7 @@ class StandardPerformanceCalculator(
     override fun createPerformanceAttributes() = StandardPerformanceAttributes().also {
         var multiplier = FINAL_MULTIPLIER
 
-        effectiveMissCount = calculateEffectiveMissCount()
+        effectiveMissCount = calculateComboBasedEstimatedMissCount()
 
         val hitWindow = StandardHitWindow(attributes.overallDifficulty)
 
@@ -69,7 +69,7 @@ class StandardPerformanceCalculator(
         if (attributes.mods.any { m -> m is ModRelax }) {
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-            val okMultiplier = 0.75 * max(0.0, if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(1.8) else 1.0)
+            val okMultiplier = 0.75 * max(0.0, if (overallDifficulty > 0) 1 - overallDifficulty / 13.33 else 1.0)
             val mehMultiplier = max(0.0, if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5) else 1.0)
 
             // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
@@ -199,7 +199,7 @@ class StandardPerformanceCalculator(
         // Bonus for many hit circles - it's harder to keep good accuracy up for longer
         accuracyValue *= (hitObjectWithAccuracyCount / 1000.0).pow(if (hitObjectWithAccuracyCount < 1000) 0.3 else 0.1)
 
-        if (mods.any { it is ModHidden || it is ModTraceable }) {
+        if (mods.any { it is ModTraceable }) {
             // Decrease bonus for AR>10.
             accuracyValue *= 1 + 0.08 * Interpolation.reverseLinear(approachRate, 11.5, 10.0)
         }
@@ -377,36 +377,56 @@ class StandardPerformanceCalculator(
         return estimatedSliderBreaks * okAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
     }
 
-    private fun calculateEffectiveMissCount() = attributes.run {
+    private fun calculateComboBasedEstimatedMissCount(): Double {
         var missCount = countMiss.toDouble()
 
-        if (sliderCount > 0) {
-            if (usingClassicSliderCalculation) {
-                // Consider that full combo is maximum combo minus dropped slider tails since
-                // they don't contribute to combo but also don't break it.
-                // In classic scores, we can't know the amount of dropped sliders so we estimate
-                // to 10% of all sliders in the beatmap.
-                val fullComboThreshold = maxCombo - 0.1 * sliderCount
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
-                missCount = min(missCount, totalImperfectHits.toDouble())
-            } else {
-                val fullComboThreshold = maxCombo.toDouble() - nonComboBreakingSliderNestedMisses
-
-                if (scoreMaxCombo < fullComboThreshold) {
-                    missCount = fullComboThreshold / max(1, scoreMaxCombo)
-                }
-
-                // Combine regular misses with tick misses, since tick misses break combo as well.
-                missCount = min(missCount, comboBreakingSliderNestedMisses + countMiss.toDouble())
-            }
+        if (attributes.sliderCount <= 0) {
+            return missCount
         }
 
-        missCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
+        if (usingClassicSliderCalculation) {
+            // If sliders in the beatmap are hard, it's likely for player to drop sliderends.
+            // However, if the beatmap has easy sliders, it's more likely for player to sliderbreak.
+            val likelyMissedSliderEndPortion = 0.04 + 0.06 * min(1.0, attributes.aimTopWeightedSliderFactor).pow(2)
+
+            // Consider that full combo is maximum combo minus dropped slider tails since they don't contribute to combo but also don't break it.
+            // In classic scores, we can't know the amount of dropped sliders so we estimate to 10% of all sliders in the beatmap.
+            val fullComboThreshold =
+                attributes.maxCombo -
+                // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
+                // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
+                // achieve the most accurate result on average.
+                min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+
+            if (scoreMaxCombo < fullComboThreshold) {
+                missCount = fullComboThreshold / max(1, scoreMaxCombo)
+            }
+
+            // In classic scores, there can't be more misses than a sum of all non-perfect judgements.
+            missCount = min(missCount, totalImperfectHits.toDouble())
+
+            // Every slider has *at least* 2 combo attributed in classic mechanics.
+            // If they broke on a slider with a tick, then this still works since they would have lost at least 2 combo (the tick and the end).
+            // Using this as a max means a score that loses 1 combo on a map can't possibly have been a slider break.
+            // It must have been a slider end.
+            val maxPossibleSliderBreaks = min(attributes.sliderCount, (attributes.maxCombo - scoreMaxCombo) / 2)
+            val sliderBreaks = missCount - countMiss
+
+            if (sliderBreaks > maxPossibleSliderBreaks) {
+                missCount = countMiss.toDouble() + maxPossibleSliderBreaks
+            }
+        } else {
+            val fullComboThreshold = attributes.maxCombo.toDouble() - nonComboBreakingSliderNestedMisses
+
+            if (scoreMaxCombo < fullComboThreshold) {
+                missCount = fullComboThreshold / max(1, scoreMaxCombo)
+            }
+
+            // Combine regular misses with combo-breaking misses because they break combo as well.
+            missCount = min(missCount, comboBreakingSliderNestedMisses + countMiss.toDouble())
+        }
+
+        return missCount
     }
 
     private fun calculateTraceableBonus(sliderFactor: Double = 1.0): Double {

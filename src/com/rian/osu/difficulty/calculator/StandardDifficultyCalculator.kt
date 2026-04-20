@@ -86,7 +86,11 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         readingDifficultNoteCount = reading?.countTopWeightedObjectDifficulties(readingDifficultyValue) ?: 0.0
 
         // Final rating
-        val ratingCalculator = StandardRatingCalculator(playableBeatmap.mods, playableBeatmap.hitObjects.objects.size, overallDifficulty)
+        val ratingCalculator = StandardRatingCalculator(
+            playableBeatmap.mods,
+            playableBeatmap.hitObjects.objects.size,
+            calculateRateAdjustedOverallDifficulty(overallDifficulty, clockRate)
+        )
 
         aimDifficulty = ratingCalculator.computeAimRating(aimDifficultyValue)
         speedDifficulty = ratingCalculator.computeSpeedRating(speedDifficultyValue)

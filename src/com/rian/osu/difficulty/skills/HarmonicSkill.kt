@@ -75,7 +75,7 @@ abstract class HarmonicSkill<TObject : DifficultyHitObject>(mods: Iterable<Mod>)
      *
      * @param difficultyValue The final difficulty value.
      */
-    fun countTopWeightedObjectDifficulties(difficultyValue: Double): Double {
+    open fun countTopWeightedObjectDifficulties(difficultyValue: Double): Double {
         if (difficultyValue == 0.0 || noteWeightSum == 0.0) {
             return 0.0
         }

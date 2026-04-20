@@ -51,7 +51,7 @@ class StandardRatingCalculator(
         var flashlightRating = calculateDifficultyRating(flashlightDifficultyValue)
 
         if (ModRelax::class in mods) {
-            flashlightRating += 0.7
+            flashlightRating *= 0.7
         } else if (ModAutopilot::class in mods) {
             flashlightRating *= 0.4
         }
@@ -72,7 +72,7 @@ class StandardRatingCalculator(
         var readingRating = calculateDifficultyRating(readingDifficultyValue)
 
         if (ModRelax::class in mods) {
-            readingRating += 0.6
+            readingRating *= 0.6
         } else if (ModAutopilot::class in mods) {
             readingRating *= 0.3
         }

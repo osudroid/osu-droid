@@ -77,10 +77,10 @@ object StandardFlowAimEvaluator {
             overlappedNotesWeight = 1 - o1 * o2 * o3
         }
 
-        if (currentAngle != null && lastAngle != null) {
+        if (currentAngle != null) {
             // Acute angles are harder to flow.
             // Square root velocity to ensure acute angle switches in streams are not assessed as harder than snap.
-            difficulty *= sqrt(currentVelocity) * StandardSnapAimEvaluator.calculateAcuteAngleAcuteness(currentAngle) * overlappedNotesWeight
+            difficulty += sqrt(currentVelocity) * StandardSnapAimEvaluator.calculateAcuteAngleAcuteness(currentAngle) * overlappedNotesWeight
         }
 
         if (max(currentVelocity, prevVelocity) > 0) {
@@ -121,6 +121,6 @@ object StandardFlowAimEvaluator {
         val distance = o1.difficultyStackedPosition.getDistance(o2.difficultyStackedPosition)
         val radius = o1.difficultyRadius
 
-        return (1 - ((distance - radius).coerceAtMost(0.0) / radius).pow(2)).coerceIn(0.0, 1.0)
+        return (1 - (max(0.0, distance - radius) / radius).pow(2)).coerceIn(0.0, 1.0)
     }
 }

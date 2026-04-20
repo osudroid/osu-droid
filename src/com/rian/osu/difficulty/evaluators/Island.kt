@@ -25,10 +25,14 @@ internal class Island(epsilon: Double) {
         ++deltaCount
     }
 
-    fun isSimilarPolarity(other: Island) =
-        // TODO: consider islands to be of similar polarity only if they're having the same average delta (we don't want to consider 3 singletaps similar to a triple)
-        // naively adding delta check here breaks _a lot_ of maps because of the flawed ratio calculation
-        deltaCount % 2 == other.deltaCount % 2
+    fun isSimilarPolarity(other: Island): Boolean {
+        // Single delta islands should not be compared.
+        if (deltaCount == 1 || other.deltaCount == 1) {
+            return false
+        }
+
+        return abs(delta - other.delta) < deltaDifferenceEpsilon && deltaCount % 2 == other.deltaCount % 2
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

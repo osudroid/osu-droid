@@ -37,7 +37,7 @@ object StandardSpeedEvaluator {
         var speedBonus = 0.0
 
         // Add additional scaling bonus for streams/bursts higher than 200bpm
-        if (DifficultyCalculationUtils.millisecondsToBPM(strainTime) < MIN_SPEED_BONUS) {
+        if (DifficultyCalculationUtils.millisecondsToBPM(strainTime) > MIN_SPEED_BONUS) {
             speedBonus = 0.75 * ((DifficultyCalculationUtils.bpmToMilliseconds(MIN_SPEED_BONUS) - strainTime) / 40).pow(2)
         }
 

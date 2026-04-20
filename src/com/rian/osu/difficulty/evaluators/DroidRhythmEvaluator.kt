@@ -38,7 +38,7 @@ object DroidRhythmEvaluator {
 
         var island = Island(deltaDifferenceEpsilon)
         var previousIsland = Island(deltaDifferenceEpsilon)
-        val islandCounts = mutableMapOf<Island, Int>()
+        val islandCounts = mutableListOf<IslandCounter>()
 
         // Store the ratio of the current start of an island to buff for tighter rhythms.
         var startRatio = 0.0
@@ -146,23 +146,22 @@ object DroidRhythmEvaluator {
 
                     var islandFound = false
 
-                    for ((otherIsland, count) in islandCounts) {
-                        if (island != otherIsland) {
+                    for (counter in islandCounts) {
+                        if (island != counter.island) {
                             continue
                         }
 
                         islandFound = true
-                        var islandCount = count
 
                         // Only add island to island counts if they're going one after another.
                         if (previousIsland == island) {
-                            islandCounts[otherIsland] = ++islandCount
+                            counter.count++
                         }
 
                         // Repeated island (ex: triplet -> triplet)
                         effectiveRatio *= min(
-                            3.0 / islandCount,
-                            (1.0 / islandCount).pow(
+                            3.0 / counter.count,
+                            (1.0 / counter.count).pow(
                                 DifficultyCalculationUtils.logistic(island.delta.toDouble(), 58.33, 0.24, 2.75)
                             )
                         )
@@ -171,7 +170,7 @@ object DroidRhythmEvaluator {
                     }
 
                     if (!islandFound) {
-                        islandCounts[island] = 1
+                        islandCounts.add(IslandCounter(island, 1))
                     }
 
                     // Scale down the difficulty if the object is doubletappable.

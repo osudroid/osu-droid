@@ -19,7 +19,7 @@ import kotlin.math.sqrt
 
 object StandardReadingEvaluator {
     private const val READING_WINDOW_SIZE = 3000.0
-    private val DISTANCE_INFLUENCE_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 // 1.25 circles distance between centers
+    private val DISTANCE_INFLUENCE_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.5 // 1.5 circles distance between centers
     private const val HIDDEN_MULTIPLIER = 0.28
     private const val DENSITY_MULTIPLIER = 2.4
     private const val DENSITY_DIFFICULTY_BASE = 2.5
@@ -53,7 +53,12 @@ object StandardReadingEvaluator {
 
         val preemptDifficulty = calculatePreemptDifficulty(velocity, constantAngleNerfFactor, current.timePreempt)
 
-        return DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
+        var difficulty = DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
+
+        // Having less time to process information is harder.
+        difficulty *= highBpmBonus(current.strainTime)
+
+        return difficulty
     }
 
     /**
@@ -88,7 +93,7 @@ object StandardReadingEvaluator {
         noteDensityDifficulty = max(0.0, noteDensityDifficulty - DENSITY_DIFFICULTY_BASE)
 
         // Apply a soft cap to general density reading to account for partial memorization.
-        noteDensityDifficulty = sqrt(noteDensityDifficulty) * DENSITY_MULTIPLIER
+        noteDensityDifficulty = noteDensityDifficulty.pow(0.45) * DENSITY_MULTIPLIER
 
         return noteDensityDifficulty
     }
@@ -285,4 +290,6 @@ object StandardReadingEvaluator {
     }
 
     private fun getTimeNerfFactor(deltaTime: Double) = (2 - deltaTime / (READING_WINDOW_SIZE / 2)).coerceIn(0.0, 1.0)
+
+    private fun highBpmBonus(ms: Double) = 1 / (1 - 0.8.pow(ms / 1000))
 }

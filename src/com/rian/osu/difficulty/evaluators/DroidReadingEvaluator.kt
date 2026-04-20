@@ -56,7 +56,12 @@ object DroidReadingEvaluator {
 
         val preemptDifficulty = calculatePreemptDifficulty(velocity, constantAngleNerfFactor, current.timePreempt)
 
-        return DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
+        var difficulty = DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
+
+        // Having less time to process information is harder.
+        difficulty *= highBpmBonus(current.strainTime)
+
+        return difficulty
     }
 
     /**
@@ -91,7 +96,7 @@ object DroidReadingEvaluator {
         noteDensityDifficulty = max(0.0, noteDensityDifficulty - DENSITY_DIFFICULTY_BASE)
 
         // Apply a soft cap to general density reading to account for partial memorization.
-        noteDensityDifficulty = sqrt(noteDensityDifficulty) * DENSITY_MULTIPLIER
+        noteDensityDifficulty = noteDensityDifficulty.pow(0.45) * DENSITY_MULTIPLIER
 
         return noteDensityDifficulty
     }
@@ -297,4 +302,6 @@ object DroidReadingEvaluator {
     }
 
     private fun getTimeNerfFactor(deltaTime: Double) = (2 - deltaTime / (READING_WINDOW_SIZE / 2)).coerceIn(0.0, 1.0)
+
+    private fun highBpmBonus(ms: Double) = 1 / (1 - 0.8.pow(ms / 1000))
 }
