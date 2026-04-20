@@ -18,9 +18,10 @@ class DroidRhythm(
     override val harmonicScale = 25.0
     override val decayExponent = 0.8
 
-    private var currentDifficulty = 0.0
+    private val skillMultiplier = 7.5
     private val difficultyDecayBase = 0.3
 
+    private var currentDifficulty = 0.0
     private val useSliderAccuracy = mods.any { it is ModScoreV2 }
 
     override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
@@ -29,7 +30,7 @@ class DroidRhythm(
         current.rhythmMultiplier = rhythmMultiplier
 
         currentDifficulty *= strainDecay(current.deltaTime)
-        currentDifficulty += (rhythmMultiplier - 1)
+        currentDifficulty += (rhythmMultiplier - 1) * skillMultiplier
 
         return currentDifficulty
     }
