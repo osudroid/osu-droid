@@ -80,7 +80,7 @@ class DroidAim(
     }
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
-        val decay = strainDecay(current.deltaTime)
+        val decay = strainDecay(current.strainTime)
 
         val snapDifficulty = DroidSnapAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierSnap
         val agilityDifficulty = DroidAgilityEvaluator.evaluateDifficultyOf(current) * skillMultiplierAgility

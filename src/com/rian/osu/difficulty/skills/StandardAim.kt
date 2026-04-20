@@ -78,7 +78,7 @@ class StandardAim(
     }
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
-        val decay = strainDecay(current.deltaTime)
+        val decay = strainDecay(current.strainTime)
 
         val snapDifficulty = StandardSnapAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierSnap
         val agilityDifficulty = StandardAgilityEvaluator.evaluateDifficultyOf(current) * skillMultiplierAgility
