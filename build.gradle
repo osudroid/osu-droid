@@ -180,7 +180,7 @@ android {
 }
 
 dependencies {
-    implementation project(':AndEngine')
+    implementation project(':AndEngine-GLES2')
     implementation project(':LibBASS')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.2.1'
