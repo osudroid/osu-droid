@@ -51,11 +51,11 @@ class DroidPerformanceCalculator(
         difficultyAttributes.mods.any { it is ModPrecise }
     }
 
-    override fun createPerformanceAttributes() = DroidPerformanceAttributes().also {
+    override fun createPerformanceAttributes(attributes: DroidPerformanceAttributes?) = (attributes ?: DroidPerformanceAttributes()).also {
         var multiplier = FINAL_MULTIPLIER
 
         if (usingClassicSliderCalculation) {
-            val remainingScore = attributes.maximumScore - totalScore
+            val remainingScore = this.attributes.maximumScore - totalScore
 
             // If there is less than one miss, let combo-based miss count decide whether this is full combo.
             val scoreBasedMissCount = max(1.0, (totalScore - remainingScore) / remainingScore.toDouble())
@@ -66,14 +66,14 @@ class DroidPerformanceCalculator(
             effectiveMissCount = calculateComboBasedEstimatedMissCount()
         }
 
-        if (attributes.mods.any { m -> m is ModNoFail }) {
+        if (this.attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
         }
 
-        if (attributes.mods.any { m -> m is ModRelax }) {
+        if (this.attributes.mods.any { m -> m is ModRelax }) {
             // Relax scaling was made for osu!standard overall difficulty, so we need to obtain it.
             val hitWindow = hitWindow
-            val greatWindow = hitWindow.greatWindow / attributes.clockRate
+            val greatWindow = hitWindow.greatWindow / this.attributes.clockRate
             val od = (79.5 - greatWindow) / 6
 
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
@@ -87,7 +87,7 @@ class DroidPerformanceCalculator(
                 min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
         }
 
-        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.aimTopWeightedSliderFactor)
+        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(this.attributes.aimTopWeightedSliderFactor)
         deviation = calculateAimDeviation()
         tapDeviation = calculateTapDeviation()
 

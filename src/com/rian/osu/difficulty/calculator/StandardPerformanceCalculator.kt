@@ -48,25 +48,25 @@ class StandardPerformanceCalculator(
     private var effectiveMissCount = 0.0
     private var speedDeviation = 0.0
 
-    override fun createPerformanceAttributes() = StandardPerformanceAttributes().also {
+    override fun createPerformanceAttributes(attributes: StandardPerformanceAttributes?) = (attributes ?: StandardPerformanceAttributes()).also {
         var multiplier = FINAL_MULTIPLIER
 
         effectiveMissCount = calculateComboBasedEstimatedMissCount()
 
-        val hitWindow = StandardHitWindow(attributes.overallDifficulty)
+        val hitWindow = StandardHitWindow(this.attributes.overallDifficulty)
 
-        greatWindow = hitWindow.greatWindow / attributes.clockRate
-        okWindow = hitWindow.okWindow / attributes.clockRate
-        mehWindow = hitWindow.mehWindow / attributes.clockRate
+        greatWindow = hitWindow.greatWindow / this.attributes.clockRate
+        okWindow = hitWindow.okWindow / this.attributes.clockRate
+        mehWindow = hitWindow.mehWindow / this.attributes.clockRate
 
-        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(attributes.approachRate, attributes.clockRate)
-        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(attributes.overallDifficulty, attributes.clockRate)
+        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(this.attributes.approachRate, this.attributes.clockRate)
+        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(this.attributes.overallDifficulty, this.attributes.clockRate)
 
-        if (attributes.mods.any { m -> m is ModNoFail }) {
+        if (this.attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
         }
 
-        if (attributes.mods.any { m -> m is ModRelax }) {
+        if (this.attributes.mods.any { m -> m is ModRelax }) {
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
             val okMultiplier = 0.75 * max(0.0, if (overallDifficulty > 0) 1 - overallDifficulty / 13.33 else 1.0)
@@ -78,7 +78,7 @@ class StandardPerformanceCalculator(
                 min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
         }
 
-        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(attributes.aimTopWeightedSliderFactor)
+        aimEstimatedSliderBreaks = calculateEstimatedSliderBreaks(this.attributes.aimTopWeightedSliderFactor)
         speedDeviation = calculateSpeedDeviation()
 
         it.effectiveMissCount = effectiveMissCount
