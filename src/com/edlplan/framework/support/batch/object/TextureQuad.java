@@ -5,7 +5,7 @@ import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.utils.FloatRef;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 public class TextureQuad extends ATextureQuad {
 

@@ -6,7 +6,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Request;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.Debug;
 
 import java.io.BufferedReader;
 import java.io.Serial;

@@ -11,10 +11,10 @@ import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.MathUtils;
 
 import java.util.ArrayList;
 

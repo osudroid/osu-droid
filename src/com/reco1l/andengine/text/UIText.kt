@@ -6,8 +6,8 @@ import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.*
+import org.andengine.engine.camera.*
+import org.andengine.opengl.font.*
 import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*

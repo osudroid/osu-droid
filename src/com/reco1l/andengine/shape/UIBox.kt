@@ -4,7 +4,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*

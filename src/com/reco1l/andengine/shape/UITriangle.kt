@@ -3,7 +3,7 @@ package com.reco1l.andengine.shape
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
-import org.anddev.andengine.opengl.util.*
+import org.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 

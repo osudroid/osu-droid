@@ -2,16 +2,16 @@ package com.acivev.ui
 
 import android.content.Context
 import com.acivev.utils.DevicePerformanceUtil
-import org.anddev.andengine.engine.handler.timer.TimerHandler
-import org.anddev.andengine.entity.particle.ParticleSystem
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter
-import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer
-import org.anddev.andengine.entity.particle.initializer.RotationInitializer
-import org.anddev.andengine.entity.particle.initializer.VelocityInitializer
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier
-import org.anddev.andengine.entity.particle.modifier.ScaleModifier
-import org.anddev.andengine.entity.scene.Scene
+import org.andengine.engine.handler.timer.TimerHandler
+import org.andengine.entity.particle.ParticleSystem
+import org.andengine.entity.particle.emitter.PointParticleEmitter
+import org.andengine.entity.particle.initializer.AccelerationInitializer
+import org.andengine.entity.particle.initializer.RotationInitializer
+import org.andengine.entity.particle.initializer.VelocityInitializer
+import org.andengine.entity.particle.modifier.AlphaModifier
+import org.andengine.entity.particle.modifier.ExpireModifier
+import org.andengine.entity.particle.modifier.ScaleModifier
+import org.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import java.util.Calendar

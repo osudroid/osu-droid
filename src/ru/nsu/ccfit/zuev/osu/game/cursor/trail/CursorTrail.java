@@ -1,11 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.trail;
 
-import org.anddev.andengine.entity.particle.ParticleSystem;
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.anddev.andengine.entity.particle.initializer.ScaleInitializer;
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.particle.ParticleSystem;
+import org.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.andengine.entity.particle.initializer.ScaleInitializer;
+import org.andengine.entity.particle.modifier.AlphaModifier;
+import org.andengine.entity.particle.modifier.ExpireModifier;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import javax.microedition.khronos.opengles.GL10;
 

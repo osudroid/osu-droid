@@ -1,7 +1,7 @@
 package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.entity.*
+import org.andengine.entity.*
 import kotlin.math.*
 
 open class UIContainer : UIComponent() {

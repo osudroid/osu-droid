@@ -5,15 +5,15 @@ import android.annotation.SuppressLint;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationByModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.ColorBackground;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.ChangeableText;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 

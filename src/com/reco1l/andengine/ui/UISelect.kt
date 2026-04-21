@@ -5,7 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.engine.camera.*
+import org.andengine.engine.camera.*
 import javax.microedition.khronos.opengles.*
 
 /**

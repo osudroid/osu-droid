@@ -8,7 +8,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")

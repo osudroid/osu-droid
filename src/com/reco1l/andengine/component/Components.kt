@@ -6,10 +6,10 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec2
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.entity.scene.CameraScene
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.shape.IShape
+import org.andengine.entity.IEntity
+import org.andengine.entity.scene.CameraScene
+import org.andengine.entity.scene.Scene
+import org.andengine.entity.shape.IShape
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 

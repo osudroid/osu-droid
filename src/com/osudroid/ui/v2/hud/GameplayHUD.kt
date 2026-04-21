@@ -12,8 +12,8 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.entity.IEntity
+import org.andengine.input.touch.TouchEvent
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.osudroid.data.BeatmapSetInfo;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

@@ -12,8 +12,8 @@ import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.framework.Color4;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.shape.Shape;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.shape.Shape;
 
 import java.util.Arrays;
 import java.util.HashSet;

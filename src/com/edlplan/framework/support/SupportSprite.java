@@ -6,9 +6,9 @@ import com.edlplan.framework.support.graphics.BlendType;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.graphics.SupportCanvas;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.engine.camera.Camera;
+import org.andengine.entity.Entity;
+import org.andengine.opengl.util.GLHelper;
 
 import javax.microedition.khronos.opengles.GL10;
 

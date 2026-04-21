@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 public class FlashlightAreaSizedSprite extends Sprite {
     public static final float BASE_SIZE = 6f;

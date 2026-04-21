@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.opengl.font.Font;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
+import org.andengine.opengl.font.Font;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 

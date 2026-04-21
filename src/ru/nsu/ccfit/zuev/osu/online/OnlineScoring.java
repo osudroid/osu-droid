@@ -8,7 +8,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.utils.Execution;
 import com.rian.osu.ui.SendingPanel;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.Debug;
 
 import java.util.concurrent.CancellationException;
 

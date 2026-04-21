@@ -1,13 +1,13 @@
 package com.rian.osu.ui
 
-import org.anddev.andengine.entity.modifier.MoveYModifier
-import org.anddev.andengine.entity.primitive.Rectangle
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.entity.text.Text
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.HorizontalAlign
+import org.andengine.entity.modifier.MoveYModifier
+import org.andengine.entity.primitive.Rectangle
+import org.andengine.entity.scene.Scene.ITouchArea
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.ChangeableText
+import org.andengine.entity.text.Text
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.HorizontalAlign
 import ru.nsu.ccfit.zuev.osu.Config
 import kotlin.math.abs
 import kotlin.math.max

@@ -1,8 +1,8 @@
 package com.reco1l.osu.ui.entity
 
-import org.anddev.andengine.entity.Entity
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.opengl.font.Font
+import org.andengine.entity.Entity
+import org.andengine.entity.text.ChangeableText
+import org.andengine.opengl.font.Font
 
 class ComposedText(x: Float, y: Float, font: Font, max: Int) : Entity(x, y) {
 

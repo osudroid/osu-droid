@@ -8,11 +8,11 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.engine.camera.*
+import org.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
-import org.anddev.andengine.entity.scene.Scene
+import org.andengine.entity.scene.Scene
 
 class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
     private var currentScene: Scene? = null

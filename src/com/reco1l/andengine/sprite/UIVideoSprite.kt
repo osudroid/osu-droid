@@ -4,11 +4,11 @@ import android.media.*
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.*
 import com.reco1l.andengine.texture.*
-import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.sprite.*
-import org.anddev.andengine.opengl.texture.region.*
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.engine.Engine
+import org.andengine.engine.camera.Camera
+import org.andengine.entity.sprite.*
+import org.andengine.opengl.texture.region.*
+import org.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
 class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {

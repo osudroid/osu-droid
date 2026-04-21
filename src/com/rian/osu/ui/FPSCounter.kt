@@ -4,8 +4,8 @@ import com.reco1l.framework.Color4
 import com.rian.osu.math.Interpolation.dampContinuously
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.opengl.font.Font
+import org.andengine.entity.text.ChangeableText
+import org.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**

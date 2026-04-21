@@ -13,12 +13,12 @@ import com.edlplan.framework.math.Vec2Int;
 import com.edlplan.framework.support.graphics.BitmapUtil;
 import com.edlplan.framework.utils.interfaces.Consumer;
 
-import org.anddev.andengine.BuildConfig;
-import org.anddev.andengine.opengl.texture.ITexture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.BuildConfig;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.util.GLHelper;
 
 import java.io.File;
 import java.util.ArrayList;

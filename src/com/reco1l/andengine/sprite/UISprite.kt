@@ -6,8 +6,8 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.opengl.texture.region.*
-import org.anddev.andengine.opengl.util.*
+import org.andengine.opengl.texture.region.*
+import org.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*

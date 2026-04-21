@@ -2,9 +2,9 @@ package com.reco1l.andengine.text
 
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.text.UITextureText.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.texture.region.*
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.engine.camera.*
+import org.andengine.opengl.texture.region.*
+import org.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*

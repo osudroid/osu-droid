@@ -2,7 +2,7 @@ package com.edlplan.framework.support.batch;
 
 import com.edlplan.framework.support.SupportState;
 
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.util.GLHelper;
 
 import javax.microedition.khronos.opengles.GL10;
 

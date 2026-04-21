@@ -3,11 +3,11 @@ package com.reco1l.osu.ui.entity
 import android.opengl.GLES20
 import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
 import com.osudroid.multiplayer.Multiplayer
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
+import org.andengine.entity.scene.Scene.ITouchArea
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.ChangeableText
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.text.NumberFormat.getNumberInstance

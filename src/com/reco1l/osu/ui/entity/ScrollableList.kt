@@ -1,11 +1,11 @@
 package com.reco1l.osu.ui.entity
 
 import com.reco1l.andengine.component.UIComponent
-import org.anddev.andengine.entity.shape.Shape
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.input.touch.detector.ScrollDetector
-import org.anddev.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
-import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector
+import org.andengine.entity.shape.Shape
+import org.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.detector.ScrollDetector
+import org.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
+import org.andengine.input.touch.detector.SurfaceScrollDetector
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Utils
 import kotlin.math.abs

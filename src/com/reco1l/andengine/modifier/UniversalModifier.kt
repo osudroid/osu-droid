@@ -8,9 +8,9 @@ import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.modifier.*
-import org.anddev.andengine.util.modifier.*
+import org.andengine.entity.*
+import org.andengine.entity.modifier.*
+import org.andengine.util.modifier.*
 import kotlin.math.*
 
 /**

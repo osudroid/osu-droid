@@ -14,7 +14,7 @@ import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.hitobject.HitObject
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2

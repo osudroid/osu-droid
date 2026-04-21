@@ -25,7 +25,7 @@ import com.reco1l.framework.HexComposition;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;

@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Utils;

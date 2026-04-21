@@ -2,8 +2,8 @@
 
 package com.reco1l.andengine
 
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.util.*
+import org.andengine.engine.camera.*
+import org.andengine.util.*
 
 
 private val TEMP_COORDINATES = FloatArray(2)

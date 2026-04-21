@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import org.anddev.andengine.opengl.util.*
+import org.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 
 abstract class TextureCoordinatesBuffer(

@@ -21,7 +21,7 @@ import com.edlplan.framework.support.graphics.texture.TexturePool;
 import com.edlplan.framework.support.util.Tracker;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.io.File;
 import java.util.HashMap;

@@ -5,8 +5,8 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.IconVariant
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.*
+import org.andengine.engine.camera.*
+import org.andengine.opengl.font.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW

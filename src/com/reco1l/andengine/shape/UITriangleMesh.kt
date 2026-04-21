@@ -3,8 +3,8 @@ package com.reco1l.andengine.shape
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.util.*
+import org.andengine.engine.camera.*
+import org.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 
 // TODO: This class should be replaced with a more efficient BufferedEntity implementation.

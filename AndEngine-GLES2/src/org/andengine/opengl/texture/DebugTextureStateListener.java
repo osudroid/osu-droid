@@ -1,6 +1,5 @@
 package org.andengine.opengl.texture;
 
-import org.andengine.BuildConfig;
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
 import org.andengine.util.debug.Debug;
 
@@ -33,14 +32,14 @@ public class DebugTextureStateListener<T extends ITextureAtlasSource> implements
 
 	@Override
 	public void onLoadedToHardware(final ITexture pTexture) {
-		if(BuildConfig.DEBUG) {
+		if(false) {
 			Debug.d("Texture loaded: " + pTexture.toString());
 		}
 	}
 
 	@Override
 	public void onUnloadedFromHardware(final ITexture pTexture) {
-		if(BuildConfig.DEBUG) {
+		if(false) {
 			Debug.d("Texture unloaded: " + pTexture.toString());
 		}
 	}

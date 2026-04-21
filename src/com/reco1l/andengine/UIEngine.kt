@@ -6,15 +6,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
-import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.hud.*
-import org.anddev.andengine.engine.options.EngineOptions
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.engine.Engine
+import org.andengine.engine.camera.hud.*
+import org.andengine.engine.options.EngineOptions
+import org.andengine.entity.IEntity
+import org.andengine.entity.scene.*
+import org.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
-import org.anddev.andengine.engine.camera.Camera
+import org.andengine.engine.camera.Camera
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 

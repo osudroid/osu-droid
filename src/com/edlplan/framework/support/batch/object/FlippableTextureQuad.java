@@ -7,7 +7,7 @@ import com.edlplan.framework.utils.BooleanRef;
 import com.edlplan.framework.utils.FloatRef;
 import com.edlplan.framework.utils.Vec2Ref;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 public class FlippableTextureQuad extends ATextureQuad {
 

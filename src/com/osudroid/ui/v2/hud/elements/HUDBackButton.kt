@@ -8,7 +8,7 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager

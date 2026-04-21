@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.modifier.UniversalModifier;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 

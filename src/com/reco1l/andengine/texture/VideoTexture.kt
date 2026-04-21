@@ -4,7 +4,7 @@ import android.graphics.*
 import android.media.*
 import android.opengl.*
 import android.view.*
-import org.anddev.andengine.opengl.texture.*
+import org.andengine.opengl.texture.*
 import java.io.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*

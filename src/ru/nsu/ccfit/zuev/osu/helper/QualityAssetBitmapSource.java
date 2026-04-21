@@ -8,10 +8,10 @@ import android.graphics.BitmapFactory;
 import com.osudroid.BuildSettings;
 import com.reco1l.framework.Bitmaps;
 
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.StreamUtils;
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.source.BaseTextureAtlasSource;
+import org.andengine.util.Debug;
+import org.andengine.util.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import org.anddev.andengine.opengl.buffer.BufferObject
+import org.andengine.opengl.buffer.BufferObject
 import javax.microedition.khronos.opengles.GL10
 
 interface IBuffer {

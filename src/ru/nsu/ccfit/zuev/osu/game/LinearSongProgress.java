@@ -5,8 +5,8 @@ import android.graphics.PointF;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.framework.Color4;
 
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 

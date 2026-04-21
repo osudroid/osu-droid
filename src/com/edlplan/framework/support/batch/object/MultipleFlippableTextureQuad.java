@@ -2,7 +2,7 @@ package com.edlplan.framework.support.batch.object;
 
 import com.edlplan.framework.math.Vec2;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.List;
 

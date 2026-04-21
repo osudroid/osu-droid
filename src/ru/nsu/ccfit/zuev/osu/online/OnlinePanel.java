@@ -4,15 +4,15 @@ package ru.nsu.ccfit.zuev.osu.online;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.reco1l.osu.ui.MessageDialog;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.Entity;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.ChangeableText;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.Debug;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;

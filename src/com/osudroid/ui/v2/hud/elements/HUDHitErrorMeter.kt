@@ -7,7 +7,7 @@ import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.engine.camera.*
+import org.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import javax.microedition.khronos.opengles.*
 import kotlin.math.abs

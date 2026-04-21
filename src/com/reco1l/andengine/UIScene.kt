@@ -4,12 +4,12 @@ import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import javax.microedition.khronos.opengles.GL10
-import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.shape.IShape
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.engine.camera.Camera
+import org.andengine.entity.IEntity
+import org.andengine.entity.scene.Scene
+import org.andengine.entity.shape.IShape
+import org.andengine.input.touch.TouchEvent
+import org.andengine.opengl.util.GLHelper
 
 
 /**

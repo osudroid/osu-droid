@@ -12,8 +12,8 @@ import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.engine.camera.*
+import org.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 

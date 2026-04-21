@@ -3,7 +3,7 @@ package com.reco1l.andengine.shape
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 

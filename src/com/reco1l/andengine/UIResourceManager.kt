@@ -7,10 +7,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.Log
 import com.reco1l.andengine.component.UIComponent
-import org.anddev.andengine.opengl.font.Font
-import org.anddev.andengine.opengl.texture.TextureOptions
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.opengl.font.Font
+import org.andengine.opengl.texture.TextureOptions
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.opengl.util.GLHelper
 import java.lang.ref.WeakReference
 
 class UIResourceManager(private val context: Context) {

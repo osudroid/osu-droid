@@ -2,13 +2,13 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.osudroid.utils.Execution;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.modifier.*;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.ChangeableText;
 
-import org.anddev.andengine.util.HorizontalAlign;
+import org.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;

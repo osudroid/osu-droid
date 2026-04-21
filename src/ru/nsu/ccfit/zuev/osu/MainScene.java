@@ -30,35 +30,35 @@ import com.reco1l.osu.ui.HorizontalMessageDialog;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.particle.ParticleSystem;
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer;
-import org.anddev.andengine.entity.particle.initializer.RotationInitializer;
-import org.anddev.andengine.entity.particle.initializer.VelocityInitializer;
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
-import org.anddev.andengine.entity.particle.modifier.ScaleModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.particle.ParticleSystem;
+import org.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.andengine.entity.particle.initializer.AccelerationInitializer;
+import org.andengine.entity.particle.initializer.RotationInitializer;
+import org.andengine.entity.particle.initializer.VelocityInitializer;
+import org.andengine.entity.particle.modifier.AlphaModifier;
+import org.andengine.entity.particle.modifier.ExpireModifier;
+import org.andengine.entity.particle.modifier.ScaleModifier;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.ColorBackground;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.Debug;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseBounceOut;
+import org.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -703,8 +703,8 @@ public class MainScene implements IUpdateHandler {
             beatPassTime %= bpmLength;
 
             if (logo != null) {
-                logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
-                        new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
+                logo.registerEntityModifier(new SequenceEntityModifier(new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
+                        new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
             }
         }
 
@@ -862,7 +862,7 @@ public class MainScene implements IUpdateHandler {
                     background = new Sprite(0,
                             (Config.getRES_HEIGHT() - height) / 2, Config
                             .getRES_WIDTH(), height, tex);
-                    lastBackground.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
+                    lastBackground.registerEntityModifier(new org.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
                         @Override
                         public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                             scene.attachChild(background, 0);
@@ -974,15 +974,15 @@ public class MainScene implements IUpdateHandler {
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
-        bg.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(3.0f, 0, 1));
+        bg.registerEntityModifier(new org.andengine.entity.modifier.AlphaModifier(3.0f, 0, 1));
         scene.attachChild(bg);
         logo.registerEntityModifier(new ParallelEntityModifier(
                 new RotationModifier(3.0f, 0, -15),
-                new org.anddev.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
+                new org.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
         ));
         logoOverlay.registerEntityModifier(new ParallelEntityModifier(
                 new RotationModifier(3.0f, 0, -15),
-                new org.anddev.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
+                new org.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
         ));
 
         if (GlobalManager.getInstance().getSongService() != null) {

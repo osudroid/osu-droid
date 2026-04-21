@@ -5,8 +5,8 @@ import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.util.BufferUtil;
 
-import org.anddev.andengine.opengl.texture.ITexture;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.util.GLHelper;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;

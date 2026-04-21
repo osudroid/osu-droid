@@ -9,8 +9,8 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.*
-import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.entity.scene.*
+import org.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*

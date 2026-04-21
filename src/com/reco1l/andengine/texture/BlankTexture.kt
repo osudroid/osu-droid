@@ -1,8 +1,8 @@
 package com.reco1l.andengine.texture
 
-import org.anddev.andengine.opengl.texture.Texture
-import org.anddev.andengine.opengl.texture.TextureOptions
-import org.anddev.andengine.opengl.texture.region.TextureRegion
+import org.andengine.opengl.texture.Texture
+import org.andengine.opengl.texture.TextureOptions
+import org.andengine.opengl.texture.region.TextureRegion
 import javax.microedition.khronos.opengles.GL10
 
 class BlankTextureRegion : TextureRegion(BlankTexture(), 0, 0, 1, 1)

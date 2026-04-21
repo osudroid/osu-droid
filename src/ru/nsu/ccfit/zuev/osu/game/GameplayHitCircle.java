@@ -13,7 +13,7 @@ import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
 
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 
