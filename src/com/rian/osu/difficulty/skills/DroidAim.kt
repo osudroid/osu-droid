@@ -37,7 +37,7 @@ class DroidAim(
 
     private val skillMultiplierSnap = 70.9
     private val skillMultiplierAgility = 2.35
-    private val skillMultiplierFlow = 243.0
+    private val skillMultiplierFlow = 242.0
     private val skillMultiplierTotal = 1.12
     private val combinedSnapNormExponent = 1.2
 

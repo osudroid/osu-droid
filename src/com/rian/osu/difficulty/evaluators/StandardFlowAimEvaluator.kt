@@ -79,8 +79,7 @@ object StandardFlowAimEvaluator {
 
         if (currentAngle != null) {
             // Acute angles are harder to flow.
-            // Square root velocity to ensure acute angle switches in streams are not assessed as harder than snap.
-            difficulty += sqrt(currentVelocity) * StandardSnapAimEvaluator.calculateAcuteAngleAcuteness(currentAngle) * overlappedNotesWeight
+            difficulty += currentVelocity * StandardSnapAimEvaluator.calculateAcuteAngleAcuteness(currentAngle) * overlappedNotesWeight
         }
 
         if (max(currentVelocity, prevVelocity) > 0) {
