@@ -348,6 +348,7 @@ object BeatmapDifficultyCalculator {
      * @return A [StandardPerformanceAttributes] relating to the [StatisticV2].
      */
     @JvmStatic
+    @JvmOverloads
     fun calculateStandardPerformance(
         beatmap: IBeatmap, attributes: StandardDifficultyAttributes, stat: StatisticV2, perfAttributes: StandardPerformanceAttributes? = null
     ) = calculateStandardPerformance(attributes, constructStandardPerformanceParameters(beatmap, stat), perfAttributes)
