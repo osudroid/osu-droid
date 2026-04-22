@@ -11,7 +11,6 @@ import com.rian.osu.math.ErrorFunction
 import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.ModAutopilot
 import com.rian.osu.mods.ModFlashlight
-import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModNoFail
 import com.rian.osu.mods.ModRelax
 import com.rian.osu.mods.ModScoreV2
@@ -360,21 +359,23 @@ class StandardPerformanceCalculator(
         else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
 
     private fun calculateEstimatedSliderBreaks(topWeightedSliderFactor: Double): Double {
-        if (!usingClassicSliderCalculation || countOk == 0) {
+        val nonMissMistakes = countOk + countMeh
+
+        if (!usingClassicSliderCalculation || nonMissMistakes == 0) {
             return 0.0
         }
 
         val missedComboPercent = 1 - scoreMaxCombo.toDouble() / attributes.maxCombo
-        var estimatedSliderBreaks = min(countOk.toDouble(), effectiveMissCount * topWeightedSliderFactor)
+        var estimatedSliderBreaks = min(nonMissMistakes.toDouble(), effectiveMissCount * topWeightedSliderFactor)
 
         // Scores with more Oks are more likely to have slider breaks.
-        val okAdjustment = ((countOk - estimatedSliderBreaks) + 0.5) / countOk
+        val nonMissAdjustment = ((nonMissMistakes - estimatedSliderBreaks) + 0.5) / nonMissMistakes
 
         // There is a low probability of extra slider breaks on effective miss counts close to 1, as score based
         // calculations are good at indicating if only a single break occurred.
         estimatedSliderBreaks *= DifficultyCalculationUtils.smoothstep(effectiveMissCount, 1.0, 2.0)
 
-        return estimatedSliderBreaks * okAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
+        return estimatedSliderBreaks * nonMissAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
     }
 
     private fun calculateComboBasedEstimatedMissCount(): Double {

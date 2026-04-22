@@ -483,21 +483,23 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateEstimatedSliderBreaks(topWeightedSliderFactor: Double): Double {
-        if (!usingClassicSliderCalculation || countOk == 0) {
+        val nonMissMistakes = countOk + countMeh
+
+        if (!usingClassicSliderCalculation || nonMissMistakes == 0) {
             return 0.0
         }
 
         val missedComboPercent = 1 - scoreMaxCombo.toDouble() / attributes.maxCombo
-        var estimatedSliderBreaks = min(countOk.toDouble(), effectiveMissCount * topWeightedSliderFactor)
+        var estimatedSliderBreaks = min(nonMissMistakes.toDouble(), effectiveMissCount * topWeightedSliderFactor)
 
         // Scores with more Oks are more likely to have slider breaks.
-        val okAdjustment = ((countOk - estimatedSliderBreaks) + 0.5) / countOk
+        val nonMissAdjustment = ((nonMissMistakes - estimatedSliderBreaks) + 0.5) / nonMissMistakes
 
         // There is a low probability of extra slider breaks on effective miss counts close to 1, as score based
         // calculations are good at indicating if only a single break occurred.
         estimatedSliderBreaks *= DifficultyCalculationUtils.smoothstep(effectiveMissCount, 1.0, 2.0)
 
-        return estimatedSliderBreaks * okAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
+        return estimatedSliderBreaks * nonMissAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
     }
 
     private fun calculateMaximumComboBasedMissCount(): Double {
