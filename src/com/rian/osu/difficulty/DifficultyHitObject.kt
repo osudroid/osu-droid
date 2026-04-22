@@ -204,8 +204,11 @@ abstract class DifficultyHitObject(
 
     protected abstract val mode: GameMode
 
-    protected open val maximumSliderRadius = normalizedRadius * 2.4f
-    private val assumedSliderRadius = normalizedRadius * 1.8f
+    protected open val maximumSliderRadius
+        get() = normalizedRadius * 2.4f
+
+    private val assumedSliderRadius
+        get() = normalizedRadius * 1.8f
 
     private val lastDifficultyObject = previous(0)
     private val lastLastDifficultyObject = previous(1)
