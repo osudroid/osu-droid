@@ -47,8 +47,8 @@ object StandardSnapAimEvaluator {
 
         val last2 = current.previous(2)
 
-        val radius = DifficultyHitObject.NORMALIZED_RADIUS
-        val diameter = DifficultyHitObject.NORMALIZED_DIAMETER
+        val radius = current.normalizedRadius
+        val diameter = current.normalizedDiameter
 
         // Calculate the velocity to the current hit object, which starts with a base distance / time assuming the last object is a circle.
         val currentDistance = if (withSliders) current.lazyJumpDistance else current.jumpDistance
@@ -237,7 +237,7 @@ object StandardSnapAimEvaluator {
         val stackFactor = DifficultyCalculationUtils.smootherstep(
             current.lazyJumpDistance,
             0.0,
-            DifficultyHitObject.NORMALIZED_DIAMETER.toDouble()
+            current.normalizedDiameter.toDouble()
         )
 
         val angleDifferenceAdjusted = cos(2 * min(45.0.toRadians(), abs(currentAngle - prevAngle) * stackFactor))

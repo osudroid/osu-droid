@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.Interpolation
@@ -22,7 +21,6 @@ import kotlin.math.sqrt
  */
 object DroidReadingEvaluator {
     private const val READING_WINDOW_SIZE = 3000.0
-    private val DISTANCE_INFLUENCE_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 // 1.25 circles distance between centers
     private const val HIDDEN_MULTIPLIER = 0.28
     private const val DENSITY_MULTIPLIER = 2.4
     private const val DENSITY_DIFFICULTY_BASE = 2.5
@@ -39,15 +37,18 @@ object DroidReadingEvaluator {
 
         val next = current.next(0) as? DroidDifficultyHitObject
 
+        // 1.25 circles distance between centers
+        val distanceInfluenceThreshold = current.normalizedDiameter * 1.25
+
         // Only allow velocity to buff
         val velocity = max(1.0, current.lazyJumpDistance / current.strainTime)
 
         val currentVisibleObjectDensity = retrieveCurrentVisibleObjectDensity(current)
-        val pastObjectDifficultyInfluence = getPastObjectDifficultyInfluence(current)
+        val pastObjectDifficultyInfluence = getPastObjectDifficultyInfluence(current, distanceInfluenceThreshold)
         val constantAngleNerfFactor = getConstantAngleNerfFactor(current)
 
         val noteDensityDifficulty = calculateDensityDifficulty(
-            next, velocity, constantAngleNerfFactor, pastObjectDifficultyInfluence, currentVisibleObjectDensity
+            next, distanceInfluenceThreshold, velocity, constantAngleNerfFactor, pastObjectDifficultyInfluence, currentVisibleObjectDensity
         )
 
         val hiddenDifficulty = calculateHiddenDifficulty(
@@ -74,6 +75,7 @@ object DroidReadingEvaluator {
      */
     private fun calculateDensityDifficulty(
         next: DroidDifficultyHitObject?,
+        distanceInfluenceThreshold: Double,
         velocity: Double,
         constantAngleNerfFactor: Double,
         pastObjectDifficultyInfluence: Double,
@@ -85,7 +87,7 @@ object DroidReadingEvaluator {
         if (next != null) {
             // Reduce difficulty if movement to next object is small.
             futureObjectDifficultyInfluence *=
-                DifficultyCalculationUtils.smootherstep(next.lazyJumpDistance, 15.0, DISTANCE_INFLUENCE_THRESHOLD)
+                DifficultyCalculationUtils.smootherstep(next.lazyJumpDistance, 15.0, distanceInfluenceThreshold)
         }
 
         // Value higher note densities exponentially.
@@ -161,7 +163,7 @@ object DroidReadingEvaluator {
         return hiddenDifficulty
     }
 
-    private fun getPastObjectDifficultyInfluence(current: DroidDifficultyHitObject): Double {
+    private fun getPastObjectDifficultyInfluence(current: DroidDifficultyHitObject, distanceInfluenceThreshold: Double): Double {
         var pastObjectDifficultyInfluence = 0.0
 
         for (loopObj in retrievePastVisibleObjects(current)) {
@@ -170,7 +172,7 @@ object DroidReadingEvaluator {
             // When aiming an object small distances mean previous objects may be cheesed,
             // so it doesn't matter whether they were arranged confusingly.
             loopDifficulty *=
-                DifficultyCalculationUtils.smootherstep(loopObj.lazyJumpDistance, 15.0, DISTANCE_INFLUENCE_THRESHOLD)
+                DifficultyCalculationUtils.smootherstep(loopObj.lazyJumpDistance, 15.0, distanceInfluenceThreshold)
 
             // Account less for objects close to the maximum reading window.
             loopDifficulty *= getTimeNerfFactor(current.startTime - loopObj.startTime)
@@ -282,7 +284,7 @@ object DroidReadingEvaluator {
                 }
 
                 val stackFactor = DifficultyCalculationUtils.smootherstep(
-                    loopObj.lazyJumpDistance, 0.0, DifficultyHitObject.NORMALIZED_RADIUS.toDouble()
+                    loopObj.lazyJumpDistance, 0.0, current.normalizedRadius.toDouble()
                 )
 
                 constantAngleCount += cos(

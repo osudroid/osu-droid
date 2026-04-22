@@ -3,7 +3,6 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import kotlin.math.abs
@@ -97,7 +96,7 @@ object DroidFlowAimEvaluator {
 
             // Reward for % distance up to 125 / strainTime for overlaps where velocity is still changing.
             val overlapVelocityBuff = min(
-                DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 / min(current.strainTime, last.strainTime),
+                current.normalizedDiameter * 1.25 / min(current.strainTime, last.strainTime),
                 abs(prevVelocity - currentVelocity)
             )
 
@@ -114,7 +113,7 @@ object DroidFlowAimEvaluator {
         difficulty = difficulty.pow(1.45)
 
         // Reduce difficulty for low spacing since spacing below radius is always to be flowed.
-        return difficulty * DifficultyCalculationUtils.smootherstep(currentDistance, 0.0, DifficultyHitObject.NORMALIZED_RADIUS.toDouble())
+        return difficulty * DifficultyCalculationUtils.smootherstep(currentDistance, 0.0, current.normalizedRadius.toDouble())
     }
 
     private fun calculateOverlapFactor(o1: HitObject, o2: HitObject): Double {

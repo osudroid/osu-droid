@@ -39,7 +39,8 @@ class DroidDifficultyHitObject(
     index: Int
 ) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
-    override val maximumSliderRadius = NORMALIZED_RADIUS * 2
+    override val normalizedRadius = 50f
+    override val maximumSliderRadius = normalizedRadius * 2
     override val smallCircleBonus = max(1.0, 1 + ((70 - obj.difficultyRadius) / 60).pow(2))
 
     /**

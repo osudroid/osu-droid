@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.StandardDifficultyHitObject
 import kotlin.math.min
 import kotlin.math.pow
@@ -10,8 +9,6 @@ import kotlin.math.pow
  * An evaluator for calculating osu!standard agility aim difficulty.
  */
 object StandardAgilityEvaluator {
-    private val distanceCap = DifficultyHitObject.NORMALIZED_DIAMETER * 1.2
-
     /**
      * Evaluates the difficulty of fast aiming the current object.
      *
@@ -28,6 +25,7 @@ object StandardAgilityEvaluator {
         val travelDistance = prev?.lazyTravelDistance ?: 0.0
         val distance = travelDistance + current.lazyJumpDistance
 
+        val distanceCap = current.normalizedDiameter * 1.2
         val distanceScaled = min(distance, distanceCap) / distanceCap
 
         var strain = distanceScaled * 1000 / current.strainTime

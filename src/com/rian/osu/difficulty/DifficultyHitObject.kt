@@ -187,14 +187,25 @@ abstract class DifficultyHitObject(
     val timePreempt = obj.timePreempt / clockRate
 
     /**
+     * A distance by which all distances should be scaled in order to assume a uniform circle size.
+     */
+    abstract val normalizedRadius: Float
+
+    /**
+     * The normalized diameter of a circle.
+     */
+    open val normalizedDiameter
+        get() = normalizedRadius * 2
+
+    /**
      * Selective bonus for beatmaps with higher circle size.
      */
     abstract val smallCircleBonus: Double
 
     protected abstract val mode: GameMode
 
-    protected open val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
-    private val assumedSliderRadius = NORMALIZED_RADIUS * 1.8f
+    protected open val maximumSliderRadius = normalizedRadius * 2.4f
+    private val assumedSliderRadius = normalizedRadius * 1.8f
 
     private val lastDifficultyObject = previous(0)
     private val lastLastDifficultyObject = previous(1)
@@ -304,7 +315,7 @@ abstract class DifficultyHitObject(
         }
 
         // We will scale distances by this factor, so we can assume a uniform circle size among beatmaps.
-        val scalingFactor = NORMALIZED_RADIUS / obj.difficultyRadius.toFloat()
+        val scalingFactor = normalizedRadius / obj.difficultyRadius.toFloat()
 
         var lastCursorPosition =
             if (lastDifficultyObject != null) getEndCursorPosition(lastDifficultyObject)
@@ -466,7 +477,7 @@ abstract class DifficultyHitObject(
         lazyEndPosition = obj.difficultyStackedPosition + obj.path.positionAt(endTimeMin)
 
         var currentCursorPosition = obj.difficultyStackedPosition
-        val scalingFactor = NORMALIZED_RADIUS / obj.difficultyRadius
+        val scalingFactor = normalizedRadius / obj.difficultyRadius
 
         for (i in 1 until nestedObjects.size) {
             val currentMovementObject = nestedObjects[i]
@@ -489,7 +500,7 @@ abstract class DifficultyHitObject(
                 currentMovementLength = scalingFactor * currentMovement.length
             } else if (currentMovementObject is SliderRepeat) {
                 // For a slider repeat, assume a tighter movement threshold to better assess repeat sliders.
-                requiredMovement = NORMALIZED_RADIUS.toDouble()
+                requiredMovement = normalizedRadius.toDouble()
             }
 
             if (currentMovementLength > requiredMovement) {
@@ -517,18 +528,6 @@ abstract class DifficultyHitObject(
         obj.lazyEndPosition ?: obj.obj.difficultyStackedPosition
 
     companion object {
-        /**
-         * A distance by which all distances should be scaled in order to assume a uniform circle size.
-         */
-        @JvmStatic
-        val NORMALIZED_RADIUS = 50f
-
-        /**
-         * The normalized diameter of a circle.
-         */
-        @JvmStatic
-        val NORMALIZED_DIAMETER = NORMALIZED_RADIUS * 2
-
         /**
          * The minimum delta time between hit objects.
          */
