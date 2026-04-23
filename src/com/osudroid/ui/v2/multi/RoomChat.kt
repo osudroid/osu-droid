@@ -200,19 +200,19 @@ class RoomChat : UILinearContainer() {
         }
     }
 
-    fun collapse(collapseQuickly: Boolean = false) {
+    @JvmOverloads
+    fun collapse(immediate: Boolean = false) {
         if (isExpanded) {
             isExpanded = false
             input.blur()
-            if (!collapseQuickly) {
-                body.apply {
-                    clearModifiers(ModifierType.SizeY)
-                    sizeToY(0f, 0.4f).eased(Easing.OutExpo)
-                }
-            } else {
-                body.apply {
-                    clearModifiers(ModifierType.SizeY)
+
+            body.apply {
+                clearModifiers(ModifierType.SizeY)
+
+                if (immediate) {
                     height = 0f
+                } else {
+                    sizeToY(0f, 0.4f).eased(Easing.OutExpo)
                 }
             }
         }
