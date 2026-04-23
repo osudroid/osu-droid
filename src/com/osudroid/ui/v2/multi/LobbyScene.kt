@@ -3,7 +3,6 @@ package com.osudroid.ui.v2.multi
 import android.util.Log
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.sprite.*
-import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.utils.updateThread
 import com.osudroid.resources.R.string
@@ -248,8 +247,7 @@ class LobbyScene : UIScene() {
             val list = LobbyAPI.getRooms(
                 query = searchQuery,
                 sessionId = OnlineManager.getInstance().sessionId,
-                uid = OnlineManager.getInstance().userId,
-                sign = SecurityUtils.signRequest("${searchQuery ?: ""}_${OnlineManager.getInstance().userId}_${OnlineManager.getInstance().sessionId}")
+                uid = OnlineManager.getInstance().userId
             )
 
             updateThread {
