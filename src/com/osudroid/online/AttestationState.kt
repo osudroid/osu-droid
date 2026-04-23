@@ -9,13 +9,6 @@ object AttestationState {
     const val KEY_TTL_MS = 15 * 60 * 1000L
 
     /**
-     * The last challenge issued by the server and consumed for key generation.
-     */
-    @Volatile
-    @JvmStatic
-    var pendingChallenge: ByteArray? = null
-
-    /**
      * The PEM-encoded attestation certificate chain sent with password login.
      */
     @Volatile

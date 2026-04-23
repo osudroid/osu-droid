@@ -428,8 +428,6 @@ public class OnlineManager {
             return false;
         }
 
-        AttestationState.setPendingChallenge(challenge);
-
         try {
             HardwareAttestationManager.generateKeyPair(challenge);
             var chain = HardwareAttestationManager.getAttestationChainPem();
