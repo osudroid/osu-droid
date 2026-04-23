@@ -471,8 +471,7 @@ public class OnlineManager {
                 return false;
             }
 
-            post.addParam("attestationSignature", signature);
-            post.addParam("attestationPayloadHash", MD5Calculator.getStringMD5(payload));
+            post.addParam("sign", signature);
 
             return true;
         } catch (Exception e) {
