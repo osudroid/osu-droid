@@ -6,6 +6,8 @@ package com.osudroid.online
  * Values are reset on login attempts and should never be treated as persisted trust.
  */
 object AttestationState {
+    const val KEY_TTL_MS = 15 * 60 * 1000L
+
     /**
      * The last challenge issued by the server and consumed for key generation.
      */
@@ -28,6 +30,24 @@ object AttestationState {
     var sessionAttestationReady = false
 
     /**
+     * The time at which the current attestation key was generated, in [System.currentTimeMillis] time base.
+     * `null` if no key is currently generated.
+     */
+    @Volatile
+    @JvmStatic
+    var keyGeneratedAt: Long? = null
+
+    /**
+     * Determines whether the currently generated key is within the time-to-live window.
+     */
+    @JvmStatic
+    fun isKeyValid(): Boolean {
+        val t = keyGeneratedAt ?: return false
+
+        return System.currentTimeMillis() - t < KEY_TTL_MS
+    }
+
+    /**
      * Clears all attestation session fields.
      */
     @JvmStatic
@@ -35,6 +55,7 @@ object AttestationState {
         pendingChallenge = null
         attestationChain = null
         sessionAttestationReady = false
+        keyGeneratedAt = null
 
         HardwareAttestationManager.deleteKey()
     }

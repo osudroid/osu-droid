@@ -45,6 +45,7 @@ object HardwareAttestationManager {
 
                 generator.initialize(specBuilder.build())
                 generator.generateKeyPair()
+                AttestationState.keyGeneratedAt = System.currentTimeMillis()
 
                 return
             } catch (_: StrongBoxUnavailableException) {
@@ -54,6 +55,7 @@ object HardwareAttestationManager {
 
         generator.initialize(specBuilder.build())
         generator.generateKeyPair()
+        AttestationState.keyGeneratedAt = System.currentTimeMillis()
     }
 
     /**

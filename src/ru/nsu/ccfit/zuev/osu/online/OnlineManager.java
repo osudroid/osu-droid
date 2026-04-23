@@ -401,6 +401,12 @@ public class OnlineManager {
     }
 
     private boolean prepareAttestationForLogin() throws OnlineManagerException {
+        boolean reuseKey = AttestationState.isKeyValid() && AttestationState.getAttestationChain() != null;
+
+        if (reuseKey) {
+            return true;
+        }
+
         AttestationState.clearSession();
 
         var challenge = fetchAttestationChallenge();
