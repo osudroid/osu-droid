@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -33,6 +34,7 @@ public class OnlineManager {
     public static final String hostname = "osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
+    public static final String attestationChallengeEndpoint = endpoint + "attestation_challenge.php";
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
     private static final String onlineVersion = "60";
 
@@ -356,6 +358,29 @@ public class OnlineManager {
         }
 
         return response.get(1);
+    }
+
+    private byte[] fetchAttestationChallenge() {
+        var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
+
+        try (var response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                return null;
+            }
+
+            var body = response.body().string();
+            var json = new JSONObject(body);
+            var encodedChallenge = json.optString("challenge", "");
+
+            if (encodedChallenge.isEmpty()) {
+                return null;
+            }
+
+            return Base64.decode(encodedChallenge, Base64.DEFAULT);
+        } catch (Exception e) {
+            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+            return null;
+        }
     }
 
     public String getFailMessage() {
