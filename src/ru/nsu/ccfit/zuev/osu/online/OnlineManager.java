@@ -8,6 +8,9 @@ import android.util.Base64;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.osudroid.data.BeatmapInfo;
+import com.osudroid.online.AttestationState;
+import com.osudroid.online.HardwareAttestationManager;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -128,6 +131,17 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
+        if (!prepareAttestationForLogin()) {
+            return false;
+        }
+
+        var chain = AttestationState.getAttestationChain();
+
+        if (chain == null || chain.isEmpty()) {
+            failMessage = "Attestation failed";
+            return false;
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam(
@@ -136,6 +150,7 @@ public class OnlineManager {
                         escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("version", onlineVersion);
+        post.addParam("attestationChain", chain);
 
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
 
@@ -168,6 +183,7 @@ public class OnlineManager {
         Bundle bParams = new Bundle();
         bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
         GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
+        AttestationState.setSessionAttestationReady(true);
 
         return true;
     }
@@ -358,6 +374,36 @@ public class OnlineManager {
         }
 
         return response.get(1);
+    }
+
+    private boolean prepareAttestationForLogin() throws OnlineManagerException {
+        AttestationState.clearSession();
+        HardwareAttestationManager.deleteKey();
+
+        var challenge = fetchAttestationChallenge();
+
+        if (challenge == null || challenge.length == 0) {
+            failMessage = "Cannot obtain attestation challenge";
+            return false;
+        }
+
+        AttestationState.setPendingChallenge(challenge);
+
+        try {
+            HardwareAttestationManager.generateKeyPair(challenge);
+            var chain = HardwareAttestationManager.getAttestationChainPem();
+
+            if (chain == null || chain.isEmpty()) {
+                failMessage = "Cannot create attestation chain";
+                return false;
+            }
+
+            AttestationState.setAttestationChain(chain);
+            return true;
+        } catch (Exception e) {
+            failMessage = "Hardware attestation failed";
+            throw new OnlineManagerException(failMessage, e);
+        }
     }
 
     private byte[] fetchAttestationChallenge() {
