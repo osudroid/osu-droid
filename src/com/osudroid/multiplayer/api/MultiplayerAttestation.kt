@@ -1,5 +1,6 @@
 package com.osudroid.multiplayer.api
 
+import com.osudroid.BuildSettings
 import com.osudroid.online.AttestationState
 import com.osudroid.online.HardwareAttestationManager
 
@@ -15,6 +16,10 @@ object MultiplayerAttestation {
      */
     @JvmStatic
     fun signPayload(payload: String): String {
+        if (BuildSettings.DEBUG_SKIP_ATTESTATION) {
+            return BuildSettings.DEBUG_ATTESTATION_SIGN
+        }
+
         if (!AttestationState.sessionAttestationReady) {
             throw IllegalStateException("Attestation required for multiplayer auth")
         }

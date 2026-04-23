@@ -7,6 +7,7 @@ import android.util.Base64;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import com.osudroid.BuildSettings;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.online.AttestationState;
 import com.osudroid.online.HardwareAttestationManager;
@@ -413,6 +414,12 @@ public class OnlineManager {
     }
 
     private boolean prepareAttestationForLogin() throws OnlineManagerException {
+        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
+            AttestationState.setAttestationChain(BuildSettings.getDEBUG_ATTESTATION_SIGN());
+            AttestationState.setSessionAttestationReady(true);
+            return true;
+        }
+
         boolean reuseKey = AttestationState.isKeyValid() && AttestationState.getAttestationChain() != null;
 
         if (reuseKey) {
@@ -478,6 +485,11 @@ public class OnlineManager {
     }
 
     private boolean attachAttestationSignature(PostBuilder post, String payload) throws OnlineManagerException {
+        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
+            post.addParam("sign", BuildSettings.getDEBUG_ATTESTATION_SIGN());
+            return true;
+        }
+
         try {
             String signature = HardwareAttestationManager.signToBase64(payload);
 
