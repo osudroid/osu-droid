@@ -131,61 +131,73 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
-        if (!prepareAttestationForLogin()) {
-            return false;
+        boolean canRetry = true;
+
+        while (true) {
+            if (!prepareAttestationForLogin()) {
+                return false;
+            }
+
+            var chain = AttestationState.getAttestationChain();
+
+            if (chain == null || chain.isEmpty()) {
+                failMessage = "Attestation failed";
+                return false;
+            }
+
+            PostBuilder post = new URLEncodedPostBuilder();
+            post.addParam("username", username);
+            post.addParam(
+                    "password",
+                    MD5Calculator.getStringMD5(
+                            escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
+                    ));
+            post.addParam("version", onlineVersion);
+            post.addParam("attestationChain", chain);
+
+            ArrayList<String> response = sendRequest(post, endpoint + "login.php");
+
+            if (response == null) {
+                // Only retry on challenge expiry once.
+                if (failMessage.equals("CHALLENGE_EXPIRED") && canRetry) {
+                    AttestationState.clearSession();
+                    canRetry = false;
+                    continue;
+                }
+
+                return false;
+            }
+
+            if (response.size() < 2) {
+                failMessage = "Invalid server response";
+                return false;
+            }
+
+            String[] params = response.get(1).split("\\s+");
+            if (params.length < 6) {
+                failMessage = "Invalid server response";
+                return false;
+            }
+            userId = Long.parseLong(params[0]);
+            ssid = params[1];
+            rank = Integer.parseInt(params[2]);
+            score = Long.parseLong(params[3]);
+            pp = Float.parseFloat(params[4]);
+            accuracy = Float.parseFloat(params[5]);
+            this.username = params[6];
+            if (params.length >= 8) {
+                avatarURL = params[7];
+            } else {
+                avatarURL = "";
+            }
+
+            Bundle bParams = new Bundle();
+            bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
+            GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
+            AttestationState.setSessionAttestationReady(true);
+
+            return true;
         }
-
-        var chain = AttestationState.getAttestationChain();
-
-        if (chain == null || chain.isEmpty()) {
-            failMessage = "Attestation failed";
-            return false;
-        }
-
-        PostBuilder post = new URLEncodedPostBuilder();
-        post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calculator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
-        post.addParam("version", onlineVersion);
-        post.addParam("attestationChain", chain);
-
-        ArrayList<String> response = sendRequest(post, endpoint + "login.php");
-
-        if (response == null) {
-            return false;
-        }
-        if (response.size() < 2) {
-            failMessage = "Invalid server response";
-            return false;
-        }
-
-        String[] params = response.get(1).split("\\s+");
-        if (params.length < 6) {
-            failMessage = "Invalid server response";
-            return false;
-        }
-        userId = Long.parseLong(params[0]);
-        ssid = params[1];
-        rank = Integer.parseInt(params[2]);
-        score = Long.parseLong(params[3]);
-        pp = Float.parseFloat(params[4]);
-        accuracy = Float.parseFloat(params[5]);
-        this.username = params[6];
-        if (params.length >= 8) {
-            avatarURL = params[7];
-        } else {
-            avatarURL = "";
-        }
-
-        Bundle bParams = new Bundle();
-        bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
-        AttestationState.setSessionAttestationReady(true);
-
-        return true;
     }
 
     boolean tryToLogIn() throws OnlineManagerException {
