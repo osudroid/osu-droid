@@ -197,6 +197,10 @@ public class OnlineManager {
     }
 
     public boolean sendRecord(BeatmapInfo beatmap, String scoreData, String replayPath) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return false;
+        }
+
         Debug.i("Sending record...");
 
         File replayFile = new File(replayPath);
@@ -213,6 +217,10 @@ public class OnlineManager {
         post.addParam("hash", beatmap.getMD5());
         post.addParam("data", scoreData);
         post.addParam("version", onlineVersion);
+
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + beatmap.getMD5() + "|" + scoreData)) {
+            return false;
+        }
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
@@ -250,6 +258,10 @@ public class OnlineManager {
     }
 
     public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return new ArrayList<>();
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
@@ -258,6 +270,10 @@ public class OnlineManager {
             post.addParam("type", "pp");
         } else {
             post.addParam("type", "score");
+        }
+
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + hash)) {
+            return new ArrayList<>();
         }
 
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
@@ -358,6 +374,10 @@ public class OnlineManager {
     }
 
     public String getScorePack(int playid) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return "";
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
@@ -365,6 +385,10 @@ public class OnlineManager {
             post.addParam("type", "pp");
         } else {
             post.addParam("type", "score");
+        }
+
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + playid)) {
+            return "";
         }
 
         ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
@@ -426,6 +450,34 @@ public class OnlineManager {
         } catch (Exception e) {
             Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
             return null;
+        }
+    }
+
+    private boolean ensureAttestationReady() {
+        if (AttestationState.getSessionAttestationReady()) {
+            return true;
+        }
+
+        failMessage = "Attestation required";
+        return false;
+    }
+
+    private boolean attachAttestationSignature(PostBuilder post, String payload) throws OnlineManagerException {
+        try {
+            String signature = HardwareAttestationManager.signToBase64(payload);
+
+            if (signature == null || signature.isEmpty()) {
+                failMessage = "Cannot sign with hardware key";
+                return false;
+            }
+
+            post.addParam("attestationSignature", signature);
+            post.addParam("attestationPayloadHash", MD5Calculator.getStringMD5(payload));
+
+            return true;
+        } catch (Exception e) {
+            failMessage = "Hardware signing failed";
+            throw new OnlineManagerException("Hardware signing failed", e);
         }
     }
 
