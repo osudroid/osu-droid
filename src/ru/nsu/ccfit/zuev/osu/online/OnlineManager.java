@@ -402,7 +402,6 @@ public class OnlineManager {
 
     private boolean prepareAttestationForLogin() throws OnlineManagerException {
         AttestationState.clearSession();
-        HardwareAttestationManager.deleteKey();
 
         var challenge = fetchAttestationChallenge();
 
