@@ -122,6 +122,7 @@ public class MainActivity extends BaseGameActivity implements
         if (!checkPermissions()) {
             return null;
         }
+        Multiplayer.initLog();
         analytics = FirebaseAnalytics.getInstance(this);
         crashlytics = FirebaseCrashlytics.getInstance();
         Config.loadConfig(this);
