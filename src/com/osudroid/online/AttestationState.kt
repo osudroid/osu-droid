@@ -9,6 +9,20 @@ object AttestationState {
     const val KEY_TTL_MS = 15 * 60 * 1000L
 
     /**
+     * The last challenge issued by the server and consumed for key generation.
+     */
+    @Volatile
+    @JvmStatic
+    var pendingChallenge: ByteArray? = null
+
+    /**
+     * The last token issued by the server and consumed for key generation.
+     */
+    @Volatile
+    @JvmStatic
+    var pendingToken: String? = null
+
+    /**
      * The PEM-encoded attestation certificate chain sent with password login.
      */
     @Volatile
@@ -46,6 +60,7 @@ object AttestationState {
     @JvmStatic
     fun clearSession() {
         pendingChallenge = null
+        pendingToken = null
         attestationChain = null
         sessionAttestationReady = false
         keyGeneratedAt = null

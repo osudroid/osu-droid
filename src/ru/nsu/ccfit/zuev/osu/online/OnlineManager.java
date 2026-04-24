@@ -156,6 +156,12 @@ public class OnlineManager {
             post.addParam("version", onlineVersion);
             post.addParam("attestationChain", chain);
 
+            var token = AttestationState.getPendingToken();
+
+            if (token != null) {
+                post.addParam("attestationToken", token);
+            }
+
             ArrayList<String> response = sendRequest(post, endpoint + "login.php");
 
             if (response == null) {
@@ -428,7 +434,8 @@ public class OnlineManager {
 
         AttestationState.clearSession();
 
-        var challenge = fetchAttestationChallenge();
+        fetchAttestationChallenge();
+        var challenge = AttestationState.getPendingChallenge();
 
         if (challenge == null || challenge.length == 0) {
             failMessage = "Cannot obtain attestation challenge";
@@ -452,26 +459,30 @@ public class OnlineManager {
         }
     }
 
-    private byte[] fetchAttestationChallenge() {
+    private void fetchAttestationChallenge() {
         var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
 
         try (var response = client.newCall(request).execute()) {
             if (!response.isSuccessful() || response.body() == null) {
-                return null;
+                failMessage = "Failed to fetch attestation challenge";
+                return;
             }
 
             var body = response.body().string();
             var json = new JSONObject(body);
-            var encodedChallenge = json.optString("challenge", "");
 
-            if (encodedChallenge.isEmpty()) {
-                return null;
+            var challengeBase64 = json.optString("challenge");
+            var token = json.optString("token");
+
+            if (challengeBase64.isEmpty() || token.isEmpty()) {
+                failMessage = "Invalid attestation challenge response";
+                return;
             }
 
-            return Base64.decode(encodedChallenge, Base64.DEFAULT);
+            AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
+            AttestationState.setPendingToken(token);
         } catch (Exception e) {
             Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
-            return null;
         }
     }
 
