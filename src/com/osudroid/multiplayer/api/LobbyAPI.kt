@@ -52,7 +52,7 @@ object LobbyAPI {
 
         JsonArrayRequest("$HOST$GET_ROOMS").use {
             val sign = MultiplayerAttestation.signPayload(
-                arrayOf<Any>(query ?: "", uid, sessionId, RoomAPI.API_VERSION,"getrooms").joinToString("|")
+                arrayOf<Any>(query ?: "", uid, sessionId, RoomAPI.API_VERSION, "getrooms").joinToString("|")
             )
 
             it.buildUrl {
