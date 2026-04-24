@@ -1,16 +1,10 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.os.Build;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.content.pm.SigningInfo;
 import android.util.Log;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
@@ -32,23 +26,10 @@ public final class SecurityUtils {
             0xd4, 0xf7, 0x8, 0x36, 0xaf, 0x87, 0x0
     };  // WeLc0MeTo#0su!
 
-    private static String appSignature = null;
     private static byte[] secretBuffer = null;
 
     private static final String flashlightCursorHash = "3b3afff3dab87f214053ded3163ff4e91cc3474e";
     private static final String flashlightDimLayerHash = "59dfd45eecdfbeb7a91761a7af4b3e0162d13e9f";
-
-    /**
-     * @return 得到整数x的非零位个数
-     */
-    public static int getNonZeroBitsCount(int x) {
-        x = (x & 0x55555555) + ((x & 0xaaaaaaaa) >> 1);
-        x = (x & 0x33333333) + ((x & 0xcccccccc) >> 2);
-        x = (x & 0x0f0f0f0f) + ((x & 0xf0f0f0f0) >> 4);
-        x = (x & 0x00ff00ff) + ((x & 0xff00ff00) >> 8);
-        x = (x & 0x0000ffff) + ((x & 0xffff0000) >> 16);
-        return x;
-    }
 
     /**
      * @return 得到整数x高20位对3389取模后的结果
@@ -75,62 +56,6 @@ public final class SecurityUtils {
         return secretBuffer;
     }
 
-
-    public static void getAppSignature(Context context, String packageName) {
-        if (!BuildType.hasOnlineAccess()) {
-            return;
-        }
-        if (appSignature != null || packageName == null || packageName.length() == 0) {
-            return;
-        }
-        PackageManager pkgMgr = context.getPackageManager();
-        PackageInfo info;
-        Signature[] signatures;
-
-        try {
-            if (pkgMgr == null) {
-                return;
-            }
-
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                info = pkgMgr.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES);
-                SigningInfo signInfo = info.signingInfo;
-
-                if (signInfo.hasMultipleSigners()) {
-                    signatures = signInfo.getApkContentsSigners();
-                }else {
-                    signatures = signInfo.getSigningCertificateHistory();
-                }
-                appSignature = getHashCode(signatures[0].toByteArray());
-            }else {
-                info = pkgMgr.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
-                if(info != null && info.signatures != null && info.signatures.length > 0) {
-                    Signature sign = info.signatures[0];
-                    appSignature = getHashCode(sign.toByteArray());
-                }
-            }
-        } catch (PackageManager.NameNotFoundException ignored) {
-        }
-    }
-
-    /**
-     * @return 对请求加签，包含请求文本、APk签名哈希、会话ID
-     */
-    public static String signRequest(String request) {
-        if (appSignature == null) {
-            return null;
-        }
-        try {
-            String digest = String.format("%s_%s", appSignature, request);
-            Mac mac = Mac.getInstance("HmacSHA1");
-            SecretKeySpec secret = new SecretKeySpec(getSecretKey(), mac.getAlgorithm());
-            mac.init(secret);
-            return toHexString(mac.doFinal(digest.getBytes()));
-        } catch (Exception e) {
-            throw new RuntimeException("Unsupported Algorithm");
-        }
-    }
-
     public static boolean verifyFileIntegrity(Context context) {
         return verifyFileIntegrity(context, "flashlight_cursor.png", flashlightCursorHash)
                 && verifyFileIntegrity(context, "flashlight_dim_layer.png", flashlightDimLayerHash);
@@ -150,16 +75,6 @@ public final class SecurityUtils {
             return false;
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static String getHashCode(byte[] bytes) {
-        try {
-            MessageDigest digestInst = MessageDigest.getInstance("SHA1");
-            digestInst.update(bytes);
-            return toHexString(digestInst.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Unsupported Algorithm");
         }
     }
 
