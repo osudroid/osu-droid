@@ -422,6 +422,13 @@ public class OnlineManager {
     }
 
     private boolean prepareAttestationForLogin() throws OnlineManagerException {
+        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
+            AttestationState.setAttestationChain(BuildSettings.getDEBUG_ATTESTATION_SIGN());
+            // Login requires a token to be present, but we can send a dummy one.
+            AttestationState.setPendingToken("debug_bypass_token");
+            return true;
+        }
+
         boolean reuseKey = AttestationState.isKeyValid() &&
                 AttestationState.getAttestationChain() != null;
 
