@@ -180,7 +180,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             // Workaround to ensure that the wrapper is always on the top while also ensuring that it does not leak
             // across scenes.
             currentScene = UIEngine.current.scene
-            UIEngine.current.overlay.attachChild(wrapper, 0)
+            UIEngine.current.overlay.attachChild(wrapper)
         }
     }
 

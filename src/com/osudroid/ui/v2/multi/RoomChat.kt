@@ -200,12 +200,20 @@ class RoomChat : UILinearContainer() {
         }
     }
 
-    fun collapse() {
+    @JvmOverloads
+    fun collapse(immediate: Boolean = false) {
         if (isExpanded) {
             isExpanded = false
+            input.blur()
+
             body.apply {
                 clearModifiers(ModifierType.SizeY)
-                sizeToY(0f, 0.4f).eased(Easing.OutExpo)
+
+                if (immediate) {
+                    height = 0f
+                } else {
+                    sizeToY(0f, 0.4f).eased(Easing.OutExpo)
+                }
             }
         }
     }
@@ -231,6 +239,9 @@ class RoomChat : UILinearContainer() {
         )
     }
 
+    override fun onDetached() {
+        collapse(true)
+    }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
