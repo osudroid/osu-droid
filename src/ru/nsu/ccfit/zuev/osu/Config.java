@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.osudroid.BuildSettings;
 import com.osudroid.multiplayer.Multiplayer;
 import com.reco1l.framework.Color4;
 import com.reco1l.framework.HexComposition;
@@ -507,7 +508,7 @@ public class Config {
     }
 
     public static boolean isStayOnline() {
-        return stayOnline && BuildType.hasOnlineAccess();
+        return stayOnline && (BuildType.hasOnlineAccess() || BuildSettings.getDEBUG_SKIP_ATTESTATION());
     }
 
     public static void setStayOnline(boolean stayOnline) {
