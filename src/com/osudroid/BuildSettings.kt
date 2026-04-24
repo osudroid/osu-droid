@@ -25,15 +25,14 @@ object BuildSettings {
     const val DEBUG_PLAYGROUND = false
 
     /**
-     * Whether to skip hardware attestation.
-     */
-    @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
-    @JvmStatic
-    val DEBUG_SKIP_ATTESTATION = BuildConfig.DEBUG && false
-
-    /**
      * The signature to use when skipping hardware attestation.
      */
     @JvmStatic
     val DEBUG_ATTESTATION_SIGN = ""
+
+    /**
+     * Whether to skip hardware attestation.
+     */
+    @JvmStatic
+    val DEBUG_SKIP_ATTESTATION = BuildConfig.DEBUG && DEBUG_ATTESTATION_SIGN.isNotEmpty()
 }
