@@ -422,21 +422,22 @@ public class OnlineManager {
     }
 
     private boolean prepareAttestationForLogin() throws OnlineManagerException {
-        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
-            AttestationState.setAttestationChain(BuildSettings.getDEBUG_ATTESTATION_SIGN());
-            AttestationState.setSessionAttestationReady(true);
+        boolean reuseKey = AttestationState.isKeyValid() &&
+                AttestationState.getAttestationChain() != null;
+
+        if (reuseKey && AttestationState.getPendingToken() != null) {
             return true;
         }
 
-        boolean reuseKey = AttestationState.isKeyValid() && AttestationState.getAttestationChain() != null;
-
         if (reuseKey) {
-            return true;
+            // Key is valid but no pending token, fetch a fresh one.
+            fetchAttestationChallenge();
+            return AttestationState.getPendingToken() != null;
         }
 
         AttestationState.clearSession();
-
         fetchAttestationChallenge();
+
         var challenge = AttestationState.getPendingChallenge();
 
         if (challenge == null || challenge.length == 0) {
@@ -454,7 +455,7 @@ public class OnlineManager {
             }
 
             AttestationState.setAttestationChain(chain);
-            return true;
+            return AttestationState.getPendingToken() != null;
         } catch (Exception e) {
             failMessage = "Hardware attestation failed";
             throw new OnlineManagerException(failMessage, e);
