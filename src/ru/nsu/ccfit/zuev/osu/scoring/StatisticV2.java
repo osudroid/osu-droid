@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import ru.nsu.ccfit.zuev.osu.SecurityUtils;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
@@ -277,7 +275,7 @@ public class StatisticV2 implements Serializable {
                 }
             }
         }
-        scoreHash = SecurityUtils.getHigh16Bits(totalScore);
+        scoreHash = getHigh16Bits(totalScore);
     }
 
     public String getMark() {
@@ -497,7 +495,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public final boolean isScoreValid() {
-        return SecurityUtils.getHigh16Bits(totalScore) == scoreHash;
+        return getHigh16Bits(totalScore) == scoreHash;
     }
 
     public String compile() {
@@ -705,5 +703,12 @@ public class StatisticV2 implements Serializable {
         negativeHitOffsetSum = 0;
         unstableRate = 0;
         pp = 0;
+    }
+
+    /**
+     * @return 得到整数x高20位对3389取模后的结果
+     */
+    private static int getHigh16Bits(int x) {
+        return (x >> 12) % 3389;
     }
 }

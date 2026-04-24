@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import ru.nsu.ccfit.zuev.osu.SecurityUtils;
-
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Request;
@@ -11,32 +9,17 @@ import org.anddev.andengine.util.Debug;
 import java.io.BufferedReader;
 import java.io.Serial;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public abstract class PostBuilder {
-    private final StringBuilder values = new StringBuilder();
-
     public void addParam(final String key, final String value) {
-        try {
-            if (values.length() > 0) {
-                values.append("_");
-            }
-            addParamInternal(key, value);
-            values.append(URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException ignored) {
-        }
+        addParamInternal(key, value);
     }
 
     public ArrayList<String> requestWithAttempts(final String scriptUrl, int attempts) throws RequestException {
         ArrayList<String> response = null;
-        String signature = SecurityUtils.signRequest(values.toString());
 
-        if (signature != null) {
-            addParam("sign", signature);
-        }
         for (int i = 0; i < attempts; i++) {
             try {
                 response = request(scriptUrl);

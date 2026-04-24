@@ -12,7 +12,6 @@ import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
@@ -584,11 +583,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final ModHashMap mods, @Nullable CoroutineScope scope) {
-        if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
-            ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
-            return false;
-        }
-
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }

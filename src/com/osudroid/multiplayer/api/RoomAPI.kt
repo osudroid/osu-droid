@@ -15,7 +15,6 @@ import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
 import com.osudroid.ui.v2.multi.RoomScene
-import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
@@ -290,7 +289,7 @@ object RoomAPI {
 
     /**
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
-     * [IRoomEventListener.onRoomConnectFail]
+     * [IRoomEventListener.onRoomConnectFail].
      */
     fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
                       multiplayerSessionID: String? = null) {
@@ -301,18 +300,26 @@ object RoomAPI {
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
-        val sign = SecurityUtils.signRequest("${userId}_$gameSessionId")
+
+        val sign = MultiplayerAttestation.signPayload(
+            arrayOf<Any>(
+                roomId,
+                userId,
+                gameSessionId,
+                multiplayerSessionID ?: "",
+                roomPassword ?: "",
+                API_VERSION,
+                "connect"
+            ).joinToString("|")
+        )
 
         auth["uid"] = userId.toString()
         auth["gameSessionID"] = gameSessionId
         auth["version"] = API_VERSION.toString()
+        auth["sign"] = sign
 
         if (multiplayerSessionID != null) {
             auth["multiplayerSessionID"] = multiplayerSessionID
-        }
-
-        if (sign != null) {
-            auth["authSign"] = sign
         }
 
         if (!roomPassword.isNullOrBlank()) {
