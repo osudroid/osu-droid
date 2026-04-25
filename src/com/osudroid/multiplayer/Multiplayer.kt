@@ -277,6 +277,11 @@ object Multiplayer {
     // Logging
 
     @JvmStatic
+    fun initLog() {
+        logger.init()
+    }
+
+    @JvmStatic
     fun log(text: String) {
         logger.log(text)
     }

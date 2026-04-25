@@ -126,6 +126,7 @@ public class MainActivity extends BaseGameActivity implements
         crashlytics = FirebaseCrashlytics.getInstance();
         Config.loadConfig(this);
         initialGameDirectory();
+        Multiplayer.initLog();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
