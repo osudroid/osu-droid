@@ -21,7 +21,7 @@ import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TextureRegionFactory;
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import org.json.JSONObject;
 
 import java.io.File;

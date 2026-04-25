@@ -48,7 +48,7 @@ public class FrameCountCrasher implements IUpdateHandler {
 		if(this.mFramesLeft >= 0) {
 			frameLengths[this.mFramesLeft] = pSecondsElapsed;
 		} else {
-			if(false) {
+			if(BuildConfig.DEBUG) {
 				for(int i = frameLengths.length - 1; i >= 0; i--) {
 					Debug.d("Elapsed: " + frameLengths[i]);
 				}

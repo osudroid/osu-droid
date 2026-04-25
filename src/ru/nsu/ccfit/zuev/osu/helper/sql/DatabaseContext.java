@@ -5,7 +5,7 @@ import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import org.andengine.util.FileUtils;
 
 import java.io.File;

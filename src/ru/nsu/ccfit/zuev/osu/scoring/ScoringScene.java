@@ -38,7 +38,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import org.apache.commons.io.FilenameUtils;
 
 import java.text.SimpleDateFormat;

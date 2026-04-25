@@ -12,7 +12,7 @@ import okhttp3.Request;
 import okio.BufferedSink;
 import okio.Okio;
 
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 public class OnlineFileOperator {
     public static boolean downloadFile(String urlstr, String filename) {

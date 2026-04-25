@@ -12,7 +12,7 @@ import okhttp3.OkHttpClient;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.IOException;

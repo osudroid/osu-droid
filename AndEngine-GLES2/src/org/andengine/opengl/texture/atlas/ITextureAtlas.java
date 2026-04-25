@@ -79,7 +79,7 @@ public interface ITextureAtlas<T extends ITextureAtlasSource> extends ITexture {
 		public static class DebugTextureAtlasStateListener<T extends ITextureAtlasSource> implements ITextureAtlasStateListener<T> {
 			@Override
 			public void onLoadedToHardware(final ITexture pTexture) {
-				if(false) {
+				if(BuildConfig.DEBUG) {
 					Debug.d("Texture loaded: " + pTexture.toString());
 				}
 			}
@@ -96,7 +96,7 @@ public interface ITextureAtlas<T extends ITextureAtlasSource> extends ITexture {
 
 			@Override
 			public void onUnloadedFromHardware(final ITexture pTexture) {
-				if(false) {
+				if(BuildConfig.DEBUG) {
 					Debug.d("Texture unloaded: " + pTexture.toString());
 				}
 			}

@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 public class ConfigBackup {
 

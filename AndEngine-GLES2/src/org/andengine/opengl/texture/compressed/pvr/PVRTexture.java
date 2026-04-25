@@ -112,7 +112,7 @@ public abstract class PVRTexture extends Texture {
 				case GLES20.GL_LINEAR_MIPMAP_LINEAR:
 					break;
 				default:
-					if(false) {
+					if(BuildConfig.DEBUG) {
 						Debug.w("This '" + this.getClass().getSimpleName() + "' contains mipmaps, but the provided '" + pTextureOptions.getClass().getSimpleName() + "' don't have MipMaps enabled on the MinFilter!");
 					}
 			}
