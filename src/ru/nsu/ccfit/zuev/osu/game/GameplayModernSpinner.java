@@ -9,7 +9,7 @@ import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.andengine.entity.scene.Scene;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;

@@ -31,7 +31,7 @@ import com.rian.osu.mods.ModHidden;
 import com.rian.osu.mods.ModSynesthesia;
 
 import org.andengine.entity.scene.Scene;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;

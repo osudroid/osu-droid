@@ -17,7 +17,7 @@ import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.detector.ScrollDetector;
 import org.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 import org.jetbrains.annotations.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.*;

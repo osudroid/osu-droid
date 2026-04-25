@@ -52,7 +52,7 @@ import org.andengine.opengl.font.Font;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.HorizontalAlign;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

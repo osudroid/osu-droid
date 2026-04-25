@@ -9,7 +9,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.ChangeableText;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;

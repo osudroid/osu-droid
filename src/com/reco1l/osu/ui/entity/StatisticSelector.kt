@@ -7,7 +7,7 @@ import org.andengine.entity.scene.Scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.ChangeableText
 import org.andengine.input.touch.TouchEvent
-import org.andengine.util.MathUtils
+import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.text.NumberFormat.getNumberInstance

@@ -3,7 +3,7 @@
 package com.reco1l.andengine
 
 import org.andengine.engine.camera.*
-import org.andengine.util.*
+import org.andengine.util.math.MathUtils
 
 
 private val TEMP_COORDINATES = FloatArray(2)

@@ -14,7 +14,7 @@ import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.util.MathUtils;
+import org.andengine.util.math.MathUtils;
 
 import java.util.ArrayList;
 
