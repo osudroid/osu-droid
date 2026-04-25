@@ -355,7 +355,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             var count = getChildCount();
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;
@@ -390,7 +390,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             var count = getChildCount();
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;

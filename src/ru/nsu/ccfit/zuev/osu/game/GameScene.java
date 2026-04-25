@@ -2758,7 +2758,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 for (int i = 0; i < scene.getChildCount(); i++) {
-                    IEntity entity = scene.getChild(i);
+                    IEntity entity = scene.getChildByIndex(i);
 
                     entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
 

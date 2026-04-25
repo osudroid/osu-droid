@@ -243,13 +243,13 @@ fun IEntity.getParentScene(): Scene? {
 
 inline fun IEntity.forEach(block: (IEntity) -> Unit) {
     for (i in 0 until childCount) {
-        block(getChild(i))
+        block(getChildByIndex(i))
     }
 }
 
 inline fun IEntity.forEachIndexed(block: (Int, IEntity) -> Unit) {
     for (i in 0 until childCount) {
-        block(i, getChild(i))
+        block(i, getChildByIndex(i))
     }
 }
 

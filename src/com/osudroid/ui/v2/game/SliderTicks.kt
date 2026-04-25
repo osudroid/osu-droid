@@ -57,7 +57,7 @@ class SliderTickContainer : UIContainer() {
             val tick = slider!!.nestedHitObjects[i] as? SliderTick ?: break
 
             // For reverse sliders, the ticks are in the opposite order.
-            val sprite = getChild(
+            val sprite = getChildByIndex(
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 

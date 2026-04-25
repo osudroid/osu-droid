@@ -58,7 +58,7 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
 
             for (i in 0 until childCount)
             {
-                val sprite = getChild(i) as? Shape ?: continue
+                val sprite = getChildByIndex(i) as? RectangularShape ?: continue
 
                 sprite.setPosition(sprite.x, y)
                 y += sprite.height + 5f
@@ -91,7 +91,7 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
 
             for (i in 0 until childCount)
             {
-                val sprite = getChild(i) as? Shape ?: continue
+                val sprite = getChildByIndex(i) as? RectangularShape ?: continue
                 sprite.setPosition(-160f, 146 + 0.8f * percentShow * i * (sprite.height + 5f))
             }
 

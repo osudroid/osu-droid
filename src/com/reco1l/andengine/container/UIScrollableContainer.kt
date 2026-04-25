@@ -519,7 +519,7 @@ fun UIComponent.setHierarchyScrollPrevention(value: Boolean) {
     }
 
     for (i in 0 until childCount) {
-        val child = getChild(i)
+        val child = getChildByIndex(i)
         if (child is UIScrollableContainer) {
             child.preventScrolling = value
         }

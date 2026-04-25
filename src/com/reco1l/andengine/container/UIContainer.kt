@@ -50,7 +50,7 @@ open class UIContainer : UIComponent() {
 
     operator fun <T : IEntity> get(index: Int): T? {
         @Suppress("UNCHECKED_CAST")
-        return getChild(index) as? T
+        return getChildByIndex(index) as? T
     }
 
     operator fun set(index: Int, entity: IEntity) {

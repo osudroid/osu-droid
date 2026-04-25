@@ -524,7 +524,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
                     currentPlayers = room.playersMap.keys.toLongArray()
                 } else {
                     room.activePlayers.forEachIndexed { index, player ->
-                        val card = getChild(index) as RoomPlayerCard
+                        val card = getChildByIndex(index) as RoomPlayerCard
                         card.updateState(room, player)
                     }
                 }

@@ -66,7 +66,7 @@ public class ScoreNumber extends Entity {
             if (center) {
                 totalWidth /= 2 * scale;
                 for (int i = 0, count = getChildCount(); i < count; i++) {
-                    var sp = getChild(i);
+                    var sp = getChildByIndex(i);
                     sp.setPosition(sp.getX() - totalWidth, sp.getY());
                     sp.registerEntityModifier(new SequenceEntityModifier(
                             new ScaleModifier(0.2f, scale, scale * 1.5f),

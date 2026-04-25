@@ -150,7 +150,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
             }
 
             for (i in childCount - 1 downTo 0) {
-                if (getChild(i).propagateKeyPress(keyCode, event)) {
+                if (getChildByIndex(i).propagateKeyPress(keyCode, event)) {
                     return true
                 }
             }

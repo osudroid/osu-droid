@@ -1020,7 +1020,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
         try {
             for (i in childCount - 1 downTo 0) {
-                val child = getChild(i)
+                val child = getChildByIndex(i)
                 if (child is ITouchArea && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child

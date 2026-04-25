@@ -249,7 +249,7 @@ class RoomChat : UILinearContainer() {
             messagesChanged = false
 
             for (i in max_messages - 1 downTo 0) {
-                val messageComponent = messageContainer.getChild(i) as MessageComponent
+                val messageComponent = messageContainer.getChildByIndex(i) as MessageComponent
                 messageComponent.message = if (i < messages.size) messages[i] else null
             }
         }

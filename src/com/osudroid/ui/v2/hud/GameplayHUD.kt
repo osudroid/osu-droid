@@ -41,11 +41,11 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
                 // Move to front
                 if (value != null) {
-                    setChildIndex(value, mChildren.size - 1)
+                    mChildren?.let { children -> if (children.remove(value)) children.add(value) }
 
                     // Preserve overlay on top of the element.
                     if (value.editorOverlay != null) {
-                        setChildIndex(value.editorOverlay, mChildren.size - 1)
+                        mChildren?.let { children -> if (children.remove(value.editorOverlay)) children.add(value.editorOverlay) }
                     }
 
                     elementSelector?.collapse()

@@ -99,14 +99,14 @@ class HUDLeaderboard : HUDElement() {
             }
         }
 
-        val lastPlayerPosition = getChildIndex(player)
+        val lastPlayerPosition = mChildren?.indexOf(player) ?: 0
         var playerPosition = lastPlayerPosition
 
         if (!Multiplayer.isMultiplayer) {
 
             var i = lastPlayerPosition - 1
             while (i >= 0) {
-                val sprite = getChild(i) as BoardItem
+                val sprite = getChildByIndex(i) as BoardItem
 
                 if (player.data.playScore >= sprite.data.playScore) {
                     player.data.rank = sprite.data.rank
@@ -151,7 +151,7 @@ class HUDLeaderboard : HUDElement() {
                 var i = 0
                 while (i < spriteCount) {
 
-                    val sprite = getChild(i)
+                    val sprite = getChildByIndex(i)
                     val isInBounds = i in minBound + 1..<playerPosition
 
                     // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
