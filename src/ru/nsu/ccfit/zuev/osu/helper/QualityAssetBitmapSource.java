@@ -11,6 +11,7 @@ import com.reco1l.framework.Bitmaps;
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import org.andengine.util.StreamUtils;
 
 import java.io.IOException;

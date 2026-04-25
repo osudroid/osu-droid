@@ -3,6 +3,7 @@ package org.andengine.util.adt.pool;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.andengine.BuildConfig;
 import org.andengine.util.debug.Debug;
 
 /**

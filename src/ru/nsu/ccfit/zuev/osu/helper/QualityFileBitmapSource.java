@@ -8,9 +8,10 @@ import com.osudroid.BuildSettings;
 import com.reco1l.framework.Bitmaps;
 
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.andengine.opengl.texture.source.BaseTextureAtlasSource;
-import org.andengine.util.Debug;
+import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource;
+
 import org.andengine.util.StreamUtils;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.FileInputStream;

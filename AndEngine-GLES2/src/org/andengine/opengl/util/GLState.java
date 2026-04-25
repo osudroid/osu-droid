@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
+import org.andengine.BuildConfig;
 import org.andengine.engine.options.RenderOptions;
 import org.andengine.opengl.exception.GLException;
 import org.andengine.opengl.exception.GLFrameBufferException;

@@ -1,5 +1,6 @@
 package org.andengine.ui.activity;
 
+import org.andengine.BuildConfig;
 import org.andengine.audio.music.MusicManager;
 import org.andengine.audio.sound.SoundManager;
 import org.andengine.engine.Engine;
