@@ -9,6 +9,7 @@ import org.andengine.opengl.texture.region.TextureRegion;
 import javax.annotation.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -22,7 +23,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
 
 
     public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
-        super(pX, pY, pTextureRegion);
+        super(pX, pY, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         setScale(baseSize);
 
         float clickAnimationTime = 0.25f;

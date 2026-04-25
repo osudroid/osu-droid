@@ -2,12 +2,14 @@ package com.rian.osu.ui
 
 import org.andengine.entity.modifier.MoveYModifier
 import org.andengine.entity.primitive.Rectangle
-import org.andengine.entity.scene.Scene.ITouchArea
+import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
+import org.andengine.entity.text.TextOptions
 import org.andengine.input.touch.TouchEvent
 import org.andengine.util.HorizontalAlign
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.round
@@ -18,11 +20,11 @@ class SendingPanel(
     private val score: Long,
     private val accuracy: Float,
     private val pp: Float
-) : Rectangle(0f, -200f, 800f, 200f) {
+) : Rectangle(0f, -200f, 800f, 200f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
     val dismissTouchArea: ITouchArea
         get() = dismissButton
 
-    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking").also {
+    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking", GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
         it.setPosition((width - it.width) / 2, height / 5)
         attachChild(it)
     }

@@ -3,7 +3,7 @@ package com.reco1l.osu.ui.entity
 import android.opengl.GLES20
 import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
 import com.osudroid.multiplayer.Multiplayer
-import org.andengine.entity.scene.Scene.ITouchArea
+import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent

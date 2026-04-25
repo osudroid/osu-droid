@@ -7,8 +7,7 @@ import org.andengine.entity.particle.modifier.AlphaModifier;
 import org.andengine.entity.particle.modifier.ExpireModifier;
 import org.andengine.opengl.texture.region.TextureRegion;
 
-import javax.microedition.khronos.opengles.GL10;
-
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;

@@ -128,7 +128,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapHitObjectsText,
             beatmapDifficultyText;
 
-    private Scene.ITouchArea currentPressedButton;
+    private ITouchArea currentPressedButton;
     private UISprite scoringSwitcher = null;
     private SearchBarFragment searchBar = null;
     private GroupType groupType = GroupType.MapSet;

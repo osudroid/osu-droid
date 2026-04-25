@@ -151,7 +151,7 @@ public class TexturePool {
             }
             final QualityFileBitmapSource source = new QualityFileBitmapSource(
                     TextureHelper.createFactoryFromBitmap(pack));
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(glMaxWidth, glMaxWidth, TextureOptions.BILINEAR);
+            final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), glMaxWidth, glMaxWidth, TextureOptions.BILINEAR);
             tex.addTextureAtlasSource(source, 0, 0);
             GlobalManager.getInstance().getEngine().getTextureManager().loadTexture(tex);
             createdTextures.add(tex);

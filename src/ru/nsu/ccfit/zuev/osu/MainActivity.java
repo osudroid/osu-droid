@@ -71,7 +71,7 @@ import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.sensor.accelerometer.AccelerometerData;
 import org.andengine.sensor.accelerometer.IAccelerometerListener;
 import org.andengine.ui.activity.BaseGameActivity;
-import org.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.IOException;

@@ -33,7 +33,7 @@ public class LinearSongProgress extends GameObject {
         scene.attachChild(bgRect);
 
         progressRect = new Rectangle(bgRect.getX(), bgRect.getY(), 0,
-                bgRect.getHeight());
+                bgRect.getHeight(), vbo);
         progressRect.setColor(153f / 255f, 204f / 255f, 51f / 255f);
         scene.attachChild(progressRect);
     }

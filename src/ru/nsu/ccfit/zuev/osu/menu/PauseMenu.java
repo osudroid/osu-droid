@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.reco1l.andengine.UIEngine;
 
 import org.andengine.engine.Engine;
+import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.menu.MenuScene;
 import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
