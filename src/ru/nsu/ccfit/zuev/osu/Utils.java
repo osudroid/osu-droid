@@ -6,7 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.util.math.MathUtils;
 
 import java.util.Arrays;
@@ -41,12 +41,12 @@ public class Utils {
     }
 
     public static void putSpriteAnchorCenter(float x, float y, Sprite sprite) {
-        final TextureRegion tex = sprite.getTextureRegion();
+        final ITextureRegion tex = sprite.getTextureRegion();
         sprite.setPosition(x - tex.getWidth() / 2f, y - tex.getHeight() / 2f);
     }
 
     public static void putSpriteAnchorCenter(PointF pos, Sprite sprite) {
-        final TextureRegion tex = sprite.getTextureRegion();
+        final ITextureRegion tex = sprite.getTextureRegion();
         sprite.setPosition(pos.x - tex.getWidth() / 2f, pos.y - tex.getHeight() / 2f);
     }
 
