@@ -37,7 +37,7 @@ open class UIContainer : UIComponent() {
     //region Operators
 
     inline fun <reified T : IEntity>firstOf(): T? {
-        return findChild { it is T } as? T
+        return getChildByMatcher { it is T} as? T
     }
 
     operator fun UIComponent.unaryPlus() {

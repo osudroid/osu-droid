@@ -127,7 +127,9 @@ class HUDLeaderboard : HUDElement() {
         if (playerPosition != lastPlayerPosition || isInvalidated) {
 
             if (playerPosition != lastPlayerPosition) {
-                setChildIndex(player, playerPosition)
+                mChildren?.let { children ->
+                    if (children.remove(player)) children.add(playerPosition, player)
+                }
             }
 
             val maxY = SPRITE_HEIGHT * (SCORE_COUNT - 1)
@@ -136,7 +138,7 @@ class HUDLeaderboard : HUDElement() {
 
                 var i = 0
                 while (i < spriteCount) {
-                    val sprite = getChild(i)
+                    val sprite = getChildByIndex(i)
 
                     sprite.setPosition(0f, if (i >= SCORE_COUNT) maxY else SPRITE_HEIGHT * i)
                     sprite.isVisible = i < SCORE_COUNT
@@ -258,7 +260,7 @@ class HUDLeaderboard : HUDElement() {
     }
 
 
-    private inner class BoardItem(val data: ScoreBoardItem) : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("menu-button-background")) {
+    private inner class BoardItem(val data: ScoreBoardItem) : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("menu-button-background"), GlobalManager.getInstance().engine.vertexBufferObjectManager) {
 
         val info: Text
 
