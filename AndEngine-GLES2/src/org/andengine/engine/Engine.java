@@ -820,7 +820,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 					this.mEngine.onTickUpdate();
 				}
 			} catch (final InterruptedException e) {
-				if(false) {
+				if(BuildConfig.DEBUG) {
 					Debug.d(this.getClass().getSimpleName() + " interrupted. Don't worry - this " + e.getClass().getSimpleName() + " is most likely expected!", e);
 				}
 				this.interrupt();
