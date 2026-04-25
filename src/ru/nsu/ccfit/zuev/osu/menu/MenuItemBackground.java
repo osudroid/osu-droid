@@ -26,8 +26,9 @@ public class MenuItemBackground extends Sprite {
 
     public MenuItemBackground() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
+        final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
         setAlpha(0.8f);
         title = new Text(Utils.toRes(32), Utils.toRes(25),
                 ResourceManager.getInstance().getFont("font"), "", 255, vbo);

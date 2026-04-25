@@ -42,7 +42,8 @@ import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.ColorBackground;
+import org.andengine.entity.scene.ITouchArea;
+import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
@@ -193,6 +194,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public synchronized void load() {
         scene = new UIScene();
+        final var vbo = engine.getVertexBufferObjectManager();
         // This is needed for UIScene to behave on par with regular Scene, otherwise we would have weird scenarios such
         // as entities in the back layer having touch priority despite being rendered behind the front layer.
         scene.setOnAreaTouchTraversalBackToFront();
@@ -210,13 +212,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.registerTouchArea(frontLayer);
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        float height = tex.getHeight();
-        height *= Config.getRES_WIDTH() / (float) tex.getWidth();
-        final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex);
-        scene.setBackground(new SpriteBackground(bg));
+        if (tex != null) {
+            float height = tex.getHeight();
+            height *= Config.getRES_WIDTH() / (float) tex.getWidth();
+            final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
+                    Config.getRES_WIDTH(), height, tex, vbo);
+            scene.setBackground(new SpriteBackground(bg));
+        } else {
+            scene.setBackground(new Background(70 / 255f, 129 / 255f, 252 / 255f));
+        }
 
-        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), vbo);
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
@@ -235,7 +241,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (items.size() == 0) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
                     .getFont("CaptionFont"), "There are no songs in library, try using the beatmap downloader.",
-                    HorizontalAlign.CENTER);
+                    new org.andengine.entity.text.TextOptions(HorizontalAlign.CENTER), vbo);
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
                     Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
@@ -306,7 +312,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scrollbar = new ScrollBar(scene);
 
         final TextureRegion songSelectTopTexture = ResourceManager.getInstance().getTexture("songselect-top");
-        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture);
+        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture, vbo);
         songSelectTop.setSize(songSelectTopTexture.getWidth() * songSelectTopTexture.getHeight() / 184f, 184);
         songSelectTop.setPosition(-1640, songSelectTop.getY());
         songSelectTop.setAlpha(0.6f);
@@ -321,15 +327,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer.attachChild(beatmapCreatorText);
 
         beatmapLengthText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024, vbo);
         frontLayer.attachChild(beatmapLengthText);
 
         beatmapHitObjectsText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapLengthText.getY() + beatmapLengthText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024, vbo);
         frontLayer.attachChild(beatmapHitObjectsText);
 
         beatmapDifficultyText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024, vbo);
         frontLayer.attachChild(beatmapDifficultyText);
 
         var clickShortSound = ResourceManager.getInstance().getSound("click-short");
@@ -1125,7 +1131,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         backgroundPath = beatmapInfo.getBackgroundPath();
         bg = null;
-        scene.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new Background(0, 0, 0));
 
         if (backgroundLoadingJob != null) {
             backgroundLoadingJob.cancel(new CancellationException("Background loading has been cancelled."));
@@ -1144,7 +1150,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         / (float) tex.getWidth();
                 bg = new Sprite(0,
                         (Config.getRES_HEIGHT() - height) / 2, Config
-                        .getRES_WIDTH(), height, tex);
+                        .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 bg.setColor(0, 0, 0);
             }
 
@@ -1159,7 +1165,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 bg = new Sprite(
                         0,
                         (Config.getRES_HEIGHT() - height) / 2,
-                        Config.getRES_WIDTH(), height, tex1);
+                        Config.getRES_WIDTH(), height, tex1, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 backgroundPath = "";
             }
 

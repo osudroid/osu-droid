@@ -32,7 +32,8 @@ public class OnlinePanel extends Entity {
     private Sprite avatar = null;
 
     public OnlinePanel() {
-        rect = new Rectangle(0, 0, 410, 110) {
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        rect = new Rectangle(0, 0, 410, 110, vbo) {
             boolean moved = false;
             float dx = 0, dy = 0;
 
@@ -77,7 +78,7 @@ public class OnlinePanel extends Entity {
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
-        Rectangle avatarFooter = new Rectangle(0, 0, 110, 110);
+        Rectangle avatarFooter = new Rectangle(0, 0, 110, 110, vbo);
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
 		
@@ -87,7 +88,7 @@ public class OnlinePanel extends Entity {
 
         rankText = new Text(0, 0,
                 ResourceManager.getInstance().getFont("CaptionFont"), "#1",
-                HorizontalAlign.RIGHT, 12);
+                12, new TextOptions(HorizontalAlign.RIGHT), vbo);
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
@@ -99,13 +100,13 @@ public class OnlinePanel extends Entity {
         onlineLayer.attachChild(nameText);
         ppText = new Text(120, 50,
                 ResourceManager.getInstance().getFont("smallFont"), "Performance: 0pp",
-                HorizontalAlign.LEFT, 25);
+                25, new TextOptions(HorizontalAlign.LEFT), vbo);
         ppText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(ppText);
 
         accText = new Text(120, 75,
                 ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
-                HorizontalAlign.LEFT, 17);
+                17, new TextOptions(HorizontalAlign.LEFT), vbo);
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
@@ -165,7 +166,8 @@ public class OnlinePanel extends Entity {
         if (tex == null) return;
 
         Debug.i("Avatar is set!");
-        avatar = new Sprite(0, 0, 110, 110, tex);
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        avatar = new Sprite(0, 0, 110, 110, tex, vbo);
         frontLayer.attachChild(avatar);
     }
 }

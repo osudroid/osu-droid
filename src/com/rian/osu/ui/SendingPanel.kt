@@ -58,7 +58,7 @@ class SendingPanel(
         it.setText("Sending...")
     }
 
-    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f).also {
+    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
         it.setColor(0f, 0f, 0f, 0f)
         attachChild(it)
     }
@@ -200,7 +200,7 @@ class SendingPanel(
         // Reverse back to maintain original order
         .reversed()
 
-    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button")) {
+    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button"), GlobalManager.getInstance().engine.vertexBufferObjectManager) {
         var canBeDismissed = false
 
         private val text = Text(0f, 0f, getResources().getFont("font"), "", 10, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
@@ -223,7 +223,7 @@ class SendingPanel(
         }
     }
 
-    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f) {
+    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
         private val minWidth = width
         private val minHeight = height
 
@@ -231,7 +231,7 @@ class SendingPanel(
             attachChild(it)
         }
 
-        private val valueRect = Rectangle(0f, 80f, width, 0f).also {
+        private val valueRect = Rectangle(0f, 80f, width, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             it.setColor(0.4f, 0.4f, 0.4f, 0.8f)
             attachChild(it)
         }

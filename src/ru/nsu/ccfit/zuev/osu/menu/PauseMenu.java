@@ -78,16 +78,20 @@ public class PauseMenu implements IOnMenuItemClickListener {
         };
 
         final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
-                ResourceManager.getInstance().getTexture("pause-save-replay"));
+                ResourceManager.getInstance().getTexture("pause-save-replay"),
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(saveFailedReplay);
         final SpriteMenuItem itemContinue = new SpriteMenuItem(ITEM_CONTINUE,
-                ResourceManager.getInstance().getTexture("pause-continue"));
+                ResourceManager.getInstance().getTexture("pause-continue"),
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemContinue);
         final SpriteMenuItem itemRetry = new SpriteMenuItem(ITEM_RETRY,
-                ResourceManager.getInstance().getTexture("pause-retry"));
+                ResourceManager.getInstance().getTexture("pause-retry"),
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemRetry);
         final SpriteMenuItem itemBack = new SpriteMenuItem(ITEM_BACK,
-                ResourceManager.getInstance().getTexture("pause-back"));
+                ResourceManager.getInstance().getTexture("pause-back"),
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemBack);
         scene.setBackgroundEnabled(false);
         TextureRegion tex;
@@ -107,8 +111,9 @@ public class PauseMenu implements IOnMenuItemClickListener {
             height *= Config.getRES_WIDTH() / (float) (tex.getWidth());
             final Sprite bg = new Sprite(0,
                     (Config.getRES_HEIGHT() - height) / 2,
-                    Config.getRES_WIDTH(), height, tex);
-            scene.attachChild(bg, 0);
+                    Config.getRES_WIDTH(), height, tex,
+                    GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            scene.attachChild(bg);
         }
 
         scene.buildAnimations();

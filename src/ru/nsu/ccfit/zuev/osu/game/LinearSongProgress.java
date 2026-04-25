@@ -8,6 +8,7 @@ import com.reco1l.framework.Color4;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class LinearSongProgress extends GameObject {
@@ -26,7 +27,8 @@ public class LinearSongProgress extends GameObject {
         this.time = time;
         this.startTime = startTime;
 
-        bgRect = new Rectangle(pos.x, pos.y, width, height);
+        final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        bgRect = new Rectangle(pos.x, pos.y, width, height, vbo);
         bgRect.setColor(0, 0, 0, 0.3f);
         scene.attachChild(bgRect);
 
