@@ -45,7 +45,6 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.ColorBackground;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
@@ -121,7 +120,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 backgroundLoadingJob,
                 mapStatusJob;
 
-    private ChangeableText
+    private Text
             beatmapMetadataText,
             beatmapCreatorText,
             beatmapLengthText,
@@ -313,12 +312,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
-        beatmapMetadataText = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024);
+        beatmapMetadataText = new Text(Utils.toRes(70), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), "title", 1024, vbo);
         frontLayer.attachChild(beatmapMetadataText);
 
-        beatmapCreatorText = new ChangeableText(Utils.toRes(70), beatmapMetadataText.getY() + beatmapMetadataText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
+        beatmapCreatorText = new Text(Utils.toRes(70), beatmapMetadataText.getY() + beatmapMetadataText.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024, vbo);
         frontLayer.attachChild(beatmapCreatorText);
 
         beatmapLengthText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
@@ -1745,9 +1744,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         MapSet, SingleDiff
     }
 
-    private class BeatmapStatisticToggleText extends ChangeableText {
-        public BeatmapStatisticToggleText(float pX, float pY, Font pFont, String pText, int pCharactersMaximum) {
-            super(pX, pY, pFont, pText, pCharactersMaximum);
+    private class BeatmapStatisticToggleText extends Text {
+        public BeatmapStatisticToggleText(float pX, float pY, Font pFont, String pText, int pCharactersMaximum, org.andengine.opengl.vbo.VertexBufferObjectManager pVBO) {
+            super(pX, pY, pFont, pText, pCharactersMaximum, pVBO);
         }
 
         private boolean moved = false;

@@ -5,7 +5,7 @@ import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
 import com.osudroid.multiplayer.Multiplayer
 import org.andengine.entity.scene.Scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
-import org.andengine.entity.text.ChangeableText
+import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
 import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -80,9 +80,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
         private var dy = 0f
 
 
-        val text = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100)
+        val text = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100, getGlobal().engine.vertexBufferObjectManager)
 
-        val rank = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5)
+        val rank = Text(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5, getGlobal().engine.vertexBufferObjectManager)
 
 
         init {

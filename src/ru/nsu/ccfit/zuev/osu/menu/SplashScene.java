@@ -6,7 +6,8 @@ import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.modifier.*;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 
 import org.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -20,8 +21,8 @@ public class SplashScene implements IUpdateHandler {
 
     public static final SplashScene INSTANCE = new SplashScene();
     private final Scene scene;
-    private ChangeableText infoText;
-    private ChangeableText progressText;
+    private Text infoText;
+    private Text progressText;
     private Sprite mLoading;
     private boolean mStarting = true;
 
@@ -99,7 +100,8 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeProgress() {
-        progressText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", HorizontalAlign.CENTER, 10);
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        progressText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", 10, new TextOptions(HorizontalAlign.CENTER), vbo);
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
         progressText.setAlpha(0);
         progressText.setScale(0.5f);

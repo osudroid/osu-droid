@@ -11,7 +11,6 @@ import com.rian.osu.utils.ModUtils;
 import org.andengine.entity.Entity;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.detector.ScrollDetector;
@@ -34,7 +33,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
     private final Scene mainScene;
     private final MenuItemListener listener;
-    private final ChangeableText loadingText;
+    private final Text loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
     private BeatmapInfo lastBeatmapInfo;
@@ -69,7 +68,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mainScene = scene;
         layer.attachChild(this);
 
-        this.loadingText = new ChangeableText(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50);
+        this.loadingText = new Text(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         this.attachChild(this.loadingText);
 
         this.listener = listener;
@@ -599,9 +598,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             } : null;
 
 
-            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
-            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
-            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             text.setScale(1.2f);
             mark.setScale(1.5f);

@@ -4,7 +4,7 @@ import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.framework.Color4;
 
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.MathUtils;
 
@@ -16,7 +16,7 @@ public class MenuItemBackground extends Sprite {
 
     private static final Color4 DEFAULT_COLOR = new Color4(240 / 255f, 150 / 255f, 0 / 255f);
     private static final Color4 ON_TOUCH_COLOR = new Color4(1f, 1f, 1f);
-    private final ChangeableText title, author;
+    private final Text title, author;
     private final Color4 defColor = OsuSkin.get().getColor("MenuItemDefaultColor", DEFAULT_COLOR);
     private final Color4 onTouchColor = OsuSkin.get().getColor("MenuItemOnTouchColor", ON_TOUCH_COLOR);
     private boolean moved = false;
@@ -29,10 +29,10 @@ public class MenuItemBackground extends Sprite {
                 "menu-button-background"));
 
         setAlpha(0.8f);
-        title = new ChangeableText(Utils.toRes(32), Utils.toRes(25),
-                ResourceManager.getInstance().getFont("font"), "", 255);
-        author = new ChangeableText(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100);
+        title = new Text(Utils.toRes(32), Utils.toRes(25),
+                ResourceManager.getInstance().getFont("font"), "", 255, vbo);
+        author = new Text(0, 0, ResourceManager.getInstance()
+                .getFont("font"), "", 100, vbo);
         author.setPosition(Utils.toRes(150), Utils.toRes(60));
 
         ComponentsKt.setColor4(this, defColor);

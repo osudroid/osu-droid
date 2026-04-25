@@ -7,7 +7,8 @@ import com.reco1l.osu.ui.MessageDialog;
 import org.andengine.entity.Entity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.Debug;
@@ -26,8 +27,8 @@ public class OnlinePanel extends Entity {
 
     public Rectangle rect;
 
-    private final ChangeableText rankText, nameText, ppText, accText;
-    private final ChangeableText messageText, submessageText;
+    private final Text rankText, nameText, ppText, accText;
+    private final Text messageText, submessageText;
     private Sprite avatar = null;
 
     public OnlinePanel() {
@@ -84,7 +85,7 @@ public class OnlinePanel extends Entity {
 		rightFooter.setColor(0.3f, 0.3f, 0.3f, 0.35f);
 		attachChild(rightFooter);*/
 
-        rankText = new ChangeableText(0, 0,
+        rankText = new Text(0, 0,
                 ResourceManager.getInstance().getFont("CaptionFont"), "#1",
                 HorizontalAlign.RIGHT, 12);
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
@@ -93,27 +94,27 @@ public class OnlinePanel extends Entity {
         rankText.setPosition(390 + 10 - rankText.getWidthScaled(), 55);
         onlineLayer.attachChild(rankText);
 
-        nameText = new ChangeableText(120, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
+        nameText = new Text(120, 5,
+                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16, vbo);
         onlineLayer.attachChild(nameText);
-        ppText = new ChangeableText(120, 50,
+        ppText = new Text(120, 50,
                 ResourceManager.getInstance().getFont("smallFont"), "Performance: 0pp",
                 HorizontalAlign.LEFT, 25);
         ppText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(ppText);
 
-        accText = new ChangeableText(120, 75,
+        accText = new Text(120, 75,
                 ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
                 HorizontalAlign.LEFT, 17);
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
-        messageText = new ChangeableText(110, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
+        messageText = new Text(110, 5,
+                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16, vbo);
         messageLayer.attachChild(messageText);
 
-        submessageText = new ChangeableText(110, 60,
-                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
+        submessageText = new Text(110, 60,
+                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40, vbo);
         messageLayer.attachChild(submessageText);
 
         attachChild(messageLayer);

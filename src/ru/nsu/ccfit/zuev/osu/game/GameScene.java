@@ -95,7 +95,7 @@ import org.andengine.entity.scene.background.ColorBackground;
 import org.andengine.entity.scene.background.EntityBackground;
 import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
+import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.util.GLState;
@@ -1265,7 +1265,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (!Config.isHideReplayMarquee()) {
-                var replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000, engine.getVertexBufferObjectManager());
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
                 replayText.setPosition(0, 140);

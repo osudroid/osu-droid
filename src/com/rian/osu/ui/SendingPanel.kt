@@ -4,7 +4,6 @@ import org.andengine.entity.modifier.MoveYModifier
 import org.andengine.entity.primitive.Rectangle
 import org.andengine.entity.scene.Scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
-import org.andengine.entity.text.ChangeableText
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
 import org.andengine.util.HorizontalAlign
@@ -204,7 +203,7 @@ class SendingPanel(
     private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button")) {
         var canBeDismissed = false
 
-        private val text = ChangeableText(0f, 0f, getResources().getFont("font"), "", 10).also {
+        private val text = Text(0f, 0f, getResources().getFont("font"), "", 10, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             attachChild(it)
         }
 
@@ -228,7 +227,7 @@ class SendingPanel(
         private val minWidth = width
         private val minHeight = height
 
-        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption).also {
+        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             attachChild(it)
         }
 
@@ -237,7 +236,7 @@ class SendingPanel(
             attachChild(it)
         }
 
-        private val valueText = ChangeableText(0f, 0f, getResources().getFont("font"), "", HorizontalAlign.CENTER, 100).also {
+        private val valueText = Text(0f, 0f, getResources().getFont("font"), "", 100, TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             valueRect.attachChild(it)
         }
 

@@ -50,8 +50,8 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.ColorBackground;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.ChangeableText;
 import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.debug.Debug;
@@ -91,7 +91,7 @@ public class MainScene implements IUpdateHandler {
     private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
     private Scene scene;
-    private ChangeableText musicInfoText;
+    private Text musicInfoText;
     private final Rectangle[] spectrum = new Rectangle[120];
     private final float[] peakLevel = new float[120];
     private final float[] peakDownRate = new float[120];
@@ -192,8 +192,8 @@ public class MainScene implements IUpdateHandler {
         UIBox box = new UIBox() {
 
             {
-                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
-                attachChild(versionText);
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME, vbo);
+                attachChild(versionText, 0);
 
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
                 setPosition(10f, Config.getRES_HEIGHT() - getHeight() - 10f);
@@ -366,7 +366,7 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        musicInfoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.RIGHT, 35);
+        musicInfoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 256, new TextOptions(HorizontalAlign.RIGHT), vbo);
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
         music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
@@ -486,11 +486,11 @@ public class MainScene implements IUpdateHandler {
             debugOverlay.setOrigin(Anchor.BottomCenter);
             scene.attachChild(debugOverlay);
 
-            Text debugText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            Text debugText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD", vbo);
             debugText.setColor(1f, 237f / 255f, 0f);
             debugText.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight());
 
-            Text debugTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            Text debugTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD", vbo);
             debugTextShadow.setColor(0f, 0f, 0f, 0.5f);
             debugTextShadow.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f + 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight() + 2f);
 
@@ -823,8 +823,9 @@ public class MainScene implements IUpdateHandler {
             beatmapInfo = LibraryManager.getCurrentBeatmapSet().getBeatmap(0);
 
             if (musicInfoText == null) {
-                musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
-                        ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
+                final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+                musicInfoText = new Text(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
+                        ResourceManager.getInstance().getFont("font"), "None...", 256, new TextOptions(HorizontalAlign.RIGHT), vbo);
             }
 
             musicInfoText.setText(beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText(), true);
