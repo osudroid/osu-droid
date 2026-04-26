@@ -62,6 +62,7 @@ public class LoadingScreen implements IUpdateHandler {
         ToastLogger.setPercentage(-1);
         percentage = -1;
 
+        // Spinning loading circle
         var circle = new UISprite();
         circle.setOrigin(Anchor.Center);
         circle.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
@@ -85,8 +86,9 @@ public class LoadingScreen implements IUpdateHandler {
         if (ToastLogger.getPercentage() != percentage) {
             percentage = ToastLogger.getPercentage();
             logText.setText(String.format("%d%%", (int) percentage));
-            logText.setPosition(Config.getRES_WIDTH() / 2f - logText.getWidth()
-                    / 2, Config.getRES_HEIGHT() - Utils.toRes(100));
+            logText.setPosition(
+                    Config.getRES_WIDTH() / 2f - logText.getWidth() / 2f,
+                    Config.getRES_HEIGHT() - Utils.toRes(100));
         }
     }
 
