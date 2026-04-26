@@ -38,10 +38,10 @@ public class MultipleFlippableTextureQuad extends FlippableTextureQuad {
             TextureEntry entry = new TextureEntry();
             entry.texture = texture;
             entry.size = new Vec2(texture.getWidth(), texture.getHeight());
-            entry.u1 = texture.getTextureCoordinateX1();
-            entry.u2 = texture.getTextureCoordinateX2();
-            entry.v1 = texture.getTextureCoordinateY1();
-            entry.v2 = texture.getTextureCoordinateY2();
+            entry.u1 = texture.getU();
+            entry.u2 = texture.getU2();
+            entry.v1 = texture.getV();
+            entry.v2 = texture.getV2();
             textureEntries[i] = entry;
         }
 
@@ -60,10 +60,10 @@ public class MultipleFlippableTextureQuad extends FlippableTextureQuad {
             TextureEntry entry = new TextureEntry();
             entry.texture = texture;
             entry.size = new Vec2(texture.getWidth() * globalScale, texture.getHeight() * globalScale);
-            entry.u1 = texture.getTextureCoordinateX1();
-            entry.u2 = texture.getTextureCoordinateX2();
-            entry.v1 = texture.getTextureCoordinateY1();
-            entry.v2 = texture.getTextureCoordinateY2();
+            entry.u1 = texture.getU();
+            entry.u2 = texture.getU2();
+            entry.v1 = texture.getV();
+            entry.v2 = texture.getV2();
             textureEntries[i] = entry;
         }
 
