@@ -39,12 +39,12 @@ import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.particle.ParticleSystem;
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.andengine.entity.particle.initializer.AccelerationInitializer;
-import org.andengine.entity.particle.initializer.RotationInitializer;
-import org.andengine.entity.particle.initializer.VelocityInitializer;
-import org.andengine.entity.particle.modifier.AlphaModifier;
-import org.andengine.entity.particle.modifier.ExpireModifier;
-import org.andengine.entity.particle.modifier.ScaleModifier;
+import org.andengine.entity.particle.initializer.AccelerationParticleInitializer;
+import org.andengine.entity.particle.initializer.RotationParticleInitializer;
+import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
+import org.andengine.entity.particle.modifier.AlphaParticleModifier;
+import org.andengine.entity.particle.modifier.ExpireParticleInitializer;
+import org.andengine.entity.particle.modifier.ScaleParticleModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
@@ -67,8 +67,6 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -366,6 +364,7 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
+    //TODO Fix Characters max Length
         musicInfoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 256, new TextOptions(HorizontalAlign.RIGHT), vbo);
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
@@ -391,13 +390,13 @@ public class MainScene implements IUpdateHandler {
                     (x, y) -> new Sprite(x, y, starRegion, vbo),
                     new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128);
 
-            particleSystem[0].addParticleInitializer(new VelocityInitializer(150, 430, -480, -520));
-            particleSystem[0].addParticleInitializer(new AccelerationInitializer(10, 30));
-            particleSystem[0].addParticleInitializer(new RotationInitializer(0.0f, 360.0f));
+            particleSystem[0].addParticleInitializer(new VelocityParticleInitializer(150, 430, -480, -520));
+            particleSystem[0].addParticleInitializer(new AccelerationParticleInitializer(10, 30));
+            particleSystem[0].addParticleInitializer(new RotationParticleInitializer(0.0f, 360.0f));
 
-            particleSystem[0].addParticleModifier(new ScaleModifier(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[0].addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0.0f, 1.0f));
-            particleSystem[0].addParticleModifier(new ExpireModifier(1.0f));
+            particleSystem[0].addParticleModifier(new ScaleParticleModifier(0.5f, 2.0f, 0.0f, 1.0f));
+            particleSystem[0].addParticleModifier(new AlphaParticleModifier(1.0f, 0.0f, 0.0f, 1.0f));
+            particleSystem[0].addParticleInitializer(new ExpireParticleInitializer(1.0f));
 
             particleSystem[0].setParticlesSpawnEnabled(false);
 
@@ -409,13 +408,13 @@ public class MainScene implements IUpdateHandler {
                     (x, y) -> new Sprite(x, y, starRegion, vbo),
                     new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128);
 
-            particleSystem[1].addParticleInitializer(new VelocityInitializer(-150, -430, -480, -520));
-            particleSystem[1].addParticleInitializer(new AccelerationInitializer(-10, 30));
-            particleSystem[1].addParticleInitializer(new RotationInitializer(0.0f, 360.0f));
+            particleSystem[1].addParticleInitializer(new VelocityParticleInitializer(-150, -430, -480, -520));
+            particleSystem[1].addParticleInitializer(new AccelerationParticleInitializer(-10, 30));
+            particleSystem[1].addParticleInitializer(new RotationParticleInitializer(0.0f, 360.0f));
 
-            particleSystem[1].addParticleModifier(new ScaleModifier(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[1].addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0.0f, 1.0f));
-            particleSystem[1].addParticleModifier(new ExpireModifier(1.0f));
+            particleSystem[1].addParticleModifier(new ScaleParticleModifier(0.5f, 2.0f, 0.0f, 1.0f));
+            particleSystem[1].addParticleModifier(new AlphaParticleModifier(1.0f, 0.0f, 0.0f, 1.0f));
+            particleSystem[1].addParticleInitializer(new ExpireParticleInitializer(1.0f));
 
             particleSystem[1].setParticlesSpawnEnabled(false);
 
@@ -469,6 +468,7 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(music_stop);
         scene.attachChild(music_next);
         scene.attachChild(beatmapDownloader);
+        scene.sortChildren(false);
 
         scene.registerTouchArea(logo);
         scene.registerTouchArea(box);
