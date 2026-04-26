@@ -152,7 +152,7 @@ public class OnlineManager {
         }
 
         String[] params = response.get(1).split("\\s+");
-        if (params.length < 6) {
+        if (params.length < 7) {
             failMessage = "Invalid server response";
             return false;
         }
@@ -289,7 +289,7 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.length() == 0) return false;
+        if (avatarURL == null || avatarURL.isEmpty()) return false;
 
         String filename = MD5Calculator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
