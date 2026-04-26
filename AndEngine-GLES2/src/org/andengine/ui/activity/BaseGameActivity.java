@@ -77,7 +77,11 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		this.mGamePaused = true;
 
-		this.mEngine = this.onCreateEngine(this.onCreateEngineOptions());
+		final EngineOptions engineOptions = this.onCreateEngineOptions();
+		if (engineOptions == null) {
+			return;
+		}
+		this.mEngine = this.onCreateEngine(engineOptions);
 		this.mEngine.startUpdateThread();
 
 		this.applyEngineOptions();
@@ -396,11 +400,11 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		this.mEngine.runOnUpdateThread(pRunnable, pOnlyWhenEngineRunning);
 	}
 
-	private void acquireWakeLock() {
+	protected void acquireWakeLock() {
 		this.acquireWakeLock(this.mEngine.getEngineOptions().getWakeLockOptions());
 	}
 
-	private void acquireWakeLock(final WakeLockOptions pWakeLockOptions) {
+    private void acquireWakeLock(final WakeLockOptions pWakeLockOptions) {
 		if(pWakeLockOptions == WakeLockOptions.SCREEN_ON) {
 			ActivityUtils.keepScreenOn(this);
 		} else {
@@ -414,7 +418,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		}
 	}
 
-	private void releaseWakeLock() {
+	protected void releaseWakeLock() {
 		if(this.mWakeLock != null && this.mWakeLock.isHeld()) {
 			this.mWakeLock.release();
 		}

@@ -187,7 +187,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer = new UIContainer();
         backLayer = new Entity();
         scene.unregisterUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(false);
+        scene.setTouchAreaBindingOnActionDownEnabled(false);
         load();
         GlobalManager.getInstance().getGameScene().setOldScene(scene);
     }

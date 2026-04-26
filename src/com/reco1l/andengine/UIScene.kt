@@ -46,7 +46,7 @@ open class UIScene : Scene(), IShape {
 
 
     init {
-        super.setTouchAreaBindingEnabled(true)
+        super.setTouchAreaBindingOnActionDownEnabled(true)
         super.setOnAreaTouchTraversalFrontToBack()
     }
 

@@ -1359,15 +1359,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            // Enable historical event processing for more frequent ACTION_MOVE reports depending on user configuration.
-            var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
-            touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
-            touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
-
-            var touchController = engine.getTouchController();
-            touchController.applyTouchOptions(touchOptions);
-            touchController.resetRawPointers();
+            // Reset raw pointer state to a clean slate at the start of each map.
+            // (High-precision options are applied globally in MainActivity.onCreateEngine)
+            engine.getTouchController().resetRawPointers();
         }
 
         // Disable screen dimming
@@ -1917,11 +1911,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             // Disable historical event processing for more efficient ACTION_MOVE reports. Frequent reports are not
             // relevant outside gameplay.
-            var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
-            touchOptions.setProcessHistoricalEvents(false);
-            touchOptions.setUseRawPointer(false);
-            engine.getTouchController().applyTouchOptions(touchOptions);
+            // engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
             engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
@@ -2120,14 +2110,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public void quit() {
         // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
         // not that relevant outside gameplay.
-        var touchOptions = new TouchOptions();
-        touchOptions.setRunOnUpdateThread(true);
-        touchOptions.setProcessHistoricalEvents(false);
-        touchOptions.setUseRawPointer(false);
-
-        var touchController = engine.getTouchController();
-        touchController.applyTouchOptions(touchOptions);
-        touchController.resetRawPointers();
+        // touchController.applyTouchOptions/resetRawPointers disabled.
 
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
