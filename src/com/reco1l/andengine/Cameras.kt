@@ -19,12 +19,19 @@ fun Camera.convertSceneToSurfaceCoordinates(coordinates: FloatArray, invertYAxis
 
     val (x, y) = coordinates
 
-    var relativeX = (x - minX) / (maxX - minX) * surfaceWidth
-    var relativeY = (y - minY) / (maxY - minY) * surfaceHeight
+    val camMinX = xMin
+    val camMaxX = xMax
+    val camMinY = yMin
+    val camMaxY = yMax
+    val sw = surfaceWidth.toFloat()
+    val sh = surfaceHeight.toFloat()
+
+    var relativeX = (x - camMinX) / (camMaxX - camMinX) * sw
+    var relativeY = (y - camMinY) / (camMaxY - camMinY) * sh
 
     // Adjust for the Y-axis inversion if needed. When working with OpenGL functions the Y-axis is usually already inverted.
     if (invertYAxis) {
-        relativeY = (1f - (y - minY) / (maxY - minY)) * surfaceHeight
+        relativeY = (1f - (y - camMinY) / (camMaxY - camMinY)) * sh
     }
 
     when (rotation) {
@@ -33,15 +40,15 @@ fun Camera.convertSceneToSurfaceCoordinates(coordinates: FloatArray, invertYAxis
         0f -> Unit
 
         180f -> {
-            relativeX = surfaceWidth - relativeX
-            relativeY = surfaceHeight - relativeY
+            relativeX = sw - relativeX
+            relativeY = sh - relativeY
         }
 
         else -> {
             TEMP_COORDINATES[0] = relativeX
             TEMP_COORDINATES[1] = relativeY
 
-            MathUtils.revertRotateAroundCenter(TEMP_COORDINATES, rotation, (surfaceWidth shr 1).toFloat(), (surfaceHeight shr 1).toFloat())
+            MathUtils.revertRotateAroundCenter(TEMP_COORDINATES, rotation, sw / 2f, sh / 2f)
 
             relativeX = TEMP_COORDINATES[0]
             relativeY = TEMP_COORDINATES[1]
@@ -67,30 +74,38 @@ fun Camera.convertSurfaceToSceneCoordinates(coordinates: FloatArray): FloatArray
 
     val (x, y) = coordinates
 
+    val sw = surfaceWidth.toFloat()
+    val sh = surfaceHeight.toFloat()
+
     when (rotation) {
 
         0f -> {
-            relativeX = x / surfaceWidth
-            relativeY = y / surfaceHeight
+            relativeX = x / sw
+            relativeY = y / sh
         }
 
         180f -> {
-            relativeX = 1f - (x / surfaceWidth)
-            relativeY = 1f - (y / surfaceHeight)
+            relativeX = 1f - (x / sw)
+            relativeY = 1f - (y / sh)
         }
 
         else -> {
             TEMP_COORDINATES[0] = x
             TEMP_COORDINATES[1] = y
 
-            MathUtils.rotateAroundCenter(TEMP_COORDINATES, rotation, surfaceWidth / 2f, surfaceHeight / 2f)
+            MathUtils.rotateAroundCenter(TEMP_COORDINATES, rotation, sw / 2f, sh / 2f)
 
-            relativeX = TEMP_COORDINATES[0] / surfaceWidth
-            relativeY = TEMP_COORDINATES[1] / surfaceHeight
+            relativeX = TEMP_COORDINATES[0] / sw
+            relativeY = TEMP_COORDINATES[1] / sh
         }
     }
 
-    coordinates[0] = minX + relativeX * (maxX - minX)
-    coordinates[1] = minY + relativeY * (maxY - minY)
+    val camMinX = xMin
+    val camMaxX = xMax
+    val camMinY = yMin
+    val camMaxY = yMax
+
+    coordinates[0] = camMinX + relativeX * (camMaxX - camMinX)
+    coordinates[1] = camMinY + relativeY * (camMaxY - camMinY)
     return coordinates
 }
