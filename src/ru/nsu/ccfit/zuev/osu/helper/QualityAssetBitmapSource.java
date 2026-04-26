@@ -39,7 +39,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
     public QualityAssetBitmapSource(final Context pContext,
                                     final String pAssetPath, final int pTexturePositionX,
                                     final int pTexturePositionY) {
-        super(pTexturePositionX, pTexturePositionY);
+        super(pTexturePositionX, pTexturePositionY, 0, 0);
         this.mContext = pContext;
         this.mAssetPath = pAssetPath;
 
@@ -60,12 +60,14 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
 
         this.mWidth = decodeOptions.outWidth;
         this.mHeight = decodeOptions.outHeight;
+        this.mTextureWidth = this.mWidth;
+        this.mTextureHeight = this.mHeight;
     }
 
     QualityAssetBitmapSource(final Context pContext, final String pAssetPath,
                              final int pTexturePositionX, final int pTexturePositionY,
                              final int pWidth, final int pHeight) {
-        super(pTexturePositionX, pTexturePositionY);
+        super(pTexturePositionX, pTexturePositionY, pWidth, pHeight);
         this.mContext = pContext;
         this.mAssetPath = pAssetPath;
         this.mWidth = pWidth;
@@ -75,7 +77,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
 
     public QualityAssetBitmapSource deepCopy() {
         return new QualityAssetBitmapSource(this.mContext, this.mAssetPath,
-                this.mTexturePositionX, this.mTexturePositionY, this.mWidth,
+                this.mTextureX, this.mTextureY, this.mWidth,
                 this.mHeight);
     }
 

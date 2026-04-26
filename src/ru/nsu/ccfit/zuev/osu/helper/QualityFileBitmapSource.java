@@ -48,7 +48,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
     public QualityFileBitmapSource(final InputFactory pFile,
                                    final int pTexturePositionX, final int pTexturePositionY, int inSampleSize) {
-        super(pTexturePositionX, pTexturePositionY);
+        super(pTexturePositionX, pTexturePositionY, 0, 0);
 
         fileBitmapInput = pFile;
         this.inSampleSize = inSampleSize;
@@ -72,12 +72,14 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         } finally {
             StreamUtils.close(in);
         }
+        this.mTextureWidth = this.mWidth;
+        this.mTextureHeight = this.mHeight;
 
     }
 
     QualityFileBitmapSource(final InputFactory pFile, final int pTexturePositionX,
                             final int pTexturePositionY, final int pWidth, final int pHeight) {
-        super(pTexturePositionX, pTexturePositionY);
+        super(pTexturePositionX, pTexturePositionY, pWidth, pHeight);
         fileBitmapInput = pFile;
         this.mWidth = pWidth;
         this.mHeight = pHeight;
@@ -89,8 +91,8 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
 
     public QualityFileBitmapSource deepCopy() {
-        QualityFileBitmapSource source = new QualityFileBitmapSource(this.fileBitmapInput, this.mTexturePositionX,
-                this.mTexturePositionY, this.mWidth, this.mHeight);
+        QualityFileBitmapSource source = new QualityFileBitmapSource(this.fileBitmapInput, this.mTextureX,
+                this.mTextureY, this.mWidth, this.mHeight);
         source.inSampleSize = inSampleSize;
         return source;
     }
