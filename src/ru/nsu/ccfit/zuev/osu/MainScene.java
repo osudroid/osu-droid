@@ -830,7 +830,7 @@ public class MainScene implements IUpdateHandler {
                         ResourceManager.getInstance().getFont("font"), "None...", 256, new TextOptions(HorizontalAlign.RIGHT), vbo);
             }
 
-            musicInfoText.setText(beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText(), true);
+            musicInfoText.setText(beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText());
 
             try {
                 musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
@@ -869,11 +869,13 @@ public class MainScene implements IUpdateHandler {
                         @Override
                         public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                             scene.attachChild(background, 0);
+                            scene.sortChildren(false);
                         }
 
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
                             GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
+                            scene.sortChildren(false);
                         }
                     }));
                     lastBackground = background;
