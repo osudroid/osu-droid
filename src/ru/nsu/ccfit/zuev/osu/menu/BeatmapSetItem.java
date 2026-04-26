@@ -43,9 +43,9 @@ public class BeatmapSetItem {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
         beatmapSetDir = beatmapSetInfo.getDirectory();
-        bgHeight = ResourceManager.getInstance()
+        bgHeight = (int) (ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                - Utils.toRes(25));
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
@@ -65,9 +65,9 @@ public class BeatmapSetItem {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
         beatmapSetDir = this.beatmapSetInfo.getDirectory();
-        bgHeight = ResourceManager.getInstance()
+        bgHeight = (int) (ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                - Utils.toRes(25));
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
