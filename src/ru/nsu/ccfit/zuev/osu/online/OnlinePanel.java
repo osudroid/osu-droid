@@ -28,6 +28,7 @@ public class OnlinePanel extends Entity {
 
     private final ChangeableText rankText, nameText, ppText, accText;
     private final ChangeableText messageText, submessageText;
+    private Sprite profileBanner = null;
     private Sprite avatar = null;
 
     public OnlinePanel() {
@@ -156,9 +157,24 @@ public class OnlinePanel extends Entity {
     }
 
     void setAvatar(final String texname) {
+        if (profileBanner != null)
+            profileBanner.detachSelf();
+        profileBanner = null;
+
         if (avatar != null)
             avatar.detachSelf();
         avatar = null;
+
+        var profileBannerUrl = OnlineManager.getInstance().getProfileBannerURL();
+        if (profileBannerUrl != null && !profileBannerUrl.isEmpty()) {
+            TextureRegion bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(profileBannerUrl);
+            if (bannerTexture != null) {
+                profileBanner = new Sprite(0, 0, 410, 110, bannerTexture);
+                profileBanner.setColor(0.6f, 0.6f, 0.6f);
+                frontLayer.attachChild(profileBanner);
+            }
+        }
+
         if (texname == null) return;
         TextureRegion tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(texname);
         if (tex == null) return;
