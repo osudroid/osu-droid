@@ -103,7 +103,7 @@ public class StoryboardSprite extends SupportSprite {
     }
 
     public void updateTime(double time) {
-        if (Math.abs(this.time - time) > 10) {
+        if (Math.abs(this.time - time) > 1) {
             this.time = time;
             if (osbPlayer != null) {
                 osbPlayer.update(time);

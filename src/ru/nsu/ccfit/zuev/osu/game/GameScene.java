@@ -84,7 +84,6 @@ import android.opengl.GLES20;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.engine.options.TouchOptions;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
@@ -92,10 +91,10 @@ import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.MoveXModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.andengine.entity.scene.background.ColorBackground;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.EntityBackground;
-import org.andengine.entity.shape.Shape;
+import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
@@ -112,7 +111,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
-import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
@@ -148,7 +146,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private UIBox sceneBorder;
-    private Shape beatmapBackground;
+    private RectangularShape beatmapBackground;
     private Beatmap parsedBeatmap;
     private DroidPlayableBeatmap playableBeatmap;
     private BeatmapInfo lastBeatmapInfo;
@@ -384,7 +382,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
         if (textureRegion == null) {
-            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), engine.getVertexBufferObjectManager());
 
             Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
@@ -394,7 +392,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             beatmapBackground = rectangle;
         } else {
-            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion);
+            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion, engine.getVertexBufferObjectManager());
         }
     }
 
@@ -539,14 +537,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var background = videoEnabled && video != null ? video : beatmapBackground;
+        float backgroundW = videoEnabled && video != null ? video.getWidth() : beatmapBackground.getWidth();
+        float backgroundH = videoEnabled && video != null ? video.getHeight() : beatmapBackground.getHeight();
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
         } else {
-            dimRectangle = new Rectangle(0f, 0f, 0f, 0f);
+            dimRectangle = new Rectangle(0f, 0f, 0f, 0f, engine.getVertexBufferObjectManager());
         }
 
-        dimRectangle.setSize(background.getWidth(), background.getHeight());
+        dimRectangle.setSize(backgroundW, backgroundH);
         dimRectangle.setColor(0f, 0f, 0f, 1f - brightness);
         background.attachChild(dimRectangle);
 
@@ -555,11 +555,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var factor = Config.isKeepBackgroundAspectRatio()
-                ? Config.getRES_HEIGHT() / background.getHeight()
-                : Config.getRES_WIDTH() / background.getWidth();
+                ? Config.getRES_HEIGHT() / backgroundH
+                : Config.getRES_WIDTH() / backgroundW;
 
         background.setScale(factor);
-        background.setPosition((Config.getRES_WIDTH() - background.getWidth()) / 2f, (Config.getRES_HEIGHT() - background.getHeight()) / 2f);
+        background.setPosition((Config.getRES_WIDTH() - backgroundW) / 2f, (Config.getRES_HEIGHT() - backgroundH) / 2f);
         scene.setBackground(new EntityBackground(background));
 
         if (storyboardSprite != null) {
@@ -578,7 +578,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (storyboardOverlayProxy != null) {
             if (isStoryboardEnabled) {
                 if (!storyboardOverlayProxy.hasParent()) {
-                    scene.attachChild(storyboardOverlayProxy, scene.getChildIndex(fgScene));
+                    scene.attachChild(storyboardOverlayProxy, scene.getChildCount() - 1);
                 }
             } else {
                 storyboardOverlayProxy.detachSelf();
@@ -953,7 +953,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        scene.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new Background(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
@@ -1299,7 +1299,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 @Override
-                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                protected void onManagedDraw(GLState pGLState, Camera pCamera) {
                     long currentDrawTime = SystemClock.uptimeMillis();
 
                     fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
@@ -3251,10 +3251,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private boolean isInterpolating;
 
             @Override
-            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+            protected void onManagedDraw(GLState pGLState, Camera pCamera) {
                 applyRawPointerFastPath(pCamera);
 
-                super.onManagedDraw(pGL, pCamera);
+                super.onManagedDraw(pGLState, pCamera);
             }
 
             @Override
