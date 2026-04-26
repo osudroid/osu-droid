@@ -1389,6 +1389,7 @@ public class Entity implements IEntity {
 
 				{ /* Draw children behind this Entity. */
 					for(; i < childCount; i++) {
+						if(i >= children.size()) break;
 						final IEntity child = children.get(i);
 						if(child.getZIndex() < 0) {
 							child.onDraw(pGLState, pCamera);
@@ -1405,6 +1406,7 @@ public class Entity implements IEntity {
 
 				{ /* Draw children in front of this Entity. */
 					for(; i < childCount; i++) {
+						if(i >= children.size()) break;
 						children.get(i).onDraw(pGLState, pCamera);
 					}
 				}
@@ -1425,6 +1427,7 @@ public class Entity implements IEntity {
 			final SmartList<IEntity> entities = this.mChildren;
 			final int entityCount = entities.size();
 			for(int i = 0; i < entityCount; i++) {
+				if(i >= entities.size()) break;
 				entities.get(i).onUpdate(pSecondsElapsed);
 			}
 		}
