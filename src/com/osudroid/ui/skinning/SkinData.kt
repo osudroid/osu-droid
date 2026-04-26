@@ -13,41 +13,31 @@ sealed class SkinData<T>(val tag: String, val defaultValue: T) {
     abstract fun setFromJson(data: JSONObject)
 }
 
-class IntegerSkinData(tag: String, defaultValue: Int) : SkinData<Int>(tag, defaultValue) {
-    constructor(tag: String) : this(tag, 0)
-
+class IntegerSkinData @JvmOverloads constructor(tag: String, default: Int = 0) : SkinData<Int>(tag, default) {
     override fun setFromJson(data: JSONObject) {
         currentValue = data.optInt(tag, defaultValue)
     }
 }
 
-class FloatSkinData(tag: String, defaultValue: Float) : SkinData<Float>(tag, defaultValue) {
-    constructor(tag: String) : this(tag, 0f)
-
+class FloatSkinData @JvmOverloads constructor(tag: String, default: Float = 0f) : SkinData<Float>(tag, default) {
     override fun setFromJson(data: JSONObject) {
         currentValue = data.optDouble(tag, defaultValue.toDouble()).toFloat()
     }
 }
 
-class BooleanSkinData(tag: String, defaultValue: Boolean) : SkinData<Boolean>(tag, defaultValue) {
-    constructor(tag: String) : this(tag, false)
-
+class BooleanSkinData @JvmOverloads constructor(tag: String, default: Boolean = false) : SkinData<Boolean>(tag, default) {
     override fun setFromJson(data: JSONObject) {
         currentValue = data.optBoolean(tag, defaultValue)
     }
 }
 
-class StringSkinData(tag: String, defaultValue: String) : SkinData<String>(tag, defaultValue) {
-    constructor(tag: String) : this(tag, "")
-
+class StringSkinData @JvmOverloads constructor(tag: String, default: String = "") : SkinData<String>(tag, default) {
     override fun setFromJson(data: JSONObject) {
         currentValue = data.optString(tag, defaultValue) ?: defaultValue
     }
 }
 
-class ColorSkinData(tag: String, defaultValue: Color4?) : SkinData<Color4?>(tag, defaultValue) {
-    constructor(tag: String) : this(tag, null)
-
+class ColorSkinData @JvmOverloads constructor(tag: String, default: Color4? = null) : SkinData<Color4?>(tag, default) {
     override fun setFromJson(data: JSONObject) {
         val hex = data.optString(tag).trim()
 
