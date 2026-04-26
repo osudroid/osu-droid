@@ -46,9 +46,9 @@ public class OsuSkin {
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
     protected final ArrayList<Color4> comboColor = new ArrayList<>();
 
-    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", new Color4(DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
-    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", new Color4(DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
-    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", new Color4(DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
+    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", null);
+    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", null);
+    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", null);
 
     protected final StringSkinData hitCirclePrefix = new StringSkinData("hitCirclePrefix", "default");
     protected final StringSkinData scorePrefix = new StringSkinData("scorePrefix", "score");
