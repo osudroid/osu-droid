@@ -1004,7 +1004,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         beatmapLengthText.setText(binfoStr);
 
-        String str = beatmapDifficultyText.getText();
+        String str = beatmapDifficultyText.getText().toString();
         String[] strs = str.split("Stars: ");
 
         beatmapDifficultyText.setText(
@@ -1596,7 +1596,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void setStarsDisplay(float star) {
-        String str = beatmapDifficultyText.getText();
+        String str = beatmapDifficultyText.getText().toString();
         String[] strs = str.split("Stars: ");
         if (strs.length == 2) {
             beatmapDifficultyText.setText(strs[0] + "Stars: " + GameHelper.Round(star, 2));
