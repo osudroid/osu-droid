@@ -3,7 +3,13 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.osudroid.utils.Execution;
 
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.entity.modifier.*;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
@@ -66,7 +72,7 @@ public class SplashScene implements IUpdateHandler {
 
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
-        // ChangeableText isn't compatible with animations unfortunately
+        // ChangeableText isn't compatible with animations unfortunately (still valid?)
         Execution.updateThread(() -> {
             infoText.detachSelf();
             progressText.detachSelf();
@@ -117,7 +123,7 @@ public class SplashScene implements IUpdateHandler {
         float progress = GlobalManager.getInstance().getLoadingProgress();
         if (mStarting)
         {
-            mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
+            mLoading.setAlpha(Math.min(1f, mLoading.getAlpha() + 0.1f));
         }
 
         progressText.setText(String.format("%.0f %%", progress));
