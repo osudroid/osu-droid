@@ -28,7 +28,7 @@ public class OsuSkin {
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
     protected final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 5.2f);
     protected final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
-    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha");
+    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha", 0.3f);
     protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 300f);
     protected final FloatSkinData hitCircleOverlap = new FloatSkinData("hitCircleOverlap", -2);
 
