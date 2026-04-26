@@ -49,8 +49,10 @@ class ColorSkinData(tag: String, defaultValue: Color4?) : SkinData<Color4?>(tag,
     constructor(tag: String) : this(tag, null)
 
     override fun setFromJson(data: JSONObject) {
-        val hex = data.optString(tag)
+        val hex = data.optString(tag).trim()
 
-        currentValue = if (hex.isEmpty()) defaultValue else Color4(hex, HexComposition.RRGGBB)
+        currentValue =
+            if (hex.isEmpty()) defaultValue
+            else Color4(hex, HexComposition.RRGGBB)
     }
 }
