@@ -323,7 +323,7 @@ public class ScoringScene {
             scaledContainer.attachChild(perfect);
         }
 
-        scene.setTouchAreaBindingEnabled(true);
+        scene.setTouchAreaBindingOnActionDownEnabled(true);
         if (beatmap != null && retryBtn != null) {
             scene.registerTouchArea(retryBtn);
         } else if (replayPath != null && replayBtn != null) {

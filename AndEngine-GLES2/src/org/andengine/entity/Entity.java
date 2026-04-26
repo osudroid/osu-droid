@@ -62,9 +62,11 @@ public class Entity implements IEntity {
 
 	private IEntity mParent;
 
+	// BEGIN osu!droid modified: Make these fields protected
 	protected SmartList<IEntity> mChildren;
-	private EntityModifierList mEntityModifiers;
-	private UpdateHandlerList mUpdateHandlers;
+	protected EntityModifierList mEntityModifiers;
+	protected UpdateHandlerList mUpdateHandlers;
+	// END osu!droid modified
 
 	protected Color mColor = new Color(1, 1, 1, 1);
 
@@ -88,14 +90,17 @@ public class Entity implements IEntity {
 	protected float mSkewCenterX = 0;
 	protected float mSkewCenterY = 0;
 
-	private boolean mLocalToParentTransformationDirty = true;
-	private boolean mParentToLocalTransformationDirty = true;
+	// BEGIN osu!droid modified: Make these fields protected
+	/*private*/ protected boolean mLocalToParentTransformationDirty = true;
+	/*private*/ protected boolean mParentToLocalTransformationDirty = true;
 
-	private Transformation mLocalToParentTransformation;
-	private Transformation mParentToLocalTransformation;
+	/*private*/ protected Transformation mLocalToParentTransformation;
+	/*private*/ protected Transformation mParentToLocalTransformation;
 
-	private Transformation mLocalToSceneTransformation;
-	private Transformation mSceneToLocalTransformation;
+	/*private*/ protected Transformation mLocalToSceneTransformation;
+	/*private*/ protected Transformation mSceneToLocalTransformation;
+
+	// END osu!droid modified
 
 	private Object mUserData;
 
@@ -1154,12 +1159,14 @@ public class Entity implements IEntity {
 		this.mUserData = pUserData;
 	}
 
+	// BEGIN osu!droid modified: Make this method overrideable.
 	@Override
-	public final void onDraw(final GLState pGLState, final Camera pCamera) {
+	public void onDraw(final GLState pGLState, final Camera pCamera) {
 		if(this.mVisible && !(this.mCullingEnabled && this.isCulled(pCamera))) {
 			this.onManagedDraw(pGLState, pCamera);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public final void onUpdate(final float pSecondsElapsed) {

@@ -75,6 +75,15 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	private static final int UPDATEHANDLERS_CAPACITY_DEFAULT = 8;
 	private static final int DRAWHANDLERS_CAPACITY_DEFAULT = 4;
 
+	// BEGIN osu!droid modified - zero-latency touch: skip UI-thread sleep by default (matches old GLES1 engine behavior)
+	/**
+	 * How long (ms) to sleep the UI thread after each touch event.
+	 * Default is 0 (no sleep) for minimum input latency.
+	 * Matches the old AndEngine GLES1 behavior.
+	 */
+	public static int INPUT_PAUSE_DURATION = 0;
+	// END osu!droid modified
+
 	// ===========================================================
 	// Fields
 	// ===========================================================
@@ -404,13 +413,21 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		}
 	}
 
+	// BEGIN osu!droid modified - zero-latency touch: only sleep if INPUT_PAUSE_DURATION is explicitly set non-zero
+	@android.annotation.SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouch(final View pView, final MotionEvent pSurfaceMotionEvent) {
 		if(this.mRunning) {
 			this.mTouchController.onHandleMotionEvent(pSurfaceMotionEvent);
 			try {
-				/* Because a human cannot interact 1000x per second, we pause the UI-Thread for a little. */
-				Thread.sleep(this.mEngineOptions.getTouchOptions().getTouchEventIntervalMilliseconds());
+				/*
+				 * As a human cannot interact 1000x per second, we pause the
+				 * UI-Thread for a little.
+				 * Default INPUT_PAUSE_DURATION is 0, so no sleep occurs (minimum latency).
+				 */
+				if (INPUT_PAUSE_DURATION != 0) {
+					Thread.sleep(INPUT_PAUSE_DURATION);
+				}
 			} catch (final InterruptedException e) {
 				Debug.e(e);
 			}
@@ -419,6 +436,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			return false;
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public boolean onTouchEvent(final TouchEvent pSurfaceTouchEvent) {
