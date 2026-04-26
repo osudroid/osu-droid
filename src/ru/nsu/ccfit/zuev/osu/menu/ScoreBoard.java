@@ -157,15 +157,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     sb.setLength(0);
                     var scoreStr = isPPScoringMode ?
-                        // For display purposes, we round the pp.
-                        formatPP(sb, Math.round(pp)) :
-                        formatScore(sb, score);
+                            // For display purposes, we round the pp.
+                            formatPP(sb, Math.round(pp)) :
+                            formatScore(sb, score);
 
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
                             .append(StringTable.format(
-                                isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
+                                    isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
@@ -417,8 +417,51 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         }
     }
 
+    private float cumulativeDistY = 0;
+
     @Override
-    public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
+    public void onScrollStarted(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        velocityY = 0;
+        pointerId = pPointerID;
+        tapTime = secPassed;
+        cumulativeDistY = 0;
+        isScroll = true;
+    }
+
+    @Override
+    public void onScroll(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId != -1 && pointerId != pPointerID) {
+            return;
+        }
+        isScroll = true;
+        camY -= pDistanceY;
+        if (camY <= -146) {
+            camY = -146;
+            velocityY = 0;
+        } else if (camY >= maxY) {
+            camY = maxY;
+            velocityY = 0;
+        }
+        cumulativeDistY += pDistanceY;
+    }
+
+    @Override
+    public void onScrollFinished(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId == -1 || pointerId == pPointerID) {
+            cumulativeDistY += pDistanceY;
+            if (secPassed - tapTime > 0.001f) {
+                velocityY = cumulativeDistY / (secPassed - tapTime);
+            } else {
+                velocityY = 0;
+                isScroll = false;
+            }
+            pointerId = -1;
+            initialY = -1;
+        }
+    }
+
+    // Legacy method kept for reference (no longer an override)
+    public void onScrollLegacy(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
         switch (pTouchEvent.getAction()) {
             case TouchEvent.ACTION_DOWN:
                 velocityY = 0;
@@ -518,7 +561,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private final int scoreID;
 
         private final boolean showOnline;
-        
+
 
         private ScoreItem(
                 ExecutorService avatarExecutor,
@@ -530,7 +573,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 String avaURL,
                 String username,
                 boolean isPersonalBest) {
-            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
@@ -551,7 +594,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         getWidth() / 2f,
                         0f,
                         ResourceManager.getInstance().getFont("strokeFont"),
-                        "Personal Best");
+                        "Personal Best",
+                        GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
@@ -590,7 +634,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         onDetached();
                         return;
                     }
-                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
+                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
 
                     if (currentAvatarTask == this)
                         currentAvatarTask = null;

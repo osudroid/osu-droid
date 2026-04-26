@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui.entity
 
 import com.reco1l.andengine.component.UIComponent
-import org.andengine.entity.shape.Shape
+import org.andengine.entity.shape.RectangularShape
 import org.andengine.input.touch.TouchEvent
 import org.andengine.input.touch.detector.ScrollDetector
 import org.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
@@ -23,10 +23,8 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
     private var percentShow = -1f
     private var maxY = 100500f
     private var pointerId = -1
-    private var initialY = -1f
-    private var touchY: Float? = null
-    private var secPassed = 0f
     private var tapTime = 0f
+    private var cumulativeScrollY = 0f
 
     protected var velocityY = 0f
     protected var camY = -146f
@@ -46,8 +44,6 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
     override fun onManagedUpdate(secondsElapsed: Float)
     {
         super.onManagedUpdate(secondsElapsed)
-
-        secPassed += secondsElapsed
 
         if (childCount == 0)
             return
@@ -100,64 +96,44 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
         }
     }
 
-    override fun onScroll(scrollDetector: ScrollDetector?, event: TouchEvent, distanceX: Float, distanceY: Float)
+    override fun onScrollStarted(scrollDetector: ScrollDetector?, pointerID: Int, distanceX: Float, distanceY: Float)
     {
-        when (event.action)
+        velocityY = 0f
+        pointerId = pointerID
+        tapTime = 0f
+        cumulativeScrollY = 0f
+        isScroll = true
+    }
+
+    override fun onScroll(scrollDetector: ScrollDetector?, pointerID: Int, distanceX: Float, distanceY: Float)
+    {
+        if (pointerId == -1 || pointerId == pointerID)
         {
-            TouchEvent.ACTION_DOWN ->
+            isScroll = true
+            cumulativeScrollY += distanceY
+            camY -= distanceY
+
+            if (camY <= -146)
             {
+                camY = -146f
                 velocityY = 0f
-                touchY = event.y
-                pointerId = event.pointerID
-                tapTime = secPassed
-                initialY = touchY!!
-                isScroll = true
             }
-
-            TouchEvent.ACTION_MOVE -> if (pointerId == -1 || pointerId == event.pointerID)
+            else if (camY >= maxY)
             {
-                isScroll = true
-                if (initialY == -1f)
-                {
-                    velocityY = 0f
-                    touchY = event.y
-                    pointerId = event.pointerID
-                    tapTime = secPassed
-                    initialY = touchY!!
-                }
-                val dy = event.y - touchY!!
-                camY -= dy
-                touchY = event.y
-
-                if (camY <= -146)
-                {
-                    camY = -146f
-                    velocityY = 0f
-                }
-                else if (camY >= maxY)
-                {
-                    camY = maxY
-                    velocityY = 0f
-                }
+                camY = maxY
+                velocityY = 0f
             }
+        }
+    }
 
-            else -> if (pointerId == -1 || pointerId == event.pointerID)
-            {
-                touchY = null
-
-                if (secPassed - tapTime < 0.001f || initialY == -1f)
-                {
-                    velocityY = 0f
-                    isScroll = false
-                }
-                else
-                {
-                    velocityY = (initialY - event.y) / (secPassed - tapTime)
-                    isScroll = true
-                }
-                pointerId = -1
-                initialY = -1f
-            }
+    override fun onScrollFinished(scrollDetector: ScrollDetector?, pointerID: Int, distanceX: Float, distanceY: Float)
+    {
+        if (pointerId == -1 || pointerId == pointerID)
+        {
+            val elapsed = tapTime.let { if (it < 0.001f) 0f else it }
+            velocityY = if (elapsed < 0.001f) 0f else cumulativeScrollY / elapsed
+            isScroll = velocityY != 0f
+            pointerId = -1
         }
     }
 }
