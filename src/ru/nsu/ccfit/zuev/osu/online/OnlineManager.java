@@ -37,7 +37,8 @@ public class OnlineManager {
     public static final String updateEndpoint = endpoint + "update.php?lang=";
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
-    private static final Pattern avatarUserIdPattern = Pattern.compile(".*/user/avatar/(\\\\d+)\\\\.[^/?#]+.*");
+    private static final Pattern avatarUserIdPathPattern = Pattern.compile(".*/user/avatar/(\\d+)\\.[^/?#]+.*");
+    private static final Pattern avatarUserIdQueryPattern = Pattern.compile(".*[?&]id=(\\d+)(?:[&#].*)?$");
     private static final String onlineVersion = "60";
 
     public static final OkHttpClient client = new OkHttpClient();
@@ -83,12 +84,18 @@ public class OnlineManager {
             return "";
         }
 
-        Matcher matcher = avatarUserIdPattern.matcher(avatarURL);
-        if (!matcher.matches()) {
-            return "";
+        String userIdText = null;
+
+        Matcher pathMatcher = avatarUserIdPathPattern.matcher(avatarURL);
+        if (pathMatcher.matches()) {
+            userIdText = pathMatcher.group(1);
+        } else {
+            Matcher queryMatcher = avatarUserIdQueryPattern.matcher(avatarURL);
+            if (queryMatcher.matches()) {
+                userIdText = queryMatcher.group(1);
+            }
         }
 
-        String userIdText = matcher.group(1);
         if (userIdText == null || userIdText.isEmpty()) {
             return "";
         }
