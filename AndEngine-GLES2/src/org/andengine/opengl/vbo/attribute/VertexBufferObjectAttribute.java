@@ -71,6 +71,7 @@ public class VertexBufferObjectAttribute {
 
 	public void glVertexAttribPointer(final int pStride) {
 		GLES20.glVertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
+		GLES20.glEnableVertexAttribArray(this.mLocation);
 	}
 
 	// ===========================================================

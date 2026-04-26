@@ -1,15 +1,15 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.*
-import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.andengine.engine.camera.*
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import javax.microedition.khronos.opengles.*
 import kotlin.math.abs
 
 class HUDHitErrorMeter : HUDElement() {
@@ -44,8 +44,6 @@ class HUDHitErrorMeter : HUDElement() {
             color = mehColor
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
-
-            depthInfo = DepthInfo.Default
         }
 
         val okWindow = UIBox().apply {
@@ -53,8 +51,6 @@ class HUDHitErrorMeter : HUDElement() {
             origin = Anchor.Center
             color = okColor
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
-
-            depthInfo = DepthInfo.Default
         }
 
         val greatWindow = UIBox().apply {
@@ -62,9 +58,6 @@ class HUDHitErrorMeter : HUDElement() {
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
             color = greatColor
-
-            clearInfo = ClearInfo.ClearDepthBuffer
-            depthInfo = DepthInfo.Less
         }
 
         attachChild(mehWindow)
@@ -108,14 +101,26 @@ class HUDHitErrorMeter : HUDElement() {
 
     //region Indicator update & draw
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
-        super.onDrawChildren(gl, camera)
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+        super.onManagedDraw(pGLState, pCamera)
+
+        if (activeIndicators.isEmpty()) return
+
+        // After super.onManagedDraw() the HUDHitErrorMeter matrix has been popped, so we
+        // are now in the parent (GameplayHUD) coordinate space.  We must re-push our own
+        // translation so that indicatorBox.absoluteX/Y (which are relative to this element)
+        // are mapped back to the correct screen position.
+        pGLState.pushModelViewGLMatrix()
+        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
+
         activeIndicators.fastForEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(gl, camera)
+            indicatorBox.onDraw(pGLState, pCamera)
         }
+
+        pGLState.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

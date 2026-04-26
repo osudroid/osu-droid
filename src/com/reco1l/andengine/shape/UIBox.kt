@@ -4,9 +4,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
-import org.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL11.*
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 /**
@@ -68,11 +66,11 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
 
         if (paintStyle == Outline) {
-            GLHelper.lineWidth(gl, lineWidth)
+            pGLState.lineWidth(lineWidth)
         }
     }
 

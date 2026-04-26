@@ -12,8 +12,8 @@ import com.osudroid.ui.v2.hud.HUDElementSkinData
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
 import org.andengine.input.touch.TouchEvent
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -51,7 +51,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         )
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
 
         // Scaling the element inside the box
         element.setScaleCenter(0f, 0f)
@@ -63,7 +63,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         }
 
 
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 
     //region Input handling

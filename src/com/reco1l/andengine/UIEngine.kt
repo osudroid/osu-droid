@@ -10,11 +10,11 @@ import org.andengine.engine.Engine
 import org.andengine.engine.camera.hud.*
 import org.andengine.engine.options.EngineOptions
 import org.andengine.entity.IEntity
+import org.andengine.engine.camera.Camera
 import org.andengine.entity.scene.*
 import org.andengine.input.touch.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
-import org.andengine.engine.camera.Camera
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
@@ -64,7 +64,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
     }
 
 
-    override fun onDrawScene(pGL: GL10) {
+    override fun onDrawScene(pGLState: GLState, pCamera: Camera) {
 
         val focusedEntity = focusedEntity
 
@@ -94,7 +94,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
             overlay.setPosition(0f, 0f)
         }
 
-        super.onDrawScene(pGL)
+        super.onDrawScene(pGLState, pCamera)
     }
 
 

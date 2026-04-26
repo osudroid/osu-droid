@@ -6,10 +6,11 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*
 import com.reco1l.framework.math.*
+import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.*
 import org.andengine.opengl.util.*
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL11.*
+import android.opengl.GLES20
 import kotlin.math.*
 
 /**
@@ -33,7 +34,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     var flippedHorizontal = false
         set(value) {
             field = value
-            textureRegion?.isFlippedHorizontal = value
+            requestBufferUpdate()
         }
 
     /**
@@ -42,7 +43,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     var flippedVertical = false
         set(value) {
             field = value
-            textureRegion?.isFlippedVertical = value
+            requestBufferUpdate()
         }
 
     /**
@@ -64,7 +65,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         set(value) {
             if (field != value) {
                 field = value
-                textureRegion?.setTexturePosition(value, textureY)
+                textureRegion?.setTexturePosition(value.toFloat(), textureY.toFloat())
             }
         }
 
@@ -75,7 +76,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         set(value) {
             if (field != value) {
                 field = value
-                textureRegion?.setTexturePosition(textureX, value)
+                textureRegion?.setTexturePosition(textureX.toFloat(), value.toFloat())
             }
         }
 
@@ -104,6 +105,14 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         }
 
 
+    /**
+     * The UV coordinate buffer for this sprite (attribute 3).
+     * Managed separately from the position buffer so it can be per-instance when position is shared.
+     * Protected so subclasses (e.g. UIVideoSprite) can call uvBuffer.beginDraw() with a custom shader.
+     */
+    protected val uvBuffer = SpriteUVBuffer()
+
+
     init {
         width = MatchContent
         height = MatchContent
@@ -112,12 +121,12 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
+
     open fun onTextureRegionChanged() {
         val textureRegion = textureRegion ?: return
-        textureRegion.setTexturePosition(textureX, textureY)
-        textureRegion.isFlippedVertical = flippedVertical
-        textureRegion.isFlippedHorizontal = flippedHorizontal
-        blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        textureRegion.setTexturePosition(textureX.toFloat(), textureY.toFloat())
+        blendInfo = if (textureRegion.texture.textureOptions.mPreMultiplyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        uvBuffer.update(this)
         requestBufferUpdate()
     }
 
@@ -134,18 +143,49 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
     override fun onUpdateBuffer() {
         buffer?.update(this)
+        uvBuffer.update(this)
     }
 
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
-        GLHelper.enableTextures(gl)
-        GLHelper.enableTexCoordArray(gl)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
     }
 
-    override fun onDrawBuffer(gl: GL10) {
-        textureRegion?.onApply(gl)
-        super.onDrawBuffer(gl)
+    override fun onBindShader(pGLState: GLState) {
+        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        // Upload MVP matrix
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
+        }
+
+        // Upload texture unit sampler
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
+            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        }
+
+        // Upload color uniform
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        // Disable color vertex attribute (this shader uses uniform color)
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+
+        // Set up UV coordinates at attribute 3
+        uvBuffer.beginDraw(pGLState)
+    }
+
+    override fun onDrawBuffer(pGLState: GLState) {
+        textureRegion?.texture?.bind(pGLState)
+        super.onDrawBuffer(pGLState)
     }
 
 
@@ -183,6 +223,48 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
             val y = (entity.height - quadHeight) * entity.gravity.y
 
             addQuad(0, x, y, x + quadWidth, y + quadHeight)
+        }
+    }
+
+    /**
+     * UV coordinate buffer for the sprite (maps texture region to quad vertices).
+     * Vertex order matches [SpriteVBO]: top-left, bottom-left, top-right, bottom-right (GL_TRIANGLE_STRIP).
+     */
+    class SpriteUVBuffer : TextureCoordinatesBuffer(
+        vertexCount = 4,
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW
+    ) {
+        fun update(entity: UISprite) {
+            val region = entity.textureRegion
+            val u = region?.u ?: 0f
+            val v = region?.v ?: 0f
+            val u2 = region?.u2 ?: 0f
+            val v2 = region?.v2 ?: 0f
+
+            // Vertex order: top-left, bottom-left, top-right, bottom-right
+            if (entity.flippedHorizontal && entity.flippedVertical) {
+                putVertex(0, u2, v2)
+                putVertex(1, u2, v)
+                putVertex(2, u, v2)
+                putVertex(3, u, v)
+            } else if (entity.flippedHorizontal) {
+                putVertex(0, u2, v)
+                putVertex(1, u2, v2)
+                putVertex(2, u, v)
+                putVertex(3, u, v2)
+            } else if (entity.flippedVertical) {
+                putVertex(0, u, v2)
+                putVertex(1, u, v)
+                putVertex(2, u2, v2)
+                putVertex(3, u2, v)
+            } else {
+                putVertex(0, u, v)
+                putVertex(1, u, v2)
+                putVertex(2, u2, v)
+                putVertex(3, u2, v2)
+            }
+            invalidateOnHardware()
         }
     }
 

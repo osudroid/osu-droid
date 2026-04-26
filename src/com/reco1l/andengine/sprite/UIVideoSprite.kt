@@ -1,86 +1,110 @@
 package com.reco1l.andengine.sprite
 
 import android.media.*
-import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
+import android.opengl.GLES20
 import android.os.*
+import com.acivev.andengine.opengl.ExternalOESShaderProgram
 import com.reco1l.andengine.texture.*
 import org.andengine.engine.Engine
-import org.andengine.engine.camera.Camera
-import org.andengine.entity.sprite.*
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.GL10
+import org.andengine.opengl.util.GLState
 
-class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
-    TextureRegion(it, 0, 0, it.width, it.height)
-}) {
+/**
+ * A sprite that renders a video file using Android's MediaPlayer and a GL_TEXTURE_EXTERNAL_OES
+ * texture. Uses [com.acivev.andengine.opengl.ExternalOESShaderProgram] so that the OES sampler and SurfaceTexture
+ * transform matrix are applied correctly.
+ */
+class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
 
-    private val texture = textureRegion.texture as VideoTexture
-
-
-    private var isMaliGPU: Boolean? = null
-
+    private val videoTexture = VideoTexture(source)
 
     init {
-        engine.textureManager.loadTexture(texture)
+        // Build a 0→1 region covering the whole video frame.
+        val w = videoTexture.width.toFloat()
+        val h = videoTexture.height.toFloat()
+        textureRegion = TextureRegion(videoTexture, 0f, 0f, w, h)
+        engine.textureManager.loadTexture(videoTexture)
+
+        // SurfaceTexture/OES textures have their V axis inverted relative to UISprite's UV
+        // convention — flip it so the video appears right-side up regardless of whether the
+        // device's ST matrix also applies a V-flip (both cases work out correctly).
+        flippedVertical = true
     }
 
+    // -----------------------------------------------------------------------
+    // Custom shader binding — OES external texture + ST-transform matrix
+    // -----------------------------------------------------------------------
 
-    override fun onInitDraw(pGL: GL10) {
+    override fun beginDraw(pGLState: GLState) {
+        // Latch the latest video frame and update the ST matrix BEFORE onBindShader reads it.
+        videoTexture.latch()
+        super.beginDraw(pGLState)
+    }
 
-        if (isMaliGPU == null) {
-            isMaliGPU = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
+    override fun onBindShader(pGLState: GLState) {
+        val shader = ExternalOESShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        if (ExternalOESShaderProgram.sUniformMVPMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                ExternalOESShaderProgram.sUniformMVPMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
         }
 
-        super.onInitDraw(pGL)
-
-        // Apparently there is either a bug or unintended behavior in Mali GPUs' OpenGL ES implementation.
-        // Causes the wrong texture to be displayed when GL_TEXTURE_2D is enabled before enabling GL_TEXTURE_EXTERNAL_OES.
-        if (isMaliGPU!!) {
-            GLHelper.disableTextures(pGL)
+        // ST-transform: corrects Y-flip and any other orientation from the hardware decoder.
+        if (ExternalOESShaderProgram.sUniformSTMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                ExternalOESShaderProgram.sUniformSTMatrixLocation,
+                1, false, videoTexture.getTransformMatrix(), 0
+            )
         }
 
-        pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
+        if (ExternalOESShaderProgram.sUniformTexture0Location >= 0) {
+            GLES20.glUniform1i(ExternalOESShaderProgram.sUniformTexture0Location, 0)
+        }
+
+        if (ExternalOESShaderProgram.sUniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                ExternalOESShaderProgram.sUniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+
+        // UV attribute (attribute location 3).
+        uvBuffer.beginDraw(pGLState)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
-        super.drawVertices(gl, camera)
+    // -----------------------------------------------------------------------
+    // Playback controls
+    // -----------------------------------------------------------------------
 
-        gl.glDisable(GL_TEXTURE_EXTERNAL_OES)
-    }
-
-
-    fun release() {
-        texture.player.release()
-        engine.textureManager.unloadTexture(texture)
-    }
-
-    fun play() {
-        texture.player.start()
-    }
-
-    fun pause() {
-        texture.player.pause()
-    }
+    fun play()  { videoTexture.player.start() }
+    fun pause() { videoTexture.player.pause() }
 
     fun seekTo(ms: Int) {
-        // Unfortunately in old versions we can't seek at closest frame from the desired position.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            texture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
+            videoTexture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
         } else {
-            texture.player.seekTo(ms)
+            @Suppress("DEPRECATION")
+            videoTexture.player.seekTo(ms)
         }
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
+        videoTexture.player.playbackParams = videoTexture.player.playbackParams.setSpeed(speed)
     }
 
+    fun release() {
+        videoTexture.player.release()
+        engine.textureManager.unloadTexture(videoTexture)
+    }
 
     override fun finalize() {
         release()
         super.finalize()
     }
 }
-
-

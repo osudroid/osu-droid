@@ -10,7 +10,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.*
 import org.andengine.input.touch.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 import org.andengine.entity.scene.Scene
 
@@ -88,7 +88,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
 
         if (isExpanded) {
             val (sceneSpaceX, sceneSpaceY) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
@@ -98,7 +98,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             maxHeight = min(optionsContainer.height, parent.getHeight() - sceneSpaceY)
         }
 
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 
 

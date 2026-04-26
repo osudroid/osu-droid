@@ -6,7 +6,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.opengl.util.GLState
 
 /**
  * A dropdown menu that allows the user to select an option from a list.
@@ -101,7 +101,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
         }
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
         button.content.textEntity.width = width - button.padding.horizontal - button.trailingIcon!!.width
 
         if (listChanged) {
@@ -109,7 +109,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
             onOptionsChanged()
         }
 
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 
     open fun onOptionsChanged() {

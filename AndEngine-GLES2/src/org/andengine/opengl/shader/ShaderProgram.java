@@ -1,6 +1,8 @@
 package org.andengine.opengl.shader;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.shader.exception.ShaderProgramCompileException;
@@ -33,6 +35,11 @@ public class ShaderProgram {
 	private static final int[] TYPE_CONTAINER = new int[1];
 	private static final int NAME_CONTAINER_SIZE = 64;
 	private static final byte[] NAME_CONTAINER = new byte[ShaderProgram.NAME_CONTAINER_SIZE];
+
+	// BEGIN osu!droid modified
+	/** All ShaderProgram instances – used to reset them all on EGL context loss. */
+	private static final List<ShaderProgram> sAllInstances = new CopyOnWriteArrayList<>();
+	// BEGIN osu!droid modified
 
 	// ===========================================================
 	// Fields
@@ -129,6 +136,17 @@ public class ShaderProgram {
 		pVertexBufferObjectAttributes.glVertexAttribPointers();
 	}
 
+	/**
+	 * Binds only the shader program (compiling if needed), without applying any vertex buffer object attributes.
+	 * Use this when vertex attributes are set up manually via glVertexAttribPointer.
+	 */
+	public void bindProgram(final GLState pGLState) throws ShaderProgramException {
+		if(!this.mCompiled) {
+			this.compile(pGLState);
+		}
+		pGLState.useProgram(this.mProgramID);
+	}
+
 	public void unbind(final GLState pGLState) throws ShaderProgramException {
 //		pGLState.useProgram(0); // TODO Does this have an positive/negative impact on performance?
 	}
@@ -138,6 +156,29 @@ public class ShaderProgram {
 			this.mCompiled = false;
 			pGLState.deleteProgram(this.mProgramID);
 			this.mProgramID = -1;
+		}
+	}
+
+	/**
+	 * Called when the EGL context has been lost (e.g. app was backgrounded long enough
+	 * for the driver to destroy it). Marks the program as needing recompilation so that
+	 * the next {@link #bindProgram} / {@link #bind} call will recompile and relink it
+	 * against the new context.
+	 */
+	public void resetForContextLoss() {
+		this.mCompiled = false;
+		this.mProgramID = -1;
+		this.mUniformLocations.clear();
+		this.mAttributeLocations.clear();
+	}
+
+	/**
+	 * Resets every known {@link ShaderProgram} instance for EGL context loss recovery.
+	 * Call this from {@link org.andengine.opengl.view.EngineRenderer#onSurfaceCreated}.
+	 */
+	public static void resetAllForContextLoss() {
+		for (final ShaderProgram program : sAllInstances) {
+			program.resetForContextLoss();
 		}
 	}
 

@@ -1,10 +1,12 @@
 package com.reco1l.andengine.buffered
 
+import android.opengl.GLES20
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.shape.Shape.*
+import org.andengine.opengl.shader.PositionColorShaderProgram
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.*
-import javax.microedition.khronos.opengles.GL10
 
 
 /**
@@ -109,34 +111,48 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         }
     }
 
-    override fun doDraw(gl: GL10, camera: Camera) {
-        super.doDraw(gl, camera)
-        onDeclarePointers(gl)
-        onDrawBuffer(gl)
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        super.doDraw(pGLState, pCamera)
+        onDeclarePointers(pGLState)
+        onDrawBuffer(pGLState)
+        // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        // Reset GL buffer binding through GLState to keep its internal cache in sync with the
+        // actual GL state. The new Buffer.bindAndUpload() calls GLES20.glBindBuffer() directly,
+        // bypassing GLState.mCurrentArrayBufferID. Without this reset, legacy VBO binding would
+        // skip the actual glBindBuffer call (false cache hit), causing sprites to render from the
+        // wrong VBO.
+        pGLState.bindArrayBuffer(0)
+
+        // Disable depth test after drawing so subsequent entities are not accidentally
+        // depth-tested against values we wrote (same fix as in UITriangleMesh).
+        if (depthInfo.test) {
+            pGLState.disableDepthTest()
+        }
     }
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
 
         // Clearing
         var clearMask = 0
 
-        if (clearInfo.depthBuffer) clearMask = clearMask or GL10.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) clearMask = clearMask or GL10.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
+        if (clearInfo.depthBuffer) clearMask = clearMask or GLES20.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GLES20.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES20.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
-            gl.glClear(clearMask)
+            GLES20.glClear(clearMask)
         }
 
         // Depth testing
         if (depthInfo.test) {
-            gl.glDepthFunc(depthInfo.function)
-            gl.glDepthMask(depthInfo.mask)
-
-            GLHelper.enableDepthTest(gl)
+            GLES20.glDepthFunc(depthInfo.function)
+            GLES20.glDepthMask(depthInfo.mask)
+            pGLState.enableDepthTest()
         } else {
-            GLHelper.disableDepthTest(gl)
+            pGLState.disableDepthTest()
         }
 
         // Blending
@@ -155,15 +171,42 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             destinationFactor = blendInfo.destinationFactor
         }
 
-        GLHelper.enableBlend(gl)
-        GLHelper.blendFunction(gl, sourceFactor, destinationFactor)
+        pGLState.enableBlend()
+        pGLState.blendFunction(sourceFactor, destinationFactor)
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
             updateBuffer()
         }
 
-        buffer?.beginDraw(gl)
+        buffer?.beginDraw(pGLState)
+
+        onBindShader(pGLState)
+    }
+
+    /**
+     * Called during [beginDraw] after the position buffer is set up.
+     * Subclasses should bind the appropriate shader and upload uniforms.
+     * Default implementation uses [PositionColorShaderProgram] with a constant vertex color.
+     */
+    protected open fun onBindShader(pGLState: GLState) {
+        val shader = PositionColorShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        // Upload MVP matrix
+        if (PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
+        }
+
+        // Provide color as constant vertex attribute (disable per-vertex array)
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES20.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
+
+        // Disable texture coordinates (not needed for solid-color shapes)
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     private fun updateBuffer() {
@@ -171,11 +214,11 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         buffer?.invalidateOnHardware()
     }
 
-    protected open fun onDeclarePointers(gl: GL10) {
+    protected open fun onDeclarePointers(gl: GLState) {
         buffer?.declarePointers(gl, this)
     }
 
-    protected open fun onDrawBuffer(gl: GL10) {
+    protected open fun onDrawBuffer(gl: GLState) {
         buffer?.draw(gl, this)
     }
 
@@ -187,7 +230,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo.Mixture
     }
 
-    open fun finalize() {
+    override fun finalize() {
         buffer?.finalize()
     }
 

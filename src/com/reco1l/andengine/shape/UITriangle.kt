@@ -1,11 +1,10 @@
 package com.reco1l.andengine.shape
 
+import android.opengl.GLES20
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
 import org.andengine.opengl.util.*
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL11.*
 
 /**
  * A rectangle shape based on [UIComponent].
@@ -36,9 +35,9 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
-        GLHelper.lineWidth(gl, lineWidth)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
+        pGLState.lineWidth(lineWidth)
     }
 
 
@@ -54,9 +53,9 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
             )
         }
 
-        override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
+        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UITriangle
-            gl.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP, 0, vertexCount)
+            GLES20.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GLES20.GL_TRIANGLES else GLES20.GL_LINE_LOOP, 0, vertexCount)
         }
 
     }

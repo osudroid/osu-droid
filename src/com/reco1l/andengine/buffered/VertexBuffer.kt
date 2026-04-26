@@ -1,9 +1,8 @@
 package com.reco1l.andengine.buffered
 
+import android.opengl.GLES20
 import com.reco1l.toolkt.*
-import org.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.GL10
-import javax.microedition.khronos.opengles.GL11
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 abstract class VertexBuffer(
@@ -16,22 +15,19 @@ abstract class VertexBuffer(
 
     //region Draw pipeline
 
-    override fun beginDraw(gl: GL10) {
-        GLHelper.enableVertexArray(gl)
+    override fun beginDraw(gl: GLState) {
+        bindAndUpload()
+        // Attribute 0 = position (matches standard position attribute location in shaders)
+        GLES20.glVertexAttribPointer(0, vertexSize, GLES20.GL_FLOAT, false, 0, 0)
+        GLES20.glEnableVertexAttribArray(0)
     }
 
-    override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
-
-        if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
-            selectOnHardware(gl as GL11)
-            GLHelper.vertexZeroPointer(gl)
-        } else {
-            GLHelper.vertexPointer(gl, mFloatBuffer)
-        }
+    override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
+        // Pointers are already declared in beginDraw for GLES2
     }
 
-    override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
-        gl.glDrawArrays(drawTopology, 0, vertexCount)
+    override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
+        GLES20.glDrawArrays(drawTopology, 0, vertexCount)
     }
 
     //endregion

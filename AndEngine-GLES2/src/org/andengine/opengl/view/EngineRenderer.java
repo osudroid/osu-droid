@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.RenderOptions;
+import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.debug.Debug;
 
@@ -59,6 +60,12 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 			final RenderOptions renderOptions = this.mEngine.getEngineOptions().getRenderOptions();
 			this.mGLState.reset(renderOptions, this.mConfigChooser, pEGLConfig);
 
+			// EGL context loss recovery: reset all shader programs so they are re-linked
+			// against the new GL context on next draw.
+			// Note: Buffer.onContextLost() (VBO ID reset) is called from
+			// MainActivity.onSurfaceCreated, which is in the app module.
+			ShaderProgram.resetAllForContextLoss();
+
 			// TODO Check if available and make available through EngineOptions-RenderOptions
 //			GLES20.glEnable(GLES20.GL_POLYGON_SMOOTH);
 //			GLES20.glHint(GLES20.GL_POLYGON_SMOOTH_HINT, GLES20.GL_NICEST);
@@ -68,6 +75,11 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 //			GLES20.glHint(GLES20.GL_POINT_SMOOTH_HINT, GLES20.GL_NICEST);
 
 			this.mGLState.disableDepthTest();
+			// Ensure initial depth clear value is 1.0 (maximum) so that GL_LESS tests
+			// pass on first draw and per-entity ClearInfo.ClearDepthBuffer calls work correctly.
+			GLES20.glClearDepthf(1.0f);
+			GLES20.glDepthFunc(GLES20.GL_LESS);
+			GLES20.glDepthMask(true);
 			this.mGLState.enableBlend();
 			this.mGLState.setDitherEnabled(renderOptions.isDithering());
 
@@ -100,6 +112,11 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 				final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
 				GLES20.glClear(GL_COVERAGE_BUFFER_BIT_NV);
 			}
+
+			// Clear the depth buffer at the start of every frame so leftover depth values
+			// from the previous frame (written by slider-body triangle meshes) never bleed
+			// into the current frame and cause artifacts on sprites / circles.
+			GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
 			try {
 				this.mEngine.onDrawFrame(this.mGLState);

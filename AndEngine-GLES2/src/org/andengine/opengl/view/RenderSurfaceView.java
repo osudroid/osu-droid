@@ -83,6 +83,12 @@ public class RenderSurfaceView extends GLSurfaceView {
 		}
 		this.setEGLConfigChooser(this.mConfigChooser);
 
+		// Keep the EGL context alive while the app is paused so that GPU resources
+		// (VBOs, textures, shader programs) survive a normal background/foreground
+		// transition. The system will still destroy the context under memory pressure,
+		// but that case is handled separately in EngineRenderer.onSurfaceCreated.
+		this.setPreserveEGLContextOnPause(true);
+
 		this.setOnTouchListener(pEngine);
 		this.mEngineRenderer = new EngineRenderer(pEngine, this.mConfigChooser, pRendererListener);
 		this.setRenderer(this.mEngineRenderer);

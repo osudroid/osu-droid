@@ -3,13 +3,16 @@ package com.reco1l.andengine
 import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
-import javax.microedition.khronos.opengles.GL10
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.IEntity
+import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.scene.Scene
 import org.andengine.entity.shape.IShape
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.util.GLHelper
+import org.andengine.opengl.shader.ShaderProgram
+import org.andengine.opengl.util.GLState
+import org.andengine.opengl.vbo.IVertexBufferObject
+import org.andengine.opengl.vbo.VertexBufferObjectManager
 
 
 /**
@@ -91,42 +94,39 @@ open class UIScene : Scene(), IShape {
 
     //region Drawing
 
-    override fun onDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+        cameraWidth = pCamera.widthRaw
+        cameraHeight = pCamera.heightRaw
+
         if (!isVisible) {
             return
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
-            GLHelper.enableScissorTest(gl)
+            val wasScissorTestEnabled = pGLState.isScissorTestEnabled
 
             // Entity coordinates in screen's space.
-            val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
-            val (topRightX, topRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
-            val (bottomRightX, bottomRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, height))
-            val (bottomLeftX, bottomLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, height))
+            val (topLeftX, topLeftY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            val (topRightX, topRightY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(cameraWidth, 0f))
+            val (bottomRightX, bottomRightY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(cameraWidth, cameraHeight))
+            val (bottomLeftX, bottomLeftY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, cameraHeight))
 
             val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
+            pGLState.enableScissorTest()
             ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
-            onManagedDraw(gl, camera)
+            super.onManagedDraw(pGLState, pCamera)
             ScissorStack.pop()
 
             if (!wasScissorTestEnabled) {
-                GLHelper.disableScissorTest(gl)
+                pGLState.disableScissorTest()
             }
         } else {
-            onManagedDraw(gl, camera)
+            super.onManagedDraw(pGLState, pCamera)
         }
-    }
-
-    override fun onManagedDrawChildren(gl: GL10, camera: Camera) {
-        cameraWidth = camera.widthRaw
-        cameraHeight = camera.heightRaw
-        super.onManagedDrawChildren(gl, camera)
     }
 
     //endregion
@@ -142,7 +142,7 @@ open class UIScene : Scene(), IShape {
         super.registerTouchArea(area)
     }
 
-    override fun setTouchAreaBindingEnabled(pTouchAreaBindingEnabled: Boolean) {
+    override fun setTouchAreaBindingOnActionDownEnabled(pTouchAreaBindingEnabled: Boolean) {
         Log.w("ExtendedScene", "Touch area binding is always enabled for ExtendedScene.")
     }
 
@@ -157,21 +157,33 @@ open class UIScene : Scene(), IShape {
 
     override fun contains(pX: Float, pY: Float): Boolean = true
 
-    override fun getWidth(): Float = cameraWidth
-
-    override fun getHeight(): Float = cameraHeight
-
     override fun collidesWith(shape: IShape): Boolean = false
 
-    override fun getBaseWidth(): Float = cameraWidth
-
-    override fun getBaseHeight(): Float = cameraHeight
-
-    override fun getWidthScaled(): Float = cameraWidth * scaleX
-
-    override fun getHeightScaled(): Float = cameraHeight * scaleY
-
     override fun isCullingEnabled(): Boolean = false
+
+    //endregion
+
+    //region IShape stubs
+
+    override fun isBlendingEnabled(): Boolean = true
+
+    override fun setBlendingEnabled(pBlendingEnabled: Boolean) { }
+
+    override fun getBlendFunctionSource(): Int = IShape.BLENDFUNCTION_SOURCE_DEFAULT
+
+    override fun getBlendFunctionDestination(): Int = IShape.BLENDFUNCTION_DESTINATION_DEFAULT
+
+    override fun setBlendFunctionSource(pBlendFunctionSource: Int) { }
+
+    override fun setBlendFunctionDestination(pBlendFunctionDestination: Int) { }
+
+    override fun getVertexBufferObjectManager(): VertexBufferObjectManager? = null
+
+    override fun getVertexBufferObject(): IVertexBufferObject? = null
+
+    override fun getShaderProgram(): ShaderProgram? = null
+
+    override fun setShaderProgram(pShaderProgram: ShaderProgram?) { }
 
     //endregion
 

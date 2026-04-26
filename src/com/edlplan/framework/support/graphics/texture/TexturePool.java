@@ -51,7 +51,7 @@ public class TexturePool {
 
     public TexturePool(File dir) {
         this.dir = dir;
-        glMaxWidth = GLHelper.GlMaxTextureWidth;
+        glMaxWidth = 2048; // GLHelper.GlMaxTextureWidth not available in GLES2
         if (BuildConfig.DEBUG) System.out.println("GL_MAX_TEXTURE_SIZE = " + glMaxWidth);
         if (glMaxWidth == 0) {
             throw new RuntimeException("glMaxWidth not found");
@@ -157,7 +157,7 @@ public class TexturePool {
             createdTextures.add(tex);
             for (TextureInfo info : toLoad) {
                 info.texture = new TextureRegion(tex, info.pos.x, info.pos.y, info.size.x, info.size.y);
-                info.texture.setTextureRegionBufferManaged(false);
+//                 info.texture.setTextureRegionBufferManaged(false); // not available in GLES2
             }
         }
         pack.recycle();

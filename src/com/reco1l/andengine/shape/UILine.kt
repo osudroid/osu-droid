@@ -3,9 +3,7 @@ package com.reco1l.andengine.shape
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
-import org.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL11.*
+import org.andengine.opengl.util.GLState
 
 /**
  * A rectangle shape based on [UIComponent].
@@ -48,9 +46,9 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
-        GLHelper.lineWidth(gl, lineWidth)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
+        pGLState.lineWidth(lineWidth)
     }
 
 
