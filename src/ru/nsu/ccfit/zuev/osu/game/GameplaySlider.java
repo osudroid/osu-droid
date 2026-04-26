@@ -252,7 +252,7 @@ public class GameplaySlider extends GameObject {
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
         headCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
-        approachCircle.setColor(comboColor);
+        approachCircle.setColor(comboColor.getRed(), comboColor.getGreen(), comboColor.getBlue());
         approachCircle.setScale(scale * 3 * (float) (beatmapSlider.timePreempt / GameHelper.getOriginalTimePreempt()));
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
@@ -696,7 +696,7 @@ public class GameplaySlider extends GameObject {
                 } else if (GameHelper.isSynesthesia()) {
                     var newColor = getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
 
-                    tailCirclePiece.setColor(newColor);
+                    tailCirclePiece.setColor(newColor.getRed(), newColor.getGreen(), newColor.getBlue());
                 }
             } else if (remainingSpans <= 2 && startHit) {
                 startArrow.setAlpha(0);
@@ -1284,7 +1284,7 @@ public class GameplaySlider extends GameObject {
             listener.onSliderHit(id, isTracking ? 10 : -1, tmpPoint, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);
             currentNestedObjectIndex++;
 
-            var tickSprite = (SliderTickSprite) tickContainer.getChild(currentTickSpriteIndex);
+            var tickSprite = (SliderTickSprite) tickContainer.getChildByIndex(currentTickSpriteIndex);
             tickSprite.onHit(isTracking);
 
             if (reverse && currentTickSpriteIndex > 0) {

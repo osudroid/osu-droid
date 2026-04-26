@@ -363,7 +363,7 @@ public class GameplaySpinner extends GameObject {
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         metreRegion.setTexturePosition(0,
-                (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
+                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
     }
