@@ -6,10 +6,11 @@ import org.andengine.util.call.Callable;
 import org.andengine.util.call.Callback;
 import org.andengine.util.progress.ProgressCallable;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Looper;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -18,7 +19,7 @@ import android.widget.Toast;
  * @author Nicolas Gramlich
  * @since 18:35:28 - 29.08.2009
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends AppCompatActivity {
 	// ===========================================================
 	// Constants
 	// ===========================================================
