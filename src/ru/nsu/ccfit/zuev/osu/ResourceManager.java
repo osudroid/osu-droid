@@ -628,6 +628,14 @@ public class ResourceManager {
         return region;
     }
 
+    public TextureRegion getProfileBannerTextureIfLoaded(final String bannerURL) {
+        if (bannerURL == null || bannerURL.length() == 0) {
+            return null;
+        }
+
+        return getTextureIfLoaded(MD5Calculator.getStringMD5(bannerURL));
+    }
+
     public TextureRegion getTextureIfLoaded(final String resname) {
         if (textures.containsKey(resname)/*
          * &&
