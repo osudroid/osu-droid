@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import static com.reco1l.andengine.buffered.Buffer.*;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -61,15 +63,16 @@ import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
-import org.andengine.extension.input.touch.controller.MultiTouch;
-import org.andengine.extension.input.touch.controller.MultiTouchController;
+import org.andengine.input.touch.controller.MultiTouch;
+import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.view.RenderSurfaceView;
-import org.andengine.sensor.accelerometer.AccelerometerData;
-import org.andengine.sensor.accelerometer.IAccelerometerListener;
+import org.andengine.input.sensor.acceleration.AccelerationData;
+import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.util.debug.Debug;
 
@@ -118,7 +121,7 @@ public class MainActivity extends BaseGameActivity implements
     private Uri roomInviteLink;
 
     @Override
-    public Engine onLoadEngine() {
+    public EngineOptions onCreateEngineOptions() {
         if (!checkPermissions()) {
             return null;
         }
@@ -166,15 +169,18 @@ public class MainActivity extends BaseGameActivity implements
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
         final EngineOptions opt = new EngineOptions(true,
-                null, new RatioResolutionPolicy(
+                ScreenOrientation.LANDSCAPE_SENSOR, new RatioResolutionPolicy(
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
                 mCamera);
-        opt.setNeedsMusic(true);
-        opt.setNeedsSound(true);
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
-        opt.getRenderOptions().disableExtensionVertexBufferObjects();
-        opt.getTouchOptions().enableRunOnUpdateThread();
-        UIEngine engine = new UIEngine(this, opt);
+
+        GlobalManager.getInstance().setCamera(mCamera);
+        return opt;
+    }
+
+    @Override
+    public Engine onCreateEngine(final EngineOptions pEngineOptions) {
+        UIEngine engine = new UIEngine(this, pEngineOptions);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -258,7 +264,12 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onLoadResources() {
+    public void onCreateResources(final OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
+        onLoadResources();
+        pOnCreateResourcesCallback.onCreateResourcesFinished();
+    }
+
+    private void onLoadResources() {
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
         ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
@@ -314,7 +325,11 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public Scene onLoadScene() {
+    public void onCreateScene(final OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
+        pOnCreateSceneCallback.onCreateSceneFinished(onLoadScene());
+    }
+
+    private Scene onLoadScene() {
         if (BuildSettings.DEBUG_PLAYGROUND) {
             return DebugPlaygroundScene.INSTANCE;
         }
@@ -322,7 +337,12 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onLoadComplete() {
+    public void onPopulateScene(final Scene pScene, final OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+        onLoadComplete();
+        pOnPopulateSceneCallback.onPopulateSceneFinished();
+    }
+
+    private void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -401,7 +421,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
-        this.mRenderSurfaceView.setRenderer(this.mEngine);
+        this.mRenderSurfaceView.setRenderer(this.mEngine, this);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
@@ -657,8 +677,19 @@ public class MainActivity extends BaseGameActivity implements
         var gameScene = GlobalManager.getInstance().getGameScene();
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
-            mEngine.getTextureManager().reloadTextures();
+            mEngine.onReloadResources();
         }
+    }
+
+    @Override
+    public synchronized void onSurfaceCreated(final GLState pGLState) {
+        // Reset all VBO IDs so they are re-generated against the new EGL context.
+        // This handles the case where the system destroyed the context while the app
+        // was backgrounded (context loss recovery).
+        onContextLost();
+        // Reset the storyboard quad-batch shader so it recompiles against the new context.
+        com.edlplan.framework.support.batch.StoryboardBatchShader.getInstance().resetForContextLoss();
+        super.onSurfaceCreated(pGLState);
     }
 
     @Override
@@ -756,7 +787,12 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onAccelerometerChanged(final AccelerometerData arg0) {
+    public void onAccelerationAccuracyChanged(final AccelerationData arg0) {
+        // no-op
+    }
+
+    @Override
+    public void onAccelerationChanged(final AccelerationData arg0) {
         if (this.mEngine == null) {
             return;
         }
@@ -765,6 +801,11 @@ public class MainActivity extends BaseGameActivity implements
         } else if (GlobalManager.getInstance().getCamera().getRotation() == 180 && arg0.getY() > 5) {
             GlobalManager.getInstance().getCamera().setRotation(0);
         }
+    }
+
+    public void reapplyWakeLock() {
+        releaseWakeLock();
+        acquireWakeLock();
     }
 
     @Override
