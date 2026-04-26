@@ -595,7 +595,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (shouldLoadBanner && !avatarExecutor.isShutdown() && OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerURL)) {
                         bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(bannerURL).deepCopy();
 
-                        int width = (int) getWidth() - 68;
+                        int width = (int) getWidth() - 66;
                         int height = 90;
 
                         bannerTexture.setTexturePosition(0, (bannerTexture.getHeight() - height) / 2);
