@@ -158,9 +158,9 @@ public class OnlinePanel extends Entity {
         profileBanner = null;
         avatar = null;
 
-        var profileBannerUrl = OnlineManager.getInstance().getAvatarURL();
+        var profileBannerUrl = OnlineManager.getInstance().getProfileBannerURL();
 
-        if (profileBannerUrl != null && profileBannerUrl.isEmpty()) {
+        if (profileBannerUrl != null && !profileBannerUrl.isEmpty()) {
             var bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(profileBannerUrl);
 
             if (bannerTexture != null) {
