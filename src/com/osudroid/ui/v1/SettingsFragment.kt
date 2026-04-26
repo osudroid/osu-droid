@@ -3,7 +3,6 @@ package com.osudroid.ui.v1
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -305,7 +304,7 @@ class SettingsFragment : SettingsFragment() {
 
                 GlobalManager.getInstance().songService.volume = prefs.getInt("bgmvolume", 100) / 100f
 
-                loadSkin(context, prefs.getString("skinPath", "")!!).invokeOnCompletion {
+                loadSkin(prefs.getString("skinPath", "")!!).invokeOnCompletion {
                     mainThread {
                         ToastLogger.showText(string.config_backup_restore_info_success, true)
                         dismiss()
@@ -388,7 +387,7 @@ class SettingsFragment : SettingsFragment() {
             options = skins
 
             setOnPreferenceChangeListener { _, newValue ->
-                loadSkin(context, newValue.toString())
+                loadSkin(newValue.toString())
                 true
             }
         }
@@ -691,7 +690,7 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private fun loadSkin(context: Context, path: String): Job {
+    private fun loadSkin(path: String): Job {
         val loading = LoadingFragment()
 
         loading.isDismissOnBackPress = false
@@ -703,11 +702,15 @@ class SettingsFragment : SettingsFragment() {
             // the correct skin path.
             Config.setSkinPath(path)
             ResourceManager.getInstance().loadSkin(path)
-            GlobalManager.getInstance().engine.textureManager.onReload()
+            // Do NOT call engine.textureManager.onReload() and do NOT call
+            // startActivity(MainActivity) here. With singleInstance launch mode,
+            // startActivity triggers onPause() → EGL context destroyed → onResume() →
+            // onSurfaceCreated() → onReloadResources() which queues every managed texture
+            // for reload, then updateTextures() reloads them ALL in one frame = freeze.
+            // Simply dismissing returns to the menu with the new skin already applied.
 
             mainThread {
                 loading.dismiss()
-                context.startActivity(Intent(context, MainActivity::class.java))
                 Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }
