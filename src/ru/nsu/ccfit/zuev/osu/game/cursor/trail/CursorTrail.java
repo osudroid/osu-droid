@@ -31,7 +31,7 @@ public class CursorTrail extends SpriteParticleSystem {
 
         // Cancelling the speed multiplier for the trail.
         addParticleInitializer(new ExpireParticleInitializer(0.1f * GameHelper.getSpeedMultiplier()));
-        addParticleModifier(new AlphaParticleModifier(GameHelper.getSpeedMultiplier(), 0.0f, 0f, 0.10f));
+        addParticleModifier(new AlphaParticleModifier(0.0f, 0.1f * GameHelper.getSpeedMultiplier(), 1.0f, 0.0f));
 
         addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
         addParticleInitializer(new ScaleParticleInitializer(cursor.baseSize));
