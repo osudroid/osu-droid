@@ -29,7 +29,7 @@ public class OnlineScoring {
             GlobalManager.getInstance().getMainActivity().getWindow().getDecorView(),
             "", 10000);
 
-    private Job loginJob, avatarJob;
+    private Job loginJob, profileAssetsJob;
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -114,7 +114,7 @@ public class OnlineScoring {
                 if (success) {
                     updatePanels();
                     OnlineManager.getInstance().setStayOnline(true);
-                    loadAvatar(true);
+                    loadProfileAssets(true);
                 } else {
                     setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
                     OnlineManager.getInstance().setStayOnline(false);
@@ -186,19 +186,26 @@ public class OnlineScoring {
         });
     }
 
-    public void loadAvatar(final boolean both) {
+    public void loadProfileAssets(final boolean both) {
         if (!OnlineManager.getInstance().isStayOnline()) return;
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.length() == 0)
+        final String profileBannerUrl = OnlineManager.getInstance().getProfileBannerURL();
+        if ((avatarUrl == null || avatarUrl.isEmpty())
+                && (profileBannerUrl == null || profileBannerUrl.isEmpty()))
             return;
 
-        if (avatarJob != null) {
-            avatarJob.cancel(new CancellationException("Avatar loading cancelled"));
+        if (profileAssetsJob != null) {
+            profileAssetsJob.cancel(new CancellationException("Profile asset loading cancelled"));
         }
 
-        avatarJob = Execution.async((scope) -> {
+        profileAssetsJob = Execution.async((scope) -> {
             synchronized (onlineMutex) {
-                avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
+                avatarLoaded = avatarUrl != null
+                        && !avatarUrl.isEmpty()
+                        && OnlineManager.getInstance().loadAvatarToTextureManager();
+                if (profileBannerUrl != null && !profileBannerUrl.isEmpty()) {
+                    OnlineManager.getInstance().loadProfileBannerToTextureManager();
+                }
                 JobKt.ensureActive(scope.getCoroutineContext());
                 if (both)
                     updatePanelAvatars();
