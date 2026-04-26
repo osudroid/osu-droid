@@ -90,7 +90,7 @@ public class SliderBody extends UIContainer {
     }
 
     public void setBackgroundColor(Color4 color, float alpha) {
-        background.setColor(color);
+        background.setColor(color.getRed(), color.getGreen(), color.getBlue());
         background.setAlpha(alpha);
     }
 
@@ -118,7 +118,7 @@ public class SliderBody extends UIContainer {
 
     public void setHintColor(Color4 color, float alpha) {
         if (hint != null) {
-            hint.setColor(color);
+            hint.setColor(color.getRed(), color.getGreen(), color.getBlue());
             hint.setAlpha(alpha);
         }
     }
@@ -129,7 +129,7 @@ public class SliderBody extends UIContainer {
     }
 
     public void setBorderColor(Color4 color) {
-        border.setColor(color);
+        border.setColor(color.getRed(), color.getGreen(), color.getBlue());
     }
 
 
