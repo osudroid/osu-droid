@@ -51,7 +51,7 @@ public class OnlineScoring {
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
         String avatarURL = OnlineManager.getInstance().getAvatarURL();
-        secondPanel.setAvatar(avatarLoaded && !avatarURL.isEmpty() ? avatarURL : null);
+        secondPanel.setProfile(avatarLoaded && !avatarURL.isEmpty() ? avatarURL : null);
         return secondPanel;
     }
 
@@ -71,12 +71,12 @@ public class OnlineScoring {
             secondPanel.setInfo();
     }
 
-    public void updatePanelAvatars() {
+    public void updatePanelProfiles() {
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        String texname = avatarLoaded && !avatarUrl.isEmpty() ? avatarUrl : null;
-        panel.setAvatar(texname);
+        String avatarTexName = avatarLoaded && !avatarUrl.isEmpty() ? avatarUrl : null;
+        panel.setProfile(avatarTexName);
         if (secondPanel != null)
-            secondPanel.setAvatar(texname);
+            secondPanel.setProfile(avatarTexName);
     }
 
     public void login() {
@@ -208,9 +208,9 @@ public class OnlineScoring {
                 }
                 JobKt.ensureActive(scope.getCoroutineContext());
                 if (both)
-                    updatePanelAvatars();
+                    updatePanelProfiles();
                 else if (secondPanel != null)
-                    secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
+                    secondPanel.setProfile(avatarLoaded ? avatarUrl : null);
             }
         });
     }
