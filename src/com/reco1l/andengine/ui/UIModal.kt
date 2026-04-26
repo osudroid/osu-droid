@@ -41,6 +41,12 @@ open class UIModal(
      */
     var detachOnHide = false
 
+    /**
+     * Called after the modal has fully hidden, regardless of how it was dismissed
+     * (button, backdrop tap, etc.).
+     */
+    var onDismiss: Runnable? = null
+
 
     init {
         width = FillParent
@@ -103,6 +109,9 @@ open class UIModal(
      * Called when [show] is called. This is where you should set up the modal's animations.
      */
     protected open fun onShow() {
+        // Ensure dialog always renders on top of other scene children.
+        zIndex = Int.MAX_VALUE
+
         // If there's not parent previously set, attach to the current scene.
         if (parent == null) {
             var currentScene = UIEngine.current.scene
@@ -114,6 +123,8 @@ open class UIModal(
 
             currentScene.attachChild(this)
         }
+
+        parent?.sortChildren()
     }
 
     /**
@@ -133,6 +144,7 @@ open class UIModal(
         if (detachOnHide) {
             detachSelf()
         }
+        onDismiss?.run()
     }
 
 

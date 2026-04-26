@@ -191,7 +191,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         return max(0f, consumedDeltaSec)
     }
 
-    override fun onUnregister() {
+    fun onUnregister() {
         setToDefault()
 
         try {
@@ -333,11 +333,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun isRemoveWhenFinished(): Boolean {
+    override fun isAutoUnregisterWhenFinished(): Boolean {
         return true
     }
 
-    override fun setRemoveWhenFinished(value: Boolean) {
+    override fun setAutoUnregisterWhenFinished(pRemoveWhenFinished: Boolean) {
         Log.w("UniversalModifier", "Remove when finished is always true for UniversalModifier, ignoring.")
     }
 

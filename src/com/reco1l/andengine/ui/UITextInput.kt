@@ -327,7 +327,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
                 // Extract the complete character as a string, including surrogate pairs.
                 val characterString = value.substring(stringIndex, stringIndex + charCount)
-                totalAdvance += font?.getLetter(characterString)?.mAdvance ?: 0
+                totalAdvance += (font?.getLetter(characterString[0])?.mAdvance ?: 0f).toInt()
 
                 stringIndex += charCount
                 codePointIndex++
