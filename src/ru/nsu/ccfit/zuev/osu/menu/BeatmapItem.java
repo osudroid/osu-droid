@@ -47,11 +47,9 @@ public class BeatmapItem extends Sprite {
 
         Color4 menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
         ComponentsKt.setColor4(beatmapTitle, menuItemDefaultTextColor);
-        ComponentsKt.setColor4(beatmapLeftText, menuItemDefaultTextColor);
 
         setAlpha(0.8f);
         attachChild(beatmapTitle);
-//		attachChild(trackLeftText);
 
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
@@ -72,7 +70,6 @@ public class BeatmapItem extends Sprite {
     public void setBeatmapInfo(final BeatmapInfo beatmapInfo) {
         this.beatmapInfo = beatmapInfo;
         beatmapTitle.setText(beatmapInfo.getVersion() + " (" + beatmapInfo.getCreator() + ")");
-        beatmapLeftText.setText("\n" + beatmapInfo.getTitleText());
 
         for (final Sprite s : stars) {
             s.setVisible(false);
@@ -133,7 +130,6 @@ public class BeatmapItem extends Sprite {
         Color4 menuItemDefaultTextColor = OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR);
 
         ComponentsKt.setColor4(beatmapTitle, menuItemDefaultTextColor);
-        ComponentsKt.setColor4(beatmapLeftText, menuItemDefaultTextColor);
     }
 
     public void setSelectedColor() {
@@ -142,7 +138,6 @@ public class BeatmapItem extends Sprite {
 
         Color4 menuItemSelectedTextColor = OsuSkin.get().getColor("MenuItemSelectedTextColor", SELECTED_TEXT_COLOR);
         ComponentsKt.setColor4(beatmapTitle, menuItemSelectedTextColor);
-        ComponentsKt.setColor4(beatmapLeftText, menuItemSelectedTextColor);
     }
 
     @Override
