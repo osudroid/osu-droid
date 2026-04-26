@@ -42,7 +42,7 @@ public class TextButton extends Sprite {
         float textX = (this.getWidth() - buttonText.getWidth()) / 2;
         float textY = (this.getHeight() - buttonText.getHeight()) / 2;
         buttonText.setPosition(textX, textY);
-        this.updateVertexBuffer();
+        this.onUpdateVertices();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TextButton extends Sprite {
         float textX = (this.getWidth() - buttonText.getWidth()) / 2;
         float textY = (this.getHeight() - buttonText.getHeight()) / 2;
         buttonText.setPosition(textX, textY);
-        this.updateVertexBuffer();
+        this.onUpdateVertices();
     }
 
     public void setTextColor(float pRed, float pGreen, float pBlue) {
