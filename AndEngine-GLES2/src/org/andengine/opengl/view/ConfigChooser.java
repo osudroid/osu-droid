@@ -22,7 +22,7 @@ public class ConfigChooser implements GLSurfaceView.EGLConfigChooser {
 	private static final int RED_SIZE = 5;
 	private static final int GREEN_SIZE = 6;
 	private static final int BLUE_SIZE = 5;
-	private static final int DEPTH_SIZE = 0;
+	private static final int DEPTH_SIZE = 16;
 	private static final int ALPHA_SIZE = 0;
 	private static final int STENCIL_SIZE = 0;
 
