@@ -193,6 +193,15 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 
 	public void attachChild(final IEntity pEntity);
 
+	// BEGIN osu!droid modified
+	/**
+	 * Attaches a child entity at the specified index (z-order position).
+	 * Index 0 = drawn first (behind everything), higher = drawn later (on top).
+	 * @return true if successful, false if the index was out of bounds.
+	 */
+	public boolean attachChild(final IEntity pEntity, final int pIndex);
+	// END osu!droid modified
+
 	public IEntity getChildByTag(final int pTag);
 	public IEntity getChildByMatcher(final IEntityMatcher pEntityMatcher);
 	public IEntity getChildByIndex(final int pIndex);

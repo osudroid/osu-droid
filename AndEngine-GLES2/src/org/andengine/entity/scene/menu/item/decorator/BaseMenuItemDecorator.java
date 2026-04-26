@@ -579,6 +579,13 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		this.mMenuItem.attachChild(pEntity);
 	}
 
+	// BEGIN osu!droid modified
+	@Override
+	public boolean attachChild(final IEntity pEntity, final int pIndex) {
+		return this.mMenuItem.attachChild(pEntity, pIndex);
+	}
+	// END osu!droid modified
+
 	@Override
 	public IEntity getFirstChild() {
 		return this.mMenuItem.getFirstChild();

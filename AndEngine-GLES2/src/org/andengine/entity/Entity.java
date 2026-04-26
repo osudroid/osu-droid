@@ -736,6 +736,25 @@ public class Entity implements IEntity {
 		pEntity.onAttached();
 	}
 
+	// BEGIN osu!droid modified
+	@Override
+	public boolean attachChild(final IEntity pEntity, final int pIndex) throws IllegalStateException {
+		this.assertEntityHasNoParent(pEntity);
+
+		if(this.mChildren == null) {
+			this.allocateChildren();
+		}
+		try {
+			this.mChildren.add(pIndex, pEntity);
+			pEntity.setParent(this);
+			pEntity.onAttached();
+			return true;
+		} catch (final IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+	// END osu!droid modified
+
 	@Override
 	public void sortChildren() {
 		this.sortChildren(true);

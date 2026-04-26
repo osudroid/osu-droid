@@ -59,6 +59,9 @@ public class ShaderProgram {
 	public ShaderProgram(final IShaderSource pVertexShaderSource, final IShaderSource pFragmentShaderSource) {
 		this.mVertexShaderSource = pVertexShaderSource;
 		this.mFragmentShaderSource = pFragmentShaderSource;
+		// BEGIN osu!droid modified
+		sAllInstances.add(this);
+		// END osu!droid modified
 	}
 
 	// ===========================================================
