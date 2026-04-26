@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.osudroid.ui.skinning.BooleanSkinData;
 import com.osudroid.ui.skinning.ColorSkinData;
@@ -145,6 +146,7 @@ public class OsuSkin {
         return !sliderBorderColor.isDefault();
     }
 
+    @Nullable
     public Color4 getSliderBorderColor() {
         return sliderBorderColor.getCurrentValue();
     }
@@ -153,6 +155,7 @@ public class OsuSkin {
         return sliderFollowComboColor.getCurrentValue();
     }
 
+    @Nullable
     public Color4 getSliderBodyColor() {
         return sliderBodyColor.getCurrentValue();
     }
