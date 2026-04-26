@@ -10,8 +10,8 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     private static final TextureRegion DEFAULT_TEXTURE = ResourceManager.getInstance().getTexture("flashlight_cursor");
-    public static final int TEXTURE_WIDTH = DEFAULT_TEXTURE.getWidth();
-    public static final int TEXTURE_HEIGHT = DEFAULT_TEXTURE.getHeight();
+    public static final int TEXTURE_WIDTH = (int) DEFAULT_TEXTURE.getWidth();
+    public static final int TEXTURE_HEIGHT = (int) DEFAULT_TEXTURE.getHeight();
     public final float AREA_CHANGE_FADE_DURATION = 0.8f;
     public float currentSize = BASE_SIZE;
     private UniversalModifier modifier;
