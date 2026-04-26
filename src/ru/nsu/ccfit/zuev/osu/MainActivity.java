@@ -99,7 +99,7 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
-        IAccelerometerListener {
+        IAccelerationListener {
 
     public static String versionName;
     public static SongService songService;
