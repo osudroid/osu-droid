@@ -88,6 +88,9 @@ public class AndEngine {
 			configChooser.chooseConfig(egl, eglDisplay);
 		} catch (final IllegalArgumentException e) {
 			throw new DeviceNotSupportedException(DeviceNotSupportedCause.EGLCONFIG_NOT_FOUND, e);
+		} finally {
+			/* Always terminate EGL to release resources, even if config selection fails. */
+			egl.eglTerminate(eglDisplay);
 		}
 	}
 
