@@ -121,6 +121,7 @@ public class GameplaySpinner extends GameObject {
         this.stat = stat;
         clear = duration <= 0f;
         bonusScoreCounter = 1;
+        startHit = false;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
