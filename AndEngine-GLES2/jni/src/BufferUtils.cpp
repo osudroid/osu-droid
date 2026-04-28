@@ -1,6 +1,7 @@
 #include "BufferUtils.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 // ===========================================================
 // org.andengine.opengl.util.BufferUtils
@@ -10,7 +11,7 @@ JNIEXPORT void JNICALL Java_org_andengine_opengl_util_BufferUtils_jniPut(JNIEnv 
 	unsigned char* bufferAddress = (unsigned char*)env->GetDirectBufferAddress(pBuffer);
 	float* dataAddress = (float*)env->GetPrimitiveArrayCritical(pData, 0);
 	
-	memcpy(bufferAddress, dataAddress + pOffset, pLength << 2);
+	std::memcpy(bufferAddress, dataAddress + pOffset, pLength << 2);
 	env->ReleasePrimitiveArrayCritical(pData, dataAddress, 0);
 }
 
