@@ -218,6 +218,14 @@ public abstract class GameObject {
     //region Lifetime management
 
     /**
+     * Whether the underlying {@link HitObject} of this {@link GameObject} has been judged in its entirety, including
+     * nested {@link HitObject}s.
+     */
+    public boolean isJudged() {
+        return false;
+    }
+
+    /**
      * Called when the lifetime of this {@link GameObject}'s lifetime expires and is about to be considered inactive.
      */
     public void onExpire() {}
