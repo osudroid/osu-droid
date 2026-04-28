@@ -104,6 +104,31 @@ public abstract class BaseTouchController implements ITouchController  {
 	// ===========================================================
 
 	// BEGIN osu!droid modified - raw pointer getters and setters
+	/**
+	 * Concurrency note for raw pointer reads:
+	 * <p>
+	 * Writes happen on the UI thread (in {@link #updateRawPointer}); reads happen
+	 * on the engine update thread. The per-field getters below ({@link #getRawPointerSurfaceX},
+	 * {@link #getRawPointerSurfaceY}, {@link #getRawPointerEventTime}, etc.) return the
+	 * latest value of a single field but provide <b>no cross-field coherence</b> &mdash; a
+	 * reader may observe X from one event and Y from the next.
+	 * <p>
+	 * For a coherent snapshot of multiple fields, callers should perform a seqlock-style
+	 * read using {@link #getRawPointerVersion}:
+	 * <pre>
+	 * int v1, v2;
+	 * float x, y;
+	 * do {
+	 *     v1 = controller.getRawPointerVersion(id);
+	 *     if ((v1 &amp; 1) != 0) continue;        // writer in progress (odd version)
+	 *     x = controller.getRawPointerSurfaceX(id);
+	 *     y = controller.getRawPointerSurfaceY(id);
+	 *     v2 = controller.getRawPointerVersion(id);
+	 * } while (v1 != v2);
+	 * </pre>
+	 * For rhythm-game gameplay where a one-frame torn read is harmless, the per-field
+	 * getters are fine to use directly.
+	 */
 	@Override
 	public int getRawPointerVersion(int pointerId) {
 		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? -1 : this.mRawPointerVersion.get(pointerId);
@@ -134,6 +159,10 @@ public abstract class BaseTouchController implements ITouchController  {
 		return RAW_POINTER_CAPACITY;
 	}
 
+	/**
+	 * Clear all tracked raw pointer state. No-op when raw pointer tracking is disabled,
+	 * to avoid unnecessary atomic increments at runtime.
+	 */
 	@Override
 	public void clearRawPointers() {
 		if (this.mUseRawPointer) {
@@ -143,6 +172,11 @@ public abstract class BaseTouchController implements ITouchController  {
 		}
 	}
 
+	/**
+	 * Hard-reset all raw pointer state, including the version counters. Always runs,
+	 * regardless of {@link #mUseRawPointer}, so it can be used to wipe stale state when
+	 * switching modes (e.g. on map start).
+	 */
 	@Override
 	public void resetRawPointers() {
 		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
