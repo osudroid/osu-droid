@@ -1693,8 +1693,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         updatePassiveObjects(dt);
         updateActiveObjects(dt);
 
-        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-            autoCursor.moveToObject(activeObjects.isEmpty() ? null : activeObjects.get(0), elapsedTime, this);
+        if (judgeableObject != null && (GameHelper.isAutoplay() || GameHelper.isAutopilot())) {
+            autoCursor.moveToObject(judgeableObject, elapsedTime, this);
         }
 
         if (videoEnabled && video != null && elapsedTime >= videoOffset)
