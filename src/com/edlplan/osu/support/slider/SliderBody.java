@@ -91,6 +91,19 @@ public class SliderBody extends UIContainer {
         clearLayer(background);
         clearLayer(border);
 
+        if (cache.sourcePath == null || cache.pointCount == 0 || cache.sourcePath.size() == 0) {
+            maxPathLength = 0;
+            startLength = 0;
+            endLength = 0;
+            shouldRebuildVertices = false;
+            lastFastEndSegmentIndex = -1;
+            lastFastStartSegmentIndex = -1;
+            lastFastEndLength = Float.NaN;
+            lastFastStartLength = Float.NaN;
+            setPosition(position.x, position.y);
+            return;
+        }
+
         maxPathLength = cache.sourcePath.getMeasurer().maxLength();
         startLength = 0;
 
