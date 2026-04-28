@@ -1092,8 +1092,9 @@ public class GameplaySlider extends GameObject {
         double mehWindow = hitWindow.getMehWindow() / 1000;
 
         if (replayObjectData == null || GameHelper.getReplayVersion() >= 6 || mehWindow <= duration) {
+            listener.registerAccuracy(HitObjectType.Slider, hitOffset);
+
             if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
-                listener.registerAccuracy(HitObjectType.Slider, hitOffset);
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
                 shouldSnakeOut = true;

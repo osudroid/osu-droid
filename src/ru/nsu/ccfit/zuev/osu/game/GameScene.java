@@ -3053,15 +3053,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public void registerAccuracy(HitObjectType type, final double acc) {
-        offsetSum += (float) acc;
-        offsetRegs++;
+        if (acc <= hitWindow.getMehWindow() / 1000) {
+            offsetSum += (float) acc;
+            offsetRegs++;
 
-        if (type != HitObjectType.Spinner) {
-            stat.addHitOffset(acc);
-        }
+            if (type != HitObjectType.Spinner) {
+                stat.addHitOffset(acc);
+            }
 
-        if (replaying) {
-            scoringScene.getReplayStat().addHitOffset(acc);
+            if (replaying) {
+                scoringScene.getReplayStat().addHitOffset(acc);
+            }
         }
 
         hud.onAccuracyRegister(type, (float) acc);

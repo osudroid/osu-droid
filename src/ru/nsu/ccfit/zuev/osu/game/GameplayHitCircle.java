@@ -295,6 +295,7 @@ public class GameplayHitCircle extends GameObject {
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
                 removeFromScene();
+                listener.registerAccuracy(HitObjectType.Normal, mehWindow + 1);
                 listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }
