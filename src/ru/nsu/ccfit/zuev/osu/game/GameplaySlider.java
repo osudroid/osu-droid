@@ -602,6 +602,11 @@ public class GameplaySlider extends GameObject {
             headCirclePiece.detachSelf();
         }
 
+        // Follow circle might still be animating when the slider is removed from the scene.
+        if (!Config.isAnimateFollowCircle() || !isFollowCircleAnimating) {
+            followCircle.detachSelf();
+        }
+
         tailCirclePiece.detachSelf();
         approachCircle.detachSelf();
         startArrow.detachSelf();
