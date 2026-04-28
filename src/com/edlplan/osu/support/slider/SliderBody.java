@@ -264,12 +264,19 @@ public class SliderBody extends UIContainer {
                                               boolean isHintVisible, float hintWidth) {
         RenderPathCache cache = new RenderPathCache();
 
+        cache.sourcePath = renderPath;
+
+        if (renderPath.size() == 0) {
+            cache.pointCount = 0;
+            cache.segmentCount = 0;
+            return cache;
+        }
+
         float clampedBackgroundWidth = Math.max(0, backgroundWidth);
         float clampedBorderWidth = FMath.clamp(borderWidth, 0, clampedBackgroundWidth);
         float playableWidth = clampedBackgroundWidth - clampedBorderWidth;
         float clampedHintWidth = FMath.clamp(hintWidth, 0, playableWidth);
 
-        cache.sourcePath = renderPath;
         buildPointLengthCache(renderPath, cache);
         buildSegmentThetaCache(renderPath, cache);
 
