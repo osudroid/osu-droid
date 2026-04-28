@@ -8,6 +8,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import javax.microedition.khronos.opengles.*
+import kotlin.math.abs
 
 class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
@@ -74,9 +75,15 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
     }
 
     override fun addResult(accuracy: Float, color: Color4) {
+        val accuracyMs = accuracy * 1000
+
+        if (abs(accuracyMs) > hitWindow.mehWindow) {
+            return
+        }
+
         val indicator = expiredIndicators.acquire() ?: Indicator(0f, 0f, Color4.White)
 
-        indicator.x = (WIDTH / 2f) * (accuracy * 1000 / hitWindow.mehWindow.toFloat())
+        indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow.toFloat())
         indicator.alpha = 1f
         indicator.color = color
 
