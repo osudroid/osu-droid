@@ -11,6 +11,7 @@ import com.osudroid.ui.v2.hud.elements.HUDBarHitErrorMeter
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.capitalize
+import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
@@ -194,7 +195,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
 
     override fun onBreakStateChange(isBreak: Boolean) {}
 
-    override fun onAccuracyRegister(accuracy: Float) {}
+    override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {}
 
     //endregion
 

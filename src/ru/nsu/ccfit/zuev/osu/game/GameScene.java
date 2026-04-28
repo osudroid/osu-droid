@@ -2463,15 +2463,34 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        String scoreName = switch (score) {
-            case 300 -> registerHit(id, 300, endCombo);
-            case 100 -> registerHit(id, 100, endCombo);
-            case 50 -> registerHit(id, 50, endCombo);
-            default -> "hit0";
+        String scoreName;
+
+        // Simulate a hit for hit error meter registration.
+        float accuracy = (float) switch (score) {
+            case 300 -> {
+                scoreName = registerHit(id, 300, endCombo);
+                yield 0;
+            }
+
+            case 100 -> {
+                scoreName = registerHit(id, 100, endCombo);
+                yield hitWindow.getGreatWindow() + 1;
+            }
+
+            case 50 -> {
+                scoreName = registerHit(id, 50, endCombo);
+                yield hitWindow.getOkWindow() + 1;
+            }
+
+            default -> {
+                scoreName = "hit0";
+                yield hitWindow.getMehWindow() + 1;
+            }
         };
 
         createHitEffect(pos, scoreName, null);
 
+        hud.onAccuracyRegister(HitObjectType.Spinner, accuracy);
         hud.onNoteHit(stat);
     }
 
@@ -3045,7 +3064,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             scoringScene.getReplayStat().addHitOffset(acc);
         }
 
-        hud.onAccuracyRegister((float) acc);
+        hud.onAccuracyRegister(type, (float) acc);
     }
 
 
