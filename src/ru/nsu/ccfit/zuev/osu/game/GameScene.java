@@ -3053,7 +3053,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public void registerAccuracy(HitObjectType type, final double acc) {
-        if (acc <= hitWindow.getMehWindow() / 1000) {
+        double mehWindow = hitWindow.getMehWindow() / 1000;
+
+        if (-mehWindow <= acc && acc <= mehWindow) {
             offsetSum += (float) acc;
             offsetRegs++;
 
