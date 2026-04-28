@@ -12,6 +12,8 @@ import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.framework.Color4;
 import com.rian.osu.math.Vector2;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 
 public class SliderBody extends UIContainer {
@@ -254,13 +256,9 @@ public class SliderBody extends UIContainer {
     }
 
 
-    public static RenderPathCache createCache(LinePath renderPath, float backgroundWidth, float borderWidth,
+    public static RenderPathCache createCache(@NotNull LinePath renderPath, float backgroundWidth, float borderWidth,
                                               boolean isHintVisible, float hintWidth) {
         RenderPathCache cache = new RenderPathCache();
-
-        if (renderPath == null || renderPath.size() == 0) {
-            return cache;
-        }
 
         float clampedBackgroundWidth = Math.max(0, backgroundWidth);
         float clampedBorderWidth = FMath.clamp(borderWidth, 0, clampedBackgroundWidth);
