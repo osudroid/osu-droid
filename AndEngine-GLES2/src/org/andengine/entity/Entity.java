@@ -15,6 +15,7 @@ import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.call.ParameterCallable;
 import org.andengine.util.color.Color;
+import org.andengine.util.debug.Debug;
 
 
 /**
@@ -91,14 +92,14 @@ public class Entity implements IEntity {
 	protected float mSkewCenterY = 0;
 
 	// BEGIN osu!droid modified: Make these fields protected
-	/*private*/ protected boolean mLocalToParentTransformationDirty = true;
-	/*private*/ protected boolean mParentToLocalTransformationDirty = true;
+	protected boolean mLocalToParentTransformationDirty = true;
+	protected boolean mParentToLocalTransformationDirty = true;
 
-	/*private*/ protected Transformation mLocalToParentTransformation;
-	/*private*/ protected Transformation mParentToLocalTransformation;
+	protected Transformation mLocalToParentTransformation;
+	protected Transformation mParentToLocalTransformation;
 
-	/*private*/ protected Transformation mLocalToSceneTransformation;
-	/*private*/ protected Transformation mSceneToLocalTransformation;
+	protected Transformation mLocalToSceneTransformation;
+	protected Transformation mSceneToLocalTransformation;
 
 	// END osu!droid modified
 
@@ -737,6 +738,14 @@ public class Entity implements IEntity {
 	}
 
 	// BEGIN osu!droid modified
+	/**
+	 * Insert {@code pEntity} as a child at the given index.
+	 * <p>
+	 * Unlike {@link #attachChild(IEntity)} which always appends, this overload
+	 * tolerates an out-of-range {@code pIndex}: rather than propagating an
+	 * {@link IndexOutOfBoundsException}, it logs a warning and returns
+	 * {@code false} so callers can keep going. Returns {@code true} on success.
+	 */
 	@Override
 	public boolean attachChild(final IEntity pEntity, final int pIndex) throws IllegalStateException {
 		this.assertEntityHasNoParent(pEntity);
@@ -750,6 +759,7 @@ public class Entity implements IEntity {
 			pEntity.onAttached();
 			return true;
 		} catch (final IndexOutOfBoundsException e) {
+			Debug.w("Entity.attachChild: index " + pIndex + " out of range (size=" + this.mChildren.size() + "), child not attached.", e);
 			return false;
 		}
 	}
@@ -1179,6 +1189,13 @@ public class Entity implements IEntity {
 	}
 
 	// BEGIN osu!droid modified: Make this method overrideable.
+	/**
+	 * Made non-final so subclasses can wrap or replace the visibility/culling guard.
+	 * <p>
+	 * <b>Subclasses overriding this method must either call {@code super.onDraw}
+	 * or replicate the {@code mVisible} / {@code mCullingEnabled} check</b>;
+	 * otherwise hidden or culled entities will still be drawn.
+	 */
 	@Override
 	public void onDraw(final GLState pGLState, final Camera pCamera) {
 		if(this.mVisible && !(this.mCullingEnabled && this.isCulled(pCamera))) {
@@ -1389,6 +1406,8 @@ public class Entity implements IEntity {
 
 				{ /* Draw children behind this Entity. */
 					for(; i < childCount; i++) {
+						// Defensive: a child may detach itself (or others) during onDraw,
+						// shrinking the list below the cached childCount.
 						if(i >= children.size()) break;
 						final IEntity child = children.get(i);
 						if(child.getZIndex() < 0) {
@@ -1406,6 +1425,7 @@ public class Entity implements IEntity {
 
 				{ /* Draw children in front of this Entity. */
 					for(; i < childCount; i++) {
+						// Defensive: see note above; child list may shrink mid-iteration.
 						if(i >= children.size()) break;
 						children.get(i).onDraw(pGLState, pCamera);
 					}
@@ -1427,6 +1447,8 @@ public class Entity implements IEntity {
 			final SmartList<IEntity> entities = this.mChildren;
 			final int entityCount = entities.size();
 			for(int i = 0; i < entityCount; i++) {
+				// Defensive: an entity may detach itself (e.g. an expiring particle/timer)
+				// during onUpdate, shrinking the list below the cached entityCount.
 				if(i >= entities.size()) break;
 				entities.get(i).onUpdate(pSecondsElapsed);
 			}
