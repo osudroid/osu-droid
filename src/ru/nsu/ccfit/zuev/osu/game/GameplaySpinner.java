@@ -158,14 +158,6 @@ public class GameplaySpinner extends GameObject {
             approachCircle.setVisible(false);
         }
 
-        approachCircle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt),
-            Modifiers.parallel(
-                Modifiers.alpha(duration, 0.75f, 1),
-                Modifiers.scale(duration, 2.0f, 0)
-            )
-        ));
-
         spinText.setAlpha(0);
         spinText.registerEntityModifier(Modifiers.sequence(
             Modifiers.delay(timePreempt * 0.75f),
@@ -175,7 +167,19 @@ public class GameplaySpinner extends GameObject {
         ));
 
         scene.attachChild(spinText, 0);
-        scene.attachChild(approachCircle, 0);
+
+        if (approachCircle.isVisible()) {
+            approachCircle.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(timePreempt),
+                Modifiers.parallel(
+                    Modifiers.alpha(duration, 0.75f, 1),
+                    Modifiers.scale(duration, 2.0f, 0)
+                )
+            ));
+
+            scene.attachChild(approachCircle, 0);
+        }
+
         scene.attachChild(circle, 0);
         scene.attachChild(metre, 0);
         scene.attachChild(background, 0);
