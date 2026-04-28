@@ -9,6 +9,7 @@ import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -223,7 +224,7 @@ public class GameplayHitCircle extends GameObject {
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
-                listener.registerAccuracy(replayObjectData.accuracy / 1000f);
+                listener.registerAccuracy(HitObjectType.Normal, replayObjectData.accuracy / 1000f);
                 startHit = true;
                 successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
                 passedTime = -1;
@@ -240,7 +241,7 @@ public class GameplayHitCircle extends GameObject {
 
             if (hittingCursor != null) {
                 double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
-                listener.registerAccuracy(hitOffset);
+                listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
                 passedTime = -1;

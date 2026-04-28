@@ -57,6 +57,7 @@ import com.rian.osu.beatmap.ComboColor;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -3032,11 +3033,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
 
-    public void registerAccuracy(final double acc) {
+    public void registerAccuracy(HitObjectType type, final double acc) {
         offsetSum += (float) acc;
         offsetRegs++;
 
-        stat.addHitOffset(acc);
+        if (type != HitObjectType.Spinner) {
+            stat.addHitOffset(acc);
+        }
 
         if (replaying) {
             scoringScene.getReplayStat().addHitOffset(acc);
