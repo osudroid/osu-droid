@@ -35,7 +35,7 @@ public abstract class BaseResolutionPolicy implements IResolutionPolicy {
 		final int specHeightMode = MeasureSpec.getMode(pHeightMeasureSpec);
 
 		if (specWidthMode != MeasureSpec.EXACTLY || specHeightMode != MeasureSpec.EXACTLY) {
-			throw new IllegalStateException("This IResolutionPolicy requires MeasureSpec.EXACTLY ! That means ");
+			throw new IllegalStateException("This IResolutionPolicy requires MeasureSpec.EXACTLY, which means both width and height must be measured with MeasureSpec.EXACTLY.");
 		}
 	}
 
