@@ -7,8 +7,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
-import com.osudroid.ui.v2.hud.elements.HUDBarHitErrorMeter
-import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.capitalize
 import com.rian.osu.beatmap.constants.HitObjectType
