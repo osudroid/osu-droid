@@ -1682,6 +1682,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // Clearing expired objects.
         if (!expiredObjects.isEmpty()) {
+            for (int i = 0, size = expiredObjects.size(); i < size; i++) {
+                expiredObjects.get(i).onExpire();
+            }
+
             activeObjects.removeAll(expiredObjects);
             expiredObjects.clear();
         }
@@ -1984,6 +1988,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // is hit.
                 judgeableObject = searchJudgeableObject(i + 1);
             }
+
+            if (elapsedTime >= obj.getLifetimeEnd()) {
+                expiredObjects.add(obj);
+            }
         }
     }
 
@@ -2000,14 +2008,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     @Nullable
     private GameObject searchJudgeableObject(int startIndex) {
-        if (!Config.isRemoveSliderLock()) {
-            return activeObjects.isEmpty() ? null : activeObjects.get(0);
-        }
-
         for (int i = startIndex, size = activeObjects.size(); i < size; i++) {
             var obj = activeObjects.get(i);
 
-            if (!obj.isStartHit()) {
+            if (!obj.isJudged()) {
                 return obj;
             }
         }
