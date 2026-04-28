@@ -196,6 +196,7 @@ public class GameplaySlider extends GameObject {
         position.set(stackedPosition.x, stackedPosition.y);
 
         hitTime = (float) beatmapSlider.startTime / 1000;
+        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         endsCombo = beatmapSlider.isLastInCombo();
         elapsedSpanTime = -timePreempt;
         duration = beatmapSlider.getDuration() / 1000;
@@ -289,7 +290,6 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
-        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
 
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
