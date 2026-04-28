@@ -165,6 +165,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private boolean comboWas100 = false;
     private ArrayList<GameObject> activeObjects;
     private ArrayList<GameObject> expiredObjects;
+    private final Set<GameObject> processedExpiredObjects = Collections.newSetFromMap(new IdentityHashMap<>());
     private GameObject judgeableObject;
     private BreakPeriod[] breakPeriods;
     private int breakPeriodIndex;
@@ -1681,9 +1682,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Clearing expired objects.
+        processedExpiredObjects.clear();
+
         if (!expiredObjects.isEmpty()) {
             for (int i = 0, size = expiredObjects.size(); i < size; i++) {
-                expiredObjects.get(i).onExpire();
+                var obj = expiredObjects.get(i);
+
+                if (processedExpiredObjects.add(obj)) {
+                    obj.onExpire();
+                }
             }
 
             activeObjects.removeAll(expiredObjects);
