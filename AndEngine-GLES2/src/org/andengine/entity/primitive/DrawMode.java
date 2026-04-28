@@ -25,7 +25,7 @@ public enum DrawMode {
 	// Constants
 	// ===========================================================
 
-	public final int mDrawMode;
+	private final int mDrawMode;
 
 	// ===========================================================
 	// Fields

@@ -91,7 +91,7 @@ public class Mesh extends Shape {
 	}
 
 	public void setDrawMode(final DrawMode pDrawMode) {
-		this.mDrawMode = pDrawMode.mDrawMode;
+		this.mDrawMode = pDrawMode.getDrawMode();
 	}
 
 	// ===========================================================
