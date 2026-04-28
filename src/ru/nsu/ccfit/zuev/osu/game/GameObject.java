@@ -38,6 +38,14 @@ public abstract class GameObject {
 
     public abstract void update(float dt);
 
+    /**
+     * Updates this {@link GameObject} in the same frame after it has been initialized.
+     *
+     * @param dt The time difference, in seconds. In this context, it is the time difference between its lifetime start
+     *           and the current elapsed time.
+     */
+    public void updateAfterInit(float dt) {}
+
     public float getHitTime() {
         return hitTime;
     }
