@@ -26,19 +26,21 @@ public interface ITouchController extends IUpdateHandler {
 	public void onHandleMotionEvent(final MotionEvent pMotionEvent);
 
 	// BEGIN osu!droid modified - raw pointer operations + touch option application
+	// Provided as default no-ops so third-party ITouchController implementations
+	// don't have to be updated for this fork-specific API surface.
+
 	/** Apply touch options (useRawPointer, processHistoricalEvents) to this controller. */
-	void applyTouchOptions(TouchOptions pTouchOptions);
+	default void applyTouchOptions(TouchOptions pTouchOptions) { }
 
-
-	int getRawPointerVersion(int pointerId);
-	boolean isRawPointerDown(int pointerId);
-	float getRawPointerSurfaceX(int pointerId);
-	float getRawPointerSurfaceY(int pointerId);
-	long getRawPointerEventTime(int pointerId);
-	int getRawPointerCapacity();
-	void clearRawPointers();
-	void resetRawPointers();
-	boolean isUseRawPointers();
+	default int getRawPointerVersion(int pointerId) { return -1; }
+	default boolean isRawPointerDown(int pointerId) { return false; }
+	default float getRawPointerSurfaceX(int pointerId) { return 0f; }
+	default float getRawPointerSurfaceY(int pointerId) { return 0f; }
+	default long getRawPointerEventTime(int pointerId) { return 0L; }
+	default int getRawPointerCapacity() { return 0; }
+	default void clearRawPointers() { }
+	default void resetRawPointers() { }
+	default boolean isUseRawPointers() { return false; }
 	// END osu!droid modified
 
 	// ===========================================================
