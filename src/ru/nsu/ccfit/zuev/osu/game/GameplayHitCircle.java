@@ -49,7 +49,7 @@ public class GameplayHitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
-                     final float secPassed, final Color4 comboColor) {
+                     final Color4 comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
@@ -63,7 +63,7 @@ public class GameplayHitCircle extends GameObject {
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
         hitTime = (float) beatmapCircle.startTime / 1000;
-        passedTime = secPassed - (hitTime - timePreempt);
+        passedTime = hitTime - timePreempt;
         startHit = false;
         successfulHit = false;
         kiai = GameHelper.isKiai();
@@ -202,6 +202,17 @@ public class GameplayHitCircle extends GameObject {
 
     private void playHitSamples() {
         listener.playHitSamples(hitSamples);
+    }
+
+    @Override
+    public void updateAfterInit(float dt) {
+        super.updateAfterInit(dt);
+
+        // Update existing entities first before this object (simulates an update tick).
+        approachCircle.onUpdate(dt);
+        circlePiece.onUpdate(dt);
+
+        update(dt);
     }
 
     @Override
