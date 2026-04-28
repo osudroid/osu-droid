@@ -17,6 +17,7 @@ class SliderTickContainer : UIContainer() {
 
     fun init(beatmapSlider: Slider) {
         slider = beatmapSlider
+        val lifetimeStart = calculateLifetimeStart(0)
 
         detachChildren()
 
@@ -34,7 +35,7 @@ class SliderTickContainer : UIContainer() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(tick)
+            sprite.init(tick, lifetimeStart)
 
             attachChild(sprite)
         }
@@ -44,6 +45,8 @@ class SliderTickContainer : UIContainer() {
         if (slider == null) {
             return
         }
+
+        val lifetimeStart = calculateLifetimeStart(newSpanIndex)
 
         val spanStartIndex =
             // Amount of slider ticks passed.
@@ -61,9 +64,20 @@ class SliderTickContainer : UIContainer() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(tick)
+            sprite.init(tick, lifetimeStart)
         }
     }
+
+    private fun calculateLifetimeStart(spanIndex: Int): Float {
+        val slider = slider ?: return 0f
+
+        if (spanIndex == 0) {
+            return (slider.startTime - slider.timePreempt).toFloat() / 1000
+        }
+
+        return (slider.startTime + slider.spanDuration * spanIndex).toFloat() / 1000
+    }
+
 
     override fun onDetached() {
         super.onDetached()
@@ -84,12 +98,14 @@ class SliderTickSprite : UISprite() {
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
+     * @param spanLifetimeStart The lifetime start of the current [Slider] span, in seconds.
      */
-    fun init(tick: SliderTick) {
+    fun init(tick: SliderTick, spanLifetimeStart: Float) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
 
         val fadeInStartTime = startTime - timePreempt
+        val fadeInDelay = fadeInStartTime - spanLifetimeStart
 
         clearEntityModifiers()
 
@@ -98,7 +114,7 @@ class SliderTickSprite : UISprite() {
 
         registerEntityModifier(
             Modifiers.sequence(null,
-                Modifiers.delay(fadeInStartTime),
+                Modifiers.delay(fadeInDelay),
                 Modifiers.parallel(null,
                     Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
                     Modifiers.fadeIn(ANIM_DURATION)
@@ -109,10 +125,11 @@ class SliderTickSprite : UISprite() {
         if (GameHelper.isHidden() && !GameHelper.getHidden().onlyFadeApproachCircles) {
             val fadeOutDuration = min(timePreempt - ANIM_DURATION, 1f)
             val fadeOutStartTime = startTime - fadeOutDuration
+            val fadeOutDelay = fadeOutStartTime - spanLifetimeStart
 
             registerEntityModifier(
                 Modifiers.sequence(null,
-                    Modifiers.delay(fadeOutStartTime),
+                    Modifiers.delay(fadeOutDelay),
                     Modifiers.fadeOut(fadeOutDuration)
                 )
             )

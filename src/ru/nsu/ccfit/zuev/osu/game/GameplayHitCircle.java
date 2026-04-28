@@ -63,7 +63,7 @@ public class GameplayHitCircle extends GameObject {
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
         hitTime = (float) beatmapCircle.startTime / 1000;
-        passedTime = hitTime - timePreempt;
+        passedTime = -timePreempt;
         startHit = false;
         successfulHit = false;
         kiai = GameHelper.isKiai();
@@ -194,7 +194,7 @@ public class GameplayHitCircle extends GameObject {
             var fadeOutModifier = Modifiers.alpha(0.1f, circlePiece.getAlpha(), 0, e -> Execution.updateThread(e::detachSelf));
 
             circlePiece.registerEntityModifier(fadeOutModifier);
-            extendLifetime(hitTime + passedTime - timePreempt, fadeOutModifier);
+            extendLifetime(hitTime + passedTime, fadeOutModifier);
         }
 
         scene = null;
@@ -230,7 +230,7 @@ public class GameplayHitCircle extends GameObject {
 
         // If we have clicked circle
         if (replayObjectData != null) {
-            if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
+            if (passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 startHit = true;
                 successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
@@ -243,7 +243,7 @@ public class GameplayHitCircle extends GameObject {
                 return;
             }
         } else if (!autoPlay && listener.isObjectHittable(this)) {
-            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
+            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime);
 
             if (hittingCursor != null) {
                 double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
@@ -277,7 +277,7 @@ public class GameplayHitCircle extends GameObject {
         passedTime += dt;
 
         // We are still at approach time. Let entity modifiers finish first.
-        if (passedTime < timePreempt) {
+        if (passedTime < 0) {
             return;
         }
 
@@ -290,10 +290,10 @@ public class GameplayHitCircle extends GameObject {
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(1 - FMath.clamp((passedTime - timePreempt) / 0.05f, 0, 1));
+            approachCircle.setAlpha(1 - FMath.clamp(passedTime / 0.05f, 0, 1));
 
             // If passed too much time, counting it as miss
-            if (passedTime > timePreempt + mehWindow) {
+            if (passedTime > mehWindow) {
                 startHit = true;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
