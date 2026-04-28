@@ -80,8 +80,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	 * How long (ms) to sleep the UI thread after each touch event.
 	 * Default is 0 (no sleep) for minimum input latency.
 	 * Matches the old AndEngine GLES1 behavior.
+	 * <p>
+	 * Marked {@code volatile} because it may be mutated from any thread (e.g. settings UI)
+	 * and read by the UI thread inside {@link #onTouch}.
 	 */
-	public static int INPUT_PAUSE_DURATION = 0;
+	public static volatile int INPUT_PAUSE_DURATION = 0;
 	// END osu!droid modified
 
 	// ===========================================================
