@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 class SliderTickContainer : UIContainer() {
     private var slider: Slider? = null
 
-    fun init(currentTimeSec: Double, beatmapSlider: Slider) {
+    fun init(beatmapSlider: Slider) {
         slider = beatmapSlider
 
         detachChildren()
@@ -34,13 +34,13 @@ class SliderTickContainer : UIContainer() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(currentTimeSec, tick)
+            sprite.init(tick)
 
             attachChild(sprite)
         }
     }
 
-    fun onNewSpan(currentTimeSec: Double, newSpanIndex: Int) {
+    fun onNewSpan(newSpanIndex: Int) {
         if (slider == null) {
             return
         }
@@ -61,7 +61,7 @@ class SliderTickContainer : UIContainer() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(currentTimeSec, tick)
+            sprite.init(tick)
         }
     }
 
@@ -83,10 +83,9 @@ class SliderTickSprite : UISprite() {
     /**
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
-     * @param currentTimeSec The current time in seconds.
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
      */
-    fun init(currentTimeSec: Double, tick: SliderTick) {
+    fun init(tick: SliderTick) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
 
@@ -99,7 +98,7 @@ class SliderTickSprite : UISprite() {
 
         registerEntityModifier(
             Modifiers.sequence(null,
-                Modifiers.delay(fadeInStartTime - currentTimeSec.toFloat()),
+                Modifiers.delay(fadeInStartTime),
                 Modifiers.parallel(null,
                     Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
                     Modifiers.fadeIn(ANIM_DURATION)
@@ -113,7 +112,7 @@ class SliderTickSprite : UISprite() {
 
             registerEntityModifier(
                 Modifiers.sequence(null,
-                    Modifiers.delay(fadeOutStartTime - currentTimeSec.toFloat()),
+                    Modifiers.delay(fadeOutStartTime),
                     Modifiers.fadeOut(fadeOutDuration)
                 )
             )

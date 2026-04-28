@@ -184,9 +184,8 @@ public class GameplaySlider extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
-                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
-                     final Color4 comboColor, final Color4 borderColor, final SliderPath sliderPath,
-                     final LinePath renderPath) {
+                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final Color4 comboColor,
+                     final Color4 borderColor, final SliderPath sliderPath, final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
         this.stat = stat;
@@ -198,7 +197,7 @@ public class GameplaySlider extends GameObject {
 
         hitTime = (float) beatmapSlider.startTime / 1000;
         endsCombo = beatmapSlider.isLastInCombo();
-        elapsedSpanTime = secPassed - hitTime;
+        elapsedSpanTime = -hitTime;
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
@@ -401,7 +400,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(secPassed, beatmapSlider);
+        tickContainer.init(beatmapSlider);
 
         scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
@@ -693,7 +692,7 @@ public class GameplaySlider extends GameObject {
             }
 
             // Restore ticks
-            tickContainer.onNewSpan(getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
+            tickContainer.onNewSpan(completedSpanCount);
             currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows
@@ -903,6 +902,23 @@ public class GameplaySlider extends GameObject {
         }
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        super.updateAfterInit(dt);
+
+        // Update existing entities first before this object (simulates an update tick).
+        startArrow.onUpdate(dt);
+        endArrow.onUpdate(dt);
+        headCirclePiece.onUpdate(dt);
+        tailCirclePiece.onUpdate(dt);
+        approachCircle.onUpdate(dt);
+        tickContainer.onUpdate(dt);
+        sliderBody.onUpdate(dt);
+        ball.onUpdate(dt);
+        followCircle.onUpdate(dt);
+
+        update(dt);
+    }
 
     @Override
     public void update(final float dt) {

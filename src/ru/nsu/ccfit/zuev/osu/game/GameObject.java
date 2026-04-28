@@ -39,10 +39,11 @@ public abstract class GameObject {
     public abstract void update(float dt);
 
     /**
-     * Updates this {@link GameObject} in the same frame after it has been initialized.
+     * Updates this {@link GameObject} in the same frame after it has been initialized. This is used to account for the
+     * time difference between the current elapsed time (time at which this {@link GameObject} is initialized) and its
+     * lifetime start (time at which this {@link GameObject} <b>should have</b> been initialized).
      *
-     * @param dt The time difference, in seconds. In this context, it is the time difference between its lifetime start
-     *           and the current elapsed time.
+     * @param dt The time difference, in seconds.
      */
     public void updateAfterInit(float dt) {}
 
