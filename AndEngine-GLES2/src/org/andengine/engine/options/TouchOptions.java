@@ -52,7 +52,6 @@ public class TouchOptions {
 		this.mTouchEventIntervalMilliseconds = pTouchEventIntervalMilliseconds;
 	}
 
-
 	// BEGIN osu!droid modified - Option for historical events processing and raw pointer
 	public TouchOptions enableProcessHistoricalEvents() {
 		return this.setProcessHistoricalEvents(true);
