@@ -189,16 +189,6 @@ public class MainActivity extends BaseGameActivity implements
         }
         engine.setTouchController(new MultiTouchController());
 
-        // Enable high-precision input globally: raw pointer tracking + historical event processing.
-        // Raw pointer: pointer state (position/down) is updated immediately on the UI thread,
-        //              so it can be read from any thread without waiting for an update tick.
-        // Historical events: Android batches intermediate MOVE positions into one MotionEvent;
-        //                    enabling this fires each of them separately for accurate tracking.
-        pEngineOptions.getTouchOptions()
-                .setUseRawPointer(true)
-                .setProcessHistoricalEvents(true);
-        engine.getTouchController().applyTouchOptions(pEngineOptions.getTouchOptions());
-
         GlobalManager.getInstance().setEngine(engine);
         return GlobalManager.getInstance().getEngine();
     }

@@ -84,6 +84,7 @@ import android.opengl.GLES20;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.options.TouchOptions;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
@@ -1913,7 +1914,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             // Disable historical event processing for more efficient ACTION_MOVE reports. Frequent reports are not
             // relevant outside gameplay.
-            // engine.getTouchController().applyTouchOptions(touchOptions);
+            var touchOptions = new TouchOptions();
+            touchOptions.setProcessHistoricalEvents(false);
+            touchOptions.setUseRawPointer(false);
+            engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
             engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
@@ -2112,7 +2116,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public void quit() {
         // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
         // not that relevant outside gameplay.
-        // touchController.applyTouchOptions/resetRawPointers disabled.
+        var touchOptions = new TouchOptions();
+        touchOptions.setProcessHistoricalEvents(false);
+        touchOptions.setUseRawPointer(false);
+
+        var touchController = engine.getTouchController();
+        touchController.applyTouchOptions(touchOptions);
+        touchController.resetRawPointers();
 
         // Enable screen dimming
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
