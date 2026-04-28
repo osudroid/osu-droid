@@ -87,6 +87,10 @@ public class SliderBody extends UIContainer {
     public void init(boolean beginEmpty, Vector2 position, RenderPathCache cache) {
         this.cache = cache;
 
+        clearLayer(hint);
+        clearLayer(background);
+        clearLayer(border);
+
         maxPathLength = cache.sourcePath.getMeasurer().maxLength();
         startLength = 0;
 
