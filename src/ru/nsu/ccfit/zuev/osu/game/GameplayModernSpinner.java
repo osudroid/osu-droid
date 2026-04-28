@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -84,7 +83,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
         fullRotations = 0;
         rotations = 0;
         bonusScoreCounter = 1;
-        spinnable = false;
 
         reloadHitSounds();
 
@@ -120,25 +118,28 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.attachChild(middle2);
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+        passedTime = -timePreempt;
 
-        top.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.fadeIn(timePreempt, e -> {
-                    spinnable = true;
-                    listener.onSpinnerStart(id);
-            }),
-            Modifiers.delay(duration)
-        ));
-
+        top.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+
+        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
     }
 
     @Override
     public void update(float dt) {
+        passedTime += dt;
+
         // Allow the spinner to fully fade in first before receiving spins.
-        if (!spinnable) {
+        if (passedTime < 0) {
             return;
+        }
+
+        if (!startHit) {
+            listener.onSpinnerStart(id);
+            startHit = true;
         }
 
         updateSamples(dt);
@@ -262,6 +263,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         }
 
         oldMouse.set(currMouse);
+
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
     }
 
     public void removeFromScene() {
@@ -281,10 +286,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.detachChild(glow);
 
         scene.detachChild(bonusScore);
-
-        listener.removeObject(GameplayModernSpinner.this);
-
-        Execution.updateThread(() -> GameObjectPool.getInstance().putSpinner(this));
 
         int score = 0;
         if (replayObjectData != null) {
