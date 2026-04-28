@@ -67,9 +67,9 @@ public class BatchedSpriteParticleSystem extends BlendFunctionParticleSystem<Unc
 			/* In order to support alpha changes of the sprites inside the spritebatch,
 			 * we have to 'premultiply' the RGB channels of the sprite with its alpha channel. */
 			final float alpha = sprite.getAlpha();
-			final float colorABGRPackedInt = ColorUtils.convertRGBAToABGRPackedFloat(sprite.getRed() * alpha, sprite.getGreen() * alpha, sprite.getBlue() * alpha, alpha);
+			final float colorABGRPackedFloat = ColorUtils.convertRGBAToABGRPackedFloat(sprite.getRed() * alpha, sprite.getGreen() * alpha, sprite.getBlue() * alpha, alpha);
 
-			this.mSpriteBatch.drawWithoutChecks(sprite, colorABGRPackedInt);
+			this.mSpriteBatch.drawWithoutChecks(sprite, colorABGRPackedFloat);
 		}
 		this.mSpriteBatch.submit();
 
