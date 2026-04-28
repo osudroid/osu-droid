@@ -2508,10 +2508,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         activeObjects.add(object);
     }
 
-    public void removeObject(final GameObject object) {
-        expiredObjects.add(object);
-    }
-
     @Override
     public boolean isObjectHittable(GameObject object) {
         return object == judgeableObject;
