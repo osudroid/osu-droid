@@ -702,15 +702,11 @@ class SettingsFragment : SettingsFragment() {
             // the correct skin path.
             Config.setSkinPath(path)
             ResourceManager.getInstance().loadSkin(path)
-            // Do NOT call engine.textureManager.onReload() and do NOT call
-            // startActivity(MainActivity) here. With singleInstance launch mode,
-            // startActivity triggers onPause() → EGL context destroyed → onResume() →
-            // onSurfaceCreated() → onReloadResources() which queues every managed texture
-            // for reload, then updateTextures() reloads them ALL in one frame = freeze.
-            // Simply dismissing returns to the menu with the new skin already applied.
+            GlobalManager.getInstance().engine.textureManager.onReload()
 
             mainThread {
                 loading.dismiss()
+                requireContext().startActivity(Intent(requireContext(), MainActivity::class.java))
                 Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }
