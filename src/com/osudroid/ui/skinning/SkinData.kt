@@ -39,7 +39,7 @@ class StringSkinData @JvmOverloads constructor(tag: String, default: String = ""
 
 class ColorSkinData @JvmOverloads constructor(tag: String, default: Color4? = null) : SkinData<Color4?>(tag, default) {
     override fun setFromJson(data: JSONObject) {
-        val hex = data.optString(tag).trim()
+        val hex = if (data.isNull(tag)) "" else data.optString(tag)
 
         currentValue =
             if (hex.isEmpty()) defaultValue
