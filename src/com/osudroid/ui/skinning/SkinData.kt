@@ -41,8 +41,14 @@ class ColorSkinData @JvmOverloads constructor(tag: String, default: Color4? = nu
     override fun setFromJson(data: JSONObject) {
         val hex = if (data.isNull(tag)) "" else data.optString(tag)
 
-        currentValue =
-            if (hex.isEmpty()) defaultValue
-            else Color4(hex, HexComposition.RRGGBB)
+        currentValue = if (hex.isEmpty()) {
+            defaultValue
+        } else {
+            try {
+                Color4(hex, HexComposition.RRGGBB)
+            } catch (_: NumberFormatException) {
+                defaultValue
+            }
+        }
     }
 }
