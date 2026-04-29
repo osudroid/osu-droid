@@ -579,13 +579,14 @@ public class SliderBody extends UIContainer {
                 while (segmentIndex > 0 && cache.pointLengths[segmentIndex] > length) {
                     segmentIndex--;
                 }
+            }
 
-                if (preferNextOnExactPoint && segmentIndex + 1 < cache.pointCount - 1) {
-                    float pointLength = cache.pointLengths[segmentIndex + 1];
+            // If next exact point is preferred, select it if its length falls within the epsilon.
+            if (preferNextOnExactPoint && segmentIndex + 1 < cache.pointCount - 1) {
+                float pointLength = cache.pointLengths[segmentIndex + 1];
 
-                    if (Math.abs(pointLength - length) <= lengthUpdateEpsilon) {
-                        return segmentIndex + 1;
-                    }
+                if (Math.abs(pointLength - length) <= lengthUpdateEpsilon) {
+                    return segmentIndex + 1;
                 }
             }
 
