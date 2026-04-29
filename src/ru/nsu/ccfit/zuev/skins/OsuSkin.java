@@ -103,6 +103,7 @@ public class OsuSkin {
         return sliderHintWidth.getCurrentValue();
     }
 
+    @Nullable
     public Color4 getSliderHintColor() {
         return sliderHintColor.getCurrentValue();
     }
