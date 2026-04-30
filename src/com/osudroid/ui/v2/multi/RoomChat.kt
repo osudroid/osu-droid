@@ -304,6 +304,7 @@ class RoomChat : UILinearContainer() {
 
             linearContainer {
                 width = FillParent
+                height = FillParent
                 orientation = Orientation.Horizontal
 
                 tagText = text {
@@ -315,6 +316,8 @@ class RoomChat : UILinearContainer() {
 
                 messageText = text {
                     width = FillParent
+                    height = FillParent
+                    clipToBounds = true
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     applyTheme = { color = it.accentColor }
