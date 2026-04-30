@@ -941,7 +941,8 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
         room.host = uid
 
-        chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_new_host, room.playersMap[uid]?.name.toString()), "#459FFF")
+        val newHostName = room.playersMap[uid]?.name ?: "#$uid"
+        chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_new_host, newHostName), "#459FFF")
 
         updateThread {
             ModMenu.back(false)
