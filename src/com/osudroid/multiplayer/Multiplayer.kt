@@ -11,6 +11,7 @@ import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -250,14 +251,27 @@ object Multiplayer {
             while (isReconnecting) {
                 val currentTime = System.currentTimeMillis()
 
-                // Timeout to reconnect was exceed.
+                // Timeout to reconnect was exceeded.
                 if (currentTime - reconnectionStartTimeMS >= 30000) {
                     ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
                     roomScene?.back()
                     return@launch
                 }
 
-                if (currentTime - lastAttemptResponseTimeMS < 5000 || isWaitingAttemptResponse) continue
+                // Still waiting for the server to respond to the last attempt — poll cheaply
+                // instead of spinning at 100% CPU.
+                if (isWaitingAttemptResponse) {
+                    delay(250)
+                    continue
+                }
+
+                // Inter-attempt cooldown: sleep for the exact remaining time rather than
+                // busy-spinning until the 5-second window has elapsed.
+                val msSinceLastResponse = currentTime - lastAttemptResponseTimeMS
+                if (msSinceLastResponse < 5000) {
+                    delay(5000 - msSinceLastResponse)
+                    continue
+                }
 
                 try {
                     RoomAPI.connectToRoom(
