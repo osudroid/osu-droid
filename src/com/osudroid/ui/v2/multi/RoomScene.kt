@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicReference
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
@@ -117,14 +118,14 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      * Running job that force-starts the game if `allPlayersBeatmapLoadComplete` is not received
      * within [BEATMAP_LOAD_TIMEOUT_MS] ms after `playBeatmap` was received (EH-2).
      *
-     * `@Volatile` is required because this field is written from three different threads:
+     * An [AtomicReference] is used because this field is accessed from three different threads:
      * - socket EventThread  → [startBeatmapLoadTimeout] / [cancelBeatmapLoadTimeout]
-     * - AndEngine update thread → [cancelBeatmapLoadTimeout] (called from [back])
-     * - [matchScope] coroutine (Dispatchers.Default) → set to `null` after the delay fires
-     * Without `@Volatile` the JVM memory model gives no visibility guarantee across threads.
+     * - AndEngine update thread → [cancelBeatmapLoadTimeout] (called from [teardownSession])
+     * - [matchScope] coroutine (Dispatchers.Default) → reads and potentially replaces the reference
+     * [AtomicReference] gives a single atomic swap operation (getAndSet/set) with full
+     * visibility guarantees, avoiding the check-then-act race that a plain @Volatile var has.
      */
-    @Volatile
-    private var beatmapLoadTimeoutJob: Job? = null
+    private val beatmapLoadTimeoutJob = AtomicReference<Job?>(null)
 
 
     /**
@@ -1158,8 +1159,8 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      * hanging indefinitely when one client stops responding mid-load without a clean disconnect.
      */
     private fun startBeatmapLoadTimeout() {
-        beatmapLoadTimeoutJob?.cancel()
-        beatmapLoadTimeoutJob = matchScope.launch {
+        beatmapLoadTimeoutJob.getAndSet(null)?.cancel()
+        beatmapLoadTimeoutJob.set(matchScope.launch {
             delay(BEATMAP_LOAD_TIMEOUT_MS)
             Multiplayer.log(
                 "WARNING: allPlayersBeatmapLoadComplete not received within " +
@@ -1170,8 +1171,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
                     GlobalManager.getInstance().gameScene.isReadyToStart = true
                 }
             }
-            beatmapLoadTimeoutJob = null
-        }
+        })
     }
 
     /**
@@ -1179,8 +1179,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      * Call this when [onRoomMatchStart] is received or when the room is torn down.
      */
     private fun cancelBeatmapLoadTimeout() {
-        beatmapLoadTimeoutJob?.cancel()
-        beatmapLoadTimeoutJob = null
+        beatmapLoadTimeoutJob.getAndSet(null)?.cancel()
     }
 
 
