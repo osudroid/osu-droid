@@ -854,10 +854,14 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         updateThread {
             updateBackground(selectedBeatmap?.backgroundPath)
             updateBeatmap(beatmap)
+        }
 
+        // songService (MediaPlayer) must be called from the main Android thread, not the
+        // AndEngine update thread or the socket EventThread.
+        mainThread {
             if (selectedBeatmap == null) {
                 GlobalManager.getInstance().songService.stop()
-                return@updateThread
+                return@mainThread
             }
 
             GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
