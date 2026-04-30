@@ -923,7 +923,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     /**This method is used purely to update UI in other clients*/
     override fun onPlayerModsChange(uid: Long, mods: RoomMods) {
 
-        room.playersMap[uid]!!.mods = mods
+        val target = room.playersMap[uid] ?: run {
+            Multiplayer.log("WARNING: onPlayerModsChange — unknown uid $uid, player may have already left")
+            return
+        }
+        target.mods = mods
 
         updatePlayerList()
 
@@ -1087,7 +1091,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus) {
 
-        room.playersMap[uid]!!.status = status
+        val target = room.playersMap[uid] ?: run {
+            Multiplayer.log("WARNING: onPlayerStatusChange — unknown uid $uid, player may have already left")
+            return
+        }
+        target.status = status
 
         val player = Multiplayer.player
         if (player != null && uid == player.id) {
@@ -1100,7 +1108,11 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?) {
 
-        room.playersMap[uid]!!.team = team
+        val target = room.playersMap[uid] ?: run {
+            Multiplayer.log("WARNING: onPlayerTeamChange — unknown uid $uid, player may have already left")
+            return
+        }
+        target.team = team
 
         updatePlayerList()
         updateInformation()
