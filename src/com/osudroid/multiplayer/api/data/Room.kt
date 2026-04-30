@@ -115,9 +115,23 @@ data class Room(
 
     /**
      * Get the players list in map format using UIDs as keys.
+     *
+     * Backed by a cache that is invalidated whenever the players array is mutated
+     * (see [sortPlayers] and [resizePlayers]).  Callers that already hold the lock
+     * (e.g. every @Synchronized method in this class) get the cached map for free
+     * on repeated accesses within the same event; callers on other threads pay at
+     * most one rebuild per mutation event.
      */
-    val playersMap
-        @Synchronized get() = activePlayers.associateBy { it.id }
+    val playersMap: Map<Long, RoomPlayer>
+        @Synchronized get() = _playersMap
+            ?: players.filterNotNull().associateByTo(HashMap()) { it.id }.also { _playersMap = it }
+
+    // Backing field for the playersMap cache.  Null means the cache is stale.
+    // @Volatile so the null-write in sortPlayers/resizePlayers is immediately
+    // visible to threads that read playersMap without going through the lock
+    // (e.g. a quick null-check before acquiring).
+    @Volatile
+    private var _playersMap: Map<Long, RoomPlayer>? = null
 
     /**
      * Get the players list of a team in a map format.
@@ -191,13 +205,16 @@ data class Room(
     @Synchronized
     fun resizePlayers(newSize: Int) {
         players = players.copyOf(newSize)
+        _playersMap = null
     }
 
     /**
      * Sort players array placing non-null first.
+     * Also invalidates the [playersMap] cache since the array content has changed.
      */
     @Synchronized
     private fun sortPlayers() {
         players = players.sortedWith { a, b -> (a == null).compareTo(b == null) }.toTypedArray()
+        _playersMap = null
     }
 }
