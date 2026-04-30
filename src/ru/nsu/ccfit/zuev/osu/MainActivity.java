@@ -124,7 +124,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public EngineOptions onCreateEngineOptions() {
         if (!checkPermissions()) {
-            return null;
+            // Activity is finishing (redirected to PermissionActivity).
+            // Return a minimal valid EngineOptions so BaseGameActivity does not NPE
+            // before the Activity is destroyed — the engine will be torn down with the Activity.
+            Camera stubCamera = new SmoothCamera(0, 0, 1, 1, 0, 0, 1);
+            return new EngineOptions(false, ScreenOrientation.LANDSCAPE_SENSOR,
+                    new RatioResolutionPolicy(1, 1), stubCamera);
         }
         analytics = FirebaseAnalytics.getInstance(this);
         crashlytics = FirebaseCrashlytics.getInstance();
