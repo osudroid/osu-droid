@@ -615,6 +615,9 @@ public class Entity implements IEntity {
 	    if(this.mChildren == null) {
 	        return null;
 	    }
+	    if (pIndex < 0 || pIndex >= this.mChildren.size()) {
+	        return null;
+	    }
 	    return this.mChildren.get(pIndex);
 	}
 
