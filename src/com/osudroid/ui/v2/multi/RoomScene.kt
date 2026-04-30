@@ -721,10 +721,16 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         GlobalManager.getInstance().engine.scene = this
 
         if (!isWaitingForBeatmapChange) {
+            // onRoomBeatmapChange sets engine.scene = this just above, so it will always
+            // find the scene active and call invalidateStatus() internally.  Do NOT call
+            // invalidateStatus() again afterwards — that would emit a redundant
+            // setPlayerStatus to the server (SI-4).
             onRoomBeatmapChange(room.beatmap)
         }
+        // When isWaitingForBeatmapChange == true a beatmap change is already in flight.
+        // Emitting a status now would race the imminent onRoomBeatmapChange callback that
+        // will call invalidateStatus() with the correct beatmap context.
 
-        invalidateStatus()
         chat.show()
     }
 
