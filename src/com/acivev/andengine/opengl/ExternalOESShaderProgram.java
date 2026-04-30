@@ -22,11 +22,15 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     // Singleton
     // ===========================================================
 
-    private static ExternalOESShaderProgram INSTANCE;
+    private static volatile ExternalOESShaderProgram INSTANCE;
 
     public static ExternalOESShaderProgram getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ExternalOESShaderProgram();
+            synchronized (ExternalOESShaderProgram.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new ExternalOESShaderProgram();
+                }
+            }
         }
         return INSTANCE;
     }
@@ -61,13 +65,29 @@ public class ExternalOESShaderProgram extends ShaderProgram {
             "}";
 
     // ===========================================================
-    // Uniform locations (populated after link)
+    // Uniform locations (populated after link, private to prevent external mutation)
     // ===========================================================
 
-    public static int sUniformMVPMatrixLocation  = ShaderProgramConstants.LOCATION_INVALID;
-    public static int sUniformSTMatrixLocation   = ShaderProgramConstants.LOCATION_INVALID;
-    public static int sUniformTexture0Location   = ShaderProgramConstants.LOCATION_INVALID;
-    public static int sUniformColorLocation      = ShaderProgramConstants.LOCATION_INVALID;
+    // Keep these as public static temporarily for UIVideoSprite compatibility,
+    // but they are now only written by this class (link / resetForContextLoss).
+    private int mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+    private int mUniformSTMatrixLocation  = ShaderProgramConstants.LOCATION_INVALID;
+    private int mUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;
+    private int mUniformColorLocation     = ShaderProgramConstants.LOCATION_INVALID;
+
+    public int getUniformMVPMatrixLocation()  { return mUniformMVPMatrixLocation; }
+    public int getUniformSTMatrixLocation()   { return mUniformSTMatrixLocation; }
+    public int getUniformTexture0Location()   { return mUniformTexture0Location; }
+    public int getUniformColorLocation()      { return mUniformColorLocation; }
+
+    /** @deprecated Use the typed getters instead. Left for migration only. */
+    @Deprecated public static int sUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+    /** @deprecated Use the typed getters instead. Left for migration only. */
+    @Deprecated public static int sUniformSTMatrixLocation  = ShaderProgramConstants.LOCATION_INVALID;
+    /** @deprecated Use the typed getters instead. Left for migration only. */
+    @Deprecated public static int sUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;
+    /** @deprecated Use the typed getters instead. Left for migration only. */
+    @Deprecated public static int sUniformColorLocation     = ShaderProgramConstants.LOCATION_INVALID;
 
     // ===========================================================
     // Constructor
@@ -92,10 +112,16 @@ public class ExternalOESShaderProgram extends ShaderProgram {
 
         super.link(pGLState);
 
-        sUniformMVPMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
-        sUniformSTMatrixLocation  = this.getUniformLocation("u_stMatrix");
-        sUniformTexture0Location  = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
-        sUniformColorLocation     = this.getUniformLocation(ShaderProgramConstants.UNIFORM_COLOR);
+        mUniformMVPMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
+        mUniformSTMatrixLocation  = this.getUniformLocation("u_stMatrix");
+        mUniformTexture0Location  = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
+        mUniformColorLocation     = this.getUniformLocation(ShaderProgramConstants.UNIFORM_COLOR);
+
+        // Keep deprecated statics in sync for any call sites not yet migrated.
+        sUniformMVPMatrixLocation = mUniformMVPMatrixLocation;
+        sUniformSTMatrixLocation  = mUniformSTMatrixLocation;
+        sUniformTexture0Location  = mUniformTexture0Location;
+        sUniformColorLocation     = mUniformColorLocation;
     }
 
     // ===========================================================
@@ -122,6 +148,11 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     @Override
     public void resetForContextLoss() {
         super.resetForContextLoss();
+        mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+        mUniformSTMatrixLocation  = ShaderProgramConstants.LOCATION_INVALID;
+        mUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;
+        mUniformColorLocation     = ShaderProgramConstants.LOCATION_INVALID;
+        // Keep deprecated statics in sync.
         sUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
         sUniformSTMatrixLocation  = ShaderProgramConstants.LOCATION_INVALID;
         sUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;

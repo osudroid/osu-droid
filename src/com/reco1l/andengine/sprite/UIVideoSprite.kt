@@ -46,28 +46,28 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
         val shader = ExternalOESShaderProgram.getInstance()
         shader.bindProgram(pGLState)
 
-        if (ExternalOESShaderProgram.sUniformMVPMatrixLocation >= 0) {
+        if (shader.uniformMVPMatrixLocation >= 0) {
             GLES20.glUniformMatrix4fv(
-                ExternalOESShaderProgram.sUniformMVPMatrixLocation,
+                shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }
 
         // ST-transform: corrects Y-flip and any other orientation from the hardware decoder.
-        if (ExternalOESShaderProgram.sUniformSTMatrixLocation >= 0) {
+        if (shader.uniformSTMatrixLocation >= 0) {
             GLES20.glUniformMatrix4fv(
-                ExternalOESShaderProgram.sUniformSTMatrixLocation,
+                shader.uniformSTMatrixLocation,
                 1, false, videoTexture.getTransformMatrix(), 0
             )
         }
 
-        if (ExternalOESShaderProgram.sUniformTexture0Location >= 0) {
-            GLES20.glUniform1i(ExternalOESShaderProgram.sUniformTexture0Location, 0)
+        if (shader.uniformTexture0Location >= 0) {
+            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
-        if (ExternalOESShaderProgram.sUniformColorLocation >= 0) {
+        if (shader.uniformColorLocation >= 0) {
             GLES20.glUniform4f(
-                ExternalOESShaderProgram.sUniformColorLocation,
+                shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
@@ -104,7 +104,9 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
     }
 
     override fun finalize() {
-        release()
+        // Do NOT call release() here — finalize() runs on a GC thread which has no active GL
+        // context.  Calling unloadTexture() from a non-GL thread silently corrupts GL state.
+        // Callers must call release() explicitly before dropping the last reference.
         super.finalize()
     }
 }
