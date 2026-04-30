@@ -54,7 +54,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private float downTime = -1;
     private int _scoreID = -1;
     private boolean moved = false;
-    private ArrayList<ScoreBoardItem> scoreItems = null;
+    private volatile ArrayList<ScoreBoardItem> scoreItems = null;
     private BeatmapLeaderboardScoringMode currentScoringMode;
 
     private LoadTask currentTask;
@@ -115,7 +115,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     Log.e("Scoreboard", "Failed to load scores from online.", e);
 
                     if (isActive()) {
-                        loadingText.setText("Cannot load scores");
+                        // setText modifies VBO-backed data; must be called from the update thread.
+                        Execution.updateThread(() -> loadingText.setText("Cannot load scores"));
                     }
                     return;
                 }
@@ -124,7 +125,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     return;
                 }
 
-                loadingText.setText(OnlineManager.getInstance().getFailMessage());
+                final String failMessage = OnlineManager.getInstance().getFailMessage();
+                // setText modifies VBO-backed data; must be called from the update thread.
+                Execution.updateThread(() -> loadingText.setText(failMessage));
 
                 boolean isPPScoringMode = currentScoringMode == BeatmapLeaderboardScoringMode.PP;
                 var username = OnlineManager.getInstance().getUsername();
