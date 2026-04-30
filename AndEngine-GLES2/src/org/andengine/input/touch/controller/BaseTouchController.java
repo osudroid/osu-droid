@@ -8,6 +8,7 @@ import org.andengine.util.adt.pool.RunnablePoolUpdateHandler;
 import android.view.MotionEvent;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -29,13 +30,19 @@ public abstract class BaseTouchController implements ITouchController  {
 	//							  processHistoricalEvents flag for accurate MOVE tracking
 	private static final int RAW_POINTER_CAPACITY = 10;
 
-	private boolean mUseRawPointer;
-	private boolean mProcessHistoricalEvents;
-	private final float[] mRawPointerX = new float[RAW_POINTER_CAPACITY];
-	private final float[] mRawPointerY = new float[RAW_POINTER_CAPACITY];
-	private final boolean[] mRawPointerDown = new boolean[RAW_POINTER_CAPACITY];
-	private final long[] mRawPointerEventTime = new long[RAW_POINTER_CAPACITY];
-	private final AtomicIntegerArray mRawPointerVersion = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	// volatile so that changes from applyTouchOptions() (game-update thread) are
+	// immediately visible to onHandleMotionEvent() (UI thread).
+	private volatile boolean mUseRawPointer;
+	private volatile boolean mProcessHistoricalEvents;
+
+	// Atomic arrays give each element volatile store/load semantics, providing the
+	// store-store / load-load ordering the seqlock requires on ARM without needing
+	// platform-specific fences.  Floats are stored as their raw int bits.
+	private final AtomicIntegerArray mRawPointerX    = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	private final AtomicIntegerArray mRawPointerY    = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	private final AtomicIntegerArray mRawPointerDown = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	private final AtomicLongArray    mRawPointerEventTime = new AtomicLongArray(RAW_POINTER_CAPACITY);
+	private final AtomicIntegerArray mRawPointerVersion  = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
 	// END osu!droid modified
 
 	private ITouchEventCallback mTouchEventCallback;
@@ -136,22 +143,22 @@ public abstract class BaseTouchController implements ITouchController  {
 
 	@Override
 	public boolean isRawPointerDown(int pointerId) {
-		return pointerId >= 0 && pointerId < RAW_POINTER_CAPACITY && this.mRawPointerDown[pointerId];
+		return pointerId >= 0 && pointerId < RAW_POINTER_CAPACITY && this.mRawPointerDown.get(pointerId) != 0;
 	}
 
 	@Override
 	public float getRawPointerSurfaceX(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : this.mRawPointerX[pointerId];
+		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : Float.intBitsToFloat(this.mRawPointerX.get(pointerId));
 	}
 
 	@Override
 	public float getRawPointerSurfaceY(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : this.mRawPointerY[pointerId];
+		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : Float.intBitsToFloat(this.mRawPointerY.get(pointerId));
 	}
 
 	@Override
 	public long getRawPointerEventTime(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0L : this.mRawPointerEventTime[pointerId];
+		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0L : this.mRawPointerEventTime.get(pointerId);
 	}
 
 	@Override
@@ -181,10 +188,10 @@ public abstract class BaseTouchController implements ITouchController  {
 	public void resetRawPointers() {
 		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
 			this.mRawPointerVersion.set(i, 0);
-			this.mRawPointerX[i] = 0f;
-			this.mRawPointerY[i] = 0f;
-			this.mRawPointerDown[i] = false;
-			this.mRawPointerEventTime[i] = 0L;
+			this.mRawPointerX.set(i, 0);
+			this.mRawPointerY.set(i, 0);
+			this.mRawPointerDown.set(i, 0);
+			this.mRawPointerEventTime.set(i, 0L);
 		}
 	}
 
@@ -215,11 +222,14 @@ public abstract class BaseTouchController implements ITouchController  {
 		if (!this.mUseRawPointer || id < 0 || id >= RAW_POINTER_CAPACITY) {
 			return;
 		}
+		// Seqlock write: bump version to odd (write in progress), store data via
+		// volatile (atomic) array elements to guarantee store-store ordering on ARM,
+		// then bump version back to even (write done).
 		this.mRawPointerVersion.incrementAndGet(id);
-		this.mRawPointerX[id] = x;
-		this.mRawPointerY[id] = y;
-		this.mRawPointerDown[id] = down;
-		this.mRawPointerEventTime[id] = eventTime;
+		this.mRawPointerX.set(id, Float.floatToRawIntBits(x));
+		this.mRawPointerY.set(id, Float.floatToRawIntBits(y));
+		this.mRawPointerDown.set(id, down ? 1 : 0);
+		this.mRawPointerEventTime.set(id, eventTime);
 		this.mRawPointerVersion.incrementAndGet(id);
 	}
 
