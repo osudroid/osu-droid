@@ -11,6 +11,7 @@ import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -80,7 +81,11 @@ object Multiplayer {
 
     private val logger = MultiplayerLogger()
 
-    private val reconnectionScope by lazy { CoroutineScope(Dispatchers.Default) }
+    /** Scope used for the reconnection loop. A new scope is created per session so the old one can be cancelled cleanly. */
+    private var reconnectionScope: CoroutineScope? = null
+
+    /** Active reconnection coroutine job, so duplicate launches can be cancelled. */
+    private var reconnectionJob: Job? = null
 
 
     @Volatile
@@ -209,6 +214,15 @@ object Multiplayer {
 
     // Reconnection
 
+    /** Cancels any active reconnection coroutine and its scope. Should be called when leaving the room. */
+    fun cancelReconnection() {
+        isReconnecting = false
+        reconnectionJob?.cancel()
+        reconnectionJob = null
+        reconnectionScope?.let { scope -> (scope.coroutineContext[Job.Key])?.cancel() }
+        reconnectionScope = null
+    }
+
     fun onReconnectAttempt(success: Boolean) {
 
         lastAttemptResponseTimeMS = System.currentTimeMillis()
@@ -243,10 +257,16 @@ object Multiplayer {
         }
         isReconnecting = true
 
+        // Cancel any leftover scope/job from a previous session and create a fresh scope.
+        reconnectionScope?.let { scope -> (scope.coroutineContext[Job.Key])?.cancel() }
+        reconnectionJob?.cancel()
+        val scope = CoroutineScope(Dispatchers.Default)
+        reconnectionScope = scope
+
         attemptCount = 0
         reconnectionStartTimeMS = System.currentTimeMillis()
 
-        reconnectionScope.launch {
+        reconnectionJob = scope.launch {
 
             while (isReconnecting) {
                 val currentTime = System.currentTimeMillis()

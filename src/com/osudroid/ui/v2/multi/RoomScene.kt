@@ -718,7 +718,9 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     // Navigation
 
     override fun back() {
-        Multiplayer.isReconnecting = false
+        // Cancel the reconnection scope/job before setting isReconnecting = false so the
+        // coroutine's loop exits and the scope is cleaned up (ML-2).
+        Multiplayer.cancelReconnection()
 
         // Null out event listeners before disconnect so any queued socket events that
         // arrive after teardown find no listener to call (ML-1).
