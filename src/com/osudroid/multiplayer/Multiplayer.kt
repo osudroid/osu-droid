@@ -43,12 +43,14 @@ object Multiplayer {
      * Indicates if player is in multiplayer mode
      */
     @JvmField
+    @Volatile
     var isMultiplayer = false
 
     /**
      * Indicates if the client is waiting for a reconnection.
      */
     @JvmField
+    @Volatile
     var isReconnecting = false
 
     /**
@@ -80,12 +82,16 @@ object Multiplayer {
     private val reconnectionScope by lazy { CoroutineScope(Dispatchers.Default) }
 
 
+    @Volatile
     private var attemptCount = 0
 
+    @Volatile
     private var reconnectionStartTimeMS = 0L
 
+    @Volatile
     private var lastAttemptResponseTimeMS = 0L
 
+    @Volatile
     private var isWaitingAttemptResponse = false
 
 
