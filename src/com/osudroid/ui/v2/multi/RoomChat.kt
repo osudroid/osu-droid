@@ -340,7 +340,7 @@ class RoomChat : UILinearContainer() {
                     text = "${if (lastMessage is PlayerMessage) lastMessage.player.name else StringTable.get(R.string.multiplayer_room_chat_system)}: "
                     color = if (lastMessage is PlayerMessage) getPlayerTagColor(lastMessage.player) else Theme.current.accentColor
                 }
-                messageText.text = lastMessage.content
+                messageText.text = lastMessage.content.substringBefore('\n')
             }
         }
 
