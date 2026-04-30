@@ -766,9 +766,15 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
         if (uid != null) {
 
+            // Look up the sender.  If they are not yet in playersMap the most likely cause is
+            // that chatMessage arrived on the EventThread just before the playerJoined event
+            // that was queued right behind it (EH-3).  Rather than silently discarding the
+            // message, build a temporary stub player so the text is displayed in the chat log.
+            // The stub uses "#uid" as its name; once playerJoined fires, any subsequent
+            // messages from that player will show their real username.
             val player = room.playersMap[uid] ?: run {
-                Multiplayer.log("WARNING: Unable to find user by ID on chat message")
-                return
+                Multiplayer.log("WARNING: chatMessage from unknown UID $uid — displaying with stub name (EH-3)")
+                RoomPlayer(id = uid, name = "#$uid", status = PlayerStatus.NotReady, team = null, mods = RoomMods())
             }
 
             if (!player.isMuted) {
