@@ -986,10 +986,12 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
-
         updateThread {
+            // Apply the new room mods to ModMenu first so that enabledMods is up-to-date
+            // before we serialize and emit to the server.  Serializing before setMods() runs
+            // would send the previous (stale) mods payload to the server.
             ModMenu.setMods(mods, room.gameplaySettings.isFreeMod)
+            RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
             updateInformation()
         }
     }
