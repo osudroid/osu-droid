@@ -67,8 +67,11 @@ data class Room(
     /**
      * The array containing the players, null values are empty slots. The array size corresponds to [maxPlayers].
      *
-     * Marked @Volatile so that when [sortPlayers] (or [resizePlayers]) replaces the array reference,
-     * all threads immediately see the new reference without a stale cached copy.
+     * Slot indices mirror the server's layout exactly: index `i` here corresponds to slot `i` on the
+     * server.  The array is never re-sorted locally so the two views never diverge (SI-3).
+     *
+     * Marked @Volatile so that when [resizePlayers] replaces the array reference all threads
+     * immediately see the new reference without a stale cached copy.
      * Compound read-modify-write operations must still go through a @Synchronized method.
      */
     @Volatile
@@ -80,7 +83,9 @@ data class Room(
     var host: Long = -1
         @Synchronized set(value) {
             field = value
-            sortPlayers()
+            // NOTE: sortPlayers() used to be called here, but sorting shifts players out of
+            // their server-assigned slot positions (SI-3).  Host assignment does not change
+            // which players are present, so no array mutation or cache invalidation is needed.
         }
 
     /**
@@ -117,7 +122,7 @@ data class Room(
      * Get the players list in map format using UIDs as keys.
      *
      * Backed by a cache that is invalidated whenever the players array is mutated
-     * (see [sortPlayers] and [resizePlayers]).  Callers that already hold the lock
+     * (see [addPlayer], [removePlayer], and [resizePlayers]).  Callers that already hold the lock
      * (e.g. every @Synchronized method in this class) get the cached map for free
      * on repeated accesses within the same event; callers on other threads pay at
      * most one rebuild per mutation event.
@@ -127,7 +132,7 @@ data class Room(
             ?: players.filterNotNull().associateByTo(HashMap()) { it.id }.also { _playersMap = it }
 
     // Backing field for the playersMap cache.  Null means the cache is stale.
-    // @Volatile so the null-write in sortPlayers/resizePlayers is immediately
+    // @Volatile so the null-write in addPlayer/removePlayer/resizePlayers is immediately
     // visible to threads that read playersMap without going through the lock
     // (e.g. a quick null-check before acquiring).
     @Volatile
@@ -148,6 +153,9 @@ data class Room(
 
     /**
      * Special handling to add a player in the array.
+     *
+     * The player is placed in the first available null slot and the array is NOT re-sorted,
+     * preserving server-assigned slot positions for all existing players (SI-3).
      *
      * @return `true` if it was successfully added, `false` it if wasn't or if it was already in the array (this can
      * happen due to reconnection).
@@ -171,12 +179,15 @@ data class Room(
         }
 
         players[index] = player
-        sortPlayers()
+        _playersMap = null
         return !wasAlready
     }
 
     /**
      * Special handling to remove a player in the array.
+     *
+     * The vacated slot is set to null in-place; the array is NOT re-sorted so that
+     * all remaining players keep their server-assigned slot positions (SI-3).
      *
      * @return The removed player or `null` if it wasn't on the array.
      */
@@ -187,7 +198,7 @@ data class Room(
 
         if (removed != null) {
             players[index] = null
-            sortPlayers()
+            _playersMap = null
         } else {
             Multiplayer.log("WARNING: Tried to remove a player with invalid index: $index")
         }
@@ -207,16 +218,6 @@ data class Room(
     @Synchronized
     fun resizePlayers(newSize: Int) {
         players = players.copyOf(newSize)
-        _playersMap = null
-    }
-
-    /**
-     * Sort players array placing non-null first.
-     * Also invalidates the [playersMap] cache since the array content has changed.
-     */
-    @Synchronized
-    private fun sortPlayers() {
-        players = players.sortedWith { a, b -> (a == null).compareTo(b == null) }.toTypedArray()
         _playersMap = null
     }
 }
