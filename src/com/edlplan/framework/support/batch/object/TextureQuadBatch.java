@@ -127,19 +127,19 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
         Matrix.multiplyMM(mvp, 0, sBaseGLMatrix, 0, camMatrix, 0);
 
         // --- Bind shader --------------------------------------------------------
-        GLES20.glUseProgram(shader.programID);
+        GLES20.glUseProgram(shader.getProgramID());
 
         // --- Upload MVP uniform -------------------------------------------------
-        if (shader.uMVPLoc >= 0) {
-            GLES20.glUniformMatrix4fv(shader.uMVPLoc, 1, false, mvp, 0);
+        if (shader.getUMVPLoc() >= 0) {
+            GLES20.glUniformMatrix4fv(shader.getUMVPLoc(), 1, false, mvp, 0);
         }
 
         // --- Bind texture -------------------------------------------------------
         GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
-        if (shader.uTextureLoc >= 0) {
-            GLES20.glUniform1i(shader.uTextureLoc, 0);
+        if (shader.getUTextureLoc() >= 0) {
+            GLES20.glUniform1i(shader.getUTextureLoc(), 0);
         }
 
         // --- Upload vertex data (client-side array, no VBO) ---------------------

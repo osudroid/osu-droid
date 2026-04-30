@@ -42,10 +42,14 @@ public class StoryboardBatchShader {
 
     // Singleton ------------------------------------------------------------------
 
-    private static StoryboardBatchShader sInstance;
+    private static volatile StoryboardBatchShader sInstance;
 
     public static StoryboardBatchShader getInstance() {
-        if (sInstance == null) sInstance = new StoryboardBatchShader();
+        if (sInstance == null) {
+            synchronized (StoryboardBatchShader.class) {
+                if (sInstance == null) sInstance = new StoryboardBatchShader();
+            }
+        }
         return sInstance;
     }
 
@@ -54,10 +58,15 @@ public class StoryboardBatchShader {
     public static final int ATTRIB_TEXCOORD = 1;
     public static final int ATTRIB_COLOR    = 2;
 
-    // Uniform locations (resolved after link) ------------------------------------
-    public int programID   = -1;
-    public int uMVPLoc     = -1;
-    public int uTextureLoc = -1;
+    // Uniform locations (resolved after link) kept private to prevent external
+    // mutation — an accidental write of -1 would force a full recompile every frame.
+    private int programID   = -1;
+    private int uMVPLoc     = -1;
+    private int uTextureLoc = -1;
+
+    public int getProgramID()   { return programID; }
+    public int getUMVPLoc()     { return uMVPLoc; }
+    public int getUTextureLoc() { return uTextureLoc; }
 
     private StoryboardBatchShader() {}
 
