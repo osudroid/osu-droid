@@ -198,7 +198,9 @@ data class Room(
 
     /**
      * Atomically resize the players array. Players whose slot index falls within the new size
-     * are preserved; those beyond it are silently dropped (the server is authoritative).
+     * are preserved; those beyond it are truncated (the server is authoritative on capacity).
+     * Callers are expected to identify and surface any truncated players **before** calling
+     * this method — see [com.osudroid.ui.v2.multi.RoomScene.onRoomMaxPlayersChange] (SI-2).
      * Callers outside this class must use this instead of assigning [players] directly so the
      * operation is covered by the same monitor that guards [addPlayer] / [removePlayer].
      */

@@ -831,6 +831,19 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
+        // Before shrinking the array, surface any players that would be silently
+        // truncated so the chat keeps an audit trail and the displayed player list
+        // stays consistent (SI-2).  After sorting, non-null entries always come
+        // first, so any active player beyond the new limit sits at index >= maxPlayers.
+        if (maxPlayers < room.players.size) {
+            room.players.drop(maxPlayers).filterNotNull().forEach { dropped ->
+                chat.onSystemChatMessage(
+                    StringTable.format(R.string.multiplayer_room_player_left, dropped.name, dropped.id),
+                    "#459FFF"
+                )
+            }
+        }
+
         room.maxPlayers = maxPlayers
         room.resizePlayers(maxPlayers)
 
