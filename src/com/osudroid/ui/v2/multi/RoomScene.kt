@@ -116,7 +116,14 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     /**
      * Running job that force-starts the game if `allPlayersBeatmapLoadComplete` is not received
      * within [BEATMAP_LOAD_TIMEOUT_MS] ms after `playBeatmap` was received (EH-2).
+     *
+     * `@Volatile` is required because this field is written from three different threads:
+     * - socket EventThread  → [startBeatmapLoadTimeout] / [cancelBeatmapLoadTimeout]
+     * - AndEngine update thread → [cancelBeatmapLoadTimeout] (called from [back])
+     * - [matchScope] coroutine (Dispatchers.Default) → set to `null` after the delay fires
+     * Without `@Volatile` the JVM memory model gives no visibility guarantee across threads.
      */
+    @Volatile
     private var beatmapLoadTimeoutJob: Job? = null
 
 
