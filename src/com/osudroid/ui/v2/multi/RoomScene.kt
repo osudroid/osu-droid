@@ -808,7 +808,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
         room.maxPlayers = maxPlayers
-        room.players = room.players.copyOf(maxPlayers)
+        room.resizePlayers(maxPlayers)
 
         updateInformation()
         updatePlayerList()

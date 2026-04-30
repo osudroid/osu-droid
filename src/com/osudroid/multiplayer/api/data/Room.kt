@@ -65,15 +65,20 @@ data class Room(
     val sessionID: String? = null
 ) {
     /**
-     * The array containing the players, null values are empty slots. The array size correspond to [maxPlayers].
+     * The array containing the players, null values are empty slots. The array size corresponds to [maxPlayers].
+     *
+     * Marked @Volatile so that when [sortPlayers] (or [resizePlayers]) replaces the array reference,
+     * all threads immediately see the new reference without a stale cached copy.
+     * Compound read-modify-write operations must still go through a @Synchronized method.
      */
+    @Volatile
     var players: Array<RoomPlayer?> = arrayOfNulls(maxPlayers)
 
     /**
      * The host/room owner UID.
      */
     var host: Long = -1
-        set(value) {
+        @Synchronized set(value) {
             field = value
             sortPlayers()
         }
@@ -100,25 +105,25 @@ data class Room(
      * Besides [players] it provides an array trimmed with no empty slots.
      */
     val activePlayers
-        get() = players.filterNotNull()
+        @Synchronized get() = players.filterNotNull()
 
     /**
      * Returns an array of all players that are in READY status.
      */
     val readyPlayers
-        get() = activePlayers.filter { it.status == PlayerStatus.Ready }
+        @Synchronized get() = activePlayers.filter { it.status == PlayerStatus.Ready }
 
     /**
      * Get the players list in map format using UIDs as keys.
      */
     val playersMap
-        get() = activePlayers.associateBy { it.id }
+        @Synchronized get() = activePlayers.associateBy { it.id }
 
     /**
      * Get the players list of a team in a map format.
      */
     val teamMap
-        get() = activePlayers.groupBy { it.team }
+        @Synchronized get() = activePlayers.groupBy { it.team }
 
     /**
      * Determines if the room team mode is team vs team.
@@ -133,6 +138,7 @@ data class Room(
      * @return `true` if it was successfully added, `false` it if wasn't or if it was already in the array (this can
      * happen due to reconnection).
      */
+    @Synchronized
     fun addPlayer(player: RoomPlayer): Boolean {
         /** @see [RoomPlayer.equals] */
         var index = players.indexOf(player)
@@ -160,6 +166,7 @@ data class Room(
      *
      * @return The removed player or `null` if it wasn't on the array.
      */
+    @Synchronized
     fun removePlayer(uid: Long): RoomPlayer? {
         val index = players.indexOfFirst { it != null && it.id == uid }
         val removed = players.getOrNull(index)
@@ -176,8 +183,20 @@ data class Room(
 
 
     /**
+     * Atomically resize the players array. Players whose slot index falls within the new size
+     * are preserved; those beyond it are silently dropped (the server is authoritative).
+     * Callers outside this class must use this instead of assigning [players] directly so the
+     * operation is covered by the same monitor that guards [addPlayer] / [removePlayer].
+     */
+    @Synchronized
+    fun resizePlayers(newSize: Int) {
+        players = players.copyOf(newSize)
+    }
+
+    /**
      * Sort players array placing non-null first.
      */
+    @Synchronized
     private fun sortPlayers() {
         players = players.sortedWith { a, b -> (a == null).compareTo(b == null) }.toTypedArray()
     }
