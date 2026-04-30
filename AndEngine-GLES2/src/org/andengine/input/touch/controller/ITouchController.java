@@ -40,7 +40,7 @@ public interface ITouchController extends IUpdateHandler {
 	default int getRawPointerCapacity() { return 0; }
 	default void clearRawPointers() { }
 	default void resetRawPointers() { }
-	default boolean isUseRawPointers() { return false; }
+	default boolean isUseRawPointer() { return false; }
 	// END osu!droid modified
 
 	// ===========================================================

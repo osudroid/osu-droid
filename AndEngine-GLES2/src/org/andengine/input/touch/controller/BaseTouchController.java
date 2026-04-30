@@ -196,12 +196,12 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	@Override
-	public boolean isUseRawPointers() {
+	public boolean isUseRawPointer() {
 		return this.mUseRawPointer;
 	}
 
-	public void setUseRawPointers(boolean useRawPointers) {
-		this.mUseRawPointer = useRawPointers;
+	public void setUseRawPointer(boolean useRawPointer) {
+		this.mUseRawPointer = useRawPointer;
 	}
 
 	public boolean isProcessHistoricalEvents() {
@@ -214,7 +214,7 @@ public abstract class BaseTouchController implements ITouchController  {
 
 	@Override
 	public void applyTouchOptions(final TouchOptions pTouchOptions) {
-		this.setUseRawPointers(pTouchOptions.isUseRawPointer());
+		this.setUseRawPointer(pTouchOptions.isUseRawPointer());
 		this.setProcessHistoricalEvents(pTouchOptions.isProcessHistoricalEvents());
 	}
 
