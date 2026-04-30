@@ -720,6 +720,11 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     override fun back() {
         Multiplayer.isReconnecting = false
 
+        // Null out event listeners before disconnect so any queued socket events that
+        // arrive after teardown find no listener to call (ML-1).
+        RoomAPI.roomEventListener = null
+        RoomAPI.playerEventListener = null
+
         // Cancel any pending beatmap-load timeout so it cannot fire after teardown (EH-2).
         cancelBeatmapLoadTimeout()
 
