@@ -24,6 +24,11 @@ import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.updateThread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
@@ -94,6 +99,19 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      */
     @JvmField
     var isWaitingForModsChange = false
+
+    /**
+     * Coroutine scope used for the beatmap-load timeout job (EH-2).
+     * A dedicated scope is used so that cancelling the job is cheap and cannot interfere with
+     * other coroutines.
+     */
+    private val matchScope = CoroutineScope(Dispatchers.Default)
+
+    /**
+     * Running job that force-starts the game if `allPlayersBeatmapLoadComplete` is not received
+     * within [BEATMAP_LOAD_TIMEOUT_MS] ms after `playBeatmap` was received (EH-2).
+     */
+    private var beatmapLoadTimeoutJob: Job? = null
 
 
     /**
@@ -702,6 +720,9 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     override fun back() {
         Multiplayer.isReconnecting = false
 
+        // Cancel any pending beatmap-load timeout so it cannot fire after teardown (EH-2).
+        cancelBeatmapLoadTimeout()
+
         runSafe { RoomAPI.disconnect() }
 
         Multiplayer.room = null
@@ -1031,10 +1052,21 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
             }
         }
 
+        // Start a safety timer: if allPlayersBeatmapLoadComplete is never received (e.g. one
+        // client crashes mid-load without a clean disconnect) the match would hang forever for
+        // everyone.  Force-set isReadyToStart after the timeout so the game proceeds regardless
+        // (EH-2).
+        startBeatmapLoadTimeout()
+
         updatePlayerList()
     }
 
     override fun onRoomMatchStart() {
+
+        // allPlayersBeatmapLoadComplete received — the server confirmed all clients are ready.
+        // Cancel the safety timeout so it cannot fire spuriously after the game has already
+        // started (EH-2).
+        cancelBeatmapLoadTimeout()
 
         updateThread {
             if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
@@ -1065,6 +1097,50 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
     override fun onRoomFinalLeaderboard(leaderboard: JSONArray) {
         Multiplayer.onFinalLeaderboard(leaderboard)
+    }
+
+
+    // Beatmap-load timeout (EH-2)
+
+    /**
+     * Starts a safety timer that force-starts gameplay if [onRoomMatchStart] is not received
+     * within [BEATMAP_LOAD_TIMEOUT_MS] milliseconds.  This prevents the entire lobby from
+     * hanging indefinitely when one client stops responding mid-load without a clean disconnect.
+     */
+    private fun startBeatmapLoadTimeout() {
+        beatmapLoadTimeoutJob?.cancel()
+        beatmapLoadTimeoutJob = matchScope.launch {
+            delay(BEATMAP_LOAD_TIMEOUT_MS)
+            Multiplayer.log(
+                "WARNING: allPlayersBeatmapLoadComplete not received within " +
+                "${BEATMAP_LOAD_TIMEOUT_MS}ms — force-starting game (EH-2)"
+            )
+            updateThread {
+                if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
+                    GlobalManager.getInstance().gameScene.isReadyToStart = true
+                }
+            }
+            beatmapLoadTimeoutJob = null
+        }
+    }
+
+    /**
+     * Cancels the pending beatmap-load timeout, if any.
+     * Call this when [onRoomMatchStart] is received or when the room is torn down.
+     */
+    private fun cancelBeatmapLoadTimeout() {
+        beatmapLoadTimeoutJob?.cancel()
+        beatmapLoadTimeoutJob = null
+    }
+
+
+    companion object {
+        /**
+         * How long (ms) to wait for `allPlayersBeatmapLoadComplete` before force-starting the
+         * game.  30 s gives slow devices enough time to finish loading while still providing a
+         * meaningful upper bound on how long other players can be blocked (EH-2).
+         */
+        private const val BEATMAP_LOAD_TIMEOUT_MS = 30_000L
     }
 
 
