@@ -223,6 +223,37 @@ object Multiplayer {
         reconnectionScope = null
     }
 
+    /**
+     * Permanently gives up on reconnecting: cancels the reconnection loop, shows the error
+     * toast, and navigates back to the lobby (unless gameplay is currently active, in which
+     * case the navigation is deferred to the game-end flow).
+     *
+     * Idempotent — if a second caller races in after the first has already set
+     * [isReconnecting] to `false`, it is a no-op. This ensures the two independent
+     * exit paths (30-second absolute timeout in the coroutine loop and the max-attempt
+     * guard in [onReconnectAttempt]) cannot both execute the toast + `back()` sequence.
+     */
+    private fun abandonReconnection() {
+        // Guard: only the first caller acts.
+        if (!isReconnecting) return
+        isReconnecting = false
+
+        reconnectionJob?.cancel()
+        reconnectionJob = null
+
+        ToastLogger.showText(
+            "The connection to server has been lost, please check your internet connection.",
+            true
+        )
+
+        // Do not interrupt an active game session; the teardown will happen naturally
+        // when the player finishes (or abandons) the game.
+        val gameScene = GlobalManager.getInstance().gameScene
+        if (gameScene == null || GlobalManager.getInstance().engine.scene != gameScene.scene) {
+            roomScene?.back()
+        }
+    }
+
     fun onReconnectAttempt(success: Boolean) {
 
         lastAttemptResponseTimeMS = System.currentTimeMillis()
@@ -236,15 +267,8 @@ object Multiplayer {
 
             roomScene?.chat?.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FFBFBF")
         } else {
-            isReconnecting = false
-
-            ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
-
-            val gameScene = GlobalManager.getInstance().gameScene
-
-            if (gameScene != null && GlobalManager.getInstance().engine.scene != gameScene.scene) {
-                roomScene?.back()
-            }
+            // Max attempts reached — delegate to the shared exit path.
+            abandonReconnection()
         }
 
         isWaitingAttemptResponse = false
@@ -271,10 +295,9 @@ object Multiplayer {
             while (isReconnecting) {
                 val currentTime = System.currentTimeMillis()
 
-                // Timeout to reconnect was exceeded.
+                // Absolute timeout exceeded — delegate to the shared exit path.
                 if (currentTime - reconnectionStartTimeMS >= 30000) {
-                    ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
-                    roomScene?.back()
+                    abandonReconnection()
                     return@launch
                 }
 
