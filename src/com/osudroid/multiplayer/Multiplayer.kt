@@ -13,6 +13,7 @@ import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -212,12 +213,11 @@ object Multiplayer {
 
     // Reconnection
 
-    /** Cancels any active reconnection coroutine and its scope. Should be called when leaving the room. */
+    /** Cancels any active reconnection coroutine state. Should be called when leaving the room. */
     fun cancelReconnection() {
         isReconnecting = false
         reconnectionJob?.cancel()
         reconnectionJob = null
-        reconnectionScope?.let { scope -> scope.coroutineContext[Job.Key]?.cancel() }
         reconnectionScope = null
     }
 
@@ -279,10 +279,11 @@ object Multiplayer {
         }
         isReconnecting = true
 
-        // Cancel any leftover scope/job from a previous session and create a fresh scope.
-        reconnectionScope?.let { scope -> scope.coroutineContext[Job.Key]?.cancel() }
+        // Cancel any leftover job from a previous session and create a fresh scope with an
+        // explicit SupervisorJob so the scope itself can be cancelled if needed.
         reconnectionJob?.cancel()
-        val scope = CoroutineScope(Dispatchers.Default)
+        reconnectionJob = null
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         reconnectionScope = scope
 
         attemptCount = 0
