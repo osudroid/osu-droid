@@ -3,7 +3,9 @@ package com.reco1l.andengine.sprite
 import android.media.*
 import android.opengl.GLES20
 import android.os.*
+import android.util.Log
 import com.acivev.andengine.opengl.ExternalOESShaderProgram
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.texture.*
 import org.andengine.engine.Engine
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
@@ -20,11 +22,23 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
     private val videoTexture = VideoTexture(source)
 
     init {
-        // Build a 0→1 region covering the whole video frame.
         val w = videoTexture.width.toFloat()
         val h = videoTexture.height.toFloat()
-        textureRegion = TextureRegion(videoTexture, 0f, 0f, w, h)
+        textureRegion = TextureRegion(videoTexture, 0f, 0f, w.coerceAtLeast(1f), h.coerceAtLeast(1f))
         engine.textureManager.loadTexture(videoTexture)
+
+        // Some hardware decoders report 0×0 from prepare() and only provide dimensions
+        // on the first decoded frame. Register a listener to fix the TextureRegion then.
+        if (w <= 0f || h <= 0f) {
+            videoTexture.player.setOnVideoSizeChangedListener { _, width, height ->
+                if (width > 0 && height > 0) {
+                    videoTexture.updateCachedSize(width, height)
+                    updateThread {
+                        textureRegion = TextureRegion(videoTexture, 0f, 0f, width.toFloat(), height.toFloat())
+                    }
+                }
+            }
+        }
 
         // SurfaceTexture/OES textures have their V axis inverted relative to UISprite's UV
         // convention — flip it so the video appears right-side up regardless of whether the
@@ -95,7 +109,12 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        videoTexture.player.playbackParams = videoTexture.player.playbackParams.setSpeed(speed)
+        // Guard against IllegalStateException if release() races this call from a coroutine.
+        try {
+            videoTexture.player.playbackParams = videoTexture.player.playbackParams.setSpeed(speed)
+        } catch (e: IllegalStateException) {
+            Log.w("UIVideoSprite", "setPlaybackSpeed called on a released player; ignoring.", e)
+        }
     }
 
     fun release() {
