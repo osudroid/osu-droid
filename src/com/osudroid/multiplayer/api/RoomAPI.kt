@@ -124,7 +124,10 @@ object RoomAPI {
             Multiplayer.log("WARNING: playerStatusChanged — unexpected status type: ${it.contentToString()}")
             return@Listener
         }
-        val status = PlayerStatus[statusOrdinal]
+        val status = PlayerStatus[statusOrdinal] ?: run {
+            Multiplayer.log("WARNING: playerStatusChanged — unknown PlayerStatus ordinal $statusOrdinal, ignoring event")
+            return@Listener
+        }
 
         playerEventListener?.onPlayerStatusChange(id, status)
     }
@@ -136,7 +139,10 @@ object RoomAPI {
             Multiplayer.log("WARNING: teamModeChanged — unexpected payload type: ${it.contentToString()}")
             return@Listener
         }
-        val mode = TeamMode[ordinal]
+        val mode = TeamMode[ordinal] ?: run {
+            Multiplayer.log("WARNING: teamModeChanged — unknown TeamMode ordinal $ordinal, ignoring event")
+            return@Listener
+        }
         roomEventListener?.onRoomTeamModeChange(mode)
     }
 
@@ -147,7 +153,10 @@ object RoomAPI {
             Multiplayer.log("WARNING: winConditionChanged — unexpected payload type: ${it.contentToString()}")
             return@Listener
         }
-        val condition = WinCondition.from(ordinal)
+        val condition = WinCondition.from(ordinal) ?: run {
+            Multiplayer.log("WARNING: winConditionChanged — unknown WinCondition ordinal $ordinal, ignoring event")
+            return@Listener
+        }
         roomEventListener?.onRoomWinConditionChange(condition)
     }
 
@@ -160,7 +169,13 @@ object RoomAPI {
         }
         val team = when {
             it[1] == null -> null
-            it[1] is Int  -> RoomTeam[it[1] as Int]
+            it[1] is Int  -> {
+                val n = it[1] as Int
+                RoomTeam[n] ?: run {
+                    Multiplayer.log("WARNING: teamChanged — unknown RoomTeam ordinal $n, ignoring event")
+                    return@Listener
+                }
+            }
             else -> {
                 Multiplayer.log("WARNING: teamChanged — unexpected team type: ${it.contentToString()}")
                 return@Listener
@@ -237,8 +252,8 @@ object RoomAPI {
                 maxPlayers = json.getInt("maxPlayers"),
                 mods = RoomMods(json.getJSONArray("mods")),
                 gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                teamMode = TeamMode[json.getInt("teamMode")],
-                winCondition = WinCondition.from(json.getInt("winCondition")),
+                teamMode = TeamMode[json.getInt("teamMode")] ?: TeamMode.HeadToHead,
+                winCondition = WinCondition.from(json.getInt("winCondition")) ?: WinCondition.ScoreV1,
                 playerCount = activePlayers.size,
                 playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
                 sessionID = json.getString("sessionId")

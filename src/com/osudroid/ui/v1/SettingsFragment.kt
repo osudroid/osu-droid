@@ -592,7 +592,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
+                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -666,7 +666,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
+                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -675,7 +675,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.winCondition.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()))
+                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }

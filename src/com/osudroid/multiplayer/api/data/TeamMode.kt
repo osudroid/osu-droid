@@ -17,6 +17,9 @@ enum class TeamMode {
 
 
     companion object {
-        operator fun get(ordinal: Int) = entries[ordinal]
+        /**
+         * Returns the [TeamMode] for [ordinal], or `null` if the ordinal is not recognised (EH-1).
+         */
+        operator fun get(ordinal: Int): TeamMode? = entries.getOrNull(ordinal)
     }
 }

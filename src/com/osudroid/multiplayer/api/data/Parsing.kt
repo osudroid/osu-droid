@@ -10,7 +10,10 @@ import org.json.JSONObject
 fun parsePlayer(o: JSONObject) = RoomPlayer(
     id = o.getString("id").toLong(),
     name = o.getString("username"),
-    status = PlayerStatus[o.getInt("status")],
+    // Unknown PlayerStatus ordinals (EH-1) fall back to NotReady so the player is visible
+    // but not ready, which is the safest state.
+    status = PlayerStatus[o.getInt("status")] ?: PlayerStatus.NotReady,
+    // Unknown RoomTeam ordinals return null; team is nullable so no fallback needed.
     team = if (o.isNull("team")) null else o.getInt("team").let { n -> RoomTeam[n] },
     mods = RoomMods(o.getJSONArray("mods"))
 )

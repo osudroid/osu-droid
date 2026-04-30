@@ -27,6 +27,11 @@ enum class PlayerStatus {
 
 
     companion object {
-        operator fun get(ordinal: Int) = entries[ordinal]
+        /**
+         * Returns the [PlayerStatus] for [ordinal], or `null` if the ordinal is not recognised
+         * (e.g. the server added a new status that this client does not know about).
+         * Callers must handle the `null` case instead of crashing with AIOOBE (EH-1).
+         */
+        operator fun get(ordinal: Int): PlayerStatus? = entries.getOrNull(ordinal)
     }
 }
