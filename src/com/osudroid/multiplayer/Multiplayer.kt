@@ -216,7 +216,7 @@ object Multiplayer {
         isReconnecting = false
         reconnectionJob?.cancel()
         reconnectionJob = null
-        reconnectionScope?.let { scope -> (scope.coroutineContext[Job.Key])?.cancel() }
+        reconnectionScope?.let { scope -> scope.coroutineContext[Job.Key]?.cancel() }
         reconnectionScope = null
     }
 
@@ -279,7 +279,7 @@ object Multiplayer {
         isReconnecting = true
 
         // Cancel any leftover scope/job from a previous session and create a fresh scope.
-        reconnectionScope?.let { scope -> (scope.coroutineContext[Job.Key])?.cancel() }
+        reconnectionScope?.let { scope -> scope.coroutineContext[Job.Key]?.cancel() }
         reconnectionJob?.cancel()
         val scope = CoroutineScope(Dispatchers.Default)
         reconnectionScope = scope
