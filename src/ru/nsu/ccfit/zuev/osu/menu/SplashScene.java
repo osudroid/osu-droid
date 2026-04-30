@@ -3,16 +3,13 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.osudroid.utils.Execution;
 
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.FadeInModifier;
 import org.andengine.entity.modifier.FadeOutModifier;
-import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.entity.modifier.RotationByModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.modifier.SequenceEntityModifier;
-import org.andengine.util.modifier.IModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
@@ -73,26 +70,23 @@ public class SplashScene implements IUpdateHandler {
     {
         mStarting = false;
 
-        // Register a completion callback on the FadeOutModifier so we continue
-        // only after the fade has actually finished — no arbitrary Thread.sleep.
-        mLoading.registerEntityModifier(new FadeOutModifier(0.2f, new IEntityModifier.IEntityModifierListener() {
-            @Override
-            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+        mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
-            @Override
-            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                playWelcomeAnimationInternal();
-            }
-        }));
-
+        // ChangeableText isn't compatible with animations unfortunately (still valid?)
         Execution.updateThread(() -> {
             infoText.detachSelf();
             progressText.detachSelf();
         });
-    }
 
-    private void playWelcomeAnimationInternal()
-    {        var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
+        try
+        {
+            Thread.sleep(220);
+        }
+        catch (InterruptedException ignored)
+        {
+        }
+
+        var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
         final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
         var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"), vbo);
 
