@@ -724,9 +724,17 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
     // Navigation
 
-    override fun back() {
-        // Cancel the reconnection scope/job before setting isReconnecting = false so the
-        // coroutine's loop exits and the scope is cleaned up (ML-2).
+    /**
+     * Tears down all multiplayer state: cancels reconnection, nulls event listeners,
+     * disconnects the socket, cancels pending jobs, and hides the chat.
+     *
+     * This is the common teardown path shared by [back] (which also navigates to the lobby)
+     * and the kicked-during-game handler (which must NOT navigate since the game scene must
+     * be allowed to finish).
+     *
+     * **Must be called on the AndEngine update thread.**
+     */
+    private fun teardownSession() {
         Multiplayer.cancelReconnection()
 
         // Null out event listeners before disconnect so any queued socket events that
@@ -743,7 +751,10 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         Multiplayer.roomScene = null
         Multiplayer.player = null
         chat.hide()
+    }
 
+    override fun back() {
+        teardownSession()
         UIEngine.current.scene = LobbyScene()
     }
 
@@ -1211,7 +1222,19 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
             updateThread {
                 if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
+                    // Kicked while a game is in progress.  We cannot navigate away from the
+                    // game scene immediately — doing so would abruptly interrupt gameplay.
+                    // Instead:
+                    //   1. Show the toast so the player knows why they were kicked.
+                    //   2. Tear down all multiplayer state (disconnect socket, null globals,
+                    //      cancel coroutines, hide chat) so live-score events stop firing.
+                    //   3. Clear isMultiplayer so the scoring scene and GameScene treat the
+                    //      remainder of the game as a solo session — submitFinalScore() will
+                    //      not be called, and ScoringScene.back() will return to SongMenu
+                    //      rather than trying to re-enter the (now-disconnected) room.
                     mainThread { ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true) }
+                    teardownSession()
+                    Multiplayer.isMultiplayer = false
                     return@updateThread
                 }
 
