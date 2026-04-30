@@ -44,6 +44,11 @@ public class MultiTouchController extends BaseTouchController {
 				return;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_OUTSIDE:
+				// Android semantics: ACTION_CANCEL aborts ALL active pointers simultaneously.
+				// Clear every pointer in the raw table so the game doesn't see stale "down" states.
+				for (int i = 0; i < pMotionEvent.getPointerCount(); i++) {
+					updateRawPointer(pMotionEvent.getPointerId(i), 0f, 0f, false, pMotionEvent.getEventTime());
+				}
 				this.onHandleTouchAction(action, pMotionEvent);
 				return;
 			case MotionEvent.ACTION_MOVE:
