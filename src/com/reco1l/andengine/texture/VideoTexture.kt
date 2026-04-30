@@ -5,6 +5,7 @@ import android.media.*
 import android.opengl.*
 import android.opengl.GLES20.GL_CLAMP_TO_EDGE
 import android.opengl.GLES20.GL_LINEAR
+import android.util.Log
 import android.view.*
 import org.andengine.opengl.texture.*
 import org.andengine.opengl.texture.PixelFormat
@@ -25,12 +26,22 @@ class VideoTexture(val source: String) : Texture(
 ) {
 
     val player = MediaPlayer().apply {
-
-        setDataSource(source)
-        setVolume(0f, 0f)
-        isLooping = false
-        prepare()
+        try {
+            setDataSource(source)
+            setVolume(0f, 0f)
+            isLooping = false
+            prepare()
+        } catch (e: Exception) {
+            Log.e("VideoTexture", "Failed to prepare MediaPlayer for source: $source", e)
+            throw e
+        }
     }
+
+    // Cache video dimensions after prepare(); some decoders report 0×0 until
+    // the first frame is decoded. UIVideoSprite registers setOnVideoSizeChangedListener
+    // to fix up the TextureRegion lazily when this happens.
+    private var cachedWidth  = player.videoWidth
+    private var cachedHeight = player.videoHeight
 
 
     private var surfaceTexture: SurfaceTexture? = null
@@ -103,8 +114,14 @@ class VideoTexture(val source: String) : Texture(
         }
     }
 
-    override fun getWidth(): Int = player.videoWidth
-    override fun getHeight(): Int = player.videoHeight
+    override fun getWidth(): Int  = if (cachedWidth  > 0) cachedWidth  else player.videoWidth.also  { if (it > 0) cachedWidth  = it }
+    override fun getHeight(): Int = if (cachedHeight > 0) cachedHeight else player.videoHeight.also { if (it > 0) cachedHeight = it }
+
+    /** Update the cached dimensions. Called by UIVideoSprite via OnVideoSizeChangedListener. */
+    fun updateCachedSize(width: Int, height: Int) {
+        if (width > 0)  cachedWidth  = width
+        if (height > 0) cachedHeight = height
+    }
 
     companion object {
 
