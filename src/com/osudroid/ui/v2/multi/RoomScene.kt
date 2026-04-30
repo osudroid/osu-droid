@@ -22,6 +22,7 @@ import com.osudroid.ui.v2.GameLoaderScene
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
+import com.osudroid.utils.mainThread
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
@@ -723,7 +724,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
     // Communication
 
     override fun onServerError(error: String) {
-        ToastLogger.showText(error, true)
+        mainThread { ToastLogger.showText(error, true) }
     }
 
     override fun onRoomChatMessage(uid: Long?, message: String) {
@@ -799,7 +800,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             return
         }
 
-        back()
+        updateThread { back() }
     }
 
     override fun onRoomConnectFail(error: String?) {
@@ -810,7 +811,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             return
         }
 
-        back()
+        updateThread { back() }
     }
 
 
@@ -818,14 +819,14 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onRoomNameChange(name: String) {
         room.name = name
-        updateInformation()
+        updateThread { updateInformation() }
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
         room.maxPlayers = maxPlayers
         room.resizePlayers(maxPlayers)
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
     }
 
@@ -836,30 +837,32 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         GlobalManager.getInstance().selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap?.md5)
 
         if (GlobalManager.getInstance().engine.scene != this) {
-            updateBeatmapInfo()
+            updateThread { updateBeatmapInfo() }
             isWaitingForBeatmapChange = false
             return
         }
 
         // Notify to the host when other players can't download the beatmap.
         if (Multiplayer.isRoomHost && beatmap != null && beatmap.parentSetID == null) {
-            ToastLogger.showText(R.string.multiplayer_room_beatmap_unavailable, false)
+            mainThread { ToastLogger.showText(R.string.multiplayer_room_beatmap_unavailable, false) }
         }
 
         invalidateStatus()
-
-        updateBackground(GlobalManager.getInstance().selectedBeatmap?.backgroundPath)
-        updateBeatmap(beatmap)
-
         isWaitingForBeatmapChange = false
 
-        if (GlobalManager.getInstance().selectedBeatmap == null) {
-            GlobalManager.getInstance().songService.stop()
-            return
-        }
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+        updateThread {
+            updateBackground(selectedBeatmap?.backgroundPath)
+            updateBeatmap(beatmap)
 
-        GlobalManager.getInstance().songService.preLoad(GlobalManager.getInstance().selectedBeatmap!!.audioPath)
-        GlobalManager.getInstance().songService.play()
+            if (selectedBeatmap == null) {
+                GlobalManager.getInstance().songService.stop()
+                return@updateThread
+            }
+
+            GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
+            GlobalManager.getInstance().songService.play()
+        }
     }
 
     override fun onRoomHostChange(uid: Long) {
@@ -872,10 +875,10 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             ModMenu.back(false)
             ModMenu.updateModButtonVisibility()
             ModMenu.updateCustomizationMenuEnabledStates()
+            updateButtons()
         }
 
         updatePlayerList()
-        updateButtons()
     }
 
 
@@ -889,13 +892,14 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.mods = mods
 
-        ModMenu.setMods(mods, room.gameplaySettings.isFreeMod)
-
         isWaitingForModsChange = true
 
         RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
-        updateInformation()
+        updateThread {
+            ModMenu.setMods(mods, room.gameplaySettings.isFreeMod)
+            updateInformation()
+        }
     }
 
     override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
@@ -903,13 +907,13 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.gameplaySettings = settings
 
-        updateButtons()
-        updateInformation()
         updatePlayerList()
 
         isWaitingForModsChange = true
 
         updateThread {
+            updateButtons()
+            updateInformation()
             ModMenu.back(false)
 
             if (wasFreeMod != settings.isFreeMod) {
@@ -934,7 +938,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         val player = Multiplayer.player ?: return
         if (uid == player.id) {
             isWaitingForModsChange = false
-            updateBeatmapInfo()
+            updateThread { updateBeatmapInfo() }
         }
     }
 
@@ -942,7 +946,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.teamMode = mode
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
 
         isWaitingForStatusChange = true
@@ -953,7 +957,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
         room.winCondition = winCondition
 
-        updateInformation()
+        updateThread { updateInformation() }
 
         if (Multiplayer.isRoomHost) {
             isWaitingForModsChange = true
@@ -979,19 +983,21 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onRoomMatchPlay() {
 
-        val global = GlobalManager.getInstance()
         val player = Multiplayer.player ?: return
 
-        if (player.status != PlayerStatus.MissingBeatmap && global.engine.scene != global.gameScene.scene) {
+        updateThread {
+            val global = GlobalManager.getInstance()
+            if (player.status != PlayerStatus.MissingBeatmap && global.engine.scene != global.gameScene.scene) {
 
-            if (GlobalManager.getInstance().selectedBeatmap == null) {
-                Multiplayer.log("WARNING: Attempt to start match with null track.")
-                return
+                if (global.selectedBeatmap == null) {
+                    Multiplayer.log("WARNING: Attempt to start match with null track.")
+                    return@updateThread
+                }
+
+                global.songMenu.stopMusic()
+                global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
+
             }
-
-            global.songMenu.stopMusic()
-            global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
-
         }
 
         updatePlayerList()
@@ -999,8 +1005,10 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onRoomMatchStart() {
 
-        if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
-            GlobalManager.getInstance().gameScene.isReadyToStart = true
+        updateThread {
+            if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
+                GlobalManager.getInstance().gameScene.isReadyToStart = true
+            }
         }
 
         updatePlayerList()
@@ -1008,11 +1016,13 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
     override fun onRoomMatchSkip() {
 
-        if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
-            return
-        }
+        updateThread {
+            if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
+                return@updateThread
+            }
 
-        GlobalManager.getInstance().gameScene.skip()
+            GlobalManager.getInstance().gameScene.skip()
+        }
     }
 
 
@@ -1036,7 +1046,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_joined, player.name, player.id), "#459FFF")
         }
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
     }
 
@@ -1048,7 +1058,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_left, player.name, player.id), "#459FFF")
         }
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
     }
 
@@ -1060,22 +1070,24 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
 
             Multiplayer.log("Kicked from room.")
 
-            if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
-                ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true)
-                return
-            }
-
-            back()
-
-            UIMessageDialog().apply dialog@{
-                title = StringTable.get(R.string.multiplayer_room_kicked_title)
-                text = StringTable.get(R.string.multiplayer_room_kicked_message)
-
-                addButton {
-                    setText(R.string.multiplayer_room_kicked_close)
-                    onActionUp = { this@dialog.hide() }
+            updateThread {
+                if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
+                    mainThread { ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true) }
+                    return@updateThread
                 }
-            }.show()
+
+                back()
+
+                UIMessageDialog().apply dialog@{
+                    title = StringTable.get(R.string.multiplayer_room_kicked_title)
+                    text = StringTable.get(R.string.multiplayer_room_kicked_message)
+
+                    addButton {
+                        setText(R.string.multiplayer_room_kicked_close)
+                        onActionUp = { this@dialog.hide() }
+                    }
+                }.show()
+            }
             return
         }
 
@@ -1085,7 +1097,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_kicked, removedPlayer.name, removedPlayer.id), "#FFBFBF")
         }
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
     }
 
@@ -1102,7 +1114,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             isWaitingForStatusChange = false
         }
 
-        updateInformation()
+        updateThread { updateInformation() }
         updatePlayerList()
     }
 
@@ -1115,7 +1127,7 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
         target.team = team
 
         updatePlayerList()
-        updateInformation()
+        updateThread { updateInformation() }
     }
 
 }
