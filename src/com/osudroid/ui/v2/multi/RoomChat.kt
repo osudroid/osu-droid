@@ -74,9 +74,6 @@ class RoomChat : UILinearContainer() {
         get() = UIEngine.current.overlay
 
     init {
-        // At any given time, there should be only one chat instance in the overlay.
-        // Two or more instances of these can present after a player successfully reconnects.
-        overlay.detachChildren { it is RoomChat }
 
         // Force the main container to fill the entire screen so that the chat can be closed by
         // tapping outside of it (see onAreaTouched).
