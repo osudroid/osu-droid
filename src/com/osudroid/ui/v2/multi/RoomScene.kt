@@ -1043,6 +1043,17 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
         val player = Multiplayer.player ?: return
 
+        if (player.status == PlayerStatus.MissingBeatmap) {
+            // This client does not have the beatmap and will never call startGame(), so
+            // GameScene.onGameLoad() will never fire and notifyBeatmapLoaded() would never be
+            // sent.  The server waits for every client's beatmapLoadComplete before sending
+            // allPlayersBeatmapLoadComplete, so one missing-beatmap client would block the
+            // match for everyone (EH-5).  Send the ACK immediately so the server can proceed
+            // once all other players have loaded.
+            Multiplayer.log("INFO: MissingBeatmap — sending immediate beatmapLoadComplete ACK (EH-5)")
+            RoomAPI.notifyBeatmapLoaded()
+        }
+
         updateThread {
             val global = GlobalManager.getInstance()
             if (player.status != PlayerStatus.MissingBeatmap && global.engine.scene != global.gameScene.scene) {
