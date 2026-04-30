@@ -34,8 +34,14 @@ public class Entity implements IEntity {
 	private static final int ENTITYMODIFIERS_CAPACITY_DEFAULT = 4;
 	private static final int UPDATEHANDLERS_CAPACITY_DEFAULT = 4;
 
-	private static final float[] VERTICES_SCENE_TO_LOCAL_TMP = new float[2];
-	private static final float[] VERTICES_LOCAL_TO_SCENE_TMP = new float[2];
+	// ThreadLocal so coordinate-conversion helpers are safe when called from multiple
+	// threads (e.g. an async hit-test or culling pass alongside the update thread).
+	private static final ThreadLocal<float[]> VERTICES_SCENE_TO_LOCAL_TMP = new ThreadLocal<float[]>() {
+		@Override protected float[] initialValue() { return new float[2]; }
+	};
+	private static final ThreadLocal<float[]> VERTICES_LOCAL_TO_SCENE_TMP = new ThreadLocal<float[]>() {
+		@Override protected float[] initialValue() { return new float[2]; }
+	};
 
 	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
 		@Override
@@ -1088,7 +1094,7 @@ public class Entity implements IEntity {
 	 */
 	@Override
 	public float[] convertLocalToSceneCoordinates(final float pX, final float pY) {
-		return this.convertLocalToSceneCoordinates(pX, pY, Entity.VERTICES_LOCAL_TO_SCENE_TMP);
+		return this.convertLocalToSceneCoordinates(pX, pY, Entity.VERTICES_LOCAL_TO_SCENE_TMP.get());
 	}
 
 	/* (non-Javadoc)
@@ -1111,7 +1117,7 @@ public class Entity implements IEntity {
 	 */
 	@Override
 	public float[] convertLocalToSceneCoordinates(final float[] pCoordinates) {
-		return this.convertLocalToSceneCoordinates(pCoordinates, Entity.VERTICES_LOCAL_TO_SCENE_TMP);
+		return this.convertLocalToSceneCoordinates(pCoordinates, Entity.VERTICES_LOCAL_TO_SCENE_TMP.get());
 	}
 
 	/* (non-Javadoc)
@@ -1134,7 +1140,7 @@ public class Entity implements IEntity {
 	 */
 	@Override
 	public float[] convertSceneToLocalCoordinates(final float pX, final float pY) {
-		return this.convertSceneToLocalCoordinates(pX, pY, Entity.VERTICES_SCENE_TO_LOCAL_TMP);
+		return this.convertSceneToLocalCoordinates(pX, pY, Entity.VERTICES_SCENE_TO_LOCAL_TMP.get());
 	}
 
 	/* (non-Javadoc)
@@ -1155,7 +1161,7 @@ public class Entity implements IEntity {
 	 */
 	@Override
 	public float[] convertSceneToLocalCoordinates(final float[] pCoordinates) {
-		return this.convertSceneToLocalCoordinates(pCoordinates, Entity.VERTICES_SCENE_TO_LOCAL_TMP);
+		return this.convertSceneToLocalCoordinates(pCoordinates, Entity.VERTICES_SCENE_TO_LOCAL_TMP.get());
 	}
 
 	/* (non-Javadoc)
