@@ -8,6 +8,7 @@ import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.osudroid.ui.v2.multi.*
 import com.reco1l.andengine.*
+import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -247,7 +248,7 @@ object Multiplayer {
         // when the player finishes (or abandons) the game.
         val gameScene = GlobalManager.getInstance().gameScene
         if (gameScene == null || GlobalManager.getInstance().engine.scene != gameScene.scene) {
-            roomScene?.back()
+            updateThread { roomScene?.back() }
         }
     }
 
