@@ -42,6 +42,7 @@ object RoomAPI {
     var roomEventListener: IRoomEventListener? = null
 
 
+    @Volatile
     private var socket: Socket? = null
 
 
@@ -187,7 +188,7 @@ object RoomAPI {
         room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
         room.status = RoomStatus[json.getInt("status")]
 
-        socket!!.apply {
+        socket?.apply {
             on("beatmapChanged", beatmapChanged)
             on("hostChanged", hostChanged)
             on("playerKicked", playerKicked)
@@ -269,8 +270,11 @@ object RoomAPI {
 
         roomEventListener?.onRoomConnectFail(it[0].toString())
 
-        socket?.off()
+        // Capture the reference before nulling so a concurrent connectToRoom() that has
+        // already assigned a new socket is not accidentally cleared.
+        val s = socket
         socket = null
+        s?.off()
     }
 
     private val disconnect = Listener {
@@ -295,9 +299,12 @@ object RoomAPI {
     fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
                       multiplayerSessionID: String? = null) {
 
-        // Clearing previous socket in case of reconnection.
-        socket?.off()
+        // Capture and clear the old socket reference BEFORE creating the new one.
+        // This means any late callbacks still firing on the old socket will read null
+        // from the field and cannot accidentally wipe out the new socket reference.
+        val oldSocket = socket
         socket = null
+        oldSocket?.off()
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
@@ -321,7 +328,7 @@ object RoomAPI {
 
         Multiplayer.log("Starting connection -> $roomId, $userId")
 
-        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId) else IO.socket(url, IO.Options().also {
+        val newSocket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own
@@ -330,7 +337,9 @@ object RoomAPI {
             it.reconnection = false
         })
 
-        socket!!.apply {
+        socket = newSocket
+
+        newSocket.apply {
 
             on("initialConnection", initialConnection)
             on("error", error)
@@ -400,7 +409,10 @@ object RoomAPI {
      * Notify all clients to start loading beatmap.
      */
     fun notifyMatchPlay() {
-        socket!!.emit("playBeatmap")
+        socket?.emit("playBeatmap") ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'playBeatmap' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: playBeatmap")
     }
 
@@ -544,7 +556,10 @@ object RoomAPI {
      * Notify beatmap finish load.
      */
     fun notifyBeatmapLoaded() {
-        socket!!.emit("beatmapLoadComplete")
+        socket?.emit("beatmapLoadComplete") ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'beatmapLoadComplete' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: beatmapLoadComplete")
     }
 
@@ -552,7 +567,10 @@ object RoomAPI {
      * Request skip.
      */
     fun requestSkip() {
-        socket!!.emit("skipRequested")
+        socket?.emit("skipRequested") ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'skipRequested' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: skipRequested")
     }
 
