@@ -1,5 +1,6 @@
 package com.osudroid.multiplayer.api.data
 
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -19,10 +20,33 @@ fun parsePlayer(o: JSONObject) = RoomPlayer(
 )
 
 /**
- * Parse a [JSONArray] of players to [RoomPlayer]
+ * Parse a [JSONArray] of players to an array of [RoomPlayer?] of exactly [size] elements.
+ *
+ * Null elements represent empty room slots.  Any mismatch between [array]'s actual length and
+ * [size] is logged (EH-4):
+ * - `array.length() > size` — excess entries are silently dropped (server bug / API mismatch).
+ * - `array.length() < size` — trailing slots become null (normal for partially-filled rooms,
+ *   but logged at DEBUG level so unexpected under-sends are observable).
  */
-fun parsePlayers(array: JSONArray?, size: Int) = Array(size) { i ->
-    parsePlayer(array?.optJSONObject(i) ?: return@Array null)
+fun parsePlayers(array: JSONArray?, size: Int): Array<RoomPlayer?> {
+    if (array != null) {
+        val actual = array.length()
+        when {
+            actual > size -> Log.w(
+                "Parsing",
+                "parsePlayers: array has $actual entries but maxPlayers=$size; " +
+                "${actual - size} excess player(s) beyond slot boundary will be ignored (EH-4)"
+            )
+            actual < size -> Log.d(
+                "Parsing",
+                "parsePlayers: array has $actual entries for a $size-slot room; " +
+                "${size - actual} trailing slot(s) treated as empty (EH-4)"
+            )
+        }
+    }
+    return Array(size) { i ->
+        parsePlayer(array?.optJSONObject(i) ?: return@Array null)
+    }
 }
 
 /**
