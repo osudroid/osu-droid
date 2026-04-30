@@ -24,6 +24,7 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
     private var maxY = 100500f
     private var pointerId = -1
     private var tapTime = 0f
+    private var scrollStartTimeMs = 0L   // wall-clock time of the last onScrollStarted call
     private var cumulativeScrollY = 0f
 
     protected var velocityY = 0f
@@ -101,6 +102,7 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
         velocityY = 0f
         pointerId = pointerID
         tapTime = 0f
+        scrollStartTimeMs = System.currentTimeMillis()
         cumulativeScrollY = 0f
         isScroll = true
     }
@@ -130,8 +132,9 @@ abstract class ScrollableList : UIComponent(), IScrollDetectorListener
     {
         if (pointerId == -1 || pointerId == pointerID)
         {
-            val elapsed = tapTime.let { if (it < 0.001f) 0f else it }
-            velocityY = if (elapsed < 0.001f) 0f else cumulativeScrollY / elapsed
+            // Use wall-clock elapsed time so velocity is independent of the game tick rate.
+            val elapsedSec = (System.currentTimeMillis() - scrollStartTimeMs) / 1000f
+            velocityY = if (elapsedSec < 0.001f) 0f else cumulativeScrollY / elapsedSec
             isScroll = velocityY != 0f
             pointerId = -1
         }
