@@ -951,7 +951,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
     override fun onRoomModsChange(mods: RoomMods) {
 
-        if (mods != room.mods) {
+        if (!mods.equalsWithContext(room.mods, room.gameplaySettings.isFreeMod)) {
             invalidateStatus()
         }
 
