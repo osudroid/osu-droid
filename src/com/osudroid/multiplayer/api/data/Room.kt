@@ -132,9 +132,10 @@ data class Room(
             ?: players.filterNotNull().associateByTo(HashMap()) { it.id }.also { _playersMap = it }
 
     // Backing field for the playersMap cache.  Null means the cache is stale.
-    // @Volatile so the null-write in addPlayer/removePlayer/resizePlayers is immediately
-    // visible to threads that read playersMap without going through the lock
-    // (e.g. a quick null-check before acquiring).
+    // @Volatile ensures invalidation writes in addPlayer/removePlayer/resizePlayers are
+    // promptly visible to any direct field reads or future unsynchronized fast-paths.
+    // The current playersMap getter is still @Synchronized and rebuilds the cache under the
+    // lock.
     @Volatile
     private var _playersMap: Map<Long, RoomPlayer>? = null
 
