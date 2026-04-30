@@ -407,6 +407,7 @@ object RoomAPI {
         val s = socket
         socket = null
         s?.off()
+        s?.disconnect()
     }
 
     private val disconnect = Listener {
