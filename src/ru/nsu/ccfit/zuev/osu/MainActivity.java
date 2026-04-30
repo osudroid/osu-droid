@@ -238,10 +238,11 @@ public class MainActivity extends BaseGameActivity implements
             final DisplayMetrics dm = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(dm);
 
+            // Automatically enable low-texture mode on low-density (ldpi / mdpi) devices.
             if (dm.densityDpi > DisplayMetrics.DENSITY_MEDIUM) {
                 editor.putBoolean("lowtextures", false);
             } else {
-                editor.putBoolean("lowtextures", false);
+                editor.putBoolean("lowtextures", true);
             }
             editor.commit();
         }
@@ -600,7 +601,7 @@ public class MainActivity extends BaseGameActivity implements
                 if (!d.exists()) d.mkdirs();
                 File f = new File(d, "rawlog.txt");
                 if (!f.exists()) f.createNewFile();
-                Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
+                Runtime.getRuntime().exec(new String[]{"logcat", "-f", f.getAbsolutePath()});
             } catch (IOException ignored) {
             }
         }
@@ -654,6 +655,11 @@ public class MainActivity extends BaseGameActivity implements
         super.onResume();
         activityVisible = true;
 
+        // Cancel any previously scheduled flush task before scheduling a new one.
+        // Without this, every resume stacks another periodic task that can no longer be cancelled.
+        if (logFlushFuture != null && !logFlushFuture.isCancelled()) {
+            logFlushFuture.cancel(false);
+        }
         logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
         if (mEngine == null) {
@@ -680,6 +686,8 @@ public class MainActivity extends BaseGameActivity implements
         onContextLost();
         // Reset the storyboard quad-batch shader so it recompiles against the new context.
         com.edlplan.framework.support.batch.StoryboardBatchShader.getInstance().resetForContextLoss();
+        // Reset the video OES shader so it recompiles against the new context.
+        com.acivev.andengine.opengl.ExternalOESShaderProgram.getInstance().resetForContextLoss();
         super.onSurfaceCreated(pGLState);
     }
 
@@ -850,7 +858,8 @@ public class MainActivity extends BaseGameActivity implements
 
         Scene currentScene = GlobalManager.getInstance().getEngine().getScene();
 
-        if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
+        // Back key / menu key handling — reaches here only when action == ACTION_DOWN (guarded above).
+        if (keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
             return true;
         }
 
