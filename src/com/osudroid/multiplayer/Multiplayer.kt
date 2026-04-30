@@ -200,8 +200,16 @@ object Multiplayer {
         // been made flexible in case the server submits individual scores in the future.
         val ownScoreIndex = list.indexOfFirst { it.playerName == OnlineManager.getInstance().username }.takeUnless { it == -1 }
 
-        if (ownScore != null && ownScoreIndex != null) {
-            list[ownScoreIndex] = ownScore
+        if (ownScore != null) {
+            if (ownScoreIndex == null) {
+                // This should never happen, but if the server leaderboard doesn't include the
+                // local player (e.g. username casing mismatch or API mismatch), append the local
+                // score so it remains visible rather than being silently omitted.
+                list.add(ownScore)
+                log("WARNING: Player score wasn't found in final leaderboard.")
+            } else {
+                list[ownScoreIndex] = ownScore
+            }
         }
 
         finalData = list.toTypedArray()
