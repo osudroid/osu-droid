@@ -145,7 +145,7 @@ public class LibraryManager {
 
         for (var osuFile : osuFiles) {
             try {
-                var data = new BeatmapParser(osuFile).parse(false);
+                var data = new BeatmapParser(osuFile).parse(true);
                 var beatmapInfo = BeatmapInfo(data, directory.lastModified(), false);
 
                 if (data.getEvents().videoFilename != null && Config.isDeleteUnsupportedVideos()) {
