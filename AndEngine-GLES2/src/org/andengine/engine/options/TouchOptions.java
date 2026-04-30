@@ -72,6 +72,7 @@ public class TouchOptions {
 	public boolean isProcessHistoricalEvents() {
 		return this.mProcessHistoricalEvents;
 	}
+
 	public TouchOptions enableUseRawPointer() {
 		return this.setUseRawPointer(true);
 	}
