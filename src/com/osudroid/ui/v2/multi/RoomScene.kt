@@ -65,7 +65,15 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 
-class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
+class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
+
+    /**
+     * The room this scene is showing. Updated in-place when the socket reconnects so that the
+     * displayed scene keeps receiving events rather than being silently replaced by an off-screen
+     * ghost scene (SI-1).
+     */
+    var room: Room = room
+        internal set
 
     /**
      * Indicates that the host can change beatmap (it should be false while a change request was done)

@@ -286,7 +286,27 @@ object RoomAPI {
                 on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
             }
 
-            val scene = RoomScene(room)
+            // During reconnection we must NOT create a new RoomScene.  Creating one would:
+            //   • replace RoomAPI.roomEventListener / playerEventListener with a scene that
+            //     is never displayed (SI-1 — the ghost-scene bug), and
+            //   • leave the on-screen scene as a dead UI shell that can never receive events.
+            // Instead, update the existing scene's room reference in-place and re-register it
+            // as the active listener, then forward the connect event to it.
+            val existingScene = if (Multiplayer.isReconnecting) Multiplayer.roomScene else null
+
+            val scene = if (existingScene != null) {
+                // Reuse the displayed scene.  Update its room reference so all subsequent reads
+                // of `this.room` inside event handlers see the fresh server state.
+                existingScene.room = room
+                // Re-register the existing scene as the event listener in case something
+                // inadvertently replaced it while the reconnection was in flight.
+                playerEventListener = existingScene
+                roomEventListener = existingScene
+                existingScene
+            } else {
+                // Fresh connection: build and register a brand-new scene as normal.
+                RoomScene(room)
+            }
 
             Multiplayer.room = room
             Multiplayer.player = localPlayer
