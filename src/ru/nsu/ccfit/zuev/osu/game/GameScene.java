@@ -3346,7 +3346,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private void applyRawPointerFastPath(final Camera camera) {
                 var touchController = engine.getTouchController();
 
-                if (touchController == null || !touchController.isUseRawPointers()) {
+                if (touchController == null || !touchController.isUseRawPointer()) {
                     return;
                 }
 
@@ -3416,11 +3416,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return false;
                 }
 
-                for (int attempt = 0; attempt < 2; ++attempt) {
+                for (int attempt = 0; attempt < 4; ++attempt) {
                     int versionBefore = touchController.getRawPointerVersion(pointerId);
 
                     // An odd version means the main thread is updating this pointer, so we wait.
                     if ((versionBefore & 1) != 0) {
+                        Thread.onSpinWait(); // hint to the CPU that this is a spin-wait loop
                         continue;
                     }
 
