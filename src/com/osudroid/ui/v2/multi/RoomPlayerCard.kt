@@ -137,13 +137,13 @@ class RoomPlayerCard : UILinearContainer() {
             nameText.text = player.name
             nameText.spacing = 6f
 
-            hostIcon.detachSelf()
-            mutedIcon.detachSelf()
-
             nameText.trailingIcon = when {
                 player.id == room.host && player.isMuted -> UILinearContainer().apply {
                     orientation = Orientation.Horizontal
                     spacing = 6f
+
+                    hostIcon.detachSelf()
+                    mutedIcon.detachSelf()
 
                     +hostIcon
                     +mutedIcon
