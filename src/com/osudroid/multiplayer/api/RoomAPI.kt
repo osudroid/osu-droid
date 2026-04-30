@@ -439,6 +439,7 @@ object RoomAPI {
         val oldSocket = socket
         socket = null
         oldSocket?.off()
+        oldSocket?.disconnect()
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
