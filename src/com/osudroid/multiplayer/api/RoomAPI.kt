@@ -15,6 +15,7 @@ import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.osudroid.multiplayer.api.data.parsePlayer
 import com.osudroid.multiplayer.api.data.parsePlayers
 import com.osudroid.ui.v2.multi.RoomScene
+import com.osudroid.utils.updateThread
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -328,7 +329,10 @@ object RoomAPI {
             Multiplayer.player = localPlayer
             Multiplayer.roomScene = scene
 
-            scene.onRoomConnect(room)
+            // onRoomConnect triggers UI mutations (updateInformation, updatePlayerList, show, etc.).
+            // Calling it directly here would run those mutations on the socket EventThread, which
+            // is not safe for the AndEngine scene graph.  Dispatch to the update thread instead.
+            updateThread { scene.onRoomConnect(room) }
 
         } catch (e: Exception) {
             Multiplayer.log("ERROR: initialConnection handler threw an exception: ${e.javaClass.simpleName} — ${e.message}")
