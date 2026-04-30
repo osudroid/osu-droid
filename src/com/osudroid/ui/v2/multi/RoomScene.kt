@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.multi
 
 import com.osudroid.BuildSettings
+import java.util.concurrent.atomic.AtomicBoolean
 import com.osudroid.beatmaplisting.BeatmapDownloader
 import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.multiplayer.Multiplayer
@@ -90,9 +91,14 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
     /**
      * Indicates that the player can change its status, its purpose is to await server changes.
+     *
+     * An [AtomicBoolean] is used so that the check-then-set in the touch handler is a single
+     * atomic [AtomicBoolean.compareAndSet] operation, preventing two rapid taps from both
+     * slipping through before either one sets the flag.  It also guarantees cross-thread
+     * visibility: the socket EventThread writes this field (e.g. on disconnect, beatmap change)
+     * while the AndEngine update thread reads it in the touch callback.
      */
-    @JvmField
-    var isWaitingForStatusChange = false
+    val isWaitingForStatusChange = AtomicBoolean(false)
 
     /**
      * Indicates that the player can change its mods, its purpose is to await server changes.
@@ -412,7 +418,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
                     isSelected = true
                     onActionUp = callback@{
 
-                        if (isWaitingForStatusChange || !Multiplayer.isRoomHost || Multiplayer.player?.status != PlayerStatus.Ready) {
+                        if (isWaitingForStatusChange.get() || !Multiplayer.isRoomHost || Multiplayer.player?.status != PlayerStatus.Ready) {
                             return@callback
                         }
 
@@ -450,17 +456,18 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
                     setText(R.string.multiplayer_room_not_ready)
                     onActionUp = callback@{
 
-                        if (isWaitingForStatusChange) {
+                        // Atomic guard: only the first tap wins even if two ACTION_UP events
+                        // are delivered before the server reply clears the flag.
+                        if (!isWaitingForStatusChange.compareAndSet(false, true)) {
                             return@callback
                         }
 
                         ResourceManager.getInstance().getSound("menuclick")?.play()
-                        isWaitingForStatusChange = true
 
                         // Guard: if back() nulled player between the isWaitingForStatusChange check
                         // and here, reset the flag and exit instead of crashing.
                         val player = Multiplayer.player ?: run {
-                            isWaitingForStatusChange = false
+                            isWaitingForStatusChange.set(false)
                             return@callback
                         }
 
@@ -469,13 +476,13 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
                             PlayerStatus.NotReady -> {
                                 if (room.beatmap == null) {
                                     ToastLogger.showText(R.string.multiplayer_room_cannot_ready_changing_beatmap, true)
-                                    isWaitingForStatusChange = false
+                                    isWaitingForStatusChange.set(false)
                                     return@callback
                                 }
 
                                 if (room.teamMode == TeamMode.TeamVersus && player.team == null) {
                                     ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
-                                    isWaitingForStatusChange = false
+                                    isWaitingForStatusChange.set(false)
                                     return@callback
                                 }
 
@@ -486,10 +493,10 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
                             PlayerStatus.MissingBeatmap -> {
                                 ToastLogger.showText(R.string.multiplayer_room_cannot_ready_missing_beatmap, true)
-                                isWaitingForStatusChange = false
+                                isWaitingForStatusChange.set(false)
                             }
 
-                            else -> isWaitingForStatusChange = false /*This case can never happen, the PLAYING status is set when a game starts*/
+                            else -> isWaitingForStatusChange.set(false) /*This case can never happen, the PLAYING status is set when a game starts*/
                         }
                     }
                     statusButton = this
@@ -700,7 +707,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         // Guard: player is nulled by back(); if we race past the reconnecting check, exit cleanly.
         val player = Multiplayer.player ?: return
 
-        isWaitingForStatusChange = true
+        isWaitingForStatusChange.set(true)
 
         var newStatus = PlayerStatus.NotReady
 
@@ -711,7 +718,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         if (player.status != newStatus) {
             RoomAPI.setPlayerStatus(newStatus)
         } else {
-            isWaitingForStatusChange = false
+            isWaitingForStatusChange.set(false)
         }
     }
 
@@ -840,7 +847,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         if (!byUser) {
             // Setting await locks to avoid player emitting events that will be ignored.
             isWaitingForBeatmapChange = true
-            isWaitingForStatusChange = true
+            isWaitingForStatusChange.set(true)
             isWaitingForModsChange = true
 
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
@@ -1014,7 +1021,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
         updateThread { updateInformation() }
         updatePlayerList()
 
-        isWaitingForStatusChange = true
+        isWaitingForStatusChange.set(true)
         invalidateStatus()
     }
 
@@ -1242,7 +1249,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
         val player = Multiplayer.player
         if (player != null && uid == player.id) {
-            isWaitingForStatusChange = false
+            isWaitingForStatusChange.set(false)
         }
 
         updateThread { updateInformation() }
