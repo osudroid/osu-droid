@@ -1075,10 +1075,10 @@ class RoomScene(val room: Room) : UIScene(), IRoomEventListener, IPlayerEventLis
             return
         }
 
-        val player = room.removePlayer(uid)
+        val removedPlayer = room.removePlayer(uid)
 
-        if (player != null) {
-            chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_kicked, player.name, player.id), "#FFBFBF")
+        if (removedPlayer != null) {
+            chat.onSystemChatMessage(StringTable.format(R.string.multiplayer_room_player_kicked, removedPlayer.name, removedPlayer.id), "#FFBFBF")
         }
 
         updateInformation()
