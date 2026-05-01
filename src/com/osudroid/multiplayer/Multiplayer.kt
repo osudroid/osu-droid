@@ -10,6 +10,7 @@ import com.osudroid.ui.v2.multi.*
 import com.reco1l.andengine.*
 import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -73,7 +74,7 @@ object Multiplayer {
 
     /**
      * Determines if the player is connected to a room. This doesn't ensure that the connection to socket is currently
-     * active it can be under reconnection state.
+     * active; it can be under reconnection state.
      *
      * Note: Any event emitted during reconnection is ignored.
      */
@@ -83,12 +84,15 @@ object Multiplayer {
 
     private val logger = MultiplayerLogger()
 
-    /** Scope used for the reconnection loop. A new scope is created per session so the old one can be cancelled cleanly. */
+    /**
+     * [CoroutineScope] used for reconnection.
+     */
     private var reconnectionScope: CoroutineScope? = null
 
-    /** Active reconnection coroutine job, so duplicate launches can be cancelled. */
+    /**
+     * Active reconnection coroutine [Job].
+     */
     private var reconnectionJob: Job? = null
-
 
     @Volatile
     private var attemptCount = 0
@@ -192,7 +196,9 @@ object Multiplayer {
             list.add(jsonToStatistic(json))
         }
 
-        if (list.isEmpty()) return
+        if (list.isEmpty()) {
+            return
+        }
 
         if (room?.isTeamVersus == false) {
             // Replace server statistics with local
@@ -224,7 +230,9 @@ object Multiplayer {
 
     // Reconnection
 
-    /** Cancels any active reconnection coroutine state. Should be called when leaving the room. */
+    /**
+     * Cancels any active reconnection coroutine state. Should be called when leaving the room.
+     */
     fun cancelReconnection() {
         isReconnecting = false
         reconnectionJob?.cancel()
@@ -292,9 +300,10 @@ object Multiplayer {
         isReconnecting = true
 
         // Cancel any leftover job from a previous session and create a fresh scope with an
-        // explicit SupervisorJob so the scope itself can be cancelled if needed.
+        // explicit SupervisorJob so the scope itself can be canceled if needed.
         reconnectionJob?.cancel()
         reconnectionJob = null
+
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         reconnectionScope = scope
 
@@ -315,7 +324,7 @@ object Multiplayer {
                 // Still waiting for the server to respond to the last attempt — poll cheaply
                 // instead of spinning at 100% CPU.
                 if (isWaitingAttemptResponse) {
-                    delay(250)
+                    delay(250.milliseconds)
                     continue
                 }
 
@@ -323,7 +332,7 @@ object Multiplayer {
                 // busy-spinning until the 5-second window has elapsed.
                 val msSinceLastResponse = currentTime - lastAttemptResponseTimeMS
                 if (msSinceLastResponse < 5000) {
-                    delay(5000 - msSinceLastResponse)
+                    delay((5000 - msSinceLastResponse).milliseconds)
                     continue
                 }
 
