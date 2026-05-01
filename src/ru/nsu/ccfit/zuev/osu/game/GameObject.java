@@ -46,7 +46,9 @@ public abstract class GameObject {
      *
      * @param dt The time difference, in seconds.
      */
-    public void updateAfterInit(float dt) {}
+    public void updateAfterInit(float dt) {
+        update(dt);
+    }
 
     public float getHitTime() {
         return hitTime;

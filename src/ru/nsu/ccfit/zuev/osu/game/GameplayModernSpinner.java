@@ -131,15 +131,13 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
     @Override
     public void updateAfterInit(float dt) {
-        super.updateAfterInit(dt);
-
         // Update existing entities first before this object (simulates an update tick).
         updateAfterInit(glow, dt);
         updateAfterInit(bottom, dt);
         updateAfterInit(middle, dt);
         updateAfterInit(middle2, dt);
 
-        update(dt);
+        super.updateAfterInit(dt);
     }
 
     @Override

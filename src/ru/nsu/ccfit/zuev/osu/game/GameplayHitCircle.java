@@ -208,19 +208,11 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void updateAfterInit(float dt) {
-        super.updateAfterInit(dt);
-
         // Update existing entities first before this object (simulates an update tick).
         updateAfterInit(approachCircle, dt);
         updateAfterInit(circlePiece, dt);
 
-        update(dt);
-    }
-
-    private void updateAfterInit(IEntity entity, float dt) {
-        if (entity.hasParent()) {
-            entity.onUpdate(dt);
-        }
+        super.updateAfterInit(dt);
     }
 
     @Override

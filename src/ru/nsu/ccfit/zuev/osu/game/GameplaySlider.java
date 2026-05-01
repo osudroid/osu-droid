@@ -907,8 +907,6 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void updateAfterInit(float dt) {
-        super.updateAfterInit(dt);
-
         // Update existing entities first before this object (simulates an update tick).
         updateAfterInit(startArrow, dt);
         updateAfterInit(endArrow, dt);
@@ -920,7 +918,7 @@ public class GameplaySlider extends GameObject {
         updateAfterInit(ball, dt);
         updateAfterInit(followCircle, dt);
 
-        update(dt);
+        super.updateAfterInit(dt);
     }
 
     @Override
