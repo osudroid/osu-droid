@@ -191,13 +191,25 @@ public class SliderBody extends UIContainer {
         return cache;
     }
 
+    private float getClampedBackgroundWidth() {
+        return Math.max(0, backgroundWidth);
+    }
+
+    private float getPlayableWidth() {
+        return getClampedBackgroundWidth() - FMath.clamp(borderWidth, 0, getClampedBackgroundWidth());
+    }
+
+    private float getClampedHintWidth() {
+        return FMath.clamp(hintWidth, 0, getPlayableWidth());
+    }
+
     private void buildVertices(LinePath subPath) {
 
         TriangleBuilder builder = cache.triangleBuilder;
 
         if (hint != null && hint.isVisible()) {
             cache.drawLinePath
-                    .reset(subPath, Math.min(hintWidth, backgroundWidth - borderWidth))
+                    .reset(subPath, getClampedHintWidth())
                     .computeTriangles(builder)
                     .applyVertices(hint.getVertices());
 
@@ -205,14 +217,14 @@ public class SliderBody extends UIContainer {
         }
 
         cache.drawLinePath
-                .reset(subPath, backgroundWidth - borderWidth)
+                .reset(subPath, getPlayableWidth())
                 .computeTriangles(builder)
                 .applyVertices(background.getVertices());
 
         background.setContentSize(builder.maxX, builder.maxY);
 
         cache.drawLinePath
-                .reset(subPath, backgroundWidth)
+                .reset(subPath, getClampedBackgroundWidth())
                 .computeTriangles(builder)
                 .applyVertices(border.getVertices());
 
@@ -390,7 +402,7 @@ public class SliderBody extends UIContainer {
         float segmentTheta = cache.segmentThetas[segmentIndex];
 
         if (hint != null && hint.isVisible()) {
-            float width = Math.min(hintWidth, backgroundWidth - borderWidth);
+            float width = getClampedHintWidth();
 
             if (width <= 0) {
                 clearLayer(hint);
@@ -400,12 +412,12 @@ public class SliderBody extends UIContainer {
             }
         }
 
-        if (!buildFastLayer(background, cache.background, backgroundWidth - borderWidth,
+        if (!buildFastLayer(background, cache.background, getPlayableWidth(),
             segmentIndex, segmentStart, cutPoint, segmentTheta)) {
             return false;
         }
 
-        return buildFastLayer(border, cache.border, backgroundWidth,
+        return buildFastLayer(border, cache.border, getClampedBackgroundWidth(),
             segmentIndex, segmentStart, cutPoint, segmentTheta);
     }
 
@@ -434,7 +446,7 @@ public class SliderBody extends UIContainer {
         float segmentTheta = cache.segmentThetas[segmentIndex];
 
         if (hint != null && hint.isVisible()) {
-            float width = Math.min(hintWidth, backgroundWidth - borderWidth);
+            float width = getClampedHintWidth();
 
             if (width <= 0) {
                 clearLayer(hint);
@@ -444,12 +456,12 @@ public class SliderBody extends UIContainer {
             }
         }
 
-        if (!buildFastLayerFromStart(background, cache.background, backgroundWidth - borderWidth,
+        if (!buildFastLayerFromStart(background, cache.background, getPlayableWidth(),
             segmentIndex, segmentEnd, cutPoint, segmentTheta)) {
             return false;
         }
 
-        return buildFastLayerFromStart(border, cache.border, backgroundWidth,
+        return buildFastLayerFromStart(border, cache.border, getClampedBackgroundWidth(),
             segmentIndex, segmentEnd, cutPoint, segmentTheta);
     }
 
