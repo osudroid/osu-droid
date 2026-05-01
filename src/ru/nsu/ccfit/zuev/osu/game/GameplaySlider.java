@@ -695,7 +695,7 @@ public class GameplaySlider extends GameObject {
             }
 
             // Restore ticks
-            tickContainer.onNewSpan(completedSpanCount);
+            tickContainer.onNewSpan((float) getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
             currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows

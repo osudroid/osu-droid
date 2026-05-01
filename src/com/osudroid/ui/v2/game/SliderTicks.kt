@@ -35,13 +35,15 @@ class SliderTickContainer : UIContainer() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(tick, lifetimeStart)
+
+            // It is safe to use lifetimeStart here as the ticks will be updated in GameplaySlider.updateAfterInit().
+            sprite.init(tick, lifetimeStart, lifetimeStart)
 
             attachChild(sprite)
         }
     }
 
-    fun onNewSpan(newSpanIndex: Int) {
+    fun onNewSpan(currentTimeSec: Float, newSpanIndex: Int) {
         if (slider == null) {
             return
         }
@@ -64,7 +66,7 @@ class SliderTickContainer : UIContainer() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(tick, lifetimeStart)
+            sprite.init(tick, currentTimeSec, lifetimeStart)
         }
     }
 
@@ -98,9 +100,10 @@ class SliderTickSprite : UISprite() {
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
+     * @param currentTimeSec The current time in seconds.
      * @param spanLifetimeStart The lifetime start of the current [Slider] span, in seconds.
      */
-    fun init(tick: SliderTick, spanLifetimeStart: Float) {
+    fun init(tick: SliderTick, currentTimeSec: Float, spanLifetimeStart: Float) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
 
@@ -108,6 +111,8 @@ class SliderTickSprite : UISprite() {
         val fadeInDelay = fadeInStartTime - spanLifetimeStart
 
         clearEntityModifiers()
+
+        val dt = currentTimeSec - fadeInStartTime
 
         alpha = 0f
         setScale(0.5f)
@@ -119,7 +124,11 @@ class SliderTickSprite : UISprite() {
                     Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
                     Modifiers.fadeIn(ANIM_DURATION)
                 )
-            )
+            ).also {
+                if (dt > 0) {
+                    it.onUpdate(dt, this)
+                }
+            }
         )
 
         if (GameHelper.isHidden() && !GameHelper.getHidden().onlyFadeApproachCircles) {
@@ -131,7 +140,11 @@ class SliderTickSprite : UISprite() {
                 Modifiers.sequence(null,
                     Modifiers.delay(fadeOutDelay),
                     Modifiers.fadeOut(fadeOutDuration)
-                )
+                ).also {
+                    if (dt > 0) {
+                        it.onUpdate(dt, this)
+                    }
+                }
             )
         }
     }
