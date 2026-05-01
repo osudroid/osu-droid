@@ -33,7 +33,7 @@ class BooleanSkinData @JvmOverloads constructor(tag: String, default: Boolean = 
 
 class StringSkinData @JvmOverloads constructor(tag: String, default: String = "") : SkinData<String>(tag, default) {
     override fun setFromJson(data: JSONObject) {
-        currentValue = data.optString(tag, defaultValue) ?: defaultValue
+        currentValue = data.optString(tag, defaultValue)
     }
 }
 
