@@ -760,13 +760,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // same time regardless of the setting.
         elapsedTime = Math.min(elapsedTime, videoOffset);
 
-        sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
+        sliderBorderColor = null;
         if (playableBeatmap.getColors().getSliderBorderColor() != null) {
             sliderBorderColor = playableBeatmap.getColors().getSliderBorderColor();
         }
 
         if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
             sliderBorderColor = OsuSkin.get().getSliderBorderColor();
+        }
+
+        if (sliderBorderColor == null) {
+            sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
         }
 
         comboColors = new ArrayList<>();
