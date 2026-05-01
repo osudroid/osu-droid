@@ -13,6 +13,7 @@ import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
 import com.reco1l.toolkt.kotlin.fastForEach
+import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -153,8 +154,8 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
         elements.fastForEach { it.onHitObjectLifetimeStart(obj) }
     }
 
-    override fun onAccuracyRegister(accuracy: Float) {
-        elements.fastForEach { it.onAccuracyRegister(accuracy) }
+    override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
+        elements.fastForEach { it.onAccuracyRegister(type, accuracy) }
     }
 
     //endregion
