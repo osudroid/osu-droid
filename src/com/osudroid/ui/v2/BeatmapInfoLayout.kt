@@ -1,9 +1,12 @@
 package com.osudroid.ui.v2
 
+import android.util.Log
 import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.*
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.ui.v2.modmenu.*
+import com.osudroid.utils.async
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
@@ -14,10 +17,13 @@ import com.reco1l.toolkt.*
 import com.rian.osu.*
 import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
 import com.rian.osu.utils.ModUtils.calculateRateWithMods
+import kotlinx.coroutines.Job
 import ru.nsu.ccfit.zuev.osu.*
 import java.text.*
 import java.util.*
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
 
 class BeatmapInfoLayout : UILinearContainer() {
 
@@ -40,6 +46,9 @@ class BeatmapInfoLayout : UILinearContainer() {
 
     private lateinit var starRatingBadge: StarRatingBadge
     private lateinit var versionText: UIText
+
+    private var calculationJob: Job? = null
+    private var displayedBeatmap: BeatmapInfo? = null
 
 
     init {
@@ -177,11 +186,14 @@ class BeatmapInfoLayout : UILinearContainer() {
      * Change the displayed difficulty statistics.
      */
     fun setDifficultyStatistics(beatmapInfo: BeatmapInfo?) {
-        circlesBadge.value = beatmapInfo?.hitCircleCount?.toString() ?: "0"
-        slidersBadge.value = beatmapInfo?.sliderCount?.toString() ?: "0"
-        spinnersBadge.value = beatmapInfo?.spinnerCount?.toString() ?: "0"
+        displayedBeatmap = beatmapInfo
+        calculationJob?.cancel()
+        calculationJob = null
 
         if (beatmapInfo == null) {
+            circlesBadge.value = "0"
+            slidersBadge.value = "0"
+            spinnersBadge.value = "0"
             arText.value = "0.00"
             odText.value = "0.00"
             csText.value = "0.00"
@@ -192,23 +204,49 @@ class BeatmapInfoLayout : UILinearContainer() {
             return
         }
 
-        if (beatmapInfo.needsDifficultyCalculation) {
-            val beatmap = try {
-                BeatmapCache.getBeatmap(
-                    beatmapInfo,
-                    true,
-                    Config.getDifficultyAlgorithm().toGameMode()
-                )
-            } catch (_: Exception) {
-                null
-            }
+        updateDisplay(beatmapInfo)
 
-            if (beatmap != null) {
-                val newInfo = BeatmapInfo(beatmap, beatmapInfo.dateImported, true)
-                beatmapInfo.apply(newInfo)
-                DatabaseManager.beatmapInfoTable.update(newInfo)
+        if (beatmapInfo.needsDifficultyCalculation) {
+            calculationJob = async {
+                val beatmap = try {
+                    BeatmapCache.getBeatmap(
+                        beatmapInfo,
+                        true,
+                        Config.getDifficultyAlgorithm().toGameMode(),
+                        this
+                    )
+                } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        throw e
+                    }
+
+                    Log.e("BeatmapInfoLayout", "Failed to calculate difficulty for ${beatmapInfo.filename}", e)
+                    null
+                }
+
+                ensureActive()
+
+                if (beatmap != null) {
+                    val newInfo = BeatmapInfo(beatmap, beatmapInfo.dateImported, true, this)
+                    beatmapInfo.apply(newInfo)
+                    DatabaseManager.beatmapInfoTable.update(newInfo)
+
+                    ensureActive()
+
+                    updateThread {
+                        if (displayedBeatmap === beatmapInfo) {
+                            updateDisplay(beatmapInfo)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun updateDisplay(beatmapInfo: BeatmapInfo) {
+        circlesBadge.value = beatmapInfo.hitCircleCount.toString()
+        slidersBadge.value = beatmapInfo.sliderCount.toString()
+        spinnersBadge.value = beatmapInfo.spinnerCount.toString()
 
         val mods = ModMenu.enabledMods
         val totalSpeedMultiplier = calculateRateWithMods(mods.values, Double.POSITIVE_INFINITY)
