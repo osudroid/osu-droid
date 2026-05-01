@@ -65,29 +65,27 @@ data class Room(
     val sessionID: String? = null
 ) {
     /**
-     * The array containing the players, null values are empty slots. The array size corresponds to [maxPlayers].
+     * The players in this [Room]. `null` values are empty slots. The array size corresponds to [maxPlayers].
      *
      * Slot indices mirror the server's layout exactly: index `i` here corresponds to slot `i` on the
-     * server.  The array is never re-sorted locally so the two views never diverge (SI-3).
+     * server. The array is never re-sorted locally so the two views never diverge.
      *
-     * Marked @Volatile so that when [resizePlayers] replaces the array reference all threads
-     * immediately see the new reference without a stale cached copy.
-     * Compound read-modify-write operations must still go through a @Synchronized method.
+     * Marked [Volatile] so that when [resizePlayers] replaces the array reference, all threads immediately see the new
+     * reference without a stale cached copy. **Compound read-modify-write operations must still go through a
+     * [synchronized] method** (see [addPlayer], [removePlayer], and [resizePlayers]).
      */
     @Volatile
     var players: Array<RoomPlayer?> = arrayOfNulls(maxPlayers)
+        @Synchronized set(value) {
+            field = value
+            _playersMap = null
+        }
 
     /**
      * The host/room owner UID.
      */
     @Volatile
     var host: Long = -1
-        @Synchronized set(value) {
-            field = value
-            // NOTE: sortPlayers() used to be called here, but sorting shifts players out of
-            // their server-assigned slot positions (SI-3).  Host assignment does not change
-            // which players are present, so no array mutation or cache invalidation is needed.
-        }
 
     /**
      * The current beatmap.
@@ -120,46 +118,34 @@ data class Room(
         @Synchronized get() = activePlayers.filter { it.status == PlayerStatus.Ready }
 
     /**
-     * Get the players list in map format using UIDs as keys.
-     *
-     * Backed by a cache that is invalidated whenever the players array is mutated
-     * (see [addPlayer], [removePlayer], and [resizePlayers]).  Callers that already hold the lock
-     * (e.g. every @Synchronized method in this class) get the cached map for free
-     * on repeated accesses within the same event; callers on other threads pay at
-     * most one rebuild per mutation event.
+     * All players in this [Room], mapped by their user ID.
      */
-    val playersMap: Map<Long, RoomPlayer>
+    val playersMap
         @Synchronized get() = _playersMap
             ?: players.filterNotNull().associateByTo(HashMap()) { it.id }.also { _playersMap = it }
 
-    // Backing field for the playersMap cache.  Null means the cache is stale.
-    // @Volatile ensures invalidation writes in addPlayer/removePlayer/resizePlayers are
-    // promptly visible to any direct field reads or future unsynchronized fast-paths.
-    // The current playersMap getter is still @Synchronized and rebuilds the cache under the
-    // lock.
     @Volatile
     private var _playersMap: Map<Long, RoomPlayer>? = null
 
     /**
-     * Get the players list of a team in a map format.
+     * All [players] in this [Room], grouped by their team.
      */
     val teamMap
         @Synchronized get() = activePlayers.groupBy { it.team }
 
     /**
-     * Determines if the room team mode is team vs team.
+     * Whether this [Room] is in Team VS mode.
      */
     val isTeamVersus
         get() = teamMode == TeamMode.TeamVersus
 
-
     /**
-     * Special handling to add a player in the array.
+     * Special handling to add a player to this [Room].
      *
-     * The player is placed in the first available null slot and the array is NOT re-sorted,
-     * preserving server-assigned slot positions for all existing players (SI-3).
+     * The player is placed in the first available `null` slot and [players] is NOT re-sorted to preserve
+     * server-assigned slot positions for all existing players.
      *
-     * @return `true` if it was successfully added, `false` it if wasn't or if it was already in the array (this can
+     * @return `true` if it was successfully added, `false` it if wasn't or if it was already in [players] (this can
      * happen due to reconnection).
      */
     @Synchronized
@@ -186,12 +172,12 @@ data class Room(
     }
 
     /**
-     * Special handling to remove a player in the array.
+     * Special handling to remove a player from this [Room].
      *
-     * The vacated slot is set to null in-place; the array is NOT re-sorted so that
-     * all remaining players keep their server-assigned slot positions (SI-3).
+     * The vacated slot is set to `null` in-place; [players] is NOT re-sorted so that all remaining players keep their
+     * server-assigned slot positions.
      *
-     * @return The removed player or `null` if it wasn't on the array.
+     * @return The removed player, or `null` if it wasn't in [players].
      */
     @Synchronized
     fun removePlayer(uid: Long): RoomPlayer? {
@@ -208,18 +194,18 @@ data class Room(
         return removed
     }
 
-
     /**
-     * Atomically resize the players array. Players whose slot index falls within the new size
-     * are preserved; those beyond it are truncated (the server is authoritative on capacity).
+     * Atomically resizes [players]. Players whose slot index falls within the new size are preserved; those beyond it
+     * are truncated (the server is authoritative on capacity).
+     *
      * Callers are expected to identify and surface any truncated players **before** calling
-     * this method — see [com.osudroid.ui.v2.multi.RoomScene.onRoomMaxPlayersChange] (SI-2).
+     * this method — see [com.osudroid.ui.v2.multi.RoomScene.onRoomMaxPlayersChange].
+     *
      * Callers outside this class must use this instead of assigning [players] directly so the
      * operation is covered by the same monitor that guards [addPlayer] / [removePlayer].
      */
     @Synchronized
     fun resizePlayers(newSize: Int) {
         players = players.copyOf(newSize)
-        _playersMap = null
     }
 }
