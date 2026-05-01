@@ -233,7 +233,10 @@ object RoomAPI {
 
     // Server-to-client events
 
-    private val initialConnection = Listener {
+    private fun createInitialConnectionListener(expectedSocket: Socket) = Listener {
+        if (socket !== expectedSocket) {
+            return@Listener
+        }
 
         val json = it[0] as? JSONObject ?: run {
             Multiplayer.log("WARNING: initialConnection — unexpected payload type: ${it.contentToString()}")
@@ -271,15 +274,14 @@ object RoomAPI {
                 Multiplayer.log("ERROR: initialConnection — local player UID not found in server player list. Disconnecting.")
                 roomEventListener?.onRoomConnectFail("Server did not include local player in room state.")
 
-                val s = socket
                 socket = null
 
-                s?.off()
-                s?.disconnect()
+                expectedSocket.off()
+                expectedSocket.disconnect()
                 return@Listener
             }
 
-            socket?.apply {
+            expectedSocket.apply {
                 on("beatmapChanged", beatmapChanged)
                 on("hostChanged", hostChanged)
                 on("playerKicked", playerKicked)
@@ -334,11 +336,10 @@ object RoomAPI {
 
             roomEventListener?.onRoomConnectFail("Unexpected error processing server room state: ${e.message}")
 
-            val s = socket
             socket = null
 
-            s?.off()
-            s?.disconnect()
+            expectedSocket.off()
+            expectedSocket.disconnect()
         }
     }
 
@@ -387,7 +388,9 @@ object RoomAPI {
         roomEventListener?.onRoomFinalLeaderboard(array)
     }
 
-    private val error = Listener {
+    private fun createErrorListener(expectedSocket: Socket) = Listener {
+        if (socket !== expectedSocket) return@Listener
+
         Multiplayer.log("RECEIVED: error -> ${it.contentToString()}")
 
         val error = it[0] as? String ?: run {
@@ -399,19 +402,26 @@ object RoomAPI {
 
     // Default listeners
 
-    private val connectError = Listener {
+    private fun createConnectErrorListener(expectedSocket: Socket) = Listener {
+        if (socket !== expectedSocket) {
+            return@Listener
+        }
+
         Multiplayer.log("RECEIVED: connect_error -> ${it.contentToString()}")
 
         roomEventListener?.onRoomConnectFail(it[0].toString())
 
-        val s = socket
         socket = null
 
-        s?.off()
-        s?.disconnect()
+        expectedSocket.off()
+        expectedSocket.disconnect()
     }
 
-    private val disconnect = Listener {
+    private fun createDisconnectListener(expectedSocket: Socket) = Listener {
+        if (socket !== expectedSocket) {
+            return@Listener
+        }
+
         Multiplayer.log("RECEIVED: disconnect -> ${it.contentToString()}")
 
         val reason = it.getOrNull(0) as? String
@@ -473,11 +483,11 @@ object RoomAPI {
 
         newSocket.apply {
 
-            on("initialConnection", initialConnection)
-            on("error", error)
+            on("initialConnection", createInitialConnectionListener(this))
+            on("error", createErrorListener(this))
 
-            on(Socket.EVENT_CONNECT_ERROR, connectError)
-            on(Socket.EVENT_DISCONNECT, disconnect)
+            on(Socket.EVENT_CONNECT_ERROR, createConnectErrorListener(this))
+            on(Socket.EVENT_DISCONNECT, createDisconnectListener(this))
 
         }.connect()
     }
