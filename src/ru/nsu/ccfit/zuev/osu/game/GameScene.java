@@ -166,6 +166,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private boolean comboWas100 = false;
     private ArrayList<GameObject> activeObjects;
     private ArrayList<GameObject> expiredObjects;
+    private final Set<GameObject> processedExpiredObjects = Collections.newSetFromMap(new IdentityHashMap<>());
     private GameObject judgeableObject;
     private BreakPeriod[] breakPeriods;
     private int breakPeriodIndex;
@@ -1686,7 +1687,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Clearing expired objects.
+        processedExpiredObjects.clear();
+
         if (!expiredObjects.isEmpty()) {
+            for (int i = 0, size = expiredObjects.size(); i < size; i++) {
+                var obj = expiredObjects.get(i);
+
+                if (processedExpiredObjects.add(obj)) {
+                    obj.onExpire();
+                }
+            }
+
             activeObjects.removeAll(expiredObjects);
             expiredObjects.clear();
         }
@@ -1694,8 +1705,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         updatePassiveObjects(dt);
         updateActiveObjects(dt);
 
-        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-            autoCursor.moveToObject(activeObjects.isEmpty() ? null : activeObjects.get(0), elapsedTime, this);
+        if (judgeableObject != null && (GameHelper.isAutoplay() || GameHelper.isAutopilot())) {
+            autoCursor.moveToObject(judgeableObject, elapsedTime, this);
         }
 
         if (videoEnabled && video != null && elapsedTime >= videoOffset)
@@ -1989,6 +2000,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // is hit.
                 judgeableObject = searchJudgeableObject(i + 1);
             }
+
+            if (elapsedTime >= obj.getLifetimeEnd()) {
+                expiredObjects.add(obj);
+            }
         }
     }
 
@@ -2005,14 +2020,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     @Nullable
     private GameObject searchJudgeableObject(int startIndex) {
-        if (!Config.isRemoveSliderLock()) {
-            return activeObjects.isEmpty() ? null : activeObjects.get(0);
-        }
-
         for (int i = startIndex, size = activeObjects.size(); i < size; i++) {
             var obj = activeObjects.get(i);
 
-            if (!obj.isStartHit()) {
+            if (!obj.isJudged()) {
                 return obj;
             }
         }
@@ -2526,10 +2537,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void addObject(final GameObject object) {
         activeObjects.add(object);
-    }
-
-    public void removeObject(final GameObject object) {
-        expiredObjects.add(object);
     }
 
     @Override

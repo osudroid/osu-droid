@@ -27,8 +27,6 @@ public interface GameObjectListener {
 
     void addObject(GameObject object);
 
-    void removeObject(GameObject object);
-
     boolean isObjectHittable(GameObject object);
 
     Cursor getCursor(int index);
