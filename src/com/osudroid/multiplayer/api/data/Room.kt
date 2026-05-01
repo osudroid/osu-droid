@@ -80,6 +80,7 @@ data class Room(
     /**
      * The host/room owner UID.
      */
+    @Volatile
     var host: Long = -1
         @Synchronized set(value) {
             field = value
