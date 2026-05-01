@@ -102,6 +102,7 @@ object Multiplayer {
     @Volatile
     private var isWaitingAttemptResponse = false
 
+    private val abandonReconnectionLock = Any()
 
     //region Connection
 
@@ -240,23 +241,24 @@ object Multiplayer {
      * guard in [onReconnectAttempt]) cannot both execute the toast + `back()` sequence.
      */
     private fun abandonReconnection() {
-        // Guard: only the first caller acts.
-        if (!isReconnecting) return
-        isReconnecting = false
+        synchronized(abandonReconnectionLock) {
+            if (!isReconnecting) return
+            isReconnecting = false
 
-        reconnectionJob?.cancel()
-        reconnectionJob = null
+            reconnectionJob?.cancel()
+            reconnectionJob = null
 
-        ToastLogger.showText(
-            "The connection to server has been lost, please check your internet connection.",
-            true
-        )
+            ToastLogger.showText(
+                "The connection to server has been lost, please check your internet connection.",
+                true
+            )
 
-        // Do not interrupt an active game session; the teardown will happen naturally
-        // when the player finishes (or abandons) the game.
-        val gameScene = GlobalManager.getInstance().gameScene
-        if (gameScene == null || GlobalManager.getInstance().engine.scene != gameScene.scene) {
-            updateThread { roomScene?.back() }
+            // Do not interrupt an active game session; the teardown will happen naturally
+            // when the player finishes (or abandons) the game.
+            val gameScene = GlobalManager.getInstance().gameScene
+            if (gameScene == null || GlobalManager.getInstance().engine.scene != gameScene.scene) {
+                updateThread { roomScene?.back() }
+            }
         }
     }
 
