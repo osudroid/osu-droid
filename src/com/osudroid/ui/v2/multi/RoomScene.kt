@@ -63,6 +63,7 @@ import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
+import kotlin.time.Duration.Companion.milliseconds
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -72,18 +73,15 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 
-class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListener {
-
+class RoomScene(
     /**
-     * The room this scene is showing. Updated in-place when the socket reconnects so that the
-     * displayed scene keeps receiving events rather than being silently replaced by an off-screen
-     * ghost scene (SI-1).
+     * The [Room] this [RoomScene] is showing. Updated in-place when the socket reconnects so that this [RoomScene] can
+     * be reused and update its current state accordingly.
      */
-    var room: Room = room
-        internal set
-
+    var room: Room
+) : UIScene(), IRoomEventListener, IPlayerEventListener {
     /**
-     * Indicates that the host can change beatmap (it should be false while a change request was done)
+     * Indicates that the host can change beatmap. **This must be `false` when waiting for a beatmap change request**.
      *
      * This is only used if [com.osudroid.multiplayer.Multiplayer.player] is the room host.
      */
@@ -91,26 +89,21 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
     var isWaitingForBeatmapChange = false
 
     /**
-     * Indicates that the player can change its status, its purpose is to await server changes.
-     *
-     * An [AtomicBoolean] is used so that the check-then-set in the touch handler is a single
-     * atomic [AtomicBoolean.compareAndSet] operation, preventing two rapid taps from both
-     * slipping through before either one sets the flag.  It also guarantees cross-thread
-     * visibility: the socket EventThread writes this field (e.g. on disconnect, beatmap change)
-     * while the AndEngine update thread reads it in the touch callback.
+     * Indicates that the player can change its status. Its purpose is to await for server changes.
      */
     val isWaitingForStatusChange = AtomicBoolean(false)
 
     /**
-     * Indicates that the player can change its mods, its purpose is to await server changes.
+     * Indicates that the player can change its mods. Its purpose is to await for server changes.
      */
     @JvmField
     var isWaitingForModsChange = false
 
     /**
-     * Coroutine scope used for the beatmap-load timeout job (EH-2).
-     * A dedicated scope is used so that cancelling the job is cheap and cannot interfere with
-     * other coroutines.
+     * [CoroutineScope] used for the beatmap-load timeout job.
+     *
+     * A dedicated [CoroutineScope] is used so that cancelling the [Job] is cheap and cannot interfere with other
+     * coroutines.
      */
     private val matchScope = CoroutineScope(Dispatchers.Default)
 
@@ -740,17 +733,17 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      * and the kicked-during-game handler (which must NOT navigate since the game scene must
      * be allowed to finish).
      *
-     * **Must be called on the AndEngine update thread.**
+     * **Must be called on the update thread.**
      */
     private fun teardownSession() {
         Multiplayer.cancelReconnection()
 
         // Null out event listeners before disconnect so any queued socket events that
-        // arrive after teardown find no listener to call (ML-1).
+        // arrive after teardown find no listener to call.
         RoomAPI.roomEventListener = null
         RoomAPI.playerEventListener = null
 
-        // Cancel any pending beatmap-load timeout so it cannot fire after teardown (EH-2).
+        // Cancel any pending beatmap-load timeout so it cannot fire after teardown.
         cancelBeatmapLoadTimeout()
 
         runSafe { RoomAPI.disconnect() }
@@ -1158,12 +1151,15 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
      */
     private fun startBeatmapLoadTimeout() {
         beatmapLoadTimeoutJob.getAndSet(null)?.cancel()
+
         beatmapLoadTimeoutJob.set(matchScope.launch {
-            delay(BEATMAP_LOAD_TIMEOUT_MS)
+            delay(BEATMAP_LOAD_TIMEOUT_MS.milliseconds)
+
             Multiplayer.log(
                 "WARNING: allPlayersBeatmapLoadComplete not received within " +
                 "${BEATMAP_LOAD_TIMEOUT_MS}ms — force-starting game (EH-2)"
             )
+
             updateThread {
                 if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
                     GlobalManager.getInstance().gameScene.isReadyToStart = true
@@ -1226,7 +1222,7 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
 
             updateThread {
                 if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
-                    // Kicked while a game is in progress.  We cannot navigate away from the
+                    // Kicked while a game is in progress. We cannot navigate away from the
                     // game scene immediately — doing so would abruptly interrupt gameplay.
                     // Instead:
                     //   1. Show the toast so the player knows why they were kicked.
@@ -1236,9 +1232,10 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
                     //      remainder of the game as a solo session — submitFinalScore() will
                     //      not be called, and ScoringScene.back() will return to SongMenu
                     //      rather than trying to re-enter the (now-disconnected) room.
-                    mainThread { ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true) }
+                    ToastLogger.showText(R.string.multiplayer_room_kicked_gameplay, true)
                     teardownSession()
                     Multiplayer.isMultiplayer = false
+
                     return@updateThread
                 }
 
