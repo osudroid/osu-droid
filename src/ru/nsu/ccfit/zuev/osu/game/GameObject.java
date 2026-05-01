@@ -9,6 +9,7 @@ import com.osudroid.game.CursorEvent;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.hitobject.HitObject;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -68,6 +69,18 @@ public abstract class GameObject {
     }
 
     public void stopLoopingSamples() {}
+
+    /**
+     * Calls {@link IEntity#onUpdate} on an {@link IEntity} if {@link IEntity#hasParent()} is {@code true}.
+     *
+     * @param entity The {@link IEntity} to update.
+     * @param dt The time difference in seconds.
+     */
+    protected void updateAfterInit(IEntity entity, float dt) {
+        if (entity.hasParent()) {
+            entity.onUpdate(dt);
+        }
+    }
 
     /**
      * Obtains the {@link CursorEvent} that hits this {@link GameObject}, if any.

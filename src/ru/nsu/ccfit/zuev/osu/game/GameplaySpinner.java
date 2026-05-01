@@ -260,12 +260,12 @@ public class GameplaySpinner extends GameObject {
         super.updateAfterInit(dt);
 
         // Update existing entities first before this object (simulates an update tick).
-        clearText.onUpdate(dt);
-        spinText.onUpdate(dt);
-        approachCircle.onUpdate(dt);
-        background.onUpdate(dt);
-        circle.onUpdate(dt);
-        metre.onUpdate(dt);
+        updateAfterInit(clearText, dt);
+        updateAfterInit(spinText, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(background, dt);
+        updateAfterInit(circle, dt);
+        updateAfterInit(metre, dt);
 
         update(dt);
     }

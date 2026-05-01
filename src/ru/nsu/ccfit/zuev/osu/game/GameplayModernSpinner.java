@@ -134,11 +134,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         super.updateAfterInit(dt);
 
         // Update existing entities first before this object (simulates an update tick).
-        glow.onUpdate(dt);
-        bottom.onUpdate(dt);
-        top.onUpdate(dt);
-        middle.onUpdate(dt);
-        middle2.onUpdate(dt);
+        updateAfterInit(glow, dt);
+        updateAfterInit(bottom, dt);
+        updateAfterInit(middle, dt);
+        updateAfterInit(middle2, dt);
 
         update(dt);
     }

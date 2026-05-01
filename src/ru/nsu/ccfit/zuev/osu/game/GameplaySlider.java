@@ -31,6 +31,7 @@ import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.mods.ModSynesthesia;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -909,15 +910,15 @@ public class GameplaySlider extends GameObject {
         super.updateAfterInit(dt);
 
         // Update existing entities first before this object (simulates an update tick).
-        startArrow.onUpdate(dt);
-        endArrow.onUpdate(dt);
-        headCirclePiece.onUpdate(dt);
-        tailCirclePiece.onUpdate(dt);
-        approachCircle.onUpdate(dt);
-        tickContainer.onUpdate(dt);
-        sliderBody.onUpdate(dt);
-        ball.onUpdate(dt);
-        followCircle.onUpdate(dt);
+        updateAfterInit(startArrow, dt);
+        updateAfterInit(endArrow, dt);
+        updateAfterInit(headCirclePiece, dt);
+        updateAfterInit(tailCirclePiece, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(tickContainer, dt);
+        updateAfterInit(sliderBody, dt);
+        updateAfterInit(ball, dt);
+        updateAfterInit(followCircle, dt);
 
         update(dt);
     }

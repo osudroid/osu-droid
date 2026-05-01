@@ -14,6 +14,7 @@ import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
@@ -210,10 +211,16 @@ public class GameplayHitCircle extends GameObject {
         super.updateAfterInit(dt);
 
         // Update existing entities first before this object (simulates an update tick).
-        approachCircle.onUpdate(dt);
-        circlePiece.onUpdate(dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(circlePiece, dt);
 
         update(dt);
+    }
+
+    private void updateAfterInit(IEntity entity, float dt) {
+        if (entity.hasParent()) {
+            entity.onUpdate(dt);
+        }
     }
 
     @Override
