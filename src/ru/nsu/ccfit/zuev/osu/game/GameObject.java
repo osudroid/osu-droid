@@ -9,7 +9,7 @@ import com.osudroid.game.CursorEvent;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.hitobject.HitObject;
 
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
