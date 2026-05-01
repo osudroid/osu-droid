@@ -6,31 +6,25 @@ import org.json.JSONObject
 
 
 /**
- * Parse a [JSONObject] of player to [RoomPlayer]
+ * Parse a [JSONObject] of player to [RoomPlayer].
  */
 fun parsePlayer(o: JSONObject) = RoomPlayer(
     id = o.getString("id").toLong(),
     name = o.getString("username"),
-    // Unknown PlayerStatus ordinals (EH-1) fall back to NotReady so the player is visible
-    // but not ready, which is the safest state.
     status = PlayerStatus[o.getInt("status")] ?: PlayerStatus.NotReady,
-    // Unknown RoomTeam ordinals return null; team is nullable so no fallback needed.
-    team = if (o.isNull("team")) null else o.getInt("team").let { n -> RoomTeam[n] },
+    team = if (o.isNull("team")) null else RoomTeam[o.getInt("team")],
     mods = RoomMods(o.getJSONArray("mods"))
 )
 
 /**
- * Parse a [JSONArray] of players to an array of [RoomPlayer?] of exactly [size] elements.
+ * Parse a [JSONArray] of players to an array of [RoomPlayer]s of exactly [size] elements.
  *
- * Null elements represent empty room slots.  Any mismatch between [array]'s actual length and
- * [size] is logged (EH-4):
- * - `array.length() > size` — excess entries are silently dropped (server bug / API mismatch).
- * - `array.length() < size` — trailing slots become null (normal for partially-filled rooms,
- *   but logged at DEBUG level so unexpected under-sends are observable).
+ * `null` elements represent empty room slots.
  */
 fun parsePlayers(array: JSONArray?, size: Int): Array<RoomPlayer?> {
     if (array != null) {
         val actual = array.length()
+
         when {
             actual > size -> Log.w(
                 "Parsing",
@@ -44,6 +38,7 @@ fun parsePlayers(array: JSONArray?, size: Int): Array<RoomPlayer?> {
             )
         }
     }
+
     return Array(size) { i ->
         parsePlayer(array?.optJSONObject(i) ?: return@Array null)
     }
