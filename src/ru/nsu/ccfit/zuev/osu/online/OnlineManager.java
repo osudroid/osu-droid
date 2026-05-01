@@ -297,7 +297,7 @@ public class OnlineManager {
         File picfile = new File(Config.getCachePath(), filename);
         OnlineFileOperator.downloadFile(avatarURL, picfile.getAbsolutePath(), true);
 
-        var bitmap = loadAvatarToBitmap(picfile);
+        var bitmap = loadFileToBitmap(picfile);
         int imageWidth = 0, imageHeight = 0;
 
         if (bitmap != null) {
@@ -317,7 +317,7 @@ public class OnlineManager {
             File avatarFile = new File(Config.getCachePath(), defaultAvatarFilename);
             OnlineFileOperator.downloadFile(defaultAvatarURL, avatarFile.getAbsolutePath());
 
-            bitmap = loadAvatarToBitmap(avatarFile);
+            bitmap = loadFileToBitmap(avatarFile);
             if (bitmap != null) {
                 imageWidth = bitmap.getWidth();
                 imageHeight = bitmap.getHeight();
@@ -348,7 +348,7 @@ public class OnlineManager {
         File bannerFile = new File(Config.getCachePath(), filename);
         OnlineFileOperator.downloadFile(bannerURL, bannerFile.getAbsolutePath(), true);
 
-        var bitmap = loadAvatarToBitmap(bannerFile);
+        var bitmap = loadFileToBitmap(bannerFile);
         int imageWidth = 0, imageHeight = 0;
 
         if (bitmap != null) {
@@ -364,15 +364,15 @@ public class OnlineManager {
         return ResourceManager.getInstance().getProfileBannerTextureIfLoaded(bannerURL) != null;
     }
 
-    private Bitmap loadAvatarToBitmap(File avatarFile) {
-        if (!avatarFile.exists()) {
+    private Bitmap loadFileToBitmap(File file) {
+        if (!file.exists()) {
             return null;
         }
 
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            return BitmapFactory.decodeFile(avatarFile.getPath());
+            return BitmapFactory.decodeFile(file.getPath());
         } catch (NullPointerException e) {
             return null;
         }
