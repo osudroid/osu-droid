@@ -211,6 +211,7 @@ object Multiplayer {
                     // local player (e.g. username casing mismatch or API mismatch), append the local
                     // score so it remains visible rather than being silently omitted.
                     list.add(ownScore)
+                    list.sortByDescending { it.totalScoreWithMultiplier }
                     log("WARNING: Player score wasn't found in final leaderboard.")
                 } else {
                     list[ownScoreIndex] = ownScore
