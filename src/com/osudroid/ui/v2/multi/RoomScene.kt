@@ -857,17 +857,10 @@ class RoomScene(
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
-        // Before shrinking the array, surface any players that would be silently
-        // truncated so the chat keeps an audit trail and the displayed player list
-        // stays consistent (SI-2).  The player array preserves server slot indices,
-        // so any active player beyond the new limit is in a slot with index >= maxPlayers.
-        if (maxPlayers < room.players.size) {
-            room.players.drop(maxPlayers).filterNotNull().forEach { dropped ->
-                chat.onSystemChatMessage(
-                    StringTable.format(R.string.multiplayer_room_player_left, dropped.name, dropped.id),
-                    "#459FFF"
-                )
-            }
+        // The server caps maxPlayers to the current player count, so this case should only happen if the server
+        // rejected the change and sent back the current maxPlayers value. In that case we don't need to update anything.
+        if (maxPlayers == room.players.size) {
+            return
         }
 
         room.maxPlayers = maxPlayers
