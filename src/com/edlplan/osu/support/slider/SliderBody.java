@@ -286,7 +286,7 @@ public class SliderBody extends UIContainer {
 
 
     public static RenderPathCache createCache(@NotNull LinePath renderPath, float backgroundWidth, float borderWidth,
-                                              boolean isHintVisible, float hintWidth) {
+                                              boolean isHintVisible, float hintWidth, boolean computeFullCache) {
         RenderPathCache cache = new RenderPathCache();
 
         cache.sourcePath = renderPath;
@@ -311,37 +311,41 @@ public class SliderBody extends UIContainer {
 
         cache.path.measure();
 
-        TriangleBuilder builder = cache.triangleBuilder;
+        cache.segmentCount = Math.max(0, cache.pointCount - 1);
 
-        // Build once to capture per-segment quad offsets used by hybrid prefix/suffix reuse.
-        float offsetProbeWidth = playableWidth > 0 ? playableWidth : clampedBackgroundWidth;
+        if (computeFullCache) {
+            TriangleBuilder builder = cache.triangleBuilder;
 
-        if (offsetProbeWidth > 0) {
-            cache.drawLinePath.reset(renderPath, offsetProbeWidth).computeTriangles(builder);
-            cache.segmentCount = cache.drawLinePath.getSegmentQuadStartCount();
+            // Build once to capture per-segment quad offsets used by hybrid prefix/suffix reuse.
+            float offsetProbeWidth = playableWidth > 0 ? playableWidth : clampedBackgroundWidth;
 
-            if (cache.segmentQuadStartOffsets.length < cache.segmentCount) {
-                cache.segmentQuadStartOffsets = new int[cache.segmentCount];
+            if (offsetProbeWidth > 0) {
+                cache.drawLinePath.reset(renderPath, offsetProbeWidth).computeTriangles(builder);
+                cache.segmentCount = cache.drawLinePath.getSegmentQuadStartCount();
+
+                if (cache.segmentQuadStartOffsets.length < cache.segmentCount) {
+                    cache.segmentQuadStartOffsets = new int[cache.segmentCount];
+                }
+
+                for (int i = 0; i < cache.segmentCount; i++) {
+                    cache.segmentQuadStartOffsets[i] = cache.drawLinePath.getSegmentQuadStartOffset(i);
+                }
             }
 
-            for (int i = 0; i < cache.segmentCount; i++) {
-                cache.segmentQuadStartOffsets[i] = cache.drawLinePath.getSegmentQuadStartOffset(i);
+            if (isHintVisible && clampedHintWidth > 0) {
+                cache.drawLinePath.reset(renderPath, clampedHintWidth).computeTriangles(builder);
+                cache.hint.setCache(builder);
             }
-        }
 
-        if (isHintVisible && clampedHintWidth > 0) {
-            cache.drawLinePath.reset(renderPath, clampedHintWidth).computeTriangles(builder);
-            cache.hint.setCache(builder);
-        }
+            if (playableWidth > 0) {
+                cache.drawLinePath.reset(renderPath, playableWidth).computeTriangles(builder);
+                cache.background.setCache(builder);
+            }
 
-        if (playableWidth > 0) {
-            cache.drawLinePath.reset(renderPath, playableWidth).computeTriangles(builder);
-            cache.background.setCache(builder);
-        }
-
-        if (clampedBackgroundWidth > 0) {
-            cache.drawLinePath.reset(renderPath, clampedBackgroundWidth).computeTriangles(builder);
-            cache.border.setCache(builder);
+            if (clampedBackgroundWidth > 0) {
+                cache.drawLinePath.reset(renderPath, clampedBackgroundWidth).computeTriangles(builder);
+                cache.border.setCache(builder);
+            }
         }
 
         return cache;

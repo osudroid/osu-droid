@@ -3130,7 +3130,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sliderBodyWidth,
                 sliderBorderWidth,
                 isHintVisible,
-                sliderHintWidth
+                sliderHintWidth,
+                Config.isSnakingInSliders() || Config.isSnakingOutSliders()
             );
 
             ++index;
