@@ -327,6 +327,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             detachChildren();
             currentAvatarTask = null;
+            camY = -146;
             attachChild(loadingText);
 
             if (beatmapInfo == null)
@@ -378,8 +379,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 isScroll = false;
             }
 
-            if (Math.abs(velocityY) > 500 * pSecondsElapsed) {
-                velocityY -= 10 * pSecondsElapsed * Math.signum(velocityY);
+            if (Math.abs(velocityY) > 30.0f) {
+                // Friction-based deceleration: reduces velocity by ~85% per second, stops in ~0.5s
+                velocityY *= Math.max(0.0f, 1.0f - 8.0f * pSecondsElapsed);
             } else {
                 velocityY = 0;
                 isScroll = false;
@@ -391,6 +393,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             }
 
             var count = getChildCount();
+            int spriteIndex = 0;
             for (int i = 0; i < count; i++)
             {
                 var child = getChildByIndex(i);
@@ -399,7 +402,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     continue;
 
                 var sprite = (Sprite) child;
-                sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
+                sprite.setPosition(-160, 146 + 0.8f * percentShow * spriteIndex * (sprite.getHeight() - 32));
+                spriteIndex++;
             }
 
             if (percentShow == 1) {
@@ -453,7 +457,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         if (pointerId == -1 || pointerId == pPointerID) {
             cumulativeDistY += pDistanceY;
             if (secPassed - tapTime > 0.001f) {
-                velocityY = cumulativeDistY / (secPassed - tapTime);
+                // Negate: during scroll camY -= pDistanceY, but update applies camY += velocityY * dt,
+                // so velocity must have opposite sign to pDistanceY to continue in the same direction.
+                velocityY = -(cumulativeDistY / (secPassed - tapTime));
             } else {
                 velocityY = 0;
                 isScroll = false;
@@ -614,7 +620,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             setScale(0.65f);
             setWidth(724 * 1.1f);
-            camY = -146;
 
             setColor(0, 0, 0);
             setAlpha(0.5f);
