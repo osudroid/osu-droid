@@ -2,6 +2,8 @@ package com.osudroid.ui.v2.modmenu
 
 import com.edlplan.framework.easing.Easing
 import com.osudroid.beatmaps.BeatmapCache
+import com.osudroid.data.BeatmapInfo
+import com.osudroid.data.DatabaseManager
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent.Companion.MatchContent
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
@@ -355,6 +357,12 @@ object ModMenu : UIScene() {
             if (beatmap == null) {
                 songMenu.setStarsDisplay(0f)
                 return@scope
+            }
+
+            if (selectedBeatmap.needsDifficultyCalculation) {
+                val newInfo = BeatmapInfo(beatmap, selectedBeatmap.dateImported, true)
+                selectedBeatmap.apply(newInfo)
+                DatabaseManager.beatmapInfoTable.update(newInfo)
             }
 
             enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->

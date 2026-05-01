@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2
 
+import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.*
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.ui.v2.modmenu.*
@@ -176,7 +177,6 @@ class BeatmapInfoLayout : UILinearContainer() {
      * Change the displayed difficulty statistics.
      */
     fun setDifficultyStatistics(beatmapInfo: BeatmapInfo?) {
-
         circlesBadge.value = beatmapInfo?.hitCircleCount?.toString() ?: "0"
         slidersBadge.value = beatmapInfo?.sliderCount?.toString() ?: "0"
         spinnersBadge.value = beatmapInfo?.spinnerCount?.toString() ?: "0"
@@ -190,6 +190,24 @@ class BeatmapInfoLayout : UILinearContainer() {
             bpmBadge.text = "0"
             lengthBadge.text = "00:00"
             return
+        }
+
+        if (beatmapInfo.needsDifficultyCalculation) {
+            val beatmap = try {
+                BeatmapCache.getBeatmap(
+                    beatmapInfo,
+                    true,
+                    Config.getDifficultyAlgorithm().toGameMode()
+                )
+            } catch (_: Exception) {
+                null
+            }
+
+            if (beatmap != null) {
+                val newInfo = BeatmapInfo(beatmap, beatmapInfo.dateImported, true)
+                beatmapInfo.apply(newInfo)
+                DatabaseManager.beatmapInfoTable.update(newInfo)
+            }
         }
 
         val mods = ModMenu.enabledMods
