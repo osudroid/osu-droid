@@ -509,11 +509,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private float dy = 0;
 
         private TextureRegion avatarTexture;
-        private TextureRegion bannerTexture;
 
         private Runnable avatarTask;
-
-        private final Entity bannerLayer = new Entity();
 
         private final ExecutorService avatarExecutor;
 
@@ -541,16 +538,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             this.username = username;
             this.scoreID = scoreID;
 
-            var bannerURL = OnlineManager.getProfileBannerURL(avaURL);
-
             var shouldLoadAvatar = showOnlineScores
                     && Config.getLoadAvatar()
                     && avaURL != null
-                    && avatarExecutor != null;
-
-            var shouldLoadBanner = showOnlineScores
-                    && Config.getLoadAvatar()
-                    && !bannerURL.isEmpty()
                     && avatarExecutor != null;
 
             int baseX = shouldLoadAvatar ? 90 : 0;
@@ -583,32 +573,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             setColor(0, 0, 0);
             setAlpha(0.5f);
 
-            attachChild(bannerLayer);
-
             float finalBaseY = baseY;
             avatarTask = shouldLoadAvatar ? new Runnable() {
 
                 @Override
                 public void run() {
                     var texture = ResourceManager.getInstance().getTexture("emptyavatar");
-
-                    if (shouldLoadBanner && !avatarExecutor.isShutdown() && OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerURL)) {
-                        bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(bannerURL);
-
-                        if (bannerTexture != null) {
-                            bannerTexture = bannerTexture.deepCopy();
-                            int width = (int) getWidth() - 66;
-                            int height = 90;
-
-                            bannerTexture.setTexturePosition(0, (bannerTexture.getHeight() - height) / 2);
-                            bannerTexture.setWidth(width);
-                            bannerTexture.setHeight(height);
-
-                            var bannerSprite = new Sprite(55, finalBaseY + 12, width, height, bannerTexture);
-                            bannerSprite.setColor(0.5f, 0.5f, 0.5f);
-                            bannerLayer.attachChild(bannerSprite);
-                        }
-                    }
 
                     if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
                         avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
@@ -651,9 +621,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 // Ensure texture unloading happens in the next tick of the
                 // update thread to prevent concurrency problems.
                 Execution.updateThread(() -> ResourceManager.getInstance().unloadTexture(avatarTexture));
-
-            if (bannerTexture != null)
-                Execution.updateThread(() -> ResourceManager.getInstance().unloadTexture(bannerTexture));
 
             mainScene.unregisterTouchArea(this);
         }

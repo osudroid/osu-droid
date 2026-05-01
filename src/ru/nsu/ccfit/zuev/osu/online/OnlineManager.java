@@ -17,8 +17,6 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -37,8 +35,6 @@ public class OnlineManager {
     public static final String updateEndpoint = endpoint + "update.php?lang=";
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
-    private static final Pattern avatarUserIdPathPattern = Pattern.compile(".*/user/avatar/(\\d+)\\.[^/?#]+.*");
-    private static final Pattern avatarUserIdQueryPattern = Pattern.compile(".*[?&]id=(\\d+)(?:[&#].*)?$");
     private static final String onlineVersion = "60";
 
     public static final OkHttpClient client = new OkHttpClient();
@@ -77,34 +73,6 @@ public class OnlineManager {
 
     public static String getProfileBannerURL(long userId) {
         return profileBannerEndpoint + userId + ".png";
-    }
-
-    public static String getProfileBannerURL(String avatarURL) {
-        if (avatarURL == null || avatarURL.isEmpty()) {
-            return "";
-        }
-
-        String userIdText = null;
-
-        Matcher pathMatcher = avatarUserIdPathPattern.matcher(avatarURL);
-        if (pathMatcher.matches()) {
-            userIdText = pathMatcher.group(1);
-        } else {
-            Matcher queryMatcher = avatarUserIdQueryPattern.matcher(avatarURL);
-            if (queryMatcher.matches()) {
-                userIdText = queryMatcher.group(1);
-            }
-        }
-
-        if (userIdText == null || userIdText.isEmpty()) {
-            return "";
-        }
-
-        try {
-            return getProfileBannerURL(Long.parseLong(userIdText));
-        } catch (NumberFormatException e) {
-            return "";
-        }
     }
 
     public void init() {
