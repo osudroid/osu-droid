@@ -3151,11 +3151,27 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private SliderBody.RenderPathCache getSliderRenderPath(int index) {
-        if (sliderRenderPaths == null || index < 0 || index >= sliderRenderPaths.length) {
-            throw new NullPointerException("Missing slider render path for index " + index);
+        if (sliderRenderPaths == null) {
+            throw new IllegalStateException(
+                "Slider render paths have not been calculated; sliderRenderPaths is null, index=" + index
+            );
         }
 
-        return Objects.requireNonNull(sliderRenderPaths[index], "Null slider render path for index " + index);
+        if (index < 0 || index >= sliderRenderPaths.length) {
+            throw new IndexOutOfBoundsException(
+                "Invalid slider render path index " + index + " for sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        var renderPath = sliderRenderPaths[index];
+
+        if (renderPath == null) {
+            throw new IllegalStateException(
+                "Slider render path at index " + index + " is null after calculation; sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        return renderPath;
     }
 
     public boolean getReplaying() {
