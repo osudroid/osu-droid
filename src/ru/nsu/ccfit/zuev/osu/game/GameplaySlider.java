@@ -31,6 +31,7 @@ import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.mods.ModSynesthesia;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -185,9 +186,8 @@ public class GameplaySlider extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
-                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
-                     final Color4 comboColor, final Color4 borderColor, final SliderPath sliderPath,
-                     final LinePath renderPath) {
+                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final Color4 comboColor,
+                     final Color4 borderColor, final SliderPath sliderPath, final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
         this.stat = stat;
@@ -198,8 +198,9 @@ public class GameplaySlider extends GameObject {
         position.set(stackedPosition.x, stackedPosition.y);
 
         hitTime = (float) beatmapSlider.startTime / 1000;
+        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         endsCombo = beatmapSlider.isLastInCombo();
-        elapsedSpanTime = secPassed - hitTime;
+        elapsedSpanTime = -timePreempt;
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
@@ -292,7 +293,6 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
-        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
 
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
@@ -403,7 +403,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(secPassed, beatmapSlider);
+        tickContainer.init(beatmapSlider);
 
         scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
@@ -695,7 +695,7 @@ public class GameplaySlider extends GameObject {
             }
 
             // Restore ticks
-            tickContainer.onNewSpan(getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
+            tickContainer.onNewSpan((float) getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
             currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows
@@ -905,6 +905,21 @@ public class GameplaySlider extends GameObject {
         }
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(startArrow, dt);
+        updateAfterInit(endArrow, dt);
+        updateAfterInit(headCirclePiece, dt);
+        updateAfterInit(tailCirclePiece, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(tickContainer, dt);
+        updateAfterInit(sliderBody, dt);
+        updateAfterInit(ball, dt);
+        updateAfterInit(followCircle, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {

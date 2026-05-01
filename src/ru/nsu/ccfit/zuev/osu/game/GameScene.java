@@ -1748,7 +1748,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // The casts can be simplified, but it is necessary to prevent floating point errors (see how
             // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
             // are cast and converted to seconds individually).
-            if (elapsedTime < (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000) {
+            float lifetimeStart = (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000;
+            float lifetimeDt = elapsedTime - lifetimeStart;
+
+            if (lifetimeDt < 0) {
                 break;
             }
 
@@ -1785,10 +1788,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             final Color4 comboColor = getComboColor(obj);
 
+            GameObject gameObject = null;
+
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
+                gameplayCircle.init(this, mgScene, parsedCircle, comboColor);
                 addObject(gameplayCircle);
 
                 if (GameHelper.isAutoplay()) {
@@ -1801,6 +1806,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplayCircle.setReplayData(replay.objectData[gameplayCircle.getId()]);
                 }
 
+                gameObject = gameplayCircle;
             } else if (obj instanceof Spinner parsedSpinner) {
                 final float rps = 2 + 2 * playableBeatmap.getDifficulty().od / 10f;
                 final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
@@ -1817,12 +1823,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
 
+                gameObject = gameplaySpinner;
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, stat, parsedSlider, playableBeatmap.getControlPoints(),
-                        elapsedTime, comboColor, sliderBorderColor, getSliderPath(sliderIndex),
-                        getSliderRenderPath(sliderIndex));
+                        comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
 
                 ++sliderIndex;
                 addObject(gameplaySlider);
@@ -1837,6 +1843,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (gameplaySlider.getReplayData().tickSet == null)
                         gameplaySlider.getReplayData().tickSet = new BitSet();
                 }
+
+                gameObject = gameplaySlider;
+            }
+
+            if (gameObject != null) {
+                gameObject.updateAfterInit(lifetimeDt);
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
