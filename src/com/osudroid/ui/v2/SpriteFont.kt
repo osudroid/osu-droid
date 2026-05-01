@@ -3,7 +3,7 @@ package com.osudroid.ui.v2
 import com.reco1l.andengine.text.UITextureText
 import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.skins.StringSkinData
+import com.osudroid.ui.skinning.StringSkinData
 
 open class SpriteFont(private val texturePrefix: StringSkinData) : UITextureText(mutableMapOf<Char, TextureRegion>().also {
 
