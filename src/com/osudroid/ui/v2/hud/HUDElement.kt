@@ -1,32 +1,15 @@
 package com.osudroid.ui.v2.hud
 
-import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
-import com.osudroid.ui.v2.hud.elements.HUDAverageOffsetCounter
-import com.osudroid.ui.v2.hud.elements.HUDBPMCounter
-import com.osudroid.ui.v2.hud.elements.HUDBackButton
-import com.osudroid.ui.v2.hud.elements.HUDComboCounter
-import com.osudroid.ui.v2.hud.elements.HUDGreatCounter
-import com.osudroid.ui.v2.hud.elements.HUDHealthBar
-import com.osudroid.ui.v2.hud.elements.HUDHitErrorMeter
-import com.osudroid.ui.v2.hud.elements.HUDLinearSongProgress
-import com.osudroid.ui.v2.hud.elements.HUDMehCounter
-import com.osudroid.ui.v2.hud.elements.HUDMissCounter
-import com.osudroid.ui.v2.hud.elements.HUDNotesPerSecondCounter
-import com.osudroid.ui.v2.hud.elements.HUDOkCounter
-import com.osudroid.ui.v2.hud.elements.HUDPPCounter
-import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
-import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
-import com.osudroid.ui.v2.hud.elements.HUDTapsPerSecondCounter
-import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
+import com.osudroid.ui.v2.hud.elements.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
-import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.capitalize
+import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
@@ -50,7 +33,8 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     score_counter(HUDScoreCounter::class),
     ur_counter(HUDUnstableRateCounter::class),
     avg_offset_counter(HUDAverageOffsetCounter::class),
-    hit_error_meter(HUDHitErrorMeter::class),
+    hit_error_meter(HUDBarHitErrorMeter::class),
+    color_hit_error_meter(HUDColorHitErrorMeter::class),
     linear_song_progress(HUDLinearSongProgress::class),
     great_counter(HUDGreatCounter::class),
     ok_counter(HUDOkCounter::class),
@@ -209,7 +193,7 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
 
     override fun onBreakStateChange(isBreak: Boolean) {}
 
-    override fun onAccuracyRegister(accuracy: Float) {}
+    override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {}
 
     //endregion
 

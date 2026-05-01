@@ -9,6 +9,7 @@ import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -49,7 +50,7 @@ public class GameplayHitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
-                     final float secPassed, final Color4 comboColor) {
+                     final Color4 comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
@@ -63,7 +64,7 @@ public class GameplayHitCircle extends GameObject {
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
         hitTime = (float) beatmapCircle.startTime / 1000;
-        passedTime = secPassed - (hitTime - timePreempt);
+        passedTime = -timePreempt;
         startHit = false;
         successfulHit = false;
         kiai = GameHelper.isKiai();
@@ -166,6 +167,8 @@ public class GameplayHitCircle extends GameObject {
 
         scene.attachChild(circlePiece, 0);
         scene.attachChild(approachCircle);
+
+        setLifetimeEnd(hitTime + (float) beatmapCircle.hitWindow.getMehWindow() / 1000);
     }
 
     private void removeFromScene() {
@@ -188,21 +191,27 @@ public class GameplayHitCircle extends GameObject {
 
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
             circlePiece.detachSelf();
-
-            Execution.updateThread(() -> GameObjectPool.getInstance().putCircle(this));
         } else {
-            circlePiece.registerEntityModifier(Modifiers.alpha(0.1f, circlePiece.getAlpha(), 0, e -> Execution.updateThread(() -> {
-                circlePiece.detachSelf();
-                GameObjectPool.getInstance().putCircle(this);
-            })));
+            var fadeOutModifier = Modifiers.alpha(0.1f, circlePiece.getAlpha(), 0, e -> Execution.updateThread(e::detachSelf));
+
+            circlePiece.registerEntityModifier(fadeOutModifier);
+            extendLifetime(hitTime + passedTime, fadeOutModifier);
         }
 
-        listener.removeObject(this);
         scene = null;
     }
 
     private void playHitSamples() {
         listener.playHitSamples(hitSamples);
+    }
+
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(circlePiece, dt);
+
+        super.updateAfterInit(dt);
     }
 
     @Override
@@ -212,9 +221,7 @@ public class GameplayHitCircle extends GameObject {
             return;
         }
 
-        // PassedTime < 0 means circle logic is over
-        if (passedTime < 0) {
-            removeFromScene();
+        if (isJudged()) {
             return;
         }
 
@@ -222,11 +229,10 @@ public class GameplayHitCircle extends GameObject {
 
         // If we have clicked circle
         if (replayObjectData != null) {
-            if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
-                listener.registerAccuracy(replayObjectData.accuracy / 1000f);
+            if (passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
+                listener.registerAccuracy(HitObjectType.Normal, replayObjectData.accuracy / 1000f);
                 startHit = true;
                 successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
-                passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
                 if (successfulHit) {
@@ -236,14 +242,13 @@ public class GameplayHitCircle extends GameObject {
                 return;
             }
         } else if (!autoPlay && listener.isObjectHittable(this)) {
-            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime - timePreempt);
+            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime);
 
             if (hittingCursor != null) {
                 double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
-                listener.registerAccuracy(hitOffset);
+                listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
-                passedTime = -1;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
                 if (successfulHit) {
@@ -271,13 +276,13 @@ public class GameplayHitCircle extends GameObject {
         passedTime += dt;
 
         // We are still at approach time. Let entity modifiers finish first.
-        if (passedTime < timePreempt) {
+        if (passedTime < 0) {
             return;
         }
 
         if (autoPlay) {
-            passedTime = -1;
             // Remove circle and register hit in update thread
+            listener.registerAccuracy(HitObjectType.Normal, 0);
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             startHit = true;
             successfulHit = true;
@@ -285,16 +290,29 @@ public class GameplayHitCircle extends GameObject {
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(1 - FMath.clamp((passedTime - timePreempt) / 0.05f, 0, 1));
+            approachCircle.setAlpha(1 - FMath.clamp(passedTime / 0.05f, 0, 1));
 
             // If passed too much time, counting it as miss
-            if (passedTime > timePreempt + mehWindow) {
-                passedTime = -1;
+            if (passedTime > mehWindow) {
+                startHit = true;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
                 removeFromScene();
+                listener.registerAccuracy(HitObjectType.Normal, mehWindow + 1);
                 listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }
+    }
+
+    @Override
+    public void onExpire() {
+        super.onExpire();
+
+        GameObjectPool.getInstance().putCircle(this);
+    }
+
+    @Override
+    public boolean isJudged() {
+        return startHit;
     }
 }

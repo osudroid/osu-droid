@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -48,8 +47,8 @@ public class GameplaySpinner extends GameObject {
     protected boolean clear = false;
     protected int bonusScoreCounter = 1;
     protected StatisticV2 stat;
+    protected float passedTime;
     protected float duration;
-    protected boolean spinnable;
 
     protected final boolean isSpinnerFrequencyModulate;
     protected final ArrayList<GameplayHitSampleInfo> hitSamples = new ArrayList<>(5);
@@ -120,15 +119,15 @@ public class GameplaySpinner extends GameObject {
 
         this.listener = listener;
         this.stat = stat;
-        startHit = true;
         clear = duration <= 0f;
         bonusScoreCounter = 1;
-        spinnable = false;
+        startHit = false;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+        passedTime = -timePreempt;
 
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
@@ -142,7 +141,7 @@ public class GameplaySpinner extends GameObject {
         }
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(e -> listener.onSpinnerStart(id),
+        circle.registerEntityModifier(Modifiers.sequence(
             Modifiers.delay(timePreempt * 0.75f),
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
@@ -159,13 +158,6 @@ public class GameplaySpinner extends GameObject {
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.delay(timePreempt, e -> spinnable = true),
-            Modifiers.parallel(
-                Modifiers.alpha(duration, 0.75f, 1),
-                Modifiers.scale(duration, 2.0f, 0)
-            )
-        ));
 
         spinText.setAlpha(0);
         spinText.registerEntityModifier(Modifiers.sequence(
@@ -176,13 +168,26 @@ public class GameplaySpinner extends GameObject {
         ));
 
         scene.attachChild(spinText, 0);
-        scene.attachChild(approachCircle, 0);
+
+        if (approachCircle.isVisible()) {
+            approachCircle.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(timePreempt),
+                Modifiers.parallel(
+                    Modifiers.alpha(duration, 0.75f, 1),
+                    Modifiers.scale(duration, 2.0f, 0)
+                )
+            ));
+
+            scene.attachChild(approachCircle, 0);
+        }
+
         scene.attachChild(circle, 0);
         scene.attachChild(metre, 0);
         scene.attachChild(background, 0);
 
         oldMouse = null;
 
+        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
     }
 
     void removeFromScene() {
@@ -205,10 +210,6 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
-
-        listener.removeObject(GameplaySpinner.this);
-
-        Execution.updateThread(() -> GameObjectPool.getInstance().putSpinner(this));
 
         int score = 0;
         if (replayObjectData != null) {
@@ -254,12 +255,31 @@ public class GameplaySpinner extends GameObject {
         playAndFreeHitSamples(score);
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(clearText, dt);
+        updateAfterInit(spinText, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(background, dt);
+        updateAfterInit(circle, dt);
+        updateAfterInit(metre, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {
+        passedTime += dt;
+
         // Allow the spinner to fully fade in first before receiving spins.
-        if (!spinnable) {
+        if (passedTime < 0) {
             return;
+        }
+
+        if (!startHit) {
+            listener.onSpinnerStart(id);
+            startHit = true;
         }
 
         updateSamples(dt);
@@ -365,6 +385,24 @@ public class GameplaySpinner extends GameObject {
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
+
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
+    }
+
+    @Override
+    public void onExpire() {
+        super.onExpire();
+
+        GameObjectPool.getInstance().putSpinner(this);
+    }
+
+    @Override
+    public boolean isJudged() {
+        // In remove spinner lock mode, the spinner is assumed to be judged to allow other objects to be judged while
+        // the spinner is still active.
+        return Config.isRemoveSliderLock() || passedTime >= duration;
     }
 
     protected void reloadHitSounds() {
