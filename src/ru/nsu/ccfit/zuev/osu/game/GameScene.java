@@ -1995,9 +1995,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var obj = activeObjects.get(i);
             obj.update(deltaTime);
 
-            // In remove slider lock mode, immediately mark the next object as judgeable once the current object is hit
-            // rather than after it is judged.
-            if (obj.isJudged() || (Config.isRemoveSliderLock() && obj.isStartHit())) {
+            // Advance to the next judgeable object if the current judgeable object is judged.
+            // In remove slider lock mode, do this as soon as the current judgeable object is hit instead.
+            if (isObjectHittable(obj) && (obj.isJudged() || (Config.isRemoveSliderLock() && obj.isStartHit()))) {
                 judgeableObject = searchJudgeableObject(i + 1);
             }
 
