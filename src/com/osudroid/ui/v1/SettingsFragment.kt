@@ -706,7 +706,6 @@ class SettingsFragment : SettingsFragment() {
 
             mainThread {
                 loading.dismiss()
-                requireContext().startActivity(Intent(requireContext(), MainActivity::class.java))
                 Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }
