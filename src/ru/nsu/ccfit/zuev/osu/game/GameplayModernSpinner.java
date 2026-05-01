@@ -83,6 +83,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         fullRotations = 0;
         rotations = 0;
         bonusScoreCounter = 1;
+        startHit = false;
 
         reloadHitSounds();
 

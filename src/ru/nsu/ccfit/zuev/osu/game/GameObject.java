@@ -226,7 +226,7 @@ public abstract class GameObject {
     }
 
     /**
-     * Called when the lifetime of this {@link GameObject}'s lifetime expires and is about to be considered inactive.
+     * Called when this {@link GameObject}'s lifetime expires.
      */
     public void onExpire() {}
 

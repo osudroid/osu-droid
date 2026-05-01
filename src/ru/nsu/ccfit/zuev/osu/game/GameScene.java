@@ -57,6 +57,7 @@ import com.rian.osu.beatmap.ComboColor;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.HitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -165,6 +166,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private boolean comboWas100 = false;
     private ArrayList<GameObject> activeObjects;
     private ArrayList<GameObject> expiredObjects;
+    private final Set<GameObject> processedExpiredObjects = Collections.newSetFromMap(new IdentityHashMap<>());
     private GameObject judgeableObject;
     private BreakPeriod[] breakPeriods;
     private int breakPeriodIndex;
@@ -760,13 +762,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // same time regardless of the setting.
         elapsedTime = Math.min(elapsedTime, videoOffset);
 
-        sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
+        sliderBorderColor = null;
         if (playableBeatmap.getColors().getSliderBorderColor() != null) {
             sliderBorderColor = playableBeatmap.getColors().getSliderBorderColor();
         }
 
         if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
             sliderBorderColor = OsuSkin.get().getSliderBorderColor();
+        }
+
+        if (sliderBorderColor == null) {
+            sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
         }
 
         comboColors = new ArrayList<>();
@@ -1681,9 +1687,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Clearing expired objects.
+        processedExpiredObjects.clear();
+
         if (!expiredObjects.isEmpty()) {
             for (int i = 0, size = expiredObjects.size(); i < size; i++) {
-                expiredObjects.get(i).onExpire();
+                var obj = expiredObjects.get(i);
+
+                if (processedExpiredObjects.add(obj)) {
+                    obj.onExpire();
+                }
             }
 
             activeObjects.removeAll(expiredObjects);
@@ -2466,15 +2478,34 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        String scoreName = switch (score) {
-            case 300 -> registerHit(id, 300, endCombo);
-            case 100 -> registerHit(id, 100, endCombo);
-            case 50 -> registerHit(id, 50, endCombo);
-            default -> "hit0";
-        };
+        String scoreName;
+
+        // Simulate a hit for hit error meter registration.
+        float accuracy = (float) switch (score) {
+            case 300 -> {
+                scoreName = registerHit(id, 300, endCombo);
+                yield 0;
+            }
+
+            case 100 -> {
+                scoreName = registerHit(id, 100, endCombo);
+                yield hitWindow.getGreatWindow() + 1;
+            }
+
+            case 50 -> {
+                scoreName = registerHit(id, 50, endCombo);
+                yield hitWindow.getOkWindow() + 1;
+            }
+
+            default -> {
+                scoreName = "hit0";
+                yield hitWindow.getMehWindow() + 1;
+            }
+        } / 1000;
 
         createHitEffect(pos, scoreName, null);
 
+        hud.onAccuracyRegister(HitObjectType.Spinner, accuracy);
         hud.onNoteHit(stat);
     }
 
@@ -2506,10 +2537,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void addObject(final GameObject object) {
         activeObjects.add(object);
-    }
-
-    public void removeObject(final GameObject object) {
-        expiredObjects.add(object);
     }
 
     @Override
@@ -3036,17 +3063,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
 
-    public void registerAccuracy(final double acc) {
-        offsetSum += (float) acc;
-        offsetRegs++;
+    public void registerAccuracy(HitObjectType type, final double acc) {
+        double mehWindow = hitWindow.getMehWindow() / 1000;
 
-        stat.addHitOffset(acc);
+        if (-mehWindow <= acc && acc <= mehWindow) {
+            offsetSum += (float) acc;
+            offsetRegs++;
 
-        if (replaying) {
-            scoringScene.getReplayStat().addHitOffset(acc);
+            if (type != HitObjectType.Spinner) {
+                stat.addHitOffset(acc);
+            }
+
+            if (replaying) {
+                scoringScene.getReplayStat().addHitOffset(acc);
+            }
         }
 
-        hud.onAccuracyRegister((float) acc);
+        hud.onAccuracyRegister(type, (float) acc);
     }
 
 
