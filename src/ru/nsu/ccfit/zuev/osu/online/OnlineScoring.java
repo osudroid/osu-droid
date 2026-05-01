@@ -207,10 +207,13 @@ public class OnlineScoring {
                     OnlineManager.getInstance().loadProfileBannerToTextureManager();
                 }
                 JobKt.ensureActive(scope.getCoroutineContext());
-                if (both)
-                    updatePanelProfiles();
-                else if (secondPanel != null)
-                    secondPanel.setProfile(avatarLoaded ? avatarUrl : null);
+
+                Execution.updateThread(() -> {
+                    if (both)
+                        updatePanelProfiles();
+                    else if (secondPanel != null)
+                        secondPanel.setProfile(avatarLoaded ? avatarUrl : null);
+                });
             }
         });
     }
