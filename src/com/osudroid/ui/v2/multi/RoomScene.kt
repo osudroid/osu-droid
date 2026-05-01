@@ -943,17 +943,13 @@ class RoomScene(room: Room) : UIScene(), IRoomEventListener, IPlayerEventListene
             updateBeatmap(beatmap)
         }
 
-        // songService (MediaPlayer) must be called from the main Android thread, not the
-        // AndEngine update thread or the socket EventThread.
-        mainThread {
-            if (selectedBeatmap == null) {
-                GlobalManager.getInstance().songService.stop()
-                return@mainThread
-            }
-
-            GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
-            GlobalManager.getInstance().songService.play()
+        if (selectedBeatmap == null) {
+            GlobalManager.getInstance().songService.stop()
+            return
         }
+
+        GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
+        GlobalManager.getInstance().songService.play()
     }
 
     override fun onRoomHostChange(uid: Long) {
