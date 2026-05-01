@@ -1,32 +1,20 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
-import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.*
+import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
-import org.andengine.engine.camera.*
-import org.andengine.opengl.util.GLState
-import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.constants.HitObjectType
-import ru.nsu.ccfit.zuev.osu.GlobalManager
+import org.anddev.andengine.engine.camera.*
+import javax.microedition.khronos.opengles.*
 import kotlin.math.abs
 
-sealed class HUDHitErrorMeter : HUDElement() {
-    protected val hitWindow: HitWindow = GlobalManager.getInstance().gameScene.hitWindow
-class HUDHitErrorMeter : HUDElement() {
+class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
     private val expiredIndicators = SynchronizedPool<Indicator>(20)
     private val activeIndicators = mutableListOf<Indicator>()
-
-    private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
-
-    private val greatColor = Color4(70, 180, 220)
-    private val okColor = Color4(100, 220, 40)
-    private val mehColor = Color4(200, 180, 110)
-
 
     // Using a shared box for drawing indicators to reduce memory usage.
     private val indicatorBox = UIBox().apply {
@@ -35,7 +23,7 @@ class HUDHitErrorMeter : HUDElement() {
         setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT - 2f)
 
         // Used to get anchor working properly.
-        parent = this@HUDHitErrorMeter
+        parent = this@HUDBarHitErrorMeter
     }
 
 
@@ -48,6 +36,8 @@ class HUDHitErrorMeter : HUDElement() {
             color = mehColor
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
+
+            depthInfo = DepthInfo.Default
         }
 
         val okWindow = UIBox().apply {
@@ -55,6 +45,8 @@ class HUDHitErrorMeter : HUDElement() {
             origin = Anchor.Center
             color = okColor
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
+
+            depthInfo = DepthInfo.Default
         }
 
         val greatWindow = UIBox().apply {
@@ -62,6 +54,9 @@ class HUDHitErrorMeter : HUDElement() {
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
             color = greatColor
+
+            clearInfo = ClearInfo.ClearDepthBuffer
+            depthInfo = DepthInfo.Less
         }
 
         attachChild(mehWindow)
@@ -80,51 +75,36 @@ class HUDHitErrorMeter : HUDElement() {
         greatWindow.alpha = 0.6f
     }
 
-    protected val greatColor = Color4(70, 180, 220)
-    protected val okColor = Color4(100, 220, 40)
-    protected val mehColor = Color4(200, 180, 110)
-    protected val missColor = Color4(255, 9, 9)
-
-    final override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
-        val absAccuracy = abs(accuracy * 1000)
-
-        val color = when {
-            absAccuracy <= hitWindow.greatWindow -> greatColor
-            absAccuracy <= hitWindow.okWindow -> okColor
-            absAccuracy <= hitWindow.mehWindow -> mehColor
-            else -> missColor
+    override fun addResult(type: HitObjectType, accuracy: Float, color: Color4) {
+        if (type == HitObjectType.Spinner) {
+            return
         }
 
-        addResult(type, accuracy, color)
-    }
+        val accuracyMs = accuracy * 1000
 
-    protected abstract fun addResult(type: HitObjectType, accuracy: Float, color: Color4)
+        if (abs(accuracyMs) > hitWindow.mehWindow) {
+            return
+        }
+
+        val indicator = expiredIndicators.acquire() ?: Indicator(0f, 0f, Color4.White)
+
+        indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow.toFloat())
+        indicator.alpha = 1f
+        indicator.color = color
+
         activeIndicators.add(indicator)
     }
 
-
     //region Indicator update & draw
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
-        super.onManagedDraw(pGLState, pCamera)
-
-        if (activeIndicators.isEmpty()) return
-
-        // After super.onManagedDraw() the HUDHitErrorMeter matrix has been popped, so we
-        // are now in the parent (GameplayHUD) coordinate space.  We must re-push our own
-        // translation so that indicatorBox.absoluteX/Y (which are relative to this element)
-        // are mapped back to the correct screen position.
-        pGLState.pushModelViewGLMatrix()
-        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
-
+    override fun onDrawChildren(gl: GL10, camera: Camera) {
+        super.onDrawChildren(gl, camera)
         activeIndicators.fastForEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(pGLState, pCamera)
+            indicatorBox.onDraw(gl, camera)
         }
-
-        pGLState.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
