@@ -1,8 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static com.acivev.ui.EffectKt.addFireworks;
 import static com.acivev.ui.EffectKt.addFireworksWithPeriod;
-import static com.acivev.ui.EffectKt.addSnowfall;
 import static com.acivev.ui.EffectKt.addSnowfallWithPeriod;
 
 import android.content.Context;
@@ -12,6 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.acivev.VibratorManager;
+import com.acivev.ui.MainMenuVisuals;
 import com.edlplan.framework.easing.Easing;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.utils.Execution;
@@ -90,7 +89,6 @@ public class MainScene implements IUpdateHandler {
     private Sprite music_nowplay;
     private Scene scene;
     private Text musicInfoText;
-    private final Rectangle[] spectrum = new Rectangle[120];
     private final float[] peakLevel = new float[120];
     private final float[] peakDownRate = new float[120];
     private final float[] peakAlpha = new float[120];
@@ -121,6 +119,9 @@ public class MainScene implements IUpdateHandler {
     private float menuBarX = 0;
 
     private MainMenu menu;
+
+    // === Visual enhancements ===
+    private final MainMenuVisuals menuVisuals = new MainMenuVisuals();
 
     public void load(Context context) {
         this.context = context;
@@ -190,7 +191,7 @@ public class MainScene implements IUpdateHandler {
         UIBox box = new UIBox() {
 
             {
-                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME, vbo);
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid-GLES2 " + BuildConfig.VERSION_NAME, vbo);
                 attachChild(versionText, 0);
 
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
@@ -370,18 +371,7 @@ public class MainScene implements IUpdateHandler {
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
         music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex, vbo);
 
-        for (int i = 0; i < 120; i++) {
-            final float pX = (float) Config.getRES_WIDTH() / 2;
-            final float pY = (float) Config.getRES_HEIGHT() / 2;
-
-            spectrum[i] = new Rectangle(pX, pY, 260, 10, vbo);
-            spectrum[i].setRotationCenter(0, 5);
-            spectrum[i].setScaleCenter(0, 5);
-            spectrum[i].setRotation(-220 + i * 3f);
-            spectrum[i].setAlpha(0.0f);
-
-            scene.attachChild(spectrum[i]);
-        }
+        menuVisuals.load(scene, vbo);
 
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
@@ -420,6 +410,7 @@ public class MainScene implements IUpdateHandler {
 
             scene.attachChild(particleSystem[1]);
         }
+
 
         TextureRegion beatmapDownloaderTex = ResourceManager.getInstance().getTexture("beatmap_downloader");
         Sprite beatmapDownloader = new Sprite(Config.getRES_WIDTH() - beatmapDownloaderTex.getWidth(), (Config.getRES_HEIGHT() - beatmapDownloaderTex.getHeight()) / 2f, beatmapDownloaderTex, vbo) {
@@ -627,11 +618,11 @@ public class MainScene implements IUpdateHandler {
     @Override
     public void onUpdate(final float pSecondsElapsed) {
         beatPassTime += pSecondsElapsed * 1000;
+
+        menuVisuals.updateFrame(pSecondsElapsed, isContinuousKiai);
+
         if (isOnExitAnim) {
-            for (Rectangle specRectangle : spectrum) {
-                specRectangle.setWidth(0);
-                specRectangle.setAlpha(0);
-            }
+            menuVisuals.onExit();
             return;
         }
 
@@ -642,9 +633,7 @@ public class MainScene implements IUpdateHandler {
         if (doMenuShow && !isMenuShowed) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            for (Rectangle rectangle : spectrum) {
-                rectangle.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2, (float) Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
-            }
+            menuVisuals.onMenuShow();
 
             menu.attachButtons();
             menu.showFirstMenu();
@@ -689,10 +678,7 @@ public class MainScene implements IUpdateHandler {
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
                 logoOverlay.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
-
-                for (Rectangle rectangle : spectrum) {
-                    rectangle.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3, (float) Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
-                }
+                menuVisuals.onMenuHide();
                 isMenuShowed = false;
                 doMenuShow = false;
                 showPassTime = 0;
@@ -708,6 +694,8 @@ public class MainScene implements IUpdateHandler {
                 logo.registerEntityModifier(new SequenceEntityModifier(new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
                         new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
             }
+
+            menuVisuals.onBeat(isContinuousKiai);
         }
 
         if (GlobalManager.getInstance().getSongService() != null) {
@@ -792,15 +780,11 @@ public class MainScene implements IUpdateHandler {
                         peakLevel[i] = Math.max(peakLevel[i] - peakDownRate[i], 0f);
                         peakAlpha[i] = Math.max(peakAlpha[i] - initialAlpha / gradient, 0f);
                     }
+                }
 
-                    spectrum[i].setWidth(250f + peakLevel[i]);
-                    spectrum[i].setAlpha(peakAlpha[i]);
-                }
+                menuVisuals.updateAudio(peakLevel, peakAlpha, isContinuousKiai);
             } else {
-                for (Rectangle specRectangle : spectrum) {
-                    specRectangle.setWidth(0);
-                    specRectangle.setAlpha(0);
-                }
+                menuVisuals.clearBars();
                 if (!doChange && !doStop && GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getPosition() >= GlobalManager.getInstance().getSongService().getLength()) {
                     musicControl(MusicOption.NEXT);
                 }
