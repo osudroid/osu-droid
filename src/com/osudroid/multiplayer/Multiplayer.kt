@@ -241,13 +241,11 @@ object Multiplayer {
     }
 
     /**
-     * Permanently gives up on reconnecting: cancels the reconnection loop, shows the error
-     * toast, and navigates back to the lobby (unless gameplay is currently active, in which
-     * case the navigation is deferred to the game-end flow).
+     * Permanently gives up on reconnecting: cancels the reconnection loop, shows the error toast, and navigates back to
+     * the lobby (unless gameplay is currently active, in which case the navigation is deferred to the game-end flow).
      *
-     * Idempotent — if a second caller races in after the first has already set
-     * [isReconnecting] to `false`, it is a no-op. This ensures the two independent
-     * exit paths (30-second absolute timeout in the coroutine loop and the max-attempt
+     * If a second caller races in after the first has already set [isReconnecting] to `false`, it is a no-op.
+     * This ensures the two independent exit paths (30-second absolute timeout in the coroutine loop and the max-attempt
      * guard in [onReconnectAttempt]) cannot both execute the toast + `back()` sequence.
      */
     private fun abandonReconnection() {
