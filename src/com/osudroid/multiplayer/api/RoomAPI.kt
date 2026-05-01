@@ -265,16 +265,15 @@ object RoomAPI {
             room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
             room.status = RoomStatus[json.getInt("status")]
 
-            // Locate our own player entry before registering further listeners.
-            // If the server sends a player list that does not include our UID (malformed
-            // payload or API mismatch) we cannot safely proceed — disconnect and surface
-            // an error rather than crashing with NullPointerException.
             val localPlayer = room.playersMap[OnlineManager.getInstance().userId]
+
             if (localPlayer == null) {
                 Multiplayer.log("ERROR: initialConnection — local player UID not found in server player list. Disconnecting.")
                 roomEventListener?.onRoomConnectFail("Server did not include local player in room state.")
+
                 val s = socket
                 socket = null
+
                 s?.off()
                 s?.disconnect()
                 return@Listener
@@ -303,43 +302,41 @@ object RoomAPI {
                 on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
             }
 
-            // During reconnection we must NOT create a new RoomScene.  Creating one would:
-            //   • replace RoomAPI.roomEventListener / playerEventListener with a scene that
-            //     is never displayed (SI-1 — the ghost-scene bug), and
-            //   • leave the on-screen scene as a dead UI shell that can never receive events.
-            // Instead, update the existing scene's room reference in-place and re-register it
-            // as the active listener, then forward the connect event to it.
+            // During reconnection, reuse the RoomScene. Creating a new one would:
+            // - replace roomEventListener / playerEventListener with a scene that is never displayed (see
+            //   onRoomConnect for more details; essentially, its show() method is never called during reconnection), and
+            // - leave the on-screen scene as a dead UI shell that can never receive events.
+            // Instead, update the existing scene's room reference in-place and re-register it as the active listener,
+            // then forward the connect event to it.
             val existingScene = if (Multiplayer.isReconnecting) Multiplayer.roomScene else null
 
             val scene = if (existingScene != null) {
-                // Reuse the displayed scene.  Update its room reference so all subsequent reads
-                // of `this.room` inside event handlers see the fresh server state.
                 existingScene.room = room
+
                 // Re-register the existing scene as the event listener in case something
                 // inadvertently replaced it while the reconnection was in flight.
                 playerEventListener = existingScene
                 roomEventListener = existingScene
+
                 existingScene
-            } else {
-                // Fresh connection: build and register a brand-new scene as normal.
-                RoomScene(room)
-            }
+            } else RoomScene(room)
 
             Multiplayer.room = room
             Multiplayer.player = localPlayer
             Multiplayer.roomScene = scene
 
-            // onRoomConnect triggers UI mutations (updateInformation, updatePlayerList, show, etc.).
-            // Calling it directly here would run those mutations on the socket EventThread, which
-            // is not safe for the AndEngine scene graph.  Dispatch to the update thread instead.
+            // onRoomConnect triggers UI mutations (updateInformation, updatePlayerList, show, etc.), so we move its
+            // operations to the update thread.
             updateThread { scene.onRoomConnect(room) }
-
         } catch (e: Exception) {
             Multiplayer.log("ERROR: initialConnection handler threw an exception: ${e.javaClass.simpleName} — ${e.message}")
             Multiplayer.log(e)
+
             roomEventListener?.onRoomConnectFail("Unexpected error processing server room state: ${e.message}")
+
             val s = socket
             socket = null
+
             s?.off()
             s?.disconnect()
         }
@@ -407,10 +404,9 @@ object RoomAPI {
 
         roomEventListener?.onRoomConnectFail(it[0].toString())
 
-        // Capture the reference before nulling so a concurrent connectToRoom() that has
-        // already assigned a new socket is not accidentally cleared.
         val s = socket
         socket = null
+
         s?.off()
         s?.disconnect()
     }
@@ -436,12 +432,9 @@ object RoomAPI {
      */
     fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
                       multiplayerSessionID: String? = null) {
-
-        // Capture and clear the old socket reference BEFORE creating the new one.
-        // This means any late callbacks still firing on the old socket will read null
-        // from the field and cannot accidentally wipe out the new socket reference.
         val oldSocket = socket
         socket = null
+
         oldSocket?.off()
         oldSocket?.disconnect()
 
@@ -493,17 +486,12 @@ object RoomAPI {
      * Disconnect from socket.
      */
     fun disconnect() {
-
-        if (socket == null) {
-            return
-        }
-
         socket?.apply {
-
             Multiplayer.log("Disconnected from socket.")
             off()
             disconnect()
         }
+
         socket = null
     }
 
