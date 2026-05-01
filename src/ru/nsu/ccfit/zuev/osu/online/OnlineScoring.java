@@ -112,7 +112,7 @@ public class OnlineScoring {
                     break;
                 }
                 if (success) {
-                    updatePanels();
+                    Execution.updateThread(this::updatePanels);
                     OnlineManager.getInstance().setStayOnline(true);
                     loadProfileAssets(true);
                 } else {
@@ -167,7 +167,7 @@ public class OnlineScoring {
                         if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                             i = attemptCount;
                     } else if (success) {
-                        updatePanels();
+                        Execution.updateThread(this::updatePanels);
                         OnlineManager mgr = OnlineManager.getInstance();
                         panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
                         break;
