@@ -11,10 +11,9 @@ class RoomMods @JvmOverloads constructor(val json: String = "") : ModHashMap(Mod
     /**
      * Compares two [RoomMods] instances taking the free-mod setting into account.
      *
-     * In free-mod mode only the required (non-free) mods need to match; individual
-     * player mods are irrelevant for room-level equality.  This is intentionally a
-     * separate named method rather than overriding [equals] so that [equals] remains
-     * a pure, deterministic, context-free operation.
+     * In free-mod, only the required (non-free) mods need to match; individual player mods are irrelevant for
+     * room-level equality. This is intentionally a separate named method rather than overriding [equals] so that
+     * [equals] remains a pure, deterministic, context-free operation.
      *
      * @param other The other [RoomMods] to compare against.
      * @param isFreeMod Whether the room currently has free-mod enabled.
@@ -25,6 +24,7 @@ class RoomMods @JvmOverloads constructor(val json: String = "") : ModHashMap(Mod
         if (isFreeMod) {
             val requiredMods = filter { !it.value.isValidForMultiplayerAsFreeMod }
             val otherRequiredMods = other.filter { !it.value.isValidForMultiplayerAsFreeMod }
+
             return requiredMods.size == otherRequiredMods.size &&
                 requiredMods.values.containsAll(otherRequiredMods.values)
         }
