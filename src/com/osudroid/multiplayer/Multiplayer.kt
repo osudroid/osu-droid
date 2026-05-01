@@ -200,12 +200,9 @@ object Multiplayer {
             return
         }
 
+        // Replace server statistics with local in Head-to-Head mode.
         if (room?.isTeamVersus == false) {
-            // Replace server statistics with local
             val ownScore = GlobalManager.getInstance().gameScene.stat
-
-            // In team mode, this will be null because the server does not send individual scores, though this check has
-            // been made flexible in case the server submits individual scores in the future.
             val ownScoreIndex = list.indexOfFirst { it.playerName == OnlineManager.getInstance().username }.takeUnless { it == -1 }
 
             if (ownScore != null) {
