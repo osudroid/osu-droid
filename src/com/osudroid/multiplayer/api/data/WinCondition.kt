@@ -32,7 +32,7 @@ enum class WinCondition {
 
     companion object {
         /**
-         * Returns the [WinCondition] for [ordinal], or `null` if the ordinal is not recognised (EH-1).
+         * Returns the [WinCondition] for [ordinal], or `null` if the ordinal is not recognized.
          */
         fun from(ordinal: Int): WinCondition? = entries.getOrNull(ordinal)
     }
