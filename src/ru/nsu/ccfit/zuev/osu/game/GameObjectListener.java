@@ -4,6 +4,7 @@ import android.graphics.PointF;
 
 import com.osudroid.game.Cursor;
 import com.reco1l.framework.Color4;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 
 import java.util.BitSet;
@@ -32,7 +33,7 @@ public interface GameObjectListener {
 
     int getCursorsCount();
 
-    void registerAccuracy(double acc);
+    void registerAccuracy(HitObjectType type, double acc);
     
     void updateAutoBasedPos(float pX, float pY);
 

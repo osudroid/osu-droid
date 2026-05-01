@@ -3,9 +3,9 @@ package com.osudroid.ui.v2.hud
 import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
 import com.osudroid.ui.v2.hud.elements.HUDAverageOffsetCounter
 import com.osudroid.ui.v2.hud.elements.HUDBackButton
+import com.osudroid.ui.v2.hud.elements.HUDBarHitErrorMeter
 import com.osudroid.ui.v2.hud.elements.HUDComboCounter
 import com.osudroid.ui.v2.hud.elements.HUDHealthBar
-import com.osudroid.ui.v2.hud.elements.HUDHitErrorMeter
 import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
 import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
@@ -88,7 +88,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     position = Vec2(-10f, -59f)
                 ),
                 HUDElementSkinData(
-                    type = HUDHitErrorMeter::class,
+                    type = HUDBarHitErrorMeter::class,
                     anchor = Anchor.BottomCenter,
                     origin = Anchor.BottomCenter
                 )

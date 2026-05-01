@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import com.osudroid.ui.skinning.StringSkinData;
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
 import com.reco1l.andengine.UIEngine;
@@ -47,7 +48,6 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
-import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
 
@@ -626,6 +626,14 @@ public class ResourceManager {
         }
 
         return region;
+    }
+
+    public TextureRegion getProfileBannerTextureIfLoaded(final String bannerURL) {
+        if (bannerURL == null || bannerURL.length() == 0) {
+            return null;
+        }
+
+        return getTextureIfLoaded(MD5Calculator.getStringMD5(bannerURL));
     }
 
     public TextureRegion getTextureIfLoaded(final String resname) {

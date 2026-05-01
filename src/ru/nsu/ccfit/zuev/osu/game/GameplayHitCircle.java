@@ -9,6 +9,7 @@ import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -247,7 +248,7 @@ public class GameplayHitCircle extends GameObject {
 
             if (hittingCursor != null) {
                 double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
-                listener.registerAccuracy(hitOffset);
+                listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
                 // Remove circle and register hit in update thread
@@ -283,6 +284,7 @@ public class GameplayHitCircle extends GameObject {
 
         if (autoPlay) {
             // Remove circle and register hit in update thread
+            listener.registerAccuracy(HitObjectType.Normal, 0);
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             startHit = true;
             successfulHit = true;
@@ -298,6 +300,7 @@ public class GameplayHitCircle extends GameObject {
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
                 removeFromScene();
+                listener.registerAccuracy(HitObjectType.Normal, mehWindow + 1);
                 listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }

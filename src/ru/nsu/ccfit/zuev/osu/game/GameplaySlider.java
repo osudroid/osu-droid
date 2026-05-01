@@ -19,6 +19,7 @@ import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
 import com.reco1l.framework.Color4;
 import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.constants.HitObjectType;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -228,7 +229,8 @@ public class GameplaySlider extends GameObject {
         preStageFinish = false;
         bodyColor = comboColor;
         if (!OsuSkin.get().isSliderFollowComboColor()) {
-            bodyColor = OsuSkin.get().getSliderBodyColor();
+            var skinBodyColor = OsuSkin.get().getSliderBodyColor();
+            bodyColor = skinBodyColor != null ? skinBodyColor : comboColor;
         }
         circleColor = comboColor;
         currentNestedObjectIndex = 0;
@@ -1108,8 +1110,9 @@ public class GameplaySlider extends GameObject {
         double mehWindow = hitWindow.getMehWindow() / 1000;
 
         if (replayObjectData == null || GameHelper.getReplayVersion() >= 6 || mehWindow <= duration) {
+            listener.registerAccuracy(HitObjectType.Slider, hitOffset);
+
             if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
-                listener.registerAccuracy(hitOffset);
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
                 shouldSnakeOut = true;
@@ -1123,7 +1126,7 @@ public class GameplaySlider extends GameObject {
             // In replays older than version 6, when the 50 hit window is longer than the duration of the slider,
             // the slider head is considered to *not* exist if it was not hit until the slider is over.
             // It is a very weird behavior, but that's what it actually was...
-            listener.registerAccuracy(hitOffset);
+            listener.registerAccuracy(HitObjectType.Slider, hitOffset);
             playCurrentNestedObjectHitSound();
             ticksGot++;
             shouldSnakeOut = true;
