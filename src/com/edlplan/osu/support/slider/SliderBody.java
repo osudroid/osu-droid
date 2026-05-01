@@ -305,12 +305,6 @@ public class SliderBody extends UIContainer {
         buildPointLengthCache(renderPath, cache);
         buildSegmentThetaCache(renderPath, cache);
 
-        for (int i = 0, size = renderPath.size(); i < size; i++) {
-            cache.path.add(renderPath.get(i));
-        }
-
-        cache.path.measure();
-
         cache.segmentCount = Math.max(0, cache.pointCount - 1);
 
         if (computeFullCache) {
