@@ -73,7 +73,11 @@ class RoomPlayerCard : UILinearContainer() {
         private val innerContainer: UILinearContainer
         private var modDisplay: UIComponent? = null
 
-        private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
+        private val hostIcon = UISprite().apply {
+            textureRegion = ResourceManager.getInstance().getTexture("crown")
+            size = Vec2(18f)
+            anchor = Anchor.CenterLeft
+            origin = Anchor.CenterLeft
             applyTheme = { color = it.accentColor }
         }
 
