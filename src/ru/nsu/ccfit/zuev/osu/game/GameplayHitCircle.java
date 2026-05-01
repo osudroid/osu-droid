@@ -232,7 +232,7 @@ public class GameplayHitCircle extends GameObject {
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
-                listener.registerAccuracy(replayObjectData.accuracy / 1000f);
+                listener.registerAccuracy(HitObjectType.Normal, replayObjectData.accuracy / 1000f);
                 startHit = true;
                 successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
                 // Remove circle and register hit in update thread
