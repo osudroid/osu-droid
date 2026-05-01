@@ -418,9 +418,7 @@ object RoomAPI {
     }
 
     private fun createDisconnectListener(expectedSocket: Socket) = Listener {
-        if (socket !== expectedSocket) {
-            return@Listener
-        }
+        if (socket !== expectedSocket) return@Listener
 
         Multiplayer.log("RECEIVED: disconnect -> ${it.contentToString()}")
 
@@ -431,6 +429,11 @@ object RoomAPI {
             // Socket was manually disconnected by either server or client.
             byUser = reason == "io server disconnect" || reason == "io client disconnect"
         )
+
+        socket = null
+
+        expectedSocket.off()
+        expectedSocket.disconnect()
     }
 
 
