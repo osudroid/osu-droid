@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -233,9 +234,10 @@ object Multiplayer {
      */
     fun cancelReconnection() {
         isReconnecting = false
-        reconnectionJob?.cancel()
-        reconnectionJob = null
+
+        reconnectionScope?.cancel()
         reconnectionScope = null
+        reconnectionJob = null
     }
 
     /**
