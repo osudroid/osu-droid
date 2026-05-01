@@ -25,12 +25,6 @@ import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.updateThread
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicReference
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
@@ -98,28 +92,6 @@ class RoomScene(
      */
     @JvmField
     var isWaitingForModsChange = false
-
-    /**
-     * [CoroutineScope] used for the beatmap-load timeout job.
-     *
-     * A dedicated [CoroutineScope] is used so that cancelling the [Job] is cheap and cannot interfere with other
-     * coroutines.
-     */
-    private val matchScope = CoroutineScope(Dispatchers.Default)
-
-    /**
-     * Running job that force-starts the game if `allPlayersBeatmapLoadComplete` is not received
-     * within [BEATMAP_LOAD_TIMEOUT_MS] ms after `playBeatmap` was received (EH-2).
-     *
-     * An [AtomicReference] is used because this field is accessed from three different threads:
-     * - socket EventThread  → [startBeatmapLoadTimeout] / [cancelBeatmapLoadTimeout]
-     * - AndEngine update thread → [cancelBeatmapLoadTimeout] (called from [teardownSession])
-     * - [matchScope] coroutine (Dispatchers.Default) → reads and potentially replaces the reference
-     * [AtomicReference] gives a single atomic swap operation (getAndSet/set) with full
-     * visibility guarantees, avoiding the check-then-act race that a plain @Volatile var has.
-     */
-    private val beatmapLoadTimeoutJob = AtomicReference<Job?>(null)
-
 
     /**
      * The room chat.
@@ -743,9 +715,6 @@ class RoomScene(
         RoomAPI.roomEventListener = null
         RoomAPI.playerEventListener = null
 
-        // Cancel any pending beatmap-load timeout so it cannot fire after teardown.
-        cancelBeatmapLoadTimeout()
-
         runSafe { RoomAPI.disconnect() }
 
         Multiplayer.room = null
@@ -791,15 +760,14 @@ class RoomScene(
     override fun onRoomChatMessage(uid: Long?, message: String) {
 
         if (uid != null) {
-
-            // Look up the sender.  If they are not yet in playersMap the most likely cause is
+            // Look up the sender. If they are not yet in playersMap the most likely cause is
             // that chatMessage arrived on the EventThread just before the playerJoined event
-            // that was queued right behind it (EH-3).  Rather than silently discarding the
+            // that was queued right behind it (EH-3). Rather than silently discarding the
             // message, build a temporary stub player so the text is displayed in the chat log.
             // The stub uses "#uid" as its name; once playerJoined fires, any subsequent
             // messages from that player will show their real username.
             val player = room.playersMap[uid] ?: run {
-                Multiplayer.log("WARNING: chatMessage from unknown UID $uid — displaying with stub name (EH-3)")
+                Multiplayer.log("WARNING: chatMessage from unknown UID $uid — displaying with stub name")
                 RoomPlayer(id = uid, name = "#$uid", status = PlayerStatus.NotReady, team = null, mods = RoomMods())
             }
 
@@ -1094,22 +1062,10 @@ class RoomScene(
             }
         }
 
-        // Start a safety timer: if allPlayersBeatmapLoadComplete is never received (e.g. one
-        // client crashes mid-load without a clean disconnect) the match would hang forever for
-        // everyone.  Force-set isReadyToStart after the timeout so the game proceeds regardless
-        // (EH-2).
-        startBeatmapLoadTimeout()
-
         updatePlayerList()
     }
 
     override fun onRoomMatchStart() {
-
-        // allPlayersBeatmapLoadComplete received — the server confirmed all clients are ready.
-        // Cancel the safety timeout so it cannot fire spuriously after the game has already
-        // started (EH-2).
-        cancelBeatmapLoadTimeout()
-
         updateThread {
             if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
                 GlobalManager.getInstance().gameScene.isReadyToStart = true
@@ -1140,52 +1096,6 @@ class RoomScene(
     override fun onRoomFinalLeaderboard(leaderboard: JSONArray) {
         Multiplayer.onFinalLeaderboard(leaderboard)
     }
-
-
-    // Beatmap-load timeout (EH-2)
-
-    /**
-     * Starts a safety timer that force-starts gameplay if [onRoomMatchStart] is not received
-     * within [BEATMAP_LOAD_TIMEOUT_MS] milliseconds.  This prevents the entire lobby from
-     * hanging indefinitely when one client stops responding mid-load without a clean disconnect.
-     */
-    private fun startBeatmapLoadTimeout() {
-        beatmapLoadTimeoutJob.getAndSet(null)?.cancel()
-
-        beatmapLoadTimeoutJob.set(matchScope.launch {
-            delay(BEATMAP_LOAD_TIMEOUT_MS.milliseconds)
-
-            Multiplayer.log(
-                "WARNING: allPlayersBeatmapLoadComplete not received within " +
-                "${BEATMAP_LOAD_TIMEOUT_MS}ms — force-starting game (EH-2)"
-            )
-
-            updateThread {
-                if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
-                    GlobalManager.getInstance().gameScene.isReadyToStart = true
-                }
-            }
-        })
-    }
-
-    /**
-     * Cancels the pending beatmap-load timeout, if any.
-     * Call this when [onRoomMatchStart] is received or when the room is torn down.
-     */
-    private fun cancelBeatmapLoadTimeout() {
-        beatmapLoadTimeoutJob.getAndSet(null)?.cancel()
-    }
-
-
-    companion object {
-        /**
-         * How long (ms) to wait for `allPlayersBeatmapLoadComplete` before force-starting the
-         * game.  30 s gives slow devices enough time to finish loading while still providing a
-         * meaningful upper bound on how long other players can be blocked (EH-2).
-         */
-        private const val BEATMAP_LOAD_TIMEOUT_MS = 30_000L
-    }
-
 
     // Player related events
 
