@@ -182,7 +182,7 @@ public class SliderBody extends UIContainer {
         for (int i = 0; i < sourceSize; i++) {
             Vec2 currentPoint = source.get(i);
 
-            if (previousPoint == null || Vec2.length(previousPoint, currentPoint) > pointMergeDistance) {
+            if (previousPoint == null || i == sourceSize - 1 || Vec2.length(previousPoint, currentPoint) > pointMergeDistance) {
                 cache.add(currentPoint);
                 previousPoint = currentPoint;
             }
