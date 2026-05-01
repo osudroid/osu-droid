@@ -387,7 +387,7 @@ class ColorSkinDataTest {
 
         // Now revert to default
         val emptyJson = JSONObject()
-        json.put("testTag", "")
+        emptyJson.put("testTag", "")
         skinData.setFromJson(emptyJson)
 
         assertEquals(defaultColor, skinData.currentValue)
