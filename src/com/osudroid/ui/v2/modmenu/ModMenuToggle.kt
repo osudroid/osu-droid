@@ -82,8 +82,10 @@ class ModMenuToggle(var mod: Mod): UIButton() {
 
     @JvmOverloads
     fun updateVisibility(searchTerm: String = "") {
-        var shouldBeVisible = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
-            mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+        var shouldBeVisible = if (Multiplayer.isMultiplayer) {
+            // isValidForMultiplayer is always checked, even if the room hasn't been received yet,
+            // to avoid invalid mods (e.g. Autoplay) appearing before room data arrives.
+            mod.isValidForMultiplayer && (Multiplayer.room == null || Multiplayer.isRoomHost ||
                     (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
         } else {
             true
