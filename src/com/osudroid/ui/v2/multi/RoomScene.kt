@@ -518,28 +518,25 @@ class RoomScene(
         modsIndicator.mods = room.mods.values
     }
 
-    fun updatePlayerList() {
-
+    fun updatePlayerList() = updateThread {
         val shouldReload = currentPlayers.size != room.playersMap.size
-            || !currentPlayers.all { room.playersMap.containsKey(it) }
+                || !currentPlayers.all { room.playersMap.containsKey(it) }
 
-        updateThread {
-            playersContainer.apply {
+        playersContainer.apply {
 
-                if (shouldReload) {
-                    detachChildren()
+            if (shouldReload) {
+                detachChildren()
 
-                    room.activePlayers.forEach {
-                        +RoomPlayerCard().apply {
-                            updateState(room, it)
-                        }
+                room.activePlayers.forEach {
+                    +RoomPlayerCard().apply {
+                        updateState(room, it)
                     }
-                    currentPlayers = room.playersMap.keys.toLongArray()
-                } else {
-                    room.activePlayers.forEachIndexed { index, player ->
-                        val card = getChild(index) as RoomPlayerCard
-                        card.updateState(room, player)
-                    }
+                }
+                currentPlayers = room.playersMap.keys.toLongArray()
+            } else {
+                room.activePlayers.forEachIndexed { index, player ->
+                    val card = getChild(index) as RoomPlayerCard
+                    card.updateState(room, player)
                 }
             }
         }
