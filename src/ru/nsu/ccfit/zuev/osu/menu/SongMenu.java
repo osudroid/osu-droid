@@ -1304,7 +1304,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange.set(true);
 
         if (!Multiplayer.isConnected()) {
             return;
@@ -1332,7 +1332,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange.set(true);
 
         if (!Multiplayer.isConnected()) {
             return;

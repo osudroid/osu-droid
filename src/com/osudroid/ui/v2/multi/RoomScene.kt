@@ -79,18 +79,19 @@ class RoomScene(
      * This is only used if [com.osudroid.multiplayer.Multiplayer.player] is the room host.
      */
     @JvmField
-    var isWaitingForBeatmapChange = false
+    val isWaitingForBeatmapChange = AtomicBoolean(false)
 
     /**
      * Indicates that the player can change its status. Its purpose is to await for server changes.
      */
+    @JvmField
     val isWaitingForStatusChange = AtomicBoolean(false)
 
     /**
      * Indicates that the player can change its mods. Its purpose is to await for server changes.
      */
     @JvmField
-    var isWaitingForModsChange = false
+    val isWaitingForModsChange = AtomicBoolean(false)
 
     /**
      * The room chat.
@@ -733,7 +734,7 @@ class RoomScene(
 
         GlobalManager.getInstance().engine.scene = this
 
-        if (!isWaitingForBeatmapChange) {
+        if (!isWaitingForBeatmapChange.get()) {
             // onRoomBeatmapChange sets engine.scene = this just above, so it will always
             // find the scene active and call invalidateStatus() internally.  Do NOT call
             // invalidateStatus() again afterwards — that would emit a redundant
@@ -789,7 +790,7 @@ class RoomScene(
         ModMenu.clear()
         ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
-        isWaitingForModsChange = true
+        isWaitingForModsChange.set(true)
 
         RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
@@ -823,9 +824,9 @@ class RoomScene(
 
         if (!byUser) {
             // Setting await locks to avoid player emitting events that will be ignored.
-            isWaitingForBeatmapChange = true
+            isWaitingForBeatmapChange.set(true)
             isWaitingForStatusChange.set(true)
-            isWaitingForModsChange = true
+            isWaitingForModsChange.set(true)
 
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
             Multiplayer.onReconnect()
@@ -876,7 +877,7 @@ class RoomScene(
 
         if (GlobalManager.getInstance().engine.scene != this) {
             updateThread { updateBeatmapInfo() }
-            isWaitingForBeatmapChange = false
+            isWaitingForBeatmapChange.set(false)
             return
         }
 
@@ -886,7 +887,7 @@ class RoomScene(
         }
 
         invalidateStatus()
-        isWaitingForBeatmapChange = false
+        isWaitingForBeatmapChange.set(false)
 
         val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
         updateThread {
@@ -931,7 +932,7 @@ class RoomScene(
 
         room.mods = mods
 
-        isWaitingForModsChange = true
+        isWaitingForModsChange.set(true)
 
         updateThread {
             // Apply the new room mods to ModMenu first so that enabledMods is up-to-date
@@ -950,7 +951,7 @@ class RoomScene(
 
         updatePlayerList()
 
-        isWaitingForModsChange = true
+        isWaitingForModsChange.set(true)
 
         updateThread {
             updateButtons()
@@ -978,7 +979,7 @@ class RoomScene(
 
         val player = Multiplayer.player ?: return
         if (uid == player.id) {
-            isWaitingForModsChange = false
+            isWaitingForModsChange.set(false)
             updateThread { updateBeatmapInfo() }
         }
     }
@@ -1001,7 +1002,7 @@ class RoomScene(
         updateThread { updateInformation() }
 
         if (Multiplayer.isRoomHost) {
-            isWaitingForModsChange = true
+            isWaitingForModsChange.set(true)
 
             // If win condition is Score V2 we add the mod.
             val roomMods = room.mods.apply {
