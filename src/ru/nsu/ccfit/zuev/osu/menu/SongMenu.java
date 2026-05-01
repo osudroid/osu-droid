@@ -691,7 +691,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
             panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110 - paddingBottom);
-            OnlineScoring.getInstance().loadAvatar(false);
+            OnlineScoring.getInstance().loadProfileAssets(false);
             frontLayer.attachChild(panel);
 
             scoringSwitcher = new UISprite() {
