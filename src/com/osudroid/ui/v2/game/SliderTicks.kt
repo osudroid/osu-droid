@@ -112,7 +112,7 @@ class SliderTickSprite : UISprite() {
 
         clearEntityModifiers()
 
-        val dt = currentTimeSec - fadeInStartTime
+        val dt = currentTimeSec - spanLifetimeStart
 
         alpha = 0f
         setScale(0.5f)
