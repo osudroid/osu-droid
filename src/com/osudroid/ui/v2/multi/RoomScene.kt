@@ -857,9 +857,9 @@ class RoomScene(
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
-        // The server caps maxPlayers to the current player count, so this case should only happen if the server
-        // rejected the change and sent back the current maxPlayers value. In that case we don't need to update anything.
-        if (maxPlayers == room.players.size) {
+        // The server caps maxPlayers to the current amount of players in the lobby.
+        // If the server sends back the current maxPlayers value, we don't need to update anything.
+        if (maxPlayers == room.maxPlayers) {
             return
         }
 
