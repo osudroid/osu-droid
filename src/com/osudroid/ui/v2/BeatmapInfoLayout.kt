@@ -243,6 +243,11 @@ class BeatmapInfoLayout : UILinearContainer() {
         }
     }
 
+    fun cancelCalculation() {
+        calculationJob?.cancel()
+        calculationJob = null
+    }
+
     private fun updateDisplay(beatmapInfo: BeatmapInfo) {
         circlesBadge.value = beatmapInfo.hitCircleCount.toString()
         slidersBadge.value = beatmapInfo.sliderCount.toString()
