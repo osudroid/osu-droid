@@ -33,12 +33,12 @@ class UIResourceManager(private val context: Context) {
         GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, buf, 0)
         val maxTextureSize = buf[0].coerceAtLeast(256)
 
-        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${maxTextureSize / 2}x${maxTextureSize / 2}")
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${maxTextureSize}x${maxTextureSize}")
 
         val texture = BitmapTextureAtlas(
             engine.textureManager,
-            maxTextureSize / 2,
-            maxTextureSize / 2,
+            maxTextureSize,
+            maxTextureSize,
             TextureOptions.BILINEAR_PREMULTIPLYALPHA
         )
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")

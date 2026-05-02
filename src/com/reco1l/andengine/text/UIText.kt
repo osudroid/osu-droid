@@ -1,6 +1,7 @@
 package com.reco1l.andengine.text
 
 import android.opengl.GLES20
+import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
@@ -8,6 +9,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.toolkt.kotlin.*
 import org.andengine.opengl.font.*
+import org.andengine.opengl.font.exception.FontException
 import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
@@ -110,7 +112,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         }
 
         lines = text.split('\n')
-        linesWidth = FloatArray(lines!!.size) { i -> lines!![i].fold(0f) { acc, char -> acc + font.getLetter(char).mAdvance } }
+        linesWidth = FloatArray(lines!!.size) { i -> lines!![i].fold(0f) { acc, char -> acc + font.safeGetLetter(char).mAdvance } }
 
         contentWidth = linesWidth!!.max()
         contentHeight = lines!!.size.toFloat() * font.lineHeight
@@ -265,7 +267,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
 
                 line.forEach { character ->
-                    val letter = font.getLetter(character)
+                    val letter = font.safeGetLetter(character)
 
                     // Use the glyph's actual offset and height so glyphs are not
                     // vertically stretched to fill the full line height.
@@ -315,7 +317,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             lines.fastForEach { line ->
                 line.forEach { character ->
 
-                    val letter = font.getLetter(character)
+                    val letter = font.safeGetLetter(character)
 
                     val u = letter.mU
                     val v = letter.mV
@@ -341,6 +343,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
     companion object {
         private const val VERTICES_PER_CHARACTER = 6
+
+        /**
+         * Safely retrieve a [Letter] for [character] from [font], returning the letter for '?'
+         * as a fallback when the glyph atlas is full ([FontException]).
+         */
+        internal fun Font.safeGetLetter(character: Char): Letter {
+            return try {
+                getLetter(character)
+            } catch (_: FontException) {
+                Log.w("UIText", "Font atlas full for character '${character}' (U+${character.code.toString(16).uppercase()}), using fallback.")
+                try { getLetter('?') } catch (_: FontException) { getLetter(' ') }
+            }
+        }
     }
 
 }
