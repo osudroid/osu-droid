@@ -187,7 +187,7 @@ class RoomPlayerCard : UILinearContainer() {
                         textureRegion = ResourceManager.getInstance().getTexture("missing")
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
-                        size = Vec2(18f)
+                        size = Vec2(24f)
                     }
                 }
             }
@@ -241,7 +241,7 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = UIText().apply {
-                        minHeight = 18f // Force to take space even if no mods are enabled
+                        minHeight = 24f // Force to take space even if no mods are enabled
                         font = ResourceManager.getInstance().getFont("xs")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
@@ -255,8 +255,8 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = ModsIndicator().apply {
-                        minHeight = 18f // Force to take space even if no mods are enabled
-                        iconSize = 18f
+                        minHeight = 24f // Force to take space even if no mods are enabled
+                        iconSize = 24f
                     }
 
                     innerContainer += modDisplay!!
