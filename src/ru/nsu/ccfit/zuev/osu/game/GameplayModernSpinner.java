@@ -283,6 +283,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     public void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         middle.clearEntityModifiers();
         scene.detachChild(middle);
 
@@ -299,6 +303,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.detachChild(glow);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {

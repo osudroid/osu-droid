@@ -191,6 +191,10 @@ public class GameplaySpinner extends GameObject {
     }
 
     void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         clearText.clearEntityModifiers();
         scene.detachChild(clearText);
 
@@ -210,6 +214,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {
