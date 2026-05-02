@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -73,7 +74,8 @@ class RoomPlayerCard : UILinearContainer() {
         }
     }
 
-    fun cancelBannerJob() {
+    fun cancelJobs() {
+        playerButton.avatarJob?.cancel()
         playerButton.bannerJob?.cancel()
     }
 
@@ -86,8 +88,12 @@ class RoomPlayerCard : UILinearContainer() {
         private var modDisplay: UIComponent? = null
 
         private val bannerSprite: UIShapedSprite
+        private val avatarSprite: UIShapedSprite
 
         var bannerJob: Job? = null
+            private set
+
+        var avatarJob: Job? = null
             private set
 
         private val defaultBackground = UIBox().apply {
@@ -97,6 +103,7 @@ class RoomPlayerCard : UILinearContainer() {
         }
 
         private var lastPlayerId = -1L
+        private val defaultAvatar = ResourceManager.getInstance().getTexture("emptyavatar")
 
         private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
             applyTheme = { color = it.accentColor }
@@ -115,9 +122,11 @@ class RoomPlayerCard : UILinearContainer() {
         init {
             width = FillParent
             orientation = Orientation.Horizontal
-            spacing = 6f
+            spacing = 12f
 
             bannerSprite = UIShapedSprite().apply {
+                inheritAncestorsColor = false
+
                 shape = object : UIBox() {
                     init {
                         cornerRadius = 12f
@@ -134,12 +143,34 @@ class RoomPlayerCard : UILinearContainer() {
                 setColor(0.25f, 0.25f, 0.25f)
             }
 
+            avatarSprite = UIShapedSprite().apply {
+                inheritAncestorsColor = false
+                size = Vec2(50f)
+
+                shape = object : UIBox() {
+                    init {
+                        cornerRadius = 8f
+                        color = Color4.Transparent
+                    }
+
+                    override fun beginDraw(gl: GL10) {
+                        gl.glDepthMask(true)
+                        super.beginDraw(gl)
+                    }
+                }
+
+                scaleType = ScaleType.Crop
+                textureRegion = defaultAvatar
+            }
+
             background = defaultBackground
 
             foreground = UIBox().apply {
                 cornerRadius = 12f
                 paintStyle = PaintStyle.Outline
             }
+
+            +avatarSprite
 
             innerContainer = linearContainer {
                 orientation = Orientation.Vertical
@@ -157,7 +188,7 @@ class RoomPlayerCard : UILinearContainer() {
                         textureRegion = ResourceManager.getInstance().getTexture("missing")
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
-                        size = Vec2(18f)
+                        size = Vec2(24f)
                     }
                 }
             }
@@ -167,6 +198,8 @@ class RoomPlayerCard : UILinearContainer() {
 
         override fun onDetached() {
             super.onDetached()
+
+            avatarJob?.cancel()
             bannerJob?.cancel()
         }
 
@@ -178,50 +211,11 @@ class RoomPlayerCard : UILinearContainer() {
             }
 
             if (lastPlayerId != player.id) {
-                lastPlayerId = player.id
-                val bannerUrl = OnlineManager.getProfileBannerURL(player.id)
-
-                bannerJob?.cancel()
-                bannerJob = null
-
-                val resourceManager = ResourceManager.getInstance()
-                val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
-
-                if (loadedTexture != null) {
-                    bannerSprite.textureRegion = loadedTexture
-                    background = bannerSprite
-                } else {
-                    bannerSprite.textureRegion = null
-                    background = defaultBackground
-
-                    bannerJob = async {
-                        ensureActive()
-
-                        if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
-                            ensureActive()
-
-                            val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
-
-                            updateThread {
-                                if (lastPlayerId == player.id) {
-                                    bannerSprite.textureRegion = texture
-
-                                    if (texture != null) {
-                                        background = bannerSprite
-                                    }
-                                }
-                            }
-                        } else {
-                            updateThread {
-                                if (lastPlayerId == player.id) {
-                                    background = defaultBackground
-                                }
-                            }
-                        }
-                    }
-                }
+                loadAvatar(player.id)
+                loadBanner(player.id)
             }
 
+            lastPlayerId = player.id
             nameText.text = player.name
             nameText.spacing = 6f
 
@@ -250,7 +244,7 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = UIText().apply {
-                        minHeight = 18f // Force to take space even if no mods are enabled
+                        minHeight = 24f // Force to take space even if no mods are enabled
                         font = ResourceManager.getInstance().getFont("xs")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
@@ -264,8 +258,8 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = ModsIndicator().apply {
-                        minHeight = 18f // Force to take space even if no mods are enabled
-                        iconSize = 18f
+                        minHeight = 24f // Force to take space even if no mods are enabled
+                        iconSize = 24f
                     }
 
                     innerContainer += modDisplay!!
@@ -336,6 +330,88 @@ class RoomPlayerCard : UILinearContainer() {
                     }
 
                 }.show()
+            }
+        }
+
+        private fun loadAvatar(userId: Long) {
+            val resourceManager = ResourceManager.getInstance()
+            val avatarUrl = OnlineManager.getAvatarURL(userId)
+
+            avatarJob?.cancel()
+            avatarJob = null
+
+            val avatarKey = MD5Calculator.getStringMD5(avatarUrl)
+            val loadedTexture = resourceManager.getTextureIfLoaded(avatarKey)
+
+            if (loadedTexture != null) {
+                avatarSprite.textureRegion = loadedTexture
+            } else {
+                avatarSprite.textureRegion = defaultAvatar
+
+                avatarJob = async {
+                    ensureActive()
+
+                    if (OnlineManager.getInstance().loadAvatarToTextureManager(avatarUrl)) {
+                        ensureActive()
+
+                        val texture = resourceManager.getTextureIfLoaded(avatarKey)
+
+                        updateThread {
+                            if (lastPlayerId == userId) {
+                                avatarSprite.textureRegion = texture ?: defaultAvatar
+                            }
+                        }
+                    } else {
+                        updateThread {
+                            if (lastPlayerId == userId) {
+                                avatarSprite.textureRegion = defaultAvatar
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun loadBanner(userId: Long) {
+            val resourceManager = ResourceManager.getInstance()
+            val bannerUrl = OnlineManager.getProfileBannerURL(userId)
+
+            bannerJob?.cancel()
+            bannerJob = null
+
+            val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+            if (loadedTexture != null) {
+                bannerSprite.textureRegion = loadedTexture
+                background = bannerSprite
+            } else {
+                bannerSprite.textureRegion = null
+                background = defaultBackground
+
+                bannerJob = async {
+                    ensureActive()
+
+                    if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
+                        ensureActive()
+
+                        val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+                        updateThread {
+                            if (lastPlayerId == userId) {
+                                bannerSprite.textureRegion = texture
+                                if (texture != null) {
+                                    background = bannerSprite
+                                }
+                            }
+                        }
+                    } else {
+                        updateThread {
+                            if (lastPlayerId == userId) {
+                                background = defaultBackground
+                            }
+                        }
+                    }
+                }
             }
         }
     }
