@@ -300,13 +300,15 @@ public class ResourceManager {
 
             for (int i = 0; i < 10; i++) {
                 String textureName = "comboburst-" + i;
-                if (availableFiles.containsKey(textureName)) { // No idea if this is still needed
+                if (availableFiles.containsKey(textureName)) {
                     File file = availableFiles.get(textureName);
                     if (file != null) {
                         loadTexture(textureName, file.getPath(), true);
                     } else {
                         unloadTexture(textureName);
                     }
+                } else {
+                    unloadTexture(textureName);
                 }
             }
 
