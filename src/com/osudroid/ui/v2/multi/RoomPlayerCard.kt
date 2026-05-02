@@ -96,6 +96,8 @@ class RoomPlayerCard : UILinearContainer() {
             alpha = 0.5f
         }
 
+        private var lastPlayerId = -1L
+
         private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
             applyTheme = { color = it.accentColor }
         }
@@ -175,25 +177,46 @@ class RoomPlayerCard : UILinearContainer() {
                 NotReady, MissingBeatmap -> Color4("#FFA0A0")
             }
 
-            bannerJob?.cancel()
-            bannerSprite.textureRegion = null
+            if (lastPlayerId != player.id) {
+                lastPlayerId = player.id
+                val bannerUrl = OnlineManager.getProfileBannerURL(player.id)
 
-            val resourceManager = ResourceManager.getInstance()
-            val bannerUrl = OnlineManager.getProfileBannerURL(player.id)
-            val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+                bannerJob?.cancel()
+                bannerJob = null
 
-            if (loadedTexture != null) {
-                bannerSprite.textureRegion = loadedTexture
-                background = bannerSprite
-            } else {
-                bannerJob = async {
-                    if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
+                val resourceManager = ResourceManager.getInstance()
+                val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+                if (loadedTexture != null) {
+                    bannerSprite.textureRegion = loadedTexture
+                    background = bannerSprite
+                } else {
+                    bannerSprite.textureRegion = null
+                    background = defaultBackground
+
+                    bannerJob = async {
                         ensureActive()
-                        val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
 
-                        updateThread {
-                            bannerSprite.textureRegion = texture
-                            background = if (texture != null) bannerSprite else defaultBackground
+                        if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
+                            ensureActive()
+
+                            val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+                            updateThread {
+                                if (lastPlayerId == player.id) {
+                                    bannerSprite.textureRegion = texture
+
+                                    if (texture != null) {
+                                        background = bannerSprite
+                                    }
+                                }
+                            }
+                        } else {
+                            updateThread {
+                                if (lastPlayerId == player.id) {
+                                    background = defaultBackground
+                                }
+                            }
                         }
                     }
                 }
