@@ -1,37 +1,29 @@
 package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.StandardDifficultyHitObject
-import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModAutopilot
-import kotlin.math.min
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * An evaluator for calculating osu!standard speed difficulty.
  */
 object StandardSpeedEvaluator {
-    private val SINGLE_SPACING_THRESHOLD = DifficultyHitObject.NORMALIZED_DIAMETER * 1.25 // 1.25 circles distance between centers
-    private const val MIN_SPEED_BONUS = 75.0 // 200 1/4 BPM
-    private const val DISTANCE_MULTIPLIER = 0.8
+    private const val MIN_SPEED_BONUS = 200.0
 
     /**
      * Evaluates the difficulty of tapping the current object, based on:
      *
      *  * time between pressing the previous and current object,
-     *  * distance between those objects,
      *  * and how easily they can be cheesed.
      *
      * @param current The current object.
      */
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: Iterable<Mod>): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject): Double {
         if (current.obj is Spinner) {
             return 0.0
         }
 
-        val prev = current.previous(0)
         var strainTime = current.strainTime
 
         // Nerf double-tappable doubles.
@@ -45,27 +37,17 @@ object StandardSpeedEvaluator {
         var speedBonus = 0.0
 
         // Add additional scaling bonus for streams/bursts higher than 200bpm
-        if (strainTime < MIN_SPEED_BONUS) {
-            speedBonus = 0.75 * ((MIN_SPEED_BONUS - strainTime) / 40).pow(2.0)
+        if (DifficultyCalculationUtils.millisecondsToBPM(strainTime) > MIN_SPEED_BONUS) {
+            speedBonus = 0.75 * ((DifficultyCalculationUtils.bpmToMilliseconds(MIN_SPEED_BONUS) - strainTime) / 40).pow(2)
         }
 
-        val travelDistance = prev?.travelDistance ?: 0.0
-
-        // Cap distance at single_spacing_threshold
-        val distance = min(SINGLE_SPACING_THRESHOLD, travelDistance + current.minimumJumpDistance)
-
-        // Max distance bonus is 1 * `distance_multiplier` at single_spacing_threshold
-        var distanceBonus =
-            if (mods.any { it is ModAutopilot }) 0.0
-            else (distance / SINGLE_SPACING_THRESHOLD).pow(3.95) * DISTANCE_MULTIPLIER
-
-        // Apply reduced small circle bonus because flow aim difficulty on small circles does not scale as hard as jumps.
-        distanceBonus *= sqrt(current.smallCircleBonus)
-
         // Base difficulty with all bonuses
-        val difficulty = (1 + speedBonus + distanceBonus) * 1000 / strainTime
+        var difficulty = (1 + speedBonus) * 1000 / strainTime
+        difficulty *= highBpmBonus(current.strainTime)
 
         // Apply penalty if there's doubletappable doubles
         return difficulty * doubletapness
     }
+
+    private fun highBpmBonus(ms: Double) = 1 / (1 - 0.3.pow(ms / 1000))
 }

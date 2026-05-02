@@ -1,8 +1,8 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.beatmap.hitobject.HitObject
-import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.difficulty.evaluators.DroidReadingEvaluator
+import com.rian.osu.difficulty.StandardDifficultyHitObject
+import com.rian.osu.difficulty.evaluators.StandardReadingEvaluator
 import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
@@ -13,21 +13,21 @@ import kotlin.math.pow
 /**
  * Represents the skill required to read every object in the beatmap.
  */
-class DroidReading(
+class StandardReading(
     mods: Iterable<Mod>,
     private val clockRate: Double,
     private val hitObjects: List<HitObject>
-) : HarmonicSkill<DroidDifficultyHitObject>(mods) {
+) : HarmonicSkill<StandardDifficultyHitObject>(mods) {
     private var currentDifficulty = 0.0
 
     private val skillMultiplier = 2.5
     private val difficultyDecayBase = 0.8
 
-    override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
+    override fun objectDifficultyOf(current: StandardDifficultyHitObject): Double {
         val decay = difficultyDecay(current.deltaTime)
 
         currentDifficulty *= decay
-        currentDifficulty += DroidReadingEvaluator.evaluateDifficultyOf(current, mods) * (1 - decay) * skillMultiplier
+        currentDifficulty += StandardReadingEvaluator.evaluateDifficultyOf(current, mods) * (1 - decay) * skillMultiplier
 
         return currentDifficulty
     }

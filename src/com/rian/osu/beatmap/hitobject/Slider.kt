@@ -113,6 +113,12 @@ class Slider(
         }
 
     /**
+     * The amount of [SliderTick]s in this [Slider].
+     */
+    val tickCount
+        get() = nestedHitObjects.size - 2 - repeatCount
+
+    /**
      * The amount of times the length of this [Slider] spans.
      */
     val spanCount

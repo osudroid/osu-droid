@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.utils
 import androidx.annotation.IntRange
 import com.rian.osu.math.Interpolation
 import kotlin.math.exp
+import kotlin.math.pow
 
 /**
  * Utilities for difficulty calculation.
@@ -106,4 +107,14 @@ object DifficultyCalculationUtils {
 
         return smoothstep(xAdj, 0.0, width)
     }
+
+    /**
+     * Calculates the p-norm of an n-dimensional vector.
+     *
+     * @param p The order of the norm.
+     * @param coefficients The coefficients of the vector.
+     * @return THe p-norm of the vector.
+     */
+    @JvmStatic
+    fun norm(p: Double, vararg coefficients: Double) = coefficients.sumOf { it.pow(p) }.pow(1 / p)
 }

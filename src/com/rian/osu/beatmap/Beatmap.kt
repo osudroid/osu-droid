@@ -12,6 +12,9 @@ import com.rian.osu.mods.IModApplicableToHitObjectWithMods
 import com.rian.osu.mods.IModFacilitatesAdjustment
 import com.rian.osu.mods.IModRequiresOriginalBeatmap
 import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModScoreV2
+import com.rian.osu.utils.ModHashMap
+import com.rian.osu.utils.ModUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -42,6 +45,53 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
+    }
+
+    /**
+     * Calculates the maximum score of this [Beatmap] with the given [ModHashMap].
+     *
+     * This does not take spinner bonus into account.
+     *
+     * @param mods The [ModHashMap] to calculate the maximum score with.
+     * @return The maximum score of this [Beatmap] with [mods] applied.
+     */
+    fun calculateMaximumScore(mods: ModHashMap?): Int {
+        val scoreMultiplier = if (mods != null) ModUtils.calculateScoreMultiplier(mods) else 1f
+
+        if (mods != null && ModScoreV2::class in mods) {
+            return (1e6 * scoreMultiplier).toInt()
+        }
+
+        val difficultyMultiplier = 1 + difficulty.od / 10 + difficulty.hp / 10 + (difficulty.difficultyCS - 3) / 4
+
+        var combo = 0
+        var score = 0
+
+        for (obj in hitObjects) {
+            if (obj !is Slider) {
+                score += (300 + 300 * combo * difficultyMultiplier / 25).toInt()
+                ++combo
+                continue
+            }
+
+            // Slider head
+            score += 30
+            ++combo
+
+            // Slider repeats
+            score += 30 * obj.repeatCount
+            combo += obj.repeatCount
+
+            // Slider ticks
+            score += 10 * obj.tickCount
+            combo += obj.tickCount
+
+            // Slider end
+            score += (300 + 300 * combo * difficultyMultiplier / 25).toInt()
+            ++combo
+        }
+
+        return (score * scoreMultiplier).toInt()
     }
 
     /**

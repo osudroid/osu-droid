@@ -36,10 +36,9 @@ object DroidFlashlightEvaluator {
      *
      * @param current The current object.
      * @param mods The mods used.
-     * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -57,12 +56,12 @@ object DroidFlashlightEvaluator {
         var angleRepeatCount = 0.0
 
         for (i in 0 until min(current.index, 10)) {
-            val currentObject = current.previous(i)!!
+            val currentObject = current.previous(i)!! as DroidDifficultyHitObject
 
             cumulativeStrainTime += last.strainTime
 
             // Exclude overlapping objects that can be tapped at once.
-            if (currentObject.obj !is Spinner) {
+            if (currentObject.obj !is Spinner && !currentObject.isOverlapping(false)) {
                 val jumpDistance = current.obj.difficultyStackedPosition
                     .getDistance(currentObject.obj.difficultyStackedEndPosition)
 
@@ -85,7 +84,7 @@ object DroidFlashlightEvaluator {
                 }
             }
 
-            last = currentObject as DroidDifficultyHitObject
+            last = currentObject
         }
 
         result = (smallDistNerf * result).pow(2)
@@ -107,7 +106,7 @@ object DroidFlashlightEvaluator {
 
         var sliderBonus = 0.0
 
-        if (current.obj is Slider && withSliders) {
+        if (current.obj is Slider) {
             // Invert the scaling factor to determine the true travel distance independent of circle size.
             val pixelTravelDistance = current.lazyTravelDistance / scalingFactor
 

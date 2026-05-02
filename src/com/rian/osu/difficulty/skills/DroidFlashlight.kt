@@ -12,13 +12,7 @@ class DroidFlashlight(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: Iterable<Mod>,
-
-    /**
-     * Whether to consider sliders in the calculation.
-     */
-    @JvmField
-    val withSliders: Boolean
+    mods: Iterable<Mod>
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.06
 
@@ -33,9 +27,8 @@ class DroidFlashlight(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods, withSliders) * skillMultiplier
+        currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods) * skillMultiplier
 
-        objectStrains.add(currentStrain)
         return currentStrain
     }
 

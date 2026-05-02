@@ -19,7 +19,7 @@ class StandardFlashlight(
     override val decayWeight = 1.0
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 0.05512
+    private val skillMultiplier = 0.056
     private val strainDecayBase = 0.15
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {

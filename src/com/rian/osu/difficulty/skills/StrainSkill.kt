@@ -4,11 +4,9 @@ import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.ceil
-import kotlin.math.exp
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.pow
 
 /**
  * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
@@ -33,11 +31,6 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     protected open val reducedSectionBaseline = 0.75
 
-    /**
-     * All [DifficultyHitObject] strains.
-     */
-    val objectStrains = mutableListOf<Double>()
-
     protected var difficulty = 0.0
 
     private val strainPeaks = mutableListOf<Double>()
@@ -45,7 +38,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
     private var currentSectionEnd = 0.0
     private val sectionLength = 400
 
-    override fun process(current: TObject) {
+    override fun processInternal(current: TObject): Double {
         // The first object doesn't generate a strain, so we begin with an incremented section end
         if (current.index == 0) {
             currentSectionEnd = calculateCurrentSectionStart(current)
@@ -57,7 +50,11 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
             currentSectionEnd += sectionLength
         }
 
-        currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
+        val strain = strainValueAt(current)
+
+        currentSectionPeak = max(strain, currentSectionPeak)
+
+        return strain
     }
 
     /**
@@ -66,29 +63,6 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     val currentStrainPeaks
         get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
-
-    /**
-     * Returns the number of strains weighed against the top strain.
-     *
-     * The result is scaled by clock rate as it affects the total number of strains.
-     */
-    fun countTopWeightedStrains(): Double {
-        if (difficulty == 0.0) {
-            return 0.0
-        }
-
-        // This is what the top strain is if all strain values were identical.
-        val consistentTopStrain = difficulty / 10
-
-        if (consistentTopStrain == 0.0) {
-            return objectStrains.size.toDouble()
-        }
-
-        // Use a weighted sum of all strains.
-        return objectStrains.fold(0.0) { acc, strain ->
-            acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
-        }
-    }
 
     /**
      * Reduces the highest strain peaks to account for extreme difficulty spikes based on
@@ -186,16 +160,5 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         // The maximum strain of the new section is not zero by default.
         // This means we need to capture the strain level at the beginning of the new section, and use that as the initial peak level.
         currentSectionPeak = calculateInitialStrain(time, current)
-    }
-
-    companion object {
-        /**
-         * Converts a difficulty value to a performance value.
-         *
-         * @param difficulty The difficulty value.
-         * @return The performance value.
-         */
-        @JvmStatic
-        fun difficultyToPerformance(difficulty: Double) = (5 * max(1.0, difficulty / 0.0675) - 4).pow(3) / 100000
     }
 }

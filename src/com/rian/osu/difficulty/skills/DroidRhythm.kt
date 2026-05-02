@@ -14,29 +14,26 @@ class DroidRhythm(
      * The [Mod]s that this skill processes.
      */
     mods: Iterable<Mod>
-) : DroidStrainSkill(mods) {
-    override val reducedSectionCount = 5
-    override val starsPerDouble = 1.75
+) : HarmonicSkill<DroidDifficultyHitObject>(mods) {
+    override val harmonicScale = 25.0
+    override val decayExponent = 0.8
 
-    private var currentStrain = 0.0
-    private val strainDecayBase = 0.3
+    private val skillMultiplier = 7.5
+    private val difficultyDecayBase = 0.3
 
+    private var currentDifficulty = 0.0
     private val useSliderAccuracy = mods.any { it is ModScoreV2 }
 
-    override fun strainValueAt(current: DroidDifficultyHitObject): Double {
+    override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
         val rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current, useSliderAccuracy)
-        val doubletapness = 1 - current.getDoubletapness(current.next(0))
 
-        current.rhythmMultiplier = rhythmMultiplier * doubletapness
+        current.rhythmMultiplier = rhythmMultiplier
 
-        currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += (rhythmMultiplier - 1) * doubletapness
+        currentDifficulty *= strainDecay(current.deltaTime)
+        currentDifficulty += (rhythmMultiplier - 1) * skillMultiplier
 
-        return currentStrain
+        return currentDifficulty
     }
 
-    override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =
-        currentStrain * strainDecay(time - current.previous(0)!!.startTime)
-
-    private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+    private fun strainDecay(ms: Double) = difficultyDecayBase.pow(ms / 1000)
 }
