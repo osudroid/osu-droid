@@ -796,6 +796,7 @@ class RoomScene(
 
         RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
+        updateBeatmap(newRoom.beatmap)
         updateInformation()
         updatePlayerList()
 
