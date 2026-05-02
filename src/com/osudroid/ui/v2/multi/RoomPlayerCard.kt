@@ -9,11 +9,15 @@ import com.osudroid.multiplayer.api.data.RoomTeam.Blue
 import com.osudroid.multiplayer.api.data.RoomTeam.Red
 import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.*
+import com.osudroid.utils.async
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
+import com.reco1l.andengine.sprite.ScaleType
+import com.reco1l.andengine.sprite.UIShapedSprite
 import com.reco1l.andengine.text.CompoundText
 import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.text.UIText
@@ -21,9 +25,13 @@ import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import javax.microedition.khronos.opengles.GL10
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomPlayerCard : UILinearContainer() {
@@ -73,6 +81,15 @@ class RoomPlayerCard : UILinearContainer() {
         private val innerContainer: UILinearContainer
         private var modDisplay: UIComponent? = null
 
+        private val bannerSprite: UIShapedSprite
+        private var bannerJob: Job? = null
+
+        private val defaultBackground = UIBox().apply {
+            cornerRadius = 12f
+            color = Theme.current.accentColor * 0.15f
+            alpha = 0.5f
+        }
+
         private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
             applyTheme = { color = it.accentColor }
         }
@@ -92,11 +109,26 @@ class RoomPlayerCard : UILinearContainer() {
             orientation = Orientation.Horizontal
             spacing = 6f
 
-            background = UIBox().apply {
-                cornerRadius = 12f
-                color = Theme.current.accentColor * 0.15f
-                alpha = 0.5f
+            bannerSprite = UIShapedSprite().apply {
+                isVisible = false
+
+                shape = object : UIBox() {
+                    init {
+                        cornerRadius = 12f
+                        color = Color4.Transparent
+                    }
+
+                    override fun beginDraw(gl: GL10) {
+                        gl.glDepthMask(true)
+                        super.beginDraw(gl)
+                    }
+                }
+
+                scaleType = ScaleType.Crop
+                setColor(0.25f, 0.25f, 0.25f)
             }
+
+            background = defaultBackground
 
             foreground = UIBox().apply {
                 cornerRadius = 12f
@@ -127,11 +159,43 @@ class RoomPlayerCard : UILinearContainer() {
         }
 
 
+        override fun onDetached() {
+            super.onDetached()
+            bannerJob?.cancel()
+        }
+
         fun updateState(room: Room, player: RoomPlayer) {
             foreground!!.color = when (player.status) {
                 Playing -> Theme.current.accentColor
                 Ready -> Color4("#A0FFA0")
                 NotReady, MissingBeatmap -> Color4("#FFA0A0")
+            }
+
+            bannerJob?.cancel()
+            bannerSprite.textureRegion = null
+            bannerSprite.isVisible = false
+
+            val resourceManager = ResourceManager.getInstance()
+            val bannerUrl = OnlineManager.getProfileBannerURL(player.id)
+            val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+            if (loadedTexture != null) {
+                bannerSprite.textureRegion = loadedTexture
+                bannerSprite.isVisible = true
+                background = bannerSprite
+            } else {
+                bannerJob = async {
+                    if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
+                        ensureActive()
+                        val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
+
+                        updateThread {
+                            bannerSprite.textureRegion = texture
+                            bannerSprite.isVisible = texture != null
+                            background = if (texture != null) bannerSprite else defaultBackground
+                        }
+                    }
+                }
             }
 
             nameText.text = player.name
