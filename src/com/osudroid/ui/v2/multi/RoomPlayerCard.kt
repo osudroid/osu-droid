@@ -83,7 +83,6 @@ class RoomPlayerCard : UILinearContainer() {
     private class RoomPlayerButton : UIButton() {
 
         private lateinit var nameText: CompoundText
-        private lateinit var missingIndicator: UISprite
 
         private val innerContainer: UILinearContainer
         private var modDisplay: UIComponent? = null
@@ -112,10 +111,17 @@ class RoomPlayerCard : UILinearContainer() {
             anchor = Anchor.CenterLeft
             origin = Anchor.CenterLeft
             applyTheme = { color = it.accentColor }
+            size = Vec2(24f)
         }
 
         private val mutedIcon = FontAwesomeIcon(Icon.MicrophoneSlash).apply {
             applyTheme = { color = OsuColors.redLight }
+            size = Vec2(24f)
+        }
+
+        private val missingBeatmapIcon = UISprite().apply {
+            textureRegion = ResourceManager.getInstance().getTexture("missing")
+            size = Vec2(24f)
         }
 
         override var applyTheme: UIComponent.(Theme) -> Unit = { theme ->
@@ -181,25 +187,11 @@ class RoomPlayerCard : UILinearContainer() {
                 orientation = Orientation.Vertical
                 inheritAncestorsColor = false
 
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    spacing = 4f
-
-                    nameText = compoundText {
-                        applyTheme = { color = it.accentColor }
-                    }
-
-                    missingIndicator = sprite {
-                        textureRegion = ResourceManager.getInstance().getTexture("missing")
-                        anchor = Anchor.CenterLeft
-                        origin = Anchor.CenterLeft
-                        size = Vec2(24f)
-                    }
+                nameText = compoundText {
+                    applyTheme = { color = it.accentColor }
                 }
             }
-
         }
-
 
         override fun onDetached() {
             super.onDetached()
@@ -224,25 +216,9 @@ class RoomPlayerCard : UILinearContainer() {
             nameText.text = player.name
             nameText.spacing = 6f
 
-            nameText.trailingIcon = when {
-                player.id == room.host && player.isMuted -> UILinearContainer().apply {
-                    orientation = Orientation.Horizontal
-                    spacing = 6f
+            updatePlayerIcons(room, player)
 
-                    hostIcon.detachSelf()
-                    mutedIcon.detachSelf()
-
-                    +hostIcon
-                    +mutedIcon
-                }
-
-                player.id == room.host -> hostIcon
-                player.isMuted -> mutedIcon
-
-                else -> null
-            }
-
-            missingIndicator.isVisible = player.status == MissingBeatmap
+            missingBeatmapIcon.isVisible = player.status == MissingBeatmap
 
             if (Config.isPreferModAcronymInMultiplayer()) {
                 if (modDisplay !is UIText) {
@@ -292,6 +268,7 @@ class RoomPlayerCard : UILinearContainer() {
                             setText(if (player.isMuted) R.string.multiplayer_room_player_menu_unmute else R.string.multiplayer_room_player_menu_mute)
                             onActionUp = {
                                 player.isMuted = !player.isMuted
+                                updatePlayerIcons(room, player)
                                 this@dropdown.hide()
                             }
                         }
@@ -416,6 +393,29 @@ class RoomPlayerCard : UILinearContainer() {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private fun updatePlayerIcons(room: Room, player: RoomPlayer) {
+            hostIcon.detachSelf()
+            mutedIcon.detachSelf()
+            missingBeatmapIcon.detachSelf()
+
+            nameText.trailingIcon = UILinearContainer().apply {
+                orientation = Orientation.Horizontal
+                spacing = 6f
+
+                if (player.id == room.host) {
+                    +hostIcon
+                }
+
+                if (player.isMuted) {
+                    +mutedIcon
+                }
+
+                if (player.status == MissingBeatmap) {
+                    +missingBeatmapIcon
                 }
             }
         }
