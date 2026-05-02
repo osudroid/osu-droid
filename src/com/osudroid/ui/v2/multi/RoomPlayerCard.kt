@@ -73,6 +73,10 @@ class RoomPlayerCard : UILinearContainer() {
         }
     }
 
+    fun cancelBannerJob() {
+        playerButton.bannerJob?.cancel()
+    }
+
     private class RoomPlayerButton : UIButton() {
 
         private lateinit var nameText: CompoundText
@@ -82,7 +86,9 @@ class RoomPlayerCard : UILinearContainer() {
         private var modDisplay: UIComponent? = null
 
         private val bannerSprite: UIShapedSprite
-        private var bannerJob: Job? = null
+
+        var bannerJob: Job? = null
+            private set
 
         private val defaultBackground = UIBox().apply {
             cornerRadius = 12f

@@ -31,6 +31,7 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.badge
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
+import com.reco1l.andengine.component.forEach
 import com.reco1l.andengine.component.setText
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.JustifyContent
@@ -707,6 +708,7 @@ class RoomScene(
     private fun teardownSession() {
         Multiplayer.cancelReconnection()
         beatmapInfoLayout.cancelCalculation()
+        playersContainer.forEach { (it as RoomPlayerCard).cancelBannerJob() }
 
         // Null out event listeners before disconnect so any queued socket events that
         // arrive after teardown find no listener to call.
