@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import com.rian.osu.GameMode;
+
 /**
  * Represents the algorithm used to calculate the difficulty of a beatmap.
  */
@@ -22,5 +24,15 @@ public enum DifficultyAlgorithm {
      */
     public static DifficultyAlgorithm parse(int value) {
         return value == 1 ? standard : droid;
+    }
+
+    /**
+     * Converts this {@link DifficultyAlgorithm} to its {@link GameMode} equivalent.
+     */
+    public GameMode toGameMode() {
+        return switch (this) {
+            case droid -> GameMode.Droid;
+            case standard -> GameMode.Standard;
+        };
     }
 }
