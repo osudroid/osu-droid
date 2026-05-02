@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.multi
 
+import android.opengl.GLES20
 import com.edlplan.ui.fragment.WebViewFragment
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
@@ -25,9 +26,9 @@ import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import javax.microedition.khronos.opengles.GL10
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
@@ -137,9 +138,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(gl: GL10) {
-                        gl.glDepthMask(true)
-                        super.beginDraw(gl)
+                    override fun beginDraw(pGLState: GLState) {
+                        GLES20.glDepthMask(true)
+                        super.beginDraw(pGLState)
                     }
                 }
 
@@ -157,9 +158,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(gl: GL10) {
-                        gl.glDepthMask(true)
-                        super.beginDraw(gl)
+                    override fun beginDraw(pGLState: GLState) {
+                        GLES20.glDepthMask(true)
+                        super.beginDraw(pGLState)
                     }
                 }
 
