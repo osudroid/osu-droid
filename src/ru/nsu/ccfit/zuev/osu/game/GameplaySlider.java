@@ -31,7 +31,6 @@ import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.mods.ModSynesthesia;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -655,10 +654,33 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void onExpire() {
+        if (scene != null) {
+            if (!startHit) {
+                double mehWindow = hitWindow.getMehWindow() / 1000;
+                listener.registerAccuracy(HitObjectType.Slider, mehWindow + 1);
+                listener.onSliderHit(id, 10, position, false, bodyColor, GameObjectListener.SLIDER_END, false);
+            }
+
+            stopSlidingSamples();
+
+            for (int i = 0, iSize = nestedHitSamples.size(); i < iSize; ++i) {
+                var hitSamples = nestedHitSamples.get(i);
+
+                for (int j = hitSamples.size() - 1; j >= 0; --j) {
+                    var sample = hitSamples.get(j);
+
+                    sample.reset();
+                    GameplayHitSampleInfo.pool.free(sample);
+
+                    hitSamples.remove(j);
+                }
+            }
+
+            scene = null;
+        }
+
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
-        sliderHeadLateMissFadeModifier = null;
-
         startArrow.clearEntityModifiers();
         endArrow.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
@@ -666,6 +688,18 @@ public class GameplaySlider extends GameObject {
         ball.clearEntityModifiers();
         sliderBody.clearEntityModifiers();
         tickContainer.clearEntityModifiers();
+
+        headCirclePiece.detachSelf();
+        tailCirclePiece.detachSelf();
+        startArrow.detachSelf();
+        endArrow.detachSelf();
+        approachCircle.detachSelf();
+        followCircle.detachSelf();
+        ball.detachSelf();
+        sliderBody.detachSelf();
+        tickContainer.detachSelf();
+
+        sliderHeadLateMissFadeModifier = null;
 
         GameObjectPool.getInstance().putSlider(this);
     }
