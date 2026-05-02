@@ -37,20 +37,20 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomPlayerCard : UILinearContainer() {
-    private val teamColorBar: UIBox
+    private val teamColorBar: UIButton
     private val playerButton: RoomPlayerButton
 
     init {
         width = FillParent
         orientation = Orientation.Horizontal
-        padding = Vec4(12f)
+        padding = Vec4(12f, 8f)
         spacing = 12f
 
-        teamColorBar = UIBox().apply {
+        teamColorBar = UIButton().apply {
+            applyTheme = {}
             relativeSizeAxes = Axes.X
             width = 0.025f
             height = FillParent
-            cornerRadius = 12f
         }
 
         playerButton = RoomPlayerButton()
@@ -65,19 +65,47 @@ class RoomPlayerCard : UILinearContainer() {
                 attachChild(teamColorBar, 0)
             }
 
-            teamColorBar.color = when (player.team) {
+            teamColorBar.background?.color = when (player.team) {
                 Blue -> Color4("#1E62E8") * 0.8f
                 Red -> Color4("#E34444") * 0.8f
                 null -> Theme.current.accentColor * 0.6f
             }
-        } else if (teamColorBar.hasParent()) {
-            detachChild(teamColorBar)
+
+            if (player.id == OnlineManager.getInstance().userId) {
+                teamColorBar.onActionUp = { showTeamDropdown() }
+            } else {
+                teamColorBar.onActionUp = null
+            }
+        } else {
+            teamColorBar.detachSelf()
         }
     }
 
     fun cancelJobs() {
         playerButton.avatarJob?.cancel()
         playerButton.bannerJob?.cancel()
+    }
+
+    private fun showTeamDropdown() {
+        UIDropdown(teamColorBar).apply dropdown@{
+            width = 100f
+
+            addButton {
+                text = "Red"
+                onActionUp = {
+                    RoomAPI.setPlayerTeam(Red)
+                    this@dropdown.hide()
+                }
+            }
+
+            addButton {
+                text = "Blue"
+                onActionUp = {
+                    RoomAPI.setPlayerTeam(Blue)
+                    this@dropdown.hide()
+                }
+            }
+        }.show()
     }
 
     private class RoomPlayerButton : UIButton() {
@@ -152,7 +180,9 @@ class RoomPlayerCard : UILinearContainer() {
 
             avatarSprite = UIShapedSprite().apply {
                 inheritAncestorsColor = false
-                size = Vec2(50f)
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                size = Vec2(40f)
 
                 shape = object : UIBox() {
                     init {
@@ -221,7 +251,7 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = UIText().apply {
-                        minHeight = 24f // Force to take space even if no mods are enabled
+                        minHeight = 20f // Force to take space even if no mods are enabled
                         font = ResourceManager.getInstance().getFont("xs")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
@@ -235,8 +265,8 @@ class RoomPlayerCard : UILinearContainer() {
                     modDisplay?.detachSelf()
 
                     modDisplay = ModsIndicator().apply {
-                        minHeight = 24f // Force to take space even if no mods are enabled
-                        iconSize = 24f
+                        minHeight = 20f // Force to take space even if no mods are enabled
+                        iconSize = 20f
                     }
 
                     innerContainer += modDisplay!!

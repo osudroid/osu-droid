@@ -75,10 +75,10 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
                 var minWidth = trigger.width
 
                 optionsContainer.forEach { it as UITextButton
-                    minWidth = max(minWidth, it.contentWidth + it.padding.horizontal)
+                    minWidth = max(minWidth, it.contentWidth + it.padding.horizontal + optionsContainer.padding.horizontal)
                 }
 
-                optionsContainer.minWidth = minWidth
+                optionsContainer.minWidth = max(minWidth, width)
             } else {
                 // Scene was changed - hide the dropdown.
                 hide()

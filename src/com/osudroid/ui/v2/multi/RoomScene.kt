@@ -796,7 +796,6 @@ class RoomScene(
 
         RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
-        updateBeatmap(newRoom.beatmap)
         updateInformation()
         updatePlayerList()
 
@@ -819,6 +818,12 @@ class RoomScene(
             }
             return
         }
+
+        val beatmapInfo = LibraryManager.findBeatmapByMD5(newRoom.beatmap?.md5)
+        GlobalManager.getInstance().selectedBeatmap = beatmapInfo
+
+        updateBackground(beatmapInfo?.backgroundPath)
+        updateBeatmap(newRoom.beatmap)
 
         show()
     }
