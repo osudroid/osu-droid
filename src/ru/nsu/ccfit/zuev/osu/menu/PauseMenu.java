@@ -3,15 +3,15 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.reco1l.andengine.UIEngine;
 
 import org.andengine.engine.Engine;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.scene.CameraScene;
+import org.andengine.entity.scene.IOnAreaTouchListener;
 import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.menu.MenuScene;
-import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
-import org.andengine.entity.scene.menu.item.IMenuItem;
-import org.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -21,156 +21,166 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 
-public class PauseMenu implements IOnMenuItemClickListener {
-    static final int ITEM_SAVE_REPLAY = 0;
-    static final int ITEM_CONTINUE = 1;
-    static final int ITEM_RETRY = 2;
-    static final int ITEM_BACK = 3;
-    private final MenuScene scene;
-    private final GameScene game;
-    private final boolean fail;
+public class PauseMenu implements IOnAreaTouchListener {
+
+    private final CameraScene scene;
+    private final GameScene   game;
+    private final boolean     fail;
     private boolean replaySaved;
 
-    // MenuScene handles touch events differently from what is used across the game.
-    // Normally, an item should only be selected on touch down, but MenuScene also selects it on touch move with no way
-    // of canceling it.
-    // Rationale of addressing it here instead of directly in MenuScene is to avoid engine changes whenever possible.
     private boolean itemSelected;
-    private float initialSelectX, initialSelectY;
+    private float   initialSelectX, initialSelectY;
+
+    private Sprite btnSaveReplay;
+    private Sprite btnContinue;
+    private final Sprite btnRetry;
+    private final Sprite btnBack;
 
     public PauseMenu(final Engine engine, final GameScene game, final boolean fail) {
         this.game = game;
         this.fail = fail;
-        replaySaved = false;
-        scene = new MenuScene(engine.getCamera()) {
-            @Override
-            public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
-                super.onSceneTouchEvent(pScene, pSceneTouchEvent);
 
-                // Intercept touch event to prevent it from being passed to the game scene during pause.
+        final VertexBufferObjectManager vbo =
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+
+        final TextureRegion texReplay   = ResourceManager.getInstance().getTexture("pause-save-replay");
+        final TextureRegion texContinue = ResourceManager.getInstance().getTexture("pause-continue");
+        final TextureRegion texRetry    = ResourceManager.getInstance().getTexture("pause-retry");
+        final TextureRegion texBack     = ResourceManager.getInstance().getTexture("pause-back");
+
+        final boolean showSaveReplay = fail && !game.getReplaying();
+        final boolean showContinue   = !fail;
+
+        // Compute proportional scale so all visible buttons fit in 85% of screen height.
+        float totalNaturalH = texRetry.getHeight() + texBack.getHeight();
+        int   count         = 2;
+        if (showSaveReplay) { totalNaturalH += texReplay.getHeight();   count++; }
+        if (showContinue)   { totalNaturalH += texContinue.getHeight(); count++; }
+        totalNaturalH += (count - 1); // 1 px spacing between items
+
+        final float maxH  = Config.getRES_HEIGHT() * 0.85f;
+        final float scale = (totalNaturalH > maxH) ? maxH / totalNaturalH : 1.0f;
+
+        scene = new CameraScene(engine.getCamera()) {
+            @Override
+            public boolean onSceneTouchEvent(final TouchEvent pSceneTouchEvent) {
+                super.onSceneTouchEvent(pSceneTouchEvent);
+                // Intercept touch events to prevent them from passing through to the game scene.
                 return true;
-            }
-
-            @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, ITouchArea pTouchArea, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    itemSelected = true;
-                    initialSelectX = pTouchAreaLocalX;
-                    initialSelectY = pTouchAreaLocalY;
-                } else if (pSceneTouchEvent.isActionMove() && itemSelected &&
-                        MathUtils.distance(initialSelectX, initialSelectY, pTouchAreaLocalX, pTouchAreaLocalY) > 50) {
-                    itemSelected = false;
-                }
-
-                return super.onAreaTouched(pSceneTouchEvent, pTouchArea, pTouchAreaLocalX, pTouchAreaLocalY);
             }
 
             @Override
             protected void onManagedUpdate(float pSecondsElapsed) {
-
                 if (UIEngine.getCurrent().getScene() != game.getScene()) {
                     back();
                     return;
                 }
-
-                // The fade in animation duration is 1 second. We want to speed it up.
+                // Speed-up the fade-in animation (original was 1 s; 2.5× makes it ~0.4 s).
                 super.onManagedUpdate(pSecondsElapsed * 2.5f);
             }
         };
 
-        final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
-                ResourceManager.getInstance().getTexture("pause-save-replay"),
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        scene.addMenuItem(saveFailedReplay);
-        final SpriteMenuItem itemContinue = new SpriteMenuItem(ITEM_CONTINUE,
-                ResourceManager.getInstance().getTexture("pause-continue"),
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        scene.addMenuItem(itemContinue);
-        final SpriteMenuItem itemRetry = new SpriteMenuItem(ITEM_RETRY,
-                ResourceManager.getInstance().getTexture("pause-retry"),
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        scene.addMenuItem(itemRetry);
-        final SpriteMenuItem itemBack = new SpriteMenuItem(ITEM_BACK,
-                ResourceManager.getInstance().getTexture("pause-back"),
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        scene.addMenuItem(itemBack);
         scene.setBackgroundEnabled(false);
-        TextureRegion tex;
-        if (fail) {
-            itemContinue.setVisible(false);
-            tex = ResourceManager.getInstance().getTexture("fail-background");
-            if (game.getReplaying()){
-                saveFailedReplay.setVisible(false);
-            }
-        } else {
-            saveFailedReplay.setVisible(false);
-            tex = ResourceManager.getInstance().getTexture("pause-overlay");
+        scene.setOnAreaTouchListener(this);
+
+        // Background overlay
+        final TextureRegion bgTex = fail
+                ? ResourceManager.getInstance().getTexture("fail-background")
+                : ResourceManager.getInstance().getTexture("pause-overlay");
+
+        if (bgTex != null) {
+            float bgH = bgTex.getHeight() * Config.getRES_WIDTH() / bgTex.getWidth();
+            scene.attachChild(
+                    new Sprite(
+                            0,
+                            (Config.getRES_HEIGHT() - bgH) / 2f,
+                            Config.getRES_WIDTH(),
+                            bgH,
+                            bgTex,
+                            vbo
+                    )
+            );
         }
 
-        if (tex != null) {
-            float height = tex.getHeight();
-            height *= Config.getRES_WIDTH() / (float) (tex.getWidth());
-            final Sprite bg = new Sprite(0,
-                    (Config.getRES_HEIGHT() - height) / 2,
-                    Config.getRES_WIDTH(), height, tex,
-                    GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-            scene.attachChild(bg);
-        }
+        // Position all visible buttons centred on screen
+        final float displayTotalH = totalNaturalH * scale;
+        final float cx = Config.getRES_WIDTH() / 2f;
+        float y = (Config.getRES_HEIGHT() - displayTotalH) / 2f;
 
-        scene.buildAnimations();
-        scene.setOnMenuItemClickListener(this);
+        if (showSaveReplay) {
+            btnSaveReplay = addButton(texReplay, cx, y, scale, vbo);
+            y += texReplay.getHeight() * scale + scale;
+        }
+        if (showContinue) {
+            btnContinue = addButton(texContinue, cx, y, scale, vbo);
+            y += texContinue.getHeight() * scale + scale;
+        }
+        btnRetry = addButton(texRetry, cx, y, scale, vbo);
+        y += texRetry.getHeight() * scale + scale;
+        btnBack  = addButton(texBack, cx, y, scale, vbo);
     }
 
-    public MenuScene getScene() {
+    private Sprite addButton(TextureRegion tex, float cx, float y,
+                             float scale, VertexBufferObjectManager vbo) {
+        final float w = tex.getWidth()  * scale;
+        final float h = tex.getHeight() * scale;
+        final Sprite btn = new Sprite(cx - w / 2f, y, w, h, tex, vbo);
+        btn.setAlpha(0f);
+        btn.registerEntityModifier(new AlphaModifier(0.4f, 0f, 1f));
+        scene.attachChild(btn);
+        scene.registerTouchArea(btn);
+        return btn;
+    }
+
+    public Scene getScene() {
         return scene;
     }
 
-
-    public boolean onMenuItemClicked(final MenuScene pMenuScene,
-                                     final IMenuItem pMenuItem, final float pMenuItemLocalX,
-                                     final float pMenuItemLocalY) {
-        if (!itemSelected) {
-            return false;
+    @Override
+    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, ITouchArea pTouchArea,
+                                 float pTouchAreaLocalX, float pTouchAreaLocalY) {
+        if (pSceneTouchEvent.isActionDown()) {
+            itemSelected    = true;
+            initialSelectX  = pTouchAreaLocalX;
+            initialSelectY  = pTouchAreaLocalY;
+        } else if (pSceneTouchEvent.isActionMove() && itemSelected &&
+                MathUtils.distance(initialSelectX, initialSelectY,
+                        pTouchAreaLocalX, pTouchAreaLocalY) > 50) {
+            itemSelected = false;
+        } else if (pSceneTouchEvent.isActionUp() && itemSelected) {
+            itemSelected = false;
+            handleClick((Sprite) pTouchArea);
         }
+        return true;
+    }
 
+    private void handleClick(final Sprite btn) {
         BassSoundProvider playSnd;
-        switch (pMenuItem.getID()) {
-            case ITEM_SAVE_REPLAY:
-                if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
-                    ToastLogger.showText(com.osudroid.resources.R.string.message_save_replay_successful, true);
-                    replaySaved = true;
-                }
-                return true;
 
-            case ITEM_CONTINUE:
-                if (fail) {
-                    return false;
-                }
-                playSnd = ResourceManager.getInstance().getSound("menuback");
-                if (playSnd != null) {
-                    playSnd.play();
-                }
-                game.resume();
-                return true;
+        if (btn == btnSaveReplay) {
+            if (fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()) {
+                ToastLogger.showText(
+                        com.osudroid.resources.R.string.message_save_replay_successful, true);
+                replaySaved = true;
+            }
 
-            case ITEM_BACK:
-                GlobalManager.getInstance().getScoring().setReplayID(-1);
-                playSnd = ResourceManager.getInstance().getSound("menuback");
-                if (playSnd != null) {
-                    playSnd.play();
-                }
-                game.quit();
-                return true;
+        } else if (btn == btnContinue) {
+            if (fail) return;
+            playSnd = ResourceManager.getInstance().getSound("menuback");
+            if (playSnd != null) playSnd.play();
+            game.resume();
 
-            case ITEM_RETRY:
-                ResourceManager.getInstance().getSound("failsound").stop();
-                playSnd = ResourceManager.getInstance().getSound("menuhit");
-                if (playSnd != null) {
-                    playSnd.play();
-                }
-                game.restartGame();
-                return true;
+        } else if (btn == btnBack) {
+            GlobalManager.getInstance().getScoring().setReplayID(-1);
+            playSnd = ResourceManager.getInstance().getSound("menuback");
+            if (playSnd != null) playSnd.play();
+            game.quit();
+
+        } else if (btn == btnRetry) {
+            ResourceManager.getInstance().getSound("failsound").stop();
+            playSnd = ResourceManager.getInstance().getSound("menuhit");
+            if (playSnd != null) playSnd.play();
+            game.restartGame();
         }
-        return false;
     }
 }
