@@ -105,11 +105,7 @@ class RoomPlayerCard : UILinearContainer() {
         private var lastPlayerId = -1L
         private val defaultAvatar = ResourceManager.getInstance().getTexture("emptyavatar")
 
-        private val hostIcon = UISprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture("crown")
-            size = Vec2(18f)
-            anchor = Anchor.CenterLeft
-            origin = Anchor.CenterLeft
+        private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
             applyTheme = { color = it.accentColor }
             size = Vec2(24f)
         }
