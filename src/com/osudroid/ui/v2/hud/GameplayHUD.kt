@@ -13,8 +13,8 @@ import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.hitobject.HitObject
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.entity.IEntity
+import org.andengine.input.touch.TouchEvent
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -42,11 +42,11 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
                 // Move to front
                 if (value != null) {
-                    setChildIndex(value, mChildren.size - 1)
+                    mChildren?.let { children -> if (children.remove(value)) children.add(value) }
 
                     // Preserve overlay on top of the element.
                     if (value.editorOverlay != null) {
-                        setChildIndex(value.editorOverlay, mChildren.size - 1)
+                        mChildren?.let { children -> if (children.remove(value.editorOverlay)) children.add(value.editorOverlay) }
                     }
 
                     elementSelector?.collapse()

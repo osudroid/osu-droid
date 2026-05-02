@@ -1,7 +1,7 @@
 package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.entity.*
+import org.andengine.entity.*
 import kotlin.math.*
 
 open class UIContainer : UIComponent() {
@@ -37,7 +37,7 @@ open class UIContainer : UIComponent() {
     //region Operators
 
     inline fun <reified T : IEntity>firstOf(): T? {
-        return findChild { it is T } as? T
+        return getChildByMatcher { it is T} as? T
     }
 
     operator fun UIComponent.unaryPlus() {
@@ -50,7 +50,7 @@ open class UIContainer : UIComponent() {
 
     operator fun <T : IEntity> get(index: Int): T? {
         @Suppress("UNCHECKED_CAST")
-        return getChild(index) as? T
+        return getChildByIndex(index) as? T
     }
 
     operator fun set(index: Int, entity: IEntity) {

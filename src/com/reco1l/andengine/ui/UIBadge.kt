@@ -10,10 +10,10 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.SizeVariant.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.Font
+import org.andengine.engine.camera.*
+import org.andengine.opengl.font.Font
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import javax.microedition.khronos.opengles.*
 
 
 /**
@@ -163,9 +163,9 @@ open class UILabeledBadge : UILinearContainer(), ISizeVariable {
         (background as? UIBox)?.cornerRadius = cornerRadius
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
         (labelEntity.background as? UIBox)?.cornerRadius = (background as? UIBox)?.cornerRadius ?: 0f
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 }
 

@@ -1,12 +1,13 @@
 package com.edlplan.andengine;
 
+import android.opengl.GLES20;
+
 import com.edlplan.framework.utils.FloatArraySlice;
+import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-
-import javax.microedition.khronos.opengles.GL10;
 
 public class TriangleRenderer {
 
@@ -17,7 +18,7 @@ public class TriangleRenderer {
         return triangleRenderer;
     }
 
-    public synchronized void renderTriangles(FloatArraySlice ver, GL10 pGL) {
+    public synchronized void renderTriangles(FloatArraySlice ver) {
         int offset = ver.length;
         if (buffer == null || buffer.capacity() < offset) {
             ByteBuffer bb = ByteBuffer.allocateDirect((offset + 12) * 4);
@@ -28,8 +29,11 @@ public class TriangleRenderer {
         buffer.put(ver.ary, ver.offset, ver.length);
         buffer.position(0).limit(offset);
 
-        pGL.glVertexPointer(2, GL10.GL_FLOAT, 0, buffer);
-        pGL.glDrawArrays(GL10.GL_TRIANGLES, 0, ver.length / 2);
+        GLES20.glVertexAttribPointer(
+            ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
+            2, GLES20.GL_FLOAT, false, 0, buffer
+        );
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, ver.length / 2);
     }
 
 }

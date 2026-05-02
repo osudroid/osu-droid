@@ -39,6 +39,11 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
 
     private void startGameActivity() {
         Intent game = new Intent(this, MainActivity.class);
+        // Clear the entire task so the stub MainActivity instance (created before permissions
+        // were granted) is fully destroyed — along with its GL context — before the real
+        // MainActivity starts.  Without this, the stub engine's surface lingers and the new
+        // activity renders a gray screen until the process is killed and restarted.
+        game.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(game);
         overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
         finish();

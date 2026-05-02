@@ -41,7 +41,7 @@ import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.math.Interpolation
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

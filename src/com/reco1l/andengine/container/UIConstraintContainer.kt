@@ -2,9 +2,9 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.engine.camera.*
+import org.andengine.entity.*
+import org.andengine.opengl.util.GLState
 
 /**
  * Container that allows to constrain nested entities to other entities in the same container.
@@ -16,7 +16,7 @@ open class UIConstraintContainer : UIContainer() {
     private val constraints = mutableMapOf<UIComponent, UIComponent>()
 
 
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
 
         mChildren?.fastForEach { child ->
 
@@ -42,7 +42,7 @@ open class UIConstraintContainer : UIContainer() {
             child.y = -cancelledY + targetY + targetHeight * child.anchor.y
         }
 
-        super.onManagedDrawChildren(pGL, pCamera)
+        super.doDraw(pGLState, pCamera)
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.edlplan.framework.support.batch.object;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 public abstract class ATextureQuad {
 

@@ -3,7 +3,7 @@ package com.reco1l.andengine.ui.form
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.ui.*
-import org.anddev.andengine.entity.IEntity
+import org.andengine.entity.IEntity
 import org.json.JSONArray
 import org.json.JSONObject
 

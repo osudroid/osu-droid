@@ -9,8 +9,8 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.*
-import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.entity.scene.*
+import org.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
@@ -56,16 +56,16 @@ object FollowPointConnection {
 
     private fun TextureRegion.applyFollowPointMaxSize() {
         // Reference: https://github.com/ppy/osu/blob/0811de728e4205a45e485d53ccdaf19a937c6033/osu.Game.Rulesets.Osu/Skinning/Legacy/OsuLegacySkinTransformer.cs#L95-L97
-        val newWidth = min(width, HitObject.OBJECT_RADIUS.toInt() * 2)
-        val newHeight = min(height, HitObject.OBJECT_RADIUS.toInt())
+        val newWidth = min(width, HitObject.OBJECT_RADIUS * 2)
+        val newHeight = min(height, HitObject.OBJECT_RADIUS)
 
         if (width != newWidth || height != newHeight) {
 
             // Crop the texture from the center.
             setTexturePosition(width / 2 - newWidth / 2, height / 2 - newHeight / 2)
 
-            width = newWidth
-            height = newHeight
+            setTextureWidth(newWidth)
+            setTextureHeight(newHeight)
         }
     }
 

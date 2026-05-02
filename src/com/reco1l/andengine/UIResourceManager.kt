@@ -5,12 +5,12 @@ package com.reco1l.andengine
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.opengl.GLES20
 import android.util.Log
 import com.reco1l.andengine.component.UIComponent
-import org.anddev.andengine.opengl.font.Font
-import org.anddev.andengine.opengl.texture.TextureOptions
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
-import org.anddev.andengine.opengl.util.GLHelper
+import org.andengine.opengl.font.Font
+import org.andengine.opengl.texture.TextureOptions
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import java.lang.ref.WeakReference
 
 class UIResourceManager(private val context: Context) {
@@ -28,17 +28,23 @@ class UIResourceManager(private val context: Context) {
             return fetchedFont
         }
 
-        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
+        val engine = UIEngine.current
+        val buf = IntArray(1)
+        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, buf, 0)
+        val maxTextureSize = buf[0].coerceAtLeast(256)
+
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${maxTextureSize / 2}x${maxTextureSize / 2}")
 
         val texture = BitmapTextureAtlas(
-            GLHelper.GlMaxTextureWidth / 2,
-            GLHelper.GlMaxTextureWidth / 2,
+            engine.textureManager,
+            maxTextureSize / 2,
+            maxTextureSize / 2,
             TextureOptions.BILINEAR_PREMULTIPLYALPHA
         )
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
-        val font = Font(texture, typeface, size, true, Color.WHITE)
+        val font = Font(engine.fontManager, texture, typeface, size, true, Color.WHITE)
 
-        UIEngine.current.apply {
+        engine.apply {
             textureManager.loadTexture(texture)
             fontManager.loadFont(font)
 

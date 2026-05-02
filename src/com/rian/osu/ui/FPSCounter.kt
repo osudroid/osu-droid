@@ -4,8 +4,8 @@ import com.reco1l.framework.Color4
 import com.rian.osu.math.Interpolation.dampContinuously
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.opengl.font.Font
+import org.andengine.entity.text.Text
+import org.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
@@ -15,11 +15,12 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
  *
  * @param font The [Font] that will be used to display the current frame rate.
  */
-class FPSCounter(font: Font) : ChangeableText(
+class FPSCounter(font: Font) : Text(
     0f,
     0f,
     font,
-    "${getGlobal().mainActivity.refreshRate.roundToInt()}/${getGlobal().mainActivity.refreshRate.roundToInt()} FPS"
+    "${getGlobal().mainActivity.refreshRate.roundToInt()}/${getGlobal().mainActivity.refreshRate.roundToInt()} FPS",
+    getGlobal().engine.vertexBufferObjectManager
 ) {
     //region Counting logic
 

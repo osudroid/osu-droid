@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import static com.reco1l.andengine.buffered.Buffer.*;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -57,21 +59,23 @@ import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.camera.SmoothCamera;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.WakeLockOptions;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.view.RenderSurfaceView;
-import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
-import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
-import org.anddev.andengine.util.Debug;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.WakeLockOptions;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.scene.Scene;
+import org.andengine.input.touch.controller.MultiTouch;
+import org.andengine.input.touch.controller.MultiTouchController;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.util.GLState;
+import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.input.sensor.acceleration.AccelerationData;
+import org.andengine.input.sensor.acceleration.IAccelerationListener;
+import org.andengine.ui.activity.BaseGameActivity;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +99,7 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
-        IAccelerometerListener {
+        IAccelerationListener {
 
     public static String versionName;
     public static SongService songService;
@@ -118,9 +122,14 @@ public class MainActivity extends BaseGameActivity implements
     private Uri roomInviteLink;
 
     @Override
-    public Engine onLoadEngine() {
+    public EngineOptions onCreateEngineOptions() {
         if (!checkPermissions()) {
-            return null;
+            // Activity is finishing (redirected to PermissionActivity).
+            // Return a minimal valid EngineOptions so BaseGameActivity does not NPE
+            // before the Activity is destroyed — the engine will be torn down with the Activity.
+            Camera stubCamera = new SmoothCamera(0, 0, 1, 1, 0, 0, 1);
+            return new EngineOptions(false, ScreenOrientation.LANDSCAPE_SENSOR,
+                    new RatioResolutionPolicy(1, 1), stubCamera);
         }
         analytics = FirebaseAnalytics.getInstance(this);
         crashlytics = FirebaseCrashlytics.getInstance();
@@ -166,15 +175,18 @@ public class MainActivity extends BaseGameActivity implements
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
         final EngineOptions opt = new EngineOptions(true,
-                null, new RatioResolutionPolicy(
+                ScreenOrientation.LANDSCAPE_SENSOR, new RatioResolutionPolicy(
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
                 mCamera);
-        opt.setNeedsMusic(true);
-        opt.setNeedsSound(true);
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
-        opt.getRenderOptions().disableExtensionVertexBufferObjects();
-        opt.getTouchOptions().enableRunOnUpdateThread();
-        UIEngine engine = new UIEngine(this, opt);
+
+        GlobalManager.getInstance().setCamera(mCamera);
+        return opt;
+    }
+
+    @Override
+    public Engine onCreateEngine(final EngineOptions pEngineOptions) {
+        UIEngine engine = new UIEngine(this, pEngineOptions);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -182,7 +194,6 @@ public class MainActivity extends BaseGameActivity implements
         }
         engine.setTouchController(new MultiTouchController());
 
-        GlobalManager.getInstance().setCamera(mCamera);
         GlobalManager.getInstance().setEngine(engine);
         return GlobalManager.getInstance().getEngine();
     }
@@ -232,10 +243,11 @@ public class MainActivity extends BaseGameActivity implements
             final DisplayMetrics dm = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(dm);
 
+            // Automatically enable low-texture mode on low-density (ldpi / mdpi) devices.
             if (dm.densityDpi > DisplayMetrics.DENSITY_MEDIUM) {
                 editor.putBoolean("lowtextures", false);
             } else {
-                editor.putBoolean("lowtextures", false);
+                editor.putBoolean("lowtextures", true);
             }
             editor.commit();
         }
@@ -249,7 +261,16 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onLoadResources() {
+    public void onCreateResources(final OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
+        if (isFinishing()) {
+            pOnCreateResourcesCallback.onCreateResourcesFinished();
+            return;
+        }
+        onLoadResources();
+        pOnCreateResourcesCallback.onCreateResourcesFinished();
+    }
+
+    private void onLoadResources() {
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
         ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
@@ -305,7 +326,15 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public Scene onLoadScene() {
+    public void onCreateScene(final OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
+        if (isFinishing()) {
+            pOnCreateSceneCallback.onCreateSceneFinished(new Scene());
+            return;
+        }
+        pOnCreateSceneCallback.onCreateSceneFinished(onLoadScene());
+    }
+
+    private Scene onLoadScene() {
         if (BuildSettings.DEBUG_PLAYGROUND) {
             return DebugPlaygroundScene.INSTANCE;
         }
@@ -313,7 +342,16 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onLoadComplete() {
+    public void onPopulateScene(final Scene pScene, final OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+        if (isFinishing()) {
+            pOnPopulateSceneCallback.onPopulateSceneFinished();
+            return;
+        }
+        onLoadComplete();
+        pOnPopulateSceneCallback.onPopulateSceneFinished();
+    }
+
+    private void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -392,7 +430,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
-        this.mRenderSurfaceView.setRenderer(this.mEngine);
+        this.mRenderSurfaceView.setRenderer(this.mEngine, this);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
@@ -580,7 +618,7 @@ public class MainActivity extends BaseGameActivity implements
                 if (!d.exists()) d.mkdirs();
                 File f = new File(d, "rawlog.txt");
                 if (!f.exists()) f.createNewFile();
-                Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
+                Runtime.getRuntime().exec(new String[]{"logcat", "-f", f.getAbsolutePath()});
             } catch (IOException ignored) {
             }
         }
@@ -634,6 +672,11 @@ public class MainActivity extends BaseGameActivity implements
         super.onResume();
         activityVisible = true;
 
+        // Cancel any previously scheduled flush task before scheduling a new one.
+        // Without this, every resume stacks another periodic task that can no longer be cancelled.
+        if (logFlushFuture != null && !logFlushFuture.isCancelled()) {
+            logFlushFuture.cancel(false);
+        }
         logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
         if (mEngine == null) {
@@ -648,8 +691,21 @@ public class MainActivity extends BaseGameActivity implements
         var gameScene = GlobalManager.getInstance().getGameScene();
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
-            mEngine.getTextureManager().reloadTextures();
+            mEngine.onReloadResources();
         }
+    }
+
+    @Override
+    public synchronized void onSurfaceCreated(final GLState pGLState) {
+        // Reset all VBO IDs so they are re-generated against the new EGL context.
+        // This handles the case where the system destroyed the context while the app
+        // was backgrounded (context loss recovery).
+        onContextLost();
+        // Reset the storyboard quad-batch shader so it recompiles against the new context.
+        com.edlplan.framework.support.batch.StoryboardBatchShader.getInstance().resetForContextLoss();
+        // Reset the video OES shader so it recompiles against the new context.
+        com.acivev.andengine.opengl.ExternalOESShaderProgram.getInstance().resetForContextLoss();
+        super.onSurfaceCreated(pGLState);
     }
 
     @Override
@@ -702,7 +758,12 @@ public class MainActivity extends BaseGameActivity implements
         super.onDestroy();
 
         Multiplayer.flushLog();
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        // displayListener is only assigned when permissions are already granted.
+        // Guard against null to avoid a NullPointerException on the very first launch
+        // where the activity is finished before the listener is ever set up.
+        if (displayListener != null) {
+            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        }
     }
 
     @Override
@@ -747,7 +808,12 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onAccelerometerChanged(final AccelerometerData arg0) {
+    public void onAccelerationAccuracyChanged(final AccelerationData arg0) {
+        // no-op
+    }
+
+    @Override
+    public void onAccelerationChanged(final AccelerationData arg0) {
         if (this.mEngine == null) {
             return;
         }
@@ -756,6 +822,11 @@ public class MainActivity extends BaseGameActivity implements
         } else if (GlobalManager.getInstance().getCamera().getRotation() == 180 && arg0.getY() > 5) {
             GlobalManager.getInstance().getCamera().setRotation(0);
         }
+    }
+
+    public void reapplyWakeLock() {
+        releaseWakeLock();
+        acquireWakeLock();
     }
 
     @Override
@@ -809,7 +880,8 @@ public class MainActivity extends BaseGameActivity implements
 
         Scene currentScene = GlobalManager.getInstance().getEngine().getScene();
 
-        if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
+        // Back key / menu key handling — reaches here only when action == ACTION_DOWN (guarded above).
+        if (keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
             return true;
         }
 

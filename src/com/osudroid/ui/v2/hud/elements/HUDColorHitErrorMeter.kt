@@ -1,12 +1,13 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.constants.HitObjectType
-import javax.microedition.khronos.opengles.GL10
-import org.anddev.andengine.engine.camera.Camera
+import org.andengine.engine.camera.Camera
+import org.andengine.opengl.util.GLState
 
 class HUDColorHitErrorMeter : HUDHitErrorMeter() {
     private val indicators = MutableList(20) { Indicator(it, 0f, Color4.Black) }
@@ -46,15 +47,22 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
         currentIndicatorIndex = (currentIndicatorIndex + 1) % indicators.size
     }
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
-        super.onDrawChildren(gl, camera)
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+        super.onManagedDraw(pGLState, pCamera)
+
+        // After super.onManagedDraw() the matrix has been popped; re-push our translation
+        // so that indicatorBox draws in this element's local coordinate space.
+        pGLState.pushModelViewGLMatrix()
+        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
 
         indicators.fastForEach {
             indicatorBox.x = INDICATOR_SPACING + it.index * (INDICATOR_SIZE + INDICATOR_SPACING)
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(gl, camera)
+            indicatorBox.onDraw(pGLState, pCamera)
         }
+
+        pGLState.popModelViewGLMatrix()
     }
 
     private data class Indicator(val index: Int, var alpha: Float, var color: Color4)

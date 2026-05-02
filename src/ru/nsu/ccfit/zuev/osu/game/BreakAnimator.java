@@ -4,13 +4,14 @@ import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.multiplayer.Multiplayer;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.modifier.*;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -37,8 +38,7 @@ public class BreakAnimator extends GameObject {
         this.hud = hud;
 
         for (int i = 0; i < 4; i++) {
-            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
-                    .getTexture("play-warningarrow").deepCopy());
+            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-warningarrow").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             arrows[i]
                     .registerEntityModifier(new LoopEntityModifier(
                             new SequenceEntityModifier(

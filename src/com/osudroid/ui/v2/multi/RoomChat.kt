@@ -17,7 +17,7 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -74,9 +74,6 @@ class RoomChat : UILinearContainer() {
         get() = UIEngine.current.overlay
 
     init {
-        // At any given time, there should be only one chat instance in the overlay.
-        // Two or more instances of these can present after a player successfully reconnects.
-        overlay.detachChildren { it is RoomChat }
 
         // Force the main container to fill the entire screen so that the chat can be closed by
         // tapping outside of it (see onAreaTouched).
@@ -249,7 +246,7 @@ class RoomChat : UILinearContainer() {
             messagesChanged = false
 
             for (i in max_messages - 1 downTo 0) {
-                val messageComponent = messageContainer.getChild(i) as MessageComponent
+                val messageComponent = messageContainer.getChildByIndex(i) as MessageComponent
                 messageComponent.message = if (i < messages.size) messages[i] else null
             }
         }
@@ -307,6 +304,7 @@ class RoomChat : UILinearContainer() {
 
             linearContainer {
                 width = FillParent
+                height = FillParent
                 orientation = Orientation.Horizontal
 
                 tagText = text {
@@ -318,6 +316,8 @@ class RoomChat : UILinearContainer() {
 
                 messageText = text {
                     width = FillParent
+                    height = FillParent
+                    clipToBounds = true
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     applyTheme = { color = it.accentColor }
@@ -340,7 +340,7 @@ class RoomChat : UILinearContainer() {
                     text = "${if (lastMessage is PlayerMessage) lastMessage.player.name else StringTable.get(R.string.multiplayer_room_chat_system)}: "
                     color = if (lastMessage is PlayerMessage) getPlayerTagColor(lastMessage.player) else Theme.current.accentColor
                 }
-                messageText.text = lastMessage.content
+                messageText.text = lastMessage.content.substringBefore('\n')
             }
         }
 

@@ -8,9 +8,9 @@ import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.modifier.*
-import org.anddev.andengine.util.modifier.*
+import org.andengine.entity.*
+import org.andengine.entity.modifier.*
+import org.andengine.util.modifier.*
 import kotlin.math.*
 
 /**
@@ -191,7 +191,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         return max(0f, consumedDeltaSec)
     }
 
-    override fun onUnregister() {
+    fun onUnregister() {
         setToDefault()
 
         try {
@@ -333,11 +333,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun isRemoveWhenFinished(): Boolean {
+    override fun isAutoUnregisterWhenFinished(): Boolean {
         return true
     }
 
-    override fun setRemoveWhenFinished(value: Boolean) {
+    override fun setAutoUnregisterWhenFinished(pRemoveWhenFinished: Boolean) {
         Log.w("UniversalModifier", "Remove when finished is always true for UniversalModifier, ignoring.")
     }
 

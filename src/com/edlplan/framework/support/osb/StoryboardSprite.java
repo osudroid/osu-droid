@@ -21,7 +21,7 @@ import com.edlplan.framework.support.graphics.texture.TexturePool;
 import com.edlplan.framework.support.util.Tracker;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.io.File;
 import java.util.HashMap;
@@ -103,7 +103,7 @@ public class StoryboardSprite extends SupportSprite {
     }
 
     public void updateTime(double time) {
-        if (Math.abs(this.time - time) > 10) {
+        if (Math.abs(this.time - time) > 1) {
             this.time = time;
             if (osbPlayer != null) {
                 osbPlayer.update(time);

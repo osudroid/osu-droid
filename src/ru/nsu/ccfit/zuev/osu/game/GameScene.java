@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
-import com.edlplan.framework.math.line.LinePath;
+import com.edlplan.osu.support.slider.SliderBody;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
@@ -80,26 +80,29 @@ import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.camera.SmoothCamera;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.engine.options.WakeLockOptions;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.EntityBackground;
-import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
+import android.opengl.GLES20;
+
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.options.TouchOptions;
+import org.andengine.engine.options.WakeLockOptions;
+import org.andengine.entity.Entity;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.EntityBackground;
+import org.andengine.entity.shape.RectangularShape;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.util.GLState;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -110,7 +113,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
-import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
@@ -146,7 +148,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private UIBox sceneBorder;
-    private Shape beatmapBackground;
+    private RectangularShape beatmapBackground;
     private Beatmap parsedBeatmap;
     private DroidPlayableBeatmap playableBeatmap;
     private BeatmapInfo lastBeatmapInfo;
@@ -195,7 +197,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private int failcount = 0;
     private Color4 sliderBorderColor;
     private SliderPath[] sliderPaths = null;
-    private LinePath[] sliderRenderPaths = null;
+    private SliderBody.RenderPathCache[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
@@ -383,7 +385,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
         if (textureRegion == null) {
-            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), engine.getVertexBufferObjectManager());
 
             Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
@@ -393,7 +395,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             beatmapBackground = rectangle;
         } else {
-            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion);
+            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion, engine.getVertexBufferObjectManager());
         }
     }
 
@@ -538,14 +540,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var background = videoEnabled && video != null ? video : beatmapBackground;
+        float backgroundW = videoEnabled && video != null ? video.getWidth() : beatmapBackground.getWidth();
+        float backgroundH = videoEnabled && video != null ? video.getHeight() : beatmapBackground.getHeight();
 
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
         } else {
-            dimRectangle = new Rectangle(0f, 0f, 0f, 0f);
+            dimRectangle = new Rectangle(0f, 0f, 0f, 0f, engine.getVertexBufferObjectManager());
         }
 
-        dimRectangle.setSize(background.getWidth(), background.getHeight());
+        dimRectangle.setSize(backgroundW, backgroundH);
         dimRectangle.setColor(0f, 0f, 0f, 1f - brightness);
         background.attachChild(dimRectangle);
 
@@ -554,11 +558,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var factor = Config.isKeepBackgroundAspectRatio()
-                ? Config.getRES_HEIGHT() / background.getHeight()
-                : Config.getRES_WIDTH() / background.getWidth();
+                ? Config.getRES_HEIGHT() / backgroundH
+                : Config.getRES_WIDTH() / backgroundW;
 
         background.setScale(factor);
-        background.setPosition((Config.getRES_WIDTH() - background.getWidth()) / 2f, (Config.getRES_HEIGHT() - background.getHeight()) / 2f);
+        background.setPosition((Config.getRES_WIDTH() - backgroundW) / 2f, (Config.getRES_HEIGHT() - backgroundH) / 2f);
         scene.setBackground(new EntityBackground(background));
 
         if (storyboardSprite != null) {
@@ -577,7 +581,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (storyboardOverlayProxy != null) {
             if (isStoryboardEnabled) {
                 if (!storyboardOverlayProxy.hasParent()) {
-                    scene.attachChild(storyboardOverlayProxy, scene.getChildIndex(fgScene));
+                    scene.attachChild(storyboardOverlayProxy, scene.getChildCount() - 1);
                 }
             } else {
                 storyboardOverlayProxy.detachSelf();
@@ -956,7 +960,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        scene.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new Background(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
@@ -1270,7 +1274,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (!Config.isHideReplayMarquee()) {
-                var replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000, engine.getVertexBufferObjectManager());
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
                 replayText.setPosition(0, 140);
@@ -1302,7 +1306,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 @Override
-                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                protected void onManagedDraw(GLState pGLState, Camera pCamera) {
                     long currentDrawTime = SystemClock.uptimeMillis();
 
                     fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
@@ -1364,15 +1368,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            // Enable historical event processing for more frequent ACTION_MOVE reports depending on user configuration.
-            var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
-            touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
-            touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
-
-            var touchController = engine.getTouchController();
-            touchController.applyTouchOptions(touchOptions);
-            touchController.resetRawPointers();
+            // Reset raw pointer state to a clean slate at the start of each map.
+            // (High-precision options are applied globally in MainActivity.onCreateEngine)
+            engine.getTouchController().resetRawPointers();
         }
 
         // Disable screen dimming
@@ -1748,7 +1746,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // The casts can be simplified, but it is necessary to prevent floating point errors (see how
             // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
             // are cast and converted to seconds individually).
-            if (elapsedTime < (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000) {
+            float lifetimeStart = (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000;
+            float lifetimeDt = elapsedTime - lifetimeStart;
+
+            if (lifetimeDt < 0) {
                 break;
             }
 
@@ -1785,10 +1786,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             final Color4 comboColor = getComboColor(obj);
 
+            GameObject gameObject = null;
+
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
+                gameplayCircle.init(this, mgScene, parsedCircle, comboColor);
                 addObject(gameplayCircle);
 
                 if (GameHelper.isAutoplay()) {
@@ -1801,6 +1804,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplayCircle.setReplayData(replay.objectData[gameplayCircle.getId()]);
                 }
 
+                gameObject = gameplayCircle;
             } else if (obj instanceof Spinner parsedSpinner) {
                 final float rps = 2 + 2 * playableBeatmap.getDifficulty().od / 10f;
                 final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
@@ -1817,12 +1821,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
 
+                gameObject = gameplaySpinner;
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, stat, parsedSlider, playableBeatmap.getControlPoints(),
-                        elapsedTime, comboColor, sliderBorderColor, getSliderPath(sliderIndex),
-                        getSliderRenderPath(sliderIndex));
+                        comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
 
                 ++sliderIndex;
                 addObject(gameplaySlider);
@@ -1837,6 +1841,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (gameplaySlider.getReplayData().tickSet == null)
                         gameplaySlider.getReplayData().tickSet = new BitSet();
                 }
+
+                gameObject = gameplaySlider;
+            }
+
+            if (gameObject != null) {
+                gameObject.updateAfterInit(lifetimeDt);
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
@@ -1933,7 +1943,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Disable historical event processing for more efficient ACTION_MOVE reports. Frequent reports are not
             // relevant outside gameplay.
             var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(false);
             touchOptions.setUseRawPointer(false);
             engine.getTouchController().applyTouchOptions(touchOptions);
@@ -2136,7 +2145,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
         // not that relevant outside gameplay.
         var touchOptions = new TouchOptions();
-        touchOptions.setRunOnUpdateThread(true);
         touchOptions.setProcessHistoricalEvents(false);
         touchOptions.setUseRawPointer(false);
 
@@ -2788,7 +2796,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 for (int i = 0; i < scene.getChildCount(); i++) {
-                    IEntity entity = scene.getChild(i);
+                    IEntity entity = scene.getChildByIndex(i);
 
                     entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
 
@@ -2950,7 +2958,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Reference https://github.com/ppy/osu/blob/a7e110f6693beca6f6e6a20efb69a6913d58550e/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuJudgement.cs#L71-L88
 
             var light = GameObjectPool.getInstance().getEffect("lighting");
-            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
+            light.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA);
             light.setColor(color);
             light.init(
                 bgScene,
@@ -3147,7 +3155,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var sliderPaths = new SliderPath[playableBeatmap.getHitObjects().getSliderCount()];
-        var sliderRenderPaths = new LinePath[playableBeatmap.getHitObjects().getSliderCount()];
+        var sliderRenderPaths = new SliderBody.RenderPathCache[playableBeatmap.getHitObjects().getSliderCount()];
         int index = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
@@ -3165,9 +3173,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ensureActive(scope.getCoroutineContext());
             }
 
-            sliderRenderPaths[index] = GameHelper.convertSliderPath(sliderPaths[index], scope);
+            float scale = slider.getScreenSpaceGameplayScale();
+            float sliderBodyWidth = OsuSkin.get().getSliderBodyWidth() * scale;
+            float sliderBorderWidth = OsuSkin.get().getSliderBorderWidth() * scale;
+            float sliderHintWidth = OsuSkin.get().getSliderHintWidth() * scale;
+            boolean isHintVisible = OsuSkin.get().isSliderHintEnable() &&
+                slider.getDistance() > OsuSkin.get().getSliderHintShowMinLength();
+
+            sliderRenderPaths[index] = SliderBody.createCache(
+                GameHelper.convertSliderPath(sliderPaths[index], scope),
+                sliderBodyWidth,
+                sliderBorderWidth,
+                isHintVisible,
+                sliderHintWidth,
+                Config.isSnakingInSliders() || Config.isSnakingOutSliders()
+            );
+
             ++index;
         }
+
 
         this.sliderPaths = sliderPaths;
         this.sliderRenderPaths = sliderRenderPaths;
@@ -3182,12 +3206,28 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private LinePath getSliderRenderPath(int index) {
-        if (sliderRenderPaths != null && index < sliderRenderPaths.length && index >= 0) {
-            return sliderRenderPaths[index];
-        } else {
-            return null;
+    private SliderBody.RenderPathCache getSliderRenderPath(int index) {
+        if (sliderRenderPaths == null) {
+            throw new IllegalStateException(
+                "Slider render paths have not been calculated; sliderRenderPaths is null, index=" + index
+            );
         }
+
+        if (index < 0 || index >= sliderRenderPaths.length) {
+            throw new IndexOutOfBoundsException(
+                "Invalid slider render path index " + index + " for sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        var renderPath = sliderRenderPaths[index];
+
+        if (renderPath == null) {
+            throw new IllegalStateException(
+                "Slider render path at index " + index + " is null after calculation; sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        return renderPath;
     }
 
     public boolean getReplaying() {
@@ -3302,10 +3342,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private boolean isInterpolating;
 
             @Override
-            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+            protected void onManagedDraw(GLState pGLState, Camera pCamera) {
                 applyRawPointerFastPath(pCamera);
 
-                super.onManagedDraw(pGL, pCamera);
+                super.onManagedDraw(pGLState, pCamera);
             }
 
             @Override
@@ -3387,7 +3427,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private void applyRawPointerFastPath(final Camera camera) {
                 var touchController = engine.getTouchController();
 
-                if (touchController == null || !touchController.isUseRawPointers()) {
+                if (touchController == null || !touchController.isUseRawPointer()) {
                     return;
                 }
 
@@ -3457,11 +3497,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return false;
                 }
 
-                for (int attempt = 0; attempt < 2; ++attempt) {
+                for (int attempt = 0; attempt < 4; ++attempt) {
                     int versionBefore = touchController.getRawPointerVersion(pointerId);
 
                     // An odd version means the main thread is updating this pointer, so we wait.
                     if ((versionBefore & 1) != 0) {
+                        Thread.onSpinWait(); // hint to the CPU that this is a spin-wait loop
                         continue;
                     }
 

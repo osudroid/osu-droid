@@ -5,7 +5,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 open class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initialValue) {

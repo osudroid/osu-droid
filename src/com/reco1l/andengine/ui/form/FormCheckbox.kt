@@ -2,7 +2,7 @@ package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ui.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")

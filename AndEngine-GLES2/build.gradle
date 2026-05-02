@@ -1,0 +1,49 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'org.andengine'
+    compileSdk 34
+    ndkVersion '22.1.7171670'
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 29
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    useLibrary 'org.apache.http.legacy'
+    lint {
+        abortOnError true
+        ignoreWarnings true
+    }
+    buildFeatures {
+        buildConfig true
+    }
+
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.11.0'
+}
+

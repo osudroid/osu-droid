@@ -10,15 +10,16 @@ import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.math.MathUtils;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -75,7 +76,7 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
+        metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
@@ -191,6 +192,10 @@ public class GameplaySpinner extends GameObject {
     }
 
     void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         clearText.clearEntityModifiers();
         scene.detachChild(clearText);
 
@@ -210,6 +215,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {
@@ -255,6 +261,18 @@ public class GameplaySpinner extends GameObject {
         playAndFreeHitSamples(score);
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(clearText, dt);
+        updateAfterInit(spinText, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(background, dt);
+        updateAfterInit(circle, dt);
+        updateAfterInit(metre, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {
@@ -370,7 +388,7 @@ public class GameplaySpinner extends GameObject {
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         metreRegion.setTexturePosition(0,
-                (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
+                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
 
@@ -383,6 +401,7 @@ public class GameplaySpinner extends GameObject {
     public void onExpire() {
         super.onExpire();
 
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 

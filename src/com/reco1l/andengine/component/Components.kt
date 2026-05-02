@@ -6,10 +6,11 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec2
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.entity.scene.CameraScene
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.shape.IShape
+import org.andengine.entity.IEntity
+import org.andengine.entity.scene.CameraScene
+import org.andengine.entity.scene.Scene
+import org.andengine.entity.shape.IAreaShape
+import org.andengine.entity.shape.IShape
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 
@@ -18,16 +19,16 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 fun IEntity?.getWidth() = when (this) {
     is UIComponent -> width
     is CameraScene -> camera?.widthRaw ?: 0f
-    is IShape -> width
     is Scene -> Config.getRES_WIDTH().toFloat()
+    is IShape -> (this as? IAreaShape)?.width ?: 0f
     else -> 0f
 }
 
 fun IEntity?.getHeight() = when (this) {
     is UIComponent -> height
     is CameraScene -> camera?.heightRaw ?: 0f
-    is IShape -> height
     is Scene -> Config.getRES_HEIGHT().toFloat()
+    is IShape -> (this as? IAreaShape)?.height ?: 0f
     else -> 0f
 }
 
@@ -243,13 +244,13 @@ fun IEntity.getParentScene(): Scene? {
 
 inline fun IEntity.forEach(block: (IEntity) -> Unit) {
     for (i in 0 until childCount) {
-        block(getChild(i))
+        block(getChildByIndex(i))
     }
 }
 
 inline fun IEntity.forEachIndexed(block: (Int, IEntity) -> Unit) {
     for (i in 0 until childCount) {
-        block(i, getChild(i))
+        block(i, getChildByIndex(i))
     }
 }
 

@@ -9,7 +9,7 @@ import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
 import com.osudroid.ui.v2.multi.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
@@ -197,6 +197,8 @@ class MainMenu(val main: MainScene) {
         if (!third.hasParent()) {
             main.scene.attachChild(third, 1)
         }
+
+        main.scene.sortChildren()
     }
 
     fun detachButtons() {
