@@ -262,6 +262,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onCreateResources(final OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
+        if (isFinishing()) {
+            pOnCreateResourcesCallback.onCreateResourcesFinished();
+            return;
+        }
         onLoadResources();
         pOnCreateResourcesCallback.onCreateResourcesFinished();
     }
@@ -323,6 +327,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onCreateScene(final OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
+        if (isFinishing()) {
+            pOnCreateSceneCallback.onCreateSceneFinished(new Scene());
+            return;
+        }
         pOnCreateSceneCallback.onCreateSceneFinished(onLoadScene());
     }
 
@@ -335,6 +343,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onPopulateScene(final Scene pScene, final OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+        if (isFinishing()) {
+            pOnPopulateSceneCallback.onPopulateSceneFinished();
+            return;
+        }
         onLoadComplete();
         pOnPopulateSceneCallback.onPopulateSceneFinished();
     }
@@ -746,7 +758,12 @@ public class MainActivity extends BaseGameActivity implements
         super.onDestroy();
 
         Multiplayer.flushLog();
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        // displayListener is only assigned when permissions are already granted.
+        // Guard against null to avoid a NullPointerException on the very first launch
+        // where the activity is finished before the listener is ever set up.
+        if (displayListener != null) {
+            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        }
     }
 
     @Override
