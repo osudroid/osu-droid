@@ -3,8 +3,10 @@ package com.reco1l.andengine.shape
 import android.opengl.GLES20
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
+import com.reco1l.andengine.buffered.UIBufferedComponent
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.*
+import org.andengine.entity.shape.IShape
 import org.andengine.opengl.shader.PositionColorShaderProgram
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.*
@@ -28,6 +30,11 @@ class UITriangleMesh : UIComponent() {
      * The clear information of the entity.
      */
     var clearInfo = ClearInfo.None
+
+    /**
+     * The blend information of the entity.
+     */
+    var blendInfo = BlendInfo.Mixture
 
 
     init {
@@ -67,6 +74,28 @@ class UITriangleMesh : UIComponent() {
         } else {
             pGLState.disableDepthTest()
         }
+
+        // Blending
+        var sourceFactor = IShape.BLENDFUNCTION_SOURCE_DEFAULT
+        var destinationFactor = IShape.BLENDFUNCTION_DESTINATION_DEFAULT
+
+        if (blendInfo == BlendInfo.Inherit) {
+            val parent = parent
+
+            if (parent is UIBufferedComponent<*>) {
+                sourceFactor = parent.blendInfo.sourceFactor
+                destinationFactor = parent.blendInfo.destinationFactor
+            } else if (parent is UITriangleMesh) {
+                sourceFactor = parent.blendInfo.sourceFactor
+                destinationFactor = parent.blendInfo.destinationFactor
+            }
+        } else {
+            sourceFactor = blendInfo.sourceFactor
+            destinationFactor = blendInfo.destinationFactor
+        }
+
+        pGLState.enableBlend()
+        pGLState.blendFunction(sourceFactor, destinationFactor)
     }
 
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
