@@ -31,6 +31,7 @@ import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.mods.ModSynesthesia;
 
+import org.andengine.entity.IEntity;
 import org.andengine.entity.scene.Scene;
 import org.andengine.util.math.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -49,6 +50,9 @@ public class GameplaySlider extends GameObject {
     private static final String sliderStartCircleOverlayTexture = "sliderstartcircleoverlay";
     private static final String sliderEndCircleTexture = "sliderendcircle";
     private static final String sliderEndCircleOverlayTexture = "sliderendcircleoverlay";
+
+    // Avoid rebuilding slider body mesh for tiny length deltas every frame.
+    private static final float snakeLengthUpdateThreshold = 0.75f;
 
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
@@ -95,7 +99,11 @@ public class GameplaySlider extends GameObject {
     private int replayTickIndex;
 
     private LinePath superPath = null;
+    private float superPathMaxLength;
     private boolean preStageFinish = false;
+    private float lastSnakeInLength;
+    private float lastSnakeOutStartLength;
+    private float lastSnakeOutEndLength;
 
     private final SliderBody sliderBody;
     private UniversalModifier sliderHeadLateMissFadeModifier;
@@ -185,9 +193,8 @@ public class GameplaySlider extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene, final StatisticV2 stat,
-                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final float secPassed,
-                     final Color4 comboColor, final Color4 borderColor, final SliderPath sliderPath,
-                     final LinePath renderPath) {
+                     final Slider beatmapSlider, final BeatmapControlPoints controlPoints, final Color4 comboColor,
+                     final Color4 borderColor, final SliderPath sliderPath, final SliderBody.RenderPathCache buildCache) {
         this.listener = listener;
         this.scene = scene;
         this.stat = stat;
@@ -198,8 +205,9 @@ public class GameplaySlider extends GameObject {
         position.set(stackedPosition.x, stackedPosition.y);
 
         hitTime = (float) beatmapSlider.startTime / 1000;
+        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         endsCombo = beatmapSlider.isLastInCombo();
-        elapsedSpanTime = secPassed - hitTime;
+        elapsedSpanTime = -timePreempt;
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
@@ -227,6 +235,10 @@ public class GameplaySlider extends GameObject {
         tickSet.clear();
         kiai = GameHelper.isKiai();
         preStageFinish = false;
+        superPathMaxLength = 0;
+        lastSnakeInLength = Float.NaN;
+        lastSnakeOutStartLength = Float.NaN;
+        lastSnakeOutEndLength = Float.NaN;
         bodyColor = comboColor;
         if (!OsuSkin.get().isSliderFollowComboColor()) {
             var skinBodyColor = OsuSkin.get().getSliderBodyColor();
@@ -292,7 +304,6 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
-        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
 
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
@@ -376,10 +387,18 @@ public class GameplaySlider extends GameObject {
         scene.attachChild(tailCirclePiece, 0);
 
         // Slider track
-        superPath = renderPath;
-        sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
-        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+        superPath = buildCache.sourcePath;
+        superPathMaxLength = superPath.getMeasurer().maxLength();
+
+        float sliderBodyWidth = OsuSkin.get().getSliderBodyWidth() * scale;
+        float sliderBorderWidth = OsuSkin.get().getSliderBorderWidth() * scale;
+        float sliderHintWidth = OsuSkin.get().getSliderHintWidth() * scale;
+        boolean isHintVisible = OsuSkin.get().isSliderHintEnable() &&
+            beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength();
+
+        sliderBody.init(Config.isSnakingInSliders(), stackedPosition, buildCache);
+        sliderBody.setBackgroundWidth(sliderBodyWidth);
+        sliderBody.setBorderWidth(sliderBorderWidth);
         sliderBody.setBorderColor(borderColor);
 
         // Head circle not being visible means Traceable is applied to this slider
@@ -389,9 +408,9 @@ public class GameplaySlider extends GameObject {
             sliderBody.setBackgroundColor(bodyColor, OsuSkin.get().getSliderBodyBaseAlpha());
         }
 
-        if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
+        if (isHintVisible) {
             sliderBody.setHintVisible(true);
-            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
+            sliderBody.setHintWidth(sliderHintWidth);
 
             Color4 hintColor = OsuSkin.get().getSliderHintColor();
             if (hintColor != null) {
@@ -403,7 +422,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(secPassed, beatmapSlider);
+        tickContainer.init(beatmapSlider);
 
         scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
@@ -695,7 +714,7 @@ public class GameplaySlider extends GameObject {
             }
 
             // Restore ticks
-            tickContainer.onNewSpan(getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
+            tickContainer.onNewSpan((float) getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
             currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows
@@ -905,6 +924,21 @@ public class GameplaySlider extends GameObject {
         }
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(startArrow, dt);
+        updateAfterInit(endArrow, dt);
+        updateAfterInit(headCirclePiece, dt);
+        updateAfterInit(tailCirclePiece, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(tickContainer, dt);
+        updateAfterInit(sliderBody, dt);
+        updateAfterInit(ball, dt);
+        updateAfterInit(followCircle, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {
@@ -971,9 +1005,8 @@ public class GameplaySlider extends GameObject {
 
                 if (percentage < 1) {
                     if (superPath != null && sliderBody != null) {
-                        float l = superPath.getMeasurer().maxLength() * percentage;
-
-                        sliderBody.setEndLength(l);
+                        float length = superPathMaxLength * percentage;
+                        applySnakeBodyLength(false, length, false);
                     }
 
                     var position = getPositionAt(percentage, false, true);
@@ -982,7 +1015,7 @@ public class GameplaySlider extends GameObject {
                     endArrow.setPosition(position.x, position.y);
                 } else {
                     if (!preStageFinish && superPath != null && sliderBody != null) {
-                        sliderBody.setEndLength(superPath.getMeasurer().maxLength());
+                        applySnakeBodyLength(false, superPathMaxLength, true);
                         preStageFinish = true;
                     }
 
@@ -1030,13 +1063,13 @@ public class GameplaySlider extends GameObject {
         final float bodyProgress = reverse ? 1 - percentage : percentage;
 
         if (shouldSnakeOut && Config.isSnakingOutSliders() && completedSpanCount == beatmapSlider.getSpanCount() - 1) {
-            float length = bodyProgress * superPath.getMeasurer().maxLength();
+            float length = bodyProgress * superPathMaxLength;
 
             if (reverse) {
                 // In reverse, the snaking out animation starts from the end node.
-                sliderBody.setEndLength(length);
+                applySnakeBodyLength(false, length, false);
             } else {
-                sliderBody.setStartLength(length);
+                applySnakeBodyLength(true, length, false);
             }
         }
 
@@ -1433,4 +1466,31 @@ public class GameplaySlider extends GameObject {
         return tmpPoint;
     }
 
+    private void applySnakeBodyLength(boolean updateStartLength, float targetLength, boolean force) {
+        if (sliderBody == null) {
+            return;
+        }
+
+        if (updateStartLength) {
+            if (!force && !Float.isNaN(lastSnakeOutStartLength) &&
+                Math.abs(targetLength - lastSnakeOutStartLength) < snakeLengthUpdateThreshold) {
+                return;
+            }
+
+            sliderBody.setStartLength(targetLength);
+            lastSnakeOutStartLength = targetLength;
+            return;
+        }
+
+        float previous = Float.isNaN(lastSnakeInLength) ? lastSnakeOutEndLength :
+            (Float.isNaN(lastSnakeOutEndLength) ? lastSnakeInLength : Math.max(lastSnakeInLength, lastSnakeOutEndLength));
+
+        if (!force && !Float.isNaN(previous) && Math.abs(targetLength - previous) < snakeLengthUpdateThreshold) {
+            return;
+        }
+
+        sliderBody.setEndLength(targetLength);
+        lastSnakeInLength = targetLength;
+        lastSnakeOutEndLength = targetLength;
+    }
 }
