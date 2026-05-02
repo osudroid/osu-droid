@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
-import com.edlplan.framework.math.line.LinePath;
+import com.edlplan.osu.support.slider.SliderBody;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
@@ -195,7 +195,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private int failcount = 0;
     private Color4 sliderBorderColor;
     private SliderPath[] sliderPaths = null;
-    private LinePath[] sliderRenderPaths = null;
+    private SliderBody.RenderPathCache[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
@@ -3159,7 +3159,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var sliderPaths = new SliderPath[playableBeatmap.getHitObjects().getSliderCount()];
-        var sliderRenderPaths = new LinePath[playableBeatmap.getHitObjects().getSliderCount()];
+        var sliderRenderPaths = new SliderBody.RenderPathCache[playableBeatmap.getHitObjects().getSliderCount()];
         int index = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
@@ -3177,9 +3177,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ensureActive(scope.getCoroutineContext());
             }
 
-            sliderRenderPaths[index] = GameHelper.convertSliderPath(sliderPaths[index], scope);
+            float scale = slider.getScreenSpaceGameplayScale();
+            float sliderBodyWidth = OsuSkin.get().getSliderBodyWidth() * scale;
+            float sliderBorderWidth = OsuSkin.get().getSliderBorderWidth() * scale;
+            float sliderHintWidth = OsuSkin.get().getSliderHintWidth() * scale;
+            boolean isHintVisible = OsuSkin.get().isSliderHintEnable() &&
+                slider.getDistance() > OsuSkin.get().getSliderHintShowMinLength();
+
+            sliderRenderPaths[index] = SliderBody.createCache(
+                GameHelper.convertSliderPath(sliderPaths[index], scope),
+                sliderBodyWidth,
+                sliderBorderWidth,
+                isHintVisible,
+                sliderHintWidth,
+                Config.isSnakingInSliders() || Config.isSnakingOutSliders()
+            );
+
             ++index;
         }
+
 
         this.sliderPaths = sliderPaths;
         this.sliderRenderPaths = sliderRenderPaths;
@@ -3194,12 +3210,28 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private LinePath getSliderRenderPath(int index) {
-        if (sliderRenderPaths != null && index < sliderRenderPaths.length && index >= 0) {
-            return sliderRenderPaths[index];
-        } else {
-            return null;
+    private SliderBody.RenderPathCache getSliderRenderPath(int index) {
+        if (sliderRenderPaths == null) {
+            throw new IllegalStateException(
+                "Slider render paths have not been calculated; sliderRenderPaths is null, index=" + index
+            );
         }
+
+        if (index < 0 || index >= sliderRenderPaths.length) {
+            throw new IndexOutOfBoundsException(
+                "Invalid slider render path index " + index + " for sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        var renderPath = sliderRenderPaths[index];
+
+        if (renderPath == null) {
+            throw new IllegalStateException(
+                "Slider render path at index " + index + " is null after calculation; sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        return renderPath;
     }
 
     public boolean getReplaying() {
