@@ -74,9 +74,6 @@ class RoomChat : UILinearContainer() {
         get() = UIEngine.current.overlay
 
     init {
-        // At any given time, there should be only one chat instance in the overlay.
-        // Two or more instances of these can present after a player successfully reconnects.
-        overlay.detachChildren { it is RoomChat }
 
         // Force the main container to fill the entire screen so that the chat can be closed by
         // tapping outside of it (see onAreaTouched).
@@ -307,6 +304,7 @@ class RoomChat : UILinearContainer() {
 
             linearContainer {
                 width = FillParent
+                height = FillParent
                 orientation = Orientation.Horizontal
 
                 tagText = text {
@@ -318,6 +316,8 @@ class RoomChat : UILinearContainer() {
 
                 messageText = text {
                     width = FillParent
+                    height = FillParent
+                    clipToBounds = true
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
                     applyTheme = { color = it.accentColor }
@@ -340,7 +340,7 @@ class RoomChat : UILinearContainer() {
                     text = "${if (lastMessage is PlayerMessage) lastMessage.player.name else StringTable.get(R.string.multiplayer_room_chat_system)}: "
                     color = if (lastMessage is PlayerMessage) getPlayerTagColor(lastMessage.player) else Theme.current.accentColor
                 }
-                messageText.text = lastMessage.content
+                messageText.text = lastMessage.content.substringBefore('\n')
             }
         }
 

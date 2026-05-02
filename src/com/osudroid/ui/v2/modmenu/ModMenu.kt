@@ -2,6 +2,8 @@ package com.osudroid.ui.v2.modmenu
 
 import com.edlplan.framework.easing.Easing
 import com.osudroid.beatmaps.BeatmapCache
+import com.osudroid.data.BeatmapInfo
+import com.osudroid.data.DatabaseManager
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent.Companion.MatchContent
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
@@ -357,6 +359,12 @@ object ModMenu : UIScene() {
                 return@scope
             }
 
+            if (selectedBeatmap.needsDifficultyCalculation) {
+                val newInfo = BeatmapInfo(beatmap, selectedBeatmap.dateImported, true)
+                selectedBeatmap.apply(newInfo)
+                DatabaseManager.beatmapInfoTable.update(newInfo)
+            }
+
             enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
                 ensureActive()
                 mod.applyFromBeatmap(beatmap)
@@ -432,7 +440,7 @@ object ModMenu : UIScene() {
 
         if (Multiplayer.isConnected) {
             Multiplayer.roomScene?.chat?.show()
-            Multiplayer.roomScene?.isWaitingForModsChange = true
+            Multiplayer.roomScene?.isWaitingForModsChange?.set(true)
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost) {
@@ -440,7 +448,7 @@ object ModMenu : UIScene() {
             } else if (updatePlayerMods) {
                 setPlayerMods(enabledMods.serializeMods())
             } else {
-                Multiplayer.roomScene?.isWaitingForModsChange = false
+                Multiplayer.roomScene?.isWaitingForModsChange?.set(false)
             }
         }
 

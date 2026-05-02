@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
-import com.edlplan.framework.math.line.LinePath;
+import com.edlplan.osu.support.slider.SliderBody;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
@@ -197,7 +197,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private int failcount = 0;
     private Color4 sliderBorderColor;
     private SliderPath[] sliderPaths = null;
-    private LinePath[] sliderRenderPaths = null;
+    private SliderBody.RenderPathCache[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private UISprite unrankedSprite;
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
@@ -1746,7 +1746,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // The casts can be simplified, but it is necessary to prevent floating point errors (see how
             // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
             // are cast and converted to seconds individually).
-            if (elapsedTime < (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000) {
+            float lifetimeStart = (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000;
+            float lifetimeDt = elapsedTime - lifetimeStart;
+
+            if (lifetimeDt < 0) {
                 break;
             }
 
@@ -1783,10 +1786,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             final Color4 comboColor = getComboColor(obj);
 
+            GameObject gameObject = null;
+
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
+                gameplayCircle.init(this, mgScene, parsedCircle, comboColor);
                 addObject(gameplayCircle);
 
                 if (GameHelper.isAutoplay()) {
@@ -1799,6 +1804,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplayCircle.setReplayData(replay.objectData[gameplayCircle.getId()]);
                 }
 
+                gameObject = gameplayCircle;
             } else if (obj instanceof Spinner parsedSpinner) {
                 final float rps = 2 + 2 * playableBeatmap.getDifficulty().od / 10f;
                 final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
@@ -1815,12 +1821,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
 
+                gameObject = gameplaySpinner;
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, stat, parsedSlider, playableBeatmap.getControlPoints(),
-                        elapsedTime, comboColor, sliderBorderColor, getSliderPath(sliderIndex),
-                        getSliderRenderPath(sliderIndex));
+                        comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
 
                 ++sliderIndex;
                 addObject(gameplaySlider);
@@ -1835,6 +1841,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (gameplaySlider.getReplayData().tickSet == null)
                         gameplaySlider.getReplayData().tickSet = new BitSet();
                 }
+
+                gameObject = gameplaySlider;
+            }
+
+            if (gameObject != null) {
+                gameObject.updateAfterInit(lifetimeDt);
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
@@ -3143,7 +3155,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var sliderPaths = new SliderPath[playableBeatmap.getHitObjects().getSliderCount()];
-        var sliderRenderPaths = new LinePath[playableBeatmap.getHitObjects().getSliderCount()];
+        var sliderRenderPaths = new SliderBody.RenderPathCache[playableBeatmap.getHitObjects().getSliderCount()];
         int index = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
@@ -3161,9 +3173,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ensureActive(scope.getCoroutineContext());
             }
 
-            sliderRenderPaths[index] = GameHelper.convertSliderPath(sliderPaths[index], scope);
+            float scale = slider.getScreenSpaceGameplayScale();
+            float sliderBodyWidth = OsuSkin.get().getSliderBodyWidth() * scale;
+            float sliderBorderWidth = OsuSkin.get().getSliderBorderWidth() * scale;
+            float sliderHintWidth = OsuSkin.get().getSliderHintWidth() * scale;
+            boolean isHintVisible = OsuSkin.get().isSliderHintEnable() &&
+                slider.getDistance() > OsuSkin.get().getSliderHintShowMinLength();
+
+            sliderRenderPaths[index] = SliderBody.createCache(
+                GameHelper.convertSliderPath(sliderPaths[index], scope),
+                sliderBodyWidth,
+                sliderBorderWidth,
+                isHintVisible,
+                sliderHintWidth,
+                Config.isSnakingInSliders() || Config.isSnakingOutSliders()
+            );
+
             ++index;
         }
+
 
         this.sliderPaths = sliderPaths;
         this.sliderRenderPaths = sliderRenderPaths;
@@ -3178,12 +3206,28 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private LinePath getSliderRenderPath(int index) {
-        if (sliderRenderPaths != null && index < sliderRenderPaths.length && index >= 0) {
-            return sliderRenderPaths[index];
-        } else {
-            return null;
+    private SliderBody.RenderPathCache getSliderRenderPath(int index) {
+        if (sliderRenderPaths == null) {
+            throw new IllegalStateException(
+                "Slider render paths have not been calculated; sliderRenderPaths is null, index=" + index
+            );
         }
+
+        if (index < 0 || index >= sliderRenderPaths.length) {
+            throw new IndexOutOfBoundsException(
+                "Invalid slider render path index " + index + " for sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        var renderPath = sliderRenderPaths[index];
+
+        if (renderPath == null) {
+            throw new IllegalStateException(
+                "Slider render path at index " + index + " is null after calculation; sliderRenderPaths.length=" + sliderRenderPaths.length
+            );
+        }
+
+        return renderPath;
     }
 
     public boolean getReplaying() {

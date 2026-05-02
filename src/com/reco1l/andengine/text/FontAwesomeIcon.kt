@@ -8,6 +8,8 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.IconVariant
 import org.andengine.engine.camera.*
 import org.andengine.opengl.font.*
+import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
@@ -120,6 +122,31 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
     override fun onDeclarePointers(gl: GLState) {
         super.onDeclarePointers(gl)
         font?.texture?.bind(gl)
+    }
+
+    override fun onBindShader(pGLState: GLState) {
+        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
+        }
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
+            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        }
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
     }
 
     override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {

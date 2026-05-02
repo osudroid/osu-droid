@@ -814,7 +814,23 @@ public class MainScene implements IUpdateHandler {
                         ResourceManager.getInstance().getFont("font"), "None...", 256, new TextOptions(HorizontalAlign.RIGHT), vbo);
             }
 
-            musicInfoText.setText(beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText());
+            final String fullTitle = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
+            musicInfoText.setText(fullTitle);
+
+            final float maxTextWidth = 650f;
+            if (musicInfoText.getWidth() > maxTextWidth) {
+                int lo = 0, hi = fullTitle.length() - 1;
+                while (lo < hi) {
+                    int mid = (lo + hi + 1) / 2;
+                    musicInfoText.setText(fullTitle.substring(0, mid) + "…");
+                    if (musicInfoText.getWidth() <= maxTextWidth) {
+                        lo = mid;
+                    } else {
+                        hi = mid - 1;
+                    }
+                }
+                musicInfoText.setText(lo > 0 ? fullTitle.substring(0, lo) + "…" : "…");
+            }
 
             try {
                 musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());

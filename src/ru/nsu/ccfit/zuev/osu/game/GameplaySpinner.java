@@ -192,6 +192,10 @@ public class GameplaySpinner extends GameObject {
     }
 
     void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         clearText.clearEntityModifiers();
         scene.detachChild(clearText);
 
@@ -211,6 +215,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {
@@ -256,6 +261,18 @@ public class GameplaySpinner extends GameObject {
         playAndFreeHitSamples(score);
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(clearText, dt);
+        updateAfterInit(spinText, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(background, dt);
+        updateAfterInit(circle, dt);
+        updateAfterInit(metre, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {
@@ -384,6 +401,7 @@ public class GameplaySpinner extends GameObject {
     public void onExpire() {
         super.onExpire();
 
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
