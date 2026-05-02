@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -339,7 +340,8 @@ class RoomPlayerCard : UILinearContainer() {
             avatarJob?.cancel()
             avatarJob = null
 
-            val loadedTexture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
+            val avatarKey = MD5Calculator.getStringMD5(avatarUrl)
+            val loadedTexture = resourceManager.getTextureIfLoaded(avatarKey)
 
             if (loadedTexture != null) {
                 avatarSprite.textureRegion = loadedTexture
@@ -352,7 +354,7 @@ class RoomPlayerCard : UILinearContainer() {
                     if (OnlineManager.getInstance().loadAvatarToTextureManager(avatarUrl)) {
                         ensureActive()
 
-                        val texture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
+                        val texture = resourceManager.getTextureIfLoaded(avatarKey)
 
                         updateThread {
                             if (lastPlayerId == userId) {
