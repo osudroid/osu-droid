@@ -73,7 +73,8 @@ class RoomPlayerCard : UILinearContainer() {
         }
     }
 
-    fun cancelBannerJob() {
+    fun cancelJobs() {
+        playerButton.avatarJob?.cancel()
         playerButton.bannerJob?.cancel()
     }
 
@@ -86,8 +87,12 @@ class RoomPlayerCard : UILinearContainer() {
         private var modDisplay: UIComponent? = null
 
         private val bannerSprite: UIShapedSprite
+        private val avatarSprite: UIShapedSprite
 
         var bannerJob: Job? = null
+            private set
+
+        var avatarJob: Job? = null
             private set
 
         private val defaultBackground = UIBox().apply {
@@ -97,6 +102,7 @@ class RoomPlayerCard : UILinearContainer() {
         }
 
         private var lastPlayerId = -1L
+        private val defaultAvatar = ResourceManager.getInstance().getTexture("emptyavatar")
 
         private val hostIcon = FontAwesomeIcon(Icon.Crown).apply {
             applyTheme = { color = it.accentColor }
@@ -115,9 +121,11 @@ class RoomPlayerCard : UILinearContainer() {
         init {
             width = FillParent
             orientation = Orientation.Horizontal
-            spacing = 6f
+            spacing = 12f
 
             bannerSprite = UIShapedSprite().apply {
+                inheritAncestorsColor = false
+
                 shape = object : UIBox() {
                     init {
                         cornerRadius = 12f
@@ -134,12 +142,34 @@ class RoomPlayerCard : UILinearContainer() {
                 setColor(0.25f, 0.25f, 0.25f)
             }
 
+            avatarSprite = UIShapedSprite().apply {
+                inheritAncestorsColor = false
+                size = Vec2(50f)
+
+                shape = object : UIBox() {
+                    init {
+                        cornerRadius = 8f
+                        color = Color4.Transparent
+                    }
+
+                    override fun beginDraw(gl: GL10) {
+                        gl.glDepthMask(true)
+                        super.beginDraw(gl)
+                    }
+                }
+
+                scaleType = ScaleType.Crop
+                textureRegion = defaultAvatar
+            }
+
             background = defaultBackground
 
             foreground = UIBox().apply {
                 cornerRadius = 12f
                 paintStyle = PaintStyle.Outline
             }
+
+            +avatarSprite
 
             innerContainer = linearContainer {
                 orientation = Orientation.Vertical
@@ -168,6 +198,7 @@ class RoomPlayerCard : UILinearContainer() {
         override fun onDetached() {
             super.onDetached()
             bannerJob?.cancel()
+            avatarJob?.cancel()
         }
 
         fun updateState(room: Room, player: RoomPlayer) {
@@ -177,14 +208,14 @@ class RoomPlayerCard : UILinearContainer() {
                 NotReady, MissingBeatmap -> Color4("#FFA0A0")
             }
 
+            val resourceManager = ResourceManager.getInstance()
+
             if (lastPlayerId != player.id) {
-                lastPlayerId = player.id
                 val bannerUrl = OnlineManager.getProfileBannerURL(player.id)
 
                 bannerJob?.cancel()
                 bannerJob = null
 
-                val resourceManager = ResourceManager.getInstance()
                 val loadedTexture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
 
                 if (loadedTexture != null) {
@@ -196,16 +227,13 @@ class RoomPlayerCard : UILinearContainer() {
 
                     bannerJob = async {
                         ensureActive()
-
                         if (OnlineManager.getInstance().loadProfileBannerToTextureManager(bannerUrl)) {
                             ensureActive()
-
                             val texture = resourceManager.getProfileBannerTextureIfLoaded(bannerUrl)
 
                             updateThread {
                                 if (lastPlayerId == player.id) {
                                     bannerSprite.textureRegion = texture
-
                                     if (texture != null) {
                                         background = bannerSprite
                                     }
@@ -222,6 +250,42 @@ class RoomPlayerCard : UILinearContainer() {
                 }
             }
 
+            if (lastPlayerId != player.id) {
+                val avatarUrl = OnlineManager.getAvatarURL(player.id)
+
+                avatarJob?.cancel()
+                avatarJob = null
+
+                val loadedTexture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
+
+                if (loadedTexture != null) {
+                    avatarSprite.textureRegion = loadedTexture
+                } else {
+                    avatarSprite.textureRegion = defaultAvatar
+
+                    avatarJob = async {
+                        ensureActive()
+                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatarUrl)) {
+                            ensureActive()
+                            val texture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
+
+                            updateThread {
+                                if (lastPlayerId == player.id) {
+                                    avatarSprite.textureRegion = texture ?: defaultAvatar
+                                }
+                            }
+                        } else {
+                            updateThread {
+                                if (lastPlayerId == player.id) {
+                                    avatarSprite.textureRegion = defaultAvatar
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            lastPlayerId = player.id
             nameText.text = player.name
             nameText.spacing = 6f
 

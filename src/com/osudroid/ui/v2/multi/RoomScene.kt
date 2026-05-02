@@ -708,7 +708,7 @@ class RoomScene(
     private fun teardownSession() {
         Multiplayer.cancelReconnection()
         beatmapInfoLayout.cancelCalculation()
-        playersContainer.forEach { (it as RoomPlayerCard).cancelBannerJob() }
+        playersContainer.forEach { (it as RoomPlayerCard).cancelJobs() }
 
         // Null out event listeners before disconnect so any queued socket events that
         // arrive after teardown find no listener to call.
