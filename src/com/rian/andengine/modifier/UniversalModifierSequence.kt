@@ -404,6 +404,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
     override fun close() {
         origin = null
+        lastModifier = null
 
         startTime = 0f
         currentTime = 0f
