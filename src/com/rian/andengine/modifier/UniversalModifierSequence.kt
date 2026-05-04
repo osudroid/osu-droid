@@ -309,7 +309,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      */
     @JvmOverloads
     fun sizeTo(width: Float, height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
-        append(ModifierType.SizeXY, duration, easing) {
+        append(ModifierType.Size, duration, easing) {
             finalValues[0] = width
             finalValues[1] = height
         }
@@ -324,7 +324,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      */
     @JvmOverloads
     fun widthTo(width: Float, duration: Float = 0f, easing: Easing = Easing.None) =
-        append(ModifierType.SizeX, duration, easing) { finalValues[0] = width }
+        append(ModifierType.Width, duration, easing) { finalValues[0] = width }
 
     /**
      * Smoothly adjusts [UIComponent.height] over time.
@@ -336,7 +336,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      */
     @JvmOverloads
     fun heightTo(height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
-        append(ModifierType.SizeY, duration, easing) { finalValues[0] = height }
+        append(ModifierType.Height, duration, easing) { finalValues[0] = height }
 
     //endregion
 

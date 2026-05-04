@@ -71,17 +71,17 @@ enum class ModifierType {
     /**
      * Modifies the [UIComponent]'s width.
      */
-    SizeX,
+    Width,
 
     /**
      * Modifies the [UIComponent]'s height.
      */
-    SizeY,
+    Height,
 
     /**
      * Modifies the [UIComponent]'s width and height.
      */
-    SizeXY;
+    Size;
 
     fun getInitialValues(entity: UIComponent, reusableArray: FloatArray) = when (this) {
         ScaleX -> {
@@ -146,21 +146,21 @@ enum class ModifierType {
             array
         }
 
-        SizeX -> {
+        Width -> {
             val array = reusableArray.ensureSize(1)
 
             array[0] = entity.width
             array
         }
 
-        SizeY -> {
+        Height -> {
             val array = reusableArray.ensureSize(1)
 
             array[0] = entity.height
             array
         }
 
-        SizeXY -> {
+        Size -> {
             val array = reusableArray.ensureSize(2)
 
             array[0] = entity.width
@@ -225,9 +225,9 @@ enum class ModifierType {
                 entity.translationY = valueAt(1)
             }
 
-            SizeX -> entity.width = valueAt(0)
-            SizeY -> entity.height = valueAt(0)
-            SizeXY -> entity.setSize(valueAt(0), valueAt(1))
+            Width -> entity.width = valueAt(0)
+            Height -> entity.height = valueAt(0)
+            Size -> entity.setSize(valueAt(0), valueAt(1))
 
             Rotation -> entity.rotation = valueAt(0)
 
