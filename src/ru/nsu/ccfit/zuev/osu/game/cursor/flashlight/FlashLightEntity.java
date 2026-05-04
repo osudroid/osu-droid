@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.reco1l.andengine.modifier.Modifiers;
-import com.rian.osu.mods.ModFlashlight;
+import com.osudroid.mods.ModFlashlight;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;

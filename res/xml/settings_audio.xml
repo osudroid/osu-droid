@@ -4,7 +4,7 @@
 
     <PreferenceCategory android:title="@string/opt_category_volume">
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="100"
             android:key="bgmvolume"
             android:summary="@string/opt_bgm_volume_summary"
@@ -12,7 +12,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="100"
             android:key="soundvolume"
             android:summary="@string/opt_sound_volume_summary"
@@ -41,7 +41,7 @@
             android:title="@string/opt_offset_calibration_title"
             android:summary="@string/opt_offset_calibration_summary" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="20"
             android:key="gameAudioSynchronizationThreshold"
             app:min="0"

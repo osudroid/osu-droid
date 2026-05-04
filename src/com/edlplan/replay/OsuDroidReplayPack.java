@@ -4,7 +4,7 @@ import static com.osudroid.data.Scores.ScoreInfo;
 
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.ScoreInfo;
-import com.rian.osu.mods.LegacyModConverter;
+import com.osudroid.mods.LegacyModConverter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;

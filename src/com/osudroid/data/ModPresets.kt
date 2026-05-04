@@ -1,7 +1,7 @@
 package com.osudroid.data
 
 import androidx.room.*
-import com.rian.osu.utils.*
+import com.osudroid.utils.ModHashMap
 
 /**
  * Represents a mod preset.

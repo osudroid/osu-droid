@@ -3,6 +3,7 @@ package com.osudroid.ui.v2
 import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
+import com.osudroid.utils.ModHashMap
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
@@ -14,7 +15,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.rian.osu.utils.*
 import kotlin.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*

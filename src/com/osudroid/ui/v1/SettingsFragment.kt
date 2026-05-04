@@ -57,9 +57,9 @@ import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
-import com.rian.osu.mods.ModAutoplay
-import com.rian.osu.replay.ReplayImporter
-import com.rian.osu.utils.ModHashMap
+import com.osudroid.mods.ModAutoplay
+import com.osudroid.replay.ReplayImporter
+import com.osudroid.utils.ModHashMap
 import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt

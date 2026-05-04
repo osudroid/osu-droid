@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.edlplan.framework.easing.Easing
+import com.osudroid.GameMode
 import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
@@ -19,18 +20,19 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.StarRatingBadge
+import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.framework.RollingFloatCounter
-import com.rian.osu.*
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
-import com.rian.osu.mods.*
-import com.rian.osu.utils.*
-import com.rian.osu.utils.ModUtils
+import com.osudroid.*
+import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
+import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
+import com.osudroid.mods.*
+import com.osudroid.utils.*
+import com.osudroid.utils.ModUtils
 import java.io.IOException
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*

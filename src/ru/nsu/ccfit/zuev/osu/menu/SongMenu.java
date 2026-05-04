@@ -26,16 +26,16 @@ import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.multiplayer.Multiplayer;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
-import com.rian.osu.GameMode;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.math.Precision;
-import com.rian.osu.mods.LegacyModConverter;
-import com.rian.osu.mods.ModDifficultyAdjust;
-import com.rian.osu.mods.ModNightCore;
-import com.rian.osu.mods.ModPrecise;
-import com.rian.osu.mods.ModReplayV6;
-import com.rian.osu.utils.LRUCache;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.GameMode;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.math.Precision;
+import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.mods.ModDifficultyAdjust;
+import com.osudroid.mods.ModNightCore;
+import com.osudroid.mods.ModPrecise;
+import com.osudroid.mods.ModReplayV6;
+import com.osudroid.utils.LRUCache;
+import com.osudroid.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
