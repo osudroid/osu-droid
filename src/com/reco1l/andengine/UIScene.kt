@@ -3,6 +3,9 @@ package com.reco1l.andengine
 import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.rian.andengine.timing.FramedClock
+import com.rian.andengine.timing.IFrameBasedClock
+import com.rian.andengine.timing.StopwatchClock
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.IEntity
@@ -18,13 +21,10 @@ import org.anddev.andengine.opengl.util.GLHelper
  */
 @Suppress("MemberVisibilityCanBePrivate")
 open class UIScene : Scene(), IShape {
-
     /**
-     * The time multiplier for the scene.
-     *
-     * Setting this will affect the speed of every entity attached to this scene.
+     * The clock of this [UIScene].
      */
-    var timeMultiplier = 1f
+    var clock: IFrameBasedClock = FramedClock(StopwatchClock(true))
 
     /**
      * Whether this [UIScene] should clip its children.
@@ -54,8 +54,10 @@ open class UIScene : Scene(), IShape {
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        onUpdateTick?.invoke(deltaTimeSec * timeMultiplier)
-        super.onManagedUpdate(deltaTimeSec * timeMultiplier)
+        clock.processFrame()
+        onUpdateTick?.invoke(clock.elapsedFrameTime)
+
+        super.onManagedUpdate(clock.elapsedFrameTime)
     }
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
