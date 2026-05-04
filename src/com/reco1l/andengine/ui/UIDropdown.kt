@@ -5,9 +5,9 @@ import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
+import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*

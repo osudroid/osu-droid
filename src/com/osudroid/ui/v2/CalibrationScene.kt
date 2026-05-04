@@ -22,7 +22,6 @@ import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.flexContainer
 import com.reco1l.andengine.linearContainer
-import com.reco1l.andengine.modifier.ModifierType
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.shape.UICircle
@@ -37,6 +36,7 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.PromptDialog
+import com.rian.andengine.modifier.ModifierType
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.math.Interpolation
 import kotlin.math.abs

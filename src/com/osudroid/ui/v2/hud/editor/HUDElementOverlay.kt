@@ -221,8 +221,9 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
             if (event.isActionUp) {
                 action()
                 clearEntityModifiers()
-                beginSequence {
+                beginModifierSequence {
                     scaleTo(0.9f, 0.1f)
+                    then()
                     scaleTo(1f, 0.1f)
                 }
                 return true

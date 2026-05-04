@@ -10,13 +10,13 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -191,8 +191,8 @@ class RoomChat : UILinearContainer() {
         if (!isExpanded) {
             isExpanded = true
             body.apply {
-                clearModifiers(ModifierType.SizeY)
-                sizeToY(body_height, 0.4f).eased(Easing.OutExpo)
+                clearModifiers(ModifierType.Height)
+                heightTo(body_height, 0.4f).eased(Easing.OutExpo)
             }
         }
     }
@@ -204,12 +204,12 @@ class RoomChat : UILinearContainer() {
             input.blur()
 
             body.apply {
-                clearModifiers(ModifierType.SizeY)
+                clearModifiers(ModifierType.Height)
 
                 if (immediate) {
                     height = 0f
                 } else {
-                    sizeToY(0f, 0.4f).eased(Easing.OutExpo)
+                    heightTo(0f, 0.4f).eased(Easing.OutExpo)
                 }
             }
         }
