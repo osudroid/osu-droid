@@ -24,8 +24,14 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     private var startTime = 0f
     private var currentTime = 0f
     private var lastEndTime = 0f
-
     private var lastModifier: UniversalModifier? = null
+
+    /**
+     * The time at which all [UniversalModifier]s applied to this [UniversalModifierSequence] ends relative to the
+     * underlying [UIComponent.modifierStartTime], in seconds.
+     */
+    val endTime
+        get() = lastEndTime
 
     fun init(origin: UIComponent) {
         this.origin = origin
