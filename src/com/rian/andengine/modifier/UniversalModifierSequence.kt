@@ -376,7 +376,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
         return delay(delay)
     }
 
-    private fun append(type: ModifierType, duration: Float, easing: Easing, block: UniversalModifier.() -> Unit): UniversalModifierSequence {
+    private inline fun append(type: ModifierType, duration: Float, easing: Easing, crossinline block: UniversalModifier.() -> Unit): UniversalModifierSequence {
         val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
 
         modifier.target = origin
