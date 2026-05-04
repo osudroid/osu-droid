@@ -33,6 +33,12 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     val endTime
         get() = lastEndTime
 
+    /**
+     * The duration at which all [UniversalModifier]s applied to this [UniversalModifierSequence] runs for, in seconds.
+     */
+    val duration
+        get() = endTime - startTime
+
     fun init(origin: UIComponent) {
         this.origin = origin
 
