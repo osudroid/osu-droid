@@ -55,11 +55,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         get() = startTime + duration
 
     /**
-     * The [Easing] function applied to this [UniversalModifier].
-     */
-    var easing = Easing.None
-
-    /**
      * The initial values for this [UniversalModifier].
      */
     var initialValues = FloatArray(3)
@@ -82,9 +77,32 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         private set
 
     /**
+     * The [Easing] function applied to this [UniversalModifier].
+     */
+    private var easing = Easing.None
+
+    /**
      * Invoked when this [UniversalModifier] finishes.
      */
-    var onFinished: OnModifierFinished? = null
+    private var onFinished: OnModifierFinished? = null
+
+    /**
+     * Sets the callback to be invoked when this [UniversalModifier] finishes.
+     */
+    fun after(onFinished: OnModifierFinished?): UniversalModifier {
+        this.onFinished = onFinished
+
+        return this
+    }
+
+    /**
+     * Sets the [Easing] function applied to this [UniversalModifier].
+     */
+    fun eased(easing: Easing): UniversalModifier {
+        this.easing = easing
+
+        return this
+    }
 
     private var lastUpdateTime = 0f
 

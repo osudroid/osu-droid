@@ -50,7 +50,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      *
      * @param x The final [UIComponent.translationX] to reach at the end of the [UniversalModifier].
      * @param y The final [UIComponent.translationY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -65,7 +65,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.translationX] over time.
      *
      * @param value The final [UIComponent.translationX] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -77,7 +77,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.translationY] over time.
      *
      * @param value The final [UIComponent.translationY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -94,7 +94,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      *
      * @param x The final [UIComponent.mX] to reach at the end of the [UniversalModifier].
      * @param y The final [UIComponent.mY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -109,7 +109,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.mX] over time.
      *
      * @param value The final [UIComponent.mX] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -121,7 +121,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.mY] over time.
      *
      * @param value The final [UIComponent.mY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -137,7 +137,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.mScaleX] and [UIComponent.mScaleY] over time.
      * 
      * @param value The final [UIComponent.mScaleX] and [UIComponent.mScaleY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -149,10 +149,10 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
         }
 
     /**
-     * Smoothly adjusts [UIComponent.mScaleY] over time.
+     * Smoothly adjusts [UIComponent.mScaleX] over time.
      * 
-     * @param value The final [UIComponent.mScaleY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param value The final [UIComponent.mScaleX] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -164,7 +164,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.mScaleY] over time.
      * 
      * @param value The final [UIComponent.mScaleY] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -180,7 +180,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Smoothly adjusts [UIComponent.alpha] over time.
      * 
      * @param value The final [UIComponent.alpha] to reach at the end of the [UniversalModifier].
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
@@ -191,7 +191,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     /**
      * Smoothly adjusts [UIComponent.alpha] to 1 over time.
      * 
-     * @param duration The duration of the modifier, in seconds. Defaults to 0.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
      * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */    
@@ -349,7 +349,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      */
     @JvmOverloads
     fun after(onFinished: OnModifierFinished? = null): UniversalModifierSequence {
-        lastModifier?.onFinished = onFinished
+        lastModifier?.after(onFinished)
 
         return this
     }
@@ -389,7 +389,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
         modifier.type = type
         modifier.startTime = currentTime
         modifier.duration = duration
-        modifier.easing = easing
+        modifier.eased(easing)
         modifier.block()
 
         origin?.registerEntityModifier(modifier)
