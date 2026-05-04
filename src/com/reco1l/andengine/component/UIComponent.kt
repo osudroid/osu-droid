@@ -10,6 +10,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
+import com.rian.andengine.timing.IFrameBasedClock
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -445,6 +446,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      */
     open fun onChildAttached(child: IEntity) {
         onContentChanged()
+
+        (child as? UIComponent)?.updateClock(clock)
     }
 
     /**
@@ -464,6 +467,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     override fun onAttached() {
         onThemeChanged(Theme.current)
         onHandleInvalidations(false)
+
+        updateClock((parent as? UIComponent)?.clock ?: return)
     }
 
     //endregion
@@ -774,7 +779,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-
+        customClock?.processFrame()
         onUpdateTick?.invoke(deltaTimeSec)
 
         background?.onManagedUpdate(deltaTimeSec)
@@ -1048,6 +1053,45 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //endregion
 
+    //region Timekeeping
+
+    private var _clock: IFrameBasedClock? = null
+    private var customClock: IFrameBasedClock? = null
+
+    /**
+     * The clock of this [UIComponent]. Used for keeping track of time across frames. By default, this is inherited from
+     * [parent].
+     *
+     * If set, then the provided value is used as a custom clock and [parent]'s clock is ignored.
+     */
+    var clock: IFrameBasedClock?
+        get() = _clock
+        set(value) {
+            customClock = value
+        }
+
+    /**
+     * The current frame's time as observed by this class' [clock].
+     */
+    val time
+        get() = clock?.timeInfo
+
+    /**
+     * Updates the clock to be used. Has no effect if this [UIComponent] uses a custom clock.
+     */
+    protected open fun updateClock(clock: IFrameBasedClock?) {
+        this._clock = customClock ?: clock
+
+        for (i in 0 until childCount) {
+            val child = getChild(i)
+
+            if (child is UIComponent) {
+                child.updateClock(this._clock)
+            }
+        }
+    }
+
+    //endregion
 
     @Suppress("ConstPropertyName")
     companion object {
