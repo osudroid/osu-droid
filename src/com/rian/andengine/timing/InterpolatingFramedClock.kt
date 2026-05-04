@@ -39,7 +39,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      *
      * Only applies when the error is within [allowableErrorMilliseconds].
      */
-    var driftRecoveryHalfLife = 50.0
+    var driftRecoveryHalfLife = 50f
 
     /**
      * Whether interpolation was applied at the last processed frame.
@@ -61,7 +61,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
     override var isRunning = false
         private set
 
-    override var elapsedFrameTime = 0.0
+    override var elapsedFrameTime = 0f
         private set
 
     override lateinit var source: IClock
@@ -69,12 +69,12 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
 
     private lateinit var framedSourceClock: IFrameBasedClock
 
-    override var currentTime = 0.0
+    override var currentTime = 0f
         private set
 
     private val realTimeClock = FramedClock()
 
-    private var _currentTime = 0.0
+    private var _currentTime = 0f
 
     override val timeInfo = FrameTimeInfo()
 
@@ -104,7 +104,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
         framedSourceClock.processFrame()
 
         val sourceIsRunning = framedSourceClock.isRunning
-        val sourceHasElapsed = framedSourceClock.elapsedFrameTime != 0.0
+        val sourceHasElapsed = framedSourceClock.elapsedFrameTime != 0f
 
         try {
             if (!sourceIsRunning) {
@@ -153,7 +153,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
             }
 
             // Seeking backwards should only be allowed if the source is explicitly doing that.
-            val elapsedInOpposingDirection = framedSourceClock.elapsedFrameTime != 0.0 && sign(framedSourceClock.elapsedFrameTime) != sign(rate)
+            val elapsedInOpposingDirection = framedSourceClock.elapsedFrameTime != 0f && sign(framedSourceClock.elapsedFrameTime) != sign(rate)
 
             if (!elapsedInOpposingDirection) {
                 currentTime = if (rate >= 0) max(lastTime, _currentTime) else min(lastTime, _currentTime)
@@ -168,5 +168,5 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
         }
     }
 
-    override val framesPerSecond = 0.0
+    override val framesPerSecond = 0f
 }
