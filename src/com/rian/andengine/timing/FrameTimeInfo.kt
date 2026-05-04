@@ -2,12 +2,12 @@ package com.rian.andengine.timing
 
 data class FrameTimeInfo(
     /**
-     * Elapsed time during last frame in milliseconds.
+     * Elapsed time during last frame in seconds.
      */
-    var elapsed: Double = 0.0,
+    var elapsed: Float = 0f,
 
     /**
-     * Begin time of this frame.
+     * Begin time of this frame in seconds.
      */
-    var current: Double = 0.0
+    var current: Float = 0f
 )

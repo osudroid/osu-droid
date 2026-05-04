@@ -29,13 +29,13 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
     final override var isRunning = false
         private set
 
-    final override var currentTime = 0.0
+    final override var currentTime = 0f
         private set
 
-    final override var elapsedFrameTime = 0.0
+    final override var elapsedFrameTime = 0f
         private set
 
-    override val framesPerSecond = 0.0
+    override val framesPerSecond = 0f
 
     /**
      * We maintain an internal running state so that when we notice the source clock has stopped, we can continue to run
@@ -47,12 +47,12 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
      * We need to track our internal time separately from the exposed currentTime to make sure the exposed value is only
      * ever updated on [processFrame].
      */
-    private var _currentTime = 0.0
+    private var _currentTime = 0f
 
     /**
      * Tracks the current time of [realtimeReferenceClock] one [processFrame] ago.
      */
-    private var lastReferenceTime: Double? = null
+    private var lastReferenceTime: Float? = null
 
     /**
      * Whether the last [seek] operation failed. This denotes that we need to [start] in decoupled mode (if possible).
@@ -168,7 +168,7 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
         pendingSourceRestartAfterNegativeSeek = false
         shouldBeRunning = false
         lastSeekFailed = false
-        _currentTime = 0.0
+        _currentTime = 0f
     }
 
     override fun start() {
@@ -192,7 +192,7 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
         shouldBeRunning = false
     }
 
-    override fun seek(position: Double): Boolean {
+    override fun seek(position: Float): Boolean {
         lastSeekFailed = adjustableSourceClock.seek(position)
 
         if (!lastSeekFailed) {

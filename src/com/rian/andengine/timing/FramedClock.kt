@@ -19,19 +19,19 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
     final override lateinit var source: IClock
         private set
 
-    private val betweenFrameTimes = DoubleArray(128)
+    private val betweenFrameTimes = FloatArray(128)
     private var totalFramesProcessed = 0
 
-    final override var framesPerSecond = 0.0
+    final override var framesPerSecond = 0f
         private set
 
-    var jitter = 0.0
+    var jitter = 0f
         private set
 
-    override var currentTime = 0.0
+    override var currentTime = 0f
         protected set
 
-    protected open var lastFrameTime = 0.0
+    protected open var lastFrameTime = 0f
 
     override val rate by this.source::rate
 
@@ -42,8 +42,8 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
 
     override val isRunning by this.source::isRunning
 
-    private var timeUntilNextCalculation = 0.0
-    private var timeSinceLastCalculation = 0.0
+    private var timeUntilNextCalculation = 0f
+    private var timeSinceLastCalculation = 0f
     private var framesSinceLastCalculation = 0
 
     private val fpsCalculationInterval = 250
@@ -71,14 +71,14 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
             timeUntilNextCalculation += fpsCalculationInterval
 
             if (framesSinceLastCalculation == 0) {
-                framesPerSecond = 0.0
-                jitter = 0.0
+                framesPerSecond = 0f
+                jitter = 0f
             } else {
                 framesPerSecond = ceil(framesSinceLastCalculation * 1000 / timeSinceLastCalculation)
 
                 // Simple stddev
-                var sum = 0.0
-                var sumOfSquares = 0.0
+                var sum = 0f
+                var sumOfSquares = 0f
 
                 for (i in betweenFrameTimes.indices) {
                     val v = betweenFrameTimes[i]
@@ -92,7 +92,7 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
                 jitter = sqrt(variance)
             }
 
-            timeSinceLastCalculation = 0.0
+            timeSinceLastCalculation = 0f
             framesSinceLastCalculation = 0
         }
 

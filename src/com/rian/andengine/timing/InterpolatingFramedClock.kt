@@ -18,7 +18,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      * This is internally adjusted for the current playback rate (so that the actual precision is constant regardless
      * of the rate applied).
      */
-    var allowableErrorMilliseconds = 1000.0 / 60 * 2
+    var allowableErrorMilliseconds = 1f / 60 * 2
 
     /**
      * Drift recovery half-life in milliseconds. Defaults to 50 ms.

@@ -1,7 +1,7 @@
 package com.rian.andengine.timing
 
 open class OffsetClock(protected var source: IClock) : IClock {
-    var offset = 0.0
+    var offset = 0f
 
     override val currentTime
         get() = source.currentTime + offset

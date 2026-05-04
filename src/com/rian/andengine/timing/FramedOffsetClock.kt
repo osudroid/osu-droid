@@ -8,7 +8,7 @@ class FramedOffsetClock @JvmOverloads constructor(source: IClock?, processSource
     /**
      * The offset to be applied.
      */
-    var offset = 0.0
+    var offset = 0f
         set(value) {
             lastFrameTime += value - field
             field = value

@@ -22,15 +22,15 @@ interface IAdjustableClock : IClock {
     /**
      * Seek to a specified time position.
      *
-     * @param position The time position.
+     * @param position The time position in seconds.
      * @return Whether a seek was possible.
      */
-    fun seek(position: Double): Boolean
+    fun seek(position: Float): Boolean
 
     /**
      * The rate this [IAdjustableClock] is running at, relative to real-time.
      */
-    override var rate: Double
+    override var rate: Float
 
     /**
      * Reset the rate to a stable value.

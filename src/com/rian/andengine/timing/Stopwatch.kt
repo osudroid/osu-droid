@@ -37,10 +37,10 @@ open class Stopwatch {
         start()
     }
 
-    val elapsedMilliseconds: Double
+    val elapsedSeconds: Float
         get() {
             val currentElapsed = if (isRunning) elapsedNanos + (System.nanoTime() - startTime) else elapsedNanos
 
-            return currentElapsed / 1000000.0
+            return currentElapsed / 1e9f
         }
 }

@@ -6,16 +6,16 @@ package com.rian.andengine.timing
  */
 interface IFrameBasedClock : IClock {
     /**
-     * Elapsed time since last frame in milliseconds.
+     * Elapsed time since last frame in seconds.
      */
-    val elapsedFrameTime: Double
+    val elapsedFrameTime: Float
 
     /**
      * A moving average representation of the frames per second of this [IFrameBasedClock].
      *
      * Do not use this for any timing purposes (use [elapsedFrameTime] instead).
      */
-    val framesPerSecond: Double
+    val framesPerSecond: Float
 
     /**
      * Processes one frame. Generally should be run once per update loop.

@@ -3,17 +3,17 @@ package com.rian.andengine.timing
 import kotlin.math.truncate
 
 class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwatch(), IAdjustableClock {
-    private var seekOffset = 0.0
+    private var seekOffset = 0f
 
     /**
      * Keep track of how much stopwatch time we have used at previous rates.
      */
-    private var rateChangeUsed: Double = 0.0
+    private var rateChangeUsed = 0f
 
     /**
      * Keep track of the resultant time that was accumulated at previous rates.
      */
-    private var rateChangeAccumulated: Double = 0.0
+    private var rateChangeAccumulated = 0f
 
     init {
         if (start) {
@@ -28,19 +28,19 @@ class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwat
      * The current time, represented solely by the accumulated [Stopwatch] time.
      */
     private val stopwatchCurrentTime
-        get() = (stopwatchMilliseconds - rateChangeUsed) * rate + rateChangeAccumulated
+        get() = (stopwatchSeconds - rateChangeUsed) * rate + rateChangeAccumulated
 
-    private val stopwatchMilliseconds
-        get() = elapsedMilliseconds
+    private val stopwatchSeconds
+        get() = elapsedSeconds
 
-    override var rate = 1.0
+    override var rate = 1f
         set(value) {
             if (field == value) {
                 return
             }
 
-            rateChangeAccumulated += (stopwatchMilliseconds - rateChangeUsed) * field
-            rateChangeUsed = stopwatchMilliseconds
+            rateChangeAccumulated += (stopwatchSeconds - rateChangeUsed) * field
+            rateChangeUsed = stopwatchSeconds
 
             field = value
         }
@@ -58,10 +58,10 @@ class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwat
     }
 
     override fun resetSpeedAdjustments() {
-        rate = 1.0
+        rate = 1f
     }
 
-    override fun seek(position: Double): Boolean {
+    override fun seek(position: Float): Boolean {
         // Determine the offset that when added to stopwatchCurrentTime; results in the requested time value
         seekOffset = position - stopwatchCurrentTime
         return true
@@ -72,7 +72,7 @@ class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwat
     }
 
     private fun resetAccumulatedRate() {
-        rateChangeAccumulated = 0.0
-        rateChangeUsed = 0.0
+        rateChangeAccumulated = 0f
+        rateChangeUsed = 0f
     }
 }

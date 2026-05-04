@@ -11,7 +11,7 @@ class ThrottledFrameClock : FramedClock() {
      *
      * A value of 0 is treated the same as "unlimited" or [Double.MAX_VALUE].
      */
-    var maximumUpdateHz = 1000.0
+    var maximumUpdateHz = 1000f
 
     /**
      * Whether throttling should be enabled. Defaults to `true`.
@@ -21,10 +21,10 @@ class ThrottledFrameClock : FramedClock() {
     /**
      * The time spent in a [Thread.sleep] state during the last frame.
      */
-    var timeSlept = 0.0
+    var timeSlept = 0f
         private set
 
-    private var accumulatedSleepError = 0.0
+    private var accumulatedSleepError = 0f
 
     override fun processFrame() {
         super.processFrame()
@@ -35,34 +35,34 @@ class ThrottledFrameClock : FramedClock() {
             } else {
                 // Even when running at unlimited frame-rate, we should call the scheduler to give lower-priority
                 // background processes a chance to do work.
-                timeSlept = sleepAndUpdateCurrent(0.0)
+                timeSlept = sleepAndUpdateCurrent(0f)
             }
         } else {
-            timeSlept = 0.0
+            timeSlept = 0f
         }
     }
 
     private fun throttle() {
-        val excessFrameTime = 1000.0 / maximumUpdateHz - elapsedFrameTime
+        val excessFrameTime = 1f / maximumUpdateHz - elapsedFrameTime
 
-        timeSlept = sleepAndUpdateCurrent(max(0.0, excessFrameTime + accumulatedSleepError))
+        timeSlept = sleepAndUpdateCurrent(max(0f, excessFrameTime + accumulatedSleepError))
 
         accumulatedSleepError += excessFrameTime - timeSlept
 
         // Never allow the sleep error to become too negative and induce too many catch-up frames.
-        accumulatedSleepError = max(-1000 / 30.0, accumulatedSleepError)
+        accumulatedSleepError = max(-1 / 30f, accumulatedSleepError)
     }
 
-    private fun sleepAndUpdateCurrent(milliseconds: Double): Double {
+    private fun sleepAndUpdateCurrent(seconds: Float): Float {
         // By returning here, in cases where the game is not keeping up, we don't yield.
         // Not 100% sure if we want to do this, but let's give it a try.
-        if (milliseconds <= 0) {
-            return 0.0
+        if (seconds <= 0) {
+            return 0f
         }
 
         val before = currentTime
 
-        Thread.sleep(milliseconds.toLong())
+        Thread.sleep(seconds.toLong() * 1000)
 
         currentTime = sourceTime
 

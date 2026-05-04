@@ -7,12 +7,12 @@ interface IClock {
     /**
      * The current time of this [IClock], in milliseconds.
      */
-    val currentTime: Double
+    val currentTime: Float
 
     /**
      * The rate this [IClock] is running at, relative to real-time.
      */
-    val rate: Double
+    val rate: Float
 
     /**
      * Whether this [IClock] is currently running.
