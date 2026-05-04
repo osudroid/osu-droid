@@ -2,6 +2,7 @@ package com.reco1l.andengine.component
 
 import android.util.*
 import android.view.*
+import com.edlplan.framework.easing.Easing
 import com.osudroid.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
@@ -1061,6 +1062,327 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
         }
 
         addDelay(-delay, propagateChildren)
+    }
+
+    //endregion
+
+    //region Modifiers - Translation
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationX] and [translationY] over time.
+     *
+     * @param x The final [translationX] to reach at the end of the [UniversalModifier].
+     * @param y The final [translationY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateTo(x: Float, y: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateXY, duration, easing) {
+            finalValues[0] = x
+            finalValues[1] = y
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationX] over time.
+     *
+     * @param value The final [translationX] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationY] over time.
+     *
+     * @param value The final [translationY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Move
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mX] and [mY] over time.
+     *
+     * @param x The final [mX] to reach at the end of the [UniversalModifier].
+     * @param y The final [mY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveTo(x: Float, y: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveXY, duration, easing) {
+            finalValues[0] = x
+            finalValues[1] = y
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mX] over time.
+     *
+     * @param value The final [mX] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mY] over time.
+     *
+     * @param value The final [mY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Scale
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleX] and [mScaleY] over time.
+     *
+     * @param value The final [mScaleX] and [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleXY, duration, easing) {
+            finalValues[0] = value
+            finalValues[1] = value
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleX] over time.
+     *
+     * @param value The final [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleY] over time.
+     *
+     * @param value The final [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Alpha
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] over time.
+     *
+     * @param value The final [alpha] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] to 1 over time.
+     *
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeIn(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(1f, duration, easing)
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] from 0 to 1 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeInFromZero(duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) {
+            hasInitialValues = true
+            initialValues[0] = 0f
+            finalValues[0] = 1f
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] to 0 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeOut(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(0f, duration, easing)
+
+    //endregion
+
+    //region Modifiers - Color
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param color The final color to reach at the end of the [UniversalModifier], in 0xRRGGBB format.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(color: Long, duration: Float = 0f, easing: Easing = Easing.None) =
+        colorTo(
+            red = ((color ushr 16) and 0xFF) / 255f,
+            green = ((color ushr 8) and 0xFF) / 255f,
+            blue = (color and 0xFF) / 255f,
+            duration = duration,
+            easing = easing
+        )
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param color The final [Color4] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(color: Color4, duration: Float = 0f, easing: Easing = Easing.None) =
+        colorTo(color.red, color.green, color.blue, duration, easing)
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param red The final red component of [color] to reach at the end of the [UniversalModifier], in the
+     * range [0, 1].
+     * @param green The final green component of [color] to reach at the end of the [UniversalModifier], in
+     * the range [0, 1].
+     * @param blue The final blue component of [color] to reach at the end of the [UniversalModifier], in
+     * the range [0, 1].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(red: Float, green: Float, blue: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Color, duration, easing) {
+            finalValues[0] = red
+            finalValues[1] = green
+            finalValues[2] = blue
+        }
+
+    //endregion
+
+    //region Modifiers - Rotation
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mRotation] over time.
+     *
+     * @param value The final [mRotation] to reach at the end of the [UniversalModifier], in degrees.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun rotateTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Rotation, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Size
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [width] and [height] over time.
+     *
+     * @param width The final [width] to reach at the end of the [UniversalModifier].
+     * @param height The final [height] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun sizeTo(width: Float, height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Size, duration, easing) {
+            finalValues[0] = width
+            finalValues[1] = height
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [width] over time.
+     *
+     * @param width The final [width] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun widthTo(width: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Width, duration, easing) { finalValues[0] = width }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [height] over time.
+     *
+     * @param height The final [height] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun heightTo(height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Height, duration, easing) { finalValues[0] = height }
+
+    //endregion
+
+    //region Modifiers Registration
+
+    private inline fun appendModifier(
+        type: ModifierType,
+        duration: Float,
+        easing: Easing,
+        crossinline block: UniversalModifier.() -> Unit
+    ): UniversalModifier {
+        val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
+
+        modifier.target = this
+        modifier.type = type
+        modifier.startTime = modifierStartTime
+        modifier.duration = duration
+        modifier.eased(easing)
+        modifier.block()
+
+        registerEntityModifier(modifier)
+
+        return modifier
     }
 
     //endregion
