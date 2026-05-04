@@ -43,7 +43,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * The duration of this [UniversalModifier], in seconds relative to [startTime].
      */
-    var duration = 0f
+    private var duration = 0f
         set(value) {
             field = max(0f, value)
         }
@@ -168,6 +168,17 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun getSecondsElapsed() = max(0f, lastUpdateTime - startTime)
     override fun getDuration() = duration
+
+    /**
+     * Sets the duration of this [UniversalModifier].
+     *
+     * @param duration The duration of this [UniversalModifier], in seconds relative to [startTime].
+     */
+    fun setDuration(duration: Float): UniversalModifier {
+        this.duration = duration
+
+        return this
+    }
 
     override fun addModifierListener(pModifierListener: IModifier.IModifierListener<IEntity?>?) = Unit
     override fun removeModifierListener(pModifierListener: IModifier.IModifierListener<IEntity?>?) = false
