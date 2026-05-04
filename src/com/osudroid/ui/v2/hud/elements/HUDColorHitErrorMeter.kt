@@ -4,7 +4,7 @@ import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.reco1l.toolkt.kotlin.fastForEach
-import com.rian.osu.beatmap.constants.HitObjectType
+import com.osudroid.beatmaps.constants.HitObjectType
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
 

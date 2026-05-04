@@ -4,18 +4,21 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
-import com.rian.osu.GameMode;
-import com.rian.osu.beatmap.DroidHitWindow;
-import com.rian.osu.beatmap.IBeatmap;
-import com.rian.osu.beatmap.PreciseDroidHitWindow;
-import com.rian.osu.beatmap.hitobject.Slider;
-import com.rian.osu.beatmap.hitobject.sliderobject.*;
-import com.rian.osu.mods.LegacyModConverter;
-import com.rian.osu.mods.ModHardRock;
-import com.rian.osu.mods.ModPrecise;
-import com.rian.osu.mods.ModReplayV6;
-import com.rian.osu.utils.ModHashMap;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderHead;
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderRepeat;
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick;
+import com.osudroid.GameMode;
+import com.osudroid.beatmaps.DroidHitWindow;
+import com.osudroid.beatmaps.IBeatmap;
+import com.osudroid.beatmaps.PreciseDroidHitWindow;
+import com.osudroid.beatmaps.hitobjects.Slider;
+import com.osudroid.beatmaps.hitobjects.sliderobject.*;
+import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.mods.ModHardRock;
+import com.osudroid.mods.ModPrecise;
+import com.osudroid.mods.ModReplayV6;
+import com.osudroid.utils.ModHashMap;
+import com.osudroid.utils.ModUtils;
 
 import org.anddev.andengine.util.Debug;
 

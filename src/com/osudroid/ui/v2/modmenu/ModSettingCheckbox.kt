@@ -3,8 +3,8 @@ package com.osudroid.ui.v2.modmenu
 import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FormCheckbox
 import com.reco1l.andengine.ui.form.FormControl
-import com.rian.osu.mods.Mod
-import com.rian.osu.mods.settings.ModSetting
+import com.osudroid.mods.Mod
+import com.osudroid.mods.settings.ModSetting
 
 class ModSettingCheckbox(mod: Mod, setting: ModSetting<Boolean>) :
     ModSettingComponent<Boolean, Boolean>(mod, setting),

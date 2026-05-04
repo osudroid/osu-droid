@@ -2,8 +2,8 @@ package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
-import com.rian.osu.mods.Mod
-import com.rian.osu.mods.settings.*
+import com.osudroid.mods.Mod
+import com.osudroid.mods.settings.*
 
 class ModSettingEnum(mod: Mod, setting: EnumModSetting<Enum<*>>) :
     ModSettingComponent<Enum<*>, List<Enum<*>>>(mod, setting),

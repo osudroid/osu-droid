@@ -1,8 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static com.acivev.ui.EffectKt.addFireworks;
 import static com.acivev.ui.EffectKt.addFireworksWithPeriod;
-import static com.acivev.ui.EffectKt.addSnowfall;
 import static com.acivev.ui.EffectKt.addSnowfallWithPeriod;
 
 import android.content.Context;
@@ -27,8 +25,8 @@ import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.andengine.ui.UIConfirmDialog;
 import com.reco1l.framework.Color4;
 import com.reco1l.osu.ui.HorizontalMessageDialog;
-import com.rian.osu.beatmap.timings.EffectControlPoint;
-import com.rian.osu.beatmap.timings.TimingControlPoint;
+import com.osudroid.beatmaps.timings.EffectControlPoint;
+import com.osudroid.beatmaps.timings.TimingControlPoint;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;

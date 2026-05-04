@@ -6,7 +6,7 @@ import com.reco1l.framework.Color4
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
-import com.rian.osu.beatmap.constants.HitObjectType
+import com.osudroid.beatmaps.constants.HitObjectType
 import org.anddev.andengine.engine.camera.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.abs

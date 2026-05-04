@@ -17,7 +17,7 @@
             android:summary="@string/opt_highPrecisionInput_summary"
             app:layout="@layout/settings_preference_checkbox" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="300"
             android:key="back_button_press_time"
             android:summary="@string/opt_backButtonPressTime_summary"
@@ -59,7 +59,7 @@
             android:title="Spinner"
             app:layout="@layout/settings_preference_checkbox" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="127"
             android:key="seekBarVibrateIntensity"
             android:title="@string/opt_seekBarVibrateIntensity_title"

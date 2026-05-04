@@ -8,9 +8,9 @@ import com.osudroid.data.DatabaseManager
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.stopAsync
 import com.reco1l.toolkt.kotlin.fastForEach
-import com.rian.osu.beatmap.parser.BeatmapParser
-import com.rian.osu.difficulty.calculator.DroidDifficultyCalculator
-import com.rian.osu.difficulty.calculator.StandardDifficultyCalculator
+import com.osudroid.beatmaps.parser.BeatmapParser
+import com.osudroid.difficulty.calculator.DroidDifficultyCalculator
+import com.osudroid.difficulty.calculator.StandardDifficultyCalculator
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job

@@ -10,7 +10,7 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
+import com.osudroid.mods.*
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuToggle(var mod: Mod): UIButton() {
