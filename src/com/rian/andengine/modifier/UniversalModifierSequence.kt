@@ -347,14 +347,21 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     //endregion
 
     /**
-     * Sets a callback to the latest [UniversalModifier] applied in this [UniversalModifierSequence], if any. This
-     * callback will be called when the [UniversalModifier] finishes.
+     * Sets a callback to the latest [UniversalModifier] applied in this [UniversalModifierSequence]. If no
+     * [UniversalModifier]s have been applied to this [UniversalModifierSequence], a [UniversalModifier] that does
+     * nothing and starts at [currentTime] will be applied to [origin].
+     *
+     * This callback will be called when the [UniversalModifier] finishes.
      *
      * @param onFinished The callback to call.
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
     @JvmOverloads
     fun after(onFinished: OnModifierFinished? = null): UniversalModifierSequence {
+        if (lastModifier == null) {
+            append(ModifierType.None, 0f, Easing.None) {}
+        }
+
         lastModifier?.after(onFinished)
 
         return this
