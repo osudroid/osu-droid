@@ -10,7 +10,9 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
+import com.rian.andengine.modifier.UniversalModifierSequence
 import com.rian.andengine.timing.IFrameBasedClock
+import com.rian.osu.math.Precision
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -785,6 +787,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         background?.onManagedUpdate(deltaTimeSec)
         foreground?.onManagedUpdate(deltaTimeSec)
 
+        modifierDelay = 0f
+
         super.onManagedUpdate(deltaTimeSec)
     }
 
@@ -1089,6 +1093,118 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                 child.updateClock(this._clock)
             }
         }
+    }
+
+    //endregion
+
+    //region Modifiers
+
+    /**
+     * Starting time to use for new [UniversalModifier]s.
+     */
+    val modifierStartTime
+        get() = (clock?.currentTime ?: 0f) + modifierDelay
+
+    /**
+     * Delay from the current time until new [UniversalModifier]s are started, in seconds.
+     */
+    protected var modifierDelay = 0f
+        private set
+
+    /**
+     * Adds a delay duration to [modifierDelay], in seconds.
+     *
+     * @param duration The delay duration to add.
+     * @param propagateChildren Whether we also delay down the child.
+     */
+    @JvmOverloads
+    open fun addDelay(duration: Float, propagateChildren: Boolean = false) {
+        if (duration == 0f) {
+            return
+        }
+
+        modifierDelay += duration
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.addDelay(duration, true) }
+        }
+    }
+
+    /**
+     * Creates a [UniversalModifierSequence] that can be used to add [UniversalModifier]s to this [UIComponent].
+     */
+    fun createModifierSequence() = UniversalModifierSequence.obtain(this)
+
+    private var savedModifierStartTime = 0f
+
+    /**
+     * Starts a sequence of [UniversalModifier]s from an absolute time value (adjusts [modifierStartTime]).
+     *
+     * @param newModifierStartTime The new value for [modifierStartTime].
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     */
+    @JvmOverloads
+    fun beginAbsoluteSequence(newModifierStartTime: Float, propagateChildren: Boolean = true, block: UniversalModifierSequence.() -> Unit?) {
+        adjustAbsoluteSequenceTime(newModifierStartTime, propagateChildren)
+
+        createModifierSequence().use { it.block() }
+
+        restoreAbsoluteSequenceTime(propagateChildren)
+    }
+
+    private fun adjustAbsoluteSequenceTime(newModifierStartTime: Float, includeChildren: Boolean = true) {
+        savedModifierStartTime = modifierStartTime
+        modifierDelay += newModifierStartTime - modifierStartTime
+
+        if (includeChildren) {
+            mChildren?.fastForEach { child ->
+                (child as? UIComponent)?.adjustAbsoluteSequenceTime(newModifierStartTime)
+            }
+        }
+    }
+
+    private fun restoreAbsoluteSequenceTime(includeChildren: Boolean = true) {
+        restoreFromAbsoluteSequenceTime(savedModifierStartTime)
+
+        if (includeChildren) {
+            mChildren?.fastForEach { child ->
+                (child as? UIComponent)?.restoreAbsoluteSequenceTime()
+            }
+        }
+    }
+
+    private fun restoreFromAbsoluteSequenceTime(savedTime: Float) {
+        if (!Precision.almostEquals(savedTime, modifierStartTime)) {
+            throw IllegalStateException(
+                "${this::class.simpleName}'s modifierStartTime at the end of absolute sequence is " +
+                        "not the same as at the beginning (begin=$savedTime end=$modifierStartTime)"
+            )
+        }
+
+        modifierDelay += savedTime - modifierStartTime
+    }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s with a (cumulative) relative delay applied.
+     *
+     * @param delay The offset in seconds from current time. Note that this stacks with other nested sequences.
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     */
+    @JvmOverloads
+    fun beginDelayedSequence(delay: Float, propagateChildren: Boolean = true, block: UniversalModifierSequence.() -> Unit?) {
+        addDelay(delay, propagateChildren)
+        val oldDelay = modifierDelay
+
+        createModifierSequence().use { it.block() }
+
+        val newDelay = modifierDelay
+
+        if (!Precision.almostEquals(oldDelay, newDelay)) {
+            throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence is" +
+                    "not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+        }
+
+        addDelay(-delay, propagateChildren)
     }
 
     //endregion
