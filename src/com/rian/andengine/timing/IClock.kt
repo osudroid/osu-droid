@@ -5,7 +5,7 @@ package com.rian.andengine.timing
  */
 interface IClock {
     /**
-     * The current time of this [IClock], in milliseconds.
+     * The current time of this [IClock], in seconds.
      */
     val currentTime: Float
 
