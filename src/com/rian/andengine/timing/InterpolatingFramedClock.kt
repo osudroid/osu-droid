@@ -18,19 +18,19 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      * This is internally adjusted for the current playback rate (so that the actual precision is constant regardless
      * of the rate applied).
      */
-    var allowableErrorMilliseconds = 1f / 60 * 2
+    var allowableErrorMilliseconds = 2f / 60
 
     /**
-     * Drift recovery half-life in milliseconds. Defaults to 50 ms.
+     * Drift recovery half-life in seconds. Defaults to 0.05 seconds.
      *
-     * The time error decays exponentially toward the source. Every [driftRecoveryHalfLife] ms, the remaining error
+     * The time error decays exponentially toward the source. Every [driftRecoveryHalfLife] seconds, the remaining error
      * halves.
      *
-     * An example, starting at 10 ms error with a 50 ms half-life:
-     * - at 0 ms, error is 10 ms.
-     * - at 50 ms, error is 5 ms.
-     * - at 100 ms, error is 2.5 ms.
-     * - at 150 ms, error is 1.25 ms.
+     * An example, starting at 0.01 s error with a 0.05 s half-life:
+     * - at 0 s, error is 0.01 s.
+     * - at 0.05 s, error is 0.005 s.
+     * - at 0.1 s, error is 0.0025 s.
+     * - at 0.15 s, error is 0.00125 s.
      * ...
      *
      * To an observer, it will look like time has a temporary ramp applied to it:
@@ -39,7 +39,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      *
      * Only applies when the error is within [allowableErrorMilliseconds].
      */
-    var driftRecoveryHalfLife = 50f
+    var driftRecoveryHalfLife = 0.05f
 
     /**
      * Whether interpolation was applied at the last processed frame.
