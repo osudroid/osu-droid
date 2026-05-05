@@ -117,7 +117,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         val target = target ?: return 0f
         val time = target.time ?: return 0f
 
-        if (startTime < time.current) {
+        if (time.current < startTime) {
             return 0f
         }
 
