@@ -24,7 +24,12 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     private var startTime = 0f
     private var currentTime = 0f
     private var lastEndTime = 0f
-    private var lastModifier: UniversalModifier? = null
+
+    /**
+     * The latest [UniversalModifier] applied to this [UniversalModifierSequence], if any.
+     */
+    var lastModifier: UniversalModifier? = null
+        private set
 
     /**
      * The time at which all [UniversalModifier]s applied to this [UniversalModifierSequence] ends relative to the
