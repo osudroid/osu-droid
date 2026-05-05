@@ -950,8 +950,25 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
 
     //region Modifiers
 
-    fun clearModifiers(vararg type: ModifierType) {
-        unregisterEntityModifiers { it is UniversalModifier && it.type in type }
+    /**
+     * Clears [UniversalModifier]s of the specified [ModifierType] from this [UIComponent].
+     *
+     * Unlike the vararg variant, this method avoids array allocation in cases where there is only one [ModifierType] to
+     * remove.
+     *
+     * @param type The [ModifierType] to remove.
+     */
+    fun clearModifiers(type: ModifierType) {
+        unregisterEntityModifiers { it is UniversalModifier && it.type == type }
+    }
+
+    /**
+     * Clears [UniversalModifier]s of the specified [ModifierType]s from this [UIComponent].
+     *
+     * @param types The [ModifierType]s to remove.
+     */
+    fun clearModifiers(vararg types: ModifierType) {
+        unregisterEntityModifiers { it is UniversalModifier && it.type in types }
     }
 
     /**
