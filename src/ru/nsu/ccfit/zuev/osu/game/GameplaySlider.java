@@ -1426,7 +1426,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private void applyDim(UIComponent piece) {
-        if (!piece.isVisible()) {
+        if (!piece.hasParent() || !piece.isVisible()) {
             return;
         }
 
