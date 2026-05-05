@@ -786,6 +786,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
             customClock?.processFrame()
         }
 
+        // Fallback to engine-provided delta time in case clock is not present.
+        val deltaTimeSec = clock?.elapsedFrameTime ?: deltaTimeSec
+
         onUpdateTick?.invoke(deltaTimeSec)
 
         background?.onManagedUpdate(deltaTimeSec)
