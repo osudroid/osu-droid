@@ -132,7 +132,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         }
 
         val elapsed = min(time.current, endTime) - startTime
-        val percentage = if (duration > 0) easing.interpolate(elapsed / duration) else 1f
+        val percentage = if (duration > 0) easing.interpolate(elapsed / duration).coerceIn(0f, 1f) else 1f
 
         type.setValues(target, initialValues, finalValues, percentage)
 
