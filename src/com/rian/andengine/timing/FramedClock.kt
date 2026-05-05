@@ -19,6 +19,15 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
     final override lateinit var source: IClock
         private set
 
+    override var currentTime = 0f
+        protected set
+
+    protected open var lastFrameTime = 0f
+
+    init {
+        changeSource(source)
+    }
+
     private val betweenFrameTimes = FloatArray(128)
     private var totalFramesProcessed = 0
 
@@ -27,11 +36,6 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
 
     var jitter = 0f
         private set
-
-    override var currentTime = 0f
-        protected set
-
-    protected open var lastFrameTime = 0f
 
     override val rate by this.source::rate
 
@@ -49,10 +53,6 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
     private val fpsCalculationInterval = 250
 
     override val timeInfo = FrameTimeInfo()
-
-    init {
-        changeSource(source)
-    }
 
     override fun changeSource(source: IClock?) {
         this.source = source ?: StopwatchClock(true)
