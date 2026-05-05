@@ -22,8 +22,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock> {
     /**
      * The current frame's time as observed by this [HUD]'s [IFrameBasedClock].
      */
-    val time
-        get() = clock.timeInfo
+    val time by clock::timeInfo
 
     init {
         setOnAreaTouchTraversalFrontToBack()
