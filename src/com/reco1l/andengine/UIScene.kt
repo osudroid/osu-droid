@@ -5,6 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.FramedClock
+import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IFrameBasedClock
 import com.rian.andengine.timing.StopwatchClock
 import javax.microedition.khronos.opengles.GL10
@@ -21,11 +22,8 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape {
-    /**
-     * The clock of this [UIScene].
-     */
-    var clock: IFrameBasedClock = FramedClock(StopwatchClock(true))
+open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
+    override var clock: IFrameBasedClock = FramedClock(StopwatchClock(true))
         set(value) {
             field = value
             updateClock(value)
