@@ -2120,8 +2120,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     beatmapClock.start();
                 } else if (songService != null) {
                     songService.play();
+                    songService.setVolume(Config.getBgmVolume());
                 }
-                if (songService != null) songService.setVolume(Config.getBgmVolume());
+
                 musicStarted = true;
             }
 
