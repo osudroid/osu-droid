@@ -23,18 +23,6 @@ import org.anddev.andengine.opengl.util.GLHelper
  */
 @Suppress("MemberVisibilityCanBePrivate")
 open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
-    override var clock: IFrameBasedClock = FramedClock(StopwatchClock(true))
-        set(value) {
-            field = value
-            updateClock(value)
-        }
-
-    /**
-     * The current frame's time as observed by this [UIScene]'s [clock].
-     */
-    val time
-        get() = clock.timeInfo
-
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -63,17 +51,62 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     //region Update
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        clock.processFrame()
-        onUpdateTick?.invoke(clock.elapsedFrameTime)
+        originalClock.processFrame()
 
-        super.onManagedUpdate(clock.elapsedFrameTime)
-    }
-
-    protected open fun updateClock(clock: IFrameBasedClock) {
-        mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(clock)
+        if (processCustomClock) {
+            customClock?.processFrame()
         }
+
+        val deltaTime = clock.elapsedFrameTime
+        onUpdateTick?.invoke(deltaTime)
+        super.onManagedUpdate(deltaTime)
     }
+
+    //region Timekeeping
+
+    /**
+     * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIScene]'s [clock] in
+     * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
+     */
+    var processCustomClock = true
+
+    /**
+     * The original [IFrameBasedClock] of this [UIScene]. This clock is always kept running.
+     *
+     * May be overridden by a custom clock if available.
+     */
+    val originalClock: IFrameBasedClock = FramedClock(StopwatchClock(true))
+
+    private var customClock: IFrameBasedClock? = null
+
+    override var clock
+        get() = customClock ?: originalClock
+        set(value) {
+            customClock = value
+            updateClock(value)
+        }
+
+    /**
+     * The current frame's time as observed by this [UIScene]'s [clock].
+     */
+    val time by clock::timeInfo
+
+    /**
+     * Updates the [IFrameBasedClock] to be used as the custom clock for this [UIScene] and its children.
+     */
+    protected open fun updateClock(clock: IFrameBasedClock?) {
+        customClock = clock
+        val currentClock = this.clock
+
+        mChildren?.fastForEach {
+            (it as? UIComponent)?.updateClock(currentClock)
+            (it as? UIScene)?.updateClock(currentClock)
+        }
+
+        (mChildScene as? UIScene)?.updateClock(currentClock)
+    }
+
+    //endregion
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
         childScene?.onDetached()
@@ -87,6 +120,8 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     }
 
     override fun onAttached() {
+        val parentClock = (parent as? IClockProvider<*>)?.clock ?: (parent as? UIComponent)?.clock
+        updateClock(parentClock as? IFrameBasedClock)
 
         fun IEntity.propagateSkinChanges() {
 
@@ -102,6 +137,11 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
         }
 
         propagateSkinChanges()
+    }
+
+    override fun onDetached() {
+        super.onDetached()
+        updateClock(null)
     }
 
     //endregion
