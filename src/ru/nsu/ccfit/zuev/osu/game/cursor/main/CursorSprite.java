@@ -4,8 +4,6 @@ import com.reco1l.andengine.sprite.UISprite;
 import com.rian.andengine.modifier.ModifierType;
 import com.rian.andengine.modifier.UniversalModifier;
 
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import javax.annotation.Nullable;
