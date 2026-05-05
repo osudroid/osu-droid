@@ -6,8 +6,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.rian.andengine.HUD
 import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
@@ -21,9 +21,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
      */
-    val overlay = HUD().apply {
-        setOnAreaTouchTraversalFrontToBack()
-    }
+    val overlay = HUD()
 
     /**
      * The resource manager for loading and accessing UI resources (fonts, textures, etc).
