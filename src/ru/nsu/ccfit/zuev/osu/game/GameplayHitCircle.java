@@ -4,7 +4,6 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
@@ -18,6 +17,7 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 
+import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -70,6 +70,8 @@ public class GameplayHitCircle extends GameObject {
         kiai = GameHelper.isKiai();
         this.comboColor = comboColor;
 
+        float mehWindow = (float) beatmapCircle.hitWindow.getMehWindow() / 1000;
+        float initialModifierTime = hitTime - timePreempt;
         float scale = beatmapCircle.getScreenSpaceGameplayScale();
         float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
 
@@ -96,58 +98,62 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setVisible(!GameHelper.isHidden() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapCircle));
 
-        if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
-            float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
+        scene.attachChild(circlePiece, 0);
+        scene.attachChild(approachCircle);
 
-            circlePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
-            ));
-        } else if (circlePiece.isVisible()) {
-            circlePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+        boolean fadeOutCircle = GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles();
 
+        circlePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
+            sequence.fadeIn(fadeInDuration);
+
+            if (fadeOutCircle) {
+                float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
+                sequence.then().fadeOut(fadeOutDuration);
+            }
+
+            return Unit.INSTANCE;
+        });
+
+        if (!fadeOutCircle && circlePiece.isVisible()) {
             float okWindow = (float) beatmapCircle.hitWindow.getOkWindow() / 1000;
-            float lateMissFadeTime = (float) beatmapCircle.hitWindow.getMehWindow() / 1000 - okWindow;
 
-            circlePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(timePreempt + okWindow),
-                Modifiers.fadeOut(lateMissFadeTime)
-            ));
+            circlePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
+                sequence.fadeOut(mehWindow - okWindow);
+
+                return Unit.INSTANCE;
+            });
         }
 
         if (approachCircle.isVisible()) {
-            var easing = Easing.None;
+            Easing easing;
             var approachDifferentMod = GameHelper.getApproachDifferent();
 
             if (approachDifferentMod != null) {
                 approachCircle.setScale(scale * approachDifferentMod.getScale());
                 easing = approachDifferentMod.getEasing();
+            } else {
+                easing = Easing.None;
             }
 
-            approachCircle.registerEntityModifier(
-                Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f)
-            );
+            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> {
+                sequence.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                        .scaleTo(scale, timePreempt, easing)
+                        .after(e -> e.setAlpha(0));
 
-            approachCircle.registerEntityModifier(
-                Modifiers.scale(timePreempt, approachCircle.getScaleX(), scale, e -> e.setAlpha(0), easing)
-            );
+                return Unit.INSTANCE;
+            });
         }
 
         if (Config.isDimHitObjects() && circlePiece.isVisible()) {
-
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = timePreempt - (float) HitWindow.MISS_WINDOW / 1000;
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);
-            circlePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    circlePiece.getRed(), 1f,
-                    circlePiece.getGreen(), 1f,
-                    circlePiece.getBlue(), 1f
-                )
-            ));
+            circlePiece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000, sequence -> {
+                sequence.colorTo(1, 1, 1, 0.1f);
+
+                return Unit.INSTANCE;
+            });
         }
 
         // Initialize samples
@@ -165,10 +171,7 @@ public class GameplayHitCircle extends GameObject {
             hitSamples.add(gameplaySample);
         }
 
-        scene.attachChild(circlePiece, 0);
-        scene.attachChild(approachCircle);
-
-        setLifetimeEnd(hitTime + (float) beatmapCircle.hitWindow.getMehWindow() / 1000);
+        setLifetimeEnd(hitTime + mehWindow);
     }
 
     private void removeFromScene() {
@@ -192,9 +195,7 @@ public class GameplayHitCircle extends GameObject {
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
             circlePiece.detachSelf();
         } else {
-            var fadeOutModifier = Modifiers.alpha(0.1f, circlePiece.getAlpha(), 0, e -> Execution.updateThread(e::detachSelf));
-
-            circlePiece.registerEntityModifier(fadeOutModifier);
+            var fadeOutModifier = circlePiece.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf));
             extendLifetime(hitTime + passedTime, fadeOutModifier);
         }
 

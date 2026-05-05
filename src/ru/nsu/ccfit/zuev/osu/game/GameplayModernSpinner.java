@@ -2,14 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 
+import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -66,12 +66,13 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     @Override
-    public void init(final GameObjectListener listener, final Scene scene,
+    public void init(final GameObjectListener listener, final UIScene scene,
                      final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
         this.stat = stat;
+        hitTime = (float) beatmapSpinner.startTime / 1000;
         duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
         needRotations = rps * duration;
 
@@ -94,15 +95,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         boolean isBackgroundVisible = (!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        middle.setVisible(isBackgroundVisible);
-        if (middle.isVisible()) {
-            middle.setAlpha(0f);
+        if (isBackgroundVisible) {
+            middle.setAlpha(0);
             middle.setScale(0.9f);
-        }
-
-        middle2.setVisible(isBackgroundVisible);
-        if (middle2.isVisible()) {
-            middle2.setAlpha(0f);
+            middle2.setAlpha(0);
             middle2.setScale(0.9f);
         }
 
@@ -115,18 +111,34 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.attachChild(glow);
         scene.attachChild(bottom);
         scene.attachChild(top);
-        scene.attachChild(middle);
-        scene.attachChild(middle2);
+
+        if (isBackgroundVisible) {
+            scene.attachChild(middle);
+            scene.attachChild(middle2);
+        }
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
         passedTime = -timePreempt;
 
-        top.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+        fadeIn(top);
+        fadeIn(bottom);
+
+        if (isBackgroundVisible) {
+            fadeIn(middle);
+            fadeIn(middle2);
+        }
 
         setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+    }
+
+    private void fadeIn(UISprite sprite) {
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+
+        sprite.beginAbsoluteSequence(hitTime - timePreempt, sequence -> {
+            sequence.fadeIn(timePreempt);
+
+            return Unit.INSTANCE;
+        });
     }
 
     @Override
@@ -250,12 +262,17 @@ public class GameplayModernSpinner extends GameplaySpinner {
                     scene.attachChild(bonusScore);
                 }
                 spinnerBonusSample.play();
-                glow.registerEntityModifier(
-                    Modifiers.sequence(
-                        Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        Modifiers.color(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
-                    )
-                );
+
+                glow.beginModifierSequence(sequence -> {
+                    sequence.colorTo(0, 1, 0.8f)
+                            .colorTo(1, 1, 1, 0.1f)
+                            .then()
+                            .colorTo(1, 0, 1)
+                            .colorTo(0.8f, 1, 1, 0.1f);
+
+                    return Unit.INSTANCE;
+                });
+
                 float rate = 0.375f;
                 if (GameHelper.getHealthDrain() > 0) {
                     rate = 1 + (GameHelper.getHealthDrain() / 4f);

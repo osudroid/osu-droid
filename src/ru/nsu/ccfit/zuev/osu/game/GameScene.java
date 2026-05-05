@@ -39,7 +39,6 @@ import com.reco1l.andengine.shape.PaintStyle;
 import com.reco1l.andengine.shape.UIBox;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UIVideoSprite;
 import com.reco1l.andengine.UIScene;
@@ -1170,18 +1169,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             icon.setPosition(position.x, position.y);
             icon.setOrigin(Anchor.Center);
             icon.setSize(68, 66);
-            icon.setScale(scale);
-            icon.registerEntityModifier(Modifiers.sequence(
-                IEntity::detachSelf,
-                Modifiers.scale(0.25f, 1.2f, 1f),
-                Modifiers.delay(2f - timeOffset),
-                Modifiers.parallel(
-                    Modifiers.fadeOut(0.5f),
-                    Modifiers.scale(0.5f, 1f, 1.5f)
-                )
-            ));
+            icon.setScale(1.2f);
 
             fgScene.attachChild(icon);
+
+            float finalTimeOffset = timeOffset;
+
+            icon.beginModifierSequence(sequence -> {
+                sequence.scaleTo(1, 0.25f)
+                        .delay(2 - finalTimeOffset)
+                        .fadeOut(0.5f)
+                        .scaleTo(1.5f, 0.5f);
+
+                return Unit.INSTANCE;
+            });
 
             position.x -= 25f;
             timeOffset += 0.25f;
@@ -1759,15 +1760,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ++objectIndex;
 
             if (unrankedSprite != null) {
-                unrankedSprite.registerEntityModifier(
-                    Modifiers.sequence(IEntity::detachSelf,
-                        Modifiers.delay(1.5f - elapsedTime),
-                        Modifiers.parallel(
-                            Modifiers.scale(0.5f, 1, 1.5f),
-                            Modifiers.fadeOut(0.5f)
-                        )
-                    )
-                );
+                unrankedSprite.beginAbsoluteSequence(1.5f, sequence -> {
+                    sequence.scaleTo(1.5f, 0.5f)
+                            .fadeOut(0.5f);
+
+                    return Unit.INSTANCE;
+                });
 
                 // Make it null to avoid multiple entity modifier registration
                 unrankedSprite = null;
@@ -1852,7 +1850,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
-                FollowPointConnection.addConnection(bgScene, elapsedTime, obj, nextObj);
+                FollowPointConnection.addConnection(bgScene, obj, nextObj);
             }
         }
 
@@ -2480,11 +2478,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     scene,
                     pos,
                     scale,
-                    Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f),
-                        Modifiers.delay(0.35f),
-                        Modifiers.fadeOut(0.25f)
-                    )
+                    sequence -> sequence.fadeIn(0.15f)
+                            .then(0.35f)
+                            .fadeOut(0.25f)
             );
             registerHit(id, 0, endCombo);
             return;
@@ -2918,15 +2914,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
-        var fadeInLength = 0.12f;
-        var fadeOutLength = 0.6f;
-        var fadeOutDelay = 0.5f;
-
-        var fadeSequence = Modifiers.sequence(
-            Modifiers.fadeIn(fadeInLength),
-            Modifiers.delay(fadeOutDelay),
-            Modifiers.fadeOut(fadeOutLength)
-        );
+        float fadeInLength = 0.12f;
+        float fadeOutLength = 0.6f;
+        float fadeOutDelay = 0.5f;
 
         if (name.equals("hit0")) {
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
@@ -2937,20 +2927,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     mgScene,
                     pos,
                     scale,
-                    fadeSequence
+                    sequence -> sequence.fadeIn(fadeInLength)
+                            .then(fadeOutDelay)
+                            .fadeOut(fadeOutLength)
                 );
             } else {
                 effect.init(
                     mgScene,
                     pos,
                     scale * 1.6f,
-                    fadeSequence,
-                    Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
-                    Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
-                    Modifiers.sequence(
-                        Modifiers.rotation(fadeInLength, 0, rotation),
-                        Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
-                    )
+                    sequence -> sequence.fadeIn(fadeInLength)
+                            .then(fadeOutDelay)
+                            .fadeOut(fadeOutLength),
+                    sequence -> sequence.scaleTo(scale, 0.1f, Easing.InQuad)
+                            .translateToY(-5)
+                            .translateToY(-80, fadeOutDelay + fadeOutLength, Easing.InQuad),
+                    sequence -> sequence.rotateTo(0)
+                            .rotateTo(rotation, fadeInLength)
+                            .then()
+                            .rotateTo(rotation * 2, fadeOutDelay + fadeOutLength - fadeInLength, Easing.InQuad)
                 );
             }
 
@@ -2968,12 +2963,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 bgScene,
                 pos,
                 scale * 0.8f,
-                Modifiers.scale(0.6f, scale * 0.8f, scale * 1.2f, null, Easing.OutQuad),
-                Modifiers.sequence(
-                    Modifiers.fadeIn(0.2f),
-                    Modifiers.delay(0.2f),
-                    Modifiers.fadeOut(1f)
-                )
+                sequence -> sequence.scaleTo(scale * 1.2f, 0.6f, Easing.OutQuad),
+                sequence -> sequence.fadeIn(0.2f).then().fadeOut(1f)
             );
         }
 
@@ -2983,24 +2974,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 mgScene,
                 pos,
                 scale,
-                fadeSequence
+                sequence -> sequence.fadeIn(fadeInLength).then(fadeOutDelay).fadeOut(fadeOutLength)
             );
         } else {
             effect.init(
                 mgScene,
                 pos,
                 scale * 0.6f,
-                fadeSequence,
-                Modifiers.sequence(
-                    Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
-                    Modifiers.delay(fadeInLength * 0.2f),
-                    Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+                sequence -> sequence.fadeIn(fadeInLength).then(fadeOutDelay).fadeOut(fadeOutLength),
+                sequence -> sequence
+                        .scaleTo(scale * 1.1f, fadeInLength * 0.8f) // t = 0.8
+                        .then(fadeInLength * 0.2f) // t = 1.0
+                        .scaleTo(scale * 0.9f, fadeInLength * 0.2f) // t = 1.2
 
-                    // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
-                    // so we need to force the current value to be correct at 1.2 (0.95) then complete the
-                    // second half of the transform.
-                    Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
-                )
+                        // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                        // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                        // second half of the transform.
+                        .scaleTo(scale * 0.95f).scaleTo(scale, fadeInLength * 0.2f) // t = 1.4
             );
         }
     }
@@ -3012,8 +3002,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var fadeDuration = 0.24f;
 
         effect.init(mgScene, pos, scale,
-            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, Easing.OutQuad),
-            Modifiers.fadeOut(fadeDuration)
+                sequence -> sequence
+                        .scaleTo(scale * 1.4f, fadeDuration, Easing.OutQuad)
+                        .fadeOut(fadeDuration)
         );
     }
 

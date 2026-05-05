@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
+import com.reco1l.andengine.component.UIComponent;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.scene.Scene;
@@ -10,7 +12,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
-public class CursorEntity extends Entity {
+public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
     private CursorTrail trail = null;
     private PointParticleEmitter emitter = null;
