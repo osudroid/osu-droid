@@ -4,6 +4,8 @@ import com.reco1l.andengine.component.*
 
 /**
  * The type of the [UniversalModifier].
+ *
+ * @author Reco1I, Rian8337
  */
 enum class ModifierType {
     None,

@@ -20,6 +20,9 @@ import org.anddev.andengine.util.modifier.IModifier
  * Unlike regular [IEntityModifier]s, which rely on relative timing from the frame it is registered, [UniversalModifier]
  * uses absolute timing from the [target]'s [IClock] to determine when it should run, effectively removing the need of
  * delay, parallel, and sequence modifiers.
+ *
+ * @see ModifierType
+ * @author Reco1l, Rian8337
  */
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) :
     IEntityModifier, IPoolable {
