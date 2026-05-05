@@ -438,11 +438,17 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         /**
          * Obtains a [UniversalModifierSequence] from the pool or creates a new one if it is not available.
+         *
+         * @param origin The [UIComponent] that this [UniversalModifierSequence] will be applied to. If `null`, this can
+         * be set later by calling [init] on the obtained [UniversalModifierSequence].
+         * @return A [UniversalModifierSequence] instance.
          */
         @JvmStatic
         @JvmOverloads
         fun obtain(origin: UIComponent? = null) = (pool.acquire() ?: UniversalModifierSequence()).apply {
-            this.origin = origin
+            if (origin != null) {
+                init(origin)
+            }
         }
     }
 
