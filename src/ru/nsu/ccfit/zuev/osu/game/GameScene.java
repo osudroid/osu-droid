@@ -342,11 +342,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        // Create and assign a framed beatmap clock early so that UIComponents and UniversalModifiers
-        // receive the correct clock when they are attached. The audio source will be attached later in start().
+        // Create and assign a framed beatmap clock early so that UIComponents and UniversalModifiers receive
+        // the correct clock when they are attached. The audio source will be attached later in start().
         try {
-            this.beatmapClock = new FramedBeatmapClock(true, false, null);
-            scene.setClock(this.beatmapClock);
+            beatmapClock = new FramedBeatmapClock(true, false, null);
+            scene.setClock(beatmapClock);
         } catch (Exception e) {
             Log.w("GameScene", "Failed to create framed beatmap clock in constructor: " + e.getMessage());
         }
@@ -1401,18 +1401,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Hook up the framed beatmap clock as the scene's clock. Use the SongService as the audio source.
         try {
             var songService = GlobalManager.getInstance().getSongService();
+
             if (songService != null) {
                 var songClock = new SongServiceClock(songService);
-                if (this.beatmapClock != null) {
-                    this.beatmapClock.changeSource(songClock);
-                    this.beatmapClock.setUserGlobalOffset(globalOffsetSec);
-                    this.beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+
+                if (beatmapClock != null) {
+                    beatmapClock.changeSource(songClock);
+                    beatmapClock.setUserGlobalOffset(globalOffsetSec);
+                    beatmapClock.setBeatmapOffset(beatmapOffsetSec);
                 } else {
-                    // Fallback: create and assign if constructor-based assignment failed earlier.
-                    this.beatmapClock = new FramedBeatmapClock(true, false, songClock);
-                    this.beatmapClock.setUserGlobalOffset(globalOffsetSec);
-                    this.beatmapClock.setBeatmapOffset(beatmapOffsetSec);
-                    scene.setClock(this.beatmapClock);
+                    beatmapClock = new FramedBeatmapClock(true, false, songClock);
+                    beatmapClock.setUserGlobalOffset(globalOffsetSec);
+                    beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+                    scene.setClock(beatmapClock);
                 }
             }
         } catch (Exception e) {
