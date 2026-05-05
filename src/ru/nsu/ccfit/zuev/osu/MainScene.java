@@ -16,6 +16,7 @@ import com.edlplan.framework.easing.Easing;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.shape.UIBox;
 import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.ui.BannerManager;
@@ -46,7 +47,6 @@ import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
 import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
 import org.anddev.andengine.entity.particle.modifier.ScaleModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -91,7 +91,7 @@ public class MainScene implements IUpdateHandler {
     private Context context;
     private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
-    private Scene scene;
+    private UIScene scene;
     private ChangeableText musicInfoText;
     private final Rectangle[] spectrum = new Rectangle[120];
     private final float[] peakLevel = new float[120];
@@ -129,8 +129,7 @@ public class MainScene implements IUpdateHandler {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
         VibratorManager.INSTANCE.init(context);
-        scene = new Scene();
-        scene.setOnAreaTouchTraversalFrontToBack();
+        scene = new UIScene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
 
@@ -522,7 +521,7 @@ public class MainScene implements IUpdateHandler {
         }
     }
 
-    private void createOnlinePanel(Scene scene) {
+    private void createOnlinePanel(UIScene scene) {
         Config.loadOnlineConfig(context);
         OnlineManager.getInstance().init();
 
@@ -995,7 +994,7 @@ public class MainScene implements IUpdateHandler {
         }, 3000, TimeUnit.MILLISECONDS);
     }
 
-    public Scene getScene() {
+    public UIScene getScene() {
         return scene;
     }
 
