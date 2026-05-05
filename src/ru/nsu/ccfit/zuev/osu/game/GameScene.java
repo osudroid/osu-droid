@@ -12,6 +12,8 @@ import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
+import com.rian.andengine.timing.SongServiceClock;
+import com.rian.andengine.timing.FramedBeatmapClock;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.acivev.VibratorManager;
@@ -174,6 +176,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
+    private FramedBeatmapClock beatmapClock;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
     private UISprite skipBtn;
@@ -339,6 +342,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
+        // Create and assign a framed beatmap clock early so that UIComponents and UniversalModifiers
+        // receive the correct clock when they are attached. The audio source will be attached later in start().
+        try {
+            this.beatmapClock = new FramedBeatmapClock(true, false, null);
+            scene.setClock(this.beatmapClock);
+        } catch (Exception e) {
+            Log.w("GameScene", "Failed to create framed beatmap clock in constructor: " + e.getMessage());
+        }
     }
 
     public void setScoringScene(final ScoringScene sc) {
@@ -1346,6 +1357,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             totalOffset += props.getOffset();
         }
 
+        // Split global and per-beatmap offsets so we can apply them to the framed beatmap clock.
+        float globalOffsetSec = (float) Config.getOffset() / 1000f;
+        float beatmapOffsetSec = props != null ? (float) props.getOffset() / 1000f : 0f;
+
         totalOffset /= 1000;
 
         // Ensure user-defined offset has time to be applied.
@@ -1382,6 +1397,27 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         engine.setScene(scene);
         engine.getOverlay().attachChild(hud, 0);
+
+        // Hook up the framed beatmap clock as the scene's clock. Use the SongService as the audio source.
+        try {
+            var songService = GlobalManager.getInstance().getSongService();
+            if (songService != null) {
+                var songClock = new SongServiceClock(songService);
+                if (this.beatmapClock != null) {
+                    this.beatmapClock.changeSource(songClock);
+                    this.beatmapClock.setUserGlobalOffset(globalOffsetSec);
+                    this.beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+                } else {
+                    // Fallback: create and assign if constructor-based assignment failed earlier.
+                    this.beatmapClock = new FramedBeatmapClock(true, false, songClock);
+                    this.beatmapClock.setUserGlobalOffset(globalOffsetSec);
+                    this.beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+                    scene.setClock(this.beatmapClock);
+                }
+            }
+        } catch (Exception e) {
+            Log.w("GameScene", "Failed to create framed beatmap clock: " + e.getMessage());
+        }
 
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
@@ -1736,8 +1772,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 // start and the game start.
                 var songService = GlobalManager.getInstance().getSongService();
 
-                songService.play();
-                songService.setVolume(Config.getBgmVolume());
+                if (beatmapClock != null) {
+                    beatmapClock.start();
+                } else if (songService != null) {
+                    songService.play();
+                }
+
+                if (songService != null) {
+                    songService.setVolume(Config.getBgmVolume());
+                }
             });
         }
 
@@ -2072,12 +2115,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var songService = GlobalManager.getInstance().getSongService();
 
             if (elapsedTime >= getRateAdjustedOffset() && !musicStarted) {
-                songService.play();
-                songService.setVolume(Config.getBgmVolume());
+                if (beatmapClock != null) {
+                    beatmapClock.start();
+                } else if (songService != null) {
+                    songService.play();
+                }
+                if (songService != null) songService.setVolume(Config.getBgmVolume());
                 musicStarted = true;
             }
 
-            songService.seekTo(musicSeekTime);
+            if (beatmapClock != null) {
+                // musicSeekTime is ms position for audio. Convert to seconds and add total applied offsets so that
+                // underlying audio receives the same absolute seek target as before.
+                beatmapClock.seek(musicSeekTime / 1000f + beatmapClock.getTotalAppliedOffset());
+            } else if (songService != null) {
+                songService.seekTo(musicSeekTime);
+            }
 
             if (videoEnabled && video != null) {
                 video.seekTo(videoSeekTime);
@@ -2733,7 +2786,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             removeAllCursors();
         }
 
-        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
+        if (beatmapClock != null) {
+            beatmapClock.stop();
+        } else if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
@@ -2770,7 +2825,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (video != null) {
                 video.pause();
             }
-            songService.pause();
+            if (beatmapClock != null) {
+                beatmapClock.stop();
+            } else {
+                songService.pause();
+            }
             paused = true;
             scene.setIgnoreUpdate(true);
             return;
@@ -2858,7 +2917,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     // Ensure music frequency is reset back to what it was.
                     songService.setFrequencyForcefully(initialFrequency);
 
-                    if (songService.getStatus() == Status.PLAYING) {
+                    if (beatmapClock != null) {
+                        beatmapClock.stop();
+                    } else if (songService.getStatus() == Status.PLAYING) {
                         songService.pause();
                     }
 
@@ -2896,10 +2957,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.play();
         }
 
-        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && elapsedTime > 0) {
-            GlobalManager.getInstance().getSongService().play();
-            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-            totalLength = GlobalManager.getInstance().getSongService().getLength();
+        var songService = GlobalManager.getInstance().getSongService();
+        if (beatmapClock != null) {
+            if (!beatmapClock.isRunning() && elapsedTime > 0) {
+                beatmapClock.start();
+            }
+
+            if (songService != null) {
+                songService.setVolume(Config.getBgmVolume());
+                totalLength = songService.getLength();
+            }
+        } else if (songService != null && songService.getStatus() != Status.PLAYING && elapsedTime > 0) {
+            songService.play();
+            songService.setVolume(Config.getBgmVolume());
+            totalLength = songService.getLength();
         }
     }
 
