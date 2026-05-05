@@ -54,7 +54,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * The time at which this [UniversalModifier] ends, in seconds relative to [target]'s [IClock].
      */
-    val endTime: Float
+    val endTime
         get() = startTime + duration
 
     /**
