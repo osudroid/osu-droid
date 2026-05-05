@@ -3,6 +3,7 @@ package com.reco1l.andengine
 import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.FramedClock
 import com.rian.andengine.timing.IFrameBasedClock
 import com.rian.andengine.timing.StopwatchClock
@@ -25,6 +26,16 @@ open class UIScene : Scene(), IShape {
      * The clock of this [UIScene].
      */
     var clock: IFrameBasedClock = FramedClock(StopwatchClock(true))
+        set(value) {
+            field = value
+            updateClock(value)
+        }
+
+    /**
+     * The current frame's time as observed by this [UIScene]'s [clock].
+     */
+    val time
+        get() = clock.timeInfo
 
     /**
      * Whether this [UIScene] should clip its children.
@@ -58,6 +69,12 @@ open class UIScene : Scene(), IShape {
         onUpdateTick?.invoke(clock.elapsedFrameTime)
 
         super.onManagedUpdate(clock.elapsedFrameTime)
+    }
+
+    protected open fun updateClock(clock: IFrameBasedClock) {
+        mChildren?.fastForEach {
+            (it as? UIComponent)?.updateClock(clock)
+        }
     }
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
