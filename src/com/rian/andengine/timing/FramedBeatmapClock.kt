@@ -13,14 +13,14 @@ class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requir
     private val decoupledTrack = DecouplingFramedClock(source).apply { allowDecoupling = requireDecoupling }
     private val interpolatedTrack = InterpolatingFramedClock(decoupledTrack).apply { driftRecoveryHalfLife = 0.08f }
 
-    private val userGlobalOffsetClock: FramedOffsetClock?
+    private val userGlobalOffsetClock: OffsetCorrectionClock?
     private val userBeatmapOffsetClock: FramedOffsetClock?
 
     private val finalClockSource: IFrameBasedClock
 
     init {
         if (applyOffsets) {
-            val global = FramedOffsetClock(interpolatedTrack)
+            val global = OffsetCorrectionClock(interpolatedTrack)
             val beatmap = FramedOffsetClock(global)
 
             userGlobalOffsetClock = global
@@ -33,21 +33,29 @@ class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requir
         }
     }
 
-    // Expose offsets (seconds)
-    var userGlobalOffset: Float
+    /**
+     * The offset applied globally to all beatmaps, set via settings.
+     */
+    var userGlobalOffset
         get() = userGlobalOffsetClock?.offset ?: 0f
         set(value) {
             userGlobalOffsetClock?.offset = value
         }
 
-    var beatmapOffset: Float
+    /**
+     * The offset applied to the current beatmap, set via beatmap options.
+     */
+    var userBeatmapOffset
         get() = userBeatmapOffsetClock?.offset ?: 0f
         set(value) {
             userBeatmapOffsetClock?.offset = value
         }
 
-    val totalAppliedOffset: Float
-        get() = (userGlobalOffsetClock?.offset ?: 0f) + (userBeatmapOffsetClock?.offset ?: 0f)
+    /**
+     * The sum of applied offsets (global + beatmap).
+     */
+    val totalAppliedOffset
+        get() = (userGlobalOffsetClock?.rateAdjustedOffset ?: 0f) + (userBeatmapOffsetClock?.offset ?: 0f)
 
     // IFrameBasedClock delegations to the final clock with offsets applied
     override val timeInfo by finalClockSource::timeInfo
@@ -79,6 +87,7 @@ class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requir
     override fun seek(position: Float): Boolean {
         val success = decoupledTrack.seek(position - totalAppliedOffset)
         finalClockSource.processFrame()
+
         return success
     }
 
