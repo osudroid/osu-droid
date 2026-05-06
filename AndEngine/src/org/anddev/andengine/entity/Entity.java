@@ -996,11 +996,13 @@ public class Entity implements IEntity {
 	// END osu!droid modified
 
 	@Override
-	public final void onUpdate(final float pSecondsElapsed) {
+	// BEGIN osu!droid modified: Make this method overrideable.
+	public /*final*/ void onUpdate(final float pSecondsElapsed) {
 		if(!this.mIgnoreUpdate) {
 			this.onManagedUpdate(pSecondsElapsed);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public void reset() {
