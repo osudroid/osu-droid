@@ -3,12 +3,12 @@ package com.rian.andengine.timing
 /**
  * A [FramedClock] which allows an offset to be added or subtracted from an underlying source [IClock]'s time.
  */
-class FramedOffsetClock @JvmOverloads constructor(source: IClock?, processSource: Boolean = true) :
+open class FramedOffsetClock @JvmOverloads constructor(source: IClock?, processSource: Boolean = true) :
     FramedClock(source, processSource) {
     /**
      * The offset to be applied.
      */
-    var offset = 0f
+    open var offset = 0f
         set(value) {
             lastFrameTime += value - field
             field = value
