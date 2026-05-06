@@ -1,6 +1,6 @@
 package com.reco1l.andengine.sprite
 
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 

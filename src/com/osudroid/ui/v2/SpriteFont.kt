@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2
 
 import com.reco1l.andengine.text.UITextureText
-import org.anddev.andengine.opengl.texture.region.TextureRegion
+import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import com.osudroid.ui.skinning.StringSkinData
 

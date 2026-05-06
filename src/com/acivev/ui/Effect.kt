@@ -1,21 +1,21 @@
 package com.acivev.ui
 
 import android.content.Context
+import android.opengl.GLES20
 import com.acivev.utils.DevicePerformanceUtil
-import org.anddev.andengine.engine.handler.timer.TimerHandler
-import org.anddev.andengine.entity.particle.ParticleSystem
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter
-import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer
-import org.anddev.andengine.entity.particle.initializer.RotationInitializer
-import org.anddev.andengine.entity.particle.initializer.VelocityInitializer
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier
-import org.anddev.andengine.entity.particle.modifier.ScaleModifier
-import org.anddev.andengine.entity.scene.Scene
+import org.andengine.engine.handler.timer.TimerHandler
+import org.andengine.entity.particle.SpriteParticleSystem
+import org.andengine.entity.particle.emitter.PointParticleEmitter
+import org.andengine.entity.particle.initializer.AccelerationParticleInitializer
+import org.andengine.entity.particle.initializer.RotationParticleInitializer
+import org.andengine.entity.particle.initializer.VelocityParticleInitializer
+import org.andengine.entity.particle.modifier.AlphaParticleModifier
+import org.andengine.entity.particle.modifier.ExpireParticleInitializer
+import org.andengine.entity.particle.modifier.ScaleParticleModifier
+import org.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import java.util.Calendar
-import javax.microedition.khronos.opengles.GL10
 
 fun addSnowfall(scene: Scene, context: Context) {
     val snowflakeTextures = ResourceManager.getInstance().loadHighQualityAsset("snow", "snow.png")
@@ -23,39 +23,44 @@ fun addSnowfall(scene: Scene, context: Context) {
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 15 else 75
 
-    val snowParticleSystem = ParticleSystem(
-        PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),  // Emitter at the top center
-        10f, 15f, maxParticles,  // Min rate, max rate, max particles
-        snowflakeTextures
+    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
+
+    val snowParticleSystem = SpriteParticleSystem(
+        PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),
+        10f, 15f, maxParticles,
+        snowflakeTextures,
+        engine.vertexBufferObjectManager
     ).also { particleSystem ->
 
         // Random horizontal position across the screen
         particleSystem.addParticleInitializer { particle ->
-            particle.setPosition(
+            particle.entity.setPosition(
                 Math.random().toFloat() * Config.getRES_WIDTH(), 0f
             )
-
         }
 
         // Random horizontal and vertical speed
-        particleSystem.addParticleInitializer(VelocityInitializer(-50f, 50f, 100f, 300f))
+        particleSystem.addParticleInitializer(VelocityParticleInitializer(-50f, 50f, 100f, 300f))
 
         // Gravity effect
-        particleSystem.addParticleInitializer(AccelerationInitializer(0f, 10f))
+        particleSystem.addParticleInitializer(AccelerationParticleInitializer(0f, 10f))
 
         // Random rotation
-        particleSystem.addParticleInitializer(RotationInitializer(0.0f, 360.0f))
+        particleSystem.addParticleInitializer(RotationParticleInitializer(0.0f, 360.0f))
 
         // Random size from .2 to .8
-        particleSystem.addParticleModifier(ScaleModifier(0.2f, .8f, 0.0f, 1.0f))
+        particleSystem.addParticleModifier(ScaleParticleModifier(0.2f, .8f, 0.0f, 1.0f))
 
         // Fade out
-        particleSystem.addParticleModifier(AlphaModifier(1.0f, 0.0f, 0.0f, 4.0f))
+        particleSystem.addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0.0f, 4.0f))
 
         // Random lifetime between 1 to 7 seconds
-        particleSystem.addParticleModifier(ExpireModifier(1.0f, 7.0f))
+        particleSystem.addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(1.0f, 7.0f))
 
-        particleSystem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA)
+        particleSystem.addParticleInitializer { particle ->
+            particle.entity.setBlendingEnabled(true)
+            particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        }
         particleSystem.isParticlesSpawnEnabled = true
     }
     scene.attachChild(snowParticleSystem)
@@ -72,93 +77,81 @@ fun addFireworks(scene: Scene, context: Context) {
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 10 else 25
 
+    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
+
     fun launchSingleFirework() {
-        // Random launch position along bottom of screen
         val launchX = (Math.random().toFloat() * Config.getRES_WIDTH() * 0.9f) + (Config.getRES_WIDTH() * 0.05f)
         val launchY = Config.getRES_HEIGHT() * 0.9f
-
-        // Explosion height (top area)
         val explosionY = Config.getRES_HEIGHT() * 0.2f
 
-        // Trail effect
-        val trailSystem = ParticleSystem(
+        val trailSystem = SpriteParticleSystem(
             PointParticleEmitter(launchX, launchY),
             2f, 5f, 10,
-            rocketTexture
+            rocketTexture,
+            engine.vertexBufferObjectManager
         ).apply {
-
-            // Random horizontal and vertical speed
-            addParticleInitializer(VelocityInitializer(-20f, 20f, -800f, -600f))
-
-            // Random size from .8 to .3
-            addParticleModifier(ScaleModifier(0.8f, 0.3f, 0f, 0.5f))
-
-            // Fade out
-            addParticleModifier(AlphaModifier(1.0f, 0.0f, 0f, 0.5f))
-
-            // Random lifetime between .3 to .6 seconds
-            addParticleModifier(ExpireModifier(0.3f, 0.6f))
-
-            setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE)
+            addParticleInitializer(VelocityParticleInitializer(-20f, 20f, -800f, -600f))
+            addParticleModifier(ScaleParticleModifier(0.8f, 0.3f, 0f, 0.5f))
+            addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0f, 0.5f))
+            addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.3f, 0.6f))
+            addParticleInitializer { particle ->
+                particle.entity.setBlendingEnabled(true)
+                particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+            }
             isParticlesSpawnEnabled = true
         }
 
-        // Explosion effect (burst at top)
         scene.registerUpdateHandler(TimerHandler(0.8f) {
             trailSystem.isParticlesSpawnEnabled = false
 
             val randomExplosionTexture = explosionTextures.random()
 
-            val explosionSystem = ParticleSystem(
+            val explosionSystem = SpriteParticleSystem(
                 PointParticleEmitter(launchX, explosionY),
                 maxParticles.toFloat(), maxParticles.toFloat(), maxParticles,
-                randomExplosionTexture
+                randomExplosionTexture,
+                engine.vertexBufferObjectManager
             ).apply {
-                addParticleInitializer(VelocityInitializer(-400f, 400f, -400f, 400f))
-                addParticleInitializer(AccelerationInitializer(-50f, 50f))
+                addParticleInitializer(VelocityParticleInitializer(-400f, 400f, -400f, 400f))
+                addParticleInitializer(AccelerationParticleInitializer(-50f, 50f))
 
-                // Add random color initializer
                 addParticleInitializer { particle ->
                     val colors = listOf(
-                        Triple(1.0f, 0.84f, 0.0f),   // Gold
-                        Triple(1.0f, 0.0f, 0.0f),    // Red
-                        Triple(0.0f, 0.5f, 1.0f),    // Blue
-                        Triple(0.0f, 1.0f, 0.0f),    // Green
-                        Triple(0.8f, 0.0f, 1.0f),    // Purple
-                        Triple(1.0f, 0.5f, 0.0f),    // Orange
-                        Triple(1.0f, 1.0f, 1.0f)     // White
+                        Triple(1.0f, 0.84f, 0.0f),
+                        Triple(1.0f, 0.0f, 0.0f),
+                        Triple(0.0f, 0.5f, 1.0f),
+                        Triple(0.0f, 1.0f, 0.0f),
+                        Triple(0.8f, 0.0f, 1.0f),
+                        Triple(1.0f, 0.5f, 0.0f),
+                        Triple(1.0f, 1.0f, 1.0f)
                     )
                     val randomColor = colors.random()
-                    particle.setColor(randomColor.first, randomColor.second, randomColor.third)
+                    particle.entity.setColor(randomColor.first, randomColor.second, randomColor.third)
                 }
 
-                addParticleModifier(ScaleModifier(0.6f, 0.1f, 0f, 1.2f))
-                addParticleModifier(AlphaModifier(1.0f, 0.0f, 0.3f, 1.2f))
-                addParticleModifier(ExpireModifier(0.8f, 1.5f))
-                setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE)
+                addParticleModifier(ScaleParticleModifier(0.6f, 0.1f, 0f, 1.2f))
+                addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0.3f, 1.2f))
+                addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.8f, 1.5f))
+                addParticleInitializer { particle ->
+                    particle.entity.setBlendingEnabled(true)
+                    particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+                }
                 isParticlesSpawnEnabled = true
             }
 
-            scene.attachChild(explosionSystem, 1)
+            scene.attachChild(explosionSystem)
 
-            scene.registerUpdateHandler(
-                TimerHandler(
-                    2.0f
-                ) {
-                    scene.detachChild(trailSystem)
-                    scene.detachChild(explosionSystem)
-                }
-            )
+            scene.registerUpdateHandler(TimerHandler(2.0f) {
+                scene.detachChild(trailSystem)
+                scene.detachChild(explosionSystem)
+            })
         })
 
-        //I intentionally want the trail to be visible, so that it is visible before the logo.
         scene.attachChild(trailSystem)
     }
 
     fun scheduleNextFirework() {
-        // Random delay between 1.5 and 4 seconds
         val randomDelay = 1.5f + Math.random().toFloat() * 2.5f
-
         scene.registerUpdateHandler(TimerHandler(randomDelay) {
             launchSingleFirework()
             scheduleNextFirework()

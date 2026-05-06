@@ -231,19 +231,20 @@ class LobbyScene : UIScene() {
 
             isFetching = false
         }) {
+            updateThread {
+                messageContainer.apply {
+                    detachChildren()
 
-            messageContainer.apply {
-                detachChildren()
-
-                +CircularProgressBar().apply {
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    size = Vec2(48f, 48f)
+                    +CircularProgressBar().apply {
+                        anchor = Anchor.Center
+                        origin = Anchor.Center
+                        size = Vec2(48f, 48f)
+                    }
                 }
-            }
 
-            switchContainers(messageContainer)
-            roomContainer.detachChildren()
+                switchContainers(messageContainer)
+                roomContainer.detachChildren()
+            }
 
             val list = LobbyAPI.getRooms(
                 query = searchQuery,

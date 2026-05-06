@@ -7,7 +7,7 @@ import com.edlplan.framework.utils.BooleanRef;
 import com.edlplan.framework.utils.FloatRef;
 import com.edlplan.framework.utils.Vec2Ref;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 public class FlippableTextureQuad extends ATextureQuad {
 
@@ -71,10 +71,10 @@ public class FlippableTextureQuad extends ATextureQuad {
     public void setTextureAndSize(TextureRegion texture) {
         this.texture = texture;
         size.set(texture.getWidth(), texture.getHeight());
-        u1 = texture.getTextureCoordinateX1();
-        u2 = texture.getTextureCoordinateX2();
-        v1 = texture.getTextureCoordinateY1();
-        v2 = texture.getTextureCoordinateY2();
+        u1 = texture.getU();
+        u2 = texture.getU2();
+        v1 = texture.getV();
+        v2 = texture.getV2();
     }
 
     public void setBaseWidth(float width) {

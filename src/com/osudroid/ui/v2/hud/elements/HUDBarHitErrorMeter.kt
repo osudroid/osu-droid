@@ -7,8 +7,8 @@ import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.constants.HitObjectType
-import org.anddev.andengine.engine.camera.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.engine.camera.Camera
+import org.andengine.opengl.util.GLState
 import kotlin.math.abs
 
 class HUDBarHitErrorMeter : HUDHitErrorMeter() {
@@ -97,14 +97,24 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
     //region Indicator update & draw
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
-        super.onDrawChildren(gl, camera)
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+        super.onManagedDraw(pGLState, pCamera)
+
+        if (activeIndicators.isEmpty()) return
+
+        // After super.onManagedDraw() the matrix has been popped; re-push our translation
+        // so that indicatorBox draws in this element's local coordinate space.
+        pGLState.pushModelViewGLMatrix()
+        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
+
         activeIndicators.fastForEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(gl, camera)
+            indicatorBox.onDraw(pGLState, pCamera)
         }
+
+        pGLState.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

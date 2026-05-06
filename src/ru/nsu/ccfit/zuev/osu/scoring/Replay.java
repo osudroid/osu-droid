@@ -17,7 +17,7 @@ import com.rian.osu.mods.ModReplayV6;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.EOFException;
 import java.io.File;

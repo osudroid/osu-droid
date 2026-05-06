@@ -2,7 +2,7 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.framework.math.line.LinePath;
 
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.Scene;
 
 public abstract class AbstractSliderBody {
 

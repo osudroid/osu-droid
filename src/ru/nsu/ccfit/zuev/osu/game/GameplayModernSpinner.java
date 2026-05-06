@@ -7,8 +7,8 @@ import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.scene.Scene;
+import org.andengine.util.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -127,6 +127,18 @@ public class GameplayModernSpinner extends GameplaySpinner {
         middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
 
         setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+    }
+
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(glow, dt);
+        updateAfterInit(bottom, dt);
+        updateAfterInit(top, dt);
+        updateAfterInit(middle, dt);
+        updateAfterInit(middle2, dt);
+
+        super.updateAfterInit(dt);
     }
 
     @Override
@@ -271,6 +283,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     public void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         middle.clearEntityModifiers();
         scene.detachChild(middle);
 
@@ -287,6 +303,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.detachChild(glow);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {

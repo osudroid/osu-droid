@@ -7,11 +7,11 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.rian.osu.math.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.*
-import org.anddev.andengine.input.touch.*
-import org.anddev.andengine.input.touch.TouchEvent.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.engine.camera.*
+import org.andengine.entity.*
+import org.andengine.input.touch.*
+import org.andengine.input.touch.TouchEvent.*
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -310,7 +310,7 @@ open class UIScrollableContainer : UIContainer() {
         updateIndicators(deltaTimeSec)
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
 
         firstChild?.also { child ->
             if (child.x != -scrollX || child.y != -scrollY) {
@@ -319,10 +319,60 @@ open class UIScrollableContainer : UIContainer() {
             }
         }
 
-        super.onManagedDraw(gl, camera)
+        // Push the parent GL state, apply this container's own transform (which internally
+        // uses absoluteX/absoluteY — the correct render position), then read back the resulting
+        // model-view matrix to obtain the container's 4 corners in scene space.
+        // This is more accurate than convertLocalToSceneCoordinates, which uses raw mX/mY and
+        // misses parent padding, anchor, and origin offsets.
+        pGLState.pushModelViewGLMatrix()
+        onApplyTransformations(pGLState)
+
+        val m = pGLState.getModelViewGLMatrix()
+
+        pGLState.popModelViewGLMatrix()
+
+        // Column-major 4×4: transform the 4 local corners through M to get scene coords.
+        // (lx, ly) → scene = (M[0]*lx + M[4]*ly + M[12],  M[1]*lx + M[5]*ly + M[13])
+        val w = width
+        val h = height
+        fun sceneX(lx: Float, ly: Float) = m[0] * lx + m[4] * ly + m[12]
+        fun sceneY(lx: Float, ly: Float) = m[1] * lx + m[5] * ly + m[13]
+
+        val (tlX, tlY) = pCamera.convertSceneToSurfaceCoordinates(sceneX(0f, 0f), sceneY(0f, 0f))
+        val (trX, trY) = pCamera.convertSceneToSurfaceCoordinates(sceneX(w,  0f), sceneY(w,  0f))
+        val (brX, brY) = pCamera.convertSceneToSurfaceCoordinates(sceneX(w,  h),  sceneY(w,  h))
+        val (blX, blY) = pCamera.convertSceneToSurfaceCoordinates(sceneX(0f, h),  sceneY(0f, h))
+
+        val minX = minOf(tlX, trX, brX, blX)
+        val minY = minOf(tlY, trY, brY, blY)
+        val maxX = maxOf(tlX, trX, brX, blX)
+        val maxY = maxOf(tlY, trY, brY, blY)
+
+        val wasScissorTestEnabled = pGLState.isScissorTestEnabled
+        pGLState.enableScissorTest()
+        ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+
+        // Suppress UIComponent's own clipToBounds scissor to avoid double-scissoring.
+        val savedClipToBounds = clipToBounds
+        clipToBounds = false
+        super.onManagedDraw(pGLState, pCamera)
+        clipToBounds = savedClipToBounds
+
+        // Draw indicators inside the scissor (already position-clamped to container bounds).
+        val hasIndicators = horizontalIndicator != null || verticalIndicator != null
+        if (hasIndicators) {
+            pGLState.pushModelViewGLMatrix()
+            onApplyTransformations(pGLState)
+            horizontalIndicator?.onDraw(pGLState, pCamera)
+            verticalIndicator?.onDraw(pGLState, pCamera)
+            pGLState.popModelViewGLMatrix()
+        }
+
+        ScissorStack.pop()
+        if (!wasScissorTestEnabled) {
+            pGLState.disableScissorTest()
+        }
     }
-
-
     /**
      * Called when the scroll position has changed.
      */
@@ -376,14 +426,6 @@ open class UIScrollableContainer : UIContainer() {
         verticalIndicator?.height = height * (height / scrollableContentHeight).coerceAtMost(1f)
         horizontalIndicator?.width = width * (width / scrollableContentWidth).coerceAtMost(1f)
     }
-
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        super.onManagedDrawChildren(pGL, pCamera)
-
-        horizontalIndicator?.onDraw(pGL, pCamera)
-        verticalIndicator?.onDraw(pGL, pCamera)
-    }
-
 
     //region Input
 
@@ -519,7 +561,7 @@ fun UIComponent.setHierarchyScrollPrevention(value: Boolean) {
     }
 
     for (i in 0 until childCount) {
-        val child = getChild(i)
+        val child = getChildByIndex(i)
         if (child is UIScrollableContainer) {
             child.preventScrolling = value
         }

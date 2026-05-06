@@ -8,7 +8,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
@@ -40,6 +40,12 @@ open class UIModal(
      * Whether the modal should be detached from the scene when hidden.
      */
     var detachOnHide = false
+
+    /**
+     * Called after the modal has fully hidden, regardless of how it was dismissed
+     * (button, backdrop tap, etc.).
+     */
+    var onDismiss: Runnable? = null
 
 
     init {
@@ -103,6 +109,9 @@ open class UIModal(
      * Called when [show] is called. This is where you should set up the modal's animations.
      */
     protected open fun onShow() {
+        // Ensure dialog always renders on top of other scene children.
+        zIndex = Int.MAX_VALUE
+
         // If there's not parent previously set, attach to the current scene.
         if (parent == null) {
             var currentScene = UIEngine.current.scene
@@ -114,6 +123,8 @@ open class UIModal(
 
             currentScene.attachChild(this)
         }
+
+        parent?.sortChildren()
     }
 
     /**
@@ -133,6 +144,7 @@ open class UIModal(
         if (detachOnHide) {
             detachSelf()
         }
+        onDismiss?.run()
     }
 
 

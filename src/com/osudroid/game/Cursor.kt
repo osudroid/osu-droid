@@ -2,7 +2,7 @@ package com.osudroid.game
 
 import android.os.SystemClock
 
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 
 /**
  * Represents a cursor in gameplay.

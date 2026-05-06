@@ -1,1 +1,1 @@
-include ':AndEngine', ':LibBASS'
+include ':AndEngine-GLES2', ':LibBASS'

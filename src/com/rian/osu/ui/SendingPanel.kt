@@ -1,14 +1,15 @@
 package com.rian.osu.ui
 
-import org.anddev.andengine.entity.modifier.MoveYModifier
-import org.anddev.andengine.entity.primitive.Rectangle
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.entity.text.Text
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.HorizontalAlign
+import org.andengine.entity.modifier.MoveYModifier
+import org.andengine.entity.primitive.Rectangle
+import org.andengine.entity.scene.ITouchArea
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
+import org.andengine.entity.text.TextOptions
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.HorizontalAlign
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.round
@@ -19,11 +20,11 @@ class SendingPanel(
     private val score: Long,
     private val accuracy: Float,
     private val pp: Float
-) : Rectangle(0f, -200f, 800f, 200f) {
+) : Rectangle(0f, -200f, 800f, 200f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
     val dismissTouchArea: ITouchArea
         get() = dismissButton
 
-    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking").also {
+    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking", GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
         it.setPosition((width - it.width) / 2, height / 5)
         attachChild(it)
     }
@@ -59,7 +60,7 @@ class SendingPanel(
         it.setText("Sending...")
     }
 
-    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f).also {
+    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
         it.setColor(0f, 0f, 0f, 0f)
         attachChild(it)
     }
@@ -201,10 +202,10 @@ class SendingPanel(
         // Reverse back to maintain original order
         .reversed()
 
-    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button")) {
+    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button"), GlobalManager.getInstance().engine.vertexBufferObjectManager) {
         var canBeDismissed = false
 
-        private val text = ChangeableText(0f, 0f, getResources().getFont("font"), "", 10).also {
+        private val text = Text(0f, 0f, getResources().getFont("font"), "", 10, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             attachChild(it)
         }
 
@@ -224,20 +225,20 @@ class SendingPanel(
         }
     }
 
-    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f) {
+    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
         private val minWidth = width
         private val minHeight = height
 
-        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption).also {
+        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             attachChild(it)
         }
 
-        private val valueRect = Rectangle(0f, 80f, width, 0f).also {
+        private val valueRect = Rectangle(0f, 80f, width, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             it.setColor(0.4f, 0.4f, 0.4f, 0.8f)
             attachChild(it)
         }
 
-        private val valueText = ChangeableText(0f, 0f, getResources().getFont("font"), "", HorizontalAlign.CENTER, 100).also {
+        private val valueText = Text(0f, 0f, getResources().getFont("font"), "", 100, TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             valueRect.attachChild(it)
         }
 

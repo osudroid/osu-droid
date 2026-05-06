@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
@@ -131,11 +130,11 @@
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
             </intent-filter>
 
             <!-- firefox and file explorer -->

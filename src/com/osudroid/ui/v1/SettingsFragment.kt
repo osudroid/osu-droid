@@ -3,7 +3,6 @@ package com.osudroid.ui.v1
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -305,7 +304,7 @@ class SettingsFragment : SettingsFragment() {
 
                 GlobalManager.getInstance().songService.volume = prefs.getInt("bgmvolume", 100) / 100f
 
-                loadSkin(context, prefs.getString("skinPath", "")!!).invokeOnCompletion {
+                loadSkin(prefs.getString("skinPath", "")!!).invokeOnCompletion {
                     mainThread {
                         ToastLogger.showText(string.config_backup_restore_info_success, true)
                         dismiss()
@@ -388,7 +387,7 @@ class SettingsFragment : SettingsFragment() {
             options = skins
 
             setOnPreferenceChangeListener { _, newValue ->
-                loadSkin(context, newValue.toString())
+                loadSkin(newValue.toString())
                 true
             }
         }
@@ -592,7 +591,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
+                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -666,7 +665,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
+                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -675,7 +674,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.winCondition.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()))
+                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -691,7 +690,7 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private fun loadSkin(context: Context, path: String): Job {
+    private fun loadSkin(path: String): Job {
         val loading = LoadingFragment()
 
         loading.isDismissOnBackPress = false
@@ -703,11 +702,10 @@ class SettingsFragment : SettingsFragment() {
             // the correct skin path.
             Config.setSkinPath(path)
             ResourceManager.getInstance().loadSkin(path)
-            GlobalManager.getInstance().engine.textureManager.reloadTextures()
+            GlobalManager.getInstance().engine.onReloadResources()
 
             mainThread {
                 loading.dismiss()
-                context.startActivity(Intent(context, MainActivity::class.java))
                 Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }

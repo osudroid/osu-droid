@@ -1,7 +1,7 @@
 package com.reco1l.andengine.buffered
 
-import org.anddev.andengine.opengl.util.*
-import javax.microedition.khronos.opengles.*
+import android.opengl.GLES20
+import org.andengine.opengl.util.GLState
 
 abstract class TextureCoordinatesBuffer(
     vertexCount: Int,
@@ -9,20 +9,17 @@ abstract class TextureCoordinatesBuffer(
     bufferUsage: Int
 ) : VertexBuffer(0, vertexCount, vertexSize, bufferUsage) {
 
-    override fun beginDraw(gl: GL10) {
-        GLHelper.enableTextures(gl)
-        GLHelper.enableTexCoordArray(gl)
+    override fun beginDraw(gl: GLState) {
+        bindAndUpload()
+        // Attribute 3 = texture coordinates (ATTRIBUTE_TEXTURECOORDINATES_LOCATION = 3 in ShaderProgramConstants)
+        GLES20.glVertexAttribPointer(3, vertexSize, GLES20.GL_FLOAT, false, 0, 0)
+        GLES20.glEnableVertexAttribArray(3)
     }
 
-    override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
-        if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
-            selectOnHardware(gl as GL11)
-            GLHelper.texCoordZeroPointer(gl)
-        } else {
-            GLHelper.texCoordPointer(gl, mFloatBuffer)
-        }
+    override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
+        // Handled in beginDraw
     }
 
-    override fun draw(gl: GL10, entity: UIBufferedComponent<*>) = Unit
+    override fun draw(gl: GLState, entity: UIBufferedComponent<*>) = Unit
 
 }

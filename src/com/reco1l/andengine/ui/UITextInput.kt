@@ -20,7 +20,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.*
 import kotlin.text.substring
@@ -327,7 +327,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
                 // Extract the complete character as a string, including surrogate pairs.
                 val characterString = value.substring(stringIndex, stringIndex + charCount)
-                totalAdvance += font?.getLetter(characterString)?.mAdvance ?: 0
+                totalAdvance += (font?.getLetter(characterString[0])?.mAdvance ?: 0f).toInt()
 
                 stringIndex += charCount
                 codePointIndex++

@@ -9,7 +9,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 
 @Suppress("LeakingThis")
 open class UIButton : UILinearContainer() {

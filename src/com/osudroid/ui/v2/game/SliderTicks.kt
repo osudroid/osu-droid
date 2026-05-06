@@ -15,8 +15,9 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 class SliderTickContainer : UIContainer() {
     private var slider: Slider? = null
 
-    fun init(currentTimeSec: Double, beatmapSlider: Slider) {
+    fun init(beatmapSlider: Slider) {
         slider = beatmapSlider
+        val lifetimeStart = calculateLifetimeStart(0)
 
         detachChildren()
 
@@ -34,16 +35,20 @@ class SliderTickContainer : UIContainer() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(currentTimeSec, tick)
+
+            // It is safe to use lifetimeStart here as the ticks will be updated in GameplaySlider.updateAfterInit().
+            sprite.init(tick, lifetimeStart, lifetimeStart)
 
             attachChild(sprite)
         }
     }
 
-    fun onNewSpan(currentTimeSec: Double, newSpanIndex: Int) {
+    fun onNewSpan(currentTimeSec: Float, newSpanIndex: Int) {
         if (slider == null) {
             return
         }
+
+        val lifetimeStart = calculateLifetimeStart(newSpanIndex)
 
         val spanStartIndex =
             // Amount of slider ticks passed.
@@ -57,13 +62,24 @@ class SliderTickContainer : UIContainer() {
             val tick = slider!!.nestedHitObjects[i] as? SliderTick ?: break
 
             // For reverse sliders, the ticks are in the opposite order.
-            val sprite = getChild(
+            val sprite = getChildByIndex(
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(currentTimeSec, tick)
+            sprite.init(tick, currentTimeSec, lifetimeStart)
         }
     }
+
+    private fun calculateLifetimeStart(spanIndex: Int): Float {
+        val slider = slider ?: return 0f
+
+        if (spanIndex == 0) {
+            return (slider.startTime - slider.timePreempt).toFloat() / 1000
+        }
+
+        return (slider.startTime + slider.spanDuration * spanIndex).toFloat() / 1000
+    }
+
 
     override fun onDetached() {
         super.onDetached()
@@ -83,39 +99,52 @@ class SliderTickSprite : UISprite() {
     /**
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
-     * @param currentTimeSec The current time in seconds.
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
+     * @param currentTimeSec The current time in seconds.
+     * @param spanLifetimeStart The lifetime start of the current [Slider] span, in seconds.
      */
-    fun init(currentTimeSec: Double, tick: SliderTick) {
+    fun init(tick: SliderTick, currentTimeSec: Float, spanLifetimeStart: Float) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
 
         val fadeInStartTime = startTime - timePreempt
+        val fadeInDelay = fadeInStartTime - spanLifetimeStart
 
         clearEntityModifiers()
+
+        val dt = currentTimeSec - spanLifetimeStart
 
         alpha = 0f
         setScale(0.5f)
 
         registerEntityModifier(
             Modifiers.sequence(null,
-                Modifiers.delay(fadeInStartTime - currentTimeSec.toFloat()),
+                Modifiers.delay(fadeInDelay),
                 Modifiers.parallel(null,
                     Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
                     Modifiers.fadeIn(ANIM_DURATION)
                 )
-            )
+            ).also {
+                if (dt > 0) {
+                    it.onUpdate(dt, this)
+                }
+            }
         )
 
         if (GameHelper.isHidden() && !GameHelper.getHidden().onlyFadeApproachCircles) {
             val fadeOutDuration = min(timePreempt - ANIM_DURATION, 1f)
             val fadeOutStartTime = startTime - fadeOutDuration
+            val fadeOutDelay = fadeOutStartTime - spanLifetimeStart
 
             registerEntityModifier(
                 Modifiers.sequence(null,
-                    Modifiers.delay(fadeOutStartTime - currentTimeSec.toFloat()),
+                    Modifiers.delay(fadeOutDelay),
                     Modifiers.fadeOut(fadeOutDuration)
-                )
+                ).also {
+                    if (dt > 0) {
+                        it.onUpdate(dt, this)
+                    }
+                }
             )
         }
     }

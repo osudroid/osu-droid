@@ -8,16 +8,15 @@ import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.utils.Execution;
 import com.rian.osu.utils.ModUtils;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.input.touch.detector.ScrollDetector;
-import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.input.touch.detector.ScrollDetector;
+import org.andengine.input.touch.detector.SurfaceScrollDetector;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.math.MathUtils;
 import org.jetbrains.annotations.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.*;
@@ -34,7 +33,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
     private final Scene mainScene;
     private final MenuItemListener listener;
-    private final ChangeableText loadingText;
+    private final Text loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
     private BeatmapInfo lastBeatmapInfo;
@@ -55,7 +54,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private float downTime = -1;
     private int _scoreID = -1;
     private boolean moved = false;
-    private ArrayList<ScoreBoardItem> scoreItems = null;
+    private volatile ArrayList<ScoreBoardItem> scoreItems = null;
     private BeatmapLeaderboardScoringMode currentScoringMode;
 
     private LoadTask currentTask;
@@ -69,7 +68,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mainScene = scene;
         layer.attachChild(this);
 
-        this.loadingText = new ChangeableText(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50);
+        this.loadingText = new Text(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         this.attachChild(this.loadingText);
 
         this.listener = listener;
@@ -116,7 +115,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     Log.e("Scoreboard", "Failed to load scores from online.", e);
 
                     if (isActive()) {
-                        loadingText.setText("Cannot load scores");
+                        // setText modifies VBO-backed data; must be called from the update thread.
+                        Execution.updateThread(() -> loadingText.setText("Cannot load scores"));
                     }
                     return;
                 }
@@ -125,7 +125,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     return;
                 }
 
-                loadingText.setText(OnlineManager.getInstance().getFailMessage());
+                final String failMessage = OnlineManager.getInstance().getFailMessage();
+                // setText modifies VBO-backed data; must be called from the update thread.
+                Execution.updateThread(() -> loadingText.setText(failMessage));
 
                 boolean isPPScoringMode = currentScoringMode == BeatmapLeaderboardScoringMode.PP;
                 var username = OnlineManager.getInstance().getUsername();
@@ -158,15 +160,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     sb.setLength(0);
                     var scoreStr = isPPScoringMode ?
-                        // For display purposes, we round the pp.
-                        formatPP(sb, Math.round(pp)) :
-                        formatScore(sb, score);
+                            // For display purposes, we round the pp.
+                            formatPP(sb, Math.round(pp)) :
+                            formatScore(sb, score);
 
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
                             .append(StringTable.format(
-                                isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
+                                    isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
@@ -325,6 +327,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             detachChildren();
             currentAvatarTask = null;
+            camY = -146;
             attachChild(loadingText);
 
             if (beatmapInfo == null)
@@ -356,7 +359,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             var count = getChildCount();
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;
@@ -376,8 +379,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 isScroll = false;
             }
 
-            if (Math.abs(velocityY) > 500 * pSecondsElapsed) {
-                velocityY -= 10 * pSecondsElapsed * Math.signum(velocityY);
+            if (Math.abs(velocityY) > 30.0f) {
+                // Friction-based deceleration: reduces velocity by ~85% per second, stops in ~0.5s
+                velocityY *= Math.max(0.0f, 1.0f - 8.0f * pSecondsElapsed);
             } else {
                 velocityY = 0;
                 isScroll = false;
@@ -389,15 +393,17 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             }
 
             var count = getChildCount();
+            int spriteIndex = 0;
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;
 
                 var sprite = (Sprite) child;
-                sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
+                sprite.setPosition(-160, 146 + 0.8f * percentShow * spriteIndex * (sprite.getHeight() - 32));
+                spriteIndex++;
             }
 
             if (percentShow == 1) {
@@ -418,8 +424,53 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         }
     }
 
+    private float cumulativeDistY = 0;
+
     @Override
-    public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
+    public void onScrollStarted(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        velocityY = 0;
+        pointerId = pPointerID;
+        tapTime = secPassed;
+        cumulativeDistY = 0;
+        isScroll = true;
+    }
+
+    @Override
+    public void onScroll(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId != -1 && pointerId != pPointerID) {
+            return;
+        }
+        isScroll = true;
+        camY -= pDistanceY;
+        if (camY <= -146) {
+            camY = -146;
+            velocityY = 0;
+        } else if (camY >= maxY) {
+            camY = maxY;
+            velocityY = 0;
+        }
+        cumulativeDistY += pDistanceY;
+    }
+
+    @Override
+    public void onScrollFinished(ScrollDetector pScrollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId == -1 || pointerId == pPointerID) {
+            cumulativeDistY += pDistanceY;
+            if (secPassed - tapTime > 0.001f) {
+                // Negate: during scroll camY -= pDistanceY, but update applies camY += velocityY * dt,
+                // so velocity must have opposite sign to pDistanceY to continue in the same direction.
+                velocityY = -(cumulativeDistY / (secPassed - tapTime));
+            } else {
+                velocityY = 0;
+                isScroll = false;
+            }
+            pointerId = -1;
+            initialY = -1;
+        }
+    }
+
+    // Legacy method kept for reference (no longer an override)
+    public void onScrollLegacy(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
         switch (pTouchEvent.getAction()) {
             case TouchEvent.ACTION_DOWN:
                 velocityY = 0;
@@ -519,7 +570,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private final int scoreID;
 
         private final boolean showOnline;
-        
+
 
         private ScoreItem(
                 ExecutorService avatarExecutor,
@@ -531,7 +582,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 String avaURL,
                 String username,
                 boolean isPersonalBest) {
-            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
@@ -552,7 +603,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         getWidth() / 2f,
                         0f,
                         ResourceManager.getInstance().getFont("strokeFont"),
-                        "Personal Best");
+                        "Personal Best",
+                        GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
@@ -568,7 +620,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             setScale(0.65f);
             setWidth(724 * 1.1f);
-            camY = -146;
 
             setColor(0, 0, 0);
             setAlpha(0.5f);
@@ -591,7 +642,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         onDetached();
                         return;
                     }
-                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
+                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
 
                     if (currentAvatarTask == this)
                         currentAvatarTask = null;
@@ -599,9 +650,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             } : null;
 
 
-            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
-            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
-            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             text.setScale(1.2f);
             mark.setScale(1.5f);

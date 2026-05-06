@@ -1,15 +1,16 @@
 package com.reco1l.andengine.text
 
+import android.opengl.GLES20
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.IconVariant
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.*
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
-import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
+import org.andengine.engine.camera.*
+import org.andengine.opengl.font.*
+import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 /**
@@ -95,8 +96,8 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
             return
         }
 
-        contentWidth = font.getLetter(text).mAdvance.toFloat()
-        contentHeight = font.lineHeight.toFloat()
+        contentWidth = font.getLetter(text).mAdvance
+        contentHeight = font.lineHeight
 
         requestBufferUpdate()
     }
@@ -118,17 +119,42 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         buffer?.getFirstOf<IconVertexBuffer>()?.update(this, font, letter)
     }
 
-    override fun onDeclarePointers(gl: GL10) {
+    override fun onDeclarePointers(gl: GLState) {
         super.onDeclarePointers(gl)
         font?.texture?.bind(gl)
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onBindShader(pGLState: GLState) {
+        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
+        }
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
+            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        }
+
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+    }
+
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
         if (fontSettingsChanged) {
             fontSettingsChanged = false
             onFontSettingsChange()
         }
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 
 
@@ -157,7 +183,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
                 return
             }
 
-            val lineHeight = font.lineHeight + font.lineGap
+            val lineHeight = font.lineHeight
             var i = 0
 
             val scale = min(component.width / component.contentWidth, component.height / component.contentHeight)
@@ -181,8 +207,8 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
             setPosition(0)
         }
 
-        override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
-            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
+        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
+            GLES20.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
         }
     }
 
@@ -202,17 +228,17 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
 
             setPosition(0)
 
-            val letterTextureX = letter.mTextureX
-            val letterTextureY = letter.mTextureY
-            val letterTextureX2 = letterTextureX + letter.mTextureWidth
-            val letterTextureY2 = letterTextureY + letter.mTextureHeight
+            val u = letter.mU
+            val v = letter.mV
+            val u2 = letter.mU2
+            val v2 = letter.mV2
 
-            putVertex(letterTextureX, letterTextureY)
-            putVertex(letterTextureX, letterTextureY2)
-            putVertex(letterTextureX2, letterTextureY2)
-            putVertex(letterTextureX2, letterTextureY2)
-            putVertex(letterTextureX2, letterTextureY)
-            putVertex(letterTextureX, letterTextureY)
+            putVertex(u, v)
+            putVertex(u, v2)
+            putVertex(u2, v2)
+            putVertex(u2, v2)
+            putVertex(u2, v)
+            putVertex(u, v)
 
             setPosition(0)
         }

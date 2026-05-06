@@ -5,8 +5,8 @@ import com.edlplan.framework.math.FMath;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.rian.osu.mods.ModFlashlight;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.IEntityModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 

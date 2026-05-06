@@ -10,15 +10,19 @@ import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.DrawType;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.util.math.MathUtils;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -30,7 +34,7 @@ public class GameplaySpinner extends GameObject {
     private final UISprite background;
     private final UISprite circle;
     private final UISprite approachCircle;
-    private final Sprite metre;
+    private final MetreSprite metre;
     private float metreY;
     private final UISprite spinText;
     private final TextureRegion metreRegion;
@@ -75,7 +79,7 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
+        metre = new MetreSprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
@@ -152,7 +156,8 @@ public class GameplaySpinner extends GameObject {
             Modifiers.delay(timePreempt * 0.75f),
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
-        metreRegion.setTexturePosition(0, (int) metre.getHeightScaled());
+        metreRegion.setTexturePosition(0, (int) metreRegion.getHeight());
+        metre.refreshTextureCoords();
 
         approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
@@ -191,6 +196,10 @@ public class GameplaySpinner extends GameObject {
     }
 
     void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
         clearText.clearEntityModifiers();
         scene.detachChild(clearText);
 
@@ -210,6 +219,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        scene = null;
 
         int score = 0;
         if (replayObjectData != null) {
@@ -255,6 +265,18 @@ public class GameplaySpinner extends GameObject {
         playAndFreeHitSamples(score);
     }
 
+    @Override
+    public void updateAfterInit(float dt) {
+        // Update existing entities first before this object (simulates an update tick).
+        updateAfterInit(clearText, dt);
+        updateAfterInit(spinText, dt);
+        updateAfterInit(approachCircle, dt);
+        updateAfterInit(background, dt);
+        updateAfterInit(circle, dt);
+        updateAfterInit(metre, dt);
+
+        super.updateAfterInit(dt);
+    }
 
     @Override
     public void update(final float dt) {
@@ -367,10 +389,12 @@ public class GameplaySpinner extends GameObject {
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         }
+        float fillOffset = 1 - Math.abs(percentfill);
         metre.setPosition(metre.getX(),
-                metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
+                metreY + metre.getHeightScaled() * fillOffset);
         metreRegion.setTexturePosition(0,
-                (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
+                (int) (metreRegion.getHeight() * fillOffset));
+        metre.refreshTextureCoords();
 
         oldMouse.set(currMouse);
 
@@ -383,6 +407,7 @@ public class GameplaySpinner extends GameObject {
     public void onExpire() {
         super.onExpire();
 
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
@@ -485,6 +510,22 @@ public class GameplaySpinner extends GameObject {
             spinnerSpinSample.setFrequency(GameHelper.getSpeedMultiplier());
         } else {
             spinnerSpinSample.setFrequency(1);
+        }
+    }
+
+    /**
+     * A Sprite subclass that exposes texture coordinate refresh so that changes to
+     * the underlying TextureRegion's UV (via setTexturePosition) are actually
+     * re-uploaded to the GPU vertex buffer every frame.
+     */
+    protected static class MetreSprite extends Sprite {
+        public MetreSprite(float x, float y, ITextureRegion region, VertexBufferObjectManager vbo) {
+            super(x, y, region, vbo, DrawType.DYNAMIC);
+        }
+
+        /** Call this after any setTexturePosition() call to flush the new UV to the VBO. */
+        public void refreshTextureCoords() {
+            onUpdateTextureCoordinates();
         }
     }
 }

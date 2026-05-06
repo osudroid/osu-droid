@@ -10,16 +10,14 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.collision.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.entity.scene.Scene.*
-import org.anddev.andengine.input.touch.*
-import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.util.*
-import org.anddev.andengine.util.constants.Constants.*
-import javax.microedition.khronos.opengles.*
+import org.andengine.engine.camera.*
+import org.andengine.entity.*
+import org.andengine.entity.scene.*
+import org.andengine.input.touch.*
+import org.andengine.opengl.util.*
+import org.andengine.util.Constants.*
+import org.andengine.util.algorithm.collision.ShapeCollisionChecker
+import org.andengine.util.adt.transformation.Transformation
 import kotlin.math.*
 
 
@@ -195,7 +193,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
         return mX
     }
-    fun setX(value: Float) {
+    override fun setX(value: Float) {
         if (mX != value) {
             mX = value
             invalidate(InvalidationFlag.Position)
@@ -208,7 +206,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
         return mY
     }
-    fun setY(value: Float) {
+    override fun setY(value: Float) {
         if (mY != value) {
             mY = value
             invalidate(InvalidationFlag.Position)
@@ -307,13 +305,15 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * The color of the entity boxed in a [Color4] object.
      */
+    @get:JvmSynthetic
+    @set:JvmSynthetic
     open var color: Color4
-        get() = Color4(mRed, mGreen, mBlue, mAlpha)
+        get() = Color4(red, green, blue, alpha)
         set(value) {
-            mRed = value.red
-            mGreen = value.green
-            mBlue = value.blue
-            mAlpha = value.alpha
+            red = value.red
+            green = value.green
+            blue = value.blue
+            setAlpha(value.alpha)
         }
 
     /**
@@ -509,7 +509,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     /**
      * Whether the entity is outside the camera's or parent's bounds.
      */
-    open fun isCulled(camera: Camera): Boolean {
+    override fun isCulled(camera: Camera): Boolean {
 
         when (cullingMode) {
 
@@ -517,7 +517,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
                 val (x1, y1) = convertLocalToSceneCoordinates(0f, 0f)
                 val (x2, y2) = convertLocalToSceneCoordinates(width, height)
 
-                return x2 < camera.minX || y2 < camera.minY || x1 > camera.maxX || y1 > camera.maxY
+                return x2 < camera.xMin || y2 < camera.yMin || x1 > camera.xMax || y1 > camera.yMax
             }
 
             CullingMode.ParentBounds -> {
@@ -565,12 +565,12 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //region Drawing
 
-    override fun onApplyTransformations(gl: GL10, camera: Camera) {
+    override fun onApplyTransformations(gl: GLState) {
         val x = absoluteX
         val y = absoluteY
 
         if (x != 0f || y != 0f) {
-            gl.glTranslatef(x, y, 0f)
+            gl.translateModelViewGLMatrixf(x, y, 0f)
         }
 
         if (mRotation != 0f) {
@@ -578,11 +578,11 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             val centerY = height * mRotationCenterY
 
             if (centerX > 0f || centerY > 0f) {
-                gl.glTranslatef(centerX, centerY, 0f)
-                gl.glRotatef(mRotation, 0f, 0f, 1f)
-                gl.glTranslatef(-centerX, -centerY, 0f)
+                gl.translateModelViewGLMatrixf(centerX, centerY, 0f)
+                gl.rotateModelViewGLMatrixf(mRotation, 0f, 0f, 1f)
+                gl.translateModelViewGLMatrixf(-centerX, -centerY, 0f)
             } else {
-                gl.glRotatef(mRotation, 0f, 0f, 1f)
+                gl.rotateModelViewGLMatrixf(mRotation, 0f, 0f, 1f)
             }
         }
 
@@ -591,21 +591,31 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             val centerY = height * mScaleCenterY
 
             if (centerX > 0f || centerY > 0f) {
-                gl.glTranslatef(centerX, centerY, 0f)
-                gl.glScalef(mScaleX, mScaleY, 1f)
-                gl.glTranslatef(-centerX, -centerY, 0f)
+                gl.translateModelViewGLMatrixf(centerX, centerY, 0f)
+                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1)
+                gl.translateModelViewGLMatrixf(-centerX, -centerY, 0f)
             } else {
-                gl.glScalef(mScaleX, mScaleY, 1f)
+                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1)
             }
         }
     }
 
-    open fun onApplyColor(gl: GL10) {
+    /**
+     * Draw-time color components. Computed each frame from the entity's own color multiplied
+     * by ancestor colors. These are intentionally NOT written back to mColor so the entity's
+     * base color stays clean and animatable modifiers keep working correctly.
+     */
+    @JvmField var drawRed   = 1f
+    @JvmField var drawGreen = 1f
+    @JvmField var drawBlue  = 1f
+    @JvmField var drawAlpha = 1f
 
-        var red = mRed
-        var green = mGreen
-        var blue = mBlue
-        var alpha = mAlpha
+    open fun onApplyColor(gl: GLState) {
+
+        var red = red
+        var green = green
+        var blue = blue
+        var alpha = alpha
         var parent = parent
         var multiplyColor = inheritAncestorsColor
 
@@ -631,10 +641,16 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             parent = parent.parent
         }
 
-        GLHelper.setColor(gl, red, green, blue, alpha)
+        // Store composed draw-time color WITHOUT permanently modifying mColor.
+        // Calling setColor() every frame would corrupt animated entities (e.g. a
+        // child inside a fading container would have alpha = parentAlpha^N → 0).
+        drawRed   = red
+        drawGreen = green
+        drawBlue  = blue
+        drawAlpha = alpha
     }
 
-    override fun onDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, camera: Camera) {
 
         val isCulled = isCulled(camera)
 
@@ -652,8 +668,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
-            GLHelper.enableScissorTest(gl)
+            val wasScissorTestEnabled = pGLState.isScissorTestEnabled
 
             // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
@@ -666,15 +681,16 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
+            pGLState.enableScissorTest()
             ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
-            onManagedDraw(gl, camera)
+            doManagedDraw(pGLState, camera)
             ScissorStack.pop()
 
             if (!wasScissorTestEnabled) {
-                GLHelper.disableScissorTest(gl)
+                pGLState.disableScissorTest()
             }
         } else {
-            onManagedDraw(gl, camera)
+            doManagedDraw(pGLState, camera)
         }
     }
 
@@ -732,41 +748,44 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         foreground?.onHandleInvalidations()
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    private fun doManagedDraw(pGLState: GLState, camera: Camera) {
 
         onHandleInvalidations()
-
-        gl.glPushMatrix()
-        onApplyTransformations(gl, camera)
+        pGLState.pushModelViewGLMatrix()
+        onApplyTransformations(pGLState)
 
         background?.setSize(width, height)
-        background?.onDraw(gl, camera)
+        background?.onDraw(pGLState, camera)
 
-        doDraw(gl, camera)
-        onDrawChildren(gl, camera)
+
+        doDraw(pGLState, camera)
+
+        // Draw children
+        val children = mChildren
+        if (children != null) {
+            val childCount = children.size
+            for (i in 0 until childCount) {
+                children.get(i)?.onDraw(pGLState, camera)
+            }
+        }
 
         foreground?.setSize(width, height)
-        foreground?.onDraw(gl, camera)
-
+        foreground?.onDraw(pGLState, camera)
 
         if (BuildSettings.SHOW_ENTITY_BOUNDARIES && DEBUG_FOREGROUND != this) {
             DEBUG_FOREGROUND.setSize(width, height)
-            DEBUG_FOREGROUND.onDraw(gl, camera)
+            DEBUG_FOREGROUND.onDraw(pGLState, camera)
         }
 
-        gl.glPopMatrix()
+        pGLState.popModelViewGLMatrix()
     }
 
-    open fun beginDraw(gl: GL10) {
-        // We haven't done any culling implementation so we disable it globally for all buffered entities.
-        GLHelper.disableCulling(gl)
-        GLHelper.disableTextures(gl)
-        GLHelper.disableTexCoordArray(gl)
-        onApplyColor(gl)
+    open fun beginDraw(pGLState: GLState) {
+        onApplyColor(pGLState)
     }
 
-    override fun doDraw(gl: GL10, camera: Camera) {
-        beginDraw(gl)
+    open fun doDraw(pGLState: GLState, pCamera: Camera) {
+        beginDraw(pGLState)
     }
 
     //endregion
@@ -810,8 +829,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
         } else {
             localToParentTransformation.transform(VERTICES_WRAPPER)
         }
+        return ShapeCollisionChecker.checkContains(VERTICES_WRAPPER, VERTICES_WRAPPER.size / 2, x, y)
 
-        return ShapeCollisionChecker.checkContains(VERTICES_WRAPPER, VERTICES_WRAPPER.size, x, y)
     }
 
     //endregion
@@ -1020,7 +1039,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
         try {
             for (i in childCount - 1 downTo 0) {
-                val child = getChild(i)
+                val child = getChildByIndex(i)
                 if (child is ITouchArea && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child

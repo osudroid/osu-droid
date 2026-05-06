@@ -1,16 +1,19 @@
 package com.reco1l.andengine.text
 
+import android.opengl.GLES20
+import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.toolkt.kotlin.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.font.*
+import org.andengine.opengl.font.*
+import org.andengine.opengl.font.exception.FontException
+import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.*
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
 import kotlin.math.*
 
@@ -86,7 +89,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
 
     private var lines: List<String>? = null
-    private var linesWidth: IntArray? = null
+    private var linesWidth: FloatArray? = null
 
 
     init {
@@ -102,17 +105,17 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         if (font == null) {
             lines = emptyList()
-            linesWidth = IntArray(0)
+            linesWidth = FloatArray(0)
             contentWidth = 0f
             contentHeight = 0f
             return
         }
 
         lines = text.split('\n')
-        linesWidth = IntArray(lines!!.size) { i -> lines!![i].sumOf { char -> font.getLetter(char).mAdvance } }
+        linesWidth = FloatArray(lines!!.size) { i -> lines!![i].fold(0f) { acc, char -> acc + font.safeGetLetter(char).mAdvance } }
 
-        contentWidth = linesWidth!!.max().toFloat()
-        contentHeight = (lines!!.size * font.lineHeight + (lines!!.size - 1) * font.lineGap).toFloat()
+        contentWidth = linesWidth!!.max()
+        contentHeight = lines!!.size.toFloat() * font.lineHeight
 
         requestBufferUpdate()
     }
@@ -140,21 +143,51 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         buffer?.getFirstOf<TextVertexBuffer>()?.update(this, font, lines, linesWidth)
     }
 
-    override fun onDeclarePointers(gl: GL10) {
+    override fun onDeclarePointers(gl: GLState) {
         super.onDeclarePointers(gl)
         font?.texture?.bind(gl)
     }
 
-    override fun onApplyTransformations(gl: GL10, camera: Camera) {
+    override fun onBindShader(pGLState: GLState) {
+        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        // Upload MVP matrix
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
+        }
+
+        // Upload texture unit sampler
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
+            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        }
+
+        // Upload color uniform
+        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        // Disable color vertex attribute (this shader uses uniform color)
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        // UV (attr 3) is already set up by TextTextureBuffer inside the CompoundBuffer.beginDraw()
+    }
+
+    override fun onApplyTransformations(pGLState: GLState) {
 
         val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
         val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f
 
         if (scrollTranslationX != 0f || scrollTranslationY != 0f) {
-            gl.glTranslatef(-scrollTranslationX, -scrollTranslationY, 0f)
+            pGLState.translateModelViewGLMatrixf(-scrollTranslationX, -scrollTranslationY, 0f)
         }
 
-        super.onApplyTransformations(gl, camera)
+        super.onApplyTransformations(pGLState)
     }
 
 
@@ -218,14 +251,14 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: IntArray?) {
+        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: FloatArray?) {
 
             if (font == null || lines == null || linesWidth == null) {
                 mFloatBuffer.clear()
                 return
             }
 
-            val lineHeight = font.lineHeight + font.lineGap
+            val lineHeight = font.lineHeight
             var i = 0
 
             lines.fastForEachIndexed { lineIndex, line ->
@@ -234,19 +267,23 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
 
                 line.forEach { character ->
-                    val letter = font.getLetter(character)
+                    val letter = font.safeGetLetter(character)
 
-                    val letterX = lineX + letter.mWidth
-                    val letterY = lineY + font.lineHeight
+                    // Use the glyph's actual offset and height so glyphs are not
+                    // vertically stretched to fill the full line height.
+                    val glyphX = lineX + letter.mOffsetX
+                    val glyphY = lineY + letter.mOffsetY
+                    val letterX = glyphX + letter.mWidth
+                    val letterY = glyphY + letter.mHeight
 
                     setPosition(0)
 
-                    putVertex(i++, lineX, lineY)
-                    putVertex(i++, lineX, letterY)
+                    putVertex(i++, glyphX, glyphY)
+                    putVertex(i++, glyphX, letterY)
                     putVertex(i++, letterX, letterY)
                     putVertex(i++, letterX, letterY)
-                    putVertex(i++, letterX, lineY)
-                    putVertex(i++, lineX, lineY)
+                    putVertex(i++, letterX, glyphY)
+                    putVertex(i++, glyphX, glyphY)
 
                     setPosition(0)
 
@@ -255,9 +292,9 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             }
         }
 
-        override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
+        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UIText
-            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
+            GLES20.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
         }
     }
 
@@ -280,19 +317,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             lines.fastForEach { line ->
                 line.forEach { character ->
 
-                    val letter = font.getLetter(character)
+                    val letter = font.safeGetLetter(character)
 
-                    val letterTextureX = letter.mTextureX
-                    val letterTextureY = letter.mTextureY
-                    val letterTextureX2 = letterTextureX + letter.mTextureWidth
-                    val letterTextureY2 = letterTextureY + letter.mTextureHeight
+                    val u = letter.mU
+                    val v = letter.mV
+                    val u2 = letter.mU2
+                    val v2 = letter.mV2
 
-                    putVertex(letterTextureX, letterTextureY)
-                    putVertex(letterTextureX, letterTextureY2)
-                    putVertex(letterTextureX2, letterTextureY2)
-                    putVertex(letterTextureX2, letterTextureY2)
-                    putVertex(letterTextureX2, letterTextureY)
-                    putVertex(letterTextureX, letterTextureY)
+                    putVertex(u, v)
+                    putVertex(u, v2)
+                    putVertex(u2, v2)
+                    putVertex(u2, v2)
+                    putVertex(u2, v)
+                    putVertex(u, v)
                 }
             }
 
@@ -306,6 +343,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
     companion object {
         private const val VERTICES_PER_CHARACTER = 6
+
+        /**
+         * Safely retrieve a [Letter] for [character] from [font], returning the letter for '?'
+         * as a fallback when the glyph atlas is full ([FontException]).
+         */
+        internal fun Font.safeGetLetter(character: Char): Letter {
+            return try {
+                getLetter(character)
+            } catch (_: FontException) {
+                Log.w("UIText", "Font atlas full for character '${character}' (U+${character.code.toString(16).uppercase()}), using fallback.")
+                try { getLetter('?') } catch (_: FontException) { getLetter(' ') }
+            }
+        }
     }
 
 }
