@@ -50,16 +50,24 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
 
     //region Update
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
+    final override fun onUpdate(deltaTimeSec: Float) {
+        if (isIgnoreUpdate) {
+            return
+        }
+
         originalClock.processFrame()
 
         if (processCustomClock) {
             customClock?.processFrame()
         }
 
-        val deltaTime = clock.elapsedFrameTime
-        onUpdateTick?.invoke(deltaTime)
-        super.onManagedUpdate(deltaTime)
+        onManagedUpdate(clock.elapsedFrameTime)
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        onUpdateTick?.invoke(deltaTimeSec)
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     //region Timekeeping
