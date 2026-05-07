@@ -175,7 +175,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float scale;
     public StatisticV2 stat;
     private boolean gameStarted;
-    private FramedBeatmapClock beatmapClock;
+    private final FramedBeatmapClock beatmapClock;
     private float initialStartTime;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
@@ -330,14 +330,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        // Create and assign a framed beatmap clock early so that UIComponents and UniversalModifiers receive
-        // the correct clock when they are attached. The audio source will be attached later in start().
-        try {
-            beatmapClock = new FramedBeatmapClock(true, true, null);
-            scene.setClock(beatmapClock);
-        } catch (Exception e) {
-            Log.w("GameScene", "Failed to create framed beatmap clock in constructor: " + e.getMessage());
-        }
+        scene.setClock(beatmapClock = new FramedBeatmapClock(true, true));
     }
 
     public void setScoringScene(final ScoringScene sc) {
@@ -1000,9 +993,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             if (succeeded && requestId == loadingRequestId.get()) {
                                 prepareScene();
                             }
-                        } catch (CancellationException e) {
-                            cancelled = true;
-                            throw e;
+                        } catch (Exception e) {
+                            if (e instanceof CancellationException) {
+                                cancelled = true;
+                                throw e;
+                            }
+
+                            Log.e("GameScene", "Failed to load gameplay", e);
                         } finally {
                             if (requestId == loadingRequestId.get()) {
                                 if (!succeeded && !cancelled) {
@@ -1337,41 +1334,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(lastBeatmapInfo.getSetDirectory());
-
-        // Split global and per-beatmap offsets so we can apply them to the framed beatmap clock.
-        float globalOffsetSec = Config.getOffset() / 1000f;
-        float beatmapOffsetSec = props != null ? (float) props.getOffset() / 1000f : 0f;
-
         var songService = GlobalManager.getInstance().getSongService();
 
         // Hook up the framed beatmap clock as the scene's clock. Use SongService as the audio source.
-        try {
-            if (songService != null) {
-                var songClock = new SongServiceClock(songService);
-
-                if (beatmapClock != null) {
-                    beatmapClock.changeSource(songClock);
-                } else {
-                    beatmapClock = new FramedBeatmapClock(true, true, songClock);
-                    scene.setClock(beatmapClock);
-                }
-            }
-
-            if (beatmapClock != null) {
-                beatmapClock.setUserGlobalOffset(globalOffsetSec);
-                beatmapClock.setUserBeatmapOffset(beatmapOffsetSec);
-            }
-        } catch (Exception e) {
-            Log.w("GameScene", "Failed to configure framed beatmap clock: " + e.getMessage());
-        }
-
-        if (beatmapClock == null) {
-            Log.e("GameScene", "beatmapClock is not present when startng gameplay, aborting.");
-            return;
+        if (songService != null) {
+            beatmapClock.changeSource(new SongServiceClock(songService));
         }
 
         // Ensure user-defined offset has time to be applied.
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(lastBeatmapInfo.getSetDirectory());
+        beatmapClock.setUserGlobalOffset(Config.getOffset() / 1000);
+        beatmapClock.setUserBeatmapOffset(props != null ? props.getOffset() / 1000f : 0);
+
         var firstObjectTimePreempt = (float) playableBeatmap.getHitObjects().objects.get(0).timePreempt / 1000;
         beatmapClock.seek(Math.min(beatmapClock.getCurrentTime(), firstObjectStartTime - firstObjectTimePreempt));
         initialStartTime = beatmapClock.getCurrentTime();
@@ -1379,6 +1353,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (songService != null) {
             songService.setVolume(Config.getBgmVolume());
         }
+
         beatmapClock.start();
 
         if (skipTime <= 1 && Multiplayer.isConnected()) {
