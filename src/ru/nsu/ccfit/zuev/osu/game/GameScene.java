@@ -951,6 +951,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         fgScene.setBackgroundEnabled(false);
         failcount = 0;
         mainCursorId = -1;
+        beatmapClock.changeSource(null);
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
         final int requestId = loadingRequestId.incrementAndGet();
