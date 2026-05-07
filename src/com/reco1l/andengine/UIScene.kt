@@ -81,17 +81,19 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     /**
      * The original [IFrameBasedClock] of this [UIScene]. This clock is always kept running.
      *
-     * May be overridden by a custom clock if available.
+     * May be overridden by a custom clock or its parent's clock if available.
      */
     val originalClock: IFrameBasedClock = FramedClock(StopwatchClock(true))
 
     private var customClock: IFrameBasedClock? = null
+    // Cache inherited clock here to avoid parent tree climbing.
+    private var inheritedClock: IFrameBasedClock? = null
 
     override var clock
-        get() = customClock ?: originalClock
+        get() = customClock ?: inheritedClock ?: originalClock
         set(value) {
             customClock = value
-            updateClock(value)
+            updateClock(inheritedClock)
         }
 
     /**
@@ -100,10 +102,14 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     val time by clock::timeInfo
 
     /**
-     * Updates the [IFrameBasedClock] to be used as the custom clock for this [UIScene] and its children.
+     * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIScene].
+     *
+     * To update the custom clock that this [UIScene] uses, set the [clock] property instead.
+     *
+     * @param clock The [IFrameBasedClock] to use.
      */
     protected open fun updateClock(clock: IFrameBasedClock?) {
-        customClock = clock
+        inheritedClock = clock
         val currentClock = this.clock
 
         mChildren?.fastForEach {
