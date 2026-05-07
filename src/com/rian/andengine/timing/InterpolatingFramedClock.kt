@@ -73,7 +73,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
     override var currentTime = 0f
         private set
 
-    private val realTimeClock = FramedClock()
+    private val realTimeClock = FramedClock(StopwatchClock(true))
 
     private var _currentTime = 0f
 
