@@ -18,7 +18,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      * This is internally adjusted for the current playback rate (so that the actual precision is constant regardless
      * of the rate applied).
      */
-    var allowableErrorMilliseconds = 2f / 60
+    var allowableErrorSeconds = 2f / 60
 
     /**
      * Drift recovery half-life in seconds. Defaults to 0.05 seconds.
@@ -37,26 +37,27 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
      * - If source is ahead, time will speed up and gradually approach original speed.
      * - If source is behind, time will slow down and gradually approach original speed.
      *
-     * Only applies when the error is within [allowableErrorMilliseconds].
+     * Only applies when the error is within [allowableErrorSeconds].
      */
     var driftRecoveryHalfLife = 0.05f
 
     /**
      * Whether interpolation was applied at the last processed frame.
      *
-     * If [drift] becomes too high (as defined by [allowableErrorMilliseconds]), interpolation will be bypassed in order
+     * If [drift] becomes too high (as defined by [allowableErrorSeconds]), interpolation will be bypassed in order
      * to provide a more correct time value.
      */
     var isInterpolating = false
         private set
 
     /**
-     * The drift in milliseconds between the source and interpolation at the last processed frame.
+     * The drift in seconds between the source and interpolation at the last processed frame.
      */
     val drift
         get() = currentTime - framedSourceClock.currentTime
 
-    override val rate by framedSourceClock::rate
+    override val rate
+        get() = framedSourceClock.rate
 
     override var isRunning = false
         private set
@@ -83,7 +84,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
     }
 
     override fun changeSource(source: IClock?) {
-        if (source != null && this.source == source) {
+        if (source != null && ::source.isInitialized && this.source == source) {
             return
         }
 
@@ -134,7 +135,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
                     realTimeClock.elapsedFrameTime
                 )
 
-                val withinAllowableError = abs(framedSourceClock.currentTime - _currentTime) <= allowableErrorMilliseconds * rate
+                val withinAllowableError = abs(framedSourceClock.currentTime - _currentTime) <= allowableErrorSeconds * rate
 
                 if (!withinAllowableError) {
                     // if we've exceeded the allowable error, we should use the source clock's time value.
