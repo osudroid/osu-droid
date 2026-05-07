@@ -175,8 +175,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float scale;
     public StatisticV2 stat;
     private boolean gameStarted;
-    private float totalOffset;
     private FramedBeatmapClock beatmapClock;
+    private float initialStartTime;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
     private UISprite skipBtn;
@@ -277,17 +277,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * The end time of the last object in seconds.
      */
     public float lastObjectEndTime;
-
-    /**
-     * The initial {@link #elapsedTime} value when the game started, in seconds.
-     */
-    public float initialElapsedTime = 0;
-
-    /**
-     * The time passed since the game has started, in seconds.
-     */
-    public float elapsedTime = 0;
-
 
     // Video support
 
@@ -758,19 +747,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float firstObjectTimePreempt = (float) firstObject.timePreempt / 1000;
         float skipTargetTime = firstObjectStartTime - Math.max(2f, firstObjectTimePreempt);
 
-        elapsedTime = Math.min(0, skipTargetTime);
+        beatmapClock.seek(Math.min(0, skipTargetTime));
         skipTime = skipTargetTime - 1;
 
         // Some beatmaps specify a current lead-in time, which overrides the default lead-in time above.
         float leadIn = playableBeatmap.getGeneral().audioLeadIn / 1000f;
         if (leadIn > 0) {
-            elapsedTime = Math.min(elapsedTime, firstObjectStartTime - leadIn);
+            beatmapClock.seek(Math.min(beatmapClock.getCurrentTime(), firstObjectStartTime - leadIn));
         }
 
         // Ensure the video has time to start.
         // Even when video is not activated, apply offset anyway to ensure that everyone in multiplayer starts at the
         // same time regardless of the setting.
-        elapsedTime = Math.min(elapsedTime, videoOffset);
+        beatmapClock.seek(Math.min(beatmapClock.getCurrentTime(), videoOffset));
 
         sliderBorderColor = null;
         if (playableBeatmap.getColors().getSliderBorderColor() != null) {
@@ -1158,8 +1147,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (Config.isCorovans() && countdown != BeatmapCountdown.NoCountdown) {
             float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
-            if (cdSpeed != 0 && firstObjectStartTime - elapsedTime >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
-                countdownAnimator = new Countdown(bgScene, cdSpeed, 0, firstObjectStartTime - elapsedTime);
+            if (cdSpeed != 0 && firstObjectStartTime - beatmapClock.getCurrentTime() >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
+                countdownAnimator = new Countdown(bgScene, cdSpeed, 0, firstObjectStartTime - beatmapClock.getCurrentTime());
             }
         }
 
@@ -1350,23 +1339,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        totalOffset = Config.getOffset();
-
         var props = DatabaseManager.getBeatmapOptionsTable().getOptions(lastBeatmapInfo.getSetDirectory());
-        if (props != null) {
-            totalOffset += props.getOffset();
-        }
 
         // Split global and per-beatmap offsets so we can apply them to the framed beatmap clock.
-        float globalOffsetSec = (float) Config.getOffset() / 1000f;
-        float beatmapOffsetSec = props != null ? (float) props.getOffset() / 1000f : 0f;
-
-        totalOffset /= 1000;
+        float globalOffsetSec = Config.getOffset() / 1000;
+        float beatmapOffsetSec = props != null ? props.getOffset() / 1000f : 0;
 
         // Ensure user-defined offset has time to be applied.
         var firstObjectTimePreempt = (float) playableBeatmap.getHitObjects().objects.get(0).timePreempt / 1000;
-        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - firstObjectTimePreempt - getRateAdjustedOffset());
-        initialElapsedTime = elapsedTime;
+        beatmapClock.seek(Math.min(beatmapClock.getCurrentTime(), firstObjectStartTime - firstObjectTimePreempt));
+        initialStartTime = beatmapClock.getCurrentTime();
 
         if (skipTime <= 1 && Multiplayer.isConnected()) {
             Multiplayer.roomScene.getChat().hide();
@@ -1408,11 +1390,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (beatmapClock != null) {
                     beatmapClock.changeSource(songClock);
                     beatmapClock.setUserGlobalOffset(globalOffsetSec);
-                    beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+                    beatmapClock.setUserBeatmapOffset(beatmapOffsetSec);
                 } else {
                     beatmapClock = new FramedBeatmapClock(true, false, songClock);
                     beatmapClock.setUserGlobalOffset(globalOffsetSec);
-                    beatmapClock.setBeatmapOffset(beatmapOffsetSec);
+                    beatmapClock.setUserBeatmapOffset(beatmapOffsetSec);
                     scene.setClock(beatmapClock);
                 }
             }
@@ -1440,7 +1422,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        elapsedTime += dt;
         previousFrameTime = SystemClock.uptimeMillis();
 
         var playableBeatmap = this.playableBeatmap;
@@ -1473,7 +1454,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
-        final float mSecPassed = elapsedTime * 1000;
+        final float mSecPassed = beatmapClock.getCurrentTime() * 1000;
 
         if (!isGameOver) {
             float currentSpeedMultiplier = getRateAt(mSecPassed);
@@ -1489,8 +1470,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (replaying) {
-            final float replayTimeMs = elapsedTime * 1000;
-            final float replayCatchUpTimeMs = (elapsedTime + dt / 4) * 1000;
+            final float replayTimeMs = beatmapClock.getCurrentTime() * 1000;
+            final float replayCatchUpTimeMs = (beatmapClock.getCurrentTime() + dt / 4) * 1000;
             int cIndex;
 
             for (int i = 0; i < replay.cursorIndex.length; i++) {
@@ -1650,12 +1631,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setKiai(activeEffectPoint.isKiai);
-        GameHelper.setCurrentBeatTime(Math.max(0, elapsedTime - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
+        GameHelper.setCurrentBeatTime(Math.max(0, beatmapClock.getCurrentTime() - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
         if (!isGameOver) {
 
             if (breakPeriodIndex < breakPeriods.length) {
-                if (!breakAnimator.isBreak() && breakPeriods[breakPeriodIndex].startTime / 1000 <= elapsedTime) {
+                if (!breakAnimator.isBreak() && breakPeriods[breakPeriodIndex].startTime / 1000 <= beatmapClock.getCurrentTime()) {
                     var period = breakPeriods[breakPeriodIndex++];
 
                     gameStarted = false;
@@ -1744,10 +1725,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         updateActiveObjects(dt);
 
         if (judgeableObject != null && (GameHelper.isAutoplay() || GameHelper.isAutopilot())) {
-            autoCursor.moveToObject(judgeableObject, elapsedTime, this);
+            autoCursor.moveToObject(judgeableObject, beatmapClock.getCurrentTime(), this);
         }
 
-        if (videoEnabled && video != null && elapsedTime >= videoOffset)
+        if (videoEnabled && video != null && beatmapClock.getCurrentTime() >= videoOffset)
         {
             if (!videoStarted) {
                 video.play();
@@ -1765,7 +1746,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (elapsedTime >= getRateAdjustedOffset() && !musicStarted) {
+        if (beatmapClock.getCurrentTime() >= 0 && !musicStarted) {
             musicStarted = true;
 
             Execution.updateThread(() -> {
@@ -1794,7 +1775,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
             // are cast and converted to seconds individually).
             float lifetimeStart = (float) obj.startTime / 1000 - (float) obj.timePreempt / 1000;
-            float lifetimeDt = elapsedTime - lifetimeStart;
+            float lifetimeDt = beatmapClock.getCurrentTime() - lifetimeStart;
 
             if (lifetimeDt < 0) {
                 break;
@@ -1902,7 +1883,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // 节拍器
         if (metronome != null) {
-            metronome.update(elapsedTime, activeTimingPoint);
+            metronome.update(beatmapClock.getCurrentTime(), activeTimingPoint);
 
             if (mutedMod != null) {
                 metronome.setVolume(1 - mutedMod.volumeAt(stat.getCombo()));
@@ -1919,7 +1900,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             // Reset the game to continue the HUD editor session.
             if (startedFromHUDEditor && isHUDEditorMode) {
-                elapsedTime = initialElapsedTime;
+                beatmapClock.seek(initialStartTime);
                 loadGame(lastBeatmapInfo, null, lastMods, null);
                 stat.reset();
                 skip(true);
@@ -2008,7 +1989,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             leadOut += dt;
         }
 
-        if (elapsedTime > skipTime - 1f && skipBtn != null) {
+        if (beatmapClock.getCurrentTime() > skipTime - 1f && skipBtn != null) {
             if (Multiplayer.isConnected()) {
                 Multiplayer.roomScene.getChat().hide();
             }
@@ -2055,7 +2036,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 judgeableObject = searchJudgeableObject(i + 1);
             }
 
-            if (elapsedTime >= obj.getLifetimeEnd()) {
+            if (beatmapClock.getCurrentTime() >= obj.getLifetimeEnd()) {
                 expiredObjects.add(obj);
             }
         }
@@ -2095,27 +2076,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             Multiplayer.roomScene.getChat().hide();
         }
 
-        if (elapsedTime > skipTime - 1f && !force) {
+        if (beatmapClock.getCurrentTime() > skipTime - 1f && !force) {
             return;
         }
 
         ResourceManager.getInstance().getSound("menuhit").play();
 
-        float difference = skipTime - elapsedTime;
-        elapsedTime = skipTime;
-
-        double elapsedTimeMs = Math.ceil(elapsedTime * 1000);
-
-        // Seek times may be negative in forced skips, which are not supported by music and video.
-        int musicSeekTime = Math.max(0, (int) (elapsedTimeMs - totalOffset * getRateAt(elapsedTimeMs) * 1000));
-        int videoSeekTime = Math.max(0, (int) (elapsedTimeMs - videoOffset * 1000));
+        float difference = skipTime - beatmapClock.getCurrentTime();
+        beatmapClock.seek(skipTime);
 
         Execution.updateThread(() -> {
             updatePassiveObjects(difference);
 
             var songService = GlobalManager.getInstance().getSongService();
 
-            if (elapsedTime >= getRateAdjustedOffset() && !musicStarted) {
+            if (beatmapClock.getCurrentTime() >= 0 && !musicStarted) {
                 if (beatmapClock != null) {
                     beatmapClock.start();
                 } else if (songService != null) {
@@ -2126,16 +2101,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 musicStarted = true;
             }
 
-            if (beatmapClock != null) {
-                // musicSeekTime is ms position for audio. Convert to seconds and add total applied offsets so that
-                // underlying audio receives the same absolute seek target as before.
-                beatmapClock.seek(musicSeekTime / 1000f + beatmapClock.getTotalAppliedOffset());
-            } else if (songService != null) {
-                songService.seekTo(musicSeekTime);
-            }
-
             if (videoEnabled && video != null) {
-                video.seekTo(videoSeekTime);
+                video.seekTo(Math.max(0, (int) ((beatmapClock.getCurrentTime() - videoOffset) * 1000)));
             }
 
             if (skipBtn != null) {
@@ -2175,7 +2142,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         cancelStoryboardLoading();
         cancelVideoLoading();
 
-        float mSecPassed = elapsedTime * 1000;
+        float mSecPassed = beatmapClock.getCurrentTime() * 1000;
         var selectedBeatmap = GlobalManager.getInstance().getSelectedBeatmap();
         var songService = GlobalManager.getInstance().getSongService();
         var songMenu = GlobalManager.getInstance().getSongMenu();
@@ -2616,7 +2583,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float offset = previousFrameTime > 0
                 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        int eventTime = (int) (elapsedTime * 1000 + offset);
+        int eventTime = (int) (beatmapClock.getCurrentTime() * 1000 + offset);
 
         if (replaying || isGameOver) {
             return false;
@@ -2658,7 +2625,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var cursorEvent = CursorEvent.obtain(event);
 
-        cursorEvent.trackTime = elapsedTime * 1000;
+        cursorEvent.trackTime = beatmapClock.getCurrentTime() * 1000;
         cursorEvent.offset = offset;
 
         if (sprite != null) {
@@ -2717,7 +2684,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float offset = previousFrameTime > 0
                 ? (currentTime - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        float time = elapsedTime * 1000 + offset;
+        float time = beatmapClock.getCurrentTime() * 1000 + offset;
 
         for (int i = 0; i < cursors.length; ++i) {
             var cursor = cursors[i];
@@ -2961,7 +2928,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var songService = GlobalManager.getInstance().getSongService();
         if (beatmapClock != null) {
-            if (!beatmapClock.isRunning() && elapsedTime > 0) {
+            if (!beatmapClock.isRunning() && beatmapClock.getCurrentTime() > 0) {
                 beatmapClock.start();
             }
 
@@ -2969,7 +2936,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 songService.setVolume(Config.getBgmVolume());
                 totalLength = songService.getLength();
             }
-        } else if (songService != null && songService.getStatus() != Status.PLAYING && elapsedTime > 0) {
+        } else if (songService != null && songService.getStatus() != Status.PLAYING && beatmapClock.getCurrentTime() > 0) {
             songService.play();
             songService.setVolume(Config.getBgmVolume());
             totalLength = songService.getLength();
@@ -3407,8 +3374,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private final float[] fastPathLastStableX = new float[CursorCount];
             private final float[] fastPathLastStableY = new float[CursorCount];
 
-            private boolean isInterpolating;
-
             @Override
             protected void onManagedDraw(GL10 pGL, Camera pCamera) {
                 applyRawPointerFastPath(pCamera);
@@ -3418,78 +3383,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             @Override
             protected void onManagedUpdate(float secElapsed) {
-                var songService = GlobalManager.getInstance().getSongService();
-                float speedMultiplier = GameHelper.getSpeedMultiplier();
-                float dt = secElapsed * speedMultiplier;
-
-                if (songService.getStatus() == Status.PLAYING) {
-                    // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
-                    // actual progressed time. To prevent that situation from happening, we keep `dt` between thresholds.
-                    // They serve as a buffer zone to allow audio and gameplay time to synchronize in cases where one is
-                    // behind or ahead of the other.
-                    // See https://github.com/ppy/osu/issues/26879 for more information.
-                    float minDt = dt / 2;
-                    float maxDt = dt * 2;
-
-                    float audioElapsedTime = (float) songService.getPositionPrecise() / 1000;
-                    float gameElapsedTime = elapsedTime - getRateAdjustedOffset();
-                    float timeDifference = gameElapsedTime - audioElapsedTime;
-
-                    // In some cases, the audio can be behind the gameplay time so far it would cause gameplay to
-                    // completely desynchronize. In that case, we do not let gameplay progress at all until the audio
-                    // catches up.
-                    if (timeDifference <= 0.1f * speedMultiplier) {
-                        float minimumSynchronizationTime = Config.getMinimumGameplaySynchronizationTime() * speedMultiplier / 1000;
-                        // Sync gameplay with audio if the difference is too large.
-                        if (!isGameOver && timeDifference >= minimumSynchronizationTime) {
-                            if (minimumSynchronizationTime > 0) {
-                                Log.i("GameScene",
-                                        "Synchronizing gameplay time with audio time at " +
-                                        audioElapsedTime +
-                                        "s audio time and " +
-                                        gameElapsedTime +
-                                        "s gameplay time. Difference: " + timeDifference + "s");
-                            }
-                            dt = -timeDifference;
-                        }
-
-                        dt = FMath.clamp(dt, minDt, maxDt);
-                    } else {
-                        dt = 0;
-                    }
-                } else if (!musicStarted) {
-                    float realElapsedTime = elapsedTime + dt;
-                    float targetElapsedTime = Math.min(realElapsedTime, getRateAdjustedOffset());
-                    float newElapsedTime;
-
-                    if (isInterpolating) {
-                        newElapsedTime = Interpolation.dampContinuously(realElapsedTime, targetElapsedTime, 0.08f, secElapsed);
-
-                        // If the difference is more than ~2 frames at 60 FPS, snap to the target time.
-                        if (Math.abs(targetElapsedTime - newElapsedTime) > 1f / 60f * 2f * speedMultiplier) {
-                            newElapsedTime = targetElapsedTime;
-                            isInterpolating = false;
-                        }
-                    } else {
-                        newElapsedTime = targetElapsedTime;
-
-                        // Only interpolate on second frame onwards.
-                        if (previousFrameTime > 0) {
-                            isInterpolating = true;
-                        }
-                    }
-
-                    dt = Math.max(0, newElapsedTime - elapsedTime);
-                }
-
-                update(dt);
+                update(secElapsed);
 
                 //noinspection ForLoopReplaceableByForEach
                 for (int i = 0; i < cursors.length; ++i) {
-                    cursors[i].reset(previousFrameTime, elapsedTime * 1000);
+                    cursors[i].reset(previousFrameTime, beatmapClock.getCurrentTime() * 1000);
                 }
 
-                super.onManagedUpdate(dt);
+                super.onManagedUpdate(secElapsed);
             }
 
             private void applyRawPointerFastPath(final Camera camera) {
@@ -3665,9 +3566,5 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private float getRateAt(double time) {
         return ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, time);
-    }
-
-    private float getRateAdjustedOffset() {
-        return totalOffset * GameHelper.getSpeedMultiplier();
     }
 }
