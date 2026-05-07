@@ -193,7 +193,7 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
     }
 
     override fun seek(position: Float): Boolean {
-        lastSeekFailed = adjustableSourceClock.seek(position)
+        lastSeekFailed = !adjustableSourceClock.seek(position)
 
         if (!lastSeekFailed) {
             // Transfer attempt to transfer decoupled running state to source in the case we succeeded.
