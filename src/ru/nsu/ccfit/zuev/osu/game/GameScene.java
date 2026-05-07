@@ -113,7 +113,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -2706,11 +2705,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             removeAllCursors();
         }
 
-        if (beatmapClock != null) {
-            beatmapClock.stop();
-        } else if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-            GlobalManager.getInstance().getSongService().pause();
-        }
+        beatmapClock.stop();
         paused = true;
         scene.setIgnoreUpdate(true);
 
@@ -2745,11 +2740,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (video != null) {
                 video.pause();
             }
-            if (beatmapClock != null) {
-                beatmapClock.stop();
-            } else {
-                songService.pause();
-            }
+
+            beatmapClock.stop();
             paused = true;
             scene.setIgnoreUpdate(true);
             return;
@@ -2836,13 +2828,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                     // Ensure music frequency is reset back to what it was.
                     songService.setFrequencyForcefully(initialFrequency);
-
-                    if (beatmapClock != null) {
-                        beatmapClock.stop();
-                    } else if (songService.getStatus() == Status.PLAYING) {
-                        songService.pause();
-                    }
-
+                    beatmapClock.stop();
                     paused = true;
 
                     scene.setIgnoreUpdate(true);
@@ -2877,20 +2863,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.play();
         }
 
-        var songService = GlobalManager.getInstance().getSongService();
-        if (beatmapClock != null) {
-            if (!beatmapClock.isRunning()) {
-                beatmapClock.start();
-            }
-
-            if (songService != null) {
-                songService.setVolume(Config.getBgmVolume());
-                totalLength = songService.getLength();
-            }
-        } else if (songService != null && songService.getStatus() != Status.PLAYING && beatmapClock.getCurrentTime() > 0) {
-            songService.play();
-            songService.setVolume(Config.getBgmVolume());
-            totalLength = songService.getLength();
+        if (!beatmapClock.isRunning()) {
+            beatmapClock.start();
         }
     }
 
@@ -3226,7 +3200,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     /**
      * The time that gameplay started relative to the start of the {@link Beatmap}, in seconds.
-     * @return
      */
     public float getInitialStartTime() {
         return initialStartTime;
@@ -3236,10 +3209,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * The current elapsed time relative to the start of the {@link Beatmap}, in seconds.
      */
     public float getElapsedTime() {
-        if (beatmapClock == null) {
-            return 0;
-        }
-
         return beatmapClock.getCurrentTime();
     }
 
