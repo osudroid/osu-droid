@@ -3249,6 +3249,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return playableBeatmap;
     }
 
+    /**
+     * The current elapsed time relative to the start of the {@link Beatmap}, in seconds.
+     */
+    public float getElapsedTime() {
+        if (beatmapClock == null) {
+            return 0;
+        }
+
+        return beatmapClock.getCurrentTime();
+    }
+
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && !replaying) {
