@@ -108,5 +108,5 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
         timeInfo.elapsed = elapsedFrameTime
     }
 
-    override fun toString() = "${this::class.simpleName} (${truncate(currentTime)}ms, $framesPerSecond FPS)"
+    override fun toString() = "${this::class.simpleName} (${truncate(currentTime * 1e3)}ms, $framesPerSecond FPS)"
 }
