@@ -108,7 +108,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
      *
      * @param clock The [IFrameBasedClock] to use.
      */
-    protected open fun updateClock(clock: IFrameBasedClock?) {
+    open fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
         val currentClock = this.clock
 

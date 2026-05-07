@@ -1,5 +1,6 @@
 package com.rian.andengine
 
+import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.FramedClock
@@ -37,6 +38,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock> {
     protected open fun updateClock(clock: IFrameBasedClock) {
         mChildren?.fastForEach {
             (it as? UIComponent)?.updateClock(clock)
+            (it as? UIScene)?.updateClock(clock)
         }
     }
 
