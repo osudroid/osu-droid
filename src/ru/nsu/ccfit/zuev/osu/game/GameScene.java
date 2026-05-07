@@ -12,8 +12,8 @@ import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import com.rian.andengine.timing.SongServiceClock;
-import com.rian.andengine.timing.FramedBeatmapClock;
+import com.osudroid.audio.SongServiceClock;
+import com.osudroid.game.FramedBeatmapClock;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.acivev.VibratorManager;

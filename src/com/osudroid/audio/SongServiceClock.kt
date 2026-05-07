@@ -1,15 +1,14 @@
-// File: src/com/rian/andengine/timing/SongServiceClock.kt
+package com.osudroid.audio
 
-package com.rian.andengine.timing
-
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService
+import com.rian.andengine.timing.IAdjustableClock
 import ru.nsu.ccfit.zuev.audio.Status
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService
 
 /**
- * An [IAdjustableClock] that uses [SongService] (BASS audio wrapper) as its backing source.
+ * An [com.rian.andengine.timing.IAdjustableClock] that uses [ru.nsu.ccfit.zuev.audio.serviceAudio.SongService] (BASS audio wrapper) as its backing source.
  *
- * This adapter converts [SongService]'s playback position into [IAdjustableClock], allowing
- * integration with [FramedBeatmapClock].
+ * This adapter converts [ru.nsu.ccfit.zuev.audio.serviceAudio.SongService]'s playback position into [com.rian.andengine.timing.IAdjustableClock], allowing
+ * integration with [com.osudroid.game.FramedBeatmapClock].
  */
 class SongServiceClock(private val songService: SongService) : IAdjustableClock {
     override val currentTime
