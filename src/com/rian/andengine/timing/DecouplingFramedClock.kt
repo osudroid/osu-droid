@@ -106,11 +106,8 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
             }
 
             // We can only begin tracking time from the second frame, as we need an elapsed real time reference.
-            if (lastReferenceTime == null) {
-                return
-            }
-
-            val elapsedReferenceTime = referenceTime - lastReferenceTime!!
+            val lastReferenceTime = lastReferenceTime ?: return
+            val elapsedReferenceTime = (referenceTime - lastReferenceTime) * rate
 
             _currentTime += elapsedReferenceTime
 
