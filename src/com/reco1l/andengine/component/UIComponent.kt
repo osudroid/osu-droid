@@ -468,9 +468,9 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
     }
 
     override fun onDetached() {
-        super.onDetached()
-
         updateClock(null)
+
+        super.onDetached()
     }
 
     //endregion

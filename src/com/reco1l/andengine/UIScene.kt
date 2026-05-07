@@ -154,8 +154,9 @@ open class UIScene : Scene(), IShape {
     }
 
     override fun onDetached() {
-        super.onDetached()
         updateClock(null)
+
+        super.onDetached()
     }
 
     //endregion

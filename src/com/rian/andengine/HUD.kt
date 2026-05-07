@@ -4,6 +4,7 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.toolkt.kotlin.fastForEach
+import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IFrameBasedClock
 import org.anddev.andengine.engine.camera.hud.HUD as AndEngineHUD
 import org.anddev.andengine.entity.scene.Scene
@@ -85,5 +86,22 @@ open class HUD : AndEngineHUD() {
     override fun clearChildScene() {
         childScene?.onDetached()
         super.clearChildScene()
+    }
+
+    override fun onAttached() {
+        val parent = parent
+        val parentClock =
+            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: (parent as? UIComponent)?.clock
+            else UIEngine.current.clock
+
+        updateClock(parentClock)
+
+        super.onAttached()
+    }
+
+    override fun onDetached() {
+        updateClock(null)
+
+        super.onDetached()
     }
 }
