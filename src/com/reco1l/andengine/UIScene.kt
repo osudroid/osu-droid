@@ -4,10 +4,8 @@ import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.fastForEach
-import com.rian.andengine.timing.FramedClock
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IFrameBasedClock
-import com.rian.andengine.timing.StopwatchClock
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.IEntity
@@ -22,7 +20,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
+open class UIScene : Scene(), IShape {
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -55,13 +53,12 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
             return
         }
 
-        originalClock.processFrame()
-
         if (processCustomClock) {
             customClock?.processFrame()
         }
 
-        onManagedUpdate(clock.elapsedFrameTime)
+        // Fallback to parent or engine-provided delta time in case clock is not present.
+        onManagedUpdate(clock?.elapsedFrameTime ?: deltaTimeSec)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -78,19 +75,19 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
      */
     var processCustomClock = true
 
-    /**
-     * The original [IFrameBasedClock] of this [UIScene]. This clock is always kept running.
-     *
-     * May be overridden by a custom clock or its parent's clock if available.
-     */
-    val originalClock: IFrameBasedClock = FramedClock(StopwatchClock(true))
-
     private var customClock: IFrameBasedClock? = null
     // Cache inherited clock here to avoid parent tree climbing.
     private var inheritedClock: IFrameBasedClock? = null
 
-    override var clock
-        get() = customClock ?: inheritedClock ?: originalClock
+    /**
+     * The [IFrameBasedClock] of this [UIScene]. Used for keeping track of time across frames. By default, this is
+     * inherited from [parent] or [UIEngine].
+     *
+     * If set, then the provided value is used as a custom clock and [parent] or [UIEngine]'s [IFrameBasedClock] is
+     * ignored.
+     */
+    var clock
+        get() = customClock ?: inheritedClock
         set(value) {
             customClock = value
             updateClock(inheritedClock)
@@ -99,7 +96,8 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     /**
      * The current frame's time as observed by this [UIScene]'s [clock].
      */
-    val time by clock::timeInfo
+    val time
+        get() = clock?.timeInfo
 
     /**
      * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIScene].
@@ -116,8 +114,6 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
             (it as? UIComponent)?.updateClock(currentClock)
             (it as? UIScene)?.updateClock(currentClock)
         }
-
-        (mChildScene as? UIScene)?.updateClock(currentClock)
     }
 
     //endregion
@@ -134,8 +130,12 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock> {
     }
 
     override fun onAttached() {
-        val parentClock = (parent as? IClockProvider<*>)?.clock ?: (parent as? UIComponent)?.clock
-        updateClock(parentClock as? IFrameBasedClock)
+        val parent = parent
+        val parentClock =
+            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: (parent as? UIComponent)?.clock
+            else UIEngine.current.clock
+
+        updateClock(parentClock)
 
         fun IEntity.propagateSkinChanges() {
 
