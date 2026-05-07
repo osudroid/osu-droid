@@ -54,7 +54,7 @@ class ThrottledFrameClock : FramedClock() {
     }
 
     private fun sleepAndUpdateCurrent(seconds: Float): Float {
-        // By returning here, in cases where the game is not keeping up, we don't yield.
+        // By returning here, in cases where the game is not keeping up, we don't sleep.
         // Not 100% sure if we want to do this, but let's give it a try.
         if (seconds <= 0) {
             return 0f
@@ -62,7 +62,7 @@ class ThrottledFrameClock : FramedClock() {
 
         val before = currentTime
 
-        Thread.sleep(seconds.toLong() * 1000)
+        Thread.sleep((seconds * 1e3).toLong())
 
         currentTime = sourceTime
 
