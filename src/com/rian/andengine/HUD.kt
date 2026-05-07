@@ -62,6 +62,8 @@ open class HUD : AndEngineHUD() {
             (it as? UIComponent)?.updateClock(currentClock)
             (it as? UIScene)?.updateClock(currentClock)
         }
+
+        (mChildScene as? UIScene)?.updateClock(currentClock)
     }
 
     final override fun onUpdate(deltaTimeSec: Float) {

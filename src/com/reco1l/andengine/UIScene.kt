@@ -114,6 +114,8 @@ open class UIScene : Scene(), IShape {
             (it as? UIComponent)?.updateClock(currentClock)
             (it as? UIScene)?.updateClock(currentClock)
         }
+
+        (mChildScene as? UIScene)?.updateClock(currentClock)
     }
 
     //endregion
