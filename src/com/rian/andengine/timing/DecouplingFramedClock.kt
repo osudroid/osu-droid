@@ -113,12 +113,12 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
 
             // When crossing into positive time, we should attempt to start and use the source clock.
             // Note that this carries the common assumption that the source clock *should* be able to run from zero.
-            if (pendingSourceRestartAfterNegativeSeek && currentTime >= 0) {
+            if (pendingSourceRestartAfterNegativeSeek && _currentTime >= 0) {
                 pendingSourceRestartAfterNegativeSeek = false
 
                 // We still need to check the seek was successful, else we might have already exceeded valid length of
                 // the source.
-                lastSeekFailed = !adjustableSourceClock.seek(currentTime)
+                lastSeekFailed = !adjustableSourceClock.seek(_currentTime)
 
                 if (!lastSeekFailed) {
                     adjustableSourceClock.start()
