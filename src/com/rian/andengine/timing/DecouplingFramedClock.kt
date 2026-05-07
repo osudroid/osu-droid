@@ -17,7 +17,7 @@ package com.rian.andengine.timing
  * such special handling is assured for when the source has a maximum allowable time, since it is not known what that
  * time is.
  */
-open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : ISourceChangeableClock,
+class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : ISourceChangeableClock,
     IAdjustableClock, IFrameBasedClock {
     /**
      * Whether to allow operation in decoupled mode. Defaults to `true`.
