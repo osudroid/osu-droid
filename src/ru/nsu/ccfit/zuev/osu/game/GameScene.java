@@ -3250,6 +3250,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     /**
+     * The time that gameplay started relative to the start of the {@link Beatmap}, in seconds.
+     * @return
+     */
+    public float getInitialStartTime() {
+        return initialStartTime;
+    }
+
+    /**
      * The current elapsed time relative to the start of the {@link Beatmap}, in seconds.
      */
     public float getElapsedTime() {
