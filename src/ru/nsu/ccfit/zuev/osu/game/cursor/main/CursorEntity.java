@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import com.reco1l.andengine.component.UIComponent;
 
-import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
