@@ -157,7 +157,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
             val elapsedInOpposingDirection = framedSourceClock.elapsedFrameTime != 0f && sign(framedSourceClock.elapsedFrameTime) != sign(rate)
 
             if (!elapsedInOpposingDirection) {
-                currentTime = if (rate >= 0) max(lastTime, _currentTime) else min(lastTime, _currentTime)
+                _currentTime = if (rate >= 0) max(lastTime, _currentTime) else min(lastTime, _currentTime)
             }
         } finally {
             isRunning = sourceIsRunning
