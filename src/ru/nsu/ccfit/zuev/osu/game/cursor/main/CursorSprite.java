@@ -1,15 +1,15 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
+import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UISprite;
 import com.rian.andengine.modifier.ModifierType;
 import com.rian.andengine.modifier.UniversalModifier;
-
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import javax.annotation.Nullable;
 
 import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -19,12 +19,13 @@ public class CursorSprite extends UISprite implements ISliderListener {
     @Nullable private UniversalModifier rotationModifier;
 
 
-    public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
+    public CursorSprite() {
         super();
 
-        setPosition(pX, pY);
+        setAnchor(Anchor.Center);
+        setOrigin(Anchor.Center);
         setScale(baseSize);
-        setTextureRegion(pTextureRegion);
+        setTextureRegion(ResourceManager.getInstance().getTexture("cursor"));
 
         if (OsuSkin.get().isRotateCursor()) {
             rotationModifier = rotateTo(360, 14);

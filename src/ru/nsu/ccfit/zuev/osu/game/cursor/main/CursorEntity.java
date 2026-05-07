@@ -16,21 +16,16 @@ public class CursorEntity extends UIComponent {
     private CursorTrail trail = null;
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
-    private float particleOffsetX, particleOffsetY;
 
     public CursorEntity() {
-        TextureRegion cursorTex = ResourceManager.getInstance().getTexture("cursor");
-        cursorSprite = new CursorSprite(-cursorTex.getWidth() / 2f, -cursorTex.getWidth() / 2f, cursorTex);
+        cursorSprite = new CursorSprite();
 
         if (Config.isUseParticles()) {
             TextureRegion trailTex = ResourceManager.getInstance().getTexture("cursortrail");
 
-            particleOffsetX = -trailTex.getWidth() / 2f;
-            particleOffsetY = -trailTex.getHeight() / 2f;
-
             var spawnRate = (int) (GlobalManager.getInstance().getMainActivity().getRefreshRate() * 2);
 
-            emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
+            emitter = new PointParticleEmitter(0, 0);
             trail = new CursorTrail(emitter, spawnRate, trailTex, cursorSprite);
             trail.setParticlesSpawnEnabled(false);
         }
@@ -75,7 +70,7 @@ public class CursorEntity extends UIComponent {
     @Override
     public void setPosition(float pX, float pY) {
         if (emitter != null)
-            emitter.setCenter(pX + particleOffsetX, pY + particleOffsetY);
+            emitter.setCenter(pX, pY);
 
         super.setPosition(pX, pY);
     }
