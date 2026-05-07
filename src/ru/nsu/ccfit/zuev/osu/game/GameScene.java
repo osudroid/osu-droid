@@ -322,6 +322,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public GameScene(final UIEngine engine) {
         this.engine = engine;
+        beatmapClock = new FramedBeatmapClock(true, true);
         scene = createMainScene();
         bgScene = new UIScene();
         fgScene = new UIScene();
@@ -329,7 +330,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        scene.setClock(beatmapClock = new FramedBeatmapClock(true, true));
     }
 
     public void setScoringScene(final ScoringScene sc) {
@@ -3312,6 +3312,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
             private final float[] fastPathLastStableX = new float[CursorCount];
             private final float[] fastPathLastStableY = new float[CursorCount];
+
+            {
+                setClock(beatmapClock);
+            }
 
             @Override
             protected void onManagedDraw(GL10 pGL, Camera pCamera) {
