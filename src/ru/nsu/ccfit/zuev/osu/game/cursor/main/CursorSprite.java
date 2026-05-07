@@ -4,10 +4,12 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UISprite;
 import com.rian.andengine.modifier.ModifierType;
 import com.rian.andengine.modifier.UniversalModifier;
+import com.rian.andengine.modifier.UniversalModifierSequence;
 
 import javax.annotation.Nullable;
 
 import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
@@ -18,6 +20,13 @@ public class CursorSprite extends UISprite implements ISliderListener {
     private final float clickAnimationTime = 0.25f;
     @Nullable private UniversalModifier rotationModifier;
 
+    private final Function1<UniversalModifierSequence, Unit> clickSequence = sequence -> {
+        sequence.scaleTo(baseSize * 1.25f, clickAnimationTime)
+                .then()
+                .scaleTo(baseSize, clickAnimationTime);
+
+        return Unit.INSTANCE;
+    };
 
     public CursorSprite() {
         super();
@@ -39,13 +48,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize);
 
-        beginModifierSequence(sequence -> {
-            sequence.scaleTo(baseSize * 1.25f, clickAnimationTime)
-                    .then()
-                    .scaleTo(baseSize, clickAnimationTime);
-
-            return Unit.INSTANCE;
-        });
+        beginModifierSequence(clickSequence);
     }
 
     public void update(float pSecondsElapsed) {
