@@ -2,6 +2,12 @@ package com.rian.andengine.timing
 
 import kotlin.math.truncate
 
+/**
+ * A wrapper around [Stopwatch] which implements [IAdjustableClock], allowing it to be used as an [IClock] with
+ * adjustable rate and seek functionality.
+ *
+ * @param start Whether to start this [StopwatchClock] immediately.
+ */
 open class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwatch(), IAdjustableClock {
     private var seekOffset = 0f
 
