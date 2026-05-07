@@ -26,13 +26,13 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
      */
     var allowDecoupling = true
 
-    final override var isRunning = false
+    override var isRunning = false
         private set
 
-    final override var currentTime = 0f
+    override var currentTime = 0f
         private set
 
-    final override var elapsedFrameTime = 0f
+    override var elapsedFrameTime = 0f
         private set
 
     override val framesPerSecond = 0f
@@ -140,7 +140,7 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
 
     //region ISourceChangeableClock implementation
 
-    final override lateinit var source: IClock
+    override lateinit var source: IClock
         private set
 
     override fun changeSource(source: IClock?) {
