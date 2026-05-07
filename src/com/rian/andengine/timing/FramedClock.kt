@@ -50,7 +50,7 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
     private var timeSinceLastCalculation = 0f
     private var framesSinceLastCalculation = 0
 
-    private val fpsCalculationInterval = 250
+    private val fpsCalculationInterval = 0.25f
 
     override val timeInfo = FrameTimeInfo()
 
@@ -75,7 +75,7 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
                 framesPerSecond = 0f
                 jitter = 0f
             } else {
-                framesPerSecond = ceil(framesSinceLastCalculation * 1000 / timeSinceLastCalculation)
+                framesPerSecond = ceil(framesSinceLastCalculation / timeSinceLastCalculation)
 
                 // Simple stddev
                 var sum = 0f
