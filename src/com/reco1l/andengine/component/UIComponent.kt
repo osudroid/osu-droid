@@ -1506,13 +1506,14 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
     //region Timekeeping
 
     /**
-     * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIComponent]'s [clock] in
-     * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
+     * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIComponent]'s [customClock] in
+     * [onUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
     var processCustomClock = true
 
-    private var _clock: IFrameBasedClock? = null
     private var customClock: IFrameBasedClock? = null
+    // Cache inherited clock here to avoid parent tree climbing.
+    private var inheritedClock: IFrameBasedClock? = null
 
     /**
      * The [IFrameBasedClock] of this [UIComponent]. Used for keeping track of time across frames. By default, this is
@@ -1521,10 +1522,10 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
      * If set, then the provided value is used as a custom clock and [parent]'s [IFrameBasedClock] is ignored.
      */
     var clock
-        get() = _clock
+        get() = customClock ?: inheritedClock
         set(value) {
             customClock = value
-            updateClock(value)
+            updateClock(inheritedClock)
         }
 
     /**
@@ -1534,16 +1535,20 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
         get() = clock?.timeInfo
 
     /**
-     * Updates the [IFrameBasedClock] to be used. Has no effect if this [UIComponent] uses a custom [IFrameBasedClock].
+     * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIComponent].
+     *
+     * To update the custom clock that this [UIComponent] uses, set the [clock] property instead.
+     *
+     * @param clock The [IFrameBasedClock] to use.
      */
     open fun updateClock(clock: IFrameBasedClock?) {
-        this._clock = customClock ?: clock
+        inheritedClock = clock
 
-        background?.updateClock(this._clock)
-        foreground?.updateClock(this._clock)
+        background?.updateClock(this.clock)
+        foreground?.updateClock(this.clock)
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(this._clock)
+            (it as? UIComponent)?.updateClock(this.clock)
         }
     }
 
