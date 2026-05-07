@@ -121,7 +121,7 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
 
                 // We still need to check the seek was successful, else we might have already exceeded valid length of
                 // the source.
-                lastSeekFailed = adjustableSourceClock.seek(currentTime) != true
+                lastSeekFailed = !adjustableSourceClock.seek(currentTime)
 
                 if (!lastSeekFailed) {
                     adjustableSourceClock.start()
