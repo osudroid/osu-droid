@@ -18,17 +18,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: "temurin"
-        java-version: 17
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+    - name: Setup JDK 17 and Gradle
+      uses: ./.github/actions/setup-java-gradle
 
     - name: Assemble debug APK
       run: ./gradlew assembleDebug
@@ -40,17 +31,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: "temurin"
-        java-version: 17
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+    - name: Setup JDK 17 and Gradle
+      uses: ./.github/actions/setup-java-gradle
 
     - name: Assemble pre-release APK
       run: ./gradlew assemblePre_release
@@ -62,17 +44,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: "temurin"
-        java-version: 17
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+    - name: Set up JDK 17 and Gradle
+      uses: ./.github/actions/setup-java-gradle
 
     - name: Assemble release APK
       run: ./gradlew assembleRelease
@@ -84,17 +57,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: "temurin"
-        java-version: 17
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+    - name: Set up JDK 17 and Gradle
+      uses: ./.github/actions/setup-java-gradle
 
     - name: Run tests
       run: ./gradlew testDebugUnitTest
