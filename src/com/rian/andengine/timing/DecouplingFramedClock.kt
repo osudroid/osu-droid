@@ -144,12 +144,13 @@ open class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = nul
         private set
 
     override fun changeSource(source: IClock?) {
-        this.source = source ?: StopwatchClock(true)
+        val source = source ?: StopwatchClock(true)
 
         if (source !is IAdjustableClock) {
             throw IllegalArgumentException("Clock must be of type IAdjustableClock")
         }
 
+        this.source = source
         adjustableSourceClock = source
         _currentTime = adjustableSourceClock.currentTime
         shouldBeRunning = adjustableSourceClock.isRunning
