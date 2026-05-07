@@ -2,7 +2,7 @@ package com.rian.andengine.timing
 
 import kotlin.math.truncate
 
-class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwatch(), IAdjustableClock {
+open class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwatch(), IAdjustableClock {
     private var seekOffset = 0f
 
     /**
