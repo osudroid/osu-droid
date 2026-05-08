@@ -20,7 +20,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape {
+open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -86,7 +86,7 @@ open class UIScene : Scene(), IShape {
      * If set, then the provided value is used as a custom clock and [parent] or [UIEngine]'s [IFrameBasedClock] is
      * ignored.
      */
-    var clock
+    override var clock: IFrameBasedClock?
         get() = customClock ?: inheritedClock
         set(value) {
             customClock = value
@@ -132,12 +132,7 @@ open class UIScene : Scene(), IShape {
     }
 
     override fun onAttached() {
-        val parent = parent
-        val parentClock =
-            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: (parent as? UIComponent)?.clock
-            else UIEngine.current.clock
-
-        updateClock(parentClock)
+        updateClock((parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         fun IEntity.propagateSkinChanges() {
 

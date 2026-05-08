@@ -12,7 +12,7 @@ import org.anddev.andengine.entity.scene.Scene
 /**
  * An [AndEngineHUD] that provides an [IFrameBasedClock] to its [UIComponent] children.
  */
-open class HUD : AndEngineHUD() {
+open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
     /**
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [HUD]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
@@ -30,7 +30,7 @@ open class HUD : AndEngineHUD() {
      * If set, then the provided value is used as a custom clock and [parent] or [UIEngine]'s [IFrameBasedClock] is
      * ignored.
      */
-    var clock
+    override var clock: IFrameBasedClock?
         get() = customClock ?: inheritedClock
         set(value) {
             customClock = value
@@ -93,7 +93,7 @@ open class HUD : AndEngineHUD() {
     override fun onAttached() {
         val parent = parent
         val parentClock =
-            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: (parent as? UIComponent)?.clock
+            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock
             else UIEngine.current.clock
 
         updateClock(parentClock)

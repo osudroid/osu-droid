@@ -31,7 +31,7 @@ import kotlin.math.*
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
+abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvider<IFrameBasedClock?> {
 
     //region Axes properties
 
@@ -462,9 +462,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
     override fun onAttached() {
         onThemeChanged(Theme.current)
         onHandleInvalidations(false)
-
-        val parentClock = (parent as? IClockProvider<*>)?.clock ?: (parent as? UIComponent)?.clock
-        updateClock(parentClock as? IFrameBasedClock)
+        updateClock((parent as? IClockProvider<*>)?.clock as? IFrameBasedClock)
     }
 
     override fun onDetached() {
@@ -1543,7 +1541,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable {
      *
      * If set, then the provided value is used as a custom clock and [parent]'s [IFrameBasedClock] is ignored.
      */
-    var clock
+    override var clock: IFrameBasedClock?
         get() = customClock ?: inheritedClock
         set(value) {
             customClock = value
