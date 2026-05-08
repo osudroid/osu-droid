@@ -373,7 +373,7 @@ public class GameplaySlider extends GameObject {
             headCirclePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
                 sequence.fadeOut(mehWindow - okWindow);
 
-                sliderHeadLateMissFadeModifier = sequence.getLastModifier();
+                sliderHeadLateMissFadeModifier = sequence.getLastActiveModifier();
 
                 return Unit.INSTANCE;
             });

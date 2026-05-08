@@ -5,7 +5,6 @@ import com.osudroid.utils.IPoolable
 import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.framework.Color4
-import kotlin.math.max
 
 /**
  * A sequence of [UniversalModifier]s all operating upon the same [UIComponent]. Can be used to group and chain
@@ -26,9 +25,10 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     private var lastEndTime = 0f
 
     /**
-     * The latest [UniversalModifier] applied to this [UniversalModifierSequence], if any.
+     * The [UniversalModifier] that will end the latest among all [UniversalModifier]s applied to this
+     * [UniversalModifierSequence], if any.
      */
-    var lastModifier: UniversalModifier? = null
+    var lastActiveModifier: UniversalModifier? = null
         private set
 
     /**
@@ -352,22 +352,22 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     //endregion
 
     /**
-     * Sets a callback to the latest [UniversalModifier] applied in this [UniversalModifierSequence]. If no
-     * [UniversalModifier]s have been applied to this [UniversalModifierSequence], a [UniversalModifier] that does
-     * nothing and starts at [currentTime] will be applied to [origin].
+     * Sets a callback to the [lastActiveModifier] of this [UniversalModifierSequence]. If no [UniversalModifier]s
+     * have been applied to this [UniversalModifierSequence], a [UniversalModifier] that does nothing and starts at
+     * [currentTime] will be applied to [origin].
      *
-     * This callback will be called when the [UniversalModifier] finishes.
+     * This callback will be called when the current [lastActiveModifier] (as of the call of this method) finishes.
      *
      * @param onFinished The callback to call.
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
     @JvmOverloads
     fun after(onFinished: OnModifierFinished? = null): UniversalModifierSequence {
-        if (lastModifier == null) {
+        if (lastActiveModifier == null) {
             append(ModifierType.None, 0f, Easing.None) {}
         }
 
-        lastModifier?.after(onFinished)
+        lastActiveModifier?.after(onFinished)
 
         return this
     }
@@ -412,8 +412,10 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         origin?.registerEntityModifier(modifier)
 
-        lastModifier = modifier
-        lastEndTime = max(lastEndTime, modifier.endTime)
+        if (lastEndTime < modifier.endTime) {
+            lastEndTime = modifier.endTime
+            lastActiveModifier = modifier
+        }
 
         return this
     }
@@ -422,7 +424,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
     override fun close() {
         origin = null
-        lastModifier = null
+        lastActiveModifier = null
 
         startTime = 0f
         currentTime = 0f
