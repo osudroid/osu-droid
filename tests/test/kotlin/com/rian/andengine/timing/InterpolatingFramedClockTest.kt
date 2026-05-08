@@ -38,7 +38,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             assertTrue("Interpolating should not jump against rate.", interpolating.currentTime >= lastValue)
             assertTrue("Interpolating should not jump before source time.", interpolating.currentTime >= source.currentTime)
 
-            Thread.sleep((interpolating.allowableErrorSeconds / 2).toLong() * 1000)
+            Thread.sleep((interpolating.allowableErrorSeconds / 2 * 1e3).toLong())
             lastValue = interpolating.currentTime
         }
 
@@ -59,7 +59,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
                 ++interpolatedCount
             }
 
-            Thread.sleep((interpolating.allowableErrorSeconds / 2).toLong() * 1000)
+            Thread.sleep((interpolating.allowableErrorSeconds / 2 * 1e3).toLong())
             lastValue = interpolating.currentTime
         }
 
