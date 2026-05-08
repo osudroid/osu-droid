@@ -3,10 +3,8 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.UISprite;
 import com.rian.andengine.modifier.ModifierType;
-import com.rian.andengine.modifier.UniversalModifier;
+import com.rian.andengine.modifier.OnModifierFinished;
 import com.rian.andengine.modifier.UniversalModifierSequence;
-
-import javax.annotation.Nullable;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -19,8 +17,10 @@ public class CursorSprite extends UISprite implements ISliderListener {
     public final float baseSize = Config.getCursorSize() * 2;
     private final float clickAnimationTime = 0.25f;
 
-    @Nullable
-    private UniversalModifier rotationModifier;
+    private final OnModifierFinished rotationModifierFinished = e -> {
+        setRotation(0);
+        startRotationModifierLoop();
+    };
 
     private final Function1<UniversalModifierSequence, Unit> clickSequence = sequence -> {
         sequence.scaleTo(baseSize * 1.25f, clickAnimationTime)
@@ -43,9 +43,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
     public void onAttached() {
         super.onAttached();
 
-        if (OsuSkin.get().isRotateCursor()) {
-            rotationModifier = rotateTo(360, 14);
-        }
+        startRotationModifierLoop();
     }
 
     public void handleClick() {
@@ -57,10 +55,6 @@ public class CursorSprite extends UISprite implements ISliderListener {
     public void update(float pSecondsElapsed) {
         if (getScaleX() > 2f) {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
-        }
-
-        if (rotationModifier != null && rotationModifier.isFinished()) {
-            rotationModifier = rotateTo(360, 14);
         }
     }
 
@@ -81,5 +75,11 @@ public class CursorSprite extends UISprite implements ISliderListener {
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize * 1.25f);
         scaleTo(baseSize, clickAnimationTime);
+    }
+
+    private void startRotationModifierLoop() {
+        if (OsuSkin.get().isRotateCursor()) {
+            rotateTo(360, 14).after(rotationModifierFinished);
+        }
     }
 }
