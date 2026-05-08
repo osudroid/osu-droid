@@ -105,8 +105,5 @@ class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requir
     override var rate by decoupledTrack::rate
     override val source by decoupledTrack::source
 
-    override fun changeSource(source: IClock?) {
-        decoupledTrack.changeSource(source)
-        finalClockSource.processFrame()
-    }
+    override fun changeSource(source: IClock?) = decoupledTrack.changeSource(source)
 }
