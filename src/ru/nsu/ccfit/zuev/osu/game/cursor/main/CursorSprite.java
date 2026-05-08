@@ -18,7 +18,9 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 public class CursorSprite extends UISprite implements ISliderListener {
     public final float baseSize = Config.getCursorSize() * 2;
     private final float clickAnimationTime = 0.25f;
-    @Nullable private UniversalModifier rotationModifier;
+
+    @Nullable
+    private UniversalModifier rotationModifier;
 
     private final Function1<UniversalModifierSequence, Unit> clickSequence = sequence -> {
         sequence.scaleTo(baseSize * 1.25f, clickAnimationTime)
@@ -35,19 +37,20 @@ public class CursorSprite extends UISprite implements ISliderListener {
         setOrigin(Anchor.Center);
         setScale(baseSize);
         setTextureRegion(ResourceManager.getInstance().getTexture("cursor"));
+    }
+
+    @Override
+    public void onAttached() {
+        super.onAttached();
 
         if (OsuSkin.get().isRotateCursor()) {
             rotationModifier = rotateTo(360, 14);
-        } else {
-            rotationModifier = null;
         }
     }
-
 
     public void handleClick() {
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize);
-
         beginModifierSequence(clickSequence);
     }
 
