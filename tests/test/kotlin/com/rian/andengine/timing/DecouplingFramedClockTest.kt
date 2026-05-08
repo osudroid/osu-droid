@@ -38,7 +38,7 @@ class DecouplingFramedClockDecouplingIndependentTest(private val allowDecoupling
         decouplingClock.start()
         decouplingClock.processFrame()
 
-        assertTrue(decouplingClock.isRunning)
+        assertTrue(source.isRunning)
         assertTrue(decouplingClock.isRunning)
     }
 
