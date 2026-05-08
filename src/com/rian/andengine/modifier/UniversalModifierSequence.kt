@@ -406,7 +406,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
         modifier.target = origin
         modifier.type = type
         modifier.startTime = currentTime
-        modifier.duration = duration
+        modifier.setDuration(duration)
         modifier.eased(easing)
         modifier.block()
 
