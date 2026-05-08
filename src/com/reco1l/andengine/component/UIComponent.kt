@@ -1103,16 +1103,18 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
         addDelay(delay, propagateChildren)
         val oldDelay = modifierDelay
 
-        beginModifierSequence(block)
+        try {
+            beginModifierSequence(block)
 
-        val newDelay = modifierDelay
+            val newDelay = modifierDelay
 
-        if (!Precision.almostEquals(oldDelay, newDelay)) {
-            throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence is" +
-                    "not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+            if (!Precision.almostEquals(oldDelay, newDelay)) {
+                throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence is" +
+                        "not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+            }
+        } finally {
+            addDelay(-delay, propagateChildren)
         }
-
-        addDelay(-delay, propagateChildren)
     }
 
     //endregion
