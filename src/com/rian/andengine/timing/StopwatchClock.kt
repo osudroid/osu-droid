@@ -53,12 +53,14 @@ open class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : St
 
     override fun reset() {
         resetAccumulatedRate()
+        seekOffset = 0f
 
         super.reset()
     }
 
     override fun restart() {
         resetAccumulatedRate()
+        seekOffset = 0f
 
         super.restart()
     }
