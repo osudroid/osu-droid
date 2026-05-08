@@ -5,7 +5,7 @@ package com.rian.andengine.timing
  *
  * @param T The type of [IClock] provided.
  */
-interface IClockProvider<T : IClock> {
+interface IClockProvider<out T : IClock?> {
     /**
      * The [IClock] provided by this [IClockProvider].
      */
