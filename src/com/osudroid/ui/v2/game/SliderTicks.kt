@@ -16,7 +16,6 @@ class SliderTickContainer : UIContainer() {
 
     fun init(beatmapSlider: Slider) {
         slider = beatmapSlider
-        val lifetimeStart = calculateLifetimeStart(0)
 
         detachChildren()
 
@@ -36,7 +35,7 @@ class SliderTickContainer : UIContainer() {
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
             attachChild(sprite)
 
-            sprite.init(tick, lifetimeStart)
+            sprite.init(tick)
         }
     }
 
@@ -44,8 +43,6 @@ class SliderTickContainer : UIContainer() {
         if (slider == null) {
             return
         }
-
-        val lifetimeStart = calculateLifetimeStart(newSpanIndex)
 
         val spanStartIndex =
             // Amount of slider ticks passed.
@@ -63,20 +60,9 @@ class SliderTickContainer : UIContainer() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(tick, lifetimeStart)
+            sprite.init(tick)
         }
     }
-
-    private fun calculateLifetimeStart(spanIndex: Int): Float {
-        val slider = slider ?: return 0f
-
-        if (spanIndex == 0) {
-            return (slider.startTime - slider.timePreempt).toFloat() / 1000
-        }
-
-        return (slider.startTime + slider.spanDuration * spanIndex).toFloat() / 1000
-    }
-
 
     override fun onDetached() {
         super.onDetached()
@@ -97,18 +83,18 @@ class SliderTickSprite : UISprite() {
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
-     * @param spanLifetimeStart The lifetime start of the current [Slider] span, in seconds.
      */
-    fun init(tick: SliderTick, spanLifetimeStart: Float) {
+    fun init(tick: SliderTick) {
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
+        val fadeInStartTime = startTime - timePreempt
 
         clearEntityModifiers()
 
         alpha = 0f
         setScale(0.5f)
 
-        beginAbsoluteSequence(spanLifetimeStart) {
+        beginAbsoluteSequence(fadeInStartTime) {
             scaleTo(1f, ANIM_DURATION * 4, Easing.OutElasticHalf)
             fadeIn(ANIM_DURATION)
         }
