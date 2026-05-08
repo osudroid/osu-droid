@@ -695,6 +695,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             GameHelper.getSpeedMultiplier() != 1f &&
                 (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class) || mods.contains(ModOldNightCore.class)));
 
+        beatmapClock.setRate(GameHelper.getSpeedMultiplier());
+
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }
@@ -1446,6 +1448,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
                 GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
+                beatmapClock.setRate(currentSpeedMultiplier);
             }
         }
 
