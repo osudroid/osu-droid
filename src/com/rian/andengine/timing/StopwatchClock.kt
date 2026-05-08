@@ -75,9 +75,7 @@ open class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : St
         return true
     }
 
-    override fun toString(): String {
-        return "${this::class.simpleName ?: "StopwatchClock"} (${truncate(currentTime)}ms)"
-    }
+    override fun toString() = "${this::class.simpleName ?: "StopwatchClock"} (${truncate(currentTime * 1e3)}ms)"
 
     private fun resetAccumulatedRate() {
         rateChangeAccumulated = 0f
