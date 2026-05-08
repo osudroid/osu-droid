@@ -29,14 +29,8 @@ class ThrottledFrameClock : FramedClock() {
     override fun processFrame() {
         super.processFrame()
 
-        if (throttling) {
-            if (maximumUpdateHz > 0 && maximumUpdateHz < Double.MAX_VALUE) {
-                throttle()
-            } else {
-                // Even when running at unlimited frame-rate, we should call the scheduler to give lower-priority
-                // background processes a chance to do work.
-                timeSlept = sleepAndUpdateCurrent(0f)
-            }
+        if (throttling && maximumUpdateHz > 0 && maximumUpdateHz < Double.MAX_VALUE) {
+            throttle()
         } else {
             timeSlept = 0f
         }
