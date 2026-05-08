@@ -75,7 +75,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
 
     @Override
     public void onSliderEnd() {
-        clearEntityModifiers();
+        clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize * 1.25f);
         scaleTo(baseSize, clickAnimationTime);
     }
