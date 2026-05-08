@@ -412,7 +412,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         origin?.registerEntityModifier(modifier)
 
-        if (lastEndTime < modifier.endTime) {
+        if (lastActiveModifier == null || lastEndTime < modifier.endTime) {
             lastEndTime = modifier.endTime
             lastActiveModifier = modifier
         }
