@@ -768,7 +768,7 @@ class RoomScene(
             // messages from that player will show their real username.
             val player = room.playersMap[uid] ?: run {
                 Multiplayer.log("WARNING: chatMessage from unknown UID $uid — displaying with stub name")
-                RoomPlayer(id = uid, name = "#$uid", status = PlayerStatus.NotReady, team = null, mods = RoomMods())
+                RoomPlayer(id = uid, name = "#$uid", rank = 0, status = PlayerStatus.NotReady, team = null, mods = RoomMods())
             }
 
             if (!player.isMuted) {

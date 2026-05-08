@@ -11,6 +11,7 @@ import org.json.JSONObject
 fun parsePlayer(o: JSONObject) = RoomPlayer(
     id = o.getString("id").toLong(),
     name = o.getString("username"),
+    rank = o.getInt("rank"),
     status = PlayerStatus[o.getInt("status")] ?: PlayerStatus.NotReady,
     team = if (o.isNull("team")) null else RoomTeam[o.getInt("team")],
     mods = RoomMods(o.getJSONArray("mods"))

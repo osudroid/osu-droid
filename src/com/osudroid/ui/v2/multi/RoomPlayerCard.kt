@@ -111,8 +111,9 @@ class RoomPlayerCard : UILinearContainer() {
     private class RoomPlayerButton : UIButton() {
 
         private lateinit var nameText: CompoundText
+        private lateinit var rankText: UIText
 
-        private val innerContainer: UILinearContainer
+        private lateinit var innerContainer: UILinearContainer
         private var modDisplay: UIComponent? = null
 
         private val bannerSprite: UIShapedSprite
@@ -210,12 +211,27 @@ class RoomPlayerCard : UILinearContainer() {
 
             +avatarSprite
 
-            innerContainer = linearContainer {
-                orientation = Orientation.Vertical
-                inheritAncestorsColor = false
+            container {
+                width = FillParent
+                height = FillParent
 
-                nameText = compoundText {
-                    applyTheme = { color = it.accentColor }
+                innerContainer = linearContainer {
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    orientation = Orientation.Vertical
+                    inheritAncestorsColor = false
+
+                    nameText = compoundText {
+                        spacing = 6f
+                        applyTheme = { color = it.accentColor }
+                    }
+                }
+
+                rankText = text {
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    applyTheme = { color = it.accentColor * 0.8f }
+                    font = ResourceManager.getInstance().getFont("CaptionFont")
                 }
             }
         }
@@ -241,7 +257,7 @@ class RoomPlayerCard : UILinearContainer() {
 
             lastPlayerId = player.id
             nameText.text = player.name
-            nameText.spacing = 6f
+            rankText.text = "#${player.rank}"
 
             updatePlayerIcons(room, player)
 
