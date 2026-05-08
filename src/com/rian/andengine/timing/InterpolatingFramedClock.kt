@@ -135,7 +135,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
                     realTimeClock.elapsedFrameTime
                 )
 
-                val withinAllowableError = abs(framedSourceClock.currentTime - _currentTime) <= allowableErrorSeconds * rate
+                val withinAllowableError = abs(framedSourceClock.currentTime - _currentTime) <= allowableErrorSeconds * abs(rate)
 
                 if (!withinAllowableError) {
                     // if we've exceeded the allowable error, we should use the source clock's time value.
