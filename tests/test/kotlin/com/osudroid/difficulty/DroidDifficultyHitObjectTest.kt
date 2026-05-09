@@ -21,19 +21,19 @@ class DroidDifficultyHitObjectTest {
 
     @Test
     fun `Test previous index`() {
-        Assert.assertNull(_root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].previous(0))
-        Assert.assertNotNull(_root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[1].previous(0))
+        Assert.assertNull(objects[0].previous(0))
+        Assert.assertNotNull(objects[1].previous(0))
     }
 
     @Test
     fun `Test next index`() {
-        Assert.assertNotNull(_root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].next(0))
-        Assert.assertNull(_root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[1].next(0))
+        Assert.assertNotNull(objects[0].next(0))
+        Assert.assertNull(objects[1].next(0))
     }
 
     @Test
     fun `Test No Mod opacity before hit time`() {
-        _root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].apply {
+        objects[0].apply {
             Assert.assertEquals(0.0, opacityAt(400.0, listOf()), 0.0)
             Assert.assertEquals(0.5, opacityAt(600.0, listOf()), 1e-2)
             Assert.assertEquals(1.0, opacityAt(800.0, listOf()), 0.0)
@@ -43,7 +43,7 @@ class DroidDifficultyHitObjectTest {
 
     @Test
     fun `Test Hidden opacity before hit time`() {
-        _root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].apply {
+        objects[0].apply {
             Assert.assertEquals(0.0, opacityAt(400.0, hidden), 0.0)
             Assert.assertEquals(0.5, opacityAt(600.0, hidden), 1e-2)
             Assert.assertEquals(1.0, opacityAt(800.0, hidden), 0.0)
@@ -54,7 +54,7 @@ class DroidDifficultyHitObjectTest {
 
     @Test
     fun `Test Traceable opacity before hit time`() {
-        _root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].apply {
+        objects[0].apply {
             Assert.assertEquals(0.0, opacityAt(400.0, traceable), 0.0)
             Assert.assertEquals(0.0, opacityAt(700.0, traceable), 0.0)
             Assert.assertEquals(0.0, opacityAt(1000.0, traceable), 0.0)
@@ -63,7 +63,7 @@ class DroidDifficultyHitObjectTest {
 
     @Test
     fun `Test opacity after hit time`() {
-        _root_ide_package_.com.osudroid.difficulty.DroidDifficultyHitObjectTest.Companion.objects[0].apply {
+        objects[0].apply {
             Assert.assertEquals(0.0, opacityAt(1100.0, listOf()), 0.0)
             Assert.assertEquals(0.0, opacityAt(1100.0, hidden), 0.0)
             Assert.assertEquals(0.0, opacityAt(1100.0, traceable), 0.0)

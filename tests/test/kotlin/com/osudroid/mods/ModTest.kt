@@ -9,7 +9,7 @@ import org.junit.Test
 class ModTest {
     @Test
     fun `Test conversion to APIMod with default settings`() {
-        _root_ide_package_.com.osudroid.mods.TestMod().toAPIMod().apply {
+        TestMod().toAPIMod().apply {
             Assert.assertEquals("TM", acronym)
             Assert.assertNull(settings)
         }
@@ -17,7 +17,7 @@ class ModTest {
 
     @Test
     fun `Test conversion to APIMod with one modified setting`() {
-        _root_ide_package_.com.osudroid.mods.TestMod().apply {
+        TestMod().apply {
             testSetting1 = true
 
             toAPIMod().apply {
@@ -29,13 +29,13 @@ class ModTest {
 
     @Test
     fun `Test deep copy`() {
-        val originalMod = _root_ide_package_.com.osudroid.mods.TestMod().apply {
+        val originalMod = TestMod().apply {
             testSetting1 = true
             testSetting2 = true
             testSetting3 = true
         }
 
-        val copiedMod = originalMod.deepCopy() as com.osudroid.mods.TestMod
+        val copiedMod = originalMod.deepCopy() as TestMod
 
         Assert.assertNotSame(originalMod, copiedMod)
         Assert.assertEquals(originalMod, copiedMod)

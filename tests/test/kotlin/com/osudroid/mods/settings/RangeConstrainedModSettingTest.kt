@@ -14,7 +14,7 @@ class RangeConstrainedModSettingTest {
 
         // Test min > max
         test {
-            _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+            TestRangeConstrainedModSetting(
                 defaultValue = 1,
                 minValue = 2,
                 maxValue = 1
@@ -23,7 +23,7 @@ class RangeConstrainedModSettingTest {
 
         // Test default > max
         test {
-            _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+            TestRangeConstrainedModSetting(
                 defaultValue = 3,
                 minValue = 1,
                 maxValue = 2
@@ -32,7 +32,7 @@ class RangeConstrainedModSettingTest {
 
         // Test default < min
         test {
-            _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+            TestRangeConstrainedModSetting(
                 defaultValue = 0,
                 minValue = 1,
                 maxValue = 2
@@ -42,7 +42,7 @@ class RangeConstrainedModSettingTest {
 
     @Test
     fun `Test assign boundaries`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val setting = TestRangeConstrainedModSetting(
             defaultValue = 5,
             minValue = 1,
             maxValue = 10
@@ -57,7 +57,7 @@ class RangeConstrainedModSettingTest {
 
     @Test
     fun `Test min assign boundaries`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val setting = TestRangeConstrainedModSetting(
             defaultValue = 5,
             minValue = 1,
             maxValue = 10
@@ -74,7 +74,7 @@ class RangeConstrainedModSettingTest {
 
     @Test
     fun `Test max assign boundaries`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val setting = TestRangeConstrainedModSetting(
             defaultValue = 5,
             minValue = 1,
             maxValue = 10
@@ -91,7 +91,7 @@ class RangeConstrainedModSettingTest {
 
     @Test
     fun `Test out of boundary assignments`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val setting = TestRangeConstrainedModSetting(
             defaultValue = 5,
             minValue = 1,
             maxValue = 10
@@ -103,12 +103,12 @@ class RangeConstrainedModSettingTest {
 
     @Test
     fun `Test copying`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val setting = TestRangeConstrainedModSetting(
             defaultValue = 5,
             minValue = 1,
             maxValue = 10
         )
-        val otherSetting = _root_ide_package_.com.osudroid.mods.settings.TestRangeConstrainedModSetting(
+        val otherSetting = TestRangeConstrainedModSetting(
             defaultValue = 6,
             minValue = 2,
             maxValue = 9

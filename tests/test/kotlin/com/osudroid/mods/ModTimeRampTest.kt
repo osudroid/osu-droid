@@ -6,7 +6,7 @@ import org.junit.Test
 class ModTimeRampTest {
     @Test
     fun `Test toString`() {
-        Assert.assertEquals("TS (1.00x - 1.50x)", _root_ide_package_.com.osudroid.mods.TestModTimeRamp().toString())
+        Assert.assertEquals("TS (1.00x - 1.50x)", TestModTimeRamp().toString())
     }
 }
 

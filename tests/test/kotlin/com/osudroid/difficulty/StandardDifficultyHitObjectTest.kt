@@ -19,35 +19,35 @@ class StandardDifficultyHitObjectTest {
 
     @Test
     fun `Test previous index`() {
-        Assert.assertNull(_root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.previous(0))
+        Assert.assertNull(obj.previous(0))
     }
 
     @Test
     fun `Test next index`() {
-        Assert.assertNull(_root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.next(0))
+        Assert.assertNull(obj.next(0))
     }
 
     @Test
     fun `Test No Mod opacity before hit time`() {
-        Assert.assertEquals(0.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(400.0, listOf()), 0.0)
-        Assert.assertEquals(0.5, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(600.0, listOf()), 1e-2)
-        Assert.assertEquals(1.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(800.0, listOf()), 0.0)
-        Assert.assertEquals(1.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(1000.0, listOf()), 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(400.0, listOf()), 0.0)
+        Assert.assertEquals(0.5, obj.opacityAt(600.0, listOf()), 1e-2)
+        Assert.assertEquals(1.0, obj.opacityAt(800.0, listOf()), 0.0)
+        Assert.assertEquals(1.0, obj.opacityAt(1000.0, listOf()), 0.0)
     }
 
     @Test
     fun `Test Hidden opacity before hit time`() {
-        Assert.assertEquals(0.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(400.0, hidden), 0.0)
-        Assert.assertEquals(0.5, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(600.0, hidden), 1e-2)
-        Assert.assertEquals(1.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(800.0, hidden), 0.0)
-        Assert.assertEquals(0.44, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(900.0, hidden), 1e-2)
-        Assert.assertEquals(0.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(1000.0, hidden), 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(400.0, hidden), 0.0)
+        Assert.assertEquals(0.5, obj.opacityAt(600.0, hidden), 1e-2)
+        Assert.assertEquals(1.0, obj.opacityAt(800.0, hidden), 0.0)
+        Assert.assertEquals(0.44, obj.opacityAt(900.0, hidden), 1e-2)
+        Assert.assertEquals(0.0, obj.opacityAt(1000.0, hidden), 0.0)
     }
 
     @Test
     fun `Test opacity after hit time`() {
-        Assert.assertEquals(0.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(1100.0, listOf()), 0.0)
-        Assert.assertEquals(0.0, _root_ide_package_.com.osudroid.difficulty.StandardDifficultyHitObjectTest.Companion.obj.opacityAt(1100.0, hidden), 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(1100.0, listOf()), 0.0)
+        Assert.assertEquals(0.0, obj.opacityAt(1100.0, hidden), 0.0)
     }
 
     companion object {

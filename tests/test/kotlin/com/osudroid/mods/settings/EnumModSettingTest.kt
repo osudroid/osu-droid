@@ -14,13 +14,13 @@ class EnumModSettingTest {
         val setting = createSetting()
         setting.load(json)
 
-        Assert.assertEquals(_root_ide_package_.com.osudroid.mods.settings.TestEnum.Value2, setting.value)
+        Assert.assertEquals(TestEnum.Value2, setting.value)
     }
 
     @Test
     fun `Test saving value to JSON`() {
         val setting = createSetting()
-        setting.value = _root_ide_package_.com.osudroid.mods.settings.TestEnum.Value2
+        setting.value = TestEnum.Value2
 
         val json = buildJsonObject {
             setting.save(this)
@@ -29,7 +29,7 @@ class EnumModSettingTest {
         Assert.assertEquals(1, json["test"]!!.jsonPrimitive.int)
     }
 
-    private fun createSetting() = EnumModSetting(name = "Test", key = "test", defaultValue = _root_ide_package_.com.osudroid.mods.settings.TestEnum.Value1)
+    private fun createSetting() = EnumModSetting(name = "Test", key = "test", defaultValue = TestEnum.Value1)
 }
 
 private enum class TestEnum {

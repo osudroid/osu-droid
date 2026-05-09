@@ -8,7 +8,7 @@ import org.junit.Test
 class ModSettingTest {
     @Test
     fun `Test setting reset`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestModSetting(1)
+        val setting = TestModSetting(1)
 
         setting.defaultValue = 2
         setting.value = 3
@@ -21,8 +21,8 @@ class ModSettingTest {
 
     @Test
     fun `Test copying`() {
-        val setting = _root_ide_package_.com.osudroid.mods.settings.TestModSetting(1)
-        val otherSetting = _root_ide_package_.com.osudroid.mods.settings.TestModSetting(2)
+        val setting = TestModSetting(1)
+        val otherSetting = TestModSetting(2)
 
         otherSetting.copyFrom(setting)
 

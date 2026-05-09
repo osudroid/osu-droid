@@ -10,11 +10,11 @@ import kotlin.math.max
 import kotlin.math.pow
 
 /**
- * Represents a [com.osudroid.beatmaps.hitobjects.HitObject] with additional information for osu!droid difficulty calculation.
+ * Represents a [HitObject] with additional information for osu!droid difficulty calculation.
  */
 class DroidDifficultyHitObject(
     /**
-     * The [com.osudroid.beatmaps.hitobjects.HitObject] that this [DroidDifficultyHitObject] wraps.
+     * The [HitObject] that this [DroidDifficultyHitObject] wraps.
      */
     obj: HitObject,
 
