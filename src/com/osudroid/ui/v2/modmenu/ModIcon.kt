@@ -11,8 +11,6 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
-import com.rian.osu.utils.*
 import org.andengine.engine.camera.*
 import org.andengine.opengl.texture.region.*
 import org.andengine.opengl.util.GLState

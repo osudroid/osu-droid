@@ -5,11 +5,9 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.reco1l.toolkt.kotlin.fastForEach
-import com.rian.osu.beatmap.constants.HitObjectType
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.util.GLState
 import com.osudroid.beatmaps.constants.HitObjectType
-import javax.microedition.khronos.opengles.GL10
 
 class HUDColorHitErrorMeter : HUDHitErrorMeter() {
     private val indicators = MutableList(20) { Indicator(it, 0f, Color4.Black) }

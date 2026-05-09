@@ -7,14 +7,12 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.rian.osu.math.*
 import org.andengine.engine.camera.*
 import org.andengine.entity.*
 import org.andengine.input.touch.*
 import org.andengine.input.touch.TouchEvent.*
 import org.andengine.opengl.util.GLState
 
-import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 @Suppress("MemberVisibilityCanBePrivate")
