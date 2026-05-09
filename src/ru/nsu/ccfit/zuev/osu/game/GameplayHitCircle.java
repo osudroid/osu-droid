@@ -8,11 +8,11 @@ import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.reco1l.framework.Color4;
-import com.rian.osu.beatmap.HitWindow;
-import com.rian.osu.beatmap.constants.HitObjectType;
-import com.rian.osu.beatmap.hitobject.HitCircle;
-import com.rian.osu.gameplay.GameplayHitSampleInfo;
-import com.rian.osu.mods.ModHidden;
+import com.osudroid.beatmaps.HitWindow;
+import com.osudroid.beatmaps.constants.HitObjectType;
+import com.osudroid.beatmaps.hitobjects.HitCircle;
+import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
 

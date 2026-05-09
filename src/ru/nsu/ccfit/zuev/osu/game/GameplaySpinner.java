@@ -5,10 +5,10 @@ import android.graphics.PointF;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
-import com.rian.osu.beatmap.hitobject.Spinner;
-import com.rian.osu.gameplay.GameplayHitSampleInfo;
-import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
+import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo;
+import com.osudroid.beatmaps.hitobjects.Spinner;
+import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.game.GameplaySequenceHitSampleInfo;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;

@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
+import com.osudroid.utils.ModUtils
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -10,8 +11,8 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
-import com.rian.osu.utils.*
+import com.osudroid.mods.*
+import com.osudroid.utils.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*

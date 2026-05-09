@@ -4,8 +4,8 @@ import android.graphics.PointF;
 
 import com.osudroid.game.Cursor;
 import com.reco1l.framework.Color4;
-import com.rian.osu.beatmap.constants.HitObjectType;
-import com.rian.osu.gameplay.GameplayHitSampleInfo;
+import com.osudroid.beatmaps.constants.HitObjectType;
+import com.osudroid.game.GameplayHitSampleInfo;
 
 import java.util.BitSet;
 import java.util.List;

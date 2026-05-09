@@ -10,8 +10,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.utils.ModUtils
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config

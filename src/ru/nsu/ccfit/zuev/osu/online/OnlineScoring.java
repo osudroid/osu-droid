@@ -6,7 +6,7 @@ import android.net.Uri;
 import com.google.android.material.snackbar.Snackbar;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.utils.Execution;
-import com.rian.osu.ui.SendingPanel;
+import com.osudroid.ui.SendingPanel;
 
 import org.anddev.andengine.util.Debug;
 

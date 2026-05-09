@@ -6,10 +6,10 @@ import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.rian.osu.beatmap.hitobject.Slider;
-import com.rian.osu.beatmap.hitobject.SliderPathType;
-import com.rian.osu.mods.*;
-import com.rian.osu.utils.PathApproximation;
+import com.osudroid.beatmaps.hitobjects.Slider;
+import com.osudroid.beatmaps.hitobjects.SliderPathType;
+import com.osudroid.mods.*;
+import com.osudroid.utils.PathApproximation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

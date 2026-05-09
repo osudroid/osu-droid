@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import com.rian.osu.GameMode;
+import com.osudroid.GameMode;
 
 /**
  * Represents the algorithm used to calculate the difficulty of a beatmap.

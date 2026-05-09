@@ -54,7 +54,7 @@ import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.reco1l.osu.ui.MessageDialog;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
