@@ -337,7 +337,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
      * Whether the component is currently animating.
      */
     val isAnimating
-        get() = !mEntityModifiers.isNullOrEmpty()
+        get() = !mEntityModifiers.isNullOrEmpty() || universalModifierTrackers.any { !it.modifiers.isEmpty() }
 
     /**
      * The mode in which the entity is attached to its parent.
@@ -797,7 +797,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
         background?.onManagedUpdate(deltaTimeSec)
         foreground?.onManagedUpdate(deltaTimeSec)
 
-        modifierDelay = 0f
+        updateModifiers()
 
         super.onManagedUpdate(deltaTimeSec)
     }
@@ -963,25 +963,157 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
 
     //region Modifiers
 
+    private val universalModifierTrackers = mutableListOf<UniversalModifierTargetTracker>()
+
+    /**
+     * Appends a [UniversalModifier] to this [UIComponent]. The [UniversalModifier] will be tracked and
+     * automatically.
+     *
+     * @param modifier The [UniversalModifier] to append.
+     */
+    fun appendModifier(modifier: UniversalModifier) {
+        getTrackerFor(modifier.type).add(modifier)
+    }
+
+    private inline fun appendModifier(
+        type: ModifierType,
+        duration: Float,
+        easing: Easing,
+        crossinline block: UniversalModifier.() -> Unit
+    ): UniversalModifier {
+        val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
+
+        modifier.target = this
+        modifier.type = type
+        modifier.startTime = modifierStartTime
+        modifier.duration = duration
+        modifier.eased(easing)
+        modifier.block()
+
+        appendModifier(modifier)
+
+        return modifier
+    }
+
+    /**
+     * Obtains the [UniversalModifierTargetTracker] for the specified [ModifierType]. If one does not exist, it will be
+     * created.
+     *
+     * @param type The [ModifierType] to get the [UniversalModifierTargetTracker] for.
+     * @return The [UniversalModifierTargetTracker] for [type].
+     */
+    private fun getTrackerFor(type: ModifierType): UniversalModifierTargetTracker {
+        for (i in universalModifierTrackers.indices) {
+            val tracker = universalModifierTrackers[i]
+
+            if (tracker.targetMember == type.targetMember) {
+                return tracker
+            }
+        }
+
+        val tracker = UniversalModifierTargetTracker(type.targetMember, this)
+        universalModifierTrackers += tracker
+
+        return tracker
+    }
+
+    /**
+     * Resets [modifierDelay] and processes updates to [UniversalModifier]s.
+     */
+    protected fun updateModifiers() {
+        modifierDelay = 0f
+
+        updateModifiers(time?.current ?: return)
+    }
+
+    private fun updateModifiers(time: Float) {
+        universalModifierTrackers.fastForEach { it.update(time) }
+    }
+
+    override fun clearEntityModifiers() {
+        super.clearEntityModifiers()
+
+        universalModifierTrackers.fastForEach { it.clear() }
+    }
+
     /**
      * Clears [UniversalModifier]s of the specified [ModifierType] from this [UIComponent].
      *
      * Unlike the vararg variant, this method avoids array allocation in cases where there is only one [ModifierType] to
      * remove.
      *
-     * @param type The [ModifierType] to remove.
+     * @param type The [ModifierType] to clear.
+     * @param propagateChildren Whether to also clear [UniversalModifier]s of children. Defaults to `false`.
      */
-    fun clearModifiers(type: ModifierType) {
-        unregisterEntityModifiers { it is UniversalModifier && it.type == type }
+    @JvmOverloads
+    fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clear(type) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(type, true) }
+        }
     }
 
     /**
      * Clears [UniversalModifier]s of the specified [ModifierType]s from this [UIComponent].
      *
+     * @param propagateChildren Whether to also clear [UniversalModifier]s of children. Defaults to `false`.
      * @param types The [ModifierType]s to remove.
      */
-    fun clearModifiers(vararg types: ModifierType) {
-        unregisterEntityModifiers { it is UniversalModifier && it.type in types }
+    @JvmOverloads
+    fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
+        universalModifierTrackers.fastForEach { it.clear(*types) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s that start after [time].
+     * 
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s with the given [ModifierType] that start after [time].
+     *
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param type The [ModifierType] to clear.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time, type) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s with the given [ModifierType]s that start after [time].
+     *
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param types The [ModifierType]s to clear.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time, *types) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+        }
     }
 
     /**
@@ -1413,30 +1545,6 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
     @JvmOverloads
     fun heightTo(height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
         appendModifier(ModifierType.Height, duration, easing) { finalValues[0] = height }
-
-    //endregion
-
-    //region Modifiers Registration
-
-    private inline fun appendModifier(
-        type: ModifierType,
-        duration: Float,
-        easing: Easing,
-        crossinline block: UniversalModifier.() -> Unit
-    ): UniversalModifier {
-        val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
-
-        modifier.target = this
-        modifier.type = type
-        modifier.startTime = modifierStartTime
-        modifier.setDuration(duration)
-        modifier.eased(easing)
-        modifier.block()
-
-        registerEntityModifier(modifier)
-
-        return modifier
-    }
 
     //endregion
 
