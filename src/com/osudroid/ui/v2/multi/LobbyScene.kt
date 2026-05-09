@@ -184,13 +184,13 @@ class LobbyScene : UIScene() {
         val opposite = if (target == roomContainer) messageContainer else roomContainer
 
         opposite.apply {
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             scaleTo(0.95f, 0.3f)
             fadeOut(0.3f)
         }
 
         target.apply {
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
 
             scaleX = 0.95f
             scaleY = 0.95f

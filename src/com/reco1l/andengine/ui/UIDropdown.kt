@@ -171,7 +171,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
     fun show() {
         if (!isExpanded) {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             fadeTo(1f, 0.2f)
             scaleTo(1f, 0.2f)
 
@@ -187,7 +187,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
     fun hide() {
         if (isExpanded) {
             currentScene = null
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             scaleTo(0.9f, 0.2f)
             fadeTo(0f, 0.2f).after {
                 updateThread {

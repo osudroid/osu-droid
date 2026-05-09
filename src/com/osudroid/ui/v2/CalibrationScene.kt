@@ -39,7 +39,6 @@ import com.reco1l.osu.ui.PromptDialog
 import com.osudroid.beatmaps.DroidHitWindow
 import com.osudroid.math.Interpolation
 import com.rian.andengine.modifier.ModifierType
-import com.rian.osu.beatmap.DroidHitWindow
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.anddev.andengine.input.touch.TouchEvent
@@ -588,7 +587,7 @@ object CalibrationScene : UIScene() {
     /** Pop-in judgement badge above the hit circle: scale 0.7 → 1.1 → fade out. */
     private fun showJudgement(judgement: Judgement) {
         judgementText.apply {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             setText(judgement.label)
             color = judgement.color
             setScale(0.7f)
@@ -604,7 +603,7 @@ object CalibrationScene : UIScene() {
     /** Expanding outline ring that bursts outward and fades – colored by judgement. */
     private fun triggerRipple(judgement: Judgement) {
         rippleCircle.apply {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             color = judgement.color
             setScale(1f)
             alpha = 0.75f

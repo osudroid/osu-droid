@@ -145,7 +145,7 @@ open class UIModal(
             onShow()
             isVisible = true
 
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             createShowAnimation()().after {
                 onShown()
             }
@@ -159,7 +159,7 @@ open class UIModal(
         if (isVisible) {
             onHide()
 
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             createHideAnimation()().after {
                 isVisible = false
                 onHidden()

@@ -49,7 +49,7 @@ open class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initia
         super.onValueChanged()
 
         background!!.clearModifiers(ModifierType.Color)
-        checkSprite.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+        checkSprite.clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
 
         if (value) {
             background!!.colorTo(Theme.current.accentColor * 0.5f, 0.1f)
