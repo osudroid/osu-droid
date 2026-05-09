@@ -9,7 +9,6 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.andengine.modifier.OnModifierFinished
-import com.rian.osu.beatmap.hitobject.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin

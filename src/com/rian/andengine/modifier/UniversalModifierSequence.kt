@@ -406,11 +406,11 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
         modifier.target = origin
         modifier.type = type
         modifier.startTime = currentTime
-        modifier.setDuration(duration)
+        modifier.duration = duration
         modifier.eased(easing)
         modifier.block()
 
-        origin?.registerEntityModifier(modifier)
+        origin?.appendModifier(modifier)
 
         if (lastActiveModifier == null || lastEndTime < modifier.endTime) {
             lastEndTime = modifier.endTime

@@ -9,12 +9,10 @@ import com.reco1l.andengine.component.UIComponent
 import com.reco1l.framework.interpolate
 import kotlin.math.max
 import kotlin.math.min
-import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.modifier.IEntityModifier
-import org.anddev.andengine.util.modifier.IModifier
 
 /**
- * An [IEntityModifier] that can be used to apply different types of modifications to a [UIComponent]. This allows
+ * A modifier that can be used to apply different types of modifications to a [UIComponent]. This allows
  * instances of the class to be recycled in a pool.
  *
  * Unlike regular [IEntityModifier]s, which rely on relative timing from the frame it is registered, [UniversalModifier]
@@ -25,8 +23,13 @@ import org.anddev.andengine.util.modifier.IModifier
  * @author Reco1l, Rian8337
  */
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) :
-    IEntityModifier, IPoolable {
+    IPoolable, Comparable<UniversalModifier> {
     override var isRecycled = false
+
+    /**
+     * The identifier of this [UniversalModifier], used for comparison against other [UniversalModifier]s.
+     */
+    var id = -1L
 
     /**
      * The [UIComponent] to which this [UniversalModifier] is applied.
@@ -46,7 +49,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * The duration of this [UniversalModifier], in seconds relative to [startTime].
      */
-    private var duration = 0f
+    var duration = 0f
         set(value) {
             field = max(0f, value)
         }
@@ -76,8 +79,22 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Whether this [UniversalModifier] has been applied to [target].
      */
+    @get:JvmName("isApplied")
     var applied = false
         private set
+
+    /**
+     * Whether this [UniversalModifier] has been applied to [target] until the end.
+     */
+    @get:JvmName("isAppliedToEnd")
+    var appliedToEnd = false
+        private set
+
+    /**
+     * Invoked when this [UniversalModifier] has finished and is about to be removed from a
+     * [UniversalModifierTargetTracker].
+     */
+    var onFinished: OnModifierFinished? = null
 
     /**
      * The [Easing] function applied to this [UniversalModifier].
@@ -85,12 +102,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     private var easing = Easing.None
 
     /**
-     * Invoked when this [UniversalModifier] finishes.
-     */
-    private var onFinished: OnModifierFinished? = null
-
-    /**
-     * Sets the callback to be invoked when this [UniversalModifier] finishes.
+     * Sets the callback to be invoked when this [UniversalModifier] has finished and is about to be removed from a
+     * [UniversalModifierTargetTracker].
      */
     fun after(onFinished: OnModifierFinished?): UniversalModifier {
         this.onFinished = onFinished
@@ -107,53 +120,33 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         return this
     }
 
-    private var lastUpdateTime = 0f
-
-    override fun onUpdate(pSecondsElapsed: Float, pItem: IEntity?): Float {
-        if (pSecondsElapsed == 0f) {
-            return 0f
-        }
-
-        val target = target ?: return 0f
-        val time = target.time ?: return 0f
-
-        if (time.current < startTime) {
-            return 0f
-        }
+    /**
+     * Applies this [UniversalModifier] to [target] based on the provided time.
+     *
+     * @param time The time.
+     */
+    fun apply(time: Float) {
+        val target = target ?: return
 
         if (!hasInitialValues) {
             initialValues = type.getInitialValues(target, initialValues)
             hasInitialValues = true
         }
 
-        if (!applied) {
-            lastUpdateTime = startTime
-            applied = true
-        }
+        applied = true
 
-        val elapsed = min(time.current, endTime) - startTime
+        val elapsed = min(time, endTime) - startTime
         val percentage = if (duration > 0) easing.interpolate(elapsed / duration).coerceIn(0f, 1f) else 1f
 
         type.setValues(target, initialValues, finalValues, percentage)
 
-        val deltaSec = time.current - lastUpdateTime
-        lastUpdateTime += deltaSec
-
-        if (isFinished) {
-            lastUpdateTime = endTime
-            onFinished?.invoke(target)
-        }
-
-        return max(0f, deltaSec)
+        appliedToEnd = time >= endTime
     }
 
-    override fun onUnregister() {
-        reset()
-
-        pool?.release(this)
-    }
-
-    override fun reset() {
+    /**
+     * Releases this [UniversalModifier] back to the pool.
+     */
+    fun release() {
         target = null
         type = ModifierType.None
         startTime = 0f
@@ -161,51 +154,18 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         easing = Easing.None
         hasInitialValues = false
         applied = false
+        appliedToEnd = false
         onFinished = null
-        lastUpdateTime = 0f
+
+        pool?.release(this)
     }
 
-    override fun isFinished() = lastUpdateTime >= endTime
-    override fun isRemoveWhenFinished() = true
-    override fun setRemoveWhenFinished(pRemoveWhenFinished: Boolean) = Unit
-
-    override fun getSecondsElapsed() = max(0f, lastUpdateTime - startTime)
-    override fun getDuration() = duration
-
-    /**
-     * Sets the duration of this [UniversalModifier].
-     *
-     * @param duration The duration of this [UniversalModifier], in seconds relative to [startTime].
-     */
-    fun setDuration(duration: Float): UniversalModifier {
-        this.duration = duration
-
-        return this
-    }
-
-    override fun addModifierListener(pModifierListener: IModifier.IModifierListener<IEntity?>?) = Unit
-    override fun removeModifierListener(pModifierListener: IModifier.IModifierListener<IEntity?>?) = false
-
-    override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
-        modifier.target = target
-        modifier.type = type
-        modifier.startTime = startTime
-        modifier.duration = duration
-        modifier.easing = easing
-        modifier.hasInitialValues = hasInitialValues
-        modifier.onFinished = onFinished
-        modifier.lastUpdateTime = lastUpdateTime
-        modifier.initialValues = initialValues.copyOf()
-        modifier.finalValues = finalValues.copyOf()
-    }
+    override fun compareTo(other: UniversalModifier) =
+        startTime.compareTo(other.startTime).takeIf { it != 0 } ?: id.compareTo(other.id)
 
     companion object {
         val GlobalPool = SynchronizedPool<UniversalModifier>(200).apply {
             release(UniversalModifier(this))
         }
     }
-}
-
-fun interface OnModifierFinished {
-    operator fun invoke(entity: IEntity)
 }
