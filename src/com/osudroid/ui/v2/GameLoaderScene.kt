@@ -63,9 +63,6 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             scaleY = 0.9f
             scaleCenter = Anchor.Center
 
-            fadeIn(0.2f, Easing.OutCubic)
-            scaleTo(1f, 0.2f, Easing.OutCubic)
-
             if (beatmapInfo.epilepsyWarning) {
                 ResourceManager.getInstance().loadHighQualityAsset("warning", "warning.png")
 
@@ -189,7 +186,10 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
     override fun onAttached() {
         super.onAttached()
+
         mainContainer.paddingBottom = if (Multiplayer.isConnected) Multiplayer.roomScene!!.chat.buttonHeight + 12f else 0f
+        mainContainer.fadeIn(0.2f, Easing.OutCubic)
+        mainContainer.scaleTo(1f, 0.2f, Easing.OutCubic)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
