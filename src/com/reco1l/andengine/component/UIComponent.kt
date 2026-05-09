@@ -4,6 +4,7 @@ import android.util.*
 import android.view.*
 import com.edlplan.framework.easing.Easing
 import com.osudroid.*
+import com.osudroid.math.Precision
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
@@ -13,7 +14,6 @@ import com.reco1l.toolkt.kotlin.*
 import com.rian.andengine.modifier.*
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IFrameBasedClock
-import com.rian.osu.math.Precision
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*

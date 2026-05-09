@@ -1,6 +1,6 @@
 package com.rian.andengine.timing
 
-import com.rian.osu.math.Precision
+import com.osudroid.math.Precision
 import kotlin.math.abs
 import org.junit.Assert.*
 import org.junit.Before

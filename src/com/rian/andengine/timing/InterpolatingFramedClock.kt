@@ -1,6 +1,6 @@
 package com.rian.andengine.timing
 
-import com.rian.osu.math.Interpolation
+import com.osudroid.math.Interpolation
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
