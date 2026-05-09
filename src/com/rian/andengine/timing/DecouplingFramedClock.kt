@@ -72,7 +72,13 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
      */
     private var pendingSourceRestartAfterNegativeSeek = false
 
-    override val timeInfo = FrameTimeInfo()
+    private val _timeInfo = FrameTimeInfo()
+
+    override val timeInfo
+        get() = _timeInfo.apply {
+            current = currentTime
+            elapsed = elapsedFrameTime
+        }
 
     init {
         changeSource(source)
@@ -132,9 +138,6 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
             lastReferenceTime = referenceTime
             currentTime = _currentTime
             elapsedFrameTime = currentTime - lastTime
-
-            timeInfo.current = currentTime
-            timeInfo.elapsed = elapsedFrameTime
         }
     }
 

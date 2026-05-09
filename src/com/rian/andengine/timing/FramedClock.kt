@@ -46,13 +46,19 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
 
     override val isRunning by this.source::isRunning
 
+    private val _timeInfo = FrameTimeInfo()
+
+    override val timeInfo
+        get() = _timeInfo.apply {
+            current = currentTime
+            elapsed = elapsedFrameTime
+        }
+
     private var timeUntilNextCalculation = 0f
     private var timeSinceLastCalculation = 0f
     private var framesSinceLastCalculation = 0
 
     private val fpsCalculationInterval = 0.25f
-
-    override val timeInfo = FrameTimeInfo()
 
     override fun changeSource(source: IClock?) {
         this.source = source ?: StopwatchClock(true)
@@ -103,9 +109,6 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
 
         lastFrameTime = currentTime
         currentTime = sourceTime
-
-        timeInfo.current = currentTime
-        timeInfo.elapsed = elapsedFrameTime
     }
 
     override fun toString() = "${this::class.simpleName} (${truncate(currentTime * 1e3)}ms, $framesPerSecond FPS)"

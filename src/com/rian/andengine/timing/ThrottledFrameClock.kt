@@ -60,9 +60,6 @@ class ThrottledFrameClock : FramedClock() {
 
         currentTime = sourceTime
 
-        timeInfo.current = currentTime
-        timeInfo.elapsed = elapsedFrameTime
-
         return currentTime - before
     }
 }

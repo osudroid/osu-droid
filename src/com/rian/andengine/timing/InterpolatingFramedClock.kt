@@ -77,7 +77,13 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
 
     private var _currentTime = 0f
 
-    override val timeInfo = FrameTimeInfo()
+    private val _timeInfo = FrameTimeInfo()
+
+    override val timeInfo
+        get() = _timeInfo.apply {
+            current = currentTime
+            elapsed = elapsedFrameTime
+        }
 
     init {
         changeSource(source)
@@ -163,9 +169,6 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
             isRunning = sourceIsRunning
             currentTime = _currentTime
             elapsedFrameTime = currentTime - lastTime
-
-            timeInfo.current = currentTime
-            timeInfo.elapsed = elapsedFrameTime
         }
     }
 
