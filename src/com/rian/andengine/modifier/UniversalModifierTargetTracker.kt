@@ -58,8 +58,16 @@ class UniversalModifierTargetTracker(
         // If the new modifier could have an immediate effect, make the effect happen immediately.
         val time = component.time
 
-        if (time != null && (modifier.startTime < time.current || modifier.endTime <= time.current)) {
-            update(time.current)
+        if (time != null && modifier.startTime <= time.current) {
+            if (index > 0) {
+                val prevModifier = modifiers[index - 1]
+
+                if (!prevModifier.appliedToEnd) {
+                    prevModifier.apply(modifier.startTime)
+                }
+            }
+
+            modifier.apply(time.current)
         }
     }
 
