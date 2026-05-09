@@ -1,7 +1,6 @@
 package com.rian.andengine.modifier
 
 import com.reco1l.andengine.component.UIComponent
-import com.reco1l.toolkt.kotlin.fastForEach
 
 /**
  * Tracks the lifetime of [UniversalModifier]s for one specified target member of a [UIComponent].
@@ -205,13 +204,16 @@ class UniversalModifierTargetTracker(
      * removing them.
      */
     fun finish() {
-        modifiers.fastForEach {
-            it.apply(it.endTime)
-            it.onFinished?.invoke(component)
-            it.release()
-        }
+        while (modifiers.isNotEmpty()) {
+            // We remove at 0 to process the elements in chronological order.
+            // If a callback adds a new modifier, it will be placed according to its startTime.
+            // This ensures the entire chain is finished until the tracker is truly empty.
+            val modifier = _modifiers.removeAt(0)
 
-        clear()
+            modifier.apply(modifier.endTime)
+            modifier.onFinished?.invoke(component)
+            modifier.release()
+        }
     }
 
     /**
@@ -220,9 +222,12 @@ class UniversalModifierTargetTracker(
      * @param time The time.
      */
     fun update(time: Float) {
-        var removeCount = 0
+        val modifiers = _modifiers
+        val modifierCount = modifiers.size
 
-        for (i in modifiers.indices) {
+        // First pass: Apply modifiers and handle state hand-offs.
+        // We use a fixed count to avoid processing modifiers added during this frame.
+        for (i in 0 until modifierCount) {
             val modifier = modifiers[i]
 
             if (time < modifier.startTime) {
@@ -245,21 +250,29 @@ class UniversalModifierTargetTracker(
             if (!modifier.appliedToEnd) {
                 modifier.apply(time)
             }
-
-            if (modifier.appliedToEnd && i == removeCount) {
-                removeCount++
-            }
         }
 
-        if (removeCount > 0) {
-            val modifiersToRemove = _modifiers.subList(0, removeCount)
+        // Second pass: Remove finished modifiers and invoke callbacks.
+        // We iterate forward using a while loop to safely handle removals and ensure chronological callbacks.
+        var i = 0
 
-            modifiersToRemove.fastForEach {
-                it.onFinished?.invoke(component)
-                it.release()
+        while (i < modifiers.size) {
+            val modifier = modifiers[i]
+
+            // We must not process modifiers that have not started yet.
+            // This also prevents processing re-entrant additions if they start in the future.
+            if (time < modifier.startTime) {
+                break
             }
 
-            modifiersToRemove.clear()
+            if (modifier.appliedToEnd) {
+                modifiers.removeAt(i)
+                modifier.onFinished?.invoke(component)
+                modifier.release()
+                // Do not increment i, next modifier is now at current index.
+            } else {
+                i++
+            }
         }
     }
 }
