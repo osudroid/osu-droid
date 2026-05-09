@@ -23,7 +23,7 @@ public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
         this.isTrackingSliders = isTrackingSliders;
 
         if (modifier != null) {
-            unregisterEntityModifier(modifier);
+            removeModifier(modifier);
         }
 
         clearEntityModifiers();

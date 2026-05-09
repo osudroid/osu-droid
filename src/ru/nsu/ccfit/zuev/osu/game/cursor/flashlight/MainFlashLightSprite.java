@@ -26,8 +26,8 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     private void changeArea(float fromScale, float toScale) {
-        if (modifier != null && !modifier.isFinished()) {
-            unregisterEntityModifier(modifier);
+        if (modifier != null && !modifier.isAppliedToEnd()) {
+            removeModifier(modifier);
         }
 
         setScale(fromScale * sizeMultiplier);

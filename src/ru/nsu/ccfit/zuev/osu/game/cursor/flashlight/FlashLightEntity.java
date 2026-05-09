@@ -37,7 +37,7 @@ public class FlashLightEntity extends UIComponent {
 
     public void onMouseMove(float pX, float pY) {
         if (nextPX != 0 && nextPY != 0 && modifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            unregisterEntityModifier(modifier);
+            removeModifier(modifier);
         }
 
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());

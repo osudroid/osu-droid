@@ -1241,7 +1241,7 @@ public class GameplaySlider extends GameObject {
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
-                headCirclePiece.unregisterEntityModifier(sliderHeadLateMissFadeModifier);
+                headCirclePiece.removeModifier(sliderHeadLateMissFadeModifier);
             }
 
             // Change the head circle to the end circle piece.
@@ -1264,7 +1264,7 @@ public class GameplaySlider extends GameObject {
                     Execution.updateThread(e::detachSelf);
                 });
 
-                headCirclePiece.registerEntityModifier(modifier);
+                headCirclePiece.appendModifier(modifier);
                 extendLifetime((float) getGameplayPassedTimeMilliseconds() / 1000, modifier);
             }
         }
