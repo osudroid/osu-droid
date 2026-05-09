@@ -475,6 +475,22 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
         assertTrue(secondSource.isRunning)
     }
+
+    @Test
+    fun `Test source change resets pending source restart`() {
+        // Enter negative time to trigger negative seek source restart.
+        decouplingClock.seek(-10f)
+        decouplingClock.processFrame()
+
+        val secondSource = TestClock()
+        secondSource.currentTime = 0f
+        decouplingClock.changeSource(secondSource)
+
+        // If source restart is still true, the next processFrame will call secondSource.start().
+        decouplingClock.processFrame()
+
+        assertFalse("Second source should not have been started automatically", secondSource.isRunning)
+    }
 }
 
 @RunWith(Parameterized::class)
