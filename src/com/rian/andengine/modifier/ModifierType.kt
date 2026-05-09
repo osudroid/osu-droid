@@ -7,83 +7,93 @@ import com.reco1l.andengine.component.*
  *
  * @author Reco1I, Rian8337
  */
-enum class ModifierType {
-    None,
+enum class ModifierType(
+    /**
+     * The target member of this [ModifierType].
+     *
+     * This is used to group [ModifierType]s that operate on the same property (or properties) of a [UIComponent]. It is
+     * assumed that [UniversalModifier]s with different [targetMember]s are independent of each other in that they
+     * affect different properties, and therefore they can be applied independently in any order without affecting the
+     * end result.
+     */
+    val targetMember: String?
+) {
+    None(null),
 
     /**
      * Modifies the [UIComponent]'s X scale value.
      */
-    ScaleX,
+    ScaleX("scale"),
 
     /**
      * Modifies the [UIComponent]'s Y scale value.
      */
-    ScaleY,
+    ScaleY("scale"),
 
     /**
      * Modifies the [UIComponent]'s X and Y scale values.
      */
-    ScaleXY,
+    ScaleXY("scale"),
 
     /**
      * Modifies the [UIComponent]'s alpha value.
      */
-    Alpha,
+    Alpha("alpha"),
 
     /**
      * Modifies the [UIComponent]'s color value.
      */
-    Color,
+    Color("color"),
 
     /**
      * Modifies the [UIComponent]'s X position.
      */
-    MoveX,
+    MoveX("move"),
 
     /**
      * Modifies the [UIComponent]'s Y position.
      */
-    MoveY,
+    MoveY("move"),
 
     /**
      * Modifies the [UIComponent]'s X and Y position.
      */
-    MoveXY,
+    MoveXY("move"),
 
     /**
      * Modifies the [UIComponent]'s X translation.
      */
-    TranslateX,
+    TranslateX("translate"),
 
     /**
      * Modifies the [UIComponent]'s Y translation.
      */
-    TranslateY,
+    TranslateY("translate"),
 
     /**
      * Modifies the [UIComponent]'s X and Y translation.
      */
-    TranslateXY,
+    TranslateXY("translate"),
 
     /**
      * Modifies the [UIComponent]'s rotation.
      */
-    Rotation,
+    Rotation("rotation"),
 
     /**
      * Modifies the [UIComponent]'s width.
      */
-    Width,
+    Width("size"),
 
     /**
      * Modifies the [UIComponent]'s height.
      */
-    Height,
+    Height("size"),
 
     /**
      * Modifies the [UIComponent]'s width and height.
      */
-    Size;
+    Size("size");
 
     fun getInitialValues(entity: UIComponent, reusableArray: FloatArray) = when (this) {
         ScaleX -> {
