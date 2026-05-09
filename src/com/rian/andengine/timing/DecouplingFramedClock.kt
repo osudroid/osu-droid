@@ -158,6 +158,7 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
         _currentTime = adjustableSourceClock.currentTime
         shouldBeRunning = adjustableSourceClock.isRunning
         lastSeekFailed = false
+        pendingSourceRestartAfterNegativeSeek = false
     }
 
     //endregion
