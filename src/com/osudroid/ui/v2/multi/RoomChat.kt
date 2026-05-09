@@ -192,7 +192,7 @@ class RoomChat : UILinearContainer() {
             isExpanded = true
             body.apply {
                 clearModifiers(ModifierType.Height)
-                heightTo(body_height, 0.4f).eased(Easing.OutExpo)
+                heightTo(body_height, 0.4f, Easing.OutExpo)
             }
         }
     }
@@ -209,7 +209,7 @@ class RoomChat : UILinearContainer() {
                 if (immediate) {
                     height = 0f
                 } else {
-                    heightTo(0f, 0.4f).eased(Easing.OutExpo)
+                    heightTo(0f, 0.4f, Easing.OutExpo)
                 }
             }
         }

@@ -99,7 +99,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * The [Easing] function applied to this [UniversalModifier].
      */
-    private var easing = Easing.None
+    var easing = Easing.None
 
     /**
      * Sets the callback to be invoked when this [UniversalModifier] has finished and is about to be removed from a

@@ -140,14 +140,14 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
                 if (event.isActionDown) {
                     background!!.apply {
                         clearModifiers(ModifierType.Alpha)
-                        fadeTo(0.2f, 0.3f).eased(Easing.Out)
+                        fadeTo(0.2f, 0.3f, Easing.Out)
                     }
                 }
 
                 if ((event.isActionUp || event.isActionCancel) && background!!.alpha != 0f) {
                     background!!.apply {
                         clearModifiers(ModifierType.Alpha)
-                        fadeOut(0.4f).eased(Easing.OutExpo)
+                        fadeOut(0.4f, Easing.OutExpo)
                     }
                 }
             }

@@ -117,12 +117,12 @@ open class UIButton : UILinearContainer() {
     open fun processTouchFeedback(event: TouchEvent) {
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(0.9f, 0.3f).eased(Easing.Out)
+            scaleTo(0.9f, 0.3f, Easing.Out)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(1f, 0.4f).eased(Easing.OutElastic)
+            scaleTo(1f, 0.4f, Easing.OutElastic)
         }
     }
 

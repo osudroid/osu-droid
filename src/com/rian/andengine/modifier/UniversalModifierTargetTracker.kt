@@ -220,7 +220,7 @@ class UniversalModifierTargetTracker(
      * @param time The time.
      */
     fun update(time: Float) {
-        var lastAppliedIndex = 0
+        var removeCount = 0
 
         for (i in modifiers.indices) {
             val modifier = modifiers[i]
@@ -240,27 +240,26 @@ class UniversalModifierTargetTracker(
                     // the current modifier's start time as a basis.
                     prevModifier.apply(modifier.startTime)
                 }
-
-                lastAppliedIndex = i - 1
             }
 
             if (!modifier.appliedToEnd) {
                 modifier.apply(time)
-                lastAppliedIndex = i
+            }
+
+            if (modifier.appliedToEnd && i == removeCount) {
+                removeCount++
             }
         }
 
-        // Remove modifiers up until lastAppliedIndex - 1.
-        val modifiersToRemove = _modifiers.subList(0, lastAppliedIndex)
+        if (removeCount > 0) {
+            val modifiersToRemove = _modifiers.subList(0, removeCount)
 
-        modifiersToRemove.fastForEach {
-            if (it.appliedToEnd) {
+            modifiersToRemove.fastForEach {
                 it.onFinished?.invoke(component)
+                it.release()
             }
 
-            it.release()
+            modifiersToRemove.clear()
         }
-
-        modifiersToRemove.clear()
     }
 }
