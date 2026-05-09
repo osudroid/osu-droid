@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.rian.osu.beatmap.hitobject.Spinner;
+import com.osudroid.beatmaps.hitobjects.Spinner;
 
 import org.andengine.entity.scene.Scene;
 import org.andengine.util.math.MathUtils;

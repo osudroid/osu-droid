@@ -6,8 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.FMath;
 import com.osudroid.game.CursorEvent;
-import com.rian.osu.beatmap.HitWindow;
-import com.rian.osu.beatmap.hitobject.HitObject;
+import com.osudroid.beatmaps.HitWindow;
+import com.osudroid.beatmaps.hitobjects.HitObject;
 
 import org.andengine.entity.IEntity;
 import org.andengine.util.modifier.IModifier;

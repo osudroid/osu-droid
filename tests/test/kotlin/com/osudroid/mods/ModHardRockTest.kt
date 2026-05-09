@@ -1,0 +1,95 @@
+package com.osudroid.mods
+
+import com.osudroid.GameMode
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.SliderPath
+import com.osudroid.beatmaps.hitobjects.SliderPathType
+import com.osudroid.beatmaps.sections.BeatmapControlPoints
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.math.Vector2
+import org.junit.Assert
+import org.junit.Test
+
+class ModHardRockTest {
+    @Test
+    fun `Test beatmap setting adjustment osu!droid game mode`() {
+        BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f).apply {
+            ModHardRock().applyToDifficulty(GameMode.Droid, this, listOf())
+
+            Assert.assertEquals(5.2f, difficultyCS, 1e-2f)
+            Assert.assertEquals(5.2f, gameplayCS, 1e-2f)
+            Assert.assertEquals(10f, ar, 1e-2f)
+            Assert.assertEquals(9.8f, od, 1e-2f)
+            Assert.assertEquals(8.4f, hp, 1e-2f)
+        }
+    }
+
+    @Test
+    fun `Test beatmap setting adjustment osu!droid game mode with mods`() {
+        BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f).apply {
+            ModHardRock().applyToDifficulty(GameMode.Droid, this, listOf(ModReplayV6()))
+
+            Assert.assertEquals(4.887154f, difficultyCS, 1e-2f)
+            Assert.assertEquals(10f, ar, 1e-2f)
+            Assert.assertEquals(9.8f, od, 1e-2f)
+            Assert.assertEquals(8.4f, hp, 1e-2f)
+        }
+    }
+
+    @Test
+    fun `Test beatmap setting adjustment osu!standard game mode`() {
+        BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f).apply {
+            ModHardRock().applyToDifficulty(GameMode.Standard, this, listOf())
+
+            Assert.assertEquals(5.2f, difficultyCS, 1e-2f)
+            Assert.assertEquals(5.2f, gameplayCS, 1e-2f)
+            Assert.assertEquals(10f, ar, 1e-2f)
+            Assert.assertEquals(9.8f, od, 1e-2f)
+            Assert.assertEquals(8.4f, hp, 1e-2f)
+        }
+    }
+
+    @Test
+    fun `Test object application`() {
+        val difficulty = BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f)
+        val hardRock = ModHardRock()
+
+        hardRock.applyToDifficulty(GameMode.Droid, difficulty, listOf())
+
+        Slider(
+            0.0, Vector2(100, 100), 0, SliderPath(
+                SliderPathType.Linear, listOf(Vector2(0), Vector2(200, 200)), 282.842712
+            ), true, 0, mutableListOf()
+        ).apply {
+            applyDefaults(BeatmapControlPoints(), difficulty, GameMode.Droid)
+            hardRock.applyToHitObject(GameMode.Droid, this, listOf())
+
+            Assert.assertEquals(Vector2(100, 284), position)
+            Assert.assertEquals(450.0, timePreempt, 1e-2)
+            Assert.assertEquals(Vector2(200, -200), path.controlPoints[1])
+            Assert.assertTrue(nestedHitObjects.size > 2)
+
+            val tick = nestedHitObjects[1]
+
+            Assert.assertEquals(170.71068f, tick.position.x, 1e-4f)
+            Assert.assertEquals(213.28932f, tick.position.y, 1e-4f)
+        }
+    }
+
+    @Test
+    fun `Test compatibility with Difficulty Adjust mod`() {
+        val hardRock = ModHardRock()
+        val difficultyAdjust = ModDifficultyAdjust(cs = 4f)
+
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.ar = 9f
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.od = 7f
+        Assert.assertTrue(hardRock.isCompatibleWith(difficultyAdjust))
+
+        difficultyAdjust.hp = 6f
+        Assert.assertFalse(hardRock.isCompatibleWith(difficultyAdjust))
+    }
+}

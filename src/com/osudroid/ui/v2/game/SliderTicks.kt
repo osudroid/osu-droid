@@ -1,13 +1,13 @@
 package com.osudroid.ui.v2.game
 
 import com.edlplan.framework.easing.Easing
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.modifier.Modifiers
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
-import com.rian.osu.beatmap.hitobject.*
-import com.rian.osu.beatmap.hitobject.sliderobject.*
 import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper

@@ -3,10 +3,10 @@ package com.osudroid.data
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.test.platform.app.InstrumentationRegistry
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.mods.*
-import com.rian.osu.utils.ModHashMap
-import com.rian.osu.utils.ModUtils
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.mods.*
+import com.osudroid.utils.ModHashMap
+import com.osudroid.utils.ModUtils
 import java.io.IOException
 import org.junit.Assert
 import org.junit.Rule

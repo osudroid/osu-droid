@@ -4,9 +4,9 @@ import com.reco1l.andengine.ui.UIControl
 import com.reco1l.andengine.ui.form.FloatFormInput
 import com.reco1l.andengine.ui.form.FormControl
 import com.reco1l.andengine.ui.form.IntegerFormInput
-import com.rian.osu.mods.Mod
-import com.rian.osu.mods.settings.ModSetting
-import com.rian.osu.mods.settings.RangeConstrainedModSetting
+import com.osudroid.mods.Mod
+import com.osudroid.mods.settings.ModSetting
+import com.osudroid.mods.settings.RangeConstrainedModSetting
 
 sealed class ModSettingTextInput<V : Any?>(mod: Mod, setting: ModSetting<V>) :
     ModSettingComponent<V, String>(mod, setting) {

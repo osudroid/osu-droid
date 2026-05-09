@@ -15,6 +15,8 @@ import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.andengine.entity.IEntity
 import org.andengine.input.touch.TouchEvent
+import com.osudroid.beatmaps.constants.HitObjectType
+import com.osudroid.beatmaps.hitobjects.HitObject
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

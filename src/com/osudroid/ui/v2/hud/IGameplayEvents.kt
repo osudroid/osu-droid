@@ -1,8 +1,8 @@
 package com.osudroid.ui.v2.hud
 
 import android.view.MotionEvent
-import com.rian.osu.beatmap.constants.HitObjectType
-import com.rian.osu.beatmap.hitobject.HitObject
+import com.osudroid.beatmaps.constants.HitObjectType
+import com.osudroid.beatmaps.hitobjects.HitObject
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 

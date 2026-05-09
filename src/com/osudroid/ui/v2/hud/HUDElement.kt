@@ -9,9 +9,9 @@ import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
 import com.reco1l.andengine.component.*
 import com.reco1l.toolkt.kotlin.capitalize
-import com.rian.osu.beatmap.constants.HitObjectType
-import com.rian.osu.beatmap.hitobject.HitObject
 import org.andengine.input.touch.TouchEvent
+import com.osudroid.beatmaps.constants.HitObjectType
+import com.osudroid.beatmaps.hitobjects.HitObject
 import kotlin.math.abs
 import kotlin.reflect.KClass
 import ru.nsu.ccfit.zuev.osu.Config

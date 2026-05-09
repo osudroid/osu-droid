@@ -15,7 +15,7 @@
 
     <PreferenceCategory android:title="@string/opt_category_background">
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="25"
             android:key="bgbrightness"
             android:summary="@string/opt_bgbrightness_summary"
@@ -45,7 +45,7 @@
 
     <PreferenceCategory android:title="@string/opt_category_playfield">
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="100"
             android:key="playfieldSize"
             android:max="100"
@@ -55,7 +55,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="playfieldHorizontalPosition"
             android:max="100"
@@ -64,7 +64,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="playfieldVerticalPosition"
             android:max="100"

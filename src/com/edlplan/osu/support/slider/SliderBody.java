@@ -10,7 +10,7 @@ import com.reco1l.andengine.component.DepthInfo;
 import com.reco1l.andengine.shape.UITriangleMesh;
 import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.framework.Color4;
-import com.rian.osu.math.Vector2;
+import com.osudroid.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 

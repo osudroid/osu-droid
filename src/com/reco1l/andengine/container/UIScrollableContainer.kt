@@ -1,6 +1,7 @@
 package com.reco1l.andengine.container
 
 import androidx.annotation.*
+import com.osudroid.math.Precision
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.*
@@ -12,6 +13,8 @@ import org.andengine.entity.*
 import org.andengine.input.touch.*
 import org.andengine.input.touch.TouchEvent.*
 import org.andengine.opengl.util.GLState
+
+import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 @Suppress("MemberVisibilityCanBePrivate")

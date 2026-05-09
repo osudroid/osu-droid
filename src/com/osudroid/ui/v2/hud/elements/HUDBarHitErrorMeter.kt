@@ -9,6 +9,8 @@ import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.constants.HitObjectType
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.util.GLState
+import com.osudroid.beatmaps.constants.HitObjectType
+import javax.microedition.khronos.opengles.*
 import kotlin.math.abs
 
 class HUDBarHitErrorMeter : HUDHitErrorMeter() {
