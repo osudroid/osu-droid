@@ -1,22 +1,22 @@
 package com.rian.andengine.timing
 
 open class TestClock : IAdjustableClock {
-    final override var currentTime = 0f
-    final override var rate = 1f
+    override var currentTime = 0f
+    override var rate = 1f
 
-    final override var isRunning = false
+    override var isRunning = false
         protected set
 
-    final override fun reset() {
+    override fun reset() {
         currentTime = 0f
         isRunning = false
     }
 
-    final override fun start() {
+    override fun start() {
         isRunning = true
     }
 
-    final override fun stop() {
+    override fun stop() {
         isRunning = false
     }
 
@@ -26,6 +26,6 @@ open class TestClock : IAdjustableClock {
     }
 
     override fun resetSpeedAdjustments() {
-        throw NotImplementedError()
+        rate = 1f
     }
 }
