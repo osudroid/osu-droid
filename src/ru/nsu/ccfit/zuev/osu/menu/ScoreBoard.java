@@ -6,7 +6,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.utils.Execution;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.utils.ModUtils;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;

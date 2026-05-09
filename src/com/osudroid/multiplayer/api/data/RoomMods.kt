@@ -1,7 +1,7 @@
 package com.osudroid.multiplayer.api.data
 
-import com.rian.osu.utils.ModHashMap
-import com.rian.osu.utils.ModUtils
+import com.osudroid.utils.ModHashMap
+import com.osudroid.utils.ModUtils
 import org.json.JSONArray
 
 class RoomMods @JvmOverloads constructor(val json: String = "") : ModHashMap(ModUtils.deserializeMods(json)) {

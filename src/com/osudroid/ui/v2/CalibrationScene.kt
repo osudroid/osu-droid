@@ -36,9 +36,10 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.PromptDialog
+import com.osudroid.beatmaps.DroidHitWindow
+import com.osudroid.math.Interpolation
 import com.rian.andengine.modifier.ModifierType
 import com.rian.osu.beatmap.DroidHitWindow
-import com.rian.osu.math.Interpolation
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.anddev.andengine.input.touch.TouchEvent

@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
+import com.osudroid.mods.*
 import com.osudroid.multiplayer.*
 import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
@@ -10,7 +11,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.rian.andengine.modifier.ModifierType
-import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuToggle(var mod: Mod): UIButton() {

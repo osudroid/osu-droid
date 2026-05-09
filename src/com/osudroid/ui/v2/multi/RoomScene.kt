@@ -57,7 +57,7 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
-import com.rian.osu.mods.ModScoreV2
+import com.osudroid.mods.ModScoreV2
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -768,7 +768,7 @@ class RoomScene(
             // messages from that player will show their real username.
             val player = room.playersMap[uid] ?: run {
                 Multiplayer.log("WARNING: chatMessage from unknown UID $uid — displaying with stub name")
-                RoomPlayer(id = uid, name = "#$uid", status = PlayerStatus.NotReady, team = null, mods = RoomMods())
+                RoomPlayer(id = uid, name = "#$uid", rank = 0, status = PlayerStatus.NotReady, team = null, mods = RoomMods())
             }
 
             if (!player.isMuted) {

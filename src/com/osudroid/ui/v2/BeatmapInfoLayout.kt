@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2
 
 import android.util.Log
+import com.osudroid.GameMode
 import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.*
 import com.osudroid.multiplayer.api.data.*
@@ -14,9 +15,8 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
 import com.reco1l.toolkt.*
-import com.rian.osu.*
-import com.rian.osu.utils.ModUtils.applyModsToBeatmapDifficulty
-import com.rian.osu.utils.ModUtils.calculateRateWithMods
+import com.osudroid.utils.ModUtils.applyModsToBeatmapDifficulty
+import com.osudroid.utils.ModUtils.calculateRateWithMods
 import kotlinx.coroutines.Job
 import ru.nsu.ccfit.zuev.osu.*
 import java.text.*

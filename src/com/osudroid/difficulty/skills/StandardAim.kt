@@ -1,0 +1,66 @@
+package com.osudroid.difficulty.skills
+
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.difficulty.StandardDifficultyHitObject
+import com.osudroid.difficulty.evaluators.StandardAimEvaluator.evaluateDifficultyOf
+import com.osudroid.difficulty.utils.StrainUtils
+import com.osudroid.mods.Mod
+import kotlin.math.exp
+import kotlin.math.max
+import kotlin.math.pow
+
+/**
+ * Represents the skill required to correctly aim at every object in the map with a uniform circle size and normalized distances.
+ */
+class StandardAim(
+    /**
+     * The [Mod]s that this skill processes.
+     */
+    mods: Iterable<Mod>,
+
+    /**
+     * Whether to consider sliders in the calculation.
+     */
+    @JvmField
+    val withSliders: Boolean
+) : StandardStrainSkill(mods) {
+    private var currentStrain = 0.0
+    private val skillMultiplier = 26
+    private val strainDecayBase = 0.15
+
+    private val sliderStrains = mutableListOf<Double>()
+    private var maxSliderStrain = 0.0
+
+    /**
+     * Obtains the amount of sliders that are considered difficult in terms of relative strain.
+     */
+    fun countDifficultSliders(): Double {
+        if (sliderStrains.isEmpty()) {
+            return 0.0
+        }
+
+        return sliderStrains.fold(0.0) { total, strain ->
+            total + 1 / (1 + exp(-(strain / maxSliderStrain * 12 - 6)))
+        }
+    }
+
+    fun countTopWeightedSliders() = StrainUtils.countTopWeightedSliders(sliderStrains, difficulty)
+
+    override fun strainValueAt(current: StandardDifficultyHitObject): Double {
+        currentStrain *= strainDecay(current.deltaTime)
+        currentStrain += evaluateDifficultyOf(current, withSliders) * skillMultiplier
+
+        if (current.obj is Slider) {
+            sliderStrains.add(currentStrain)
+            maxSliderStrain = max(maxSliderStrain, currentStrain)
+        }
+
+        objectStrains.add(currentStrain)
+        return currentStrain
+    }
+
+    override fun calculateInitialStrain(time: Double, current: StandardDifficultyHitObject) =
+        currentStrain * strainDecay(time - current.previous(0)!!.startTime)
+
+    private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
+}
