@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.osudroid.utils.Execution;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
@@ -12,8 +13,6 @@ import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.mods.ModHidden;
-
-import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 
@@ -28,7 +27,7 @@ public class GameplayHitCircle extends GameObject {
     private final UISprite approachCircle;
     private Color4 comboColor = new Color4();
     private GameObjectListener listener;
-    private Scene scene;
+    private UIScene scene;
     private HitCircle beatmapCircle;
     private float passedTime;
     private float timePreempt;
@@ -49,7 +48,7 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
-    public void init(final GameObjectListener listener, final Scene pScene, final HitCircle beatmapCircle,
+    public void init(final GameObjectListener listener, final UIScene pScene, final HitCircle beatmapCircle,
                      final Color4 comboColor) {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
