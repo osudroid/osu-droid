@@ -3,7 +3,12 @@ package com.rian.andengine.timing
 /**
  * Provides a set of methods and properties that can be used to accurately measure elapsed time.
  */
-open class Stopwatch {
+open class Stopwatch @JvmOverloads constructor(
+    /**
+     * The time source to use for this [Stopwatch]. Defaults to [System.nanoTime].
+     */
+    private val source: () -> Long = System::nanoTime
+) {
     /**
      * Whether this [Stopwatch] is running.
      */
@@ -18,7 +23,7 @@ open class Stopwatch {
      */
     open fun start() {
         if (!isRunning) {
-            startTime = System.nanoTime()
+            startTime = source()
             isRunning = true
         }
     }
@@ -28,7 +33,7 @@ open class Stopwatch {
      */
     open fun stop() {
         if (isRunning) {
-            elapsedNanos += System.nanoTime() - startTime
+            elapsedNanos += source() - startTime
             isRunning = false
         }
     }
@@ -55,7 +60,7 @@ open class Stopwatch {
      */
     val elapsedSeconds: Float
         get() {
-            val currentElapsed = if (isRunning) elapsedNanos + (System.nanoTime() - startTime) else elapsedNanos
+            val currentElapsed = if (isRunning) elapsedNanos + (source() - startTime) else elapsedNanos
 
             return currentElapsed / 1e9f
         }

@@ -7,8 +7,12 @@ import kotlin.math.truncate
  * adjustable rate and seek functionality.
  *
  * @param start Whether to start this [StopwatchClock] immediately.
+ * @param source The time source to use for this [StopwatchClock]. Defaults to [System.nanoTime].
  */
-open class StopwatchClock @JvmOverloads constructor(start: Boolean = false) : Stopwatch(), IAdjustableClock {
+open class StopwatchClock @JvmOverloads constructor(
+    start: Boolean = false,
+    source: () -> Long = System::nanoTime
+) : Stopwatch(source), IAdjustableClock {
     private var seekOffset = 0f
 
     /**
