@@ -571,25 +571,19 @@ public class GameplaySlider extends GameObject {
             followCircle.clearEntityModifiers();
             followCircle.scaleTo(followCircle.getScaleX() * 0.8f, 0.2f, Easing.Out);
 
-            var modifier = followCircle.fadeOut(0.2f).after(e -> {
+            extendLifetime(followCircle.fadeOut(0.2f).after(e -> {
                 Execution.updateThread(e::detachSelf);
                 isFollowCircleAnimating = false;
-            });
-
-            extendLifetime(elapsedTime, modifier);
+            }));
         }
 
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
         } else {
-            var modifier = sliderBody.fadeOut(0.24f).after(e -> Execution.updateThread(e::detachSelf));
-
-            extendLifetime(elapsedTime, modifier);
+            extendLifetime(sliderBody.fadeOut(0.24f).after(e -> Execution.updateThread(e::detachSelf)));
         }
 
-        var ballModifier = ball.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf));
-
-        extendLifetime(elapsedTime, ballModifier);
+        extendLifetime(ball.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf)));
 
         if (!isHeadCircleAnimating) {
             // When animating, the head circle will detach after the animation ends.
@@ -899,9 +893,7 @@ public class GameplaySlider extends GameObject {
                 followCircle.setScale(initialScale);
                 followCircle.fadeIn(Math.min(remainTime, 0.06f));
 
-                var scaleModifier = followCircle.scaleTo(scale, Math.min(remainTime, 0.18f), Easing.Out).after(e -> isFollowCircleAnimating = false);
-
-                extendLifetime(elapsedTime, scaleModifier);
+                extendLifetime(followCircle.scaleTo(scale, Math.min(remainTime, 0.18f), Easing.Out).after(e -> isFollowCircleAnimating = false));
             } else if (!isTracking && isInRadius) {
                 isInRadius = false;
                 isFollowCircleAnimating = true;
@@ -910,14 +902,12 @@ public class GameplaySlider extends GameObject {
                 followCircle.clearEntityModifiers();
                 followCircle.scaleTo(scale * 2, 0.1f);
 
-                var alphaModifier = followCircle.fadeOut(0.1f).after(e -> {
+                extendLifetime(followCircle.fadeOut(0.1f).after(e -> {
                     if (isOver) {
                         Execution.updateThread(e::detachSelf);
                     }
                     isFollowCircleAnimating = false;
-                });
-
-                extendLifetime(elapsedTime, alphaModifier);
+                }));
             }
         } else {
             if (isTracking && !isInRadius) {
@@ -1259,12 +1249,10 @@ public class GameplaySlider extends GameObject {
                 // Slider head is hit too early - slowly fade it.
                 isHeadCircleAnimating = true;
 
-                var modifier = headCirclePiece.fadeOut(0.1f).after(e -> {
+                extendLifetime(headCirclePiece.fadeOut(0.1f).after(e -> {
                     isHeadCircleAnimating = false;
                     Execution.updateThread(e::detachSelf);
-                });
-
-                extendLifetime((float) getGameplayPassedTimeMilliseconds() / 1000, modifier);
+                }));
             }
         }
     }

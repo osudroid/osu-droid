@@ -194,8 +194,7 @@ public class GameplayHitCircle extends GameObject {
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
             circlePiece.detachSelf();
         } else {
-            var fadeOutModifier = circlePiece.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf));
-            extendLifetime(hitTime + passedTime, fadeOutModifier);
+            extendLifetime(circlePiece.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf)));
         }
 
         scene = null;

@@ -268,11 +268,10 @@ public abstract class GameObject {
     /**
      * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifier} to finish.
      *
-     * @param elapsedTime Elapsed time since the start of the beatmap, in seconds.
      * @param modifier The {@link UniversalModifier} to extend this {@link GameObject}'s lifetime with.
      */
-    protected void extendLifetime(float elapsedTime, UniversalModifier modifier) {
-        lifetimeEnd = Math.max(lifetimeEnd, elapsedTime + modifier.getDuration());
+    protected void extendLifetime(UniversalModifier modifier) {
+        lifetimeEnd = Math.max(lifetimeEnd, modifier.getEndTime());
     }
 
     //endregion
