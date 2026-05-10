@@ -40,9 +40,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
     }
 
     @Override
-    public void onAttached() {
-        super.onAttached();
-
+    protected void onLoadComplete() {
         startRotationModifierLoop();
     }
 
@@ -79,6 +77,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
 
     private void startRotationModifierLoop() {
         if (OsuSkin.get().isRotateCursor()) {
+            clearModifiers(ModifierType.Rotation);
             rotateTo(360, 14).after(rotationModifierFinished);
         }
     }
