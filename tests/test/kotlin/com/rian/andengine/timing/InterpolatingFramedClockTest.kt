@@ -255,10 +255,10 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         assertFalse(interpolating.isRunning)
         assertEquals(interpolating.currentTime, source.currentTime, interpolating.allowableErrorSeconds)
     }
-    }
+}
 
-    @RunWith(Parameterized::class)
-    class InterpolatingFramedClockTestNoDrift(private val simulatedUpdateRate: Float) : BaseInterpolatingFramedClockTest() {
+@RunWith(Parameterized::class)
+class InterpolatingFramedClockTestNoDrift(private val simulatedUpdateRate: Float) : BaseInterpolatingFramedClockTest() {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "simulatedUpdateRate={0}")
@@ -280,4 +280,4 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             assertEquals(stopwatch.currentTime, interpolating.currentTime, 1e-3f)
         }
     }
-    }
+}
