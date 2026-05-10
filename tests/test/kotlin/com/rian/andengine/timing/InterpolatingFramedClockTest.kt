@@ -10,13 +10,15 @@ import org.junit.runners.Parameterized
 
 sealed class BaseInterpolatingFramedClockTest {
     protected lateinit var source: TestClock
+    protected lateinit var realTimeClock: TestClock
     protected lateinit var interpolating: InterpolatingFramedClock
 
     @Before
     open fun setUp() {
         source = TestClock()
+        realTimeClock = TestClock().apply { start() }
 
-        interpolating = InterpolatingFramedClock()
+        interpolating = InterpolatingFramedClock(realTimeClockSource = realTimeClock)
         interpolating.changeSource(source)
     }
 }
@@ -38,7 +40,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             assertTrue("Interpolating should not jump against rate.", interpolating.currentTime >= lastValue)
             assertTrue("Interpolating should not jump before source time.", interpolating.currentTime >= source.currentTime)
 
-            Thread.sleep((interpolating.allowableErrorSeconds / 2 * 1e3).toLong())
+            realTimeClock.currentTime += interpolating.allowableErrorSeconds / 2
             lastValue = interpolating.currentTime
         }
 
@@ -49,7 +51,10 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
         (0..100).forEach { _ ->
             // We want to interpolate but not fall behind and fail interpolation too much.
-            source.currentTime += interpolating.allowableErrorSeconds / 2 + 0.005f
+            val elapsed = interpolating.allowableErrorSeconds / 2 + 0.005f
+            source.currentTime += elapsed
+            realTimeClock.currentTime += elapsed
+
             interpolating.processFrame()
 
             assertTrue("Interpolating should not jump against rate.", interpolating.currentTime >= lastValue)
@@ -59,7 +64,6 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
                 ++interpolatedCount
             }
 
-            Thread.sleep((interpolating.allowableErrorSeconds / 2 * 1e3).toLong())
             lastValue = interpolating.currentTime
         }
 
@@ -116,7 +120,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
     @Test
     fun `Test never interpolates backwards on interpolation fail`() {
-        val sleepTime = 20L
+        val simulatedSleepTime = 0.02f
 
         var lastValue = interpolating.currentTime
         source.start()
@@ -127,9 +131,10 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
             if (i < 100) {
                 // Stop the elapsing at some point in time. should still work as source's elapsedTime is zero.
-                source.currentTime += sleepTime * source.rate
+                source.currentTime += simulatedSleepTime * source.rate
             }
 
+            realTimeClock.currentTime += simulatedSleepTime
             interpolating.processFrame()
 
             if (interpolating.isInterpolating) {
@@ -139,7 +144,6 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             assertTrue("Interpolating should not jump against rate.", interpolating.currentTime >= lastValue)
             assertTrue("Interpolating should be within allowance.", abs(interpolating.currentTime - source.currentTime) <= interpolating.allowableErrorSeconds * source.rate)
 
-            Thread.sleep(sleepTime)
             lastValue = interpolating.currentTime
         }
 
@@ -148,7 +152,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
     @Test
     fun `Test can seek forwards on interpolation fail`() {
-        val sleepTime = 20L
+        val simulatedSleepTime = 0.02f
 
         var lastValue = interpolating.currentTime
         source.start()
@@ -160,11 +164,13 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             // Seek forward once at a random point.
             if (i == 100) {
                 source.currentTime += interpolating.allowableErrorSeconds * 10 * source.rate
+                realTimeClock.currentTime += simulatedSleepTime
                 interpolating.processFrame()
                 assertFalse(interpolating.isInterpolating)
                 assertEquals(source.currentTime, interpolating.currentTime, 0f)
             } else {
-                source.currentTime += sleepTime * source.rate / 1000
+                source.currentTime += simulatedSleepTime * source.rate
+                realTimeClock.currentTime += simulatedSleepTime
                 interpolating.processFrame()
             }
 
@@ -175,7 +181,6 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
             assertTrue("Interpolating should not jump against rate.", interpolating.currentTime >= lastValue)
             assertTrue("Interpolating should be within allowance.", abs(interpolating.currentTime - source.currentTime) <= interpolating.allowableErrorSeconds * source.rate)
 
-            Thread.sleep(sleepTime)
             lastValue = interpolating.currentTime
         }
 
@@ -207,8 +212,9 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         source.start()
 
         while (!interpolating.isInterpolating) {
-            source.currentTime += 0.01f
-            Thread.sleep(10)
+            val elapsed = 0.01f
+            source.currentTime += elapsed
+            realTimeClock.currentTime += elapsed
             interpolating.processFrame()
         }
 
@@ -230,18 +236,17 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
     fun `Test interpolation stays within bounds`() {
         source.start()
 
-        val sleepTime = 20L
+        val simulatedSleepTime = 0.02f
 
         (0..100).forEach { _ ->
-            source.currentTime += sleepTime / 1000f
+            source.currentTime += simulatedSleepTime
+            realTimeClock.currentTime += simulatedSleepTime
             interpolating.processFrame()
 
             // Should be a no-op.
             interpolating.changeSource(source)
 
             assertTrue("Interpolating should be within allowable error bounds.", Precision.almostEquals(interpolating.currentTime, source.currentTime, interpolating.allowableErrorSeconds))
-
-            Thread.sleep(sleepTime)
         }
 
         source.stop()
@@ -250,19 +255,19 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         assertFalse(interpolating.isRunning)
         assertEquals(interpolating.currentTime, source.currentTime, interpolating.allowableErrorSeconds)
     }
-}
+    }
 
-@RunWith(Parameterized::class)
-class InterpolatingFramedClockTestNoDrift(private val updateRate: Long) : BaseInterpolatingFramedClockTest() {
+    @RunWith(Parameterized::class)
+    class InterpolatingFramedClockTestNoDrift(private val simulatedUpdateRate: Float) : BaseInterpolatingFramedClockTest() {
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "updateRate={0}")
-        fun data() = arrayOf(0L, 1L, 10L, 50L)
+        @Parameterized.Parameters(name = "simulatedUpdateRate={0}")
+        fun data() = arrayOf(0f, 0.001f, 0.01f, 0.05f)
     }
 
     @Test
     fun `Test no interpolation drift`() {
-        val stopwatch = StopwatchClock()
+        val stopwatch = StopwatchClock(source = realTimeClock::currentTimeLong)
 
         interpolating.changeSource(stopwatch)
 
@@ -270,10 +275,9 @@ class InterpolatingFramedClockTestNoDrift(private val updateRate: Long) : BaseIn
         stopwatch.start()
 
         while (interpolating.currentTime <= 1f) {
+            realTimeClock.currentTime += simulatedUpdateRate
             interpolating.processFrame()
             assertEquals(stopwatch.currentTime, interpolating.currentTime, 1e-3f)
-
-            Thread.sleep(updateRate)
         }
     }
-}
+    }

@@ -8,12 +8,14 @@ import org.junit.runners.Parameterized
 
 sealed class BaseDecouplingFramedClockTest {
     protected lateinit var source: IAdjustableClock
+    protected lateinit var realTimeClock: TestClock
     protected lateinit var decouplingClock: DecouplingFramedClock
 
     @Before
     open fun setUp() {
         source = TestClockWithRange()
-        decouplingClock = DecouplingFramedClock()
+        realTimeClock = TestClock().apply { start() }
+        decouplingClock = DecouplingFramedClock(realtimeReferenceClockSource = realTimeClock)
         decouplingClock.changeSource(source)
     }
 }
@@ -76,10 +78,11 @@ class DecouplingFramedClockDecouplingIndependentTest(private val allowDecoupling
         decouplingClock.seek(-0.001f)
 
         // Intentionally make sure that reference time has increased to push time into positive before a process frame.
-        Thread.sleep(500)
+        realTimeClock.currentTime += 0.5f
         decouplingClock.processFrame()
 
         while (decouplingClock.currentTime < 0) {
+            realTimeClock.currentTime += 0.01f
             decouplingClock.processFrame()
         }
 
@@ -505,7 +508,7 @@ class DecouplingFramedClockDecouplingNegativeTimeSeek(private val seekBeforeStar
     fun `Test start from negative time increments correctly`() {
         // Intentionally wait some time to allow the reference clock to build up some elapsed difference.
         // We want to make sure that this is not all applied at once causing a large jump.
-        Thread.sleep(500)
+        realTimeClock.currentTime += 0.5f
 
         decouplingClock.allowDecoupling = true
 
@@ -527,7 +530,7 @@ class DecouplingFramedClockDecouplingNegativeTimeSeek(private val seekBeforeStar
         assertTrue(decouplingClock.isRunning)
         assertTrue(decouplingClock.currentTime < 0)
 
-        Thread.sleep(100)
+        realTimeClock.currentTime += 0.1f
 
         decouplingClock.processFrame()
         assertTrue(decouplingClock.currentTime < 0)
@@ -536,16 +539,16 @@ class DecouplingFramedClockDecouplingNegativeTimeSeek(private val seekBeforeStar
 }
 
 @RunWith(Parameterized::class)
-class DecouplingFramedClockDecouplingNoDriftTest(private val updateRate: Long) : BaseDecouplingFramedClockTest() {
+class DecouplingFramedClockDecouplingNoDriftTest(private val simulatedUpdateRate: Float) : BaseDecouplingFramedClockTest() {
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "updateRate = {0}")
-        fun data() = arrayOf(0L, 1L, 10L, 50L)
+        @Parameterized.Parameters(name = "simulatedUpdateRate = {0} s")
+        fun data() = arrayOf(0f, 0.001f, 0.01f, 0.05f)
     }
 
     @Test
     fun `Test no decoupled drift`() {
-        val stopwatch = StopwatchClock()
+        val stopwatch = StopwatchClock(source = realTimeClock::currentTimeLong)
 
         decouplingClock.start()
         stopwatch.start()
@@ -557,7 +560,7 @@ class DecouplingFramedClockDecouplingNoDriftTest(private val updateRate: Long) :
             decouplingClock.processFrame()
             assertEquals(stopwatch.currentTime, decouplingClock.currentTime, 1e-3f)
 
-            Thread.sleep(updateRate)
+            realTimeClock.currentTime += simulatedUpdateRate
         }
     }
 }
