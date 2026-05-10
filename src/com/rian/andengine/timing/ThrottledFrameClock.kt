@@ -9,7 +9,7 @@ class ThrottledFrameClock : FramedClock() {
     /**
      * The target number of updates per second. Only used when [throttling] is true.
      *
-     * A value of 0 is treated the same as "unlimited" or [Double.MAX_VALUE].
+     * A value of 0 is treated the same as "unlimited" or [Float.MAX_VALUE].
      */
     var maximumUpdateHz = 1000f
 
@@ -29,7 +29,7 @@ class ThrottledFrameClock : FramedClock() {
     override fun processFrame() {
         super.processFrame()
 
-        if (throttling && maximumUpdateHz > 0 && maximumUpdateHz < Double.MAX_VALUE) {
+        if (throttling && maximumUpdateHz > 0 && maximumUpdateHz < Float.MAX_VALUE) {
             throttle()
         } else {
             timeSlept = 0f
