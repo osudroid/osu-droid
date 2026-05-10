@@ -362,7 +362,7 @@ public class GameplaySpinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText.fadeIn(0.25f);
+                clearText.fadeInFromZero(0.25f);
                 clearText.setScale(1.5f);
                 clearText.scaleTo(1, 0.25f);
 
