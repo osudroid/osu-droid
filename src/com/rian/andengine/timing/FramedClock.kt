@@ -72,23 +72,31 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
 
         totalFramesProcessed = 0
         betweenFrameTimes.fill(0f)
-        timeUntilNextCalculation = 0f
+        timeUntilNextCalculation = fpsCalculationInterval
         timeSinceLastCalculation = 0f
         framesSinceLastCalculation = 0
     }
 
     override fun processFrame() {
-        betweenFrameTimes[totalFramesProcessed % betweenFrameTimes.size] = currentTime - lastFrameTime
-        ++totalFramesProcessed
-
         if (processSource) {
             (source as? IFrameBasedClock)?.processFrame()
         }
 
+        lastFrameTime = currentTime
+        currentTime = sourceTime
+        val delta = elapsedFrameTime
+
+        betweenFrameTimes[totalFramesProcessed % betweenFrameTimes.size] = delta
+        ++totalFramesProcessed
+
+        framesSinceLastCalculation++
+        timeUntilNextCalculation -= delta
+        timeSinceLastCalculation += delta
+
         if (timeUntilNextCalculation <= 0) {
             timeUntilNextCalculation += fpsCalculationInterval
 
-            if (framesSinceLastCalculation == 0) {
+            if (framesSinceLastCalculation == 0 || timeSinceLastCalculation <= 0f) {
                 framesPerSecond = 0f
                 jitter = 0f
             } else {
@@ -114,13 +122,6 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
             timeSinceLastCalculation = 0f
             framesSinceLastCalculation = 0
         }
-
-        framesSinceLastCalculation++
-        timeUntilNextCalculation -= elapsedFrameTime
-        timeSinceLastCalculation += elapsedFrameTime
-
-        lastFrameTime = currentTime
-        currentTime = sourceTime
     }
 
     override fun toString() = "${this::class.simpleName} (${truncate(currentTime * 1e3)}ms, $framesPerSecond FPS)"
