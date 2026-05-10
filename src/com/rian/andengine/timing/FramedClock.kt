@@ -1,6 +1,8 @@
 package com.rian.andengine.timing
 
 import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.math.truncate
 
@@ -92,17 +94,18 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
                 // Simple stddev
                 var sum = 0f
                 var sumOfSquares = 0f
+                val sampleCount = min(totalFramesProcessed, betweenFrameTimes.size)
 
-                for (i in betweenFrameTimes.indices) {
+                for (i in 0 until sampleCount) {
                     val v = betweenFrameTimes[i]
 
                     sum += v
                     sumOfSquares += v * v
                 }
 
-                val average = sum / betweenFrameTimes.size
-                val variance = sumOfSquares / betweenFrameTimes.size - average * average
-                jitter = sqrt(variance)
+                val average = sum / sampleCount
+                val variance = sumOfSquares / sampleCount - average * average
+                jitter = sqrt(max(0f, variance))
             }
 
             timeSinceLastCalculation = 0f
