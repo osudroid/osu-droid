@@ -38,7 +38,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
         }
 
     /**
-     * The current frame's time as observed by this [UIScene]'s [clock].
+     * The current frame's time as observed by this [HUD]'s [clock].
      */
     val time
         get() = clock?.timeInfo
