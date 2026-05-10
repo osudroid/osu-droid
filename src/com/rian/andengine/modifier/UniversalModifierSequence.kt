@@ -234,6 +234,13 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     @JvmOverloads
     fun fadeOut(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(0f, duration, easing)
 
+    /**
+     * Smoothly adjusts [UIComponent.alpha] from 1 to 0 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
+     */
     @JvmOverloads
     fun fadeOutFromOne(duration: Float = 0f, easing: Easing = Easing.None) =
         append(ModifierType.Alpha, duration, easing) {
