@@ -29,7 +29,7 @@ class TestStopwatchClockWithRangeLimit(source: () -> Long = System::nanoTime) : 
                 stop()
             }
 
-            seek(clamped)
+            super.seek(clamped)
             return false
         }
 
