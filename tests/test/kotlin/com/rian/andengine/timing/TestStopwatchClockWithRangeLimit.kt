@@ -1,6 +1,6 @@
 package com.rian.andengine.timing
 
-class TestStopwatchClockWithRangeLimit : StopwatchClock(true) {
+class TestStopwatchClockWithRangeLimit(source: () -> Long = System::nanoTime) : StopwatchClock(true, source) {
     val minTime = 0f
     var maxTime = Float.POSITIVE_INFINITY
 
