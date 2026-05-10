@@ -1291,8 +1291,8 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
             val newDelay = modifierDelay
 
             if (!Precision.almostEquals(oldDelay, newDelay)) {
-                throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence is" +
-                        "not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+                throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence " +
+                        "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
             }
         } finally {
             addDelay(-delay, propagateChildren)
