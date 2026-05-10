@@ -543,7 +543,7 @@ class DecouplingFramedClockDecouplingNoDriftTest(private val simulatedUpdateRate
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "simulatedUpdateRate = {0} s")
-        fun data() = arrayOf(0f, 0.001f, 0.01f, 0.05f)
+        fun data() = arrayOf(0.0001f, 0.001f, 0.01f, 0.05f)
     }
 
     @Test
@@ -556,11 +556,14 @@ class DecouplingFramedClockDecouplingNoDriftTest(private val simulatedUpdateRate
         decouplingClock.seek(-0.1f)
         stopwatch.seek(-0.1f)
 
-        while (decouplingClock.currentTime <= 0) {
+        // Initialize lastReferenceTime
+        decouplingClock.processFrame()
+
+        while (decouplingClock.currentTime < 0) {
+            realTimeClock.currentTime += simulatedUpdateRate
+
             decouplingClock.processFrame()
             assertEquals(stopwatch.currentTime, decouplingClock.currentTime, 1e-3f)
-
-            realTimeClock.currentTime += simulatedUpdateRate
         }
     }
 }

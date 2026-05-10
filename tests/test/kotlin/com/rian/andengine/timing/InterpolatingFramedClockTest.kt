@@ -262,7 +262,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "simulatedUpdateRate={0}")
-        fun data() = arrayOf(0f, 0.001f, 0.01f, 0.05f)
+        fun data() = arrayOf(0.0001f, 0.001f, 0.01f, 0.05f)
     }
 
     @Test
