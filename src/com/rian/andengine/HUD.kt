@@ -80,7 +80,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
     }
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
-        childScene?.onDetached()
+        this.childScene?.onDetached()
         super.setChildScene(childScene, modalDraw, modalUpdate, modalTouch)
         childScene?.onAttached()
     }

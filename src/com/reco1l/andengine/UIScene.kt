@@ -167,7 +167,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     //endregion
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
-        childScene?.onDetached()
+        this.childScene?.onDetached()
         super.setChildScene(childScene, modalDraw, modalUpdate, modalTouch)
         childScene?.onAttached()
     }
