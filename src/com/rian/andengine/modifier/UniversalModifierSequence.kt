@@ -234,6 +234,14 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     @JvmOverloads
     fun fadeOut(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(0f, duration, easing)
 
+    @JvmOverloads
+    fun fadeOutFromOne(duration: Float = 0f, easing: Easing = Easing.None) =
+        append(ModifierType.Alpha, duration, easing) {
+            hasInitialValues = true
+            initialValues[0] = 1f
+            finalValues[0] = 0f
+        }
+
     //endregion
 
     //region Color

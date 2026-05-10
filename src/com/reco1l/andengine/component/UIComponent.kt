@@ -1481,6 +1481,21 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
     @JvmOverloads
     fun fadeOut(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(0f, duration, easing)
 
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] from 1 to 0 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeOutFromOne(duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) {
+            hasInitialValues = true
+            initialValues[0] = 1f
+            finalValues[0] = 0f
+        }
+
     //endregion
 
     //region Modifiers - Color
