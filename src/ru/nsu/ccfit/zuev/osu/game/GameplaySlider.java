@@ -1264,7 +1264,6 @@ public class GameplaySlider extends GameObject {
                     Execution.updateThread(e::detachSelf);
                 });
 
-                headCirclePiece.appendModifier(modifier);
                 extendLifetime((float) getGameplayPassedTimeMilliseconds() / 1000, modifier);
             }
         }
