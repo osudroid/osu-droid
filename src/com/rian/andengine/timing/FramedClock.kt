@@ -64,6 +64,12 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
         this.source = source ?: StopwatchClock(true)
         currentTime = this.source.currentTime
         lastFrameTime = currentTime
+
+        totalFramesProcessed = 0
+        betweenFrameTimes.fill(0f)
+        timeUntilNextCalculation = 0f
+        timeSinceLastCalculation = 0f
+        framesSinceLastCalculation = 0
     }
 
     override fun processFrame() {
