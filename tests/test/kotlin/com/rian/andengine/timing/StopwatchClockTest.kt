@@ -4,13 +4,19 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class StopwatchClockTest {
+    private var mockTimeNanos = 0L
+
+    private fun createClock(start: Boolean = false) = StopwatchClock(start) { mockTimeNanos }
+
+    private fun advanceTime(seconds: Float) {
+        mockTimeNanos += (seconds * 1e9f).toLong()
+    }
+
     @Test
     fun `Test reset time`() {
-        val clock = StopwatchClock()
-        clock.start()
+        val clock = createClock(true)
 
-        Thread.sleep(1000)
-
+        advanceTime(1f)
         assertTrue(clock.currentTime > 0)
 
         clock.stop()
@@ -21,17 +27,16 @@ class StopwatchClockTest {
 
     @Test
     fun `Test rate up reset time`() {
-        val clock = StopwatchClock()
-        clock.start()
+        val clock = createClock(true)
 
-        Thread.sleep(1000)
+        advanceTime(1f)
 
         clock.stop()
         val stoppedTime = clock.currentTime
         assertTrue(stoppedTime > 0)
 
         clock.rate = 2f
-        assertEquals(stoppedTime, clock.currentTime)
+        assertEquals(stoppedTime, clock.currentTime, 0f)
 
         clock.reset()
 
@@ -40,17 +45,16 @@ class StopwatchClockTest {
 
     @Test
     fun `Test seek while stopped`() {
-        val clock = StopwatchClock()
+        val clock = createClock()
         clock.seek(5f)
         assertEquals(5f, clock.currentTime, 0f)
     }
 
     @Test
     fun `Test seek when non-zero`() {
-        val clock = StopwatchClock()
-        clock.start()
+        val clock = createClock(true)
 
-        Thread.sleep(1000)
+        advanceTime(1f)
 
         clock.stop()
         val stoppedTime = clock.currentTime
@@ -63,14 +67,14 @@ class StopwatchClockTest {
 
     @Test
     fun `Test seek negative adjust rate`() {
-        val clock = StopwatchClock()
+        val clock = createClock()
         clock.seek(-5f)
         assertEquals(-5f, clock.currentTime, 0f)
 
         clock.rate = 2f
         clock.start()
 
-        Thread.sleep(1000)
+        advanceTime(1f)
 
         clock.stop()
         val stoppedTime = clock.currentTime
@@ -83,11 +87,11 @@ class StopwatchClockTest {
 
     @Test
     fun `Test negative rate`() {
-        val clock = StopwatchClock()
+        val clock = createClock()
         clock.rate = -2f
         clock.start()
 
-        Thread.sleep(1000)
+        advanceTime(1f)
 
         clock.stop()
 
