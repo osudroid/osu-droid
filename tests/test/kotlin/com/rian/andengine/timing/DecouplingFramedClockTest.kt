@@ -276,7 +276,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
     @Test
     fun `Test seek beyond length while decoupling`() {
-        source = TestStopwatchClockWithRangeLimit().apply { maxTime = 0.5f }
+        source = TestStopwatchClockWithRangeLimit(realTimeClock::currentTimeLong).apply { maxTime = 0.5f }
 
         decouplingClock.changeSource(source)
         decouplingClock.allowDecoupling = true
@@ -290,7 +290,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
     @Test
     fun `Test seek from negative to beyond length while decoupling`() {
-        source = TestStopwatchClockWithRangeLimit().apply { maxTime = 0.5f }
+        source = TestStopwatchClockWithRangeLimit(realTimeClock::currentTimeLong).apply { maxTime = 0.5f }
 
         decouplingClock.changeSource(source)
         decouplingClock.allowDecoupling = true
@@ -338,7 +338,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
     @Test
     fun `Test backward playback over zero boundary`() {
-        source = TestStopwatchClockWithRangeLimit()
+        source = TestStopwatchClockWithRangeLimit(realTimeClock::currentTimeLong)
         decouplingClock.changeSource(source)
         decouplingClock.allowDecoupling = true
 
@@ -349,6 +349,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
         decouplingClock.processFrame()
 
         while (source.isRunning) {
+            realTimeClock.currentTime += 0.01f
             decouplingClock.processFrame()
             assertEquals(source.currentTime, decouplingClock.currentTime, 0.03f)
         }
@@ -357,7 +358,8 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
         var time = decouplingClock.currentTime
 
-        while (decouplingClock.currentTime > -300) {
+        while (decouplingClock.currentTime > -0.5f) {
+            realTimeClock.currentTime += 0.01f
             assertFalse(source.isRunning)
             assertTrue(decouplingClock.currentTime <= time)
             time = decouplingClock.currentTime
@@ -368,7 +370,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
     @Test
     fun `Test forward playback over zero boundary`() {
-        source = TestStopwatchClockWithRangeLimit()
+        source = TestStopwatchClockWithRangeLimit(realTimeClock::currentTimeLong)
         decouplingClock.changeSource(source)
         decouplingClock.allowDecoupling = true
 
@@ -380,6 +382,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
         var time = decouplingClock.currentTime
 
         while (decouplingClock.currentTime < 0) {
+            realTimeClock.currentTime += 0.01f
             assertFalse(source.isRunning)
             assertTrue(decouplingClock.currentTime >= time)
             time = decouplingClock.currentTime
@@ -404,7 +407,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
 
     @Test
     fun `Test forward playback over length boundary`() {
-        source = TestStopwatchClockWithRangeLimit().apply { maxTime = 10f }
+        source = TestStopwatchClockWithRangeLimit(realTimeClock::currentTimeLong).apply { maxTime = 10f }
 
         decouplingClock.changeSource(source)
         decouplingClock.allowDecoupling = true
@@ -434,6 +437,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
         // neither stops yet.
         // We will assert that the source should eventually stop further down anyway.
         while (decouplingClock.currentTime < 10f - tolerance) {
+            realTimeClock.currentTime += 0.01f
             assertTrue(source.isRunning)
             assertEquals(decouplingClock.currentTime, source.currentTime, tolerance)
             assertTrue(decouplingClock.currentTime >= time)
@@ -443,6 +447,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
         }
 
         while (source.isRunning) {
+            realTimeClock.currentTime += 0.01f
             decouplingClock.processFrame()
         }
 
@@ -450,6 +455,7 @@ class DecouplingFramedClockDecouplingTest : BaseDecouplingFramedClockTest() {
         assertTrue(decouplingClock.currentTime <= 10.1f)
 
         while (decouplingClock.currentTime < 10.2f) {
+            realTimeClock.currentTime += 0.01f
             assertTrue(decouplingClock.isRunning)
             assertTrue(decouplingClock.currentTime >= time)
             time = decouplingClock.currentTime
