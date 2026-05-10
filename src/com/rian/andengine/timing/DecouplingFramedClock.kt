@@ -17,7 +17,10 @@ package com.rian.andengine.timing
  * such special handling is assured for when the source has a maximum allowable time, since it is not known what that
  * time is.
  */
-class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : ISourceChangeableClock,
+class DecouplingFramedClock @JvmOverloads constructor(
+    source: IClock? = null,
+    realtimeReferenceClockSource: IClock = StopwatchClock(true)
+) : ISourceChangeableClock,
     IAdjustableClock, IFrameBasedClock {
     /**
      * Whether to allow operation in decoupled mode. Defaults to `true`.
@@ -62,7 +65,7 @@ class DecouplingFramedClock @JvmOverloads constructor(source: IClock? = null) : 
     /**
      * This clock is used when we are decoupling from the source.
      */
-    private val realtimeReferenceClock: IClock = StopwatchClock(true)
+    private val realtimeReferenceClock = realtimeReferenceClockSource
 
     private lateinit var adjustableSourceClock: IAdjustableClock
 

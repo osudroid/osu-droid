@@ -9,7 +9,10 @@ import kotlin.math.sign
 /**
  * An [IClock] which uses an internal stopwatch to interpolate (smooth out) a source.
  */
-class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedClock? = null) : IFrameBasedClock,
+class InterpolatingFramedClock @JvmOverloads constructor(
+    source: IFrameBasedClock? = null,
+    realTimeClockSource: IClock = StopwatchClock(true)
+) : IFrameBasedClock,
     ISourceChangeableClock {
     /**
      * The amount of error that is allowed between the source and interpolated time before the interpolated time is
@@ -73,7 +76,7 @@ class InterpolatingFramedClock @JvmOverloads constructor(source: IFrameBasedCloc
     override var currentTime = 0f
         private set
 
-    private val realTimeClock = FramedClock(StopwatchClock(true))
+    private val realTimeClock = realTimeClockSource as? IFrameBasedClock ?: FramedClock(realTimeClockSource)
 
     private var _currentTime = 0f
 
