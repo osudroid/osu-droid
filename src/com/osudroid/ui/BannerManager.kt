@@ -91,6 +91,10 @@ object BannerManager {
         init {
             textureRegion = banners[currentBannerIndex].image
             alpha = 0f
+        }
+
+
+        override fun onLoadComplete() {
             fadeIn(0.75f)
         }
 
