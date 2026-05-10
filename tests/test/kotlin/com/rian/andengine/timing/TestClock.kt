@@ -28,4 +28,9 @@ open class TestClock : IAdjustableClock {
     override fun resetSpeedAdjustments() {
         rate = 1f
     }
+
+    /**
+     * The current time of this [TestClock], in nanoseconds.
+     */
+    fun currentTimeLong() = (currentTime * 1e9).toLong()
 }
