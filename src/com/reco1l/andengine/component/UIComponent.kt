@@ -779,12 +779,17 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
     //region Update
 
     final override fun onUpdate(deltaTimeSec: Float) {
-        if (isIgnoreUpdate) {
+        if (isIgnoreUpdate || loadState == LoadState.NotLoaded) {
             return
         }
 
         if (processCustomClock) {
             customClock?.processFrame()
+        }
+
+        if (loadState == LoadState.Ready) {
+            loadState = LoadState.Loaded
+            onLoadComplete()
         }
 
         // Fallback to parent or engine-provided delta time in case clock is not present.
@@ -801,6 +806,38 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
 
         super.onManagedUpdate(deltaTimeSec)
     }
+
+    private var loadState = LoadState.NotLoaded
+
+    /**
+     * Whether this [UIComponent] is currently loaded and part of the active update loop.
+     *
+     * This becomes `true` after [onLoadComplete] is called and stays `true` until this [UIComponent] is unloaded.
+     */
+    val isLoaded
+        get() = loadState == LoadState.Loaded
+
+    /**
+     * Called when this [UIComponent] is fully loaded and ready for use.
+     *
+     * This is invoked when [onUpdate] is called for the first time after this [UIComponent] receives a valid [clock]
+     * **and** before [onManagedUpdate]. It is safe to start animations and modifiers here.
+     *
+     * Note that this can be called multiple times during this [UIComponent]'s lifetime if it is detached and
+     * re-attached.
+     */
+    protected open fun onLoadComplete() {}
+
+    /**
+     * Called when this [UIComponent] is being unloaded.
+     *
+     * This is invoked when this [UIComponent] loses its [clock], usually when it is detached from its [parent].
+     * If this [UIComponent] is re-attached, [onLoadComplete] will be called again.
+     *
+     * Subclasses should use this to clear persistent modifiers or stop animations if needed (e.g., if this
+     * [UIComponent] is intended to be pooled and re-used).
+     */
+    protected open fun onUnload() {}
 
     //endregion
 
@@ -1688,12 +1725,25 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IThemeable, IClockProvi
      */
     open fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
+        val currentClock = this.clock
 
-        background?.updateClock(this.clock)
-        foreground?.updateClock(this.clock)
+        if (currentClock != null) {
+            if (loadState == LoadState.NotLoaded) {
+                loadState = LoadState.Ready
+            }
+        } else {
+            if (loadState == LoadState.Loaded) {
+                onUnload()
+            }
+
+            loadState = LoadState.NotLoaded
+        }
+
+        background?.updateClock(currentClock)
+        foreground?.updateClock(currentClock)
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(this.clock)
+            (it as? UIComponent)?.updateClock(currentClock)
         }
     }
 

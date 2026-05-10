@@ -49,12 +49,17 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     //region Update
 
     final override fun onUpdate(deltaTimeSec: Float) {
-        if (isIgnoreUpdate) {
+        if (isIgnoreUpdate || loadState == LoadState.NotLoaded) {
             return
         }
 
         if (processCustomClock) {
             customClock?.processFrame()
+        }
+
+        if (loadState == LoadState.Ready) {
+            loadState = LoadState.Loaded
+            onLoadComplete()
         }
 
         // Fallback to parent or engine-provided delta time in case clock is not present.
@@ -66,6 +71,36 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
 
         super.onManagedUpdate(deltaTimeSec)
     }
+
+    /**
+     * Whether this [UIScene] is currently loaded and part of the active update loop.
+     *
+     * This becomes `true` after [onLoadComplete] is called and stays `true` until this [UIScene] is unloaded.
+     */
+    val isLoaded
+        get() = loadState == LoadState.Loaded
+
+    private var loadState = LoadState.NotLoaded
+
+    /**
+     * Called when this [UIScene] is fully loaded and ready for use.
+     *
+     * This is invoked when [onUpdate] is called for the first time after this [UIScene] receives a valid [clock]
+     * **and** before [onManagedUpdate]. It is safe to start animations and modifiers here.
+     *
+     * Note that this can be called multiple times during this [UIScene]'s lifetime if it is detached and re-attached.
+     */
+    protected open fun onLoadComplete() {}
+
+    /**
+     * Called when this [UIScene] is being unloaded.
+     *
+     * This is invoked when this [UIScene] loses its [clock], usually when it is detached from its [parent]. If this
+     * [UIScene] is re-attached, [onLoadComplete] will be called again.
+     */
+    protected open fun onUnload() {}
+
+    //endregion
 
     //region Timekeeping
 
@@ -109,6 +144,17 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     open fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
         val currentClock = this.clock
+
+        if (currentClock != null) {
+            if (loadState == LoadState.NotLoaded) {
+                loadState = LoadState.Ready
+            }
+        } else {
+            if (loadState == LoadState.Loaded) {
+                onUnload()
+            }
+            loadState = LoadState.NotLoaded
+        }
 
         mChildren?.fastForEach {
             (it as? UIComponent)?.updateClock(currentClock)
