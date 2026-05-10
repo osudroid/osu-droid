@@ -102,7 +102,7 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
         source.seek(firstSourceTime)
 
-        val secondSource = TestClock().apply {
+        val secondSource = TestNonAdjustableClock().apply {
             // More importantly, test a value lower than the original source. This is to both test value transfer *and*
             // the case where time is going backwards, as some clocks have special provisions for this.
             currentTime = secondSourceTime
