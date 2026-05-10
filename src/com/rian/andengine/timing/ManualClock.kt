@@ -5,6 +5,6 @@ package com.rian.andengine.timing
  */
 open class ManualClock : IClock {
     override var currentTime = 0f
-    override val rate = 1f
-    override val isRunning = false
+    override var rate = 1f
+    override var isRunning = false
 }
