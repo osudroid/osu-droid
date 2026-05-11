@@ -38,6 +38,7 @@ public class FlashLightEntity extends UIComponent {
     public void onMouseMove(float pX, float pY) {
         if (nextPX != 0 && nextPY != 0 && modifier != null && this.getX() != nextPX && this.getY() != nextPY) {
             removeModifier(modifier);
+            modifier = null;
         }
 
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
@@ -48,7 +49,7 @@ public class FlashLightEntity extends UIComponent {
             return;
         }
 
-        modifier = moveTo(nextPX, nextPY, areaFollowDelay, Easing.OutExpo);
+        modifier = moveTo(nextPX, nextPY, areaFollowDelay, Easing.OutExpo).after(e -> modifier = null);
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
