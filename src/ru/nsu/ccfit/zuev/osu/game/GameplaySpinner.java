@@ -362,11 +362,11 @@ public class GameplaySpinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
+                scene.attachChild(clearText);
                 clearText.fadeInFromZero(0.25f);
                 clearText.setScale(1.5f);
                 clearText.scaleTo(1, 0.25f);
 
-                scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
