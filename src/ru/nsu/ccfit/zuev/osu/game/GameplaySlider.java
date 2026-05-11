@@ -371,9 +371,10 @@ public class GameplaySlider extends GameObject {
             float okWindow = (float) hitWindow.getOkWindow() / 1000;
 
             headCirclePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sequence.fadeOut(mehWindow - okWindow);
-
-                sliderHeadLateMissFadeModifier = sequence.getLastActiveModifier();
+                sliderHeadLateMissFadeModifier = sequence
+                        .fadeOut(mehWindow - okWindow)
+                        .after(e -> sliderHeadLateMissFadeModifier = null)
+                        .getLastActiveModifier();
 
                 return Unit.INSTANCE;
             });
@@ -1232,6 +1233,7 @@ public class GameplaySlider extends GameObject {
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
                 headCirclePiece.removeModifier(sliderHeadLateMissFadeModifier);
+                sliderHeadLateMissFadeModifier = null;
             }
 
             // Change the head circle to the end circle piece.
