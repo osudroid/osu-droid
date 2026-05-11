@@ -27,13 +27,15 @@ class ThrottledFrameClock : FramedClock() {
     private var accumulatedSleepError = 0f
 
     override fun processFrame() {
-        super.processFrame()
+        updateTime()
 
         if (throttling && maximumUpdateHz > 0 && maximumUpdateHz < Float.MAX_VALUE) {
             throttle()
         } else {
             timeSlept = 0f
         }
+
+        performBookkeeping(elapsedFrameTime)
     }
 
     private fun throttle() {

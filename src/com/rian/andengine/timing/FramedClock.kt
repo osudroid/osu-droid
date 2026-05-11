@@ -78,14 +78,28 @@ open class FramedClock @JvmOverloads constructor(source: IClock? = null, private
     }
 
     override fun processFrame() {
+        updateTime()
+        performBookkeeping(elapsedFrameTime)
+    }
+
+    /**
+     * Updates the [currentTime] and [lastFrameTime] of this [FramedClock].
+     */
+    protected open fun updateTime() {
         if (processSource) {
             (source as? IFrameBasedClock)?.processFrame()
         }
 
         lastFrameTime = currentTime
         currentTime = sourceTime
-        val delta = elapsedFrameTime
+    }
 
+    /**
+     * Performs bookkeeping for diagnostics like [framesPerSecond] and [jitter].
+     *
+     * @param delta The elapsed time for the current frame.
+     */
+    protected fun performBookkeeping(delta: Float) {
         betweenFrameTimes[totalFramesProcessed % betweenFrameTimes.size] = delta
         ++totalFramesProcessed
 
