@@ -139,7 +139,7 @@ fun addFireworks(scene: Scene, context: Context) {
                 isParticlesSpawnEnabled = true
             }
 
-            scene.attachChild(explosionSystem)
+            scene.attachChild(explosionSystem, 1)
 
             scene.registerUpdateHandler(TimerHandler(2.0f) {
                 scene.detachChild(trailSystem)
