@@ -20,9 +20,9 @@ import kotlin.math.*
 import org.anddev.andengine.engine.camera.Camera
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
-    IClockProvider<IFrameBasedClock> {
+    IClockProvider<ThrottledFrameClock> {
 
-    override val clock: IFrameBasedClock = ThrottledFrameClock()
+    override val clock = ThrottledFrameClock()
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
