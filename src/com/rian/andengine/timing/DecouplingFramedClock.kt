@@ -162,6 +162,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         shouldBeRunning = adjustableSourceClock.isRunning
         lastSeekFailed = false
         pendingSourceRestartAfterNegativeSeek = false
+        lastReferenceTime = null
     }
 
     //endregion
@@ -174,6 +175,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         shouldBeRunning = false
         lastSeekFailed = false
         _currentTime = 0f
+        lastReferenceTime = null
     }
 
     override fun start() {
