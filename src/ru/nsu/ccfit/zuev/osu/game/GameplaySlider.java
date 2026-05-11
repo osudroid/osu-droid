@@ -1046,7 +1046,7 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
-            ball.fadeIn(0.1f);
+            ball.fadeInFromZero(0.1f);
         }
 
         approachCircle.clearEntityModifiers();
