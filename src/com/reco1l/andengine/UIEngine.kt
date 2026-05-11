@@ -8,7 +8,6 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.rian.andengine.HUD
 import com.rian.andengine.timing.IClockProvider
-import com.rian.andengine.timing.IFrameBasedClock
 import com.rian.andengine.timing.ThrottledFrameClock
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions
