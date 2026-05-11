@@ -130,7 +130,7 @@ class FPSCounter(font: Font) : ChangeableText(
         stringBuilder.setLength(0)
 
         formatter.format(
-            "%.${if (displayedFrameTime < 0.005f) "1" else "0"}f ms | %d FPS",
+            "%.${if (displayedFrameTime < 0.01f) "1" else "0"}f ms | %d FPS",
             displayedFrameTime * 1000,
             displayedFps
         )
