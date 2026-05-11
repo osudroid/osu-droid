@@ -58,7 +58,11 @@ class ThrottledFrameClock : FramedClock() {
 
         val before = currentTime
 
-        Thread.sleep((seconds * 1e3).toLong())
+        try {
+            Thread.sleep((seconds * 1e3).toLong())
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
 
         currentTime = sourceTime
 
