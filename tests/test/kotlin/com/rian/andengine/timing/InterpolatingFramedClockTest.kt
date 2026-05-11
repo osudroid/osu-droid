@@ -109,13 +109,13 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         }
 
         interpolating.processFrame()
-        assertEquals(firstSourceTime, interpolating.currentTime)
+        assertEquals(firstSourceTime, interpolating.currentTime, 0f)
 
         interpolating.changeSource(secondSource)
         interpolating.processFrame()
 
-        assertEquals(secondSourceTime, secondSource.currentTime)
-        assertEquals(secondSourceTime, interpolating.currentTime)
+        assertEquals(secondSourceTime, secondSource.currentTime, 0f)
+        assertEquals(secondSourceTime, interpolating.currentTime, 0f)
     }
 
     @Test
