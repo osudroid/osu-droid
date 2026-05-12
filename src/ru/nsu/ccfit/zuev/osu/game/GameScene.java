@@ -1319,6 +1319,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             );
 
             hud.attachChild(fpsCounter);
+            hud.attachChild(new FPSCounter(counterTextFont));
         }
 
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
@@ -1374,9 +1375,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            // Reset raw pointer state to a clean slate at the start of each map.
-            // (High-precision options are applied globally in MainActivity.onCreateEngine)
-            engine.getTouchController().resetRawPointers();
+            // Enable historical event processing for more frequent ACTION_MOVE reports depending on user configuration.
+            var touchOptions = new TouchOptions();
+            touchOptions.setRunOnUpdateThread(true);
+            touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
+            touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
+
+            var touchController = engine.getTouchController();
+            touchController.applyTouchOptions(touchOptions);
+            touchController.resetRawPointers();
         }
 
         // Disable screen dimming
@@ -3409,12 +3416,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return false;
                 }
 
-                for (int attempt = 0; attempt < 4; ++attempt) {
+                for (int attempt = 0; attempt < 2; ++attempt) {
                     int versionBefore = touchController.getRawPointerVersion(pointerId);
 
                     // An odd version means the main thread is updating this pointer, so we wait.
                     if ((versionBefore & 1) != 0) {
-                        Thread.onSpinWait(); // hint to the CPU that this is a spin-wait loop
                         continue;
                     }
 

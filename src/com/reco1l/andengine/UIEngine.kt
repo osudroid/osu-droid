@@ -20,8 +20,17 @@ import org.andengine.engine.camera.Camera
 
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     IClockProvider<ThrottledFrameClock> {
+    /**
+     * The clock used for the update thread.
+     */
+    val updateClock = ThrottledFrameClock()
 
-    override val clock = ThrottledFrameClock()
+    /**
+     * The clock used for the draw (GL) thread.
+     */
+    val drawClock = ThrottledFrameClock()
+
+    override val clock = updateClock
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
@@ -68,6 +77,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
 
 
     override fun onDrawScene(pGLState: GLState, pCamera: Camera) {
+        drawClock.processFrame()
 
         val focusedEntity = focusedEntity
 
@@ -195,9 +205,9 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     }
 
     override fun onUpdate(pNanosecondsElapsed: Long) {
-        clock.processFrame()
+        updateClock.processFrame()
 
-        super.onUpdate((clock.elapsedFrameTime * 1e9).toLong())
+        super.onUpdate((updateClock.elapsedFrameTime * 1e9).toLong())
     }
 
     override fun setScene(scene: Scene?) {
