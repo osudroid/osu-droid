@@ -75,7 +75,6 @@ public class GameplaySpinner extends GameObject {
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
         metre = new UISprite();
-        metre.setOrigin(Anchor.BottomLeft);
         metre.setPosition(position.x - Config.getRES_WIDTH() / 2f, position.y);
         metre.setTextureRegion(metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
@@ -136,7 +135,8 @@ public class GameplaySpinner extends GameObject {
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
         metreRegion.setTexturePosition(0, metreRegion.getHeight());
-
+        metre.requestBufferUpdate();
+        
         scene.attachChild(spinText, 0);
 
         if (!GameHelper.isHidden()) {
@@ -383,10 +383,18 @@ public class GameplaySpinner extends GameObject {
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         }
+       float fillOffset = 1 - Math.abs(percentfill);
         metre.setPosition(metre.getX(),
-                metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
+                metreY + metre.getHeight() * fillOffset);
         metreRegion.setTexturePosition(0,
-                (int) (metreRegion.getHeight() * (1 - Math.abs(percentfill))));
+                (int) (metreRegion.getHeight() * fillOffset));
+        metre.requestBufferUpdate();
+
+        oldMouse.set(currMouse);
+
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
 
         oldMouse.set(currMouse);
 
