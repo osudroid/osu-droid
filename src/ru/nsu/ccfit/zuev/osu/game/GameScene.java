@@ -1838,6 +1838,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (startedFromHUDEditor && isHUDEditorMode) {
                 beatmapClock.seek(initialStartTime);
                 loadGame(lastBeatmapInfo, null, lastMods, null);
+                applyBackground();
                 stat.reset();
                 skip(true);
                 return;
