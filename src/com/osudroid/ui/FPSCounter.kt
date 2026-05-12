@@ -23,10 +23,9 @@ class FPSCounter(font: Font) : Text(
     0f,
     0f,
     font,
-    "${getGlobal().mainActivity.refreshRate.roundToInt()}/${getGlobal().mainActivity.refreshRate.roundToInt()} FPS",
-    getGlobal().engine.vertexBufferObjectManager
     "",
-    24
+    24,
+    getGlobal().engine.vertexBufferObjectManager
 ) {
     private val drawClock = UIEngine.current.drawClock
     private val updateClock = UIEngine.current.updateClock

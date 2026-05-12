@@ -1288,37 +1288,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            var fpsCounter = new FPSCounter(counterTextFont);
-
-            // Attach a dummy entity for computing FPS, as its frame rate is tied to the draw thread and not
-            // the update thread.
-            hud.attachChild(new Entity() {
-                private long previousDrawTime;
-
-                @Override
-                protected void onManagedUpdate(float pSecondsElapsed) {
-                    fpsCounter.setPosition(
-                        Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
-                        Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
-                    );
-                }
-
-                @Override
-                protected void onManagedDraw(GLState pGLState, Camera pCamera) {
-                    long currentDrawTime = SystemClock.uptimeMillis();
-
-                    fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
-
-                    previousDrawTime = currentDrawTime;
-                }
-            });
-
-            fpsCounter.setPosition(
-                Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
-                Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
-            );
-
-            hud.attachChild(fpsCounter);
             hud.attachChild(new FPSCounter(counterTextFont));
         }
 
@@ -1377,7 +1346,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (!isHUDEditorMode && !replaying && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             // Enable historical event processing for more frequent ACTION_MOVE reports depending on user configuration.
             var touchOptions = new TouchOptions();
-            touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
             touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
 
