@@ -383,6 +383,7 @@ public class GameplaySpinner extends GameObject {
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         }
+
         float fillOffset = 1 - Math.abs(percentfill);
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * fillOffset);
