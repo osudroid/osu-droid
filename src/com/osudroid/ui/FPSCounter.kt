@@ -118,8 +118,6 @@ class FPSCounter(font: Font) : ChangeableText(
             return
         }
 
-        timeSinceLastUpdate = 0f
-
         val displayedFps = displayedFpsCount.roundToInt()
         val isHighPrecision = displayedFrameTime < 0.01f
         val displayedMs = displayedFrameTime * 1000
@@ -134,6 +132,7 @@ class FPSCounter(font: Font) : ChangeableText(
             return
         }
 
+        timeSinceLastUpdate = 0f
         lastDisplayedFps = displayedFps
         lastDisplayedFrameTime = roundedFrameTime
 
