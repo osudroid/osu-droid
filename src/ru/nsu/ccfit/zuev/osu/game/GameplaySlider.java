@@ -920,22 +920,6 @@ public class GameplaySlider extends GameObject {
     }
 
     @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(startArrow, dt);
-        updateAfterInit(endArrow, dt);
-        updateAfterInit(headCirclePiece, dt);
-        updateAfterInit(tailCirclePiece, dt);
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(tickContainer, dt);
-        updateAfterInit(sliderBody, dt);
-        updateAfterInit(ball, dt);
-        updateAfterInit(followCircle, dt);
-
-        super.updateAfterInit(dt);
-    }
-
-    @Override
     public void update(final float dt) {
 
         if (scene == null) {

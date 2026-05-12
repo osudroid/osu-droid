@@ -271,19 +271,6 @@ public class GameplaySpinner extends GameObject {
     }
 
     @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(clearText, dt);
-        updateAfterInit(spinText, dt);
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(background, dt);
-        updateAfterInit(circle, dt);
-        updateAfterInit(metre, dt);
-
-        super.updateAfterInit(dt);
-    }
-
-    @Override
     public void update(final float dt) {
         passedTime += dt;
 
