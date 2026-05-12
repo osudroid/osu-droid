@@ -7,7 +7,7 @@ import com.osudroid.mods.ModFlashlight;
 import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.IEntityModifier;
 import com.reco1l.andengine.component.UIComponent;
-import com.rian.andengine.modifier.UniversalModifier;
+import com.reco1l.framework.Interpolation;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -17,8 +17,7 @@ public class FlashLightEntity extends UIComponent {
     private final FlashLightDimLayerSprite dimLayer;
     private boolean isTrackingSliders = false;
 
-    private final float areaFollowDelay;
-    private UniversalModifier modifier = null;
+    private final float followDelay;
     private float nextPX;
     private float nextPY;
 
@@ -26,7 +25,7 @@ public class FlashLightEntity extends UIComponent {
         super();
 
         setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
-        areaFollowDelay = flashlight.getFollowDelay();
+        followDelay = flashlight.getFollowDelay();
         mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier(), flashlight.isComboBasedSize());
         dimLayer = new FlashLightDimLayerSprite();
 
@@ -39,20 +38,8 @@ public class FlashLightEntity extends UIComponent {
     }
 
     public void onMouseMove(float pX, float pY) {
-        if (nextPX != 0 && nextPY != 0 && modifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            removeModifier(modifier);
-            modifier = null;
-        }
-
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
         nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
-
-        if (areaFollowDelay == 0) {
-            setPosition(nextPX, nextPY);
-            return;
-        }
-
-        modifier = moveTo(nextPX, nextPY, areaFollowDelay, Easing.OutExpo).after(e -> modifier = null);
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
@@ -62,6 +49,25 @@ public class FlashLightEntity extends UIComponent {
     public void onUpdate(int combo) {
         dimLayer.onTrackingSliders(isTrackingSliders);
         mainSprite.onUpdate(combo);
+    }
+
+    @Override
+    protected void onManagedUpdate(float deltaTimeSec) {
+        super.onManagedUpdate(deltaTimeSec);
+
+        if (followDelay == 0) {
+            setPosition(nextPX, nextPY);
+            return;
+        }
+
+        float x = getInterpolatedPosition(deltaTimeSec, getX(), nextPX);
+        float y = getInterpolatedPosition(deltaTimeSec, getY(), nextPY);
+
+        setPosition(x, y);
+    }
+
+    private float getInterpolatedPosition(float deltaTime, float current, float next) {
+        return Interpolation.floatAt(Math.min(deltaTime, followDelay), current, next, 0, followDelay, Easing.OutExpo);
     }
 }
 

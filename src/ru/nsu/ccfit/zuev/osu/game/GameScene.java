@@ -2881,7 +2881,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             .fadeOut(fadeOutLength),
                     sequence -> sequence.scaleTo(scale, 0.1f, Easing.InQuad)
                             .translateToY(-5)
-                            .translateToY(-80, fadeOutDelay + fadeOutLength, Easing.InQuad),
+                            .translateToY(80, fadeOutDelay + fadeOutLength, Easing.InQuad),
                     sequence -> sequence.rotateTo(0)
                             .rotateTo(rotation, fadeInLength)
                             .then()
