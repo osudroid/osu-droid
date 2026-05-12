@@ -119,20 +119,29 @@ class FPSCounter(font: Font) : ChangeableText(
         }
 
         timeSinceLastUpdate = 0f
-        val displayedFps = displayedFpsCount.roundToInt()
 
-        if (!hasSignificantChanges && displayedFps == lastDisplayedFps && displayedFrameTime == lastDisplayedFrameTime) {
+        val displayedFps = displayedFpsCount.roundToInt()
+        val isHighPrecision = displayedFrameTime < 0.01f
+        val displayedMs = displayedFrameTime * 1000
+
+        val roundedFrameTime = if (isHighPrecision) {
+            (displayedMs * 10).roundToInt() / 10f
+        } else {
+            displayedMs.roundToInt().toFloat()
+        }
+
+        if (!hasSignificantChanges && displayedFps == lastDisplayedFps && roundedFrameTime == lastDisplayedFrameTime) {
             return
         }
 
         lastDisplayedFps = displayedFps
-        lastDisplayedFrameTime = displayedFrameTime
+        lastDisplayedFrameTime = roundedFrameTime
 
         stringBuilder.setLength(0)
 
         formatter.format(
-            "%.${if (displayedFrameTime < 0.01f) "1" else "0"}f ms | %d FPS",
-            displayedFrameTime * 1000,
+            "%.${if (isHighPrecision) "1" else "0"}f ms | %d FPS",
+            displayedMs,
             displayedFps
         )
 
