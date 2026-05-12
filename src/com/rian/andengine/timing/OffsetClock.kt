@@ -1,0 +1,14 @@
+package com.rian.andengine.timing
+
+open class OffsetClock(protected var source: IClock) : IClock {
+    var offset = 0f
+
+    override val currentTime
+        get() = source.currentTime + offset
+
+    override val rate
+        get() = source.rate
+
+    override val isRunning
+        get() = source.isRunning
+}

@@ -3,6 +3,10 @@ package com.reco1l.andengine
 import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.toolkt.kotlin.fastForEach
+import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.IClockReceiver
+import com.rian.andengine.timing.IFrameBasedClock
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.IEntity
@@ -17,15 +21,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape {
-
-    /**
-     * The time multiplier for the scene.
-     *
-     * Setting this will affect the speed of every entity attached to this scene.
-     */
-    var timeMultiplier = 1f
-
+open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockReceiver<IFrameBasedClock?> {
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -53,13 +49,123 @@ open class UIScene : Scene(), IShape {
 
     //region Update
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-        onUpdateTick?.invoke(deltaTimeSec * timeMultiplier)
-        super.onManagedUpdate(deltaTimeSec * timeMultiplier)
+    final override fun onUpdate(deltaTimeSec: Float) {
+        if (loadState == LoadState.NotLoaded) {
+            return
+        }
+
+        if (processCustomClock) {
+            customClock?.processFrame()
+        }
+
+        if (loadState == LoadState.Ready) {
+            loadState = LoadState.Loaded
+            onLoadComplete()
+        }
+
+        if (!isIgnoreUpdate) {
+            // Fallback to parent or engine-provided delta time in case clock is not present.
+            onManagedUpdate(clock?.elapsedFrameTime ?: deltaTimeSec)
+        }
     }
 
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        onUpdateTick?.invoke(deltaTimeSec)
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
+    /**
+     * Whether this [UIScene] is currently loaded and part of the active update loop.
+     *
+     * This becomes `true` after [onLoadComplete] is called and stays `true` until this [UIScene] is unloaded.
+     */
+    val isLoaded
+        get() = loadState == LoadState.Loaded
+
+    private var loadState = LoadState.NotLoaded
+
+    /**
+     * Called when this [UIScene] is fully loaded and ready for use.
+     *
+     * This is invoked when [onUpdate] is called for the first time after this [UIScene] receives a valid [clock]
+     * **and** before [onManagedUpdate]. It is safe to start animations and modifiers here.
+     *
+     * Note that this is called regardless of [isIgnoreUpdate], and can be called multiple times during this
+     * [UIScene]'s lifetime if it is detached and re-attached.
+     */
+    protected open fun onLoadComplete() {}
+
+    /**
+     * Called when this [UIScene] is being unloaded.
+     *
+     * This is invoked when this [UIScene] loses its [clock], usually when it is detached from its [parent]. If this
+     * [UIScene] is re-attached, [onLoadComplete] will be called again.
+     */
+    protected open fun onUnload() {}
+
+    //endregion
+
+    //region Timekeeping
+
+    /**
+     * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIScene]'s [clock] in
+     * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
+     */
+    var processCustomClock = true
+
+    private var customClock: IFrameBasedClock? = null
+    // Cache inherited clock here to avoid parent tree climbing.
+    private var inheritedClock: IFrameBasedClock? = null
+
+    /**
+     * The [IFrameBasedClock] of this [UIScene]. Used for keeping track of time across frames. By default, this is
+     * inherited from [parent] or [UIEngine].
+     *
+     * If set, then the provided value is used as a custom clock and [parent] or [UIEngine]'s [IFrameBasedClock] is
+     * ignored.
+     */
+    override var clock: IFrameBasedClock?
+        get() = customClock ?: inheritedClock
+        set(value) {
+            customClock = value
+            updateClock(inheritedClock)
+        }
+
+    /**
+     * The current frame's time as observed by this [UIScene]'s [clock].
+     */
+    val time
+        get() = clock?.timeInfo
+
+    override fun updateClock(clock: IFrameBasedClock?) {
+        inheritedClock = clock
+        val currentClock = this.clock
+
+        if (currentClock != null) {
+            if (loadState == LoadState.NotLoaded) {
+                loadState = LoadState.Ready
+            }
+        } else {
+            if (loadState == LoadState.Loaded) {
+                onUnload()
+            }
+            loadState = LoadState.NotLoaded
+        }
+
+        mChildren?.fastForEach {
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        (mChildScene as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
+    }
+
+    //endregion
+
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
-        childScene?.onDetached()
+        this.childScene?.onDetached()
         super.setChildScene(childScene, modalDraw, modalUpdate, modalTouch)
         childScene?.onAttached()
     }
@@ -70,6 +176,8 @@ open class UIScene : Scene(), IShape {
     }
 
     override fun onAttached() {
+        val inheritedClockProvider = (parent as? IClockProvider<*>) ?: (mParentScene as? IClockProvider<*>)
+        updateClock(inheritedClockProvider?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         fun IEntity.propagateSkinChanges() {
 
@@ -85,6 +193,12 @@ open class UIScene : Scene(), IShape {
         }
 
         propagateSkinChanges()
+    }
+
+    override fun onDetached() {
+        updateClock(null)
+
+        super.onDetached()
     }
 
     //endregion

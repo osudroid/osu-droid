@@ -2,28 +2,27 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.osudroid.mods.ModFlashlight;
-
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
+import com.reco1l.andengine.component.UIComponent;
+import com.rian.andengine.modifier.UniversalModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
 
-public class FlashLightEntity extends Entity  {
+public class FlashLightEntity extends UIComponent {
     private final MainFlashLightSprite mainSprite;
     private final FlashLightDimLayerSprite dimLayer;
     private boolean isTrackingSliders = false;
 
     private final float areaFollowDelay;
-    private IEntityModifier currentModifier = null;
+    private UniversalModifier modifier = null;
     private float nextPX;
     private float nextPY;
 
     public FlashLightEntity(final ModFlashlight flashlight) {
-        super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        super();
 
+        setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         areaFollowDelay = flashlight.getFollowDelay();
         mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier(), flashlight.isComboBasedSize());
         dimLayer = new FlashLightDimLayerSprite();
@@ -37,8 +36,9 @@ public class FlashLightEntity extends Entity  {
     }
 
     public void onMouseMove(float pX, float pY) {
-        if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            unregisterEntityModifier(currentModifier);
+        if (nextPX != 0 && nextPY != 0 && modifier != null && this.getX() != nextPX && this.getY() != nextPY) {
+            removeModifier(modifier);
+            modifier = null;
         }
 
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
@@ -49,9 +49,7 @@ public class FlashLightEntity extends Entity  {
             return;
         }
 
-        currentModifier = Modifiers.move(areaFollowDelay, getX(), nextPX, getY(), nextPY, null, Easing.OutExpo);
-
-        registerEntityModifier(currentModifier);
+        modifier = moveTo(nextPX, nextPY, areaFollowDelay, Easing.OutExpo).after(e -> modifier = null);
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {

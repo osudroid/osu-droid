@@ -2,14 +2,19 @@ package com.reco1l.andengine.component
 
 import android.util.*
 import android.view.*
+import com.edlplan.framework.easing.Easing
 import com.osudroid.*
+import com.osudroid.math.Precision
 import com.reco1l.andengine.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
+import com.rian.andengine.modifier.*
+import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.IClockReceiver
+import com.rian.andengine.timing.IFrameBasedClock
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -22,13 +27,13 @@ import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-
 /**
  * Entity with extended features.
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
+abstract class UIComponent : Entity(0f, 0f),
+    ITouchArea, IThemeable, IClockProvider<IFrameBasedClock?>, IClockReceiver<IFrameBasedClock?> {
 
     //region Axes properties
 
@@ -334,12 +339,7 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
      * Whether the component is currently animating.
      */
     val isAnimating
-        get() = !mEntityModifiers.isNullOrEmpty()
-
-    /**
-     * The modifier pool used to manage the modifiers of this entity. By default [UniversalModifier.GlobalPool].
-     */
-    var modifierPool = UniversalModifier.GlobalPool
+        get() = !mEntityModifiers.isNullOrEmpty() || universalModifierTrackers.any { !it.modifiers.isEmpty() }
 
     /**
      * The mode in which the entity is attached to its parent.
@@ -464,6 +464,13 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
     override fun onAttached() {
         onThemeChanged(Theme.current)
         onHandleInvalidations(false)
+        updateClock((parent as? IClockProvider<*>)?.clock as? IFrameBasedClock)
+    }
+
+    override fun onDetached() {
+        updateClock(null)
+
+        super.onDetached()
     }
 
     //endregion
@@ -773,15 +780,68 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //region Update
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
+    final override fun onUpdate(deltaTimeSec: Float) {
+        if (loadState == LoadState.NotLoaded) {
+            return
+        }
 
+        if (processCustomClock) {
+            customClock?.processFrame()
+        }
+
+        if (loadState == LoadState.Ready) {
+            loadState = LoadState.Loaded
+            onLoadComplete()
+        }
+
+        if (!isIgnoreUpdate) {
+            // Fallback to parent or engine-provided delta time in case clock is not present.
+            onManagedUpdate(clock?.elapsedFrameTime ?: deltaTimeSec)
+        }
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         onUpdateTick?.invoke(deltaTimeSec)
 
         background?.onManagedUpdate(deltaTimeSec)
         foreground?.onManagedUpdate(deltaTimeSec)
 
+        updateModifiers()
+
         super.onManagedUpdate(deltaTimeSec)
     }
+
+    private var loadState = LoadState.NotLoaded
+
+    /**
+     * Whether this [UIComponent] is currently loaded and part of the active update loop.
+     *
+     * This becomes `true` after [onLoadComplete] is called and stays `true` until this [UIComponent] is unloaded.
+     */
+    val isLoaded
+        get() = loadState == LoadState.Loaded
+
+    /**
+     * Called when this [UIComponent] is fully loaded and ready for use.
+     *
+     * This is invoked when [onUpdate] is called for the first time after this [UIComponent] receives a valid [clock]
+     * **and** before [onManagedUpdate]. It is safe to start animations and modifiers here.
+     *
+     * Note that this is called regardless of [isIgnoreUpdate], and can be called multiple times during this
+     * [UIComponent]'s lifetime if it is detached and re-attached.
+     */
+    protected open fun onLoadComplete() {}
+
+    /**
+     * Called when this [UIComponent] is being unloaded.
+     *
+     * This is invoked when this [UIComponent] loses its [clock], usually when it is detached from its [parent].
+     * If this [UIComponent] is re-attached, [onLoadComplete] will be called again.
+     *
+     * Subclasses should use this to clear persistent modifiers or stop animations if needed (e.g., if this
+     * [UIComponent] is intended to be pooled and re-used).
+     */
+    protected open fun onUnload() {}
 
     //endregion
 
@@ -944,20 +1004,622 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //region Modifiers
 
-    fun clearModifiers(vararg type: ModifierType) {
-        unregisterEntityModifiers { it is UniversalModifier && it.type in type }
+    private val universalModifierTrackers = mutableListOf<UniversalModifierTargetTracker>()
+
+    /**
+     * Appends a [UniversalModifier] to this [UIComponent]. The [UniversalModifier] will be tracked and
+     * automatically.
+     *
+     * @param modifier The [UniversalModifier] to append.
+     */
+    fun appendModifier(modifier: UniversalModifier) {
+        getTrackerFor(modifier.type, true)!!.add(modifier)
     }
 
-    override fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
+    /**
+     * Removes a [UniversalModifier] from this [UIComponent].
+     *
+     * @param modifier The [UniversalModifier] to remove.
+     * @return Whether the [UniversalModifier] was removed.
+     */
+    fun removeModifier(modifier: UniversalModifier): Boolean {
+        if (modifier.target != this) {
+            return false
+        }
 
-        val modifier = modifierPool.acquire() ?: UniversalModifier(modifierPool)
-        modifier.setToDefault()
-        modifier.parent = this
+        return getTrackerFor(modifier.type)?.remove(modifier) ?: false
+    }
+
+    private inline fun appendModifier(
+        type: ModifierType,
+        duration: Float,
+        easing: Easing,
+        crossinline block: UniversalModifier.() -> Unit
+    ): UniversalModifier {
+        val modifier = UniversalModifier.GlobalPool.acquire() ?: UniversalModifier()
+
+        modifier.target = this
+        modifier.type = type
+        modifier.startTime = modifierStartTime
+        modifier.duration = duration
+        modifier.eased(easing)
         modifier.block()
 
-        registerEntityModifier(modifier)
+        appendModifier(modifier)
+
         return modifier
     }
+
+    /**
+     * Obtains the [UniversalModifierTargetTracker] for the specified [ModifierType].
+     *
+     * @param type The [ModifierType] to get the [UniversalModifierTargetTracker] for.
+     * @param createIfNotExisting Whether to create the [UniversalModifierTargetTracker] if it does not exist.
+     * @return The [UniversalModifierTargetTracker] for [type], `null` if it did not exist and [createIfNotExisting] was
+     * `false`.
+     */
+    private fun getTrackerFor(type: ModifierType, createIfNotExisting: Boolean = false): UniversalModifierTargetTracker? {
+        for (i in universalModifierTrackers.indices) {
+            val tracker = universalModifierTrackers[i]
+
+            if (tracker.targetMember == type.targetMember) {
+                return tracker
+            }
+        }
+
+        if (!createIfNotExisting) {
+            return null
+        }
+
+        val tracker = UniversalModifierTargetTracker(type.targetMember, this)
+        universalModifierTrackers += tracker
+
+        return tracker
+    }
+
+    /**
+     * Resets [modifierDelay] and processes updates to [UniversalModifier]s.
+     */
+    protected fun updateModifiers() {
+        modifierDelay = 0f
+
+        updateModifiers(time?.current ?: return)
+    }
+
+    private fun updateModifiers(time: Float) {
+        universalModifierTrackers.fastForEach { it.update(time) }
+    }
+
+    override fun clearEntityModifiers() {
+        super.clearEntityModifiers()
+
+        universalModifierTrackers.fastForEach { it.clear() }
+    }
+
+    /**
+     * Clears [UniversalModifier]s of the specified [ModifierType] from this [UIComponent].
+     *
+     * Unlike the vararg variant, this method avoids array allocation in cases where there is only one [ModifierType] to
+     * remove.
+     *
+     * @param type The [ModifierType] to clear.
+     * @param propagateChildren Whether to also clear [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clear(type) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(type, true) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s of the specified [ModifierType]s from this [UIComponent].
+     *
+     * @param propagateChildren Whether to also clear [UniversalModifier]s of children. Defaults to `false`.
+     * @param types The [ModifierType]s to remove.
+     */
+    @JvmOverloads
+    fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
+        universalModifierTrackers.fastForEach { it.clear(*types) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s that start after [time].
+     * 
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s with the given [ModifierType] that start after [time].
+     *
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param type The [ModifierType] to clear.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time, type) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+        }
+    }
+
+    /**
+     * Clears [UniversalModifier]s with the given [ModifierType]s that start after [time].
+     *
+     * @param time The time to clear [UniversalModifier]s after.
+     * @param types The [ModifierType]s to clear.
+     * @param propagateChildren Whether to also clear such [UniversalModifier]s of children. Defaults to `false`.
+     */
+    @JvmOverloads
+    fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
+        universalModifierTrackers.fastForEach { it.clearAfter(time, *types) }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+        }
+    }
+
+    /**
+     * Starting time to use for new [UniversalModifier]s.
+     */
+    val modifierStartTime
+        get() = (clock?.currentTime ?: 0f) + modifierDelay
+
+    /**
+     * Delay from the current time until new [UniversalModifier]s are started, in seconds. **This is made public so that
+     * [beginAbsoluteSequence] and [beginDelayedSequence] can be inlined for performance and should not be altered
+     * externally**.
+     */
+    var modifierDelay = 0f
+
+    /**
+     * Adds a delay duration to [modifierDelay], in seconds.
+     *
+     * @param duration The delay duration to add.
+     * @param propagateChildren Whether we also delay down the child.
+     */
+    @JvmOverloads
+    open fun addDelay(duration: Float, propagateChildren: Boolean = false) {
+        if (duration == 0f) {
+            return
+        }
+
+        modifierDelay += duration
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.addDelay(duration, true) }
+        }
+    }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s. The block will be provided with a [UniversalModifierSequence] that can
+     * be used to add [UniversalModifier]s.
+     */
+    inline fun beginModifierSequence(crossinline block: UniversalModifierSequence.() -> Unit) =
+        UniversalModifierSequence.obtain(this).use { it.block() }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s from an absolute time value (adjusts [modifierStartTime]).
+     *
+     * @param newModifierStartTime The new value for [modifierStartTime].
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     */
+    @JvmOverloads
+    inline fun beginAbsoluteSequence(
+        newModifierStartTime: Float,
+        propagateChildren: Boolean = true,
+        crossinline block: UniversalModifierSequence.() -> Unit
+    ) {
+        val prevModifierStartTime = modifierStartTime
+
+        adjustAbsoluteSequenceTime(newModifierStartTime, propagateChildren)
+
+        try {
+            beginModifierSequence(block)
+        } finally {
+            restoreAbsoluteSequenceTime(prevModifierStartTime, propagateChildren)
+        }
+    }
+
+    /**
+     * Adjusts [modifierStartTime] to a new absolute time value. **This is used internally for [beginAbsoluteSequence]
+     * but is made public for inlining, and should not be used externally**.
+     *
+     * @param newModifierStartTime The new [modifierStartTime].
+     * @param propagateChildren Whether to propagate [newModifierStartTime] to children. Defaults to `true`.
+     */
+    fun adjustAbsoluteSequenceTime(newModifierStartTime: Float, propagateChildren: Boolean = true) {
+        modifierDelay += newModifierStartTime - modifierStartTime
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { child ->
+                (child as? UIComponent)?.adjustAbsoluteSequenceTime(newModifierStartTime)
+            }
+        }
+    }
+
+    /**
+     * Restores [modifierStartTime] to its previous absolute time value. **This is used internally for
+     * [beginAbsoluteSequence] but is made public for inlining, and should not be used externally**.
+     *
+     * @param prevModifierStartTime The previous [modifierStartTime].
+     * @param propagateChildren Whether to propagate [prevModifierStartTime]. Defaults to `true`.
+     */
+    fun restoreAbsoluteSequenceTime(prevModifierStartTime: Float, propagateChildren: Boolean = true) {
+        modifierDelay += prevModifierStartTime - modifierStartTime
+
+        if (!Precision.almostEquals(prevModifierStartTime, modifierStartTime)) {
+            throw IllegalStateException(
+                "${this::class.simpleName}'s modifierStartTime at the end of absolute sequence is " +
+                        "not the same as at the beginning (begin=$prevModifierStartTime end=$modifierStartTime)"
+            )
+        }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { child ->
+                (child as? UIComponent)?.restoreAbsoluteSequenceTime(prevModifierStartTime)
+            }
+        }
+    }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s with a (cumulative) relative delay applied.
+     *
+     * @param delay The offset in seconds from current time. Note that this stacks with other nested sequences.
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
+     */
+    @JvmOverloads
+    inline fun beginDelayedSequence(
+        delay: Float,
+        propagateChildren: Boolean = true,
+        crossinline block: UniversalModifierSequence.() -> Unit
+    ) {
+        addDelay(delay, propagateChildren)
+        val oldDelay = modifierDelay
+
+        try {
+            beginModifierSequence(block)
+
+            val newDelay = modifierDelay
+
+            if (!Precision.almostEquals(oldDelay, newDelay)) {
+                throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence " +
+                        "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+            }
+        } finally {
+            addDelay(-delay, propagateChildren)
+        }
+    }
+
+    //endregion
+
+    //region Modifiers - Translation
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationX] and [translationY] over time.
+     *
+     * @param x The final [translationX] to reach at the end of the [UniversalModifier].
+     * @param y The final [translationY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateTo(x: Float, y: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateXY, duration, easing) {
+            finalValues[0] = x
+            finalValues[1] = y
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationX] over time.
+     *
+     * @param value The final [translationX] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [translationY] over time.
+     *
+     * @param value The final [translationY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun translateToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.TranslateY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Move
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mX] and [mY] over time.
+     *
+     * @param x The final [mX] to reach at the end of the [UniversalModifier].
+     * @param y The final [mY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveTo(x: Float, y: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveXY, duration, easing) {
+            finalValues[0] = x
+            finalValues[1] = y
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mX] over time.
+     *
+     * @param value The final [mX] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mY] over time.
+     *
+     * @param value The final [mY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun moveToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.MoveY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Scale
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleX] and [mScaleY] over time.
+     *
+     * @param value The final [mScaleX] and [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleXY, duration, easing) {
+            finalValues[0] = value
+            finalValues[1] = value
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleX] over time.
+     *
+     * @param value The final [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleToX(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleX, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mScaleY] over time.
+     *
+     * @param value The final [mScaleY] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun scaleToY(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.ScaleY, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Alpha
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] over time.
+     *
+     * @param value The final [alpha] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) { finalValues[0] = value }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] to 1 over time.
+     *
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeIn(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(1f, duration, easing)
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] from 0 to 1 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeInFromZero(duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) {
+            hasInitialValues = true
+            initialValues[0] = 0f
+            finalValues[0] = 1f
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] to 0 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeOut(duration: Float = 0f, easing: Easing = Easing.None) = fadeTo(0f, duration, easing)
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [alpha] from 1 to 0 over time.
+     *
+     * @param duration The duration of the [UniversalModifier]. Defaults to 0 seconds.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun fadeOutFromOne(duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Alpha, duration, easing) {
+            hasInitialValues = true
+            initialValues[0] = 1f
+            finalValues[0] = 0f
+        }
+
+    //endregion
+
+    //region Modifiers - Color
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param color The final color to reach at the end of the [UniversalModifier], in 0xRRGGBB format.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(color: Long, duration: Float = 0f, easing: Easing = Easing.None) =
+        colorTo(
+            red = ((color ushr 16) and 0xFF) / 255f,
+            green = ((color ushr 8) and 0xFF) / 255f,
+            blue = (color and 0xFF) / 255f,
+            duration = duration,
+            easing = easing
+        )
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param color The final [Color4] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(color: Color4, duration: Float = 0f, easing: Easing = Easing.None) =
+        colorTo(color.red, color.green, color.blue, duration, easing)
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [color] over time.
+     *
+     * @param red The final red component of [color] to reach at the end of the [UniversalModifier], in the
+     * range [0, 1].
+     * @param green The final green component of [color] to reach at the end of the [UniversalModifier], in
+     * the range [0, 1].
+     * @param blue The final blue component of [color] to reach at the end of the [UniversalModifier], in
+     * the range [0, 1].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun colorTo(red: Float, green: Float, blue: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Color, duration, easing) {
+            finalValues[0] = red
+            finalValues[1] = green
+            finalValues[2] = blue
+        }
+
+    //endregion
+
+    //region Modifiers - Rotation
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [mRotation] over time.
+     *
+     * @param value The final [mRotation] to reach at the end of the [UniversalModifier], in degrees.
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun rotateTo(value: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Rotation, duration, easing) { finalValues[0] = value }
+
+    //endregion
+
+    //region Modifiers - Size
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [width] and [height] over time.
+     *
+     * @param width The final [width] to reach at the end of the [UniversalModifier].
+     * @param height The final [height] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun sizeTo(width: Float, height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Size, duration, easing) {
+            finalValues[0] = width
+            finalValues[1] = height
+        }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [width] over time.
+     *
+     * @param width The final [width] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun widthTo(width: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Width, duration, easing) { finalValues[0] = width }
+
+    /**
+     * Smoothly adjusts this [UIComponent]'s [height] over time.
+     *
+     * @param height The final [height] to reach at the end of the [UniversalModifier].
+     * @param duration The duration of the [UniversalModifier], in seconds. Defaults to 0.
+     * @param easing The easing function to apply to the [UniversalModifier]. Defaults to [Easing.None].
+     * @return The added [UniversalModifier].
+     */
+    @JvmOverloads
+    fun heightTo(height: Float, duration: Float = 0f, easing: Easing = Easing.None) =
+        appendModifier(ModifierType.Height, duration, easing) { finalValues[0] = height }
 
     //endregion
 
@@ -1048,6 +1710,63 @@ abstract class UIComponent : Entity(0f, 0f), ITouchArea, IModifierChain, IThemea
 
     //endregion
 
+    //region Timekeeping
+
+    /**
+     * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIComponent]'s [customClock] in
+     * [onUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
+     */
+    var processCustomClock = true
+
+    private var customClock: IFrameBasedClock? = null
+    // Cache inherited clock here to avoid parent tree climbing.
+    private var inheritedClock: IFrameBasedClock? = null
+
+    /**
+     * The [IFrameBasedClock] of this [UIComponent]. Used for keeping track of time across frames. By default, this is
+     * inherited from [parent].
+     *
+     * If set, then the provided value is used as a custom clock and [parent]'s [IFrameBasedClock] is ignored.
+     */
+    override var clock: IFrameBasedClock?
+        get() = customClock ?: inheritedClock
+        set(value) {
+            customClock = value
+            updateClock(inheritedClock)
+        }
+
+    /**
+     * The current frame's time as observed by this class' [clock].
+     */
+    val time
+        get() = clock?.timeInfo
+
+    override fun updateClock(clock: IFrameBasedClock?) {
+        inheritedClock = clock
+        val currentClock = this.clock
+
+        if (currentClock != null) {
+            if (loadState == LoadState.NotLoaded) {
+                loadState = LoadState.Ready
+            }
+        } else {
+            if (loadState == LoadState.Loaded) {
+                onUnload()
+            }
+
+            loadState = LoadState.NotLoaded
+        }
+
+        background?.updateClock(currentClock)
+        foreground?.updateClock(currentClock)
+
+        mChildren?.fastForEach {
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
+        }
+    }
+
+    //endregion
 
     @Suppress("ConstPropertyName")
     companion object {

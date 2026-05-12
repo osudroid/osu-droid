@@ -11,10 +11,10 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
+import com.rian.andengine.modifier.ModifierType
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -184,13 +184,13 @@ class LobbyScene : UIScene() {
         val opposite = if (target == roomContainer) messageContainer else roomContainer
 
         opposite.apply {
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             scaleTo(0.95f, 0.3f)
             fadeOut(0.3f)
         }
 
         target.apply {
-            clearModifiers(ModifierType.ScaleXY, ModifierType.Alpha)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
 
             scaleX = 0.95f
             scaleY = 0.95f

@@ -8,13 +8,13 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import com.rian.andengine.modifier.ModifierType
 import kotlin.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -62,9 +62,6 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             scaleX = 0.9f
             scaleY = 0.9f
             scaleCenter = Anchor.Center
-
-            fadeIn(0.2f, Easing.OutCubic)
-            scaleTo(1f, 0.2f, Easing.OutCubic)
 
             if (beatmapInfo.epilepsyWarning) {
                 ResourceManager.getInstance().loadHighQualityAsset("warning", "warning.png")
@@ -189,7 +186,13 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
     override fun onAttached() {
         super.onAttached()
+
         mainContainer.paddingBottom = if (Multiplayer.isConnected) Multiplayer.roomScene!!.chat.buttonHeight + 12f else 0f
+    }
+
+    override fun onLoadComplete() {
+        mainContainer.fadeIn(0.2f, Easing.OutCubic)
+        mainContainer.scaleTo(1f, 0.2f, Easing.OutCubic)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
