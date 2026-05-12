@@ -564,8 +564,6 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        float elapsedTime = (float) getGameplayPassedTimeMilliseconds() / 1000;
-
         if (Config.isAnimateFollowCircle() && isInRadius) {
             isFollowCircleAnimating = true;
 
@@ -875,7 +873,6 @@ public class GameplaySlider extends GameObject {
     }
 
     private void updateFollowCircleTrackingState() {
-        float elapsedTime = (float) getGameplayPassedTimeMilliseconds() / 1000;
         float scale = beatmapSlider.getScreenSpaceGameplayScale();
         boolean isTracking = isTracking();
 
