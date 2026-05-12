@@ -425,7 +425,8 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         origin?.appendModifier(modifier)
 
-        if (lastActiveModifier == null || endTime < modifier.endTime) {
+        // Include equality to ensure after() callbacks are deterministic when multiple modifiers end at the same time.
+        if (lastActiveModifier == null || endTime <= modifier.endTime) {
             lastActiveModifier = modifier
         }
 
