@@ -91,6 +91,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         val lastTime = currentTime
 
         (source as? IFrameBasedClock)?.processFrame()
+        (realtimeReferenceClock as? IFrameBasedClock)?.processFrame()
 
         val referenceTime = realtimeReferenceClock.currentTime
 
