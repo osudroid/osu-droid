@@ -177,6 +177,7 @@ public class GameplaySpinner extends GameObject {
         });
 
         metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
+        metre.setY(metreY + metre.getHeight());
 
         metre.setAlpha(0);
         metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
