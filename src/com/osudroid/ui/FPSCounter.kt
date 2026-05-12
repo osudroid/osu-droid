@@ -83,7 +83,7 @@ class FPSCounter(font: Font) : ChangeableText(
 
         val hasUpdateSpike = displayedFrameTime < spikeTime && elapsedUpdateFrameTime > spikeTime
         // Use elapsed frame time rather than framesPerSecond to better catch stutter frames.
-        val hasDrawSpike = displayedFpsCount > (1f / spikeTime) && elapsedDrawFrameTime > spikeTime
+        val hasDrawSpike = displayedFpsCount > 1f / spikeTime && elapsedDrawFrameTime > spikeTime
 
         displayedFrameTime = Interpolation.dampContinuously(
             displayedFrameTime,
