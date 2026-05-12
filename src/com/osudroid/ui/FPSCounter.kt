@@ -5,6 +5,7 @@ import com.osudroid.math.Interpolation
 import com.reco1l.andengine.UIEngine
 import java.util.Formatter
 import java.util.Locale
+import kotlin.math.min
 import kotlin.math.roundToInt
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.opengl.font.Font
@@ -143,7 +144,12 @@ class FPSCounter(font: Font) : ChangeableText(
 
     private fun updateAimFPS(): Boolean {
         val newAimDrawFPS = getGlobal().mainActivity.refreshRate
-        val newAimUpdateFPS = if (updateClock.throttling) updateClock.maximumUpdateHz else newAimDrawFPS
+
+        val newAimUpdateFPS = if (updateClock.throttling && updateClock.maximumUpdateHz > 0) {
+            min(updateClock.maximumUpdateHz, newAimDrawFPS)
+        } else {
+            newAimDrawFPS
+        }
 
         if (aimDrawFPS != newAimDrawFPS || aimUpdateFPS != newAimUpdateFPS) {
             aimDrawFPS = newAimDrawFPS
