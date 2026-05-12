@@ -27,11 +27,9 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.framework.RollingFloatCounter
-import com.osudroid.*
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.osudroid.mods.*
-import com.osudroid.utils.*
 import com.osudroid.utils.ModUtils
 import java.io.IOException
 import kotlinx.coroutines.*

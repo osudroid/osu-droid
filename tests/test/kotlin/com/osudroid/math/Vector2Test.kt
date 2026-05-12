@@ -1,8 +1,5 @@
 package com.osudroid.math
 
-import com.osudroid.math.Vector2
-import com.osudroid.math.times
-import com.osudroid.math.toVector2
 import kotlin.math.sqrt
 import org.junit.Assert
 import org.junit.Test

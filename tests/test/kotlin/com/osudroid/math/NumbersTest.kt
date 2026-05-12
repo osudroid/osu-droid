@@ -1,6 +1,5 @@
 package com.osudroid.math
 
-import com.osudroid.math.preciseRoundBy
 import org.junit.Assert
 import org.junit.Test
 
