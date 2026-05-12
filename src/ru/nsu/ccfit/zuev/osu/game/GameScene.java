@@ -1284,37 +1284,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            var fpsCounter = new FPSCounter(counterTextFont);
-
-            // Attach a dummy entity for computing FPS, as its frame rate is tied to the draw thread and not
-            // the update thread.
-            hud.attachChild(new Entity() {
-                private long previousDrawTime;
-
-                @Override
-                protected void onManagedUpdate(float pSecondsElapsed) {
-                    fpsCounter.setPosition(
-                        Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
-                        Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
-                    );
-                }
-
-                @Override
-                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
-                    long currentDrawTime = SystemClock.uptimeMillis();
-
-                    fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
-
-                    previousDrawTime = currentDrawTime;
-                }
-            });
-
-            fpsCounter.setPosition(
-                Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
-                Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
-            );
-
-            hud.attachChild(fpsCounter);
+            hud.attachChild(new FPSCounter(counterTextFont));
         }
 
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
