@@ -395,12 +395,6 @@ public class GameplaySpinner extends GameObject {
         if (passedTime >= duration) {
             removeFromScene();
         }
-
-        oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     @Override
