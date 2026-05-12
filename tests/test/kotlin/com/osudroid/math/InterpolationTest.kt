@@ -1,7 +1,5 @@
 package com.osudroid.math
 
-import com.osudroid.math.Interpolation
-import com.osudroid.math.Vector2
 import org.junit.Assert
 import org.junit.Test
 

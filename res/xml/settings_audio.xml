@@ -39,17 +39,8 @@
         <Preference
             android:key="offset_calibration"
             android:title="@string/opt_offset_calibration_title"
-            android:summary="@string/opt_offset_calibration_summary" />
-
-        <com.osudroid.ui.EditableSeekBarPreference
-            android:defaultValue="20"
-            android:key="gameAudioSynchronizationThreshold"
-            app:min="0"
-            android:max="100"
-            android:title="@string/opt_gameAudioSynchronizationThreshold_title"
-            android:summary="@string/opt_gameAudioSynchronizationThreshold_summary"
-            app:showSeekBarValue="true"
-            app:layout="@layout/settings_preference_seekbar_bottom" />
+            android:summary="@string/opt_offset_calibration_summary"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 

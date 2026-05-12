@@ -46,8 +46,10 @@ public class Entity implements IEntity {
 	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
 		@Override
 		public void call(final IEntity pEntity) {
-			pEntity.setParent(null);
-			pEntity.onDetached();
+            if (pEntity != null) {
+                pEntity.setParent(null);
+                pEntity.onDetached();
+            }
 		}
 	};
 
@@ -283,6 +285,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setRotation(final float pRotation) {
+        if (mRotation == pRotation)
+            return;
 		this.mRotation = pRotation;
 
 		this.mLocalToParentTransformationDirty = true;
@@ -357,6 +361,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setScale(final float pScale) {
+        if (mScaleX == pScale && mScaleY == pScale)
+            return;
 		this.mScaleX = pScale;
 		this.mScaleY = pScale;
 
@@ -877,7 +883,7 @@ public class Entity implements IEntity {
 		}
 		return this.mUpdateHandlers.removeAll(pUpdateHandlerMatcher);
 	}
-	
+
 	@Override
 	public int getUpdateHandlerCount() {
 		if(this.mUpdateHandlers == null) {
@@ -917,7 +923,7 @@ public class Entity implements IEntity {
 		}
 		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
 	}
-	
+
 	@Override
 	public int getEntityModifierCount() {
 		if(this.mEntityModifiers == null) {
@@ -931,6 +937,7 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return;
 		}
+
 		this.mEntityModifiers.clear();
 	}
 
@@ -1214,11 +1221,13 @@ public class Entity implements IEntity {
 	// END osu!droid modified
 
 	@Override
-	public final void onUpdate(final float pSecondsElapsed) {
+	// BEGIN osu!droid modified: Make this method overrideable.
+	public /*final*/ void onUpdate(final float pSecondsElapsed) {
 		if(!this.mIgnoreUpdate) {
 			this.onManagedUpdate(pSecondsElapsed);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public void reset() {

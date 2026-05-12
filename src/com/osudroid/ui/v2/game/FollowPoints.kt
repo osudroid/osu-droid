@@ -5,13 +5,11 @@ import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
-import org.andengine.entity.scene.*
 import org.andengine.opengl.texture.region.*
-
+import com.rian.andengine.modifier.OnModifierFinished
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
@@ -71,7 +69,7 @@ object FollowPointConnection {
     }
 
     @JvmStatic
-    fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
+    fun addConnection(scene: UIScene, start: HitObject, end: HitObject) {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
 
@@ -124,22 +122,18 @@ object FollowPointConnection {
             fp.rotation = rotation
             fp.alpha = 0f
 
-            fp.registerEntityModifier(
-                Modifiers.sequence(expire,
-                    Modifiers.delay(fadeInTime - secPassed),
-                    Modifiers.parallel(null,
-                        Modifiers.fadeIn(endFadeInTime),
-                        Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
-                        Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
-                        Modifiers.sequence(null,
-                            Modifiers.delay(fadeOutTime - fadeInTime),
-                            Modifiers.fadeOut(endFadeInTime)
-                        )
-                    )
-                )
-            )
-
             scene.attachChild(fp, 0)
+
+            fp.beginAbsoluteSequence(fadeInTime) {
+                fadeIn(endFadeInTime)
+                scaleTo(scale, endFadeInTime, Easing.Out)
+                moveTo(pointEndX, pointEndY, endFadeInTime, Easing.Out)
+
+                delay(fadeOutTime - fadeInTime)
+                fadeOut(endFadeInTime)
+                after(expire)
+            }
+
             d += SPACING
         }
     }

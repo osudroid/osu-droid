@@ -3,12 +3,13 @@ package com.reco1l.andengine.ui
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.andengine.input.touch.*
+import com.rian.andengine.modifier.ModifierType
+import com.rian.andengine.modifier.UniversalModifier
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
@@ -156,7 +157,7 @@ open class UIModal(
             onShow()
             isVisible = true
 
-            clearModifiers(ModifierType.Parallel)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             createShowAnimation()().after {
                 onShown()
             }
@@ -170,7 +171,7 @@ open class UIModal(
         if (isVisible) {
             onHide()
 
-            clearModifiers(ModifierType.Parallel)
+            clearModifiers(false, ModifierType.ScaleXY, ModifierType.Alpha)
             createHideAnimation()().after {
                 isVisible = false
                 onHidden()

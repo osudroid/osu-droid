@@ -3,14 +3,13 @@ package com.osudroid.ui
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.reco1l.andengine.modifier.ModifierType
-import com.reco1l.andengine.modifier.UniversalModifier
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.WebRequest
 import com.reco1l.toolkt.data.writeToFile
 import org.andengine.input.touch.TouchEvent
 import org.andengine.opengl.texture.region.TextureRegion
+import com.rian.andengine.modifier.ModifierType
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -92,6 +91,10 @@ object BannerManager {
         init {
             textureRegion = banners[currentBannerIndex].image
             alpha = 0f
+        }
+
+
+        override fun onLoadComplete() {
             fadeIn(0.75f)
         }
 
@@ -122,12 +125,12 @@ object BannerManager {
             elapsedTimeSinceLastChange = 0f
 
             if (event.isActionDown) {
-                unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
+                clearModifiers(ModifierType.ScaleXY)
                 scaleTo(0.95f, 0.1f)
             }
 
             if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-                unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
+                clearModifiers(ModifierType.ScaleXY)
                 scaleTo(1f, 0.1f)
 
                 val banner = banners[currentBannerIndex]

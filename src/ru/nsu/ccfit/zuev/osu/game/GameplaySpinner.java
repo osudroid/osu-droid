@@ -2,27 +2,22 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo;
 import com.osudroid.beatmaps.hitobjects.Spinner;
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.game.GameplaySequenceHitSampleInfo;
 
-import org.andengine.entity.scene.Scene;
-import org.andengine.entity.sprite.Sprite;
-import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.DrawType;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.math.MathUtils;
 
 import java.util.ArrayList;
 
+import kotlin.Unit;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -34,7 +29,7 @@ public class GameplaySpinner extends GameObject {
     private final UISprite background;
     private final UISprite circle;
     private final UISprite approachCircle;
-    private final MetreSprite metre;
+    private final UISprite metre;
     private float metreY;
     private final UISprite spinText;
     private final TextureRegion metreRegion;
@@ -44,7 +39,7 @@ public class GameplaySpinner extends GameObject {
     protected Spinner beatmapSpinner;
     protected PointF oldMouse;
     protected GameObjectListener listener;
-    protected Scene scene;
+    protected UIScene scene;
     protected int fullRotations = 0;
     protected float rotations = 0;
     protected float needRotations;
@@ -79,7 +74,10 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new MetreSprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        metre = new UISprite();
+        metre.setOrigin(Anchor.BottomLeft);
+        metre.setPosition(position.x - Config.getRES_WIDTH() / 2f, position.y);
+        metre.setTextureRegion(metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
@@ -108,7 +106,7 @@ public class GameplaySpinner extends GameObject {
         endsCombo = true;
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
+    public void init(final GameObjectListener listener, final UIScene scene,
                      final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         fullRotations = 0;
         rotations = 0;
@@ -130,65 +128,72 @@ public class GameplaySpinner extends GameObject {
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
+        hitTime = (float) beatmapSpinner.startTime / 1000f;
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
         passedTime = -timePreempt;
 
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        if (background.isVisible()) {
-            background.setAlpha(0);
-            background.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(timePreempt * 0.75f),
-                Modifiers.fadeIn(timePreempt * 0.25f)
-            ));
-        }
-
-        circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
-
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
-        metre.setAlpha(0);
-        metre.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
-        metreRegion.setTexturePosition(0, (int) metreRegion.getHeight());
-        metre.refreshTextureCoords();
-
-        approachCircle.setAlpha(0);
-        if (GameHelper.isHidden()) {
-            approachCircle.setVisible(false);
-        }
-
-        spinText.setAlpha(0);
-        spinText.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f),
-            Modifiers.delay(timePreempt / 2),
-            Modifiers.fadeOut(timePreempt * 0.25f)
-        ));
+        metreRegion.setTexturePosition(0, metreRegion.getHeight());
 
         scene.attachChild(spinText, 0);
 
-        if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(timePreempt),
-                Modifiers.parallel(
-                    Modifiers.alpha(duration, 0.75f, 1),
-                    Modifiers.scale(duration, 2.0f, 0)
-                )
-            ));
-
+        if (!GameHelper.isHidden()) {
             scene.attachChild(approachCircle, 0);
+            approachCircle.setAlpha(0);
+
+            approachCircle.beginAbsoluteSequence(hitTime, sequence -> {
+                sequence.fadeTo(0.75f)
+                        .fadeTo(1, duration)
+                        .scaleTo(2)
+                        .scaleTo(0, duration);
+
+                return Unit.INSTANCE;
+            });
         }
 
         scene.attachChild(circle, 0);
         scene.attachChild(metre, 0);
         scene.attachChild(background, 0);
+
+        float fadeDuration = timePreempt * 0.25f;
+        float fadeInStartTime = hitTime - fadeDuration;
+
+        if (background.isVisible()) {
+            background.setAlpha(0);
+            background.beginAbsoluteSequence(fadeInStartTime, sequence -> {
+                sequence.fadeIn(fadeDuration);
+
+                return Unit.INSTANCE;
+            });
+        }
+
+        circle.setAlpha(0);
+        circle.beginAbsoluteSequence(fadeInStartTime, sequence -> {
+            sequence.fadeIn(fadeDuration);
+
+            return Unit.INSTANCE;
+        });
+
+        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
+        metre.setY(metreY + metre.getHeight());
+
+        metre.setAlpha(0);
+        metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
+            sequence.fadeIn(fadeDuration);
+
+            return Unit.INSTANCE;
+        });
+
+        spinText.setAlpha(0);
+        spinText.beginAbsoluteSequence(fadeInStartTime, sequence -> {
+            sequence.fadeIn(fadeDuration)
+                    .then(timePreempt / 2)
+                    .fadeOut(fadeDuration);
+
+            return Unit.INSTANCE;
+        });
 
         oldMouse = null;
 
@@ -263,19 +268,6 @@ public class GameplaySpinner extends GameObject {
         stopLoopingSamples();
         listener.onSpinnerHit(id, score, endsCombo, this.bonusScoreCounter + fullRotations - 1);
         playAndFreeHitSamples(score);
-    }
-
-    @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(clearText, dt);
-        updateAfterInit(spinText, dt);
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(background, dt);
-        updateAfterInit(circle, dt);
-        updateAfterInit(metre, dt);
-
-        super.updateAfterInit(dt);
     }
 
     @Override
@@ -358,9 +350,11 @@ public class GameplaySpinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f));
-                clearText.registerEntityModifier(Modifiers.scale(0.25f, 1.5f, 1));
                 scene.attachChild(clearText);
+                clearText.fadeInFromZero(0.25f);
+                clearText.setScale(1.5f);
+                clearText.scaleTo(1, 0.25f);
+
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
@@ -389,12 +383,10 @@ public class GameplaySpinner extends GameObject {
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         }
-        float fillOffset = 1 - Math.abs(percentfill);
         metre.setPosition(metre.getX(),
-                metreY + metre.getHeightScaled() * fillOffset);
+                metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         metreRegion.setTexturePosition(0,
-                (int) (metreRegion.getHeight() * fillOffset));
-        metre.refreshTextureCoords();
+                (int) (metreRegion.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
 
@@ -510,22 +502,6 @@ public class GameplaySpinner extends GameObject {
             spinnerSpinSample.setFrequency(GameHelper.getSpeedMultiplier());
         } else {
             spinnerSpinSample.setFrequency(1);
-        }
-    }
-
-    /**
-     * A Sprite subclass that exposes texture coordinate refresh so that changes to
-     * the underlying TextureRegion's UV (via setTexturePosition) are actually
-     * re-uploaded to the GPU vertex buffer every frame.
-     */
-    protected static class MetreSprite extends Sprite {
-        public MetreSprite(float x, float y, ITextureRegion region, VertexBufferObjectManager vbo) {
-            super(x, y, region, vbo, DrawType.DYNAMIC);
-        }
-
-        /** Call this after any setTexturePosition() call to flush the new UV to the VBO. */
-        public void refreshTextureCoords() {
-            onUpdateTextureCoordinates();
         }
     }
 }

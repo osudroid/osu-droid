@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.edlplan.framework.easing.*
-import com.reco1l.andengine.modifier.OnModifierFinished
+import com.rian.andengine.modifier.OnModifierFinished
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
@@ -73,8 +73,9 @@ class HUDComboCounter : HUDElement() {
 
         displayedCountTextSprite.setScale(1f)
 
-        displayedCountTextSprite.beginSequence {
+        displayedCountTextSprite.beginModifierSequence {
             scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f, Easing.In)
+            then()
             scaleTo(1f, SMALL_POP_OUT_DURATION / 2f, Easing.Out)
         }
     }

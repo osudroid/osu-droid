@@ -3,7 +3,6 @@ package com.reco1l.andengine.ui.form
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
@@ -11,6 +10,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.andengine.input.touch.*
+import com.rian.andengine.modifier.ModifierType
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
@@ -202,9 +202,10 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
         val consumed = super.onAreaTouched(event, localX, localY)
 
         if (!consumed && event.isActionUp) {
-            background!!.clearModifiers(ModifierType.Sequence)
-            background!!.beginSequence {
+            background!!.clearModifiers(ModifierType.Alpha)
+            background!!.beginModifierSequence {
                 fadeTo(0.2f)
+                then()
                 fadeOut(0.2f)
             }
         }

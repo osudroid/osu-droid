@@ -1,6 +1,5 @@
 package com.osudroid.beatmaps.timings
 
-import com.osudroid.beatmaps.timings.DifficultyControlPoint
 import org.junit.Assert
 import org.junit.Test
 
