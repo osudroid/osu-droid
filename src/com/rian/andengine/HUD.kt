@@ -67,12 +67,12 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
     }
 
     final override fun onUpdate(deltaTimeSec: Float) {
-        if (isIgnoreUpdate) {
-            return
-        }
-
         if (processCustomClock) {
             customClock?.processFrame()
+        }
+
+        if (isIgnoreUpdate) {
+            return
         }
 
         // Fallback to parent or engine-provided delta time in case clock is not present.
