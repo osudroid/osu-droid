@@ -91,6 +91,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         val lastTime = currentTime
 
         (source as? IFrameBasedClock)?.processFrame()
+        (realtimeReferenceClock as? IFrameBasedClock)?.processFrame()
 
         val referenceTime = realtimeReferenceClock.currentTime
 
@@ -162,6 +163,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         shouldBeRunning = adjustableSourceClock.isRunning
         lastSeekFailed = false
         pendingSourceRestartAfterNegativeSeek = false
+        lastReferenceTime = null
     }
 
     //endregion
@@ -174,6 +176,7 @@ class DecouplingFramedClock @JvmOverloads constructor(
         shouldBeRunning = false
         lastSeekFailed = false
         _currentTime = 0f
+        lastReferenceTime = null
     }
 
     override fun start() {

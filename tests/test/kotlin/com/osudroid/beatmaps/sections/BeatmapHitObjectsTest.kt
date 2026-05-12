@@ -6,9 +6,6 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.SliderPath
 import com.osudroid.beatmaps.hitobjects.SliderPathType
 import com.osudroid.beatmaps.hitobjects.Spinner
-import com.osudroid.beatmaps.sections.BeatmapControlPoints
-import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.beatmaps.sections.BeatmapHitObjects
 import com.osudroid.math.Vector2
 import org.junit.Assert
 import org.junit.Test

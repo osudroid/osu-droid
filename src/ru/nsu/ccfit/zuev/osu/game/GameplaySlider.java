@@ -371,9 +371,10 @@ public class GameplaySlider extends GameObject {
             float okWindow = (float) hitWindow.getOkWindow() / 1000;
 
             headCirclePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sequence.fadeOut(mehWindow - okWindow);
-
-                sliderHeadLateMissFadeModifier = sequence.getLastActiveModifier();
+                sliderHeadLateMissFadeModifier = sequence
+                        .fadeOut(mehWindow - okWindow)
+                        .after(e -> sliderHeadLateMissFadeModifier = null)
+                        .getLastActiveModifier();
 
                 return Unit.INSTANCE;
             });
@@ -562,8 +563,6 @@ public class GameplaySlider extends GameObject {
         if (scene == null) {
             return;
         }
-
-        float elapsedTime = (float) getGameplayPassedTimeMilliseconds() / 1000;
 
         if (Config.isAnimateFollowCircle() && isInRadius) {
             isFollowCircleAnimating = true;
@@ -874,7 +873,6 @@ public class GameplaySlider extends GameObject {
     }
 
     private void updateFollowCircleTrackingState() {
-        float elapsedTime = (float) getGameplayPassedTimeMilliseconds() / 1000;
         float scale = beatmapSlider.getScreenSpaceGameplayScale();
         boolean isTracking = isTracking();
 
@@ -919,22 +917,6 @@ public class GameplaySlider extends GameObject {
             isInRadius = isTracking;
             followCircle.setAlpha(isTracking ? 1 : 0);
         }
-    }
-
-    @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(startArrow, dt);
-        updateAfterInit(endArrow, dt);
-        updateAfterInit(headCirclePiece, dt);
-        updateAfterInit(tailCirclePiece, dt);
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(tickContainer, dt);
-        updateAfterInit(sliderBody, dt);
-        updateAfterInit(ball, dt);
-        updateAfterInit(followCircle, dt);
-
-        super.updateAfterInit(dt);
     }
 
     @Override
@@ -1046,7 +1028,7 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
-            ball.fadeIn(0.1f);
+            ball.fadeInFromZero(0.1f);
         }
 
         approachCircle.clearEntityModifiers();
@@ -1232,6 +1214,7 @@ public class GameplaySlider extends GameObject {
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
                 headCirclePiece.removeModifier(sliderHeadLateMissFadeModifier);
+                sliderHeadLateMissFadeModifier = null;
             }
 
             // Change the head circle to the end circle piece.

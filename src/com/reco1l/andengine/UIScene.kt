@@ -5,6 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
@@ -20,7 +21,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
+open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockReceiver<IFrameBasedClock?> {
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -49,7 +50,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     //region Update
 
     final override fun onUpdate(deltaTimeSec: Float) {
-        if (isIgnoreUpdate || loadState == LoadState.NotLoaded) {
+        if (loadState == LoadState.NotLoaded) {
             return
         }
 
@@ -62,8 +63,10 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
             onLoadComplete()
         }
 
-        // Fallback to parent or engine-provided delta time in case clock is not present.
-        onManagedUpdate(clock?.elapsedFrameTime ?: deltaTimeSec)
+        if (!isIgnoreUpdate) {
+            // Fallback to parent or engine-provided delta time in case clock is not present.
+            onManagedUpdate(clock?.elapsedFrameTime ?: deltaTimeSec)
+        }
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -88,7 +91,8 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
      * This is invoked when [onUpdate] is called for the first time after this [UIScene] receives a valid [clock]
      * **and** before [onManagedUpdate]. It is safe to start animations and modifiers here.
      *
-     * Note that this can be called multiple times during this [UIScene]'s lifetime if it is detached and re-attached.
+     * Note that this is called regardless of [isIgnoreUpdate], and can be called multiple times during this
+     * [UIScene]'s lifetime if it is detached and re-attached.
      */
     protected open fun onLoadComplete() {}
 
@@ -134,14 +138,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     val time
         get() = clock?.timeInfo
 
-    /**
-     * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIScene].
-     *
-     * To update the custom clock that this [UIScene] uses, set the [clock] property instead.
-     *
-     * @param clock The [IFrameBasedClock] to use.
-     */
-    open fun updateClock(clock: IFrameBasedClock?) {
+    override fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
         val currentClock = this.clock
 
@@ -157,11 +154,12 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
         }
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(currentClock)
-            (it as? UIScene)?.updateClock(currentClock)
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
 
-        (mChildScene as? UIScene)?.updateClock(currentClock)
+        @Suppress("UNCHECKED_CAST")
+        (mChildScene as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
     }
 
     //endregion
@@ -178,7 +176,8 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     }
 
     override fun onAttached() {
-        updateClock((parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
+        val inheritedClockProvider = (parent as? IClockProvider<*>) ?: (mParentScene as? IClockProvider<*>)
+        updateClock(inheritedClockProvider?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         fun IEntity.propagateSkinChanges() {
 

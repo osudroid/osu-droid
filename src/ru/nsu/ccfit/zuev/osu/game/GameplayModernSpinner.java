@@ -142,19 +142,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(glow, dt);
-        updateAfterInit(bottom, dt);
-        updateAfterInit(top, dt);
-        updateAfterInit(middle, dt);
-        updateAfterInit(middle2, dt);
-
-        super.updateAfterInit(dt);
-    }
-
-    @Override
-    public void update(float dt) {
+    public void update(final float dt) {
         passedTime += dt;
 
         // Allow the spinner to fully fade in first before receiving spins.

@@ -10,8 +10,6 @@ import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.hitobjects.HitObject;
 import com.rian.andengine.modifier.UniversalModifier;
 
-import org.anddev.andengine.entity.IEntity;
-
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
@@ -39,17 +37,6 @@ public abstract class GameObject {
 
     public abstract void update(float dt);
 
-    /**
-     * Updates this {@link GameObject} in the same frame after it has been initialized. This is used to account for the
-     * time difference between the current elapsed time (time at which this {@link GameObject} is initialized) and its
-     * lifetime start (time at which this {@link GameObject} <b>should have</b> been initialized).
-     *
-     * @param dt The time difference, in seconds.
-     */
-    public void updateAfterInit(float dt) {
-        update(dt);
-    }
-
     public float getHitTime() {
         return hitTime;
     }
@@ -71,18 +58,6 @@ public abstract class GameObject {
     }
 
     public void stopLoopingSamples() {}
-
-    /**
-     * Calls {@link IEntity#onUpdate} on an {@link IEntity} if {@link IEntity#hasParent()} is {@code true}.
-     *
-     * @param entity The {@link IEntity} to update.
-     * @param dt The time difference in seconds.
-     */
-    protected void updateAfterInit(IEntity entity, float dt) {
-        if (entity.hasParent()) {
-            entity.onUpdate(dt);
-        }
-    }
 
     /**
      * Obtains the {@link CursorEvent} that hits this {@link GameObject}, if any.

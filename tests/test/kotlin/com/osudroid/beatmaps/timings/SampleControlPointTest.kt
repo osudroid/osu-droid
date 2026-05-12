@@ -1,7 +1,6 @@
 package com.osudroid.beatmaps.timings
 
 import com.osudroid.beatmaps.constants.SampleBank
-import com.osudroid.beatmaps.timings.SampleControlPoint
 import org.junit.Assert
 import org.junit.Test
 

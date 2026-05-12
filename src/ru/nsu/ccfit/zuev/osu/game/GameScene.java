@@ -1808,7 +1808,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             if (gameObject != null) {
-                gameObject.updateAfterInit(lifetimeDt);
+                gameObject.update(lifetimeDt);
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {

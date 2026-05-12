@@ -205,15 +205,6 @@ public class GameplayHitCircle extends GameObject {
     }
 
     @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(circlePiece, dt);
-
-        super.updateAfterInit(dt);
-    }
-
-    @Override
     public void update(final float dt) {
         if (beatmapCircle.hitWindow == null) {
             // Circle somehow does not have a judgement window - abandon.

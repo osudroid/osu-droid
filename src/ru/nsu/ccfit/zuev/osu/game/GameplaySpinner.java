@@ -135,7 +135,7 @@ public class GameplaySpinner extends GameObject {
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        metreRegion.setTexturePosition(0, (int) metre.getHeightScaled());
+        metreRegion.setTexturePosition(0, metreRegion.getHeight());
 
         scene.attachChild(spinText, 0);
 
@@ -177,6 +177,7 @@ public class GameplaySpinner extends GameObject {
         });
 
         metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
+        metre.setY(metreY + metre.getHeight());
 
         metre.setAlpha(0);
         metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
@@ -270,19 +271,6 @@ public class GameplaySpinner extends GameObject {
     }
 
     @Override
-    public void updateAfterInit(float dt) {
-        // Update existing entities first before this object (simulates an update tick).
-        updateAfterInit(clearText, dt);
-        updateAfterInit(spinText, dt);
-        updateAfterInit(approachCircle, dt);
-        updateAfterInit(background, dt);
-        updateAfterInit(circle, dt);
-        updateAfterInit(metre, dt);
-
-        super.updateAfterInit(dt);
-    }
-
-    @Override
     public void update(final float dt) {
         passedTime += dt;
 
@@ -362,11 +350,11 @@ public class GameplaySpinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
+                scene.attachChild(clearText);
                 clearText.fadeInFromZero(0.25f);
                 clearText.setScale(1.5f);
                 clearText.scaleTo(1, 0.25f);
 
-                scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
@@ -398,7 +386,7 @@ public class GameplaySpinner extends GameObject {
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         metreRegion.setTexturePosition(0,
-                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
+                (int) (metreRegion.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
 

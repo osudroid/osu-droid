@@ -1,7 +1,5 @@
 package com.osudroid.math
 
-import com.osudroid.math.toDegrees
-import com.osudroid.math.toRadians
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

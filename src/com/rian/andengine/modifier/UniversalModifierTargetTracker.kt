@@ -73,8 +73,11 @@ class UniversalModifierTargetTracker(
     /**
      * Removes a [UniversalModifier] from this [UniversalModifierTargetTracker].
      *
+     * If the [UniversalModifier] is successfully removed, [UniversalModifier.release] will be called to release the
+     * [UniversalModifier] back to its pool.
+     *
      * @param modifier The [UniversalModifier] to remove.
-     * @return Whether [modifier] was removed successfully. If so,
+     * @return Whether [modifier] was removed successfully.
      */
     fun remove(modifier: UniversalModifier): Boolean {
         val removed = _modifiers.remove(modifier)

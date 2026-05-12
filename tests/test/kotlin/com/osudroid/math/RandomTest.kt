@@ -1,6 +1,5 @@
 package com.osudroid.math
 
-import com.osudroid.math.Random
 import org.junit.Assert
 import org.junit.Test
 

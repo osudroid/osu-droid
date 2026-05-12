@@ -7,7 +7,6 @@ import com.osudroid.beatmaps.constants.SampleBank
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.beatmaps.hitobjects.HitCircle
 import com.osudroid.beatmaps.hitobjects.Slider
-import com.osudroid.beatmaps.parser.BeatmapParser
 import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test

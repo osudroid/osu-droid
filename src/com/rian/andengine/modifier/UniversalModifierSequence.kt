@@ -22,7 +22,6 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
     private var startTime = 0f
     private var currentTime = 0f
-    private var lastEndTime = 0f
 
     /**
      * The [UniversalModifier] that will end the latest among all [UniversalModifier]s applied to this
@@ -36,7 +35,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * underlying [UIComponent.modifierStartTime], in seconds.
      */
     val endTime
-        get() = lastEndTime
+        get() = lastActiveModifier?.endTime ?: startTime
 
     /**
      * The duration at which all [UniversalModifier]s applied to this [UniversalModifierSequence] runs for, in seconds.
@@ -49,7 +48,6 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         startTime = origin.modifierStartTime
         currentTime = startTime
-        lastEndTime = startTime
     }
 
     //endregion
@@ -410,7 +408,7 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      */
     @JvmOverloads
     fun then(delay: Float = 0f): UniversalModifierSequence {
-        currentTime = lastEndTime
+        currentTime = endTime
 
         return delay(delay)
     }
@@ -427,8 +425,8 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         origin?.appendModifier(modifier)
 
-        if (lastActiveModifier == null || lastEndTime < modifier.endTime) {
-            lastEndTime = modifier.endTime
+        // Include equality to ensure after() callbacks are deterministic when multiple modifiers end at the same time.
+        if (lastActiveModifier == null || endTime <= modifier.endTime) {
             lastActiveModifier = modifier
         }
 
@@ -443,7 +441,6 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
 
         startTime = 0f
         currentTime = 0f
-        lastEndTime = 0f
 
         pool.release(this)
     }

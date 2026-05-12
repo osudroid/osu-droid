@@ -1,6 +1,5 @@
 package com.osudroid.beatmaps.sections
 
-import com.osudroid.beatmaps.sections.BeatmapControlPoints
 import com.osudroid.beatmaps.timings.TimingControlPoint
 import org.junit.Assert
 import org.junit.Test

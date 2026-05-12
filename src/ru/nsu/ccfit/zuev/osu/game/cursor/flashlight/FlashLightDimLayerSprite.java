@@ -24,9 +24,10 @@ public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
 
         if (modifier != null) {
             removeModifier(modifier);
+            modifier = null;
         }
 
         clearEntityModifiers();
-        modifier = fadeTo(isTrackingSliders ? BASE_SLIDER_DIM_ALPHA : 0, 0.05f);
+        modifier = fadeTo(isTrackingSliders ? BASE_SLIDER_DIM_ALPHA : 0, 0.05f).after(e -> modifier = null);
     }
 }

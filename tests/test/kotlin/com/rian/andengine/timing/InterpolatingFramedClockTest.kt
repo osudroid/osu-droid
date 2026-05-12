@@ -26,9 +26,9 @@ sealed class BaseInterpolatingFramedClockTest {
 class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
     @Test
     fun `Test never interpolates backwards`() {
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime,  0f)
         source.start()
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime, 0f)
         interpolating.processFrame()
 
         // Test with test clock not elapsing
@@ -85,13 +85,13 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         }
 
         interpolating.processFrame()
-        assertEquals(firstSourceTime, interpolating.currentTime)
+        assertEquals(firstSourceTime, interpolating.currentTime, 0f)
 
         interpolating.changeSource(secondSource)
         interpolating.processFrame()
 
-        assertEquals(secondSourceTime, secondSource.currentTime)
-        assertEquals(secondSourceTime, interpolating.currentTime)
+        assertEquals(secondSourceTime, secondSource.currentTime, 0f)
+        assertEquals(secondSourceTime, interpolating.currentTime, 0f)
     }
 
     @Test
@@ -109,13 +109,13 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
         }
 
         interpolating.processFrame()
-        assertEquals(firstSourceTime, interpolating.currentTime)
+        assertEquals(firstSourceTime, interpolating.currentTime, 0f)
 
         interpolating.changeSource(secondSource)
         interpolating.processFrame()
 
-        assertEquals(secondSourceTime, secondSource.currentTime)
-        assertEquals(secondSourceTime, interpolating.currentTime)
+        assertEquals(secondSourceTime, secondSource.currentTime, 0f)
+        assertEquals(secondSourceTime, interpolating.currentTime, 0f)
     }
 
     @Test
@@ -189,19 +189,19 @@ class MainInterpolatingFramedClockTest : BaseInterpolatingFramedClockTest() {
 
     @Test
     fun `Test can seek backwards`() {
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime, 0f)
         source.start()
 
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime, 0f)
         interpolating.processFrame()
 
         source.seek(10f)
         interpolating.processFrame()
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime, 0f)
 
         source.seek(0f)
         interpolating.processFrame()
-        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime)
+        assertEquals("Interpolating should match source time.", interpolating.currentTime, source.currentTime, 0f)
     }
 
     @Test

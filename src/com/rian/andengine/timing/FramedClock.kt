@@ -13,8 +13,8 @@ import kotlin.math.truncate
  *
  * @param source A source [IClock] which will be used as the backing time source. If `null`, a [StopwatchClock] will
  * be created. When provided, the [currentTime] of [source] will be transferred instantly.
- * @param processSource Whether the source [IClock]'s [processFrame] method should be called during this [IClock]'s
- * [processFrame] call.
+ * @param processSource If [source] is an [IFrameBasedClock], whether its [processFrame] method should be called
+ * during this [FramedClock]'s [processFrame] call.
  */
 open class FramedClock @JvmOverloads constructor(source: IClock? = null, private val processSource: Boolean = true) :
     IFrameBasedClock, ISourceChangeableClock {
