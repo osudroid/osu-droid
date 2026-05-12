@@ -176,7 +176,8 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
     }
 
     override fun onAttached() {
-        updateClock((parent as? IClockProvider<*>)?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
+        val inheritedClockProvider = (parent as? IClockProvider<*>) ?: (mParentScene as? IClockProvider<*>)
+        updateClock(inheritedClockProvider?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         fun IEntity.propagateSkinChanges() {
 

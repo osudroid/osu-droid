@@ -137,12 +137,8 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
     }
 
     override fun onAttached() {
-        val parent = parent
-        val parentClock =
-            if (parent != null) (parent as? IClockProvider<*>)?.clock as? IFrameBasedClock
-            else UIEngine.current.clock
-
-        updateClock(parentClock)
+        val inheritedClockProvider = (parent as? IClockProvider<*>) ?: (mParentScene as? IClockProvider<*>)
+        updateClock(inheritedClockProvider?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         super.onAttached()
     }
