@@ -135,7 +135,7 @@ public class GameplaySpinner extends GameObject {
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        metreRegion.setTexturePosition(0, (int) metre.getHeightScaled());
+        metreRegion.setTexturePosition(0, metreRegion.getHeight());
 
         scene.attachChild(spinText, 0);
 
@@ -398,7 +398,7 @@ public class GameplaySpinner extends GameObject {
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         metreRegion.setTexturePosition(0,
-                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
+                (int) (metreRegion.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
 
