@@ -154,11 +154,12 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
         }
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(currentClock)
-            (it as? UIScene)?.updateClock(currentClock)
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
 
-        (mChildScene as? UIScene)?.updateClock(currentClock)
+        @Suppress("UNCHECKED_CAST")
+        (mChildScene as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
     }
 
     //endregion

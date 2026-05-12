@@ -1,7 +1,6 @@
 package com.rian.andengine
 
 import com.reco1l.andengine.UIEngine
-import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
@@ -53,11 +52,12 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
         val currentClock = this.clock
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(currentClock)
-            (it as? UIScene)?.updateClock(currentClock)
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
 
-        (mChildScene as? UIScene)?.updateClock(currentClock)
+        @Suppress("UNCHECKED_CAST")
+        (mChildScene as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
     }
 
     final override fun onUpdate(deltaTimeSec: Float) {

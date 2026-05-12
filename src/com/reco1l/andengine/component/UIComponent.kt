@@ -1761,7 +1761,8 @@ abstract class UIComponent : Entity(0f, 0f),
         foreground?.updateClock(currentClock)
 
         mChildren?.fastForEach {
-            (it as? UIComponent)?.updateClock(currentClock)
+            @Suppress("UNCHECKED_CAST")
+            (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
     }
 
