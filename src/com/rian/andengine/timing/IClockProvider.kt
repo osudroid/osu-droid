@@ -1,7 +1,7 @@
 package com.rian.andengine.timing
 
 /**
- * Provides an [IClock] to its implementors.
+ * An interface for classes that provides an [IClock].
  *
  * @param T The type of [IClock] provided.
  */

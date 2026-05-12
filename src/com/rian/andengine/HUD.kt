@@ -5,6 +5,7 @@ import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
 import org.anddev.andengine.engine.camera.hud.HUD as AndEngineHUD
 import org.anddev.andengine.entity.scene.Scene
@@ -12,7 +13,7 @@ import org.anddev.andengine.entity.scene.Scene
 /**
  * An [AndEngineHUD] that provides an [IFrameBasedClock] to its [UIComponent] children.
  */
-open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
+open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiver<IFrameBasedClock?> {
     /**
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [HUD]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
@@ -47,14 +48,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?> {
         setOnAreaTouchTraversalFrontToBack()
     }
 
-    /**
-     * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIScene].
-     *
-     * To update the custom clock that this [UIScene] uses, set the [clock] property instead.
-     *
-     * @param clock The [IFrameBasedClock] to use.
-     */
-    open fun updateClock(clock: IFrameBasedClock?) {
+    override fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
         val currentClock = this.clock
 

@@ -5,6 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
@@ -20,7 +21,7 @@ import org.anddev.andengine.opengl.util.GLHelper
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
+open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockReceiver<IFrameBasedClock?> {
     /**
      * Whether this [UIScene] should clip its children.
      */
@@ -137,14 +138,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?> {
     val time
         get() = clock?.timeInfo
 
-    /**
-     * Updates the [IFrameBasedClock] to be used as the parent-inherited clock of this [UIScene].
-     *
-     * To update the custom clock that this [UIScene] uses, set the [clock] property instead.
-     *
-     * @param clock The [IFrameBasedClock] to use.
-     */
-    open fun updateClock(clock: IFrameBasedClock?) {
+    override fun updateClock(clock: IFrameBasedClock?) {
         inheritedClock = clock
         val currentClock = this.clock
 
