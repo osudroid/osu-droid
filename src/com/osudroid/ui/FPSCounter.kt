@@ -109,8 +109,9 @@ class FPSCounter(font: Font) : ChangeableText(
         val hasSignificantChanges = aimRatesChanged ||
                 hasDrawSpike ||
                 hasUpdateSpike ||
-                displayedFpsCount < aimDrawFPS * 0.8f ||
-                1 / displayedFrameTime < aimUpdateFPS * 0.8f
+                // Force update if we are below the target by a certain threshold.
+                displayedFpsCount < aimDrawFPS * 0.6f ||
+                1 / displayedFrameTime < aimUpdateFPS * 0.6f
 
         timeSinceLastUpdate += updateClock.timeInfo.elapsed
 
