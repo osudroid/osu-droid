@@ -625,7 +625,7 @@ public class GameplaySlider extends GameObject {
             if (!startHit) {
                 double mehWindow = hitWindow.getMehWindow() / 1000;
                 listener.registerAccuracy(HitObjectType.Slider, mehWindow + 1);
-                listener.onSliderHit(id, 10, position, false, bodyColor, GameObjectListener.SLIDER_END, false);
+                listener.onSliderHit(id, 0, position, false, bodyColor, GameObjectListener.SLIDER_END, false);
             }
 
             stopSlidingSamples();
