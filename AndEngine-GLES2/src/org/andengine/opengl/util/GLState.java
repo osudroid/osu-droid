@@ -153,6 +153,12 @@ public class GLState {
 		this.mCurrentSourceBlendMode = -1;
 		this.mCurrentDestinationBlendMode = -1;
 
+		// osu!droid: explicitly reset scissor cache — a new GL context always starts with
+		// GL_SCISSOR_TEST disabled, but mScissorTestEnabled may be stale from before context loss.
+		// Without this, enableScissorTest() would be a no-op (thinks it's already on) while the
+		// actual GL context has scissor off. No glDisable call needed; it's already off.
+		this.mScissorTestEnabled = false;
+
 		this.enableDither();
 		this.enableDepthTest();
 
