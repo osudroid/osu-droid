@@ -54,7 +54,10 @@ public class GLState {
 	private int mCurrentArrayBufferID = -1;
 	private int mCurrentIndexBufferID = -1;
 	private int mCurrentShaderProgramID = -1;
-	private final int[] mCurrentBoundTextureIDs = new int[GLES20.GL_TEXTURE31 - GLES20.GL_TEXTURE0];
+	// osu!droid fix: GL_TEXTURE31 - GL_TEXTURE0 = 31, but there are 32 texture units (indices 0..31).
+	// The old size of 31 would throw ArrayIndexOutOfBoundsException for any code that activates
+	// GL_TEXTURE31 (index 31) and then calls bindTexture / deleteTexture.
+	private final int[] mCurrentBoundTextureIDs = new int[GLES20.GL_TEXTURE31 - GLES20.GL_TEXTURE0 + 1];
 	private int mCurrentFramebufferID = -1;
 	private int mCurrentActiveTextureIndex = 0;
 
