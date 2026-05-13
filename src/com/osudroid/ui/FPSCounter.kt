@@ -75,87 +75,89 @@ class FPSCounter : UIText() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        isVisible = Config.isShowFPS()
-
         try {
-            if (!isVisible) {
-                return
+            isVisible = Config.isShowFPS()
+
+            if (isVisible) {
+                updateFPS()
             }
-
-            val elapsedUpdateFrameTime = updateClock.elapsedFrameTime
-
-            // If the game goes into a suspended state (i.e., debugger attached), we want to ignore really long periods of
-            // no processing.
-            if (elapsedUpdateFrameTime > 10) {
-                return
-            }
-
-            // Handle the case where the window has become inactive (we want to show the FPS as it is changing, even if it
-            // is not an outlier).
-            val aimRatesChanged = updateAimFPS()
-            val hasUpdateSpike = displayedFrameTime < spikeTime && elapsedUpdateFrameTime > spikeTime
-
-            displayedFrameTime = Interpolation.dampContinuously(
-                displayedFrameTime,
-                elapsedUpdateFrameTime,
-                if (hasUpdateSpike) 0f else dampTime,
-                elapsedUpdateFrameTime
-            )
-
-            displayedFpsCount = if (hasUpdateSpike) {
-                // Show spike time using raw elapsed value, to account for `framesPerSecond` being so averaged spike frames
-                // do not show.
-                1f / elapsedUpdateFrameTime
-            } else {
-                Interpolation.dampContinuously(
-                    displayedFpsCount,
-                    updateClock.framesPerSecond,
-                    dampTime,
-                    updateClock.timeInfo.elapsed
-                )
-            }
-
-            // Force update if we are below the target by a certain threshold.
-            val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || displayedFpsCount < aimFPS * 0.6f
-
-            timeSinceLastUpdate += updateClock.timeInfo.elapsed
-
-            if (!hasSignificantChanges && timeSinceLastUpdate < updateInterval) {
-                return
-            }
-
-            val displayedFps = displayedFpsCount.roundToInt()
-            val isHighPrecision = displayedFrameTime < 0.01f
-            val displayedMs = displayedFrameTime * 1000
-
-            val roundedFrameTime = if (isHighPrecision) {
-                (displayedMs * 10).roundToInt() / 10f
-            } else {
-                displayedMs.roundToInt().toFloat()
-            }
-
-            if (!hasSignificantChanges && displayedFps == lastDisplayedFps && roundedFrameTime == lastDisplayedFrameTime) {
-                return
-            }
-
-            timeSinceLastUpdate = 0f
-            lastDisplayedFps = displayedFps
-            lastDisplayedFrameTime = roundedFrameTime
-
-            stringBuilder.setLength(0)
-
-            formatter.format(
-                "%.${if (isHighPrecision) "1" else "0"}f ms | %d FPS",
-                displayedMs,
-                displayedFps
-            )
-
-            text = stringBuilder.toString()
-
-            updateColor()
         } finally {
             super.onManagedUpdate(deltaTimeSec)
         }
+    }
+
+    private fun updateFPS() {
+        val elapsedUpdateFrameTime = updateClock.elapsedFrameTime
+
+        // If the game goes into a suspended state (i.e., debugger attached), we want to ignore really long periods of
+        // no processing.
+        if (elapsedUpdateFrameTime > 10) {
+            return
+        }
+
+        // Handle the case where the window has become inactive (we want to show the FPS as it is changing, even if it
+        // is not an outlier).
+        val aimRatesChanged = updateAimFPS()
+        val hasUpdateSpike = displayedFrameTime < spikeTime && elapsedUpdateFrameTime > spikeTime
+
+        displayedFrameTime = Interpolation.dampContinuously(
+            displayedFrameTime,
+            elapsedUpdateFrameTime,
+            if (hasUpdateSpike) 0f else dampTime,
+            elapsedUpdateFrameTime
+        )
+
+        displayedFpsCount = if (hasUpdateSpike) {
+            // Show spike time using raw elapsed value, to account for `framesPerSecond` being so averaged spike frames
+            // do not show.
+            1f / elapsedUpdateFrameTime
+        } else {
+            Interpolation.dampContinuously(
+                displayedFpsCount,
+                updateClock.framesPerSecond,
+                dampTime,
+                updateClock.timeInfo.elapsed
+            )
+        }
+
+        // Force update if we are below the target by a certain threshold.
+        val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || displayedFpsCount < aimFPS * 0.6f
+
+        timeSinceLastUpdate += updateClock.timeInfo.elapsed
+
+        if (!hasSignificantChanges && timeSinceLastUpdate < updateInterval) {
+            return
+        }
+
+        val displayedFps = displayedFpsCount.roundToInt()
+        val isHighPrecision = displayedFrameTime < 0.01f
+        val displayedMs = displayedFrameTime * 1000
+
+        val roundedFrameTime = if (isHighPrecision) {
+            (displayedMs * 10).roundToInt() / 10f
+        } else {
+            displayedMs.roundToInt().toFloat()
+        }
+
+        if (!hasSignificantChanges && displayedFps == lastDisplayedFps && roundedFrameTime == lastDisplayedFrameTime) {
+            return
+        }
+
+        timeSinceLastUpdate = 0f
+        lastDisplayedFps = displayedFps
+        lastDisplayedFrameTime = roundedFrameTime
+
+        stringBuilder.setLength(0)
+
+        formatter.format(
+            "%.${if (isHighPrecision) "1" else "0"}f ms | %d FPS",
+            displayedMs,
+            displayedFps
+        )
+
+        text = stringBuilder.toString()
+
+        updateColor()
     }
 
     private fun updateAimFPS(): Boolean {
