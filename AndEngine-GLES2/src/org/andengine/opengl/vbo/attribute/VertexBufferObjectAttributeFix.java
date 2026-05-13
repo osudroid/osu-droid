@@ -1,6 +1,6 @@
 package org.andengine.opengl.vbo.attribute;
 
-import org.andengine.opengl.GLES20Fix;
+import android.opengl.GLES20;
 
 /**
  * The {@link VertexBufferObjectAttributeFix} is a special 
@@ -36,7 +36,7 @@ public class VertexBufferObjectAttributeFix extends VertexBufferObjectAttribute 
 
 	@Override
 	public void glVertexAttribPointer(final int pStride) {
-		GLES20Fix.glVertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
+		GLES20.glVertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
 	}
 
 	// ===========================================================
