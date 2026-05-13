@@ -75,15 +75,13 @@ class FPSCounter : UIText() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        try {
-            isVisible = Config.isShowFPS()
+        isVisible = Config.isShowFPS()
 
-            if (isVisible) {
-                updateFPS()
-            }
-        } finally {
-            super.onManagedUpdate(deltaTimeSec)
+        if (isVisible) {
+            updateFPS()
         }
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     private fun updateFPS() {
