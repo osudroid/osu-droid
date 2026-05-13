@@ -63,12 +63,12 @@ class FPSCounter : UIText() {
         padding = Vec4(4f)
         anchor = Anchor.BottomRight
         origin = Anchor.BottomRight
-        alignment = Anchor.BottomRight
+        alignment = Anchor.Center
 
         background = UIBox().apply {
             cornerRadius = 8f
             applyTheme = {
-                color = it.accentColor * 0.7f
+                color = it.accentColor * 0.1f
                 alpha = 0.8f
             }
         }
