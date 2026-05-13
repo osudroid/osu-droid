@@ -31,7 +31,7 @@ public class GameplaySpinner extends GameObject {
     private final UISprite circle;
     private final UISprite approachCircle;
     private final UISprite metre;
-    private final int metreRegionOriginalHeight;
+    private final float metreRegionOriginalHeight;
     private float metreY;
     private final UISprite spinText;
     private final TextureRegion metreRegion;
@@ -138,10 +138,10 @@ public class GameplaySpinner extends GameObject {
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        metreRegion.setHeight(0);
+        metreRegion.setTextureHeight(0);
         metreRegion.setTexturePosition(0, metreRegionOriginalHeight);
         metre.setHeight(0);
-        
+
         scene.attachChild(spinText, 0);
 
         if (!GameHelper.isHidden()) {
@@ -394,8 +394,8 @@ public class GameplaySpinner extends GameObject {
         metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
         metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
 
-        metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
-        metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
+        metreRegion.setTextureHeight(metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill)));
+        metreRegion.setTexturePosition(0, metreRegionOriginalHeight * fillOffset);
         metre.requestBufferUpdate();
 
         oldMouse.set(currMouse);
