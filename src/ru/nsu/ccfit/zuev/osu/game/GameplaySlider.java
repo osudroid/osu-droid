@@ -456,7 +456,10 @@ public class GameplaySlider extends GameObject {
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
-        setLifetimeEnd(hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000));
+
+        // Extra 1ms buffer since (float)duration may round down vs double spanDuration, causing the tail to expire
+        // before percentage reaches 1.0.
+        setLifetimeEnd(hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000) + 1e-3f);
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
