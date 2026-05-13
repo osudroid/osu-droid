@@ -1,7 +1,7 @@
 package com.edlplan.framework.support.graphics;
 
 
-import android.opengl.GLES10;
+import android.opengl.GLES20;
 
 import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.utils.interfaces.Copyable;
@@ -37,14 +37,14 @@ public class BlendProperty implements Copyable<BlendProperty> {
     public void applyToGL() {
         BatchEngine.flush();
         if (enable) {
-            GLES10.glEnable(GLES10.GL_BLEND);
+            GLES20.glEnable(GLES20.GL_BLEND);
             if (isPreM) {
-                GLES10.glBlendFunc(blendType.srcTypePreM, blendType.dstTypePreM);
+                GLES20.glBlendFunc(blendType.srcTypePreM, blendType.dstTypePreM);
             } else {
-                GLES10.glBlendFunc(blendType.srcType, blendType.dstType);
+                GLES20.glBlendFunc(blendType.srcType, blendType.dstType);
             }
         } else {
-            GLES10.glDisable(GLES10.GL_BLEND);
+            GLES20.glDisable(GLES20.GL_BLEND);
         }
     }
 
