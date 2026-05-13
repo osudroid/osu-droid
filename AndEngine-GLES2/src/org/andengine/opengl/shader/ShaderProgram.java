@@ -11,7 +11,6 @@ import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.shader.source.IShaderSource;
 import org.andengine.opengl.shader.source.StringShaderSource;
 import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttribute;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 
 import android.opengl.GLES20;
@@ -53,7 +52,6 @@ public class ShaderProgram {
 	protected boolean mCompiled;
 
 	protected final HashMap<String, Integer> mUniformLocations = new HashMap<String, Integer>();
-	protected final HashMap<String, Integer> mAttributeLocations = new HashMap<String, Integer>();
 
 	// ===========================================================
 	// Constructors
@@ -83,23 +81,6 @@ public class ShaderProgram {
 		this.mCompiled = pCompiled;
 	}
 
-	public int getAttributeLocation(final String pAttributeName) {
-		final Integer location = this.mAttributeLocations.get(pAttributeName);
-		if(location != null) {
-			return location.intValue();
-		} else {
-			throw new ShaderProgramException("Unexpected attribute: '" + pAttributeName + "'. Existing attributes: " + this.mAttributeLocations.toString());
-		}
-	}
-
-	public int getAttributeLocationOptional(final String pAttributeName) {
-		final Integer location = this.mAttributeLocations.get(pAttributeName);
-		if(location != null) {
-			return location.intValue();
-		} else {
-			return ShaderProgramConstants.LOCATION_INVALID;
-		}
-	}
 
 	public int getUniformLocation(final String pUniformName) {
 		final Integer location = this.mUniformLocations.get(pUniformName);
@@ -169,7 +150,6 @@ public class ShaderProgram {
 		this.mCompiled = false;
 		this.mProgramID = -1;
 		this.mUniformLocations.clear();
-		this.mAttributeLocations.clear();
 	}
 
 	/**
@@ -211,7 +191,6 @@ public class ShaderProgram {
 			throw new ShaderProgramLinkException(GLES20.glGetProgramInfoLog(this.mProgramID));
 		}
 
-		this.initAttributeLocations();
 		this.initUniformLocations();
 
 		this.mCompiled = true;
@@ -274,50 +253,6 @@ public class ShaderProgram {
 		}
 	}
 
-	/**
-	 * TODO Is this actually needed? As the locations of {@link VertexBufferObjectAttribute}s are now 'predefined'.
-	 */
-	@Deprecated
-	private void initAttributeLocations() {
-		this.mAttributeLocations.clear();
-
-		ShaderProgram.PARAMETERS_CONTAINER[0] = 0;
-		GLES20.glGetProgramiv(this.mProgramID, GLES20.GL_ACTIVE_ATTRIBUTES, ShaderProgram.PARAMETERS_CONTAINER, 0);
-		final int numAttributes = ShaderProgram.PARAMETERS_CONTAINER[0];
-
-		for(int i = 0; i < numAttributes; i++) {
-			GLES20.glGetActiveAttrib(this.mProgramID, i, ShaderProgram.NAME_CONTAINER_SIZE, ShaderProgram.LENGTH_CONTAINER, 0, ShaderProgram.SIZE_CONTAINER, 0, ShaderProgram.TYPE_CONTAINER, 0, ShaderProgram.NAME_CONTAINER, 0);
-
-			int length = ShaderProgram.LENGTH_CONTAINER[0];
-
-			/* Some drivers do not report the actual length here, but zero. Then the name is '\0' terminated. */
-			if(length == 0) {
-				while((length < ShaderProgram.NAME_CONTAINER_SIZE) && (ShaderProgram.NAME_CONTAINER[length] != '\0')) {
-					length++;
-				}
-			}
-
-			String name = new String(ShaderProgram.NAME_CONTAINER, 0, length);
-			int location = GLES20.glGetAttribLocation(this.mProgramID, name);
-
-			if(location == ShaderProgramConstants.LOCATION_INVALID) {
-				/* Some drivers do not report an incorrect length. Then the name is '\0' terminated. */
-				length = 0;
-				while(length < ShaderProgram.NAME_CONTAINER_SIZE && ShaderProgram.NAME_CONTAINER[length] != '\0') {
-					length++;
-				}
-
-				name = new String(ShaderProgram.NAME_CONTAINER, 0, length);
-				location = GLES20.glGetAttribLocation(this.mProgramID, name);
-
-				if(location == ShaderProgramConstants.LOCATION_INVALID) {
-					throw new ShaderProgramLinkException("Invalid location for attribute: '" + name + "'.");
-				}
-			}
-
-			this.mAttributeLocations.put(name, location);
-		}
-	}
 
 	public void setUniform(final String pUniformName, final float[] pGLMatrix) {
 		GLES20.glUniformMatrix4fv(this.getUniformLocation(pUniformName), 1, false, pGLMatrix, 0);
