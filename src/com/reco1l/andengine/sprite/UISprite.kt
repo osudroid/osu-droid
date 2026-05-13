@@ -156,22 +156,22 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         shader.bindProgram(pGLState)
 
         // Upload MVP matrix
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+        if (shader.uniformMVPMatrixLocation >= 0) {
             GLES20.glUniformMatrix4fv(
-                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }
 
         // Upload texture unit sampler
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
-            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        if (shader.uniformTexture0Location >= 0) {
+            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color uniform
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+        if (shader.uniformColorLocation >= 0) {
             GLES20.glUniform4f(
-                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }

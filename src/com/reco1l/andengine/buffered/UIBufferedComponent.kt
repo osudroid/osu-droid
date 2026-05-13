@@ -194,9 +194,9 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         shader.bindProgram(pGLState)
 
         // Upload MVP matrix
-        if (PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+        if (shader.uniformMVPMatrixLocation >= 0) {
             GLES20.glUniformMatrix4fv(
-                PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }

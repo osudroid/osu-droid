@@ -163,14 +163,14 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         shader.bindProgram(pGLState)
 
         // Upload texture unit
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location >= 0) {
-            GLES20.glUniform1i(PositionTextureCoordinatesUniformColorShaderProgram.sUniformTexture0Location, 0)
+        if (shader.uniformTexture0Location >= 0) {
+            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation >= 0) {
+        if (shader.uniformColorLocation >= 0) {
             GLES20.glUniform4f(
-                PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation,
+                shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
@@ -185,9 +185,10 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     override fun onDeclarePointers(gl: GLState) {
         super.onDeclarePointers(gl)
         // Re-upload MVP matrix per character since each character is translated differently.
-        if (PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation >= 0) {
+        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
+        if (shader.uniformMVPMatrixLocation >= 0) {
             GLES20.glUniformMatrix4fv(
-                PositionTextureCoordinatesUniformColorShaderProgram.sUniformModelViewPositionMatrixLocation,
+                shader.uniformMVPMatrixLocation,
                 1, false, gl.modelViewProjectionGLMatrix, 0
             )
         }

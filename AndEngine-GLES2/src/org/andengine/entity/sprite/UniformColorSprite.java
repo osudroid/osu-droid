@@ -109,7 +109,7 @@ public class UniformColorSprite extends Sprite {
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
 		super.preDraw(pGLState, pCamera);
 
-		GLES20.glUniform4f(PositionTextureCoordinatesUniformColorShaderProgram.sUniformColorLocation, this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
+		GLES20.glUniform4f(PositionTextureCoordinatesUniformColorShaderProgram.getInstance().getUniformColorLocation(), this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
 	}
 
 	@Override

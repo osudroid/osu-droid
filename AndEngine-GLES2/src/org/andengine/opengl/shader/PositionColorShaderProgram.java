@@ -38,10 +38,12 @@ public class PositionColorShaderProgram extends ShaderProgram {
 			"}";
 
 	// ===========================================================
-	// Fields
+	// Fields  (private instance — reset on context loss)
 	// ===========================================================
 
-	public static int sUniformModelViewPositionMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+
+	public int getUniformMVPMatrixLocation() { return mUniformMVPMatrixLocation; }
 
 	// ===========================================================
 	// Constructors
@@ -73,7 +75,7 @@ public class PositionColorShaderProgram extends ShaderProgram {
 
 		super.link(pGLState);
 
-		PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
+		mUniformMVPMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
 	}
 
 	@Override
@@ -82,7 +84,7 @@ public class PositionColorShaderProgram extends ShaderProgram {
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
-		GLES20.glUniformMatrix4fv(PositionColorShaderProgram.sUniformModelViewPositionMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
+		GLES20.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
 	}
 
 	@Override
@@ -90,6 +92,12 @@ public class PositionColorShaderProgram extends ShaderProgram {
 		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 		
 		super.unbind(pGLState);
+	}
+
+	@Override
+	public void resetForContextLoss() {
+		super.resetForContextLoss();
+		mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
 	}
 
 	// ===========================================================
