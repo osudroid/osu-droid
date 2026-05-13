@@ -5,7 +5,6 @@ import org.andengine.audio.music.MusicManager;
 import org.andengine.audio.sound.SoundManager;
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.EngineOptions;
-import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.entity.scene.Scene;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
@@ -25,7 +24,6 @@ import org.andengine.ui.IGameInterface;
 import org.andengine.util.ActivityUtils;
 import org.andengine.util.Constants;
 import org.andengine.util.debug.Debug;
-import org.andengine.util.system.SystemUtils;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -440,23 +438,15 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 				break;
 			case LANDSCAPE_SENSOR:
-				if(SystemUtils.SDK_VERSION_GINGERBREAD_OR_LATER) {
-					this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-				} else {
-					Debug.w(ScreenOrientation.class.getSimpleName() + "." + ScreenOrientation.LANDSCAPE_SENSOR + " is not supported on this device. Falling back to " + ScreenOrientation.class.getSimpleName() + "." + ScreenOrientation.LANDSCAPE_FIXED);
-					this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-				}
+				// osu!droid: SDK_VERSION_GINGERBREAD_OR_LATER (API ≥ 9) is always true on minSdk 24.
+				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 				break;
 			case PORTRAIT_FIXED:
 				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 				break;
 			case PORTRAIT_SENSOR:
-				if(SystemUtils.SDK_VERSION_GINGERBREAD_OR_LATER) {
-					this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-				} else {
-					Debug.w(ScreenOrientation.class.getSimpleName() + "." + ScreenOrientation.PORTRAIT_SENSOR + " is not supported on this device. Falling back to " + ScreenOrientation.class.getSimpleName() + "." + ScreenOrientation.PORTRAIT_FIXED);
-					this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-				}
+				// osu!droid: SDK_VERSION_GINGERBREAD_OR_LATER (API ≥ 9) is always true on minSdk 24.
+				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
 				break;
 		}
 	}
