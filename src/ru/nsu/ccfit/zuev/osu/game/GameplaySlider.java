@@ -925,7 +925,7 @@ public class GameplaySlider extends GameObject {
         if (scene == null) {
             return;
         }
-        elapsedSpanTime += dt;
+        elapsedSpanTime = listener.getElapsedTime() - hitTime - completedSpanCount * spanDuration;
 
         double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
 

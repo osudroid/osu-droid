@@ -277,7 +277,7 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        passedTime += dt;
+        passedTime = listener.getElapsedTime() - hitTime;
 
         // Allow the spinner to fully fade in first before receiving spins.
         if (passedTime < 0) {

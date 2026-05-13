@@ -215,6 +215,8 @@ public class GameplayHitCircle extends GameObject {
             return;
         }
 
+        passedTime = listener.getElapsedTime() - hitTime;
+
         double mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
 
         // If we have clicked circle
@@ -262,8 +264,6 @@ public class GameplayHitCircle extends GameObject {
                 kiai = false;
             }
         }
-
-        passedTime += dt;
 
         // We are still at approach time. Let entity modifiers finish first.
         if (passedTime < 0) {

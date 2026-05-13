@@ -3175,6 +3175,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     /**
      * The current elapsed time relative to the start of the {@link Beatmap}, in seconds.
      */
+    @Override
     public float getElapsedTime() {
         return beatmapClock.getCurrentTime();
     }
