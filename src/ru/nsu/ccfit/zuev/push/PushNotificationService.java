@@ -67,13 +67,13 @@ public class PushNotificationService extends FirebaseMessagingService {
             if(!url.isEmpty()) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
                 notificationBuilder.setContentIntent(pendingIntent);
             }else {
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
                 notificationBuilder.setContentIntent(pendingIntent);
             }
 

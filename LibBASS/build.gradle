@@ -1,15 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk 34
-    ndkVersion '22.1.7171670'
+    compileSdk = 34
+    ndkVersion = '30.0.14904198'
 
     defaultConfig {
         minSdkVersion 21
         //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 29
+        targetSdkVersion 34
     }
-
 
     buildTypes {
         release {
@@ -17,10 +16,10 @@ android {
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'com.un4seen.bass'
+    namespace = 'com.un4seen.bass'
     lint {
-        abortOnError true
-        ignoreWarnings true
+        abortOnError = true
+        ignoreWarnings = true
     }
 
 }

@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:8.8.0'
         classpath 'com.google.gms:google-services:4.4.2'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -19,12 +19,12 @@ buildscript {
 }
 
 plugins {
-    id 'com.google.devtools.ksp' version '2.0.10-1.0.24'
+    id 'com.google.devtools.ksp' version '2.1.10-1.0.31'
 }
 
 allprojects {
     repositories {
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
         google()
         mavenCentral()
     }
@@ -57,21 +57,24 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'androidx.room'
 
 android {
-    namespace 'ru.nsu.ccfit.zuev.osuplus'
-    compileSdk 34
-    ndkVersion '22.1.7171670'
+    namespace = 'ru.nsu.ccfit.zuev.osuplus'
+    compileSdk = 34
+    ndkVersion = '30.0.14904198'
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 34
         versionCode getReleaseVersionCode()
         versionName getReleaseVersionName()
-        multiDexEnabled true
+        multiDexEnabled = true
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
     }
     packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
         resources {
             excludes += ['META-INF/proguard/coroutines.pro']
         }
@@ -106,7 +109,7 @@ android {
             resValue "string", "app_name", "osu!droid-debug"
             applicationIdSuffix '.debug'
             firebaseCrashlytics {
-                mappingFileUploadEnabled false
+                mappingFileUploadEnabled = false
             }
         }
 
@@ -114,9 +117,9 @@ android {
             resValue "string", "app_name", "osu!droid"
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
             firebaseCrashlytics {
-                mappingFileUploadEnabled false
+                mappingFileUploadEnabled = false
             }
         }
 
@@ -126,9 +129,9 @@ android {
 //            minifyEnabled true
 //            debuggable true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
             firebaseCrashlytics {
-                mappingFileUploadEnabled false
+                mappingFileUploadEnabled = false
             }
         }
     }
@@ -157,17 +160,17 @@ android {
 
     useLibrary 'org.apache.http.legacy'
     lint {
-        abortOnError true
+        abortOnError = true
         disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
-        ignoreWarnings true
+        ignoreWarnings = true
     }
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
     testOptions {
         unitTests {
-            includeAndroidResources true
+            includeAndroidResources = true
         }
     }
 

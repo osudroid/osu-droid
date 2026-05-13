@@ -5,6 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE             := andengine_shared
 LOCAL_MODULE_FILENAME    := libandengine
 LOCAL_CFLAGS             := -Werror
+LOCAL_LDFLAGS            := -Wl,-z,max-page-size=16384
 LOCAL_SRC_FILES          := src/GLES20Fix.c \
                              src/BufferUtils.cpp
 LOCAL_LDLIBS             := -lGLESv2

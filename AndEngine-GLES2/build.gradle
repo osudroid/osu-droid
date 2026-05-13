@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    namespace 'org.andengine'
-    compileSdk 34
-    ndkVersion '22.1.7171670'
+    namespace = 'org.andengine'
+    compileSdk = 34
+    ndkVersion = '30.0.14904198'
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 34
     }
 
     sourceSets {
@@ -32,11 +32,11 @@ android {
 
     useLibrary 'org.apache.http.legacy'
     lint {
-        abortOnError true
-        ignoreWarnings true
+        abortOnError = true
+        ignoreWarnings = true
     }
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
 }
@@ -46,4 +46,3 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.11.0'
 }
-
