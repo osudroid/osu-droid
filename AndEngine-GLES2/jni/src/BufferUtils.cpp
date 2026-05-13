@@ -1,26 +1,19 @@
-#include "BufferUtils.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-// ===========================================================
-// org.andengine.opengl.util.BufferUtils
-// ===========================================================
-	
-JNIEXPORT void JNICALL Java_org_andengine_opengl_util_BufferUtils_jniPut(JNIEnv *env, jclass, jobject pBuffer, jfloatArray pData, jint pLength, jint pOffset) {
-	unsigned char* bufferAddress = (unsigned char*)env->GetDirectBufferAddress(pBuffer);
-	float* dataAddress = (float*)env->GetPrimitiveArrayCritical(pData, 0);
-	
-	std::memcpy(bufferAddress, dataAddress + pOffset, pLength << 2);
-	env->ReleasePrimitiveArrayCritical(pData, dataAddress, 0);
-}
-
-JNIEXPORT jobject JNICALL Java_org_andengine_opengl_util_BufferUtils_jniAllocateDirect(JNIEnv *env, jclass, jint pCapacity) {
-	jbyte* bytebuffer = (jbyte*) malloc(sizeof(jbyte) * pCapacity);
-	return env->NewDirectByteBuffer(bytebuffer, pCapacity);
-}
-
-JNIEXPORT void JNICALL Java_org_andengine_opengl_util_BufferUtils_jniFreeDirect(JNIEnv* env, jclass, jobject pBuffer) {
-	unsigned char* bufferAddress = (unsigned char*)env->GetDirectBufferAddress(pBuffer);
-	free(bufferAddress);
-}
+/*
+ * BufferUtils.cpp — REMOVED (dead code)
+ *
+ * These JNI stubs backed three native methods in
+ * org.andengine.opengl.util.BufferUtils:
+ *
+ *   jniPut           — Froyo (API ≤ 8) ByteBuffer.put float-array workaround
+ *   jniAllocateDirect — Honeycomb (API 11-12) ByteBuffer.allocateDirect workaround
+ *   jniFreeDirect    — companion free for jniAllocateDirect
+ *
+ * With minSdkVersion = 24 both workaround flags were always false and the
+ * native methods were never called. The 'native' declarations and the
+ * System.loadLibrary("andengine") call were removed from BufferUtils.java
+ * as part of the GLES1→GLES2 migration cleanup (Issue 2), leaving these
+ * entry points with no Java callers.
+ *
+ * The andengine_shared NDK module that compiled this file was disabled at
+ * the same time. File kept as a historical reference only; it is not compiled.
+ */

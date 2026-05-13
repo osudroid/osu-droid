@@ -1,15 +1,15 @@
-#include <jni.h>
-#include <stdint.h>
-#include <GLES2/gl2.h>
-
-// ===========================================================
-// org.andengine.opengl.GLES20Fix
-// ===========================================================
-
-JNIEXPORT void JNICALL Java_org_andengine_opengl_GLES20Fix_glVertexAttribPointer (JNIEnv *env, jclass c, jint index, jint size, jint type, jboolean normalized, jint stride, jint offset) {
-	glVertexAttribPointer(index, size, type, normalized, stride, (void*)(intptr_t)offset);
-}
-
-JNIEXPORT void JNICALL Java_org_andengine_opengl_GLES20Fix_glDrawElements (JNIEnv *env, jclass c, jint mode, jint count, jint type, jint offset) {
-	glDrawElements(mode, count, type, (void*)(intptr_t)offset);
-}
+/*
+ * GLES20Fix.c — REMOVED (dead code)
+ *
+ * These JNI stubs backed org.andengine.opengl.GLES20Fix, which originally
+ * worked around missing GLES20 entry points on Android 2.2 (Froyo / API 8,
+ * issue #8931). GLES20Fix.java was cleaned up in the GLES1→GLES2 migration
+ * (Round 1): the System.loadLibrary call and the two 'native' method
+ * declarations were removed, so these entry points have no Java callers.
+ *
+ * The andengine_shared NDK module that compiled this file was disabled
+ * alongside BufferUtils.cpp when the last remaining Java-side JNI usage
+ * was removed (minSdk 24 — all legacy workaround paths dead).
+ *
+ * File kept as a historical reference only; it is not compiled.
+ */
