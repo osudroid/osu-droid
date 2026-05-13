@@ -307,8 +307,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public Scene onLoadScene() {
-        UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter());
-
         if (BuildSettings.DEBUG_PLAYGROUND) {
             return DebugPlaygroundScene.INSTANCE;
         }
@@ -320,6 +318,7 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
+            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
