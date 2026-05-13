@@ -11,9 +11,8 @@ import org.andengine.engine.camera.*
 import org.andengine.input.touch.*
 import org.andengine.opengl.util.GLState
 import com.rian.andengine.modifier.ModifierType
-import javax.microedition.khronos.opengles.*
-import kotlin.math.*
 import org.andengine.entity.scene.Scene
+import kotlin.math.*
 
 class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
     private var currentScene: Scene? = null

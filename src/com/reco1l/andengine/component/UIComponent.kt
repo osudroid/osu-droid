@@ -23,7 +23,6 @@ import org.andengine.opengl.util.*
 import org.andengine.util.Constants.*
 import org.andengine.util.algorithm.collision.ShapeCollisionChecker
 import org.andengine.util.adt.transformation.Transformation
-import javax.microedition.khronos.opengles.*
 
 import kotlin.math.*
 
