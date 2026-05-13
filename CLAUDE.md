@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew lint
 ```
 
-Requires **Java 17** and **Android NDK 22.1.7171670**. The project has three Gradle modules: the main app, `:AndEngine` (modified GLES2 engine), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
+Requires **Java 17** and **Android NDK 30.0.14904198**. The project has three Gradle modules: the main app, `:AndEngine-GLES2` (modified GLES2 engine), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
 
 ## Architecture Overview
 
@@ -70,7 +70,7 @@ SplashScene → LoadingScreen → MainScene (menu hub) → LobbyScene
 
 ### Rendering
 
-AndEngine (GLES1) handles all rendering. The modern UI layer wraps it via `UIEngine`/`UIScene` and a custom entity hierarchy (`Entity` → `UIComponent` → `UIBufferedComponent`/`UIContainer`/etc.).
+AndEngine (GLES2) handles all rendering. The modern UI layer wraps it via `UIEngine`/`UIScene` and a custom entity hierarchy (`Entity` → `UIComponent` → `UIBufferedComponent`/`UIContainer`/etc.).
 
 ### Asset / Resource Loading
 
