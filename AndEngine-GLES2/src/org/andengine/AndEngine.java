@@ -7,9 +7,6 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import org.andengine.opengl.view.ConfigChooser;
 import org.andengine.util.exception.DeviceNotSupportedException;
 import org.andengine.util.exception.DeviceNotSupportedException.DeviceNotSupportedCause;
-import org.andengine.util.system.SystemUtils;
-
-import android.os.Build;
 
 /**
  * (c) Zynga 2012
@@ -57,14 +54,10 @@ public class AndEngine {
 		AndEngine.checkOpenGLSupport();
 	}
 
-	private static void checkCodePathSupport() throws DeviceNotSupportedException {
-		if(SystemUtils.isAndroidVersionOrLower(Build.VERSION_CODES.FROYO)) {
-			try {
-				System.loadLibrary("andengine");
-			} catch (final UnsatisfiedLinkError e) {
-				throw new DeviceNotSupportedException(DeviceNotSupportedCause.CODEPATH_INCOMPLETE, e);
-			}
-		}
+	private static void checkCodePathSupport() {
+		// osu!droid: System.loadLibrary("andengine") was here behind an isAndroidVersionOrLower(FROYO)
+		// guard. minSdk is 24 so the guard is always false, and libandengine.so was removed from the
+		// APK when dead JNI workarounds were cleaned up (Issues 7+8). Nothing to do.
 	}
 
 	private static void checkOpenGLSupport() throws DeviceNotSupportedException {
