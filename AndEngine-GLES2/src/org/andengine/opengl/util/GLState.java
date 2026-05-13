@@ -428,7 +428,14 @@ public class GLState {
 	}
 
 	public void bindFramebuffer(final int pFramebufferID) {
-		GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, pFramebufferID);
+		// osu!droid fix: cache the bound FBO ID, mirroring all other bind methods in GLState.
+		// The old code called glBindFramebuffer unconditionally on every invocation — the
+		// mCurrentFramebufferID field was never written here, making the cache useless and
+		// deleteFramebuffer()'s invalidation check always false.
+		if(this.mCurrentFramebufferID != pFramebufferID) {
+			this.mCurrentFramebufferID = pFramebufferID;
+			GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, pFramebufferID);
+		}
 	}
 
 	public int getFramebufferStatus() {
