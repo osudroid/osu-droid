@@ -14,7 +14,7 @@ import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderP
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.*
-import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
+import com.reco1l.andengine.buffered.GL_STATIC_DRAW
 import kotlin.math.*
 
 /**
