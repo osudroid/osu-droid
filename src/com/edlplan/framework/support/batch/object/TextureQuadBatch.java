@@ -9,7 +9,9 @@ import com.edlplan.framework.support.batch.StoryboardBatchShader;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.util.BufferUtil;
 
+import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.util.GLState;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -39,6 +41,14 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
      * camera transform in {@link #applyToGL()} to produce the final MVP.
      */
     public static float[] sBaseGLMatrix = new float[16];
+
+    /**
+     * The active {@link GLState} injected by {@link com.edlplan.framework.support.SupportSprite}
+     * before each storyboard draw. Used inside {@link #applyToGL()} so that shader and buffer
+     * bindings go through {@link GLState}'s cache instead of bypassing it with raw GLES20 calls.
+     * Reset to {@code null} after the draw completes.
+     */
+    public static GLState sGLState = null;
 
     static {
         // Default: identity (will be overwritten the first time SupportSprite.draw() runs)
@@ -126,8 +136,13 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
         float[] mvp = new float[16];
         Matrix.multiplyMM(mvp, 0, sBaseGLMatrix, 0, camMatrix, 0);
 
-        // --- Bind shader --------------------------------------------------------
-        GLES20.glUseProgram(shader.getProgramID());
+        // --- Bind shader via GLState so its cache stays authoritative ------------
+        final GLState glState = sGLState;
+        if (glState != null) {
+            glState.useProgram(shader.getProgramID());
+        } else {
+            GLES20.glUseProgram(shader.getProgramID());
+        }
 
         // --- Upload MVP uniform -------------------------------------------------
         if (shader.getUMVPLoc() >= 0) {
@@ -144,7 +159,12 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
 
         // --- Upload vertex data (client-side array, no VBO) ---------------------
         // Unbind any VBO so glVertexAttribPointer reads from the client buffer.
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        // Use GLState for GL_ARRAY_BUFFER so the cache reflects the unbind.
+        if (glState != null) {
+            glState.bindArrayBuffer(0);
+        } else {
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         buffer.position(0);
@@ -175,11 +195,21 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
                 GLES20.GL_UNSIGNED_SHORT,
                 indicesBuffer);
 
-        // --- Restore state ------------------------------------------------------
-        GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_POSITION);
+        // --- Restore GL state so AndEngine's GLState cache remains authoritative -
+        // Disable the storyboard-specific attrib array (texCoord slot = 1, color slot = 2)
+        // and re-enable the two that AndEngine always expects to be active:
+        //   slot 0 = ATTRIBUTE_POSITION, slot 1 = ATTRIBUTE_COLOR
         GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
         GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
-        GLES20.glUseProgram(0);
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+
+        // Release the shader binding through GLState so the cache reflects program = 0.
+        if (glState != null) {
+            glState.useProgram(0);
+        } else {
+            GLES20.glUseProgram(0);
+        }
 
         return true;
     }
