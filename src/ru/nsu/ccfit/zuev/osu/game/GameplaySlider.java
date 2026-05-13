@@ -78,6 +78,7 @@ public class GameplaySlider extends GameObject {
     private final GameplaySequenceHitSampleInfo sliderSlideSample;
     private final GameplaySequenceHitSampleInfo sliderWhistleSample;
 
+    private boolean headWasHit;
     private int currentNestedObjectIndex;
     private int ticksGot;
     private int currentTickSpriteIndex;
@@ -216,6 +217,7 @@ public class GameplaySlider extends GameObject {
         hitWindow = beatmapSlider.getHead().hitWindow;
         trackingCursorId = -1;
         isTracking = false;
+        headWasHit = false;
 
         reloadHitSounds();
 
@@ -457,7 +459,10 @@ public class GameplaySlider extends GameObject {
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
-        setLifetimeEnd(hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000));
+
+        // Extra 1ms buffer since (float)duration may round down vs double spanDuration, causing the tail to expire
+        // before percentage reaches 1.0.
+        setLifetimeEnd(hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000) + 1e-3f);
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
@@ -565,25 +570,48 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
+        float endTime = hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000);
+
         if (Config.isAnimateFollowCircle() && isInRadius) {
             isFollowCircleAnimating = true;
-
             followCircle.clearEntityModifiers();
-            followCircle.scaleTo(followCircle.getScaleX() * 0.8f, 0.2f, Easing.Out);
 
-            extendLifetime(followCircle.fadeOut(0.2f).after(e -> {
-                Execution.updateThread(e::detachSelf);
-                isFollowCircleAnimating = false;
-            }));
+            followCircle.beginAbsoluteSequence(endTime, sequence -> {
+                sequence.scaleTo(followCircle.getScaleX() * 0.8f, 0.2f, Easing.Out)
+                        .fadeOut(0.2f)
+                        .after(e -> {
+                            Execution.updateThread(e::detachSelf);
+                            isFollowCircleAnimating = false;
+                        });
+
+                extendLifetime(sequence);
+
+                return Unit.INSTANCE;
+            });
         }
 
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
         } else {
-            extendLifetime(sliderBody.fadeOut(0.24f).after(e -> Execution.updateThread(e::detachSelf)));
+            sliderBody.beginAbsoluteSequence(endTime, sequence -> {
+                // Short fade for snaking out sliders to allow for any body color to smoothly disappear.
+                sequence.fadeOut(headWasHit && shouldSnakeOut ? 0.04f : 0.24f)
+                        .after(e -> Execution.updateThread(e::detachSelf));
+
+                extendLifetime(sequence);
+
+                return Unit.INSTANCE;
+            });
         }
 
-        extendLifetime(ball.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf)));
+        ball.beginAbsoluteSequence(endTime, sequence -> {
+            sequence.fadeOut(0.2f)
+                    .after(e -> Execution.updateThread(e::detachSelf));
+
+            extendLifetime(sequence);
+
+            return Unit.INSTANCE;
+        });
 
         if (!isHeadCircleAnimating) {
             // When animating, the head circle will detach after the animation ends.
@@ -1080,8 +1108,9 @@ public class GameplaySlider extends GameObject {
 
         if (replayObjectData == null || GameHelper.getReplayVersion() >= 6 || mehWindow <= duration) {
             listener.registerAccuracy(HitObjectType.Slider, hitOffset);
+            headWasHit = -mehWindow <= hitOffset && hitOffset <= getLateHitThreshold();
 
-            if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
+            if (headWasHit) {
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
                 shouldSnakeOut = true;
@@ -1096,6 +1125,7 @@ public class GameplaySlider extends GameObject {
             // the slider head is considered to *not* exist if it was not hit until the slider is over.
             // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(HitObjectType.Slider, hitOffset);
+            headWasHit = true;
             playCurrentNestedObjectHitSound();
             ticksGot++;
             shouldSnakeOut = true;
