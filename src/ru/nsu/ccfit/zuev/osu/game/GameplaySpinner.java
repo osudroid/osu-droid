@@ -407,9 +407,6 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void onExpire() {
-        super.onExpire();
-
-        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 

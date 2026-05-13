@@ -296,28 +296,6 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void onExpire() {
-        super.onExpire();
-
-        if (scene != null) {
-            if (!startHit) {
-                startHit = true;
-                double mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
-                listener.registerAccuracy(HitObjectType.Normal, mehWindow + 1);
-                listener.onCircleHit(id, 10, position, false, (replayObjectData == null) ? 0 : replayObjectData.result, comboColor);
-            }
-
-            for (int i = hitSamples.size() - 1; i >= 0; --i) {
-                var sample = hitSamples.get(i);
-
-                sample.reset();
-                GameplayHitSampleInfo.pool.free(sample);
-
-                hitSamples.remove(i);
-            }
-
-            scene = null;
-        }
-
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
 
