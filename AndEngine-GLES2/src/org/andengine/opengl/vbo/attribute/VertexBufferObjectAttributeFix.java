@@ -1,49 +1,17 @@
 package org.andengine.opengl.vbo.attribute;
 
-import android.opengl.GLES20;
-
 /**
- * The {@link VertexBufferObjectAttributeFix} is a special 
- * (c) Zynga 2012
+ * osu!droid: This class was a workaround for Android issue 8931 on Froyo (API ≤ 8), where
+ * glEnableVertexAttribArray crashed inside glVertexAttribPointer. minSdk is 24, so
+ * WORAROUND_GLES2_GLVERTEXATTRIBPOINTER_MISSING in VertexBufferObjectAttributesBuilder was always
+ * false and this subclass was never instantiated. Tombstoned — do not use.
  *
- * @author Nicolas Gramlich <ngramlich@zynga.com>
- * @since 12:52:33 - 08.03.2012
+ * @deprecated Dead code — Android issue 8931 / Froyo workaround. Use {@link VertexBufferObjectAttribute}.
  */
+@Deprecated
 public class VertexBufferObjectAttributeFix extends VertexBufferObjectAttribute {
-	// ===========================================================
-	// Constants
-	// ===========================================================
-
-	// ===========================================================
-	// Fields
-	// ===========================================================
-
-	// ===========================================================
-	// Constructors
-	// ===========================================================
 
 	public VertexBufferObjectAttributeFix(final int pLocation, final String pName, final int pSize, final int pType, final boolean pNormalized, final int pOffset) {
 		super(pLocation, pName, pSize, pType, pNormalized, pOffset);
 	}
-
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-
-	// ===========================================================
-	// Methods for/from SuperClass/Interfaces
-	// ===========================================================
-
-	@Override
-	public void glVertexAttribPointer(final int pStride) {
-		GLES20.glVertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
-	}
-
-	// ===========================================================
-	// Methods
-	// ===========================================================
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
 }
