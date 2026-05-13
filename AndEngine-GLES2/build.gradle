@@ -15,7 +15,11 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             res.srcDirs = ['res']
-            jniLibs.srcDirs = ['libs']
+            // libs/ contained libandengine.so for the GLES20Fix / BufferUtils JNI
+            // workarounds. Those workarounds were dead on minSdk 24 and have been
+            // removed from BufferUtils.java. The directory is kept for history
+            // but is no longer declared as a jniLibs source so the .so files
+            // are not packaged into the APK.
         }
     }
 
