@@ -50,7 +50,7 @@ public class ShaderProgramManager {
 	public synchronized void onDestroy() {
 		final ArrayList<ShaderProgram> managedShaderPrograms = this.mShaderProgramsManaged;
 		for(int i = managedShaderPrograms.size() - 1; i >= 0; i--) {
-			managedShaderPrograms.get(i).setCompiled(false);
+			managedShaderPrograms.get(i).resetForContextLoss();
 		}
 
 		this.mShaderProgramsManaged.clear();
