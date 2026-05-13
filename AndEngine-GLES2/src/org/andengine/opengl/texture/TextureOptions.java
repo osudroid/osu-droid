@@ -38,8 +38,10 @@ public class TextureOptions {
 
 	public final int mMagFilter;
 	public final int mMinFilter;
-	public final float mWrapT;
-	public final float mWrapS;
+	// osu!droid fix: wrap modes are integer-valued GL parameters; was incorrectly float which
+	// caused glTexParameterf to be used instead of the spec-required glTexParameteri.
+	public final int mWrapT;
+	public final int mWrapS;
 	public final boolean mPreMultiplyAlpha;
 
 	// ===========================================================
@@ -67,10 +69,12 @@ public class TextureOptions {
 	// ===========================================================
 
 	public void apply() {
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, this.mMinFilter);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, this.mMagFilter);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, this.mWrapS);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, this.mWrapT);
+		// osu!droid fix: use glTexParameteri — all four parameters are integer-valued GL enums.
+		// The old code used glTexParameterf for wrap modes which is not spec-compliant in GLES2.
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, this.mMinFilter);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, this.mMagFilter);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, this.mWrapS);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, this.mWrapT);
 	}
 
 	// ===========================================================
