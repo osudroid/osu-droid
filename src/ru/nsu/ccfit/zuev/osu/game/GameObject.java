@@ -9,6 +9,7 @@ import com.osudroid.game.CursorEvent;
 import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.hitobjects.HitObject;
 import com.rian.andengine.modifier.UniversalModifier;
+import com.rian.andengine.modifier.UniversalModifierSequence;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -247,6 +248,15 @@ public abstract class GameObject {
      */
     protected void extendLifetime(UniversalModifier modifier) {
         lifetimeEnd = Math.max(lifetimeEnd, modifier.getEndTime());
+    }
+
+    /**
+     * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifierSequence} to finish.
+     *
+     * @param sequence The {@link UniversalModifierSequence} to extend this {@link GameObject}'s lifetime with.
+     */
+    protected void extendLifetime(UniversalModifierSequence sequence) {
+        lifetimeEnd = Math.max(lifetimeEnd, sequence.getEndTime());
     }
 
     //endregion
