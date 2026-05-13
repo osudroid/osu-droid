@@ -512,9 +512,10 @@ public class GLState {
 	}
 
 	/**
-	 * @see {@link GLState#forceBindTexture(GLES20, int)}
-	 * @param GLES20
-	 * @param pHardwareTextureID
+	 * Binds the given texture to {@link GLES20#GL_TEXTURE_2D} on the currently active texture unit,
+	 * skipping the GL call if the texture is already bound (cached per texture unit).
+	 *
+	 * @param pHardwareTextureID the hardware texture ID to bind.
 	 */
 	public void bindTexture(final int pHardwareTextureID) {
 		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] != pHardwareTextureID) {
