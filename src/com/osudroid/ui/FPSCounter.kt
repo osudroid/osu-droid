@@ -72,8 +72,6 @@ class FPSCounter : UIText() {
                 alpha = 0.8f
             }
         }
-
-        instance = this
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -217,10 +215,4 @@ class FPSCounter : UIText() {
     }
 
     //endregion
-
-    companion object {
-        @JvmStatic
-        var instance: FPSCounter? = null
-            private set
-    }
 }
