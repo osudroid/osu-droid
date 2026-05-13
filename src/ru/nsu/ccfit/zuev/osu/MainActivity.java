@@ -704,6 +704,8 @@ public class MainActivity extends BaseGameActivity implements
         // This handles the case where the system destroyed the context while the app
         // was backgrounded (context loss recovery).
         onContextLost();
+        // Reset the TriangleRenderer VBO so it is re-created against the new context.
+        com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss();
         // Reset the storyboard quad-batch shader so it recompiles against the new context.
         com.edlplan.framework.support.batch.StoryboardBatchShader.getInstance().resetForContextLoss();
         // Reset the video OES shader so it recompiles against the new context.

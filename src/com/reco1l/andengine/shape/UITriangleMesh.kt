@@ -131,10 +131,6 @@ class UITriangleMesh : UIComponent() {
         // Ensure position attribute array is enabled
         GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
 
-        // TriangleRenderer uses a client-side FloatBuffer. In GLES2, glVertexAttribPointer
-        // with a non-null Buffer only works when GL_ARRAY_BUFFER is 0 (unbound).
-        // Unbind any VBO that a previous entity may have left bound.
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
 
         TriangleRenderer.get().renderTriangles(vertices)
 
