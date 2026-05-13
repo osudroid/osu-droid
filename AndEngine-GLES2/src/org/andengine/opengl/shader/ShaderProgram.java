@@ -261,7 +261,7 @@ public class ShaderProgram {
 	public void setUniformOptional(final String pUniformName, final float[] pGLMatrix) {
 		final int location = this.getUniformLocationOptional(pUniformName);
 		if(location != ShaderProgramConstants.LOCATION_INVALID) {
-			GLES20.glUniformMatrix4fv(this.getUniformLocationOptional(pUniformName), 1, false, pGLMatrix, 0);
+			GLES20.glUniformMatrix4fv(location, 1, false, pGLMatrix, 0);
 		}
 	}
 
@@ -272,7 +272,7 @@ public class ShaderProgram {
 	public void setUniformOptional(final String pUniformName, final float pX) {
 		final int location = this.getUniformLocationOptional(pUniformName);
 		if(location != ShaderProgramConstants.LOCATION_INVALID) {
-			GLES20.glUniform1f(this.getUniformLocationOptional(pUniformName), pX);
+			GLES20.glUniform1f(location, pX);
 		}
 	}
 
@@ -283,7 +283,7 @@ public class ShaderProgram {
 	public void setUniformOptional(final String pUniformName, final float pX, final float pY) {
 		final int location = this.getUniformLocationOptional(pUniformName);
 		if(location != ShaderProgramConstants.LOCATION_INVALID) {
-			GLES20.glUniform2f(this.getUniformLocationOptional(pUniformName), pX, pY);
+			GLES20.glUniform2f(location, pX, pY);
 		}
 	}
 
@@ -294,7 +294,7 @@ public class ShaderProgram {
 	public void setUniformOptional(final String pUniformName, final float pX, final float pY, final float pZ) {
 		final int location = this.getUniformLocationOptional(pUniformName);
 		if(location != ShaderProgramConstants.LOCATION_INVALID) {
-			GLES20.glUniform3f(this.getUniformLocationOptional(pUniformName), pX, pY, pZ);
+			GLES20.glUniform3f(location, pX, pY, pZ);
 		}
 	}
 
@@ -305,7 +305,7 @@ public class ShaderProgram {
 	public void setUniformOptional(final String pUniformName, final float pX, final float pY, final float pZ, final float pW) {
 		final int location = this.getUniformLocationOptional(pUniformName);
 		if(location != ShaderProgramConstants.LOCATION_INVALID) {
-			GLES20.glUniform4f(this.getUniformLocationOptional(pUniformName), pX, pY, pZ, pW);
+			GLES20.glUniform4f(location, pX, pY, pZ, pW);
 		}
 	}
 
