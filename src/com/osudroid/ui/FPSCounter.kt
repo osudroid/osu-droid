@@ -60,7 +60,7 @@ class FPSCounter : UIText() {
 
     init {
         font = ResourceManager.getInstance().getFont("smallFont")
-        padding = Vec4(4f)
+        padding = Vec4(6f, 4f)
         anchor = Anchor.BottomRight
         origin = Anchor.BottomRight
         alignment = Anchor.Center
