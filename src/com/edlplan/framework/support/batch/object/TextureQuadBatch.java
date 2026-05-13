@@ -150,9 +150,20 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
         }
 
         // --- Bind texture -------------------------------------------------------
+        // osu!droid fix (Issue 28): route activeTexture + bindTexture through GLState
+        // so its per-unit texture cache stays authoritative. The old code called
+        // GLES20.glActiveTexture / glBindTexture directly, leaving GLState's
+        // mCurrentBoundTextureIDs[0] stale. The next sprite that happened to carry
+        // the same cached texture ID as was bound *before* the storyboard batch
+        // would skip its glBindTexture call and render with the storyboard texture.
         GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
+        if (glState != null) {
+            glState.activeTexture(GLES20.GL_TEXTURE0);
+            glState.bindTexture(bindTexture.getHardwareTextureID());
+        } else {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
+        }
         if (shader.getUTextureLoc() >= 0) {
             GLES20.glUniform1i(shader.getUTextureLoc(), 0);
         }
