@@ -117,7 +117,7 @@ public class BufferUtils {
 	}
 
 	public static void putUnsignedInt(final ByteBuffer pByteBuffer, final int pPosition, final long pValue) {
-		pByteBuffer.putInt(pPosition, (short) (pValue & 0xFFFFFFFFL));
+		pByteBuffer.putInt(pPosition, (int) (pValue & 0xFFFFFFFFL));
 	}
 
 	// ===========================================================
