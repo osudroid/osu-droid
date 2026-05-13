@@ -40,11 +40,17 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 	// Fields
 	// ===========================================================
 
-	public static int sUniformModelViewPositionMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
-	public static int sUniformTexture0Location = ShaderProgramConstants.LOCATION_INVALID;
-	public static int sUniformTexture1Location = ShaderProgramConstants.LOCATION_INVALID;
-	public static int sUniformTextureSelectTexture0Location = ShaderProgramConstants.LOCATION_INVALID;
-	public static int sUniformPositionInterpolationMix0Location = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformMVPMatrixLocation            = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformTexture0Location             = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformTexture1Location             = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformTextureSelectTex0Location    = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformPositionInterpolationMix0    = ShaderProgramConstants.LOCATION_INVALID;
+
+	public int getUniformMVPMatrixLocation()            { return mUniformMVPMatrixLocation; }
+	public int getUniformTexture0Location()             { return mUniformTexture0Location; }
+	public int getUniformTexture1Location()             { return mUniformTexture1Location; }
+	public int getUniformTextureSelectTex0Location()    { return mUniformTextureSelectTex0Location; }
+	public int getUniformPositionInterpolationMix0()    { return mUniformPositionInterpolationMix0; }
 
 	// ===========================================================
 	// Constructors
@@ -77,11 +83,21 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 
 		super.link(pGLState);
 
-		PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformModelViewPositionMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
-		PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformTexture0Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
-		PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformTexture1Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_1);
-		PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformTextureSelectTexture0Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURESELECT_TEXTURE_0);
-		PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformPositionInterpolationMix0Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_POSITION_INTERPOLATION_MIX_0);
+		mUniformMVPMatrixLocation         = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
+		mUniformTexture0Location          = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
+		mUniformTexture1Location          = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_1);
+		mUniformTextureSelectTex0Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURESELECT_TEXTURE_0);
+		mUniformPositionInterpolationMix0 = this.getUniformLocation(ShaderProgramConstants.UNIFORM_POSITION_INTERPOLATION_MIX_0);
+	}
+
+	@Override
+	public void resetForContextLoss() {
+		super.resetForContextLoss();
+		mUniformMVPMatrixLocation         = ShaderProgramConstants.LOCATION_INVALID;
+		mUniformTexture0Location          = ShaderProgramConstants.LOCATION_INVALID;
+		mUniformTexture1Location          = ShaderProgramConstants.LOCATION_INVALID;
+		mUniformTextureSelectTex0Location = ShaderProgramConstants.LOCATION_INVALID;
+		mUniformPositionInterpolationMix0 = ShaderProgramConstants.LOCATION_INVALID;
 	}
 
 	@Override
@@ -93,9 +109,9 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
-		GLES20.glUniformMatrix4fv(PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformModelViewPositionMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
-		GLES20.glUniform1i(PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformTexture0Location, 0);
-		GLES20.glUniform1i(PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram.sUniformTexture1Location, 1);
+		GLES20.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
+		GLES20.glUniform1i(mUniformTexture0Location, 0);
+		GLES20.glUniform1i(mUniformTexture1Location, 1);
 	}
 
 	@Override

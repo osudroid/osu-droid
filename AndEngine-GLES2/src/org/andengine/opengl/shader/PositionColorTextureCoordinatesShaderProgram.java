@@ -46,8 +46,11 @@ public class PositionColorTextureCoordinatesShaderProgram extends ShaderProgram 
 	// Fields
 	// ===========================================================
 
-	public static int sUniformModelViewPositionMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
-	public static int sUniformTexture0Location = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+	private int mUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;
+
+	public int getUniformMVPMatrixLocation()  { return mUniformMVPMatrixLocation; }
+	public int getUniformTexture0Location()   { return mUniformTexture0Location; }
 
 	// ===========================================================
 	// Constructors
@@ -80,16 +83,23 @@ public class PositionColorTextureCoordinatesShaderProgram extends ShaderProgram 
 
 		super.link(pGLState);
 
-		PositionColorTextureCoordinatesShaderProgram.sUniformModelViewPositionMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
-		PositionColorTextureCoordinatesShaderProgram.sUniformTexture0Location = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
+		mUniformMVPMatrixLocation = this.getUniformLocation(ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX);
+		mUniformTexture0Location  = this.getUniformLocation(ShaderProgramConstants.UNIFORM_TEXTURE_0);
+	}
+
+	@Override
+	public void resetForContextLoss() {
+		super.resetForContextLoss();
+		mUniformMVPMatrixLocation = ShaderProgramConstants.LOCATION_INVALID;
+		mUniformTexture0Location  = ShaderProgramConstants.LOCATION_INVALID;
 	}
 
 	@Override
 	public void bind(final GLState pGLState, final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
-		GLES20.glUniformMatrix4fv(PositionColorTextureCoordinatesShaderProgram.sUniformModelViewPositionMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
-		GLES20.glUniform1i(PositionColorTextureCoordinatesShaderProgram.sUniformTexture0Location, 0);
+		GLES20.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
+		GLES20.glUniform1i(mUniformTexture0Location, 0);
 	}
 
 	// ===========================================================
