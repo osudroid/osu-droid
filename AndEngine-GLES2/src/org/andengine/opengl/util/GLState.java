@@ -493,7 +493,10 @@ public class GLState {
 	 */
 	public void activeTexture(final int pGLActiveTexture) {
 		final int activeTextureIndex = pGLActiveTexture - GLES20.GL_TEXTURE0;
-		if(pGLActiveTexture != this.mCurrentActiveTextureIndex) {
+		// osu!droid fix: compare the 0-based index against mCurrentActiveTextureIndex, not the raw
+		// GL enum. The old code compared e.g. GL_TEXTURE0 (33984) against index 0 — always unequal,
+		// so glActiveTexture was called on every invocation and the cache was never used.
+		if(activeTextureIndex != this.mCurrentActiveTextureIndex) {
 			this.mCurrentActiveTextureIndex = activeTextureIndex;
 			GLES20.glActiveTexture(pGLActiveTexture);
 		}
