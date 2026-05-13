@@ -707,9 +707,11 @@ public class MainActivity extends BaseGameActivity implements
         // Reset the TriangleRenderer VBO so it is re-created against the new context.
         com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss();
         // Reset the storyboard quad-batch shader so it recompiles against the new context.
+        // Note: this is necessary because StoryboardBatchShader does not extend ShaderProgram
+        // and is therefore not covered by ShaderProgram.resetAllForContextLoss() in EngineRenderer.
         com.edlplan.framework.support.batch.StoryboardBatchShader.getInstance().resetForContextLoss();
-        // Reset the video OES shader so it recompiles against the new context.
-        com.acivev.andengine.opengl.ExternalOESShaderProgram.getInstance().resetForContextLoss();
+        // Note: ExternalOESShaderProgram extends ShaderProgram and is reset by
+        // ShaderProgram.resetAllForContextLoss() called in EngineRenderer.onSurfaceCreated.
         super.onSurfaceCreated(pGLState);
     }
 
