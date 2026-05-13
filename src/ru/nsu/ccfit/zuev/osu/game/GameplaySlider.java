@@ -569,28 +569,48 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
+        float endTime = hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000);
+
         if (Config.isAnimateFollowCircle() && isInRadius) {
             isFollowCircleAnimating = true;
-
             followCircle.clearEntityModifiers();
-            followCircle.scaleTo(followCircle.getScaleX() * 0.8f, 0.2f, Easing.Out);
 
-            extendLifetime(followCircle.fadeOut(0.2f).after(e -> {
-                Execution.updateThread(e::detachSelf);
-                isFollowCircleAnimating = false;
-            }));
+            followCircle.beginAbsoluteSequence(endTime, sequence -> {
+                sequence.scaleTo(followCircle.getScaleX() * 0.8f, 0.2f, Easing.Out)
+                        .fadeOut(0.2f)
+                        .after(e -> {
+                            Execution.updateThread(e::detachSelf);
+                            isFollowCircleAnimating = false;
+                        });
+
+                extendLifetime(sequence);
+
+                return Unit.INSTANCE;
+            });
         }
 
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
         } else {
-            // Short fade for snaking out sliders to allow for any body color to smoothly disappear.
-            float fadeOutDuration = headWasHit && shouldSnakeOut ? 0.04f : 0.24f;
+            sliderBody.beginAbsoluteSequence(endTime, sequence -> {
+                // Short fade for snaking out sliders to allow for any body color to smoothly disappear.
+                sequence.fadeOut(headWasHit && shouldSnakeOut ? 0.04f : 0.24f)
+                        .after(e -> Execution.updateThread(e::detachSelf));
 
-            extendLifetime(sliderBody.fadeOut(fadeOutDuration).after(e -> Execution.updateThread(e::detachSelf)));
+                extendLifetime(sequence);
+
+                return Unit.INSTANCE;
+            });
         }
 
-        extendLifetime(ball.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf)));
+        ball.beginAbsoluteSequence(endTime, sequence -> {
+            sequence.fadeOut(0.2f)
+                    .after(e -> Execution.updateThread(e::detachSelf));
+
+            extendLifetime(sequence);
+
+            return Unit.INSTANCE;
+        });
 
         if (!isHeadCircleAnimating) {
             // When animating, the head circle will detach after the animation ends.
