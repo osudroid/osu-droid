@@ -159,12 +159,11 @@ class UniversalModifierTargetTracker(
      * Removes all [UniversalModifier]s from this [UniversalModifierTargetTracker].
      */
     fun clear() {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            modifier.release()
-            _modifiers.removeAt(i)
+        for (i in modifiers.indices) {
+            modifiers[i].release()
         }
+
+        _modifiers.clear()
     }
 
     /**

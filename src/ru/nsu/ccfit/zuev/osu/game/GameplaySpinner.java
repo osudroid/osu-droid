@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.andengine.UIScene;
+import com.reco1l.andengine.sprite.ScaleType;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo;
@@ -30,6 +31,7 @@ public class GameplaySpinner extends GameObject {
     private final UISprite circle;
     private final UISprite approachCircle;
     private final UISprite metre;
+    private final int metreRegionOriginalHeight;
     private float metreY;
     private final UISprite spinText;
     private final TextureRegion metreRegion;
@@ -73,11 +75,13 @@ public class GameplaySpinner extends GameObject {
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
+        metreRegionOriginalHeight = metreRegion.getHeight();
 
         metre = new UISprite();
-        metre.setPosition(position.x - Config.getRES_WIDTH() / 2f, position.y);
+        metre.setScaleType(ScaleType.Stretch);
+        metre.setPosition(background.getX() - background.getWidthScaled() / 2f, position.y);
         metre.setTextureRegion(metreRegion);
-        metre.setWidth(Config.getRES_WIDTH());
+        metre.setWidth(background.getWidthScaled());
         metre.setHeight(background.getHeightScaled());
 
         approachCircle = new UISprite();
@@ -134,9 +138,10 @@ public class GameplaySpinner extends GameObject {
         background.setVisible(!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        metreRegion.setTexturePosition(0, metreRegion.getHeight());
-        metre.requestBufferUpdate();
-
+        metreRegion.setHeight(0);
+        metreRegion.setTexturePosition(0, metreRegionOriginalHeight);
+        metre.setHeight(0);
+        
         scene.attachChild(spinText, 0);
 
         if (!GameHelper.isHidden()) {
@@ -176,8 +181,8 @@ public class GameplaySpinner extends GameObject {
             return Unit.INSTANCE;
         });
 
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
-        metre.setY(metreY + metre.getHeight());
+        metreY = background.getY() - background.getHeightScaled() / 2f;
+        metre.setY(background.getY() + background.getHeightScaled() / 2f);
 
         metre.setAlpha(0);
         metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
@@ -272,7 +277,7 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        passedTime += dt;
+        passedTime = listener.getElapsedTime() - hitTime;
 
         // Allow the spinner to fully fade in first before receiving spins.
         if (passedTime < 0) {
@@ -384,11 +389,13 @@ public class GameplaySpinner extends GameObject {
             }
         }
 
-        float fillOffset = 1 - Math.abs(percentfill);
-        metre.setPosition(metre.getX(),
-                metreY + metre.getHeight() * fillOffset);
-        metreRegion.setTexturePosition(0,
-                (int) (metreRegion.getHeight() * fillOffset));
+        float fillOffset = 1 - Math.min(1, Math.abs(percentfill));
+
+        metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
+        metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
+
+        metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
+        metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
         metre.requestBufferUpdate();
 
         oldMouse.set(currMouse);
@@ -400,9 +407,6 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void onExpire() {
-        super.onExpire();
-
-        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 

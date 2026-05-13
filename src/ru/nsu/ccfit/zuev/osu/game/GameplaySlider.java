@@ -622,31 +622,6 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void onExpire() {
-        if (scene != null) {
-            if (!startHit) {
-                double mehWindow = hitWindow.getMehWindow() / 1000;
-                listener.registerAccuracy(HitObjectType.Slider, mehWindow + 1);
-                listener.onSliderHit(id, 10, position, false, bodyColor, GameObjectListener.SLIDER_END, false);
-            }
-
-            stopSlidingSamples();
-
-            for (int i = 0, iSize = nestedHitSamples.size(); i < iSize; ++i) {
-                var hitSamples = nestedHitSamples.get(i);
-
-                for (int j = hitSamples.size() - 1; j >= 0; --j) {
-                    var sample = hitSamples.get(j);
-
-                    sample.reset();
-                    GameplayHitSampleInfo.pool.free(sample);
-
-                    hitSamples.remove(j);
-                }
-            }
-
-            scene = null;
-        }
-
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
         startArrow.clearEntityModifiers();
@@ -926,7 +901,7 @@ public class GameplaySlider extends GameObject {
         if (scene == null) {
             return;
         }
-        elapsedSpanTime += dt;
+        elapsedSpanTime = listener.getElapsedTime() - hitTime - completedSpanCount * spanDuration;
 
         double elapsedTime = completedSpanCount * spanDuration + elapsedSpanTime;
 

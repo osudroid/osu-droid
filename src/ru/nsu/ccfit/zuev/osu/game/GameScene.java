@@ -77,7 +77,6 @@ import com.osudroid.difficulty.calculator.StandardPerformanceCalculationParamete
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.math.Interpolation;
 import com.osudroid.mods.*;
-import com.osudroid.ui.FPSCounter;
 import com.osudroid.utils.ModHashMap;
 import com.osudroid.utils.ModUtils;
 
@@ -1285,12 +1284,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         stat.setPlayerName(playname);
 
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            hud.attachChild(new FPSCounter(counterTextFont));
-        }
-
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
 
         if (Multiplayer.isMultiplayer) {
@@ -1842,6 +1835,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (startedFromHUDEditor && isHUDEditorMode) {
                 beatmapClock.seek(initialStartTime);
                 loadGame(lastBeatmapInfo, null, lastMods, null);
+                applyBackground();
                 stat.reset();
                 skip(true);
                 return;
@@ -3183,6 +3177,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     /**
      * The current elapsed time relative to the start of the {@link Beatmap}, in seconds.
      */
+    @Override
     public float getElapsedTime() {
         return beatmapClock.getCurrentTime();
     }

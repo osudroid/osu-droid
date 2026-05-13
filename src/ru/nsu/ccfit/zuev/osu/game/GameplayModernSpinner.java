@@ -144,7 +144,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
     @Override
     public void update(final float dt) {
-        passedTime += dt;
+        passedTime = listener.getElapsedTime() - hitTime;
 
         // Allow the spinner to fully fade in first before receiving spins.
         if (passedTime < 0) {
@@ -313,15 +313,11 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         int score = 0;
         if (replayObjectData != null) {
-            if (fullRotations < replayObjectData.accuracy / 4)
-                fullRotations = replayObjectData.accuracy / 4;
-            if (fullRotations >= needRotations)
-                clear = true;
-            int bonusRot = (int) (replayObjectData.accuracy / 4f - needRotations + 1);
-            while (bonusRot < score) {
-                bonusRot++;
+            while (fullRotations + bonusScoreCounter < replayObjectData.accuracy / 4 + 1) {
+                fullRotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
+            clear = fullRotations >= needRotations;
         }
         float percentFilled = (Math.abs(rotations) + fullRotations)
                 / needRotations;

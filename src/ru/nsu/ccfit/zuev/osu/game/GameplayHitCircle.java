@@ -217,6 +217,8 @@ public class GameplayHitCircle extends GameObject {
             return;
         }
 
+        passedTime = listener.getElapsedTime() - hitTime;
+
         double mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
 
         // If we have clicked circle
@@ -265,8 +267,6 @@ public class GameplayHitCircle extends GameObject {
             }
         }
 
-        passedTime += dt;
-
         // We are still at approach time. Let entity modifiers finish first.
         if (passedTime < 0) {
             return;
@@ -298,28 +298,6 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void onExpire() {
-        super.onExpire();
-
-        if (scene != null) {
-            if (!startHit) {
-                startHit = true;
-                double mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
-                listener.registerAccuracy(HitObjectType.Normal, mehWindow + 1);
-                listener.onCircleHit(id, 10, position, false, (replayObjectData == null) ? 0 : replayObjectData.result, comboColor);
-            }
-
-            for (int i = hitSamples.size() - 1; i >= 0; --i) {
-                var sample = hitSamples.get(i);
-
-                sample.reset();
-                GameplayHitSampleInfo.pool.free(sample);
-
-                hitSamples.remove(i);
-            }
-
-            scene = null;
-        }
-
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
 

@@ -42,4 +42,9 @@ public interface GameObjectListener {
     void onUpdatedAutoCursor(float pX, float pY);
 
     void playHitSamples(List<GameplayHitSampleInfo> samples);
+
+    /**
+     * The current elapsed time relative to the start of the beatmap, in seconds.
+     */
+    float getElapsedTime();
 }
