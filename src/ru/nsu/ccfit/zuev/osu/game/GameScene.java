@@ -77,7 +77,6 @@ import com.osudroid.difficulty.calculator.StandardPerformanceCalculationParamete
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.math.Interpolation;
 import com.osudroid.mods.*;
-import com.osudroid.ui.FPSCounter;
 import com.osudroid.utils.ModHashMap;
 import com.osudroid.utils.ModUtils;
 
@@ -1279,12 +1278,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = Multiplayer.player.getTeam().toString();
         }
         stat.setPlayerName(playname);
-
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            hud.attachChild(new FPSCounter(counterTextFont));
-        }
 
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
 

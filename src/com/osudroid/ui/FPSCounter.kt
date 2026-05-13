@@ -2,32 +2,25 @@ package com.osudroid.ui
 
 import com.reco1l.framework.Color4
 import com.osudroid.math.Interpolation
+import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.UIEngine
+import com.reco1l.andengine.shape.UIBox
+import com.reco1l.andengine.text.UIText
+import com.reco1l.framework.math.Vec4
 import java.util.Formatter
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
  * Represents an FPS counter.
- *
- * All time units are in seconds.
- *
- * @param font The [Font] that will be used to display the current frame rate.
  */
-class FPSCounter(font: Font) : ChangeableText(
-    0f,
-    0f,
-    font,
-    "",
-    24
-) {
-    private val drawClock = UIEngine.current.drawClock
-    private val updateClock = UIEngine.current.updateClock
+class FPSCounter : UIText() {
+    private val updateClock
+        get() = UIEngine.current.clock
 
     //region Counting logic
 
@@ -43,8 +36,7 @@ class FPSCounter(font: Font) : ChangeableText(
     var displayedFrameTime = 0f
         private set
 
-    private var aimDrawFPS = 0f
-    private var aimUpdateFPS = 0f
+    private var aimFPS = 0f
 
     private val spikeTime = 0.02f
     private val dampTime = 0.1f
@@ -66,10 +58,35 @@ class FPSCounter(font: Font) : ChangeableText(
     private val middleTextColor = Color4(0xebc247)
     private val maximumTextColor = Color4(0xccff99)
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-        super.onManagedUpdate(pSecondsElapsed)
+    init {
+        font = ResourceManager.getInstance().getFont("smallFont")
+        padding = Vec4(6f, 4f)
+        anchor = Anchor.BottomRight
+        origin = Anchor.BottomRight
+        alignment = Anchor.Center
 
-        val elapsedDrawFrameTime = drawClock.elapsedFrameTime
+        background = UIBox().apply {
+            cornerRadius = 8f
+            applyTheme = {
+                color = it.accentColor * 0.1f
+                alpha = 0.8f
+            }
+        }
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        try {
+            isVisible = Config.isShowFPS()
+
+            if (isVisible) {
+                updateFPS()
+            }
+        } finally {
+            super.onManagedUpdate(deltaTimeSec)
+        }
+    }
+
+    private fun updateFPS() {
         val elapsedUpdateFrameTime = updateClock.elapsedFrameTime
 
         // If the game goes into a suspended state (i.e., debugger attached), we want to ignore really long periods of
@@ -81,10 +98,7 @@ class FPSCounter(font: Font) : ChangeableText(
         // Handle the case where the window has become inactive (we want to show the FPS as it is changing, even if it
         // is not an outlier).
         val aimRatesChanged = updateAimFPS()
-
         val hasUpdateSpike = displayedFrameTime < spikeTime && elapsedUpdateFrameTime > spikeTime
-        // Use elapsed frame time rather than framesPerSecond to better catch stutter frames.
-        val hasDrawSpike = displayedFpsCount > 1f / spikeTime && elapsedDrawFrameTime > spikeTime
 
         displayedFrameTime = Interpolation.dampContinuously(
             displayedFrameTime,
@@ -93,25 +107,21 @@ class FPSCounter(font: Font) : ChangeableText(
             elapsedUpdateFrameTime
         )
 
-        displayedFpsCount = if (hasDrawSpike) {
+        displayedFpsCount = if (hasUpdateSpike) {
             // Show spike time using raw elapsed value, to account for `framesPerSecond` being so averaged spike frames
             // do not show.
-            1f / elapsedDrawFrameTime
+            1f / elapsedUpdateFrameTime
         } else {
             Interpolation.dampContinuously(
                 displayedFpsCount,
-                drawClock.framesPerSecond,
+                updateClock.framesPerSecond,
                 dampTime,
                 updateClock.timeInfo.elapsed
             )
         }
 
-        val hasSignificantChanges = aimRatesChanged ||
-                hasDrawSpike ||
-                hasUpdateSpike ||
-                // Force update if we are below the target by a certain threshold.
-                displayedFpsCount < aimDrawFPS * 0.6f ||
-                1 / displayedFrameTime < aimUpdateFPS * 0.6f
+        // Force update if we are below the target by a certain threshold.
+        val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || displayedFpsCount < aimFPS * 0.6f
 
         timeSinceLastUpdate += updateClock.timeInfo.elapsed
 
@@ -148,21 +158,19 @@ class FPSCounter(font: Font) : ChangeableText(
         text = stringBuilder.toString()
 
         updateColor()
-        setPosition(Config.getRES_WIDTH() - widthScaled - 5, Config.getRES_HEIGHT() - heightScaled - 10)
     }
 
     private fun updateAimFPS(): Boolean {
-        val newAimDrawFPS = getGlobal().mainActivity.refreshRate
+        val refreshRate = getGlobal().mainActivity.refreshRate
 
-        val newAimUpdateFPS = if (updateClock.throttling && updateClock.maximumUpdateHz > 0) {
-            min(updateClock.maximumUpdateHz, newAimDrawFPS)
+        val newAimFPS = if (updateClock.throttling && updateClock.maximumUpdateHz > 0) {
+            min(updateClock.maximumUpdateHz, refreshRate)
         } else {
-            newAimDrawFPS
+            refreshRate
         }
 
-        if (aimDrawFPS != newAimDrawFPS || aimUpdateFPS != newAimUpdateFPS) {
-            aimDrawFPS = newAimDrawFPS
-            aimUpdateFPS = newAimUpdateFPS
+        if (aimFPS != newAimFPS) {
+            aimFPS = newAimFPS
             return true
         }
 
@@ -170,7 +178,7 @@ class FPSCounter(font: Font) : ChangeableText(
     }
 
     private fun updateColor() {
-        val performanceRatio = displayedFpsCount / aimDrawFPS
+        val performanceRatio = displayedFpsCount / aimFPS
         val red: Float
         val green: Float
         val blue: Float
