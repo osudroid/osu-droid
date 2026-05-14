@@ -64,7 +64,7 @@ public class FlashLightEntity extends UIComponent {
     }
 
     private float getInterpolatedPosition(float deltaTime, float current, float next) {
-        return Interpolation.floatAt(Math.min(deltaTime, followDelay), current, next, 0, followDelay, Easing.OutExpo);
+        return Interpolation.floatAt(Math.min(deltaTime, followDelay), current, next, 0, followDelay, Easing.Out);
     }
 }
 
