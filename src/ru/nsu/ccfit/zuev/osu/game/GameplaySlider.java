@@ -603,14 +603,19 @@ public class GameplaySlider extends GameObject {
             });
         }
 
-        ball.beginAbsoluteSequence(endTime, sequence -> {
-            sequence.fadeOut(0.2f)
-                    .after(e -> Execution.updateThread(e::detachSelf));
+        if (shouldSnakeOut) {
+            ball.detachSelf();
+        } else {
+            ball.beginAbsoluteSequence(endTime, sequence -> {
+                sequence.fadeOut(0.2f)
+                        .after(e -> Execution.updateThread(e::detachSelf));
 
-            extendLifetime(sequence);
+                extendLifetime(sequence);
 
-            return Unit.INSTANCE;
-        });
+                return Unit.INSTANCE;
+            });
+        }
+
 
         if (!isHeadCircleAnimating) {
             // When animating, the head circle will detach after the animation ends.
