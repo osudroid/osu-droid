@@ -63,7 +63,7 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         float movePositionY = object.getPosition().y;
         float deltaT = object.getHitTime() - secPassed;
 
-        if (object instanceof GameplaySpinner spinner) {
+        if (object instanceof GameplaySpinner) {
             movePositionY += 50;
         }
 
