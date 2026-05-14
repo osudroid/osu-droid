@@ -155,6 +155,11 @@ public class GameplayModernSpinner extends GameplaySpinner {
             startHit = true;
         }
 
+        if (passedTime >= duration) {
+            removeFromScene();
+            return;
+        }
+
         updateSamples(dt);
         PointF mouse = null;
 
@@ -281,10 +286,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
         }
 
         oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     public void removeFromScene() {

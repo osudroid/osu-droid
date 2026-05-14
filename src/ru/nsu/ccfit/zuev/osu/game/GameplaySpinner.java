@@ -289,6 +289,11 @@ public class GameplaySpinner extends GameObject {
             startHit = true;
         }
 
+        if (passedTime >= duration) {
+            removeFromScene();
+            return;
+        }
+
         updateSamples(dt);
         PointF mouse = null;
 
@@ -399,14 +404,11 @@ public class GameplaySpinner extends GameObject {
         metre.requestBufferUpdate();
 
         oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     @Override
     public void onExpire() {
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
