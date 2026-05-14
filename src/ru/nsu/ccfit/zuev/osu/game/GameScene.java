@@ -739,6 +739,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             expiredObjects = new ArrayList<>(estimatedMaxActiveObjects);
         }
 
+        clearPendingJudgements();
+
         float firstObjectTimePreempt = (float) firstObject.timePreempt / 1000;
         float skipTargetTime = firstObjectStartTime - Math.max(2f, firstObjectTimePreempt);
 
@@ -2074,6 +2076,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    private void clearPendingJudgements() {
+        for (int i = 0, size = pendingJudgements.size(); i < size; ++i) {
+            pendingJudgements.get(i).release();
+        }
+
+        pendingJudgements.clear();
+    }
+
     public void skip() {
         skip(false);
     }
@@ -2113,6 +2123,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             stopLoopingSamples();
+            clearPendingJudgements();
             if (activeObjects != null) {
                 activeObjects.clear();
             }
