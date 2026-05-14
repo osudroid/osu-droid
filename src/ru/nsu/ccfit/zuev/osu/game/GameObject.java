@@ -5,9 +5,12 @@ import android.graphics.PointF;
 import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.FMath;
-import com.osudroid.game.CursorEvent;
 import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.hitobjects.HitObject;
+import com.osudroid.beatmaps.hitobjects.Slider;
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderHead;
+import com.osudroid.game.CursorEvent;
+import com.osudroid.game.Judgement;
 import com.rian.andengine.modifier.UniversalModifier;
 import com.rian.andengine.modifier.UniversalModifierSequence;
 
@@ -223,6 +226,19 @@ public abstract class GameObject {
      */
     public boolean isJudged() {
         return false;
+    }
+
+    /**
+     * Whether this {@link GameObject} has fully concluded, independent of any slider lock setting.
+     * <p>
+     * Unlike {@link #isJudged()}, which can return {@code true} early (e.g. as soon as a {@link SliderHead} is hit in
+     * remove slider lock mode), this returns {@code true} only when the {@link Slider}'s result is final and
+     * irreversible.
+     * <p>
+     * Used to determine whether deferred {@link Judgement}s of later {@link HitObject}s can be flushed.
+     */
+    public boolean isCompleted() {
+        return isJudged();
     }
 
     /**
