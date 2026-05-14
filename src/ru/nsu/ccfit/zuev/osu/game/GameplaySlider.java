@@ -589,19 +589,6 @@ public class GameplaySlider extends GameObject {
             });
         }
 
-        if (shouldSnakeOut) {
-            ball.detachSelf();
-        } else {
-            ball.beginAbsoluteSequence(endTime, sequence -> {
-                sequence.fadeOut(0.2f)
-                        .after(e -> Execution.updateThread(e::detachSelf));
-
-                extendLifetime(sequence);
-
-                return Unit.INSTANCE;
-            });
-        }
-
         if (!headCirclePiece.isAnimating()) {
             // When animating, the head circle will detach after the animation ends.
             headCirclePiece.detachSelf();
@@ -996,6 +983,7 @@ public class GameplaySlider extends GameObject {
             ball.setFrameTime(1f / ((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
+            ball.setAlpha(1);
 
             followCircle.setAlpha(0);
             if (!Config.isAnimateFollowCircle()) {
@@ -1005,7 +993,11 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
-            ball.fadeInFromZero(0.1f);
+            ball.beginAbsoluteSequence((float) beatmapSlider.getEndTime() / 1000, sequence -> {
+                sequence.fadeOut().after(e -> Execution.updateThread(e::detachSelf));
+
+                return Unit.INSTANCE;
+            });
         }
 
         approachCircle.clearEntityModifiers();
