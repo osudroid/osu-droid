@@ -557,14 +557,16 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        float endTime = hitTime + (float) Math.max(duration, hitWindow.getMehWindow() / 1000);
+        float modifierStartTime = hitTime +
+                (float) Math.max(duration, (headWasHit ? firstHitAccuracy : hitWindow.getMehWindow()) / 1000.0);
+
+        setLifetimeEnd(modifierStartTime);
 
         if (Config.isAnimateFollowCircle()) {
-            float scale = beatmapSlider.getScreenSpaceGameplayScale();
             followCircle.clearEntityModifiers();
 
-            followCircle.beginAbsoluteSequence(endTime, sequence -> {
-                sequence.scaleTo(scale * 0.8f, 0.2f, Easing.Out)
+            followCircle.beginAbsoluteSequence(modifierStartTime, sequence -> {
+                sequence.scaleTo(beatmapSlider.getScreenSpaceGameplayScale() * 0.8f, 0.2f, Easing.Out)
                         .fadeOut(0.2f, Easing.In);
 
                 extendLifetime(sequence);
@@ -578,7 +580,7 @@ public class GameplaySlider extends GameObject {
         if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
         } else {
-            sliderBody.beginAbsoluteSequence(endTime, sequence -> {
+            sliderBody.beginAbsoluteSequence(modifierStartTime, sequence -> {
                 // Short fade for snaking out sliders to allow for any body color to smoothly disappear.
                 sequence.fadeOut(headWasHit && shouldSnakeOut ? 0.04f : 0.24f)
                         .after(e -> Execution.updateThread(e::detachSelf));
