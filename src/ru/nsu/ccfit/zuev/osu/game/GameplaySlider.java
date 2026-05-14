@@ -147,11 +147,6 @@ public class GameplaySlider extends GameObject {
     private boolean isFollowCircleAnimating;
 
     /**
-     * Whether the head circle is being animated.
-     */
-    private boolean isHeadCircleAnimating;
-
-    /**
      * Whether the cursor is in the slider's radius.
      */
     private boolean isInRadius;
@@ -225,7 +220,6 @@ public class GameplaySlider extends GameObject {
 
         isOver = false;
         isFollowCircleAnimating = false;
-        isHeadCircleAnimating = false;
         isInRadius = false;
 
         reverse = false;
@@ -616,8 +610,7 @@ public class GameplaySlider extends GameObject {
             });
         }
 
-
-        if (!isHeadCircleAnimating) {
+        if (!headCirclePiece.isAnimating()) {
             // When animating, the head circle will detach after the animation ends.
             headCirclePiece.detachSelf();
         }
@@ -1240,12 +1233,7 @@ public class GameplaySlider extends GameObject {
                 headCirclePiece.detachSelf();
             } else {
                 // Slider head is hit too early - slowly fade it.
-                isHeadCircleAnimating = true;
-
-                extendLifetime(headCirclePiece.fadeOut(0.1f).after(e -> {
-                    isHeadCircleAnimating = false;
-                    Execution.updateThread(e::detachSelf);
-                }));
+                extendLifetime(headCirclePiece.fadeOut(0.1f).after(e -> Execution.updateThread(e::detachSelf)));
             }
         }
     }
