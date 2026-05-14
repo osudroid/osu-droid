@@ -31,6 +31,7 @@ public class GameplayHitCircle extends GameObject {
     private HitCircle beatmapCircle;
     private float passedTime;
     private float timePreempt;
+    private float hitOffset;
     private boolean kiai;
     private boolean successfulHit;
     private final ArrayList<GameplayHitSampleInfo> hitSamples = new ArrayList<>(5);
@@ -62,6 +63,9 @@ public class GameplayHitCircle extends GameObject {
         scene = pScene;
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
+        float mehWindow = (float) beatmapCircle.hitWindow.getMehWindow() / 1000;
+        hitOffset = mehWindow;
+
         hitTime = (float) beatmapCircle.startTime / 1000;
         passedTime = -timePreempt;
         startHit = false;
@@ -69,7 +73,6 @@ public class GameplayHitCircle extends GameObject {
         kiai = GameHelper.isKiai();
         this.comboColor = comboColor;
 
-        float mehWindow = (float) beatmapCircle.hitWindow.getMehWindow() / 1000;
         float initialModifierTime = hitTime - timePreempt;
         float scale = beatmapCircle.getScreenSpaceGameplayScale();
         float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
@@ -170,13 +173,15 @@ public class GameplayHitCircle extends GameObject {
             hitSamples.add(gameplaySample);
         }
 
-        setLifetimeEnd(hitTime + mehWindow);
+        setLifetimeEnd(Float.MAX_VALUE);
     }
 
     private void removeFromScene() {
         if (scene == null) {
             return;
         }
+
+        setLifetimeEnd(hitTime + hitOffset);
 
         for (int i = hitSamples.size() - 1; i >= 0; --i) {
             var sample = hitSamples.get(i);
@@ -222,11 +227,12 @@ public class GameplayHitCircle extends GameObject {
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
-                listener.registerAccuracy(HitObjectType.Normal, replayObjectData.accuracy / 1000f);
+                hitOffset = replayObjectData.accuracy / 1000f;
+                listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
-                successfulHit = Math.abs(replayObjectData.accuracy / 1000f) <= mehWindow;
+                successfulHit = Math.abs(hitOffset) <= mehWindow;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
+                listener.onCircleHit(id, hitOffset, position, endsCombo, replayObjectData.result, comboColor);
                 if (successfulHit) {
                     playHitSamples();
                 }
@@ -237,12 +243,12 @@ public class GameplayHitCircle extends GameObject {
             var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime);
 
             if (hittingCursor != null) {
-                double hitOffset = (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
+                hitOffset = (float) (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
                 listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, (float) hitOffset, position, endsCombo, (byte) 0, comboColor);
+                listener.onCircleHit(id, hitOffset, position, endsCombo, (byte) 0, comboColor);
                 if (successfulHit) {
                     playHitSamples();
                 }
@@ -272,6 +278,7 @@ public class GameplayHitCircle extends GameObject {
 
         if (autoPlay) {
             // Remove circle and register hit in update thread
+            hitOffset = 0;
             listener.registerAccuracy(HitObjectType.Normal, 0);
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             startHit = true;

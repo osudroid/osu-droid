@@ -128,7 +128,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             fadeIn(middle2);
         }
 
-        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+        setLifetimeEnd(Float.MAX_VALUE);
     }
 
     private void fadeIn(UISprite sprite) {
@@ -292,6 +292,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
         if (scene == null) {
             return;
         }
+
+        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
 
         middle.clearEntityModifiers();
         scene.detachChild(middle);
