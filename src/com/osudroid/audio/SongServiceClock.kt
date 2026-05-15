@@ -15,10 +15,10 @@ class SongServiceClock(private val songService: SongService) : IAdjustableClock 
     override val currentTime
         get() = (songService.getPositionPrecise() / 1000.0).toFloat()
 
-    override var rate = 1f
+    override var rate
+        get() = songService.speed
         set(value) {
-            field = value
-            songService.setSpeed(value)
+            songService.speed = value
         }
 
     override val isRunning
