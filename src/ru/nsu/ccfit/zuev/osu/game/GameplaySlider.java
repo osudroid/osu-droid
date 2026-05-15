@@ -411,6 +411,7 @@ public class GameplaySlider extends GameObject {
         sliderBody.setBackgroundWidth(sliderBodyWidth);
         sliderBody.setBorderWidth(sliderBorderWidth);
         sliderBody.setBorderColor(borderColor);
+        sliderBody.setAlpha(0);
 
         // Head circle not being visible means Traceable is applied to this slider
         if (GameHelper.isTraceable() && !headCirclePiece.isVisible()) {
@@ -446,7 +447,7 @@ public class GameplaySlider extends GameObject {
         }
 
         sliderBody.beginAbsoluteSequence(initialModifierTime, sequence -> {
-            sequence.fadeIn(fadeInDuration);
+            sequence.fadeInFromZero(fadeInDuration);
 
             if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
                 // New duration from completed fade in to end (before fading out)
