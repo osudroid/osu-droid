@@ -165,7 +165,7 @@ public class GameplayHitCircle extends GameObject {
         hitSamples.ensureCapacity(parsedSamples.size());
 
         for (int i = 0, size = parsedSamples.size(); i < size; i++) {
-            var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+            var gameplaySample = GameplayHitSampleInfo.obtain();
             gameplaySample.init(parsedSamples.get(i));
 
             if (GameHelper.isSamplesMatchPlaybackRate()) {
@@ -186,14 +186,10 @@ public class GameplayHitCircle extends GameObject {
         setLifetimeEnd(hitTime + hitOffset);
 
         for (int i = hitSamples.size() - 1; i >= 0; --i) {
-            var sample = hitSamples.get(i);
-
-            sample.reset();
-            GameplayHitSampleInfo.pool.free(sample);
-
-            hitSamples.remove(i);
+            hitSamples.get(i).release();
         }
 
+        hitSamples.clear();
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
         approachCircle.detachSelf();

@@ -186,6 +186,13 @@ public class SongService extends Service {
         }
     }
 
+    public float getSpeed() {
+        if (audioFunc != null) {
+            return audioFunc.getSpeed();
+        }
+        return 0;
+    }
+
     public void setSpeed(float speed) {
         if (audioFunc != null) {
             audioFunc.setSpeed(speed);

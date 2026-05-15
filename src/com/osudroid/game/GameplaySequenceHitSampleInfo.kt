@@ -58,7 +58,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         samples = Array(sampleInfo.samples.size) { i ->
             val sample = sampleInfo.samples[i]
 
-            val gameplaySampleInfo = GameplayHitSampleInfo.pool.obtain().also {
+            val gameplaySampleInfo = GameplayHitSampleInfo.obtain().also {
                 it.init(sample.second)
                 it.frequency = frequency
                 it.isLooping = isLooping
@@ -127,10 +127,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
             stopAll()
         }
 
-        samples?.fastForEach {
-            it.second.reset()
-            GameplayHitSampleInfo.pool.free(it.second)
-        }
+        samples?.fastForEach { it.second.release() }
 
         samples = null
         index = 0

@@ -1,8 +1,9 @@
 package com.osudroid.game
 
-import com.reco1l.framework.Pool
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.beatmaps.hitobjects.HitSampleInfo
+import com.osudroid.utils.IPoolable
+import com.osudroid.utils.SynchronizedPool
 import kotlin.math.max
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.skins.OsuSkin
@@ -11,7 +12,9 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * A wrapper for [HitSampleInfo]s to allow for additional gameplay-specific information to be stored.
  */
-class GameplayHitSampleInfo : IGameplayHitSampleInfo {
+class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
+    override var isRecycled = false
+
     override var frequency = 1f
         set(value) {
             field = value
@@ -80,13 +83,24 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
         soundProvider = null
     }
 
+    /**
+     * Releases this [GameplayHitSampleInfo] back to the pool.
+     */
+    fun release() {
+        reset()
+
+        pool.release(this)
+    }
+
     private fun getFinalVolume(volume: Float) = volume * max(0.05f, sampleInfo!!.volume / 100f)
 
     companion object {
+        private val pool = SynchronizedPool<GameplayHitSampleInfo>(25).apply { release(GameplayHitSampleInfo()) }
+
         /**
-         * A [Pool] of [GameplayHitSampleInfo]s.
+         * Obtains a [GameplayHitSampleInfo] from the pool or creates a new one if the pool is empty.
          */
-        @JvmField
-        val pool = Pool(25) { GameplayHitSampleInfo() }
+        @JvmStatic
+        fun obtain() = pool.acquire() ?: GameplayHitSampleInfo()
     }
 }

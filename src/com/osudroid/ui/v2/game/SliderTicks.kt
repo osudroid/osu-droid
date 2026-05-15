@@ -3,10 +3,11 @@ package com.osudroid.ui.v2.game
 import com.edlplan.framework.easing.Easing
 import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
+import com.osudroid.utils.IPoolable
+import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.framework.*
 import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
@@ -28,7 +29,7 @@ class SliderTickContainer : UIContainer() {
             val tick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
             val tickPosition = tick.screenSpaceGameplayStackedPosition
 
-            val sprite = SliderTickSprite.pool.obtain()
+            val sprite = SliderTickSprite.obtain()
 
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
@@ -72,7 +73,8 @@ class SliderTickContainer : UIContainer() {
 }
 
 
-class SliderTickSprite : UISprite() {
+class SliderTickSprite : UISprite(), IPoolable {
+    override var isRecycled = false
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
@@ -127,15 +129,18 @@ class SliderTickSprite : UISprite() {
     override fun onDetached() {
         super.onDetached()
         clearEntityModifiers()
-        pool.free(this)
+        pool.release(this)
     }
 
     companion object {
         private const val ANIM_DURATION = 0.15f
+        private val pool = SynchronizedPool<SliderTickSprite>(20).apply { release(SliderTickSprite()) }
 
+        /**
+         * Obtains a [SliderTickSprite] from the pool, or creates a new one if the pool is empty.
+         */
         @JvmStatic
-        val pool = Pool { SliderTickSprite() }
-
+        fun obtain() = pool.acquire() ?: SliderTickSprite()
     }
 
 }

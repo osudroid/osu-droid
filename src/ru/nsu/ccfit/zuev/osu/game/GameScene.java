@@ -47,7 +47,6 @@ import com.reco1l.andengine.UIScene;
 import com.osudroid.resources.R;
 import com.osudroid.ui.v2.game.FollowPointConnection;
 import com.osudroid.ui.v2.hud.GameplayHUD;
-import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDPPCounter;
 import com.osudroid.multiplayer.Multiplayer;
 
@@ -822,9 +821,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ensureActive(scope.getCoroutineContext());
         }
 
-        FollowPointConnection.getPool().renew(16);
-        SliderTickSprite.getPool().renew(16);
-
         // TODO replay
         offsetSum = 0;
         offsetRegs = 0;
@@ -1399,7 +1395,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         final float mSecPassed = beatmapClock.getCurrentTime() * 1000;
 
         if (!isGameOver) {
-            float currentSpeedMultiplier = getRateAt(mSecPassed);
+            float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
@@ -3483,9 +3479,5 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         return estimatedMaxActiveObjects;
-    }
-
-    private float getRateAt(double time) {
-        return ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, time);
     }
 }
