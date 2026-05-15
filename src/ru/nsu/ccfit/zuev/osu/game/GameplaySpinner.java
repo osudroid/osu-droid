@@ -202,7 +202,7 @@ public class GameplaySpinner extends GameObject {
 
         oldMouse = null;
 
-        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+        setLifetimeEnd(Float.MAX_VALUE);
     }
 
     void removeFromScene() {
@@ -229,6 +229,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        setLifetimeEnd(hitTime + duration);
         scene = null;
 
         int score = 0;
@@ -287,6 +288,11 @@ public class GameplaySpinner extends GameObject {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+        }
+
+        if (passedTime >= duration) {
+            removeFromScene();
+            return;
         }
 
         updateSamples(dt);
@@ -399,14 +405,11 @@ public class GameplaySpinner extends GameObject {
         metre.requestBufferUpdate();
 
         oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     @Override
     public void onExpire() {
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 

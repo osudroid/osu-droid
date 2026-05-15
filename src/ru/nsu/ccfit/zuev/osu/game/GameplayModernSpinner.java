@@ -129,7 +129,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             fadeIn(middle2);
         }
 
-        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+        setLifetimeEnd(Float.MAX_VALUE);
     }
 
     private void fadeIn(UISprite sprite) {
@@ -154,6 +154,11 @@ public class GameplayModernSpinner extends GameplaySpinner {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+        }
+
+        if (passedTime >= duration) {
+            removeFromScene();
+            return;
         }
 
         updateSamples(dt);
@@ -282,16 +287,14 @@ public class GameplayModernSpinner extends GameplaySpinner {
         }
 
         oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     public void removeFromScene() {
         if (scene == null) {
             return;
         }
+
+        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
 
         middle.clearEntityModifiers();
         scene.detachChild(middle);
