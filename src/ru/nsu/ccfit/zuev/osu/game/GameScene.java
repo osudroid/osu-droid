@@ -199,6 +199,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private SliderBody.RenderPathCache[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private UISprite unrankedSprite;
+    private final ArrayList<ModIcon> modIcons = new ArrayList<>();
     private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
 
     @Nullable
@@ -957,6 +958,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         failcount = 0;
         mainCursorId = -1;
         beatmapClock.changeSource(null);
+        modIcons.clear();
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
         final int requestId = loadingRequestId.incrementAndGet();
@@ -1158,7 +1160,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var position = new PointF(Config.getRES_WIDTH() - 130, 130);
-        float timeOffset = 0;
 
         for (var mod : lastMods.values()) {
             if (!mod.isUserPlayable()) {
@@ -1172,20 +1173,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             icon.setScale(1.2f);
 
             fgScene.attachChild(icon);
-
-            float finalTimeOffset = timeOffset;
-
-            icon.beginModifierSequence(sequence -> {
-                sequence.scaleTo(1, 0.25f)
-                        .delay(2 - finalTimeOffset)
-                        .fadeOut(0.5f)
-                        .scaleTo(1.5f, 0.5f);
-
-                return Unit.INSTANCE;
-            });
+            modIcons.add(icon);
 
             position.x -= 25f;
-            timeOffset += 0.25f;
         }
 
         boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
@@ -3285,6 +3275,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             {
                 setClock(beatmapClock);
+            }
+
+            @Override
+            protected void onLoadComplete() {
+                for (int i = 0, size = modIcons.size(); i < size; i++) {
+                    float finalTimeOffset = i * 0.25f;
+
+                    modIcons.get(i).beginModifierSequence(sequence -> {
+                        sequence.scaleTo(1, 0.25f)
+                                .delay(2 - finalTimeOffset)
+                                .fadeOut(0.5f)
+                                .scaleTo(1.5f, 0.5f);
+
+                        return Unit.INSTANCE;
+                    });
+                }
+
+                modIcons.clear();
             }
 
             @Override

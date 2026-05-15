@@ -412,6 +412,7 @@ public class GameplaySlider extends GameObject {
         sliderBody.setBackgroundWidth(sliderBodyWidth);
         sliderBody.setBorderWidth(sliderBorderWidth);
         sliderBody.setBorderColor(borderColor);
+        sliderBody.setAlpha(0);
 
         // Head circle not being visible means Traceable is applied to this slider
         if (GameHelper.isTraceable() && !headCirclePiece.isVisible()) {
@@ -446,7 +447,19 @@ public class GameplaySlider extends GameObject {
             applyDim(sliderBody);
         }
 
-        applyBodyFadeAdjustments(fadeInDuration);
+        sliderBody.beginAbsoluteSequence(initialModifierTime, sequence -> {
+            sequence.fadeInFromZero(fadeInDuration);
+
+            if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
+                // New duration from completed fade in to end (before fading out)
+                float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
+
+                sequence.then().fadeOut(fadeOutDuration, Easing.Out);
+            }
+
+            return Unit.INSTANCE;
+        });
+
         setLifetimeEnd(Float.MAX_VALUE);
     }
 
@@ -1274,21 +1287,6 @@ public class GameplaySlider extends GameObject {
 
             nestedObjectToJudge = nestedObjects.get(currentNestedObjectIndex);
         }
-    }
-
-    private void applyBodyFadeAdjustments(float fadeInDuration) {
-        sliderBody.beginAbsoluteSequence(hitTime - timePreempt, sequence -> {
-            sequence.fadeIn(fadeInDuration);
-
-            if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
-                // New duration from completed fade in to end (before fading out)
-                float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
-
-                sequence.then().fadeOut(fadeOutDuration, Easing.Out);
-            }
-
-            return Unit.INSTANCE;
-        });
     }
 
     private void reloadHitSounds() {
