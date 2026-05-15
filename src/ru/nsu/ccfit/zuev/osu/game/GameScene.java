@@ -1395,6 +1395,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
+                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
                 beatmapClock.setRate(currentSpeedMultiplier);
             }
         }
