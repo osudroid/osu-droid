@@ -817,9 +817,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ensureActive(scope.getCoroutineContext());
         }
 
-        FollowPointConnection.getPool().renew(16);
-        SliderTickSprite.getPool().renew(16);
-
         // TODO replay
         offsetSum = 0;
         offsetRegs = 0;

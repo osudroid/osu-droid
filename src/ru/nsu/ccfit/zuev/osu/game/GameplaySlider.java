@@ -618,13 +618,10 @@ public class GameplaySlider extends GameObject {
             var hitSamples = nestedHitSamples.get(i);
 
             for (int j = hitSamples.size() - 1; j >= 0; --j) {
-                var sample = hitSamples.get(j);
-
-                sample.reset();
-                GameplayHitSampleInfo.pool.free(sample);
-
-                hitSamples.remove(j);
+                hitSamples.get(j).release();
             }
+
+            hitSamples.clear();
         }
 
         path = null;
@@ -1306,7 +1303,7 @@ public class GameplaySlider extends GameObject {
             }
 
             for (int j = 0; j < nestedObjectSampleCount; ++j) {
-                var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+                var gameplaySample = GameplayHitSampleInfo.obtain();
                 gameplaySample.init(nestedObjectSamples.get(j));
 
                 if (GameHelper.isSamplesMatchPlaybackRate()) {
