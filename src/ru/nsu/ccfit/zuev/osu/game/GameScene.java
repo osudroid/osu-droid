@@ -2655,7 +2655,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.pause();
         }
 
-        Execution.updateThread(this::stopLoopingSamples);
+        stopLoopingSamples();
 
         if (!GameHelper.isAutoplay() && !GameHelper.isAutopilot() && !replaying) {
             removeAllCursors();
