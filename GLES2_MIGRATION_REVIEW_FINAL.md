@@ -1,8 +1,8 @@
 # AndEngine GLES1 → GLES2 Migration Review — Complete Record
 
 > **Project:** osu!droid
-> **Reviewed:** May 14, 2026 (fifteen review passes)
-> **Scope:** Full codebase review post-migration, covering all fifteen rounds of inspection and fixes
+> **Reviewed:** May 14–16, 2026 (sixteen review passes)
+> **Scope:** Full codebase review post-migration, covering all sixteen rounds of inspection and fixes
 
 > **⚠️ Commit message note:** Individual commit messages referenced issue numbers relative to
 > their own review round (e.g. "fix Issue 5" meant Round 2 Issue 5). The table below uses
@@ -31,19 +31,21 @@
 16. [Round 13 — Issue Details](#round-13--issue-details)
 17. [Round 14 — Issue Details](#round-14--issue-details)
 18. [Round 15 — Issue Details](#round-15--issue-details)
-19. [Architecture Health Check](#architecture-health-check)
-20. [No Action Required](#no-action-required)
+19. [Round 16 — Issue Details](#round-16--issue-details)
+20. [Architecture Health Check](#architecture-health-check)
+21. [No Action Required](#no-action-required)
 
 ---
 
 ## Final Status
 
 **✅ Migration Complete — All Issues Resolved** — The GLES2 rendering pipeline is correct, safe under EGL context loss,
-and free of all legacy GLES1 artefacts. All issues (1–29) are fixed.
+and free of all legacy GLES1 artefacts. All issues (1–30) are fixed.
 
 Round 13 was a clean verification pass — no new issues discovered.
-Round 14 found and fixed one remaining GLState bypass in `TextureQuadBatch` (Issue 28); all other raw GL call sites verified clean — no further issues found.
-Round 15 fixed the last open item: Issue 6 (`CLAUDE.md` stale NDK version, module name, and GLES generation). **All 29 issues closed. The review is complete.**
+Round 14 found and fixed one remaining GLState bypass in `TextureQuadBatch` (Issue 28); all other raw GL call sites verified clean — no further issues found at that time.
+Round 15 fixed the last open documentation item: Issue 6 (`CLAUDE.md` stale NDK version, module name, and GLES generation).
+Round 16 fixed a post-review regression report: `TriangleRenderer.renderTriangles()` was bypassing `GLState` with raw `GLES20.glBindBuffer` calls (Issue 30). **All 30 issues closed. The review is complete.**
 
 ---
 
@@ -80,6 +82,7 @@ Round 15 fixed the last open item: Issue 6 (`CLAUDE.md` stale NDK version, modul
 | 27 | R12 | 🟢 Low | `GLState.java` | `bindFramebuffer()` never updates `mCurrentFramebufferID` — every FBO bind unconditionally calls `glBindFramebuffer`, caching never fires; `deleteFramebuffer()`'s cache-invalidation check is also always dead | ✅ Fixed |
 | 28 | R14 | 🟡 Medium | `TextureQuadBatch.java` | `applyToGL()` calls `GLES20.glActiveTexture` / `glBindTexture` directly, bypassing `GLState`; after a storyboard flush `mCurrentBoundTextureIDs[0]` is stale — the next sprite whose cached texture ID matches pre-batch value skips its `glBindTexture` and renders with the wrong texture | ✅ Fixed |
 | 29 | R15 | 🟢 Low | `CLAUDE.md` | NDK version `22.1.7171670` (should be `30.0.14904198`), module name `:AndEngine` (should be `:AndEngine-GLES2`), and "GLES1" label (should be "GLES2") | ✅ Fixed |
+| 30 | R16 | 🟡 Medium | `TriangleRenderer.java`, `UITriangleMesh.kt` | `renderTriangles()` called `GLES20.glBindBuffer(GL_ARRAY_BUFFER, mVboId)` and `GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0)` directly, bypassing `GLState.mCurrentArrayBufferID`; a false cache hit on the next `pGLState.bindArrayBuffer()` call would silently skip the actual bind, causing sprites to render from the wrong VBO | ✅ Fixed |
 
 ---
 
@@ -111,9 +114,10 @@ they were written in**. The table below maps each commit to the globally unique 
 | `fix(vbo): remove dead HONEYCOMB branches from HighPerformanceVertexBufferObject` | R8 Issue 1 | **#20** |
 | `chore(SystemUtils): remove always-true SDK_VERSION_*_OR_LATER constants` | R8 Issue 2 | **#21** |
 
-> **Note:** Round 9 through Round 14 commit messages are recorded inline in each round's section above. Issue 29 (Round 15) is the final fix.
+> **Note:** Round 9 through Round 14 commit messages are recorded inline in each round's section above. Issues 29–30 (Rounds 15–16) are the final fixes.
 
 | `docs(CLAUDE.md): fix stale NDK version, module name, and GLES generation` | R15 Issue 1 | **#29** |
+| `fix: route TriangleRenderer VBO binds through GLState to prevent false cache hits` | R16 Issue 1 | **#30** |
 
 ---
 
@@ -818,8 +822,10 @@ public void bindFramebuffer(final int pFramebufferID) {
 > texture-unit cache stale after every storyboard batch flush.
 >
 > All other raw GL call sites inspected (`TriangleRenderer`, `IBuffer.bindAndUpload()`,
-> `VideoTexture`) are either explicitly repaired by their callers or use texture targets
-> not tracked by `GLState` — no further issues found. **No other new issues in this round.**
+> `VideoTexture`) were assessed as either explicitly repaired by their callers or using
+> texture targets not tracked by `GLState`. **Note:** the `TriangleRenderer` assessment was
+> incorrect — its raw `glBindBuffer` calls were subsequently identified as a real GLState
+> bypass and fixed in Round 16 (Issue 30). No other new issues in this round.
 
 ---
 
@@ -901,6 +907,60 @@ Issue 6 is now closed. All 29 issues are resolved.
 
 ---
 
+## Round 16 — Issue Details
+
+> Triggered by a post-review code-review comment identifying a GLState bypass in
+> `TriangleRenderer` that was incorrectly classified as safe in Round 14.
+>
+> Files reviewed: `TriangleRenderer.java`, `UITriangleMesh.kt`
+>
+> **One issue found and fixed** (Issue 30). **All 30 issues closed. The review is complete.**
+
+---
+
+### Issue 30 — `TriangleRenderer.renderTriangles()` Bypasses `GLState` for VBO Binds 🟡 Medium ✅ Fixed
+
+`TriangleRenderer.renderTriangles()` bound and unbound its VBO with direct `GLES20.glBindBuffer`
+calls, bypassing `GLState.mCurrentArrayBufferID`:
+
+```java
+// Before — bypasses GLState:
+GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);        // ← stale cache going in
+GLES20.glBufferData(...);
+GLES20.glVertexAttribPointer(...);
+GLES20.glDrawArrays(...);
+GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);             // ← cache still thinks old value
+```
+
+After the draw, `GLState` believed the array buffer was still whatever it was before the call.
+When the next entity called `pGLState.bindArrayBuffer(its_vbo_id)` and that ID happened to match
+the stale cache value — a false hit — the actual `glBindBuffer` call was silently skipped, causing
+the entity to render geometry from the wrong VBO.
+
+In Round 14 this was assessed as "safe-by-convention" because callers always entered with
+`GL_ARRAY_BUFFER = 0`. That reasoning was flawed: after `renderTriangles()` returned, `GLState`
+still cached `0`, but the real GPU state had been zero throughout the call (correctly). The
+problem was the intermediate bind to `mVboId` was invisible to the cache — if any other code path
+read `mCurrentArrayBufferID` between the two raw calls the value would be wrong. More critically,
+using `pGLState.bindArrayBuffer(0)` for the unbind is the correct and consistent pattern used
+everywhere else in the codebase.
+
+**Fix applied:** `renderTriangles` now accepts a `GLState pGLState` parameter. Both bind calls
+route through `pGLState.bindArrayBuffer()`:
+
+```java
+// After — routes through GLState:
+pGLState.bindArrayBuffer(mVboId);
+GLES20.glBufferData(...);
+GLES20.glVertexAttribPointer(...);
+GLES20.glDrawArrays(...);
+pGLState.bindArrayBuffer(0);    // cache updated to 0; next bind sees correct state
+```
+
+`UITriangleMesh.doDraw()` updated to pass `pGLState` (already in scope) to `renderTriangles()`.
+
+---
+
 ## Architecture Health Check
 
 Final confirmed-correct state of the rendering pipeline:
@@ -935,6 +995,7 @@ Final confirmed-correct state of the rendering pipeline:
 | `BufferUtils.putUnsignedInt(buf, pos, long)` — `(short)` cast truncates to 16 bits | ✅ Fixed (Issue 26) |
 | `GLState.bindFramebuffer()` — never updates `mCurrentFramebufferID`; all FBO binds uncached | ✅ Fixed (Issue 27) |
 | `TextureQuadBatch.applyToGL()` — `glActiveTexture`/`glBindTexture` bypass `GLState`; texture cache stale after storyboard flush | ✅ Fixed (Issue 28) |
+| `TriangleRenderer.renderTriangles()` — raw `glBindBuffer` calls bypassed `GLState.mCurrentArrayBufferID`; false cache hit caused next VBO bind to be skipped | ✅ Fixed (Issue 30) |
 | `ExternalOESShaderProgram` — `volatile INSTANCE`, typed getters, reset via `sAllInstances` | ✅ Correct |
 | `StoryboardBatchShader` — `volatile INSTANCE`, explicit reset in `MainActivity` | ✅ Correct |
 | `VideoTexture` / `UIVideoSprite` — `GL_TEXTURE_EXTERNAL_OES`, ST-transform matrix | ✅ Correct |
@@ -953,7 +1014,6 @@ Final confirmed-correct state of the rendering pipeline:
 - `ScreenGrabber.grab()` — uses `IntBuffer.wrap(int[])` (heap buffer) for `glReadPixels`; Android GLES20 JNI handles non-direct buffers; acceptable for a one-shot screen-grab.
 - `SmartPVRTexturePixelBufferStrategy.getPixelBuffer()` — returns heap `ByteBuffer.wrap()` vs. `GreedyPVRTexturePixelBufferStrategy`'s direct slice; inconsistent but both work on Android.
 - Split-screen engines (`SingleSceneSplitScreenEngine`, `DoubleSceneSplitScreenEngine`) — call `glScissor`/`glViewport` directly bypassing `GLState` caches; `GLState` does not track the scissor rect or viewport dimensions, so no stale-cache concern.
-- `TriangleRenderer.renderTriangles()` — accepts `GLState pGLState` and routes both the VBO bind and the final unbind through `pGLState.bindArrayBuffer()`, keeping the cache in sync before and after every call.
 - `Buffer.bindAndUpload()` raw `glBindBuffer` — every call site is wrapped in `UIBufferedComponent.doDraw()` which calls `pGLState.bindArrayBuffer(0)` immediately after the draw, repairing the cache. This is explicitly documented in `UIBufferedComponent.kt` lines 121–126.
 - `VideoTexture` raw `glBindTexture(GL_TEXTURE_EXTERNAL_OES, …)` — `EXTERNAL_OES` is a separate texture target not tracked by GLState's `mCurrentBoundTextureIDs` array (which only covers `GL_TEXTURE_2D`). No stale-cache concern.
 
