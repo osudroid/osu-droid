@@ -26,6 +26,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
+import com.osudroid.game.replay.ReplaySettingsPanel;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
@@ -213,6 +214,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private PerformanceCalculationParameters performanceCalculationParameters;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
+
+    private ReplaySettingsPanel replaySettingsPanel;
 
     // Game
 
@@ -1270,6 +1273,33 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
 
+        if (!startedFromHUDEditor && (GameHelper.isAutoplay() || replaying)) {
+            hud.attachChild(replaySettingsPanel = new ReplaySettingsPanel());
+
+            replaySettingsPanel.getPlaybackControl().setOnPauseToggle(isPaused -> {
+                if (isPaused) {
+                    beatmapClock.stop();
+                    stopLoopingSamples();
+
+                    if (video != null && videoStarted) {
+                        video.pause();
+                    }
+                } else {
+                    if (!beatmapClock.isRunning()) {
+                        beatmapClock.start();
+                    }
+
+                    playLoopingSamples();
+
+                    if (video != null && videoStarted) {
+                        video.play();
+                    }
+                }
+
+                return Unit.INSTANCE;
+            });
+        }
+
         if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
         } else {
@@ -1395,6 +1425,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (!isGameOver) {
             float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
+
+            if (replaySettingsPanel != null) {
+                currentSpeedMultiplier *= replaySettingsPanel.getPlaybackControl().getRate();
+            }
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
@@ -1834,6 +1868,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             objects = null;
             activeObjects.clear();
             expiredObjects.clear();
+            replaySettingsPanel = null;
             breakPeriods = null;
             cursorSprites = null;
             this.playableBeatmap = null;
@@ -2031,6 +2066,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 expiredObjects.clear();
             }
             breakPeriods = null;
+            replaySettingsPanel = null;
             objects = null;
             timingControlPoints = null;
             effectControlPoints = null;
