@@ -131,7 +131,18 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
      * value of the control is not equal to the default value.
      */
     var showResetButton = true
+        set(value) {
+            if (field != value) {
+                field = value
+                updateResetButtonVisibility()
+            }
+        }
 
+    /**
+     * Whether the current [value] equals to [defaultValue]. Can be overridden to provide a custom behavior.
+     */
+    protected open val isDefault
+        get() = value == defaultValue
 
     init {
         width = FillParent
@@ -150,6 +161,7 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
      */
     open fun onControlValueChanged() {
         valueText?.text = valueFormatter(value)
+        updateResetButtonVisibility()
         onValueChanged?.invoke(control.value)
     }
 
@@ -168,36 +180,23 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
 
     //endregion
 
-
-    /**
-     * Whether the current [value] equals to [defaultValue]. Can be overridden to provide a custom behavior.
-     */
-    protected open val isDefault
-        get() = value == defaultValue
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
+    private fun updateResetButtonVisibility() {
         if (showResetButton) {
             resetButton.apply {
                 if (!isVisible && !isDefault) {
                     clearEntityModifiers()
                     isVisible = true
                     translateToX(0f, 0.1f)
-                    fadeTo(1f, 0.1f)
+                    fadeIn(0.1f)
                 } else if (isVisible && isDefault) {
-                    isResetButtonHiding = true
                     clearEntityModifiers()
                     translateToX(-10f, 0.1f)
-                    fadeTo(0f, 0.1f).after {
-                        isVisible = false
-                    }
+                    fadeOut(0.1f).after { isVisible = false }
                 }
             }
         } else {
             resetButton.isVisible = false
         }
-
-        super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
