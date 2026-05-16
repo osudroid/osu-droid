@@ -49,6 +49,7 @@ import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
+import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
@@ -121,6 +122,10 @@ public class MainActivity extends BaseGameActivity implements
 
     // Multiplayer
     private Uri roomInviteLink;
+
+    // Set to true by MainScene.exit() before calling finish(), so that onDestroy() kills the
+    // process after the full Activity lifecycle has run (Firebase, SongService, SharedPrefs, etc.).
+    public volatile boolean killOnDestroy = false;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -279,6 +284,22 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
         ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
 
+        // Fonts must be loaded before SplashScene.initialize() so that the Text entities
+        // it creates get valid Font references bound to the current engine.
+        // These are moved up from their original position later in this method; do NOT load
+        // them a second time below.
+        ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+        ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
+        ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
+        ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
+
+        // Re-initialize SplashScene so its Sprite/Text children are bound to the current
+        // engine's VBO manager, TextureManager, and FontManager.  On the very first launch
+        // this just creates the entities for the first time (the SplashScene constructor no
+        // longer does so).  On subsequent launches within the same process this safely
+        // replaces stale GL references with fresh ones.
+        SplashScene.INSTANCE.initialize();
+
         // Setting the scene as fast as we can
         getEngine().setScene(SplashScene.INSTANCE.getScene());
 
@@ -318,12 +339,9 @@ public class MainActivity extends BaseGameActivity implements
             ResourceManager.getInstance().loadHighQualityFile("menu-background", bg);
         }
         // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
-        ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-        ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
-        ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
-        ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
-
         ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
+        // Note: fonts ("font", "smallFont", "xs", "strokeFont") are loaded earlier in this
+        // method, before SplashScene.initialize(), so they are NOT reloaded here.
     }
 
     @Override
@@ -764,12 +782,29 @@ public class MainActivity extends BaseGameActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
+        // Safety net: if the Activity is destroyed while the user is still in a room (e.g.
+        // swiped away from the task switcher, or system-killed), teardownSession() may never
+        // have been called. Disconnect the socket here so the server knows the client is gone.
+        // This is a no-op when the socket is already null (normal exit path).
+        RoomAPI.INSTANCE.disconnect();
+
         Multiplayer.flushLog();
         // displayListener is only assigned when permissions are already granted.
         // Guard against null to avoid a NullPointerException on the very first launch
         // where the activity is finished before the listener is ever set up.
         if (displayListener != null) {
             ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        }
+
+        if (killOnDestroy) {
+            // The user explicitly exited via the Main Menu.  The full lifecycle has now run:
+            // Firebase Analytics and Crashlytics have had a chance to flush/close their
+            // sessions, SongService has been unbound, and SharedPreferences writes have been
+            // committed.  Killing the process here ensures that all static singletons
+            // (SplashScene.INSTANCE, ResourceManager, UIEngine.current, etc.) are fully reset
+            // on the next launch, preventing stale GL resource references (black fonts,
+            // broken textures) if the user re-launches from the task switcher.
+            android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
 

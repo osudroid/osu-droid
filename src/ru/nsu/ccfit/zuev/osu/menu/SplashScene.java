@@ -35,6 +35,28 @@ public class SplashScene implements IUpdateHandler {
 
     public SplashScene() {
         scene = new Scene();
+        // GL-bound entities (Sprite, Text) are NOT created here because this constructor
+        // runs as a Java static field initializer at class-load time, before any engine or
+        // ResourceManager is set up.  Call initialize() explicitly once resources are ready.
+        // The update handler is also intentionally NOT registered here for the same reason —
+        // initialze() registers it once GL entities are in place.
+    }
+
+    /**
+     * Creates (or recreates) all GL-bound child entities using the current engine and
+     * ResourceManager.  Must be called after ResourceManager.Init() and the initial font/
+     * texture loads, and before the scene is set on the engine.
+     *
+     * Calling this more than once (e.g. on Activity re-creation within the same process)
+     * safely detaches stale entities and rebuilds them against the live engine resources,
+     * preventing black fonts and broken textures caused by stale GL references.
+     */
+    public void initialize() {
+        scene.detachChildren();
+        // Guard against double-registration: unregister before (re-)registering so that
+        // calling initialize() multiple times never installs duplicate update handlers.
+        scene.unregisterUpdateHandler(this);
+        mStarting = true;
         initializeLoading();
         initializeProgress();
         initializeInfo();
@@ -120,6 +142,10 @@ public class SplashScene implements IUpdateHandler {
 
     @Override
     public void onUpdate(float pSecondsElapsed) {
+        if (progressText == null || infoText == null || mLoading == null) {
+            // initialize() has not been called yet; nothing to update.
+            return;
+        }
         float progress = GlobalManager.getInstance().getLoadingProgress();
         if (mStarting)
         {

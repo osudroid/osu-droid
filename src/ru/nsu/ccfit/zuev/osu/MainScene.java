@@ -1011,6 +1011,13 @@ public class MainScene implements IUpdateHandler {
         taskPool.schedule(new TimerTask() {
             @Override
             public void run() {
+                // finish() posts a request to the main thread; the Activity lifecycle
+                // (onPause → onStop → onDestroy) will run normally, which ensures Firebase
+                // Analytics flushing, Crashlytics session close, SongService unbind, and all
+                // other teardown complete.  The actual process kill is deferred to the end of
+                // MainActivity.onDestroy() (see killOnDestroy flag there), so it only fires
+                // after the full lifecycle has executed.
+                GlobalManager.getInstance().getMainActivity().killOnDestroy = true;
                 GlobalManager.getInstance().getMainActivity().finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
