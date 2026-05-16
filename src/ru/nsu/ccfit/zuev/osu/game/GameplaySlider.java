@@ -630,7 +630,6 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void onExpire() {
-        followCircle.clearEntityModifiers();
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
         startArrow.clearEntityModifiers();
@@ -641,7 +640,6 @@ public class GameplaySlider extends GameObject {
         sliderBody.clearEntityModifiers();
         tickContainer.clearEntityModifiers();
 
-        followCircle.detachSelf();
         headCirclePiece.detachSelf();
         tailCirclePiece.detachSelf();
         startArrow.detachSelf();
