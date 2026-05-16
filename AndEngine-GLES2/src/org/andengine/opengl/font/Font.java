@@ -143,8 +143,15 @@ public class Font implements IFont {
 	public synchronized Letter getLetter(final char pCharacter) throws FontException {
 		Letter letter = this.mManagedCharacterToLetterMap.get(pCharacter);
 		if(letter == null) {
-			letter = this.createLetter(pCharacter);
-
+			try {
+				letter = this.createLetter(pCharacter);
+			} catch (final FontException e) {
+				// Atlas is full — common when browsing large CJK beatmap lists.
+				// Return a zero-advance whitespace letter so rendering continues
+				// rather than crashing. The character will simply be invisible.
+				android.util.Log.w("Font", "Atlas full, skipping '" + pCharacter + "': " + e.getMessage());
+				letter = new Letter(pCharacter, 0);
+			}
 			this.mLettersPendingToBeDrawnToTexture.add(letter);
 			this.mManagedCharacterToLetterMap.put(pCharacter, letter);
 		}
@@ -236,10 +243,16 @@ public class Font implements IFont {
 
 			this.mCurrentTextureX += Font.LETTER_TEXTURE_PADDING;
 
-			final float u = this.mCurrentTextureX / textureWidth;
-			final float v = this.mCurrentTextureY / textureHeight;
-			final float u2 = (this.mCurrentTextureX + letterWidth) / textureWidth;
-			final float v2 = (this.mCurrentTextureY + letterHeight) / textureHeight;
+			// Apply half-texel offset so UV cords point at texel centers, not corners.
+			// Without this, floating-point rounding on Adreno/Mali GPUs can cause the
+			// sampler to land on a neighboring texel, producing bar artifacts between glyphs.
+			final float halfTexelU = 0.5f / textureWidth;
+			final float halfTexelV = 0.5f / textureHeight;
+
+			final float u  = (this.mCurrentTextureX / textureWidth) + halfTexelU;
+			final float v  = (this.mCurrentTextureY / textureHeight) + halfTexelV;
+			final float u2 = ((this.mCurrentTextureX + letterWidth) / textureWidth) - halfTexelU;
+			final float v2 = ((this.mCurrentTextureY + letterHeight) / textureHeight) - halfTexelV;
 
 			letter = new Letter(pCharacter, this.mCurrentTextureX - Font.LETTER_TEXTURE_PADDING, this.mCurrentTextureY - Font.LETTER_TEXTURE_PADDING, letterWidth, letterHeight, letterLeft, letterTop - this.getAscent(), advance, u, v, u2, v2);
 			this.mCurrentTextureX += letterWidth + Font.LETTER_TEXTURE_PADDING;
