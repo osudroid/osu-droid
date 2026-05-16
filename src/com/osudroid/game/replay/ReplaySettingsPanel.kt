@@ -13,7 +13,7 @@ import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.text
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
