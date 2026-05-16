@@ -40,12 +40,10 @@ class ReplayPlaybackControl : UICard() {
         title = "Playback"
 
         content.apply {
-            val slider = FormSlider().apply {
+            val slider = FormSlider(rate).apply {
                 label = "Playback speed"
                 control.min = 0.05f
                 control.max = 2f
-                value = rate
-                defaultValue = rate
                 valueFormatter = { rateFormatter.format(it) }
                 onValueChanged = { rate = it }
             }
