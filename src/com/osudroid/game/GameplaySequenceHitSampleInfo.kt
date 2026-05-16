@@ -36,7 +36,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
     private var hasSamplePlaying = false
 
     private val currentSampleInfo
-        get() = samples[index]
+        get() = samples.getOrNull(index)
 
     override val isInitialized
         get() = samples.isNotEmpty()
@@ -76,12 +76,12 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         }
 
         hasSamplePlaying = true
-        currentSampleInfo.play()
+        currentSampleInfo?.play()
     }
 
     override fun stop() {
         hasSamplePlaying = false
-        currentSampleInfo.stop()
+        currentSampleInfo?.stop()
     }
 
     /**
