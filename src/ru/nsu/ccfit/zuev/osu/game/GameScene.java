@@ -1191,6 +1191,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
+        hud.setClock(beatmapClock);
+        // Main scene already processes the clock, so don't do it again.
+        hud.setProcessCustomClock(false);
 
         if (!replaying && !GameHelper.isAutoplay()) {
             // Since block areas are saved in device pixels, we need to map them to scaled pixels.
@@ -2460,6 +2463,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    private void playLoopingSamples() {
+        if (activeObjects == null) {
+            return;
+        }
+
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).playLoopingSamples();
+        }
+    }
+
     private void stopLoopingSamples() {
         if (activeObjects == null) {
             return;
@@ -2654,7 +2667,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.pause();
         }
 
-        Execution.updateThread(this::stopLoopingSamples);
+        stopLoopingSamples();
 
         if (!GameHelper.isAutoplay() && !GameHelper.isAutopilot() && !replaying) {
             removeAllCursors();
@@ -2821,6 +2834,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (!beatmapClock.isRunning()) {
             beatmapClock.start();
         }
+
+        playLoopingSamples();
     }
 
     public boolean isPaused() {

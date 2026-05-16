@@ -15,6 +15,13 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
     override var isRecycled = false
 
+    /**
+     * The time at which this [GameplayHitSampleInfo] should be played, in seconds.
+     *
+     * Used when this [GameplayHitSampleInfo] is played in sequence (see [GameplaySequenceHitSampleInfo]).
+     */
+    var time = 0.0
+
     override var frequency = 1f
         set(value) {
             field = value
@@ -53,11 +60,12 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
         this.sampleInfo = sampleInfo
 
         for (i in sampleInfo.lookupNames.indices) {
-            soundProvider = getResources().getCustomSound(sampleInfo.lookupNames[i], false)
+            val soundProvider = getResources().getCustomSound(sampleInfo.lookupNames[i], false)
 
             if (soundProvider != null) {
-                soundProvider!!.setFrequency(frequency)
-                soundProvider!!.setLooping(isLooping)
+                soundProvider.setFrequency(frequency)
+                soundProvider.setLooping(isLooping)
+                this.soundProvider = soundProvider
                 break
             }
         }
@@ -76,6 +84,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
     }
 
     override fun reset() {
+        time = 0.0
         frequency = 1f
         volume = 1f
         isLooping = false

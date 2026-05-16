@@ -355,7 +355,7 @@ public class GameplaySpinner extends GameObject {
             updateSpinSampleFrequency(percentfill);
             spinnerSpinSample.play();
         } else {
-            spinnerSpinSample.stop();
+            spinnerSpinSample.stopAll();
         }
 
         if (percentfill > 1 || clear) {
