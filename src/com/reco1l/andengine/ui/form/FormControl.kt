@@ -169,16 +169,23 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
     //endregion
 
 
+    /**
+     * Whether the current [value] equals to [defaultValue]. Can be overridden to provide a custom behavior.
+     */
+    protected open val isDefault
+        get() = value == defaultValue
+
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (showResetButton) {
             resetButton.apply {
-                if (!isVisible && value != defaultValue) {
+                if (!isVisible && !isDefault) {
                     clearEntityModifiers()
                     isVisible = true
                     translateToX(0f, 0.1f)
                     fadeTo(1f, 0.1f)
-                } else if (isVisible && value == defaultValue) {
+                } else if (isVisible && isDefault) {
+                    isResetButtonHiding = true
                     clearEntityModifiers()
                     translateToX(-10f, 0.1f)
                     fadeTo(0f, 0.1f).after {
