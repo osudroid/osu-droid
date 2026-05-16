@@ -226,7 +226,9 @@ class DecouplingFramedClock @JvmOverloads constructor(
         adjustableSourceClock.resetSpeedAdjustments()
     }
 
-    override var rate by adjustableSourceClock::rate
+    override var rate
+        get() = adjustableSourceClock.rate
+        set(value) { adjustableSourceClock.rate = value }
 
     //endregion
 }
