@@ -70,7 +70,23 @@ class VideoTexture(val source: String) : Texture(
         // Nothing – the SurfaceTexture pushes frames itself.
     }
 
+    /**
+     * Called by [TextureManager.onReload] after context loss.
+     * We must release the old [SurfaceTexture] here because [loadToHardware] will create
+     * a fresh one; leaving the old one alive leaks its native resources.
+     */
+    override fun setNotLoadedToHardware() {
+        surfaceTexture?.release()
+        surfaceTexture = null
+        super.setNotLoadedToHardware()
+    }
+
     override fun loadToHardware(pGLState: GLState) {
+        // Release any lingering SurfaceTexture (safety net — normally cleared by
+        // setNotLoadedToHardware, but guard against direct loadToHardware calls too).
+        surfaceTexture?.release()
+        surfaceTexture = null
+
         val textures = IntArray(1)
         GLES20.glGenTextures(1, textures, 0)
         mHardwareTextureID = textures[0]
