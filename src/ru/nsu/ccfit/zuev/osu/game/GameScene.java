@@ -1187,6 +1187,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
         hud.setClock(beatmapClock);
+        // Main scene already processes the clock, so don't do it again.
+        hud.setProcessCustomClock(false);
 
         if (!replaying && !GameHelper.isAutoplay()) {
             // Since block areas are saved in device pixels, we need to map them to scaled pixels.
