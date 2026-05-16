@@ -1197,6 +1197,26 @@ abstract class UIComponent : Entity(0f, 0f),
     }
 
     /**
+     * Finishes all [UniversalModifier]s, using their [UniversalModifier.finalValues] and calling their
+     * [UniversalModifier.onFinished] callbacks.
+     *
+     * @param propagateChildren Whether to also finish [UniversalModifier]s of children. Defaults to `false`.
+      * @param type The [ModifierType] to finish, or `null` to finish all [UniversalModifier]s regardless of their type.
+     */
+    @JvmOverloads
+    fun finishModifiers(propagateChildren: Boolean = false, type: ModifierType? = null) {
+        if (type != null) {
+            getTrackerFor(type)?.finish()
+        } else {
+            universalModifierTrackers.fastForEach { it.finish() }
+        }
+
+        if (propagateChildren) {
+            mChildren?.fastForEach { (it as? UIComponent)?.finishModifiers(true, type) }
+        }
+    }
+
+    /**
      * Starting time to use for new [UniversalModifier]s.
      */
     val modifierStartTime

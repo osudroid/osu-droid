@@ -52,13 +52,18 @@ class ReplaySettingsPanel : UIContainer() {
         height = FillParent
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
-        alpha = 0.5f
+        alpha = 0f
+        elementContainer.isVisible = false
 
         clock = UIEngine.current.clock
         processCustomClock = false
 
         +ReplaySettingsPanelButton()
         +elementContainer
+    }
+
+    override fun onLoadComplete() {
+        fadeTo(0.5f, 0.2f)
     }
 
     fun expand() {
