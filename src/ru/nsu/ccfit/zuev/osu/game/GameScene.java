@@ -2861,15 +2861,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        if (video != null && videoStarted) {
-            video.play();
-        }
-
-        if (!beatmapClock.isRunning()) {
+        if (!beatmapClock.isRunning()
+                && (replaySettingsPanel == null || !replaySettingsPanel.getPlaybackControl().isPlaybackPaused())) {
             beatmapClock.start();
-        }
 
-        playLoopingSamples();
+            if (video != null && videoStarted) {
+                video.play();
+            }
+
+            playLoopingSamples();
+        }
     }
 
     public boolean isPaused() {
