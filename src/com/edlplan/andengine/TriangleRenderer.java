@@ -4,6 +4,7 @@ import android.opengl.GLES20;
 
 import com.edlplan.framework.utils.FloatArraySlice;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
+import org.andengine.opengl.util.GLState;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,9 +39,10 @@ public class TriangleRenderer {
      * <p>
      * Must be called on the GL thread. The caller is responsible for enabling
      * {@link ShaderProgramConstants#ATTRIBUTE_POSITION_LOCATION} before this call.
-     * After the call {@code GL_ARRAY_BUFFER} is left unbound (0).
+     * After the call {@code GL_ARRAY_BUFFER} is left unbound (0) and
+     * {@code pGLState.mCurrentArrayBufferID} is updated accordingly.
      */
-    public void renderTriangles(FloatArraySlice ver) {
+    public void renderTriangles(FloatArraySlice ver, GLState pGLState) {
         final int floatCount = ver.length;
         final int byteCount = floatCount * 4;
 
@@ -63,8 +65,8 @@ public class TriangleRenderer {
             mVboId = ids[0];
         }
 
-        // Upload data to the GPU.
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
+        // Upload data to the GPU. Route through GLState to keep its internal cache in sync.
+        pGLState.bindArrayBuffer(mVboId);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, byteCount, mStagingBuffer, GLES20.GL_DYNAMIC_DRAW);
 
         // Point the position attribute at offset 0 inside the currently bound VBO.
@@ -74,8 +76,9 @@ public class TriangleRenderer {
         );
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, floatCount / 2);
 
-        // Leave no VBO bound so client-side glVertexAttribPointer calls by other renderers work.
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        // Leave no VBO bound. Use pGLState so its cache stays in sync with the actual GL state,
+        // preventing a false cache hit that would cause the next VBO bind to be skipped.
+        pGLState.bindArrayBuffer(0);
     }
 
 }

@@ -132,7 +132,7 @@ class UITriangleMesh : UIComponent() {
         GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
 
 
-        TriangleRenderer.get().renderTriangles(vertices)
+        TriangleRenderer.get().renderTriangles(vertices, pGLState)
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
         GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
