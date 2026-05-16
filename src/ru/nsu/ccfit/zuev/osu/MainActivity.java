@@ -703,7 +703,7 @@ public class MainActivity extends BaseGameActivity implements
         // Reset all VBO IDs so they are re-generated against the new EGL context.
         // This handles the case where the system destroyed the context while the app
         // was backgrounded (context loss recovery).
-        onContextLost();
+        com.reco1l.andengine.buffered.Buffer.onContextLost();
         // Reset the TriangleRenderer VBO so it is re-created against the new context.
         com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss();
         // Reset the storyboard quad-batch shader so it recompiles against the new context.
