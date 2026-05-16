@@ -21,6 +21,12 @@ class ReplayPlaybackControl : UICard() {
         private set
 
     /**
+     * Whether the user has paused playback via the play/pause button.
+     */
+    var isPlaybackPaused = false
+        private set
+
+    /**
      * Called when the user presses the play/pause button. The argument is `true` when pausing, `false` when resuming.
      */
     var onPauseToggle: ((Boolean) -> Unit)? = null
@@ -66,8 +72,6 @@ class ReplayPlaybackControl : UICard() {
                     height = 42f
                     padding = Vec4(12f, 0f)
                     icon = resourceManager.getTexture("music_pause")
-
-                    var isPlaybackPaused = false
 
                     onActionUp = {
                         isPlaybackPaused = !isPlaybackPaused
