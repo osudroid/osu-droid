@@ -1370,6 +1370,13 @@ public class GameplaySlider extends GameObject {
     }
 
     @Override
+    public void playLoopingSamples() {
+        if (isInRadius) {
+            playSlidingSamples();
+        }
+    }
+
+    @Override
     public void stopLoopingSamples() {
         sliderSlideSample.stopAll();
         sliderWhistleSample.stopAll();

@@ -2461,6 +2461,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    private void playLoopingSamples() {
+        if (activeObjects == null) {
+            return;
+        }
+
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).playLoopingSamples();
+        }
+    }
+
     private void stopLoopingSamples() {
         if (activeObjects == null) {
             return;
@@ -2822,6 +2832,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (!beatmapClock.isRunning()) {
             beatmapClock.start();
         }
+
+        playLoopingSamples();
     }
 
     public boolean isPaused() {

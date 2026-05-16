@@ -58,6 +58,8 @@ public abstract class GameObject {
         return startHit;
     }
 
+    public void playLoopingSamples() {}
+
     public void stopLoopingSamples() {}
 
     /**
