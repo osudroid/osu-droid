@@ -11,11 +11,17 @@ class ReplayPlaybackControl : UICard() {
      */
     val rateControl = ReplayPlaybackRate()
 
+    /**
+     * Controls for seeking.
+     */
+    val seekControl = ReplayPlaybackSeek()
+
     init {
         width = FillParent
         title = "Playback"
 
         content.apply {
+            +seekControl
             +rateControl
         }
     }
