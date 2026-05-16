@@ -23,6 +23,9 @@ class ReplaySettingsPanel : UIContainer() {
     lateinit var playbackControl: ReplayPlaybackControl
         private set
 
+    lateinit var visualSettingsControl: ReplayVisualSettingsControl
+        private set
+
     private val isExpanded
         get() = Precision.almostEquals(x, 0f)
 
@@ -83,6 +86,9 @@ class ReplaySettingsPanel : UIContainer() {
     private fun UILinearContainer.addControls() {
         playbackControl = ReplayPlaybackControl()
         +playbackControl
+
+        visualSettingsControl = ReplayVisualSettingsControl()
+        +visualSettingsControl
     }
 
     private inner class ReplaySettingsPanelButton : UIContainer() {

@@ -1298,6 +1298,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 return Unit.INSTANCE;
             });
+
+            replaySettingsPanel.getVisualSettingsControl().setOnBackgroundBrightnessChanged(brightness -> {
+                breakAnimator.setDimBrightness(brightness);
+
+                // We do not want
+                if (!breakAnimator.isBreak() && dimRectangle != null) {
+                    dimRectangle.setAlpha(1f - brightness);
+                }
+
+                return Unit.INSTANCE;
+            });
         }
 
         if (Multiplayer.isMultiplayer) {
