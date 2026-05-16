@@ -953,7 +953,7 @@ Final confirmed-correct state of the rendering pipeline:
 - `ScreenGrabber.grab()` — uses `IntBuffer.wrap(int[])` (heap buffer) for `glReadPixels`; Android GLES20 JNI handles non-direct buffers; acceptable for a one-shot screen-grab.
 - `SmartPVRTexturePixelBufferStrategy.getPixelBuffer()` — returns heap `ByteBuffer.wrap()` vs. `GreedyPVRTexturePixelBufferStrategy`'s direct slice; inconsistent but both work on Android.
 - Split-screen engines (`SingleSceneSplitScreenEngine`, `DoubleSceneSplitScreenEngine`) — call `glScissor`/`glViewport` directly bypassing `GLState` caches; `GLState` does not track the scissor rect or viewport dimensions, so no stale-cache concern.
-- `TriangleRenderer.renderTriangles()` raw `glBindBuffer` calls — always starts with `GL_ARRAY_BUFFER = 0` (all preceding entities unbind via `pGLState.bindArrayBuffer(0)`) and always exits with `GL_ARRAY_BUFFER = 0`. GLState and GL are therefore in sync before and after every call; the raw bind is safe-by-convention.
+- `TriangleRenderer.renderTriangles()` — accepts `GLState pGLState` and routes both the VBO bind and the final unbind through `pGLState.bindArrayBuffer()`, keeping the cache in sync before and after every call.
 - `Buffer.bindAndUpload()` raw `glBindBuffer` — every call site is wrapped in `UIBufferedComponent.doDraw()` which calls `pGLState.bindArrayBuffer(0)` immediately after the draw, repairing the cache. This is explicitly documented in `UIBufferedComponent.kt` lines 121–126.
 - `VideoTexture` raw `glBindTexture(GL_TEXTURE_EXTERNAL_OES, …)` — `EXTERNAL_OES` is a separate texture target not tracked by GLState's `mCurrentBoundTextureIDs` array (which only covers `GL_TEXTURE_2D`). No stale-cache concern.
 
