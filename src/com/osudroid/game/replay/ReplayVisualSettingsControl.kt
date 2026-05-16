@@ -11,10 +11,24 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
  */
 class ReplayVisualSettingsControl : UICard() {
     /**
-     * The background brightness.
+     * The default background brightness.
      */
-    var backgroundBrightness = Config.getBackgroundBrightness()
-        private set
+    var defaultBackgroundBrightness = Config.getBackgroundBrightness()
+        set(value) {
+            field = value
+            brightnessSlider.defaultValue = value * 100
+        }
+
+    private val brightnessSlider = FormSlider(defaultBackgroundBrightness * 100).apply {
+        label = StringTable.get(com.osudroid.resources.R.string.opt_bgbrightness_title)
+        control.min = 0f
+        control.max = 100f
+        valueFormatter = { "${it.roundToInt()}%"}
+        onValueChanged = {
+            defaultBackgroundBrightness = it / 100f
+            onBackgroundBrightnessChanged?.invoke(defaultBackgroundBrightness)
+        }
+    }
 
     /**
      * Called when the background brightness was changed. The argument is the background brightness (from 0 to 1).
@@ -25,17 +39,6 @@ class ReplayVisualSettingsControl : UICard() {
         width = FillParent
         title = "Visual Settings"
 
-        content.apply {
-            +FormSlider(backgroundBrightness * 100).apply {
-                label = StringTable.get(com.osudroid.resources.R.string.opt_bgbrightness_title)
-                control.min = 0f
-                control.max = 100f
-                valueFormatter = { "${it.roundToInt()}%"}
-                onValueChanged = {
-                    backgroundBrightness = it / 100f
-                    onBackgroundBrightnessChanged?.invoke(backgroundBrightness)
-                }
-            }
-        }
+        content += brightnessSlider
     }
 }
