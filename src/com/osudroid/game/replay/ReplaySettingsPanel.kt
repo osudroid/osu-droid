@@ -93,7 +93,7 @@ class ReplaySettingsPanel : UIContainer() {
             }
 
             setSize(BUTTON_WIDTH, 150f)
-            y = -100f
+            y = -125f
 
             anchor = Anchor.CenterLeft
             origin = Anchor.CenterLeft
