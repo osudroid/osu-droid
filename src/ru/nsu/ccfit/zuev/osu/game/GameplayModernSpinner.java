@@ -224,7 +224,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             updateSpinSampleFrequency(percentFilled);
             spinnerSpinSample.play();
         } else {
-            spinnerSpinSample.stop();
+            spinnerSpinSample.stopAll();
         }
 
         middle.setColor(1, 1 - percent, 1 - percent);
