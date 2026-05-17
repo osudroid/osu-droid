@@ -360,7 +360,9 @@ public class GameplaySpinner extends GameObject {
                     clearText.scaleTo(1, 0.25f);
 
                     clear = true;
-                } else if (Math.abs(rotations) > 1) {
+                }
+
+                if (Math.abs(rotations) > 1) {
                     rotations -= 1 * Math.signum(rotations);
                     bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
                     listener.onSpinnerHit(id, 1000, false, 0);
