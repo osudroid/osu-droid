@@ -32,7 +32,6 @@ import com.osudroid.ui.v2.game.SliderTickContainer;
 import com.reco1l.framework.Color4;
 import com.rian.andengine.modifier.UniversalModifier;
 
-import org.andengine.entity.scene.Scene;
 import org.andengine.util.math.MathUtils;
 
 import kotlin.Unit;
