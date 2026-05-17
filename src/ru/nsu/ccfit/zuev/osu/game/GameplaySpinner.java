@@ -460,12 +460,12 @@ public class GameplaySpinner extends GameObject {
 
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
+
+            rotations = totalRotations - wholeRotations;
         } else {
-            // The clear-transition does not decrement the rotation accumulator, so the triggering rotation persists and
-            // fires as the first bonus on the following frame. Therefore ceil(needRotations) - 1 rotations are
-            // pre-clear and all remaining (wholeRotations - preClear) are bonuses. This can overcount by 1 if
-            // passedTime falls within one frame of the clear-transition (before the re-fire), but that window is ~16 ms
-            // and unreachable in practice from a seek operation.
+            // On clear, rotations is reset to only the excess beyond needRotations (replay version 8+ behavior, which
+            // always applies for Autoplay). Therefore ceil(needRotations) - 1 rotations are pre-clear, and
+            // floor(totalRotations - needRotations) are bonus rotations.
             int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
 
             for (int i = 0; i < preClear; i++) {
@@ -480,9 +480,9 @@ public class GameplaySpinner extends GameObject {
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
 
-            if (wholeRotations > preClear) {
+            if (totalRotations > needRotations) {
                 clear = true;
-                int bonus = wholeRotations - preClear;
+                int bonus = (int)(totalRotations - needRotations);
 
                 for (int i = 0; i < bonus; i++) {
                     bonusScoreCounter++;
@@ -495,11 +495,12 @@ public class GameplaySpinner extends GameObject {
 
                     stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
+
+                rotations = (totalRotations - needRotations) - bonus;
+            } else {
+                rotations = totalRotations - wholeRotations;
             }
         }
-
-        // Carry the fractional sub-rotation so the update loop resumes from the correct position.
-        rotations = totalRotations - wholeRotations;
     }
 
     protected void reloadHitSounds() {

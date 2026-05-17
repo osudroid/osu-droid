@@ -3938,14 +3938,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 requiredRotations = 0.1f;
             }
 
-            // The clear-transition does not decrement the rotation accumulator, so the triggering rotation persists and
-            // fires as the first bonus on the following frame. Therefore, ceil(requiredRotations) - 1 rotations are
-            // pre-clear and all remaining (totalRotations - preClear) are bonuses. This can overcount by 1 if the
-            // spinner clears on its very last frame and the bonus never fires, but that edge case is unreachable
-            // in practice.
-            int totalRotations = (int) (5f * duration);
-            int preClear = Math.min(totalRotations, (int) Math.ceil(requiredRotations) - 1);
-            int bonus = Math.max(0, totalRotations - preClear);
+            // On clear, rotations is reset to only the excess beyond requiredRotations (replay version 8+ behavior,
+            // which always applies for Autoplay). Therefore, ceil(requiredRotations) - 1 rotations are pre-clear and
+            // floor(totalRotations - requiredRotations) are bonus rotations.
+            float totalRotations = 5f * duration;
+            int preClear = (int) Math.ceil(requiredRotations) - 1;
+            int bonus = Math.max(0, (int)(totalRotations - requiredRotations));
 
             for (int s = 0; s < preClear; s++) {
                 stat.registerSpinnerHit();
