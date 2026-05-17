@@ -3,11 +3,11 @@ package com.reco1l.osu.ui.entity
 import android.opengl.GLES20
 import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
 import com.osudroid.multiplayer.Multiplayer
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
+import org.andengine.entity.scene.ITouchArea
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.text.NumberFormat.getNumberInstance
@@ -73,16 +73,16 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
     }
 
 
-    inner class BoardItem(val index: Int, private val stats: StatisticV2) : Sprite(570f, 0f, ResourceManager.getInstance().getTexture("menu-button-background")) {
+    inner class BoardItem(val index: Int, private val stats: StatisticV2) : Sprite(570f, 0f, ResourceManager.getInstance().getTexture("menu-button-background"), getGlobal().engine.vertexBufferObjectManager) {
 
         private var moved = false
         private var dx = 0f
         private var dy = 0f
 
 
-        val text = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100)
+        val text = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100, getGlobal().engine.vertexBufferObjectManager)
 
-        val rank = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5)
+        val rank = Text(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5, getGlobal().engine.vertexBufferObjectManager)
 
 
         init {

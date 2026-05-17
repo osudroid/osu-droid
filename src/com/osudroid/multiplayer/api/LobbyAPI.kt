@@ -74,8 +74,8 @@ object LobbyAPI {
                         maxPlayers = json.getInt("maxPlayers"),
                         mods = RoomMods(json.getJSONArray("mods")),
                         gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                        teamMode = TeamMode[json.getInt("teamMode")],
-                        winCondition = WinCondition.from(json.getInt("winCondition")),
+                        teamMode = TeamMode[json.getInt("teamMode")] ?: TeamMode.HeadToHead,
+                        winCondition = WinCondition.from(json.getInt("winCondition")) ?: WinCondition.ScoreV1,
                         playerCount = json.getInt("playerCount"),
                         playerNames = json.getString("playerNames"),
                         status = RoomStatus[json.getInt("status")]

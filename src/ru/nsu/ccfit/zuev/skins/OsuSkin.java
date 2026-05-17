@@ -49,7 +49,7 @@ public class OsuSkin {
 
     protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", null);
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", null);
-    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", null);
+    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", new Color4(DEFAULT_COLOR_HEX, HexComposition.RRGGBB));
 
     protected final StringSkinData hitCirclePrefix = new StringSkinData("hitCirclePrefix", "default");
     protected final StringSkinData scorePrefix = new StringSkinData("scorePrefix", "score");

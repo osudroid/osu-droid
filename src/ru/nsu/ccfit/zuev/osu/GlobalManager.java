@@ -4,7 +4,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.UIEngine;
 
-import org.anddev.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.Camera;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;

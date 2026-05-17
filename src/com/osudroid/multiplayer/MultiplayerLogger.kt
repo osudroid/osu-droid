@@ -31,8 +31,14 @@ class MultiplayerLogger : AutoCloseable {
 
     /**
      * Initializes the logger by creating the log file and writing the initial log entry.
+     * Any previously open writer is flushed and closed first to avoid file-descriptor leaks.
      */
     fun init() {
+        // Flush and close any previous writer so we don't leak OS file descriptors
+        // (e.g. on Activity re-creation caused by a permission redirect).
+        try { writer?.flush(); writer?.close() } catch (_: Exception) {}
+
+        isClosed = false
         writer = File("${Config.getDefaultCorePath()}/Log", "multi_log.txt").apply {
             parentFile?.mkdirs()
 

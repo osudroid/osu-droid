@@ -1,16 +1,16 @@
 package com.osudroid.ui.v2.modmenu
 
+import com.osudroid.mods.*
 import com.osudroid.multiplayer.*
 import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
+import com.rian.andengine.modifier.ModifierType
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuToggle(var mod: Mod): UIButton() {
@@ -82,8 +82,10 @@ class ModMenuToggle(var mod: Mod): UIButton() {
 
     @JvmOverloads
     fun updateVisibility(searchTerm: String = "") {
-        var shouldBeVisible = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
-            mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+        var shouldBeVisible = if (Multiplayer.isMultiplayer) {
+            // isValidForMultiplayer is always checked, even if the room hasn't been received yet,
+            // to avoid invalid mods (e.g. Autoplay) appearing before room data arrives.
+            mod.isValidForMultiplayer && (Multiplayer.room == null || Multiplayer.isRoomHost ||
                     (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
         } else {
             true

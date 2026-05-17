@@ -1,17 +1,20 @@
 package com.edlplan.framework.support.batch.object;
 
+import android.opengl.GLES20;
+import android.opengl.Matrix;
+
 import com.edlplan.framework.support.batch.AbstractBatch;
 import com.edlplan.framework.support.batch.BatchEngine;
+import com.edlplan.framework.support.batch.StoryboardBatchShader;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.util.BufferUtil;
 
-import org.anddev.andengine.opengl.texture.ITexture;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.shader.constants.ShaderProgramConstants;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.util.GLState;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
-import javax.microedition.khronos.opengles.GL10;
 
 public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
 
@@ -30,6 +33,27 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
     private float[] ary;
     private int offset;
     private ITexture bindTexture;
+
+    /**
+     * Base MVP matrix set by {@link com.edlplan.framework.support.SupportSprite} from
+     * the AndEngine GLState before the storyboard draw call. This is the ortho projection
+     * that maps screen-pixel coordinates to NDC.  It is combined with the storyboard
+     * camera transform in {@link #applyToGL()} to produce the final MVP.
+     */
+    public static float[] sBaseGLMatrix = new float[16];
+
+    /**
+     * The active {@link GLState} injected by {@link com.edlplan.framework.support.SupportSprite}
+     * before each storyboard draw. Used inside {@link #applyToGL()} so that shader and buffer
+     * bindings go through {@link GLState}'s cache instead of bypassing it with raw GLES20 calls.
+     * Reset to {@code null} after the draw completes.
+     */
+    public static GLState sGLState = null;
+
+    static {
+        // Default: identity (will be overwritten the first time SupportSprite.draw() runs)
+        Matrix.setIdentityM(sBaseGLMatrix, 0);
+    }
 
     private TextureQuadBatch(int size) {
         if (size > Short.MAX_VALUE / 4 - 10) {
@@ -102,59 +126,103 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
 
     @Override
     protected boolean applyToGL() {
-        if (offset != 0) {
+        if (offset == 0) return false;
 
-            GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultipyAlpha);
+        StoryboardBatchShader shader = StoryboardBatchShader.getInstance();
+        if (!shader.ensureCompiled()) return true; // data lost, clear it anyway
 
-            //handle render operation
-            GL10 pGL = BatchEngine.pGL;
-            bindTexture.bind(pGL);
-            GLHelper.enableTextures(pGL);
-            GLHelper.enableTexCoordArray(pGL);
-            pGL.glEnableClientState(GL10.GL_COLOR_ARRAY);
-            pGL.glShadeModel(GL10.GL_SMOOTH);
-            GLHelper.enableVertexArray(pGL);
-            GLHelper.disableCulling(pGL);
+        // --- Build final MVP = base ortho (screen→NDC) × camera (OSB→screen) ----
+        float[] camMatrix = BatchEngine.shaderGlobals.camera.getFinalMatrix().data;
+        float[] mvp = new float[16];
+        Matrix.multiplyMM(mvp, 0, sBaseGLMatrix, 0, camMatrix, 0);
 
-            buffer.position(0);
-            buffer.put(ary, 0, offset);
-            buffer.position(0).limit(offset);
-
-            pGL.glVertexPointer(2, GL10.GL_FLOAT, STEP, buffer);
-            buffer.position(OFFSET_COORD);
-            pGL.glTexCoordPointer(2, GL10.GL_FLOAT, STEP, buffer);
-            buffer.position(OFFSET_COLOR);
-            pGL.glColorPointer(4, GL10.GL_FLOAT, STEP, buffer);
-
-
-            pGL.glDrawElements(
-                    GL10.GL_TRIANGLES,
-                    offset / SIZE_PER_QUAD * 6,
-                    GL10.GL_UNSIGNED_SHORT,
-                    indicesBuffer);
-
-            pGL.glDisableClientState(GL10.GL_COLOR_ARRAY);
-
-
-            /*shader.useThis();
-            shader.loadShaderGlobals(BatchEngine.getShaderGlobals());
-            shader.loadTexture(bindTexture);
-
-            buffer.position(0);
-            buffer.put(ary, 0, offset);
-            buffer.position(0).limit(offset);
-
-            shader.loadBuffer(buffer);
-
-            BatchEngine.pGL.glDrawElements(
-                    GL10.GL_TRIANGLES,
-                    offset / SIZE_PER_QUAD * 6,
-                    GL10.GL_UNSIGNED_SHORT,
-                    indicesBuffer);*/
-            return true;
+        // --- Bind shader via GLState so its cache stays authoritative ------------
+        final GLState glState = sGLState;
+        if (glState != null) {
+            glState.useProgram(shader.getProgramID());
         } else {
-            return false;
+            GLES20.glUseProgram(shader.getProgramID());
         }
+
+        // --- Upload MVP uniform -------------------------------------------------
+        if (shader.getUMVPLoc() >= 0) {
+            GLES20.glUniformMatrix4fv(shader.getUMVPLoc(), 1, false, mvp, 0);
+        }
+
+        // --- Bind texture -------------------------------------------------------
+        // osu!droid fix (Issue 28): route activeTexture + bindTexture through GLState
+        // so its per-unit texture cache stays authoritative. The old code called
+        // GLES20.glActiveTexture / glBindTexture directly, leaving GLState's
+        // mCurrentBoundTextureIDs[0] stale. The next sprite that happened to carry
+        // the same cached texture ID as was bound *before* the storyboard batch
+        // would skip its glBindTexture call and render with the storyboard texture.
+        GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
+        if (glState != null) {
+            glState.activeTexture(GLES20.GL_TEXTURE0);
+            glState.bindTexture(bindTexture.getHardwareTextureID());
+        } else {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
+        }
+        if (shader.getUTextureLoc() >= 0) {
+            GLES20.glUniform1i(shader.getUTextureLoc(), 0);
+        }
+
+        // --- Upload vertex data (client-side array, no VBO) ---------------------
+        // Unbind any VBO so glVertexAttribPointer reads from the client buffer.
+        // Use GLState for GL_ARRAY_BUFFER so the cache reflects the unbind.
+        if (glState != null) {
+            glState.bindArrayBuffer(0);
+        } else {
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        buffer.position(0);
+        buffer.put(ary, 0, offset);
+
+        // a_position  (2 floats at stride STEP, byte offset 0)
+        buffer.position(0);
+        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_POSITION);
+        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_POSITION, 2,
+                GLES20.GL_FLOAT, false, STEP, buffer);
+
+        // a_texCoord  (2 floats at stride STEP, byte offset 2*4 = 8)
+        buffer.position(OFFSET_COORD);
+        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
+        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_TEXCOORD, 2,
+                GLES20.GL_FLOAT, false, STEP, buffer);
+
+        // a_color     (4 floats at stride STEP, byte offset 4*4 = 16)
+        buffer.position(OFFSET_COLOR);
+        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
+        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_COLOR, 4,
+                GLES20.GL_FLOAT, false, STEP, buffer);
+
+        // --- Draw ---------------------------------------------------------------
+        indicesBuffer.position(0);
+        GLWrapped.drawElements(GLES20.GL_TRIANGLES,
+                offset / SIZE_PER_QUAD * 6,
+                GLES20.GL_UNSIGNED_SHORT,
+                indicesBuffer);
+
+        // --- Restore GL state so AndEngine's GLState cache remains authoritative -
+        // Disable the storyboard-specific attrib array (texCoord slot = 1, color slot = 2)
+        // and re-enable the two that AndEngine always expects to be active:
+        //   slot 0 = ATTRIBUTE_POSITION, slot 1 = ATTRIBUTE_COLOR
+        GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
+        GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+
+        // Release the shader binding through GLState so the cache reflects program = 0.
+        if (glState != null) {
+            glState.useProgram(0);
+        } else {
+            GLES20.glUseProgram(0);
+        }
+
+        return true;
     }
 
 }

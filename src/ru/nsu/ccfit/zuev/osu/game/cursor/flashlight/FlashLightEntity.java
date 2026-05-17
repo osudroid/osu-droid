@@ -2,29 +2,30 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
-import com.reco1l.andengine.modifier.Modifiers;
-import com.rian.osu.mods.ModFlashlight;
+import com.osudroid.mods.ModFlashlight;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.IEntityModifier;
+import com.reco1l.andengine.component.UIComponent;
+import com.reco1l.framework.Interpolation;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
 
-public class FlashLightEntity extends Entity  {
+public class FlashLightEntity extends UIComponent {
     private final MainFlashLightSprite mainSprite;
     private final FlashLightDimLayerSprite dimLayer;
     private boolean isTrackingSliders = false;
 
-    private final float areaFollowDelay;
-    private IEntityModifier currentModifier = null;
+    private final float followDelay;
     private float nextPX;
     private float nextPY;
 
     public FlashLightEntity(final ModFlashlight flashlight) {
-        super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        super();
 
-        areaFollowDelay = flashlight.getFollowDelay();
+        setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        followDelay = flashlight.getFollowDelay();
         mainSprite = new MainFlashLightSprite(flashlight.getSizeMultiplier(), flashlight.isComboBasedSize());
         dimLayer = new FlashLightDimLayerSprite();
 
@@ -37,21 +38,8 @@ public class FlashLightEntity extends Entity  {
     }
 
     public void onMouseMove(float pX, float pY) {
-        if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            unregisterEntityModifier(currentModifier);
-        }
-
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
         nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
-
-        if (areaFollowDelay == 0) {
-            setPosition(nextPX, nextPY);
-            return;
-        }
-
-        currentModifier = Modifiers.move(areaFollowDelay, getX(), nextPX, getY(), nextPY, null, Easing.OutExpo);
-
-        registerEntityModifier(currentModifier);
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
@@ -61,6 +49,25 @@ public class FlashLightEntity extends Entity  {
     public void onUpdate(int combo) {
         dimLayer.onTrackingSliders(isTrackingSliders);
         mainSprite.onUpdate(combo);
+    }
+
+    @Override
+    protected void onManagedUpdate(float deltaTimeSec) {
+        super.onManagedUpdate(deltaTimeSec);
+
+        if (followDelay == 0) {
+            setPosition(nextPX, nextPY);
+            return;
+        }
+
+        float x = getInterpolatedPosition(deltaTimeSec, getX(), nextPX);
+        float y = getInterpolatedPosition(deltaTimeSec, getY(), nextPY);
+
+        setPosition(x, y);
+    }
+
+    private float getInterpolatedPosition(float deltaTime, float current, float next) {
+        return Interpolation.floatAt(Math.min(deltaTime, followDelay), current, next, 0, followDelay, Easing.Out);
     }
 }
 

@@ -4,7 +4,7 @@ import android.graphics.PointF
 import android.os.SystemClock
 import com.osudroid.utils.IPoolable
 import com.osudroid.utils.SynchronizedPool
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
 import ru.nsu.ccfit.zuev.osu.game.GameHelper

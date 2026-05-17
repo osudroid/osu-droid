@@ -21,7 +21,7 @@ import com.edlplan.ui.EasingHelper
 import com.osudroid.utils.mainThread
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
-import org.anddev.andengine.entity.scene.Scene
+import org.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu

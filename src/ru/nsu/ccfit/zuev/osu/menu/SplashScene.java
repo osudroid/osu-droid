@@ -2,13 +2,21 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.osudroid.utils.Execution;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 
-import org.anddev.andengine.util.HorizontalAlign;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -20,13 +28,35 @@ public class SplashScene implements IUpdateHandler {
 
     public static final SplashScene INSTANCE = new SplashScene();
     private final Scene scene;
-    private ChangeableText infoText;
-    private ChangeableText progressText;
+    private Text infoText;
+    private Text progressText;
     private Sprite mLoading;
     private boolean mStarting = true;
 
     public SplashScene() {
         scene = new Scene();
+        // GL-bound entities (Sprite, Text) are NOT created here because this constructor
+        // runs as a Java static field initializer at class-load time, before any engine or
+        // ResourceManager is set up.  Call initialize() explicitly once resources are ready.
+        // The update handler is also intentionally NOT registered here for the same reason —
+        // initialze() registers it once GL entities are in place.
+    }
+
+    /**
+     * Creates (or recreates) all GL-bound child entities using the current engine and
+     * ResourceManager.  Must be called after ResourceManager.Init() and the initial font/
+     * texture loads, and before the scene is set on the engine.
+     *
+     * Calling this more than once (e.g. on Activity re-creation within the same process)
+     * safely detaches stale entities and rebuilds them against the live engine resources,
+     * preventing black fonts and broken textures caused by stale GL references.
+     */
+    public void initialize() {
+        scene.detachChildren();
+        // Guard against double-registration: unregister before (re-)registering so that
+        // calling initialize() multiple times never installs duplicate update handlers.
+        scene.unregisterUpdateHandler(this);
+        mStarting = true;
         initializeLoading();
         initializeProgress();
         initializeInfo();
@@ -35,8 +65,9 @@ public class SplashScene implements IUpdateHandler {
 
     private void initializeLoading() {
         var loadTex = ResourceManager.getInstance().getTexture("loading_start");
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
 
-        mLoading = new Sprite(0, 0, loadTex);
+        mLoading = new Sprite(0, 0, loadTex, vbo);
         mLoading.setPosition((Config.getRES_WIDTH() - mLoading.getWidth()) / 2f, (Config.getRES_HEIGHT() - mLoading.getHeight()) / 2f);
         mLoading.setRotationCenter(mLoading.getWidth() / 2f, mLoading.getHeight() / 2f);
         mLoading.setScale(0.4f);
@@ -47,7 +78,8 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeInfo() {
-        infoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.CENTER, 1024);
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        infoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1024, new TextOptions(HorizontalAlign.CENTER), vbo);
         infoText.setPosition((Config.getRES_WIDTH() - infoText.getWidth()) / 2, Config.getRES_HEIGHT() - infoText.getHeight() - 20);
         infoText.setAlpha(0);
         infoText.setScale(0.6f);
@@ -62,7 +94,7 @@ public class SplashScene implements IUpdateHandler {
 
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
-        // ChangeableText isn't compatible with animations unfortunately
+        // ChangeableText isn't compatible with animations unfortunately (still valid?)
         Execution.updateThread(() -> {
             infoText.detachSelf();
             progressText.detachSelf();
@@ -77,7 +109,8 @@ public class SplashScene implements IUpdateHandler {
         }
 
         var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
-        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"));
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"), vbo);
 
         var welcomeSound = ResourceManager.getInstance().getSound("welcome");
         var welcomePiano = ResourceManager.getInstance().getSound("welcome_piano");
@@ -99,7 +132,8 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeProgress() {
-        progressText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", HorizontalAlign.CENTER, 10);
+        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
+        progressText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", 10, new TextOptions(HorizontalAlign.CENTER), vbo);
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
         progressText.setAlpha(0);
         progressText.setScale(0.5f);
@@ -108,10 +142,14 @@ public class SplashScene implements IUpdateHandler {
 
     @Override
     public void onUpdate(float pSecondsElapsed) {
+        if (progressText == null || infoText == null || mLoading == null) {
+            // initialize() has not been called yet; nothing to update.
+            return;
+        }
         float progress = GlobalManager.getInstance().getLoadingProgress();
         if (mStarting)
         {
-            mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
+            mLoading.setAlpha(Math.min(1f, mLoading.getAlpha() + 0.1f));
         }
 
         progressText.setText(String.format("%.0f %%", progress));

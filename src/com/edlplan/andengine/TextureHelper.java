@@ -2,10 +2,10 @@ package com.edlplan.andengine;
 
 import android.graphics.Bitmap;
 
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegionFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,7 +62,7 @@ public class TextureHelper {
         if (errorCount >= 3) {
             return null;
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), tw, th, TextureOptions.BILINEAR);
 
         TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
                 false);
@@ -93,7 +93,7 @@ public class TextureHelper {
         if (errorCount >= 3) {
             return null;
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), tw, th, TextureOptions.BILINEAR);
 
         TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
                 false);

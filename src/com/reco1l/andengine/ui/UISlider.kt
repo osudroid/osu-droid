@@ -6,7 +6,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.roundBy
-import org.anddev.andengine.input.touch.*
+import org.andengine.input.touch.*
 import kotlin.math.*
 
 @Suppress("LeakingThis")

@@ -1,16 +1,15 @@
 package com.edlplan.framework.support;
 
 import com.edlplan.framework.support.batch.BatchEngine;
+import com.edlplan.framework.support.batch.object.TextureQuadBatch;
 import com.edlplan.framework.support.graphics.BaseCanvas;
 import com.edlplan.framework.support.graphics.BlendType;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.graphics.SupportCanvas;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.opengl.util.GLHelper;
-
-import javax.microedition.khronos.opengles.GL10;
+import org.andengine.engine.camera.Camera;
+import org.andengine.entity.Entity;
+import org.andengine.opengl.util.GLState;
 
 public class SupportSprite extends Entity {
 
@@ -40,9 +39,15 @@ public class SupportSprite extends Entity {
     }
 
     @Override
-    protected void doDraw(GL10 pGL, Camera pCamera) {
-        SupportState.setUsingSupportCamera(true);
-        BatchEngine.pGL = pGL;
+    protected void draw(GLState pGLState, Camera pCamera) {
+        // Capture AndEngine's current ortho MVP so TextureQuadBatch can use it as
+        // the base projection (screen pixels → NDC) when rendering storyboard quads.
+        System.arraycopy(pGLState.getModelViewProjectionGLMatrix(), 0,
+                TextureQuadBatch.sBaseGLMatrix, 0, 16);
+
+        // Inject GLState so TextureQuadBatch.applyToGL() can keep it in sync
+        // (shader binding, buffer binding) instead of calling raw GLES20 methods.
+        TextureQuadBatch.sGLState = pGLState;
 
         GLWrapped.blend.setBlendType(BlendType.Normal);
         GLWrapped.blend.apply();
@@ -66,8 +71,10 @@ public class SupportSprite extends Entity {
         canvas.restoreToCount(count);
         canvas.unprepare();
 
-        SupportState.setUsingSupportCamera(false);
-        GLHelper.blendFunction(pGL, BlendType.Normal.srcTypePreM, BlendType.Normal.dstTypePreM);
+        // Clear the GLState reference — TextureQuadBatch.applyToGL() has already
+        // performed all necessary GLState resync internally (program, array buffer,
+        // and attrib arrays), so no further repair is needed here.
+        TextureQuadBatch.sGLState = null;
     }
 
     public interface OnSupportDraw {

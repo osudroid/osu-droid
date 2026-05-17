@@ -1,86 +1,131 @@
 package com.reco1l.andengine.sprite
 
 import android.media.*
-import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
+import android.opengl.GLES20
 import android.os.*
+import android.util.Log
+import com.acivev.andengine.opengl.ExternalOESShaderProgram
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.texture.*
-import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.sprite.*
-import org.anddev.andengine.opengl.texture.region.*
-import org.anddev.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.GL10
+import org.andengine.engine.Engine
+import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.opengl.texture.region.*
+import org.andengine.opengl.util.GLState
 
-class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
-    TextureRegion(it, 0, 0, it.width, it.height)
-}) {
+/**
+ * A sprite that renders a video file using Android's MediaPlayer and a GL_TEXTURE_EXTERNAL_OES
+ * texture. Uses [com.acivev.andengine.opengl.ExternalOESShaderProgram] so that the OES sampler and SurfaceTexture
+ * transform matrix are applied correctly.
+ */
+class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
 
-    private val texture = textureRegion.texture as VideoTexture
-
-
-    private var isMaliGPU: Boolean? = null
-
+    private val videoTexture = VideoTexture(source)
 
     init {
-        engine.textureManager.loadTexture(texture)
-    }
+        val w = videoTexture.width.toFloat()
+        val h = videoTexture.height.toFloat()
+        textureRegion = TextureRegion(videoTexture, 0f, 0f, w.coerceAtLeast(1f), h.coerceAtLeast(1f))
+        engine.textureManager.loadTexture(videoTexture)
 
-
-    override fun onInitDraw(pGL: GL10) {
-
-        if (isMaliGPU == null) {
-            isMaliGPU = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
+        // Some hardware decoders report 0×0 from prepare() and only provide dimensions
+        // on the first decoded frame. Register a listener to fix the TextureRegion then.
+        if (w <= 0f || h <= 0f) {
+            videoTexture.player.setOnVideoSizeChangedListener { _, width, height ->
+                if (width > 0 && height > 0) {
+                    videoTexture.updateCachedSize(width, height)
+                    updateThread {
+                        textureRegion = TextureRegion(videoTexture, 0f, 0f, width.toFloat(), height.toFloat())
+                    }
+                }
+            }
         }
 
-        super.onInitDraw(pGL)
+        // SurfaceTexture/OES textures have their V axis inverted relative to UISprite's UV
+        // convention — flip it so the video appears right-side up regardless of whether the
+        // device's ST matrix also applies a V-flip (both cases work out correctly).
+        flippedVertical = true
+    }
 
-        // Apparently there is either a bug or unintended behavior in Mali GPUs' OpenGL ES implementation.
-        // Causes the wrong texture to be displayed when GL_TEXTURE_2D is enabled before enabling GL_TEXTURE_EXTERNAL_OES.
-        if (isMaliGPU!!) {
-            GLHelper.disableTextures(pGL)
+    // -----------------------------------------------------------------------
+    // Custom shader binding — OES external texture + ST-transform matrix
+    // -----------------------------------------------------------------------
+
+    override fun beginDraw(pGLState: GLState) {
+        // Latch the latest video frame and update the ST matrix BEFORE onBindShader reads it.
+        videoTexture.latch()
+        super.beginDraw(pGLState)
+    }
+
+    override fun onBindShader(pGLState: GLState) {
+        val shader = ExternalOESShaderProgram.getInstance()
+        shader.bindProgram(pGLState)
+
+        if (shader.uniformMVPMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                shader.uniformMVPMatrixLocation,
+                1, false, pGLState.modelViewProjectionGLMatrix, 0
+            )
         }
 
-        pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
+        // ST-transform: corrects Y-flip and any other orientation from the hardware decoder.
+        if (shader.uniformSTMatrixLocation >= 0) {
+            GLES20.glUniformMatrix4fv(
+                shader.uniformSTMatrixLocation,
+                1, false, videoTexture.getTransformMatrix(), 0
+            )
+        }
+
+        if (shader.uniformTexture0Location >= 0) {
+            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+        }
+
+        if (shader.uniformColorLocation >= 0) {
+            GLES20.glUniform4f(
+                shader.uniformColorLocation,
+                drawRed, drawGreen, drawBlue, drawAlpha
+            )
+        }
+
+        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+
+        // UV attribute (attribute location 3).
+        uvBuffer.beginDraw(pGLState)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
-        super.drawVertices(gl, camera)
+    // -----------------------------------------------------------------------
+    // Playback controls
+    // -----------------------------------------------------------------------
 
-        gl.glDisable(GL_TEXTURE_EXTERNAL_OES)
-    }
-
-
-    fun release() {
-        texture.player.release()
-        engine.textureManager.unloadTexture(texture)
-    }
-
-    fun play() {
-        texture.player.start()
-    }
-
-    fun pause() {
-        texture.player.pause()
-    }
+    fun play()  { videoTexture.player.start() }
+    fun pause() { videoTexture.player.pause() }
 
     fun seekTo(ms: Int) {
-        // Unfortunately in old versions we can't seek at closest frame from the desired position.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            texture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
+            videoTexture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
         } else {
-            texture.player.seekTo(ms)
+            @Suppress("DEPRECATION")
+            videoTexture.player.seekTo(ms)
         }
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
+        // Guard against IllegalStateException if release() races this call from a coroutine.
+        try {
+            videoTexture.player.playbackParams = videoTexture.player.playbackParams.setSpeed(speed)
+        } catch (e: IllegalStateException) {
+            Log.w("UIVideoSprite", "setPlaybackSpeed called on a released player; ignoring.", e)
+        }
     }
 
+    fun release() {
+        videoTexture.player.release()
+        engine.textureManager.unloadTexture(videoTexture)
+    }
 
     override fun finalize() {
-        release()
+        // Do NOT call release() here — finalize() runs on a GC thread which has no active GL
+        // context.  Calling unloadTexture() from a non-GL thread silently corrupts GL state.
+        // Callers must call release() explicitly before dropping the last reference.
         super.finalize()
     }
 }
-
-

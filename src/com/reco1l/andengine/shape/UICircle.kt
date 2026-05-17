@@ -5,9 +5,7 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.UICircle.*
 import com.reco1l.toolkt.*
-import org.anddev.andengine.opengl.util.GLHelper
-import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL11.*
+import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 
@@ -67,9 +65,9 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
     }
 
 
-    override fun beginDraw(gl: GL10) {
-        super.beginDraw(gl)
-        GLHelper.lineWidth(gl, lineWidth)
+    override fun beginDraw(pGLState: GLState) {
+        super.beginDraw(pGLState)
+        pGLState.lineWidth(lineWidth)
     }
 
     override fun onSizeChanged() {

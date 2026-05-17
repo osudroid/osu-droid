@@ -4,13 +4,14 @@ import com.osudroid.ui.v2.hud.GameplayHUD;
 import com.reco1l.andengine.sprite.UISprite;
 import com.reco1l.andengine.Anchor;
 import com.osudroid.multiplayer.Multiplayer;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.modifier.*;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -29,6 +30,7 @@ public class BreakAnimator extends GameObject {
     private UISprite mark = null;
     private boolean isbreak = false;
     private boolean over = false;
+    private float dimBrightness = Config.getBackgroundBrightness();
 
     public BreakAnimator(final Scene scene, final StatisticV2 stat, GameplayHUD hud) {
         length = 0;
@@ -37,8 +39,7 @@ public class BreakAnimator extends GameObject {
         this.hud = hud;
 
         for (int i = 0; i < 4; i++) {
-            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
-                    .getTexture("play-warningarrow").deepCopy());
+            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-warningarrow").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             arrows[i]
                     .registerEntityModifier(new LoopEntityModifier(
                             new SequenceEntityModifier(
@@ -64,6 +65,10 @@ public class BreakAnimator extends GameObject {
         this.dimRectangle = dimRectangle;
     }
 
+    public void setDimBrightness(float brightness) {
+        dimBrightness = brightness;
+    }
+
     public boolean isBreak() {
         return isbreak;
     }
@@ -72,6 +77,29 @@ public class BreakAnimator extends GameObject {
         final boolean isover = over;
         over = false;
         return isover;
+    }
+
+    public void reset() {
+        isbreak = false;
+        over = false;
+        length = 0;
+        time = 0;
+
+        if (mark != null) {
+            mark.detachSelf();
+            mark = null;
+        }
+
+        if (passfail != null) {
+            passfail.detachSelf();
+            passfail = null;
+        }
+
+        for (final Sprite sp : arrows) {
+            sp.detachSelf();
+        }
+
+        resumeBgFade();
     }
 
     public void init(final float length) {
@@ -109,13 +137,13 @@ public class BreakAnimator extends GameObject {
 
     private void setBgFade(float percent) {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha((1 - Config.getBackgroundBrightness()) * (1 - percent));
+            dimRectangle.setAlpha((1 - dimBrightness) * (1 - percent));
         }
     }
 
     private void resumeBgFade() {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha(1 - Config.getBackgroundBrightness());
+            dimRectangle.setAlpha(1 - dimBrightness);
         }
     }
 

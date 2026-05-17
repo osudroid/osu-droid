@@ -3,9 +3,9 @@ package com.osudroid.ui.v2.hud.elements
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.shape.UICircle
+import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
-import com.reco1l.andengine.component.*
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 
@@ -14,7 +14,7 @@ sealed class HUDSongProgress : HUDElement() {
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         if (gameScene.elapsedTime < gameScene.firstObjectStartTime) {
-            setProgress((gameScene.elapsedTime - gameScene.initialElapsedTime) / (gameScene.firstObjectStartTime - gameScene.initialElapsedTime), true)
+            setProgress((gameScene.elapsedTime - gameScene.initialStartTime) / (gameScene.firstObjectStartTime - gameScene.initialStartTime), true)
         } else {
             setProgress((gameScene.elapsedTime - gameScene.firstObjectStartTime) / (gameScene.lastObjectEndTime - gameScene.firstObjectStartTime), false)
         }
@@ -81,27 +81,18 @@ class HUDPieSongProgress : HUDSongProgress() {
 
         // Reference: https://github.com/ppy/osu/blob/6455c0583b5e607baeca7f584410bc63515aa619/osu.Game/Skinning/LegacySongProgress.cs
 
-        UICircle().also { clear ->
+        // Draw a white ring outline. Using PaintStyle.Outline avoids relying on the
+        // depth buffer, which may not be available (DEPTH_SIZE = 0 in ConfigChooser).
+        UICircle().also { ring ->
 
-            clear.setSize(30f, 30f)
-            clear.anchor = Anchor.Center
-            clear.origin = Anchor.Center
-            clear.color = Color4.Transparent
-            clear.clearInfo = ClearInfo.ClearDepthBuffer
-            clear.depthInfo = DepthInfo.Less
+            ring.setSize(33f, 33f)
+            ring.anchor = Anchor.Center
+            ring.origin = Anchor.Center
+            ring.color = Color4.White
+            ring.paintStyle = PaintStyle.Outline
+            ring.lineWidth = 3f
 
-            attachChild(clear)
-        }
-
-        UICircle().also { background ->
-
-            background.setSize(33f, 33f)
-            background.anchor = Anchor.Center
-            background.origin = Anchor.Center
-            background.color = Color4.White
-            background.depthInfo = DepthInfo.Default
-
-            attachChild(background)
+            attachChild(ring)
         }
 
         circularProgress = UICircle().also { progress ->

@@ -12,7 +12,7 @@ import okhttp3.OkHttpClient;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class OnlineManager {
     public static final String hostname = "osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
-    public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
+    public static final String defaultAvatarURL = getAvatarURL(0);
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
     private static final String onlineVersion = "60";
 
@@ -69,6 +69,10 @@ public class OnlineManager {
             case SCORE -> endpoint + "upload/" + playID + ".odr";
             case PP -> endpoint + "bestpp/" + playID + ".odr";
         };
+    }
+
+    public static String getAvatarURL(long userId) {
+        return "https://" + hostname + "/user/avatar/" + userId + ".png";
     }
 
     public static String getProfileBannerURL(long userId) {

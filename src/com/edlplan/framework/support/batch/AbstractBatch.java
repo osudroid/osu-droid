@@ -1,10 +1,5 @@
 package com.edlplan.framework.support.batch;
 
-import com.edlplan.framework.support.SupportState;
-
-import org.anddev.andengine.opengl.util.GLHelper;
-
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  * 一个Batch表示缓存了一类的操作
@@ -44,26 +39,8 @@ public abstract class AbstractBatch<T> {
     }
 
     public final void flush() {
-        GL10 pGL = BatchEngine.pGL;
-        int type = GLHelper.getCurrentMatrixType();
-        if (SupportState.isUsingSupportCamera()) {
-            pGL.glMatrixMode(GL10.GL_PROJECTION);
-            pGL.glPushMatrix();
-            pGL.glMultMatrixf(BatchEngine.shaderGlobals.camera.getProjectionMatrix().data, 0);
-
-            pGL.glMatrixMode(GL10.GL_MODELVIEW);
-            pGL.glPushMatrix();
-            pGL.glMultMatrixf(BatchEngine.shaderGlobals.camera.getMaskMatrix().data, 0);
-        }
         if (applyToGL()) {
             clearData();
-        }
-        if (SupportState.isUsingSupportCamera()) {
-            pGL.glMatrixMode(GL10.GL_PROJECTION);
-            pGL.glPopMatrix();
-            pGL.glMatrixMode(GL10.GL_MODELVIEW);
-            pGL.glPopMatrix();
-            pGL.glMatrixMode(type);
         }
     }
 }

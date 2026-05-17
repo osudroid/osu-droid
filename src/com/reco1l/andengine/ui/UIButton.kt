@@ -4,12 +4,12 @@ import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.math.*
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
+import com.rian.andengine.modifier.ModifierType
 
 @Suppress("LeakingThis")
 open class UIButton : UILinearContainer() {
@@ -117,12 +117,12 @@ open class UIButton : UILinearContainer() {
     open fun processTouchFeedback(event: TouchEvent) {
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(0.9f, 0.3f).eased(Easing.Out)
+            scaleTo(0.9f, 0.3f, Easing.Out)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
             clearModifiers(ModifierType.ScaleXY)
-            scaleTo(1f, 0.4f).eased(Easing.OutElastic)
+            scaleTo(1f, 0.4f, Easing.OutElastic)
         }
     }
 

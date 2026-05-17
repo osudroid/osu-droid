@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
+import com.osudroid.utils.ModUtils
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -10,12 +11,12 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
-import com.rian.osu.utils.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.engine.camera.*
+import org.andengine.opengl.texture.region.*
+import org.andengine.opengl.util.GLState
+import com.osudroid.mods.*
+import com.osudroid.utils.*
 import ru.nsu.ccfit.zuev.osu.*
-import javax.microedition.khronos.opengles.*
 
 /**
  * The icon for a mod in the mod menu.
@@ -37,7 +38,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
     }
 
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
 
         val acronymText = get<UIComponent>(0)
         if (acronymText is UIText) {
@@ -46,7 +47,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
         (background as? UIBox)?.cornerRadius = height * 0.2f
 
-        super.onManagedDraw(gl, camera)
+        super.onManagedDraw(pGLState, pCamera)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

@@ -2,7 +2,7 @@
 
 package com.osudroid.multiplayer
 
-import com.rian.osu.utils.ModUtils
+import com.osudroid.utils.ModUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2

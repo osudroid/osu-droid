@@ -25,7 +25,7 @@ import com.reco1l.framework.HexComposition;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
@@ -88,7 +88,6 @@ public class Config {
         RES_HEIGHT,
         spinnerStyle,
         metronomeSwitch,
-        minimumGameplaySynchronizationTime,
         backButtonPressTime;
 
     private static float soundVolume,
@@ -231,7 +230,6 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
-        minimumGameplaySynchronizationTime = prefs.getInt("gameAudioSynchronizationThreshold", 20);
         backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
@@ -790,10 +788,6 @@ public class Config {
 
     public static boolean isDisplayPlayfieldBorder() {
         return getBoolean("displayPlayfieldBorder", false);
-    }
-
-    public static int getMinimumGameplaySynchronizationTime() {
-        return minimumGameplaySynchronizationTime;
     }
 
     public static int getBackButtonPressTime() {

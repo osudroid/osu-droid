@@ -4,8 +4,8 @@ import android.graphics.PointF;
 
 import com.osudroid.game.Cursor;
 import com.reco1l.framework.Color4;
-import com.rian.osu.beatmap.constants.HitObjectType;
-import com.rian.osu.gameplay.GameplayHitSampleInfo;
+import com.osudroid.beatmaps.constants.HitObjectType;
+import com.osudroid.game.GameplayHitSampleInfo;
 
 import java.util.BitSet;
 import java.util.List;
@@ -42,4 +42,9 @@ public interface GameObjectListener {
     void onUpdatedAutoCursor(float pX, float pY);
 
     void playHitSamples(List<GameplayHitSampleInfo> samples);
+
+    /**
+     * The current elapsed time relative to the start of the beatmap, in seconds.
+     */
+    float getElapsedTime();
 }

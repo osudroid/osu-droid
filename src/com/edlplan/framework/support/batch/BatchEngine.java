@@ -3,11 +3,8 @@ package com.edlplan.framework.support.batch;
 import com.edlplan.framework.support.graphics.Camera;
 import com.edlplan.framework.support.graphics.ShaderGlobals;
 
-import javax.microedition.khronos.opengles.GL10;
-
 public class BatchEngine {
 
-    public static GL10 pGL;
     public static ShaderGlobals shaderGlobals = new ShaderGlobals();
     private static AbstractBatch<?> savedbatch = null;
     private static boolean flushing = false;

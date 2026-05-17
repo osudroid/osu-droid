@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.osudroid.data.BeatmapSetInfo;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -43,9 +43,9 @@ public class BeatmapSetItem {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
         beatmapSetDir = beatmapSetInfo.getDirectory();
-        bgHeight = ResourceManager.getInstance()
+        bgHeight = (int) (ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                - Utils.toRes(25));
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
@@ -65,9 +65,9 @@ public class BeatmapSetItem {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
         beatmapSetDir = this.beatmapSetInfo.getDirectory();
-        bgHeight = ResourceManager.getInstance()
+        bgHeight = (int) (ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                - Utils.toRes(25));
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);

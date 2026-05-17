@@ -6,10 +6,13 @@ import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.FMath;
 import com.osudroid.game.CursorEvent;
-import com.rian.osu.beatmap.HitWindow;
-import com.rian.osu.beatmap.hitobject.HitObject;
+import com.osudroid.beatmaps.HitWindow;
+import com.osudroid.beatmaps.hitobjects.HitObject;
 
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.util.modifier.IModifier;
+import com.rian.andengine.modifier.UniversalModifier;
+import com.rian.andengine.modifier.UniversalModifierSequence;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -57,6 +60,8 @@ public abstract class GameObject {
     public boolean isStartHit() {
         return startHit;
     }
+
+    public void playLoopingSamples() {}
 
     public void stopLoopingSamples() {}
 
@@ -242,13 +247,21 @@ public abstract class GameObject {
     }
 
     /**
-     * Extends the lifetime of this {@link GameObject} to allow an {@link IModifier} to finish.
+     * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifier} to finish.
      *
-     * @param elapsedTime Elapsed time since the start of the beatmap, in seconds.
-     * @param modifier The {@link IModifier} to extend this {@link GameObject}'s lifetime with.
+     * @param modifier The {@link UniversalModifier} to extend this {@link GameObject}'s lifetime with.
      */
-    protected void extendLifetime(float elapsedTime, IModifier<?> modifier) {
-        lifetimeEnd = Math.max(lifetimeEnd, elapsedTime + modifier.getDuration());
+    protected void extendLifetime(UniversalModifier modifier) {
+        lifetimeEnd = Math.max(lifetimeEnd, modifier.getEndTime());
+    }
+
+    /**
+     * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifierSequence} to finish.
+     *
+     * @param sequence The {@link UniversalModifierSequence} to extend this {@link GameObject}'s lifetime with.
+     */
+    protected void extendLifetime(UniversalModifierSequence sequence) {
+        lifetimeEnd = Math.max(lifetimeEnd, sequence.getEndTime());
     }
 
     //endregion

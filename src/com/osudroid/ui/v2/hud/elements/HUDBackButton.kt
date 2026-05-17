@@ -8,7 +8,7 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -73,6 +73,13 @@ class HUDBackButton : HUDElement() {
     init {
         setSize(SIZE, SIZE)
         alpha = 0.25f
+
+        // The HUD layer may be attached to the beatmap's clock, which can be paused at any time. When that happens,
+        // this back button will never be pressable. For this reason, we use the engine's update clock.
+        // We will not inherit the beatmap clock's rate, but this is fine since the press duration is based on real
+        // time, not game time.
+        clock = UIEngine.current.clock
+        processCustomClock = false
 
         attachChild(frontCircle)
         attachChild(backCircle)

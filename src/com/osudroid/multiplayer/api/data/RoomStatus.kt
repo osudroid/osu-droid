@@ -22,6 +22,9 @@ enum class RoomStatus {
 
 
     companion object {
-        operator fun get(ordinal: Int) = entries[ordinal]
+        /**
+         * Returns the [RoomStatus] for [ordinal], or `null` if the ordinal is not recognized.
+         */
+        operator fun get(ordinal: Int): RoomStatus? = entries.getOrNull(ordinal)
     }
 }

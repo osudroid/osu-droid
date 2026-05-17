@@ -30,7 +30,7 @@ open class UILinearContainer : UIContainer() {
 
         for (i in 0 until childCount) {
 
-            val child = getChild(i) as? UIComponent ?: continue
+            val child = getChildByIndex(i) as? UIComponent ?: continue
 
             if (!child.isVisible) {
                 continue

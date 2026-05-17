@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
@@ -15,6 +14,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -27,7 +28,9 @@
         android:resizeableActivity="false"
         android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject"
         tools:ignore="UnusedAttribute">
-        <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService" android:exported="false"/>
+        <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"/>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
@@ -131,11 +134,11 @@
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
             </intent-filter>
 
             <!-- firefox and file explorer -->

@@ -5,7 +5,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import org.anddev.andengine.entity.IEntity
+import org.andengine.entity.IEntity
 
 
 inline fun IEntity.text(builder: UIText.() -> Unit): UIText {

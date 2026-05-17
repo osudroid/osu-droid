@@ -43,8 +43,8 @@ class UIShapedSprite : UISprite() {
 
     companion object {
 
-        private val SHAPE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES10.GL_ALWAYS)
-        private val SPRITE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES10.GL_EQUAL)
+        private val SHAPE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES20.GL_ALWAYS)
+        private val SPRITE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES20.GL_EQUAL)
 
     }
 }

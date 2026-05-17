@@ -8,7 +8,7 @@ import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
 import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.andengine.component.*
-import org.anddev.andengine.opengl.texture.region.*
+import org.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
