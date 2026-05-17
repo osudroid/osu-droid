@@ -290,11 +290,6 @@ public class GameplaySpinner extends GameObject {
             startHit = true;
         }
 
-        if (passedTime >= duration) {
-            removeFromScene();
-            return;
-        }
-
         updateSamples(dt);
         PointF mouse = null;
 
@@ -324,87 +319,90 @@ public class GameplaySpinner extends GameObject {
             }
         }
 
-        if (mouse == null)
-            return;
+        if (mouse != null) {
+            circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
 
-        circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
+            var len1 = Utils.length(currMouse);
+            var len2 = Utils.length(oldMouse);
+            var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
 
-        var len1 = Utils.length(currMouse);
-        var len2 = Utils.length(oldMouse);
-        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+            if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+                dfill = 0;
 
-        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
-            dfill = 0;
-
-        if (autoPlay) {
-            dfill = 5 * 4 * dt;
-            circle.setRotation((rotations + dfill / 4f) * 360);
-            //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-               float angle = (rotations + dfill / 4f) * 360;
-               float pX = position.x + 50 * (float)Math.sin(angle);
-               float pY = position.y + 50 * (float)Math.cos(angle);
-               listener.updateAutoBasedPos(pX, pY);
+            if (autoPlay) {
+                dfill = 5 * 4 * dt;
+                circle.setRotation((rotations + dfill / 4f) * 360);
+                //auto时，FL光圈绕中心旋转
+                if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                    float angle = (rotations + dfill / 4f) * 360;
+                    float pX = position.x + 50 * (float)Math.sin(angle);
+                    float pY = position.y + 50 * (float)Math.cos(angle);
+                    listener.updateAutoBasedPos(pX, pY);
+                }
             }
-        }
 
-        rotations += dfill / 4f;
-        float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
+            rotations += dfill / 4f;
+            float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
-        if (dfill != 0) {
-            updateSpinSampleFrequency(percentfill);
-            spinnerSpinSample.play();
-        } else {
-            spinnerSpinSample.stopAll();
-        }
+            if (dfill != 0) {
+                updateSpinSampleFrequency(percentfill);
+                spinnerSpinSample.play();
+            } else {
+                spinnerSpinSample.stopAll();
+            }
 
-        if (percentfill > 1 || clear) {
-            percentfill = 1;
-            if (!clear) {
-                scene.attachChild(clearText);
-                clearText.fadeInFromZero(0.25f);
-                clearText.setScale(1.5f);
-                clearText.scaleTo(1, 0.25f);
+            if (percentfill > 1 || clear) {
+                percentfill = 1;
+                if (!clear) {
+                    scene.attachChild(clearText);
+                    clearText.fadeInFromZero(0.25f);
+                    clearText.setScale(1.5f);
+                    clearText.scaleTo(1, 0.25f);
 
-                clear = true;
+                    clear = true;
+                } else if (Math.abs(rotations) > 1) {
+                    rotations -= 1 * Math.signum(rotations);
+                    bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    bonusScoreCounter++;
+                    if (!bonusScore.hasParent()) {
+                        scene.attachChild(bonusScore);
+                    }
+                    spinnerBonusSample.play();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
-                listener.onSpinnerHit(id, 1000, false, 0);
-                bonusScoreCounter++;
-                if (!bonusScore.hasParent()) {
-                    scene.attachChild(bonusScore);
+                if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
+                    fullRotations++;
+                    stat.registerSpinnerHit();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-                spinnerBonusSample.play();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
-        } else if (Math.abs(rotations) > 1) {
-            rotations -= 1 * Math.signum(rotations);
-            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
-                fullRotations++;
-                stat.registerSpinnerHit();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
-            }
+
+            float fillOffset = 1 - Math.min(1, Math.abs(percentfill));
+
+            metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
+            metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
+
+            metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
+            metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
+            metre.requestBufferUpdate();
+
+            oldMouse.set(currMouse);
         }
 
-        float fillOffset = 1 - Math.min(1, Math.abs(percentfill));
-
-        metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
-        metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
-
-        metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
-        metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
-        metre.requestBufferUpdate();
-
-        oldMouse.set(currMouse);
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
     }
 
     @Override
