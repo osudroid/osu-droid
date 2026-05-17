@@ -79,6 +79,29 @@ public class BreakAnimator extends GameObject {
         return isover;
     }
 
+    public void reset() {
+        isbreak = false;
+        over = false;
+        length = 0;
+        time = 0;
+
+        if (mark != null) {
+            mark.detachSelf();
+            mark = null;
+        }
+
+        if (passfail != null) {
+            passfail.detachSelf();
+            passfail = null;
+        }
+
+        for (final Sprite sp : arrows) {
+            sp.detachSelf();
+        }
+
+        resumeBgFade();
+    }
+
     public void init(final float length) {
         if (this.length > 0 && time < this.length) {
             return;

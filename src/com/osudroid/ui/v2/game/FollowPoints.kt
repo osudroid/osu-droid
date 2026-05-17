@@ -48,9 +48,17 @@ object FollowPointConnection {
 
     private val expire = OnModifierFinished { fp ->
         updateThread {
+            val poolable = fp as IPoolable
+
+            // `clearAll` may have already recycled this follow point, so we need to check if it's already recycled
+            // before releasing it again.
+            if (poolable.isRecycled) {
+                return@updateThread
+            }
+
             fp.detachSelf()
             fp.reset()
-            pool.release(fp as IPoolable)
+            pool.release(poolable)
         }
     }
 
@@ -67,6 +75,20 @@ object FollowPointConnection {
 
             setTextureWidth(newWidth)
             setTextureHeight(newHeight)
+        }
+    }
+
+    @JvmStatic
+    fun clearAll(scene: UIScene) {
+        for (i in scene.childCount - 1 downTo 0) {
+            val child = scene.getChild(i)
+
+            if (child is PoolableFollowPoint || child is PoolableAnimatedFollowPoint) {
+                child.clearEntityModifiers()
+                child.detachSelf()
+                child.reset()
+                pool.release(child as IPoolable)
+            }
         }
     }
 

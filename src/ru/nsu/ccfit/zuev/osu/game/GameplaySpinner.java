@@ -288,6 +288,20 @@ public class GameplaySpinner extends GameObject {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                if (clear) {
+                    scene.attachChild(clearText);
+                }
+
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         updateSamples(dt);
@@ -427,6 +441,66 @@ public class GameplaySpinner extends GameObject {
         // In remove spinner lock mode, the spinner is assumed to be judged to allow other objects to be judged while
         // the spinner is still active.
         return Config.isRemoveSliderLock() || passedTime >= duration;
+    }
+
+    protected void applySeekRotations() {
+        float totalRotations = 5f * passedTime;
+        int wholeRotations = (int) totalRotations;
+
+        if (clear) {
+            // Already cleared (e.g. zero-duration spinner); all whole rotations are bonus.
+            for (int i = 0; i < wholeRotations; i++) {
+                bonusScoreCounter++;
+                listener.onSpinnerHit(id, 1000, false, 0);
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            rotations = totalRotations - wholeRotations;
+        } else {
+            // On clear, rotations is reset to only the excess beyond needRotations (replay version 8+ behavior, which
+            // always applies for Autoplay). Therefore ceil(needRotations) - 1 rotations are pre-clear, and
+            // floor(totalRotations - needRotations) are bonus rotations.
+            int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
+
+            for (int i = 0; i < preClear; i++) {
+                fullRotations++;
+                stat.registerSpinnerHit();
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            if (totalRotations > needRotations) {
+                clear = true;
+                int bonus = (int)(totalRotations - needRotations);
+
+                for (int i = 0; i < bonus; i++) {
+                    bonusScoreCounter++;
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    float rate = 0.375f;
+
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
+
+                rotations = (totalRotations - needRotations) - bonus;
+            } else {
+                rotations = totalRotations - wholeRotations;
+            }
+        }
     }
 
     protected void reloadHitSounds() {

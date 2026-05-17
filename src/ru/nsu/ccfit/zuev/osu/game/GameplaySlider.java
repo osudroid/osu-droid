@@ -1140,24 +1140,31 @@ public class GameplaySlider extends GameObject {
         if (isTracking() && replayObjectData == null) {
             allTicksInRange = true;
 
-            // Do not judge the slider end as it will be judged in onSpanFinish.
-            for (int i = 1; i < nestedObjects.size() - 1; ++i) {
-                var nestedObject = nestedObjects.get(i);
+            // In Autoplay, the cursor is always at the ball's exact position, so the distance check below
+            // is always satisfied and can be skipped. This also avoids false misses after seeking: when
+            // seeking into the middle of a slider, elapsedSpanTime > 0 immediately, so past ticks are
+            // evaluated with the ball already ahead of them — their positions would fail the distance
+            // check even though Autoplay would always have tracked them.
+            if (!autoPlay) {
+                // Do not judge the slider end as it will be judged in onSpanFinish.
+                for (int i = 1; i < nestedObjects.size() - 1; ++i) {
+                    var nestedObject = nestedObjects.get(i);
 
-                // Stop the process when a nested object that can't be hit before the current time is reached.
-                if (nestedObject.startTime > currentTime) {
-                    break;
-                }
+                    // Stop the process when a nested object that can't be hit before the current time is reached.
+                    if (nestedObject.startTime > currentTime) {
+                        break;
+                    }
 
-                // When the first nested object that is further outside the follow area is reached,
-                // forcefully miss all other nested objects that would otherwise be valid to be hit.
-                // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
-                var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
-                var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
+                    // When the first nested object that is further outside the follow area is reached,
+                    // forcefully miss all other nested objects that would otherwise be valid to be hit.
+                    // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
+                    var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
+                    var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
 
-                if (distanceSquared > distanceTrackingThresholdSquared) {
-                    allTicksInRange = false;
-                    break;
+                    if (distanceSquared > distanceTrackingThresholdSquared) {
+                        allTicksInRange = false;
+                        break;
+                    }
                 }
             }
         }

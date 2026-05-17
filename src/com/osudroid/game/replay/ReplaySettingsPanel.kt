@@ -136,7 +136,7 @@ class ReplaySettingsPanel : UIContainer() {
     }
 
     companion object {
-        private const val PANEL_WIDTH = 460f
+        private const val PANEL_WIDTH = 440f
         private const val BUTTON_WIDTH = 48f
         private const val BUTTON_RADIUS = 12f
     }
