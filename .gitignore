@@ -44,4 +44,5 @@ release.jks
 .claude/settings.local.json
 .claude/logs/
 .claude/cache/
+.claude/worktrees/
 CLAUDE.local.md
