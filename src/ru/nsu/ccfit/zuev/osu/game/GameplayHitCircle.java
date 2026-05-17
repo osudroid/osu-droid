@@ -15,6 +15,7 @@ import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.mods.ModHidden;
 
 import org.andengine.entity.scene.Scene;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 
@@ -48,7 +49,6 @@ public class GameplayHitCircle extends GameObject {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final UIScene pScene, final HitCircle beatmapCircle,
@@ -101,6 +101,9 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapCircle));
+
+        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture(
+                GameHelper.isTraceable() ? "defaultapproachcircle" : "approachcircle"));
 
         scene.attachChild(circlePiece, 0);
         scene.attachChild(approachCircle);
