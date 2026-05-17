@@ -2,7 +2,7 @@ package com.osudroid.difficulty.skills
 
 import com.osudroid.difficulty.DifficultyHitObject
 import com.osudroid.mods.Mod
-import com.osudroid.util.addInPlace
+import com.osudroid.utils.addInPlace
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.pow

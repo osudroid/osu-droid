@@ -1,6 +1,6 @@
-package com.rian.util
+package com.osudroid.utils
 
-import org.junit.Assert.*
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -18,8 +18,8 @@ class AddInPlaceTest {
     fun `addInPlace into empty list inserts at index 0`() {
         val index = list.addInPlace(5)
 
-        assertEquals(0, index)
-        assertEquals(listOf(5), list)
+        Assert.assertEquals(0, index)
+        Assert.assertEquals(listOf(5), list)
     }
 
     // Return-value correctness
@@ -30,7 +30,7 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(5)
 
-        assertEquals(0, index)
+        Assert.assertEquals(0, index)
     }
 
     @Test
@@ -39,7 +39,7 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(35)
 
-        assertEquals(3, index)
+        Assert.assertEquals(3, index)
     }
 
     @Test
@@ -48,7 +48,7 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(15)
 
-        assertEquals(1, index)
+        Assert.assertEquals(1, index)
     }
 
     // List-state correctness after insertion
@@ -58,7 +58,7 @@ class AddInPlaceTest {
         list.addAll(listOf(10, 20, 30))
         list.addInPlace(5)
 
-        assertEquals(listOf(5, 10, 20, 30), list)
+        Assert.assertEquals(listOf(5, 10, 20, 30), list)
     }
 
     @Test
@@ -66,7 +66,7 @@ class AddInPlaceTest {
         list.addAll(listOf(10, 20, 30))
         list.addInPlace(40)
 
-        assertEquals(listOf(10, 20, 30, 40), list)
+        Assert.assertEquals(listOf(10, 20, 30, 40), list)
     }
 
     @Test
@@ -74,7 +74,7 @@ class AddInPlaceTest {
         list.addAll(listOf(10, 20, 30))
         list.addInPlace(25)
 
-        assertEquals(listOf(10, 20, 25, 30), list)
+        Assert.assertEquals(listOf(10, 20, 25, 30), list)
     }
 
     @Test
@@ -84,7 +84,7 @@ class AddInPlaceTest {
 
         list.addInPlace(2)
 
-        assertEquals(sizeBefore + 1, list.size)
+        Assert.assertEquals(sizeBefore + 1, list.size)
     }
 
     // Duplicate values
@@ -95,9 +95,9 @@ class AddInPlaceTest {
         list.addInPlace(20)
 
         // Both copies of 20 must be adjacent and the list sorted
-        assertEquals(4, list.size)
-        assertTrue(list == list.sorted())
-        assertEquals(2, list.count { it == 20 })
+        Assert.assertEquals(4, list.size)
+        Assert.assertTrue(list == list.sorted())
+        Assert.assertEquals(2, list.count { it == 20 })
     }
 
     @Test
@@ -105,7 +105,7 @@ class AddInPlaceTest {
         list.add(5)
         list.addInPlace(5)
 
-        assertEquals(listOf(5, 5), list)
+        Assert.assertEquals(listOf(5, 5), list)
     }
 
     // Single-element list: boundary probes
@@ -115,8 +115,8 @@ class AddInPlaceTest {
         list.add(10)
         val index = list.addInPlace(5)
 
-        assertEquals(0, index)
-        assertEquals(listOf(5, 10), list)
+        Assert.assertEquals(0, index)
+        Assert.assertEquals(listOf(5, 10), list)
     }
 
     @Test
@@ -124,8 +124,8 @@ class AddInPlaceTest {
         list.add(10)
         val index = list.addInPlace(15)
 
-        assertEquals(1, index)
-        assertEquals(listOf(10, 15), list)
+        Assert.assertEquals(1, index)
+        Assert.assertEquals(listOf(10, 15), list)
     }
 
     // Multiple sequential insertions
@@ -138,7 +138,7 @@ class AddInPlaceTest {
             list.addInPlace(v)
         }
 
-        assertEquals(values.sorted(), list)
+        Assert.assertEquals(values.sorted(), list)
     }
 
     // String list (verifies generic Comparable constraint)
@@ -149,8 +149,8 @@ class AddInPlaceTest {
 
         val index = list.addInPlace("banana")
 
-        assertEquals(1, index)
-        assertEquals(listOf("apple", "banana", "cherry", "elderberry"), list)
+        Assert.assertEquals(1, index)
+        Assert.assertEquals(listOf("apple", "banana", "cherry", "elderberry"), list)
     }
 
     @Test
@@ -159,8 +159,8 @@ class AddInPlaceTest {
 
         val index = list.addInPlace("apple")
 
-        assertEquals(0, index)
-        assertEquals(listOf("apple", "banana", "cherry"), list)
+        Assert.assertEquals(0, index)
+        Assert.assertEquals(listOf("apple", "banana", "cherry"), list)
     }
 
     @Test
@@ -169,8 +169,8 @@ class AddInPlaceTest {
 
         val index = list.addInPlace("cherry")
 
-        assertEquals(2, index)
-        assertEquals(listOf("apple", "banana", "cherry"), list)
+        Assert.assertEquals(2, index)
+        Assert.assertEquals(listOf("apple", "banana", "cherry"), list)
     }
 
     // Double list (another Comparable type)
@@ -181,8 +181,8 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(2.5)
 
-        assertEquals(2, index)
-        assertEquals(listOf(1.1, 2.2, 2.5, 3.3), list)
+        Assert.assertEquals(2, index)
+        Assert.assertEquals(listOf(1.1, 2.2, 2.5, 3.3), list)
     }
 
     // Negative numbers
@@ -193,8 +193,8 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(-15)
 
-        assertEquals(2, index)
-        assertEquals(listOf(-30, -20, -15, -10, 0), list)
+        Assert.assertEquals(2, index)
+        Assert.assertEquals(listOf(-30, -20, -15, -10, 0), list)
     }
 
     @Test
@@ -203,7 +203,7 @@ class AddInPlaceTest {
 
         val index = list.addInPlace(-5)
 
-        assertEquals(1, index)
-        assertEquals(listOf(-10, -5, 0, 10), list)
+        Assert.assertEquals(1, index)
+        Assert.assertEquals(listOf(-10, -5, 0, 10), list)
     }
 }

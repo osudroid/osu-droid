@@ -18,6 +18,9 @@ import com.osudroid.mods.IModApplicableToHitObjectWithMods
 import com.osudroid.mods.IModFacilitatesAdjustment
 import com.osudroid.mods.IModRequiresOriginalBeatmap
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModScoreV2
+import com.osudroid.utils.ModHashMap
+import com.osudroid.utils.ModUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 

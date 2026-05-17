@@ -1,7 +1,7 @@
 package com.osudroid.difficulty.utils
 
-import com.osudroid.beatmap.PlayableBeatmap
-import com.osudroid.beatmap.hitobject.Spinner
+import com.osudroid.beatmaps.PlayableBeatmap
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.utils.ModUtils
 import kotlin.math.PI
 import kotlin.math.max

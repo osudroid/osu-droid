@@ -1,11 +1,11 @@
 package com.osudroid.difficulty.calculator
 
-import com.osudroid.beatmap.Beatmap
-import com.osudroid.beatmap.PlayableBeatmap
-import com.osudroid.beatmap.StandardHitWindow
-import com.osudroid.beatmap.StandardPlayableBeatmap
-import com.osudroid.beatmap.hitobject.HitObject
-import com.osudroid.beatmap.sections.BeatmapDifficulty
+import com.osudroid.beatmaps.Beatmap
+import com.osudroid.beatmaps.PlayableBeatmap
+import com.osudroid.beatmaps.StandardHitWindow
+import com.osudroid.beatmaps.StandardPlayableBeatmap
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.difficulty.StandardDifficultyHitObject
 import com.osudroid.difficulty.attributes.StandardDifficultyAttributes
 import com.osudroid.difficulty.skills.HarmonicSkill

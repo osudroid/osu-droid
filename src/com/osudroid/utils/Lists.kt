@@ -1,4 +1,4 @@
-package com.rian.util
+package com.osudroid.utils
 
 /**
  * Adds the given item to this [MutableList] according to its [Comparable] implementation.

@@ -1,6 +1,6 @@
 package com.osudroid.difficulty.calculator
 
-import com.osudroid.beatmap.StandardHitWindow
+import com.osudroid.beatmaps.StandardHitWindow
 import com.osudroid.difficulty.attributes.StandardDifficultyAttributes
 import com.osudroid.difficulty.attributes.StandardPerformanceAttributes
 import com.osudroid.difficulty.skills.HarmonicSkill

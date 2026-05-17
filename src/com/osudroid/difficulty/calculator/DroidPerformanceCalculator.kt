@@ -1,7 +1,7 @@
 package com.osudroid.difficulty.calculator
 
-import com.osudroid.beatmap.DroidHitWindow
-import com.osudroid.beatmap.PreciseDroidHitWindow
+import com.osudroid.beatmaps.DroidHitWindow
+import com.osudroid.beatmaps.PreciseDroidHitWindow
 import com.osudroid.difficulty.attributes.DroidDifficultyAttributes
 import com.osudroid.difficulty.attributes.DroidPerformanceAttributes
 import com.osudroid.difficulty.skills.DroidFlashlight

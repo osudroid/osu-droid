@@ -1,7 +1,7 @@
 package com.osudroid.difficulty.calculator
 
 import com.osudroid.GameMode
-import com.osudroid.beatmap.parser.BeatmapParser
+import com.osudroid.beatmaps.parser.BeatmapParser
 import com.osudroid.mods.ModDoubleTime
 import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModNoFail

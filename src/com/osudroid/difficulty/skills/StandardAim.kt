@@ -1,6 +1,6 @@
 package com.osudroid.difficulty.skills
 
-import com.osudroid.beatmap.hitobject.Slider
+import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.difficulty.StandardDifficultyHitObject
 import com.osudroid.difficulty.evaluators.StandardAgilityEvaluator
 import com.osudroid.difficulty.evaluators.StandardFlowAimEvaluator

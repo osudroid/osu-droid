@@ -1,6 +1,6 @@
 package com.osudroid.difficulty.skills
 
-import com.osudroid.beatmap.hitobject.HitObject
+import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.evaluators.DroidReadingEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils

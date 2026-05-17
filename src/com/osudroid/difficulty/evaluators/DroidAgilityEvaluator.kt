@@ -1,6 +1,6 @@
 package com.osudroid.difficulty.evaluators
 
-import com.osudroid.beatmap.hitobject.Spinner
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import kotlin.math.min
 import kotlin.math.pow

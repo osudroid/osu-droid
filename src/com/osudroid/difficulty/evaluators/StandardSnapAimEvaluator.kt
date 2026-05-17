@@ -1,7 +1,7 @@
 package com.osudroid.difficulty.evaluators
 
-import com.osudroid.beatmap.hitobject.Slider
-import com.osudroid.beatmap.hitobject.Spinner
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.difficulty.DifficultyHitObject
 import com.osudroid.difficulty.StandardDifficultyHitObject
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils

@@ -1,8 +1,8 @@
 package com.osudroid.difficulty.calculator
 
-import com.osudroid.beatmap.Beatmap
-import com.osudroid.beatmap.DroidPlayableBeatmap
-import com.osudroid.beatmap.PlayableBeatmap
+import com.osudroid.beatmaps.Beatmap
+import com.osudroid.beatmaps.DroidPlayableBeatmap
+import com.osudroid.beatmaps.PlayableBeatmap
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.attributes.DroidDifficultyAttributes
 import com.osudroid.difficulty.attributes.HighStrainSection

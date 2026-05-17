@@ -1,8 +1,8 @@
 package com.osudroid.difficulty.evaluators
 
-import com.osudroid.beatmap.hitobject.HitObject
-import com.osudroid.beatmap.hitobject.Slider
-import com.osudroid.beatmap.hitobject.Spinner
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import kotlin.math.abs
