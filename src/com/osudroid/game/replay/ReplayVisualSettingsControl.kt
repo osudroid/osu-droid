@@ -29,10 +29,7 @@ class ReplayVisualSettingsControl : UICard() {
         control.min = 0f
         control.max = 100f
         valueFormatter = { "${it.roundToInt()}%"}
-        onValueChanged = {
-            defaultBackgroundBrightness = it / 100f
-            onBackgroundBrightnessChanged?.invoke(defaultBackgroundBrightness)
-        }
+        onValueChanged = { onBackgroundBrightnessChanged?.invoke(it / 100f) }
     }
 
     /**
