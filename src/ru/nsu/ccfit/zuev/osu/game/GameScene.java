@@ -3921,37 +3921,39 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void applySpinnerResult(Spinner spinner, @Nullable Replay.ReplayObjectData data, boolean endCombo) {
-        if (data != null) {
-            // Spinner accuracy encoding: totalSpins * 4 + resultCode.
-            int totalSpins = (data.accuracy & 0xFFFF) >> 2;
+        float duration = (float) spinner.getDuration() / 1000;
+        float needRotations = (2 + 2 * playableBeatmap.getDifficulty().od / 10f) * duration;
 
-            for (int s = 0; s < totalSpins; s++) {
-                stat.registerHit(1000, false, false);
-            }
+        if (duration < 0.05f) {
+            needRotations = 0.1f;
+        }
+
+        int preClear;
+        int bonus;
+
+        if (data != null) {
+            // data.accuracy = totalSpins * 4 + resultCode, where totalSpins = fullRotations (pre-clear, 100 pts each)
+            // + (bonusScoreCounter - 1) (bonus, 1000 pts each). Split by needRotations to award the correct amounts.
+            int totalSpins = (data.accuracy & 0xFFFF) >> 2;
+            preClear = Math.min(totalSpins, (int) Math.ceil(needRotations) - 1);
+            bonus = totalSpins - preClear;
         } else {
             // Autoplay always clears the spinner. Reconstruct the pre-clear (100 pts each) and bonus (1000 pts each)
             // rotation split from the spinner's parameters.
-            float duration = (float) spinner.getDuration() / 1000;
-            float requiredRotations = (2 + 2 * playableBeatmap.getDifficulty().od / 10f) * duration;
-
-            if (duration < 0.05f) {
-                requiredRotations = 0.1f;
-            }
-
-            // On clear, rotations is reset to only the excess beyond requiredRotations (replay version 8+ behavior,
-            // which always applies for Autoplay). Therefore, ceil(requiredRotations) - 1 rotations are pre-clear and
-            // floor(totalRotations - requiredRotations) are bonus rotations.
+            // On clear, rotations is reset to only the excess beyond needRotations. Therefore, ceil(needRotations) - 1
+            // rotations are pre-clear and floor(totalRotations - needRotations) are bonus rotations.
             float totalRotations = 5f * duration;
-            int preClear = (int) Math.ceil(requiredRotations) - 1;
-            int bonus = Math.max(0, (int)(totalRotations - requiredRotations));
 
-            for (int s = 0; s < preClear; s++) {
-                stat.registerSpinnerHit();
-            }
+            preClear = (int) Math.ceil(needRotations) - 1;
+            bonus = Math.max(0, (int)(totalRotations - needRotations));
+        }
 
-            for (int s = 0; s < bonus; s++) {
-                stat.registerHit(1000, false, false);
-            }
+        for (int s = 0; s < preClear; s++) {
+            stat.registerSpinnerHit();
+        }
+
+        for (int s = 0; s < bonus; s++) {
+            stat.registerHit(1000, false, false);
         }
 
         applyCircleResult(data, endCombo);
