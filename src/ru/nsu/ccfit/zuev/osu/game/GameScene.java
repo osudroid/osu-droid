@@ -3611,7 +3611,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // Detach any lingering hit effects from the gameplay scene.
         for (int i = mgScene.getChildCount() - 1; i >= 0; --i) {
-            mgScene.getChild(i).detachSelf();
+            var child = mgScene.getChild(i);
+
+            if (child instanceof UISprite sprite) {
+                // Hit effects need to be pooled, so we cannot directly detach.
+                // finishModifiers() fires the effect's fade-out callback, which schedules putEffect() so the GameEffect
+                // wrapper is returned to the pool rather than orphaned.
+                sprite.finishModifiers();
+            }
+
+            // We detach directly so that the next frame is not orphaned with hit effects that were not detached (since
+            // GameEffect's callback is scheduled for the next update tick).
+            child.detachSelf();
         }
 
         // Remove follow points spawned for objects before the seek point.
