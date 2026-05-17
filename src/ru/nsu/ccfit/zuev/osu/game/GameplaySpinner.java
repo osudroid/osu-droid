@@ -202,7 +202,7 @@ public class GameplaySpinner extends GameObject {
 
         oldMouse = null;
 
-        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+        setLifetimeEnd(Float.MAX_VALUE);
     }
 
     void removeFromScene() {
@@ -229,6 +229,7 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(metre);
 
         scene.detachChild(bonusScore);
+        setLifetimeEnd(hitTime + duration);
         scene = null;
 
         int score = 0;
@@ -287,6 +288,20 @@ public class GameplaySpinner extends GameObject {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                if (clear) {
+                    scene.attachChild(clearText);
+                }
+
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         updateSamples(dt);
@@ -318,87 +333,97 @@ public class GameplaySpinner extends GameObject {
             }
         }
 
-        if (mouse == null)
-            return;
+        if (mouse != null) {
+            circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
 
-        circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
+            var len1 = Utils.length(currMouse);
+            var len2 = Utils.length(oldMouse);
+            var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
 
-        var len1 = Utils.length(currMouse);
-        var len2 = Utils.length(oldMouse);
-        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+            if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+                dfill = 0;
 
-        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
-            dfill = 0;
-
-        if (autoPlay) {
-            dfill = 5 * 4 * dt;
-            circle.setRotation((rotations + dfill / 4f) * 360);
-            //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-               float angle = (rotations + dfill / 4f) * 360;
-               float pX = position.x + 50 * (float)Math.sin(angle);
-               float pY = position.y + 50 * (float)Math.cos(angle);
-               listener.updateAutoBasedPos(pX, pY);
+            if (autoPlay) {
+                dfill = 5 * 4 * dt;
+                circle.setRotation((rotations + dfill / 4f) * 360);
+                //auto时，FL光圈绕中心旋转
+                if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                    float angle = (rotations + dfill / 4f) * 360;
+                    float pX = position.x + 50 * (float)Math.sin(angle);
+                    float pY = position.y + 50 * (float)Math.cos(angle);
+                    listener.updateAutoBasedPos(pX, pY);
+                }
             }
-        }
 
-        rotations += dfill / 4f;
-        float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
+            rotations += dfill / 4f;
+            float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
-        if (dfill != 0) {
-            updateSpinSampleFrequency(percentfill);
-            spinnerSpinSample.play();
-        } else {
-            spinnerSpinSample.stop();
-        }
+            if (dfill != 0) {
+                updateSpinSampleFrequency(percentfill);
+                spinnerSpinSample.play();
+            } else {
+                spinnerSpinSample.stopAll();
+            }
 
-        if (percentfill > 1 || clear) {
-            percentfill = 1;
-            if (!clear) {
-                scene.attachChild(clearText);
-                clearText.fadeInFromZero(0.25f);
-                clearText.setScale(1.5f);
-                clearText.scaleTo(1, 0.25f);
+            if (percentfill > 1 || clear) {
+                percentfill = 1;
 
-                clear = true;
+                if (!clear) {
+                    scene.attachChild(clearText);
+                    clearText.fadeInFromZero(0.25f);
+                    clearText.setScale(1.5f);
+                    clearText.scaleTo(1, 0.25f);
+
+                    clear = true;
+
+                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
+                    // carried over, resulting in an early first spinner bonus score.
+                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
+                    // rotations instead of 6.6.
+                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
+                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
+                    }
+                }
+
+                if (Math.abs(rotations) > 1) {
+                    rotations -= 1 * Math.signum(rotations);
+                    bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    bonusScoreCounter++;
+                    if (!bonusScore.hasParent()) {
+                        scene.attachChild(bonusScore);
+                    }
+                    spinnerBonusSample.play();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
-                listener.onSpinnerHit(id, 1000, false, 0);
-                bonusScoreCounter++;
-                if (!bonusScore.hasParent()) {
-                    scene.attachChild(bonusScore);
+                if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
+                    fullRotations++;
+                    stat.registerSpinnerHit();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-                spinnerBonusSample.play();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
-        } else if (Math.abs(rotations) > 1) {
-            rotations -= 1 * Math.signum(rotations);
-            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
-                fullRotations++;
-                stat.registerSpinnerHit();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
-            }
+
+            float fillOffset = 1 - Math.min(1, Math.abs(percentfill));
+
+            metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
+            metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
+
+            metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
+            metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
+            metre.requestBufferUpdate();
+
+            oldMouse.set(currMouse);
         }
-
-        float fillOffset = 1 - Math.min(1, Math.abs(percentfill));
-
-        metre.setHeight(background.getHeightScaled() * Math.min(1, Math.abs(percentfill)));
-        metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
-
-        metreRegion.setHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
-        metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
-        metre.requestBufferUpdate();
-
-        oldMouse.set(currMouse);
 
         if (passedTime >= duration) {
             removeFromScene();
@@ -407,6 +432,7 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void onExpire() {
+        removeFromScene();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
@@ -422,12 +448,72 @@ public class GameplaySpinner extends GameObject {
         return passedTime >= duration;
     }
 
+    protected void applySeekRotations() {
+        float totalRotations = 5f * passedTime;
+        int wholeRotations = (int) totalRotations;
+
+        if (clear) {
+            // Already cleared (e.g. zero-duration spinner); all whole rotations are bonus.
+            for (int i = 0; i < wholeRotations; i++) {
+                bonusScoreCounter++;
+                listener.onSpinnerHit(id, 1000, false, 0);
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            rotations = totalRotations - wholeRotations;
+        } else {
+            // On clear, rotations is reset to only the excess beyond needRotations (replay version 8+ behavior, which
+            // always applies for Autoplay). Therefore ceil(needRotations) - 1 rotations are pre-clear, and
+            // floor(totalRotations - needRotations) are bonus rotations.
+            int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
+
+            for (int i = 0; i < preClear; i++) {
+                fullRotations++;
+                stat.registerSpinnerHit();
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            if (totalRotations > needRotations) {
+                clear = true;
+                int bonus = (int)(totalRotations - needRotations);
+
+                for (int i = 0; i < bonus; i++) {
+                    bonusScoreCounter++;
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    float rate = 0.375f;
+
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
+
+                rotations = (totalRotations - needRotations) - bonus;
+            } else {
+                rotations = totalRotations - wholeRotations;
+            }
+        }
+    }
+
     protected void reloadHitSounds() {
         var parsedSamples = beatmapSpinner.getSamples();
         hitSamples.ensureCapacity(parsedSamples.size());
 
         for (int i = 0, size = parsedSamples.size(); i < size; ++i) {
-            var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+            var gameplaySample = GameplayHitSampleInfo.obtain();
             gameplaySample.init(parsedSamples.get(i));
 
             if (GameHelper.isSamplesMatchPlaybackRate()) {
@@ -479,12 +565,10 @@ public class GameplaySpinner extends GameObject {
         }
 
         for (int i = hitSamples.size() - 1; i >= 0; --i) {
-            var sample = hitSamples.get(i);
-            sample.reset();
-            GameplayHitSampleInfo.pool.free(sample);
-
-            hitSamples.remove(i);
+            hitSamples.get(i).release();
         }
+
+        hitSamples.clear();
     }
 
     @Override

@@ -13,36 +13,36 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.frequency = value }
+            samples.fastForEach { it.frequency = value }
         }
 
     override var isLooping = false
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.isLooping = value }
+            samples.fastForEach { it.isLooping = value }
         }
 
     override var volume = 1f
         set(value) {
             field = value
 
-            samples?.fastForEach { it.second.volume = value }
+            samples.fastForEach { it.volume = value }
         }
 
     private var index = 0
-    private var samples: Array<Pair<Double, GameplayHitSampleInfo>>? = null
+    private var samples = ArrayList<GameplayHitSampleInfo>()
     private var elapsedTime = 0f
     private var hasSamplePlaying = false
 
     private val currentSampleInfo
-        get() = samples?.get(index)?.second
+        get() = samples.getOrNull(index)
 
     override val isInitialized
-        get() = samples != null
+        get() = samples.isNotEmpty()
 
     private val sampleNeedsUpdating
-        get() = isInitialized && index < samples!!.size - 1 && elapsedTime >= samples!![index + 1].first
+        get() = isInitialized && index < samples.size - 1 && elapsedTime >= samples[index + 1].time
 
     /**
      * Initializes this [GameplaySequenceHitSampleInfo].
@@ -55,16 +55,17 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
 
         elapsedTime = startTime
 
-        samples = Array(sampleInfo.samples.size) { i ->
-            val sample = sampleInfo.samples[i]
+        samples.ensureCapacity(sampleInfo.samples.size)
 
-            val gameplaySampleInfo = GameplayHitSampleInfo.pool.obtain().also {
-                it.init(sample.second)
+        sampleInfo.samples.fastForEach { (time, sample) ->
+            val gameplaySampleInfo = GameplayHitSampleInfo.obtain().also {
+                it.init(sample)
+                it.time = time
                 it.frequency = frequency
                 it.isLooping = isLooping
             }
 
-            sample.first to gameplaySampleInfo
+            samples.add(gameplaySampleInfo)
         }
     }
 
@@ -89,7 +90,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
     fun stopAll() {
         hasSamplePlaying = false
 
-        samples?.fastForEach { it.second.stop() }
+        samples.fastForEach { it.stop() }
     }
 
     /**
@@ -127,12 +128,8 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
             stopAll()
         }
 
-        samples?.fastForEach {
-            it.second.reset()
-            GameplayHitSampleInfo.pool.free(it.second)
-        }
-
-        samples = null
+        samples.fastForEach { it.release() }
+        samples.clear()
         index = 0
         elapsedTime = 0f
         frequency = 1f

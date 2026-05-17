@@ -29,6 +29,7 @@ public class BreakAnimator extends GameObject {
     private UISprite mark = null;
     private boolean isbreak = false;
     private boolean over = false;
+    private float dimBrightness = Config.getBackgroundBrightness();
 
     public BreakAnimator(final Scene scene, final StatisticV2 stat, GameplayHUD hud) {
         length = 0;
@@ -64,6 +65,10 @@ public class BreakAnimator extends GameObject {
         this.dimRectangle = dimRectangle;
     }
 
+    public void setDimBrightness(float brightness) {
+        dimBrightness = brightness;
+    }
+
     public boolean isBreak() {
         return isbreak;
     }
@@ -72,6 +77,29 @@ public class BreakAnimator extends GameObject {
         final boolean isover = over;
         over = false;
         return isover;
+    }
+
+    public void reset() {
+        isbreak = false;
+        over = false;
+        length = 0;
+        time = 0;
+
+        if (mark != null) {
+            mark.detachSelf();
+            mark = null;
+        }
+
+        if (passfail != null) {
+            passfail.detachSelf();
+            passfail = null;
+        }
+
+        for (final Sprite sp : arrows) {
+            sp.detachSelf();
+        }
+
+        resumeBgFade();
     }
 
     public void init(final float length) {
@@ -109,13 +137,13 @@ public class BreakAnimator extends GameObject {
 
     private void setBgFade(float percent) {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha((1 - Config.getBackgroundBrightness()) * (1 - percent));
+            dimRectangle.setAlpha((1 - dimBrightness) * (1 - percent));
         }
     }
 
     private void resumeBgFade() {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha(1 - Config.getBackgroundBrightness());
+            dimRectangle.setAlpha(1 - dimBrightness);
         }
     }
 

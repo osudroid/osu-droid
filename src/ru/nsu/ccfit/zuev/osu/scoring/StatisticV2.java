@@ -696,7 +696,10 @@ public class StatisticV2 implements Serializable {
         scoreMaxCombo = 0;
         currentCombo = 0;
         totalScore = 0;
+        scoreHash = SecurityUtils.getHigh16Bits(0);
         hp = 1;
+        life = 1;
+        isAlive = true;
         mark = null;
         bonusScore = 0;
         positiveHitOffsetCount = 0;

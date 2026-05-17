@@ -30,7 +30,7 @@ open class SynchronizedPool<T : IPoolable>(maxPoolSize: Int) : Pools.Pool<T> {
 
     init {
         require(maxPoolSize > 0) { "The max pool size must be > 0" }
-        pool = arrayOfNulls<IPoolable>(maxPoolSize)
+        pool = arrayOfNulls(maxPoolSize)
     }
 
     override fun acquire(): T? = synchronized(lock) {
