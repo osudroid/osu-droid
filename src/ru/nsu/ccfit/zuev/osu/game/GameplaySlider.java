@@ -155,7 +155,6 @@ public class GameplaySlider extends GameObject {
 
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
         startArrow = new UISprite();
         startArrow.setOrigin(Anchor.Center);
@@ -266,6 +265,9 @@ public class GameplaySlider extends GameObject {
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapSlider));
+
+        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture(
+                GameHelper.isTraceable() ? "defaultapproachcircle" : "approachcircle"));
 
         scene.attachChild(headCirclePiece, 0);
         scene.attachChild(approachCircle);
