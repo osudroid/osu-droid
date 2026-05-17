@@ -12,11 +12,16 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 class ReplayVisualSettingsControl : UICard() {
     /**
      * The default background brightness.
+     *
+     * Note that setting this value will also override the control's value.
      */
     var defaultBackgroundBrightness = Config.getBackgroundBrightness()
         set(value) {
             field = value
-            brightnessSlider.defaultValue = value * 100
+            val sliderValue = value * 100
+
+            brightnessSlider.defaultValue = sliderValue
+            brightnessSlider.value = sliderValue
         }
 
     private val brightnessSlider = FormSlider(defaultBackgroundBrightness * 100).apply {
