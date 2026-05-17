@@ -239,6 +239,14 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 if (!clear) {
                     // Clear Sprite
                     clear = true;
+
+                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
+                    // carried over, resulting in an early first spinner bonus score.
+                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
+                    // rotations instead of 6.6.
+                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
+                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
+                    }
                 }
 
                 if (Math.abs(rotations) > 1) {
