@@ -6,8 +6,10 @@ import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.FMath;
 import com.osudroid.game.CursorEvent;
-import com.rian.osu.beatmap.HitWindow;
-import com.rian.osu.beatmap.hitobject.HitObject;
+import com.osudroid.beatmaps.HitWindow;
+import com.osudroid.beatmaps.hitobjects.HitObject;
+import com.rian.andengine.modifier.UniversalModifier;
+import com.rian.andengine.modifier.UniversalModifierSequence;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -20,6 +22,7 @@ public abstract class GameObject {
     protected Replay.ReplayObjectData replayObjectData = null;
     protected boolean startHit = false;
     protected PointF position = new PointF();
+    private float lifetimeEnd;
 
     public Replay.ReplayObjectData getReplayData() {
         return replayObjectData;
@@ -54,6 +57,8 @@ public abstract class GameObject {
     public boolean isStartHit() {
         return startHit;
     }
+
+    public void playLoopingSamples() {}
 
     public void stopLoopingSamples() {}
 
@@ -211,4 +216,50 @@ public abstract class GameObject {
 
         return Utils.squaredDistance(position, cursorEvent.position) <= Utils.sqr((float) hitObject.getScreenSpaceGameplayRadius());
     }
+
+    //region Lifetime management
+
+    /**
+     * Whether the underlying {@link HitObject} of this {@link GameObject} has been judged in its entirety, including
+     * nested {@link HitObject}s.
+     */
+    public boolean isJudged() {
+        return false;
+    }
+
+    /**
+     * Called when this {@link GameObject}'s lifetime expires.
+     */
+    public void onExpire() {}
+
+    /**
+     * Obtains the time in seconds since the beatmap started at which this {@link GameObject}'s lifetime ends.
+     */
+    public float getLifetimeEnd() {
+        return lifetimeEnd;
+    }
+
+    protected void setLifetimeEnd(float lifetimeEnd) {
+        this.lifetimeEnd = lifetimeEnd;
+    }
+
+    /**
+     * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifier} to finish.
+     *
+     * @param modifier The {@link UniversalModifier} to extend this {@link GameObject}'s lifetime with.
+     */
+    protected void extendLifetime(UniversalModifier modifier) {
+        lifetimeEnd = Math.max(lifetimeEnd, modifier.getEndTime());
+    }
+
+    /**
+     * Extends the lifetime of this {@link GameObject} to allow a {@link UniversalModifierSequence} to finish.
+     *
+     * @param sequence The {@link UniversalModifierSequence} to extend this {@link GameObject}'s lifetime with.
+     */
+    protected void extendLifetime(UniversalModifierSequence sequence) {
+        lifetimeEnd = Math.max(lifetimeEnd, sequence.getEndTime());
+    }
+
+    //endregion
 }

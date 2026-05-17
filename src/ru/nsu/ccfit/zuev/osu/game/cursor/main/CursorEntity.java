@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.Entity;
+import com.reco1l.andengine.component.UIComponent;
+
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
@@ -10,7 +11,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
-public class CursorEntity extends Entity {
+public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
     private CursorTrail trail = null;
     private PointParticleEmitter emitter = null;
@@ -18,8 +19,7 @@ public class CursorEntity extends Entity {
     private float particleOffsetX, particleOffsetY;
 
     public CursorEntity() {
-        TextureRegion cursorTex = ResourceManager.getInstance().getTexture("cursor");
-        cursorSprite = new CursorSprite(-cursorTex.getWidth() / 2f, -cursorTex.getWidth() / 2f, cursorTex);
+        cursorSprite = new CursorSprite();
 
         if (Config.isUseParticles()) {
             TextureRegion trailTex = ResourceManager.getInstance().getTexture("cursortrail");

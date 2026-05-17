@@ -21,6 +21,16 @@ public class DrawLinePath {
     private TriangleBuilder triangles;
     private AbstractPath path;
 
+    private float[] segmentThetas = new float[0];
+    private int[] segmentQuadStartOffsets = new int[0];
+    private int segmentQuadStartCount;
+    private AbstractPath cachedThetaPath;
+    private int cachedThetaPathSize;
+    private float cachedFirstX;
+    private float cachedFirstY;
+    private float cachedLastX;
+    private float cachedLastY;
+
     public DrawLinePath() {
         alpha = 1;
     }
@@ -29,6 +39,7 @@ public class DrawLinePath {
         alpha = 1;
         path = p;
         this.width = width;
+        ensureThetaCache();
         if (triangles != null) {
             triangles.length = 0;
         }
@@ -46,6 +57,18 @@ public class DrawLinePath {
         }
         triangles = cache;
         return builder;
+    }
+
+    public int getSegmentQuadStartCount() {
+        return segmentQuadStartCount;
+    }
+
+    public int getSegmentQuadStartOffset(int segmentIndex) {
+        if (segmentIndex < 0 || segmentIndex >= segmentQuadStartCount) {
+            return 0;
+        }
+
+        return segmentQuadStartOffsets[segmentIndex];
     }
 
 
@@ -114,8 +137,46 @@ public class DrawLinePath {
         );
     }
 
+    private void ensureThetaCache() {
+        int size = path == null ? 0 : path.size();
+
+        if (size < 2) {
+            cachedThetaPath = path;
+            cachedThetaPathSize = size;
+            return;
+        }
+
+        Vec2 first = path.get(0);
+        Vec2 last = path.get(size - 1);
+
+        if (cachedThetaPath == path &&
+            cachedThetaPathSize == size &&
+            cachedFirstX == first.x && cachedFirstY == first.y &&
+            cachedLastX == last.x && cachedLastY == last.y) {
+            return;
+        }
+
+        int segmentCount = size - 1;
+
+        if (segmentThetas.length < segmentCount) {
+            segmentThetas = new float[segmentCount];
+        }
+
+        for (int i = 0; i < segmentCount; i++) {
+            segmentThetas[i] = Vec2.calTheta(path.get(i), path.get(i + 1));
+        }
+
+        cachedThetaPath = path;
+        cachedThetaPathSize = size;
+        cachedFirstX = first.x;
+        cachedFirstY = first.y;
+        cachedLastX = last.x;
+        cachedLastY = last.y;
+    }
+
     private void init() {
         if (path.size() < 2) {
+            segmentQuadStartCount = 0;
             if (path.size() == 1) {
                 addLineCap(path.get(0), FMath.Pi, FMath.Pi);
                 addLineCap(path.get(0), 0, FMath.Pi);
@@ -123,8 +184,17 @@ public class DrawLinePath {
             return;
         }
 
-        float theta = Vec2.calTheta(path.get(0), path.get(1));
+        int segmentCount = path.size() - 1;
+
+        if (segmentQuadStartOffsets.length < segmentCount) {
+            segmentQuadStartOffsets = new int[segmentCount];
+        }
+
+        segmentQuadStartCount = segmentCount;
+
+        float theta = segmentThetas[0];
         addLineCap(path.get(0), theta + FMath.PiHalf, FMath.Pi);
+        segmentQuadStartOffsets[0] = triangles.length;
         addLineQuads(path.get(0), path.get(1));
         if (path.size() == 2) {
             addLineCap(path.get(1), theta - FMath.PiHalf, FMath.Pi);
@@ -137,8 +207,9 @@ public class DrawLinePath {
         int max_i = path.size();
         for (int i = 2; i < max_i; i++) {
             nextPoint = path.get(i);
-            nextTheta = Vec2.calTheta(nowPoint, nextPoint);
+            nextTheta = segmentThetas[i - 1];
             addLineCap(nowPoint, preTheta - FMath.PiHalf, nextTheta - preTheta);
+            segmentQuadStartOffsets[i - 1] = triangles.length;
             addLineQuads(nowPoint, nextPoint);
             nowPoint = nextPoint;
             preTheta = nextTheta;

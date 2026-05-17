@@ -1,9 +1,16 @@
 package com.osudroid.ui.v1
 
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.view.updateLayoutParams
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.reco1l.toolkt.android.dp
+import kotlin.math.roundToInt
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class LoadingBadgeFragment : BaseFragment() {
@@ -57,6 +64,22 @@ class LoadingBadgeFragment : BaseFragment() {
     }
 
     override fun onLoadView() {
+        findViewById<LinearLayout>(R.id.container)!!.updateLayoutParams<RelativeLayout.LayoutParams> {
+            var fpsHeight = 0
+
+            if (Config.isShowFPS()) {
+                val font = ResourceManager.getInstance().getFont("smallFont")
+
+                if (font != null) {
+                    val scale = resources.displayMetrics.widthPixels.toFloat() / Config.getRES_WIDTH()
+
+                    fpsHeight = ((font.lineHeight + 4f) * scale).roundToInt()
+                }
+            }
+
+            bottomMargin = 16f.dp.roundToInt() + fpsHeight
+        }
+
         progressView = findViewById(R.id.progress)!!
         messageView = findViewById(R.id.message)!!
         textView = findViewById(R.id.text)!!

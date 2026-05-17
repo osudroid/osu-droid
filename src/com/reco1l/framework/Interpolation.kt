@@ -4,6 +4,7 @@ import com.edlplan.framework.easing.*
 
 object Interpolation {
 
+    @JvmStatic
     fun intAt(time: Float, start: Int, end: Int, startTime: Float, endTime: Float, easing: Easing = Easing.None): Int {
 
         if (start == end) {
@@ -22,7 +23,7 @@ object Interpolation {
         return start + (t * (end - start)).toInt()
     }
 
-
+    @JvmStatic
     fun floatAt(time: Float, start: Float, end: Float, startTime: Float, endTime: Float, easing: Easing = Easing.None): Float {
 
         if (start == end) {

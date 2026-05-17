@@ -33,7 +33,8 @@ public class OnlineManager {
     public static final String hostname = "osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
-    public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
+    public static final String defaultAvatarURL = getAvatarURL(0);
+    public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
     private static final String onlineVersion = "60";
 
     public static final OkHttpClient client = new OkHttpClient();
@@ -53,6 +54,7 @@ public class OnlineManager {
     private float accuracy = 0;
     private float pp = 0;
     private String avatarURL = "";
+    private String profileBannerURL = "";
     private int mapRank;
 
     public static OnlineManager getInstance() {
@@ -67,6 +69,14 @@ public class OnlineManager {
             case SCORE -> endpoint + "upload/" + playID + ".odr";
             case PP -> endpoint + "bestpp/" + playID + ".odr";
         };
+    }
+
+    public static String getAvatarURL(long userId) {
+        return "https://" + hostname + "/user/avatar/" + userId + ".png";
+    }
+
+    public static String getProfileBannerURL(long userId) {
+        return profileBannerEndpoint + userId + ".png";
     }
 
     public void init() {
@@ -146,7 +156,7 @@ public class OnlineManager {
         }
 
         String[] params = response.get(1).split("\\s+");
-        if (params.length < 6) {
+        if (params.length < 7) {
             failMessage = "Invalid server response";
             return false;
         }
@@ -162,6 +172,7 @@ public class OnlineManager {
         } else {
             avatarURL = "";
         }
+        profileBannerURL = getProfileBannerURL(userId);
 
         Bundle bParams = new Bundle();
         bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
@@ -277,8 +288,12 @@ public class OnlineManager {
         return loadAvatarToTextureManager(avatarURL);
     }
 
+    public boolean loadProfileBannerToTextureManager() {
+        return loadProfileBannerToTextureManager(profileBannerURL);
+    }
+
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.length() == 0) return false;
+        if (avatarURL == null || avatarURL.isEmpty()) return false;
 
         String filename = MD5Calculator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
@@ -286,7 +301,7 @@ public class OnlineManager {
         File picfile = new File(Config.getCachePath(), filename);
         OnlineFileOperator.downloadFile(avatarURL, picfile.getAbsolutePath(), true);
 
-        var bitmap = loadAvatarToBitmap(picfile);
+        var bitmap = loadFileToBitmap(picfile);
         int imageWidth = 0, imageHeight = 0;
 
         if (bitmap != null) {
@@ -306,7 +321,7 @@ public class OnlineManager {
             File avatarFile = new File(Config.getCachePath(), defaultAvatarFilename);
             OnlineFileOperator.downloadFile(defaultAvatarURL, avatarFile.getAbsolutePath());
 
-            bitmap = loadAvatarToBitmap(avatarFile);
+            bitmap = loadFileToBitmap(avatarFile);
             if (bitmap != null) {
                 imageWidth = bitmap.getWidth();
                 imageHeight = bitmap.getHeight();
@@ -325,15 +340,43 @@ public class OnlineManager {
         return false;
     }
 
-    private Bitmap loadAvatarToBitmap(File avatarFile) {
-        if (!avatarFile.exists()) {
+    public boolean loadProfileBannerToTextureManager(String bannerURL) {
+        if (bannerURL == null || bannerURL.isEmpty()) return false;
+
+        if (ResourceManager.getInstance().getProfileBannerTextureIfLoaded(bannerURL) != null) {
+            return true;
+        }
+
+        String filename = MD5Calculator.getStringMD5(bannerURL);
+        Debug.i("Loading profile banner from " + bannerURL);
+        File bannerFile = new File(Config.getCachePath(), filename);
+        OnlineFileOperator.downloadFile(bannerURL, bannerFile.getAbsolutePath(), true);
+
+        var bitmap = loadFileToBitmap(bannerFile);
+        int imageWidth = 0, imageHeight = 0;
+
+        if (bitmap != null) {
+            imageWidth = bitmap.getWidth();
+            imageHeight = bitmap.getHeight();
+        }
+
+        if (imageWidth * imageHeight <= 0) {
+            return false;
+        }
+
+        ResourceManager.getInstance().loadHighQualityFile(filename, bannerFile);
+        return ResourceManager.getInstance().getProfileBannerTextureIfLoaded(bannerURL) != null;
+    }
+
+    private Bitmap loadFileToBitmap(File file) {
+        if (!file.exists()) {
             return null;
         }
 
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            return BitmapFactory.decodeFile(avatarFile.getPath());
+            return BitmapFactory.decodeFile(file.getPath());
         } catch (NullPointerException e) {
             return null;
         }
@@ -380,6 +423,10 @@ public class OnlineManager {
 
     public String getAvatarURL() {
         return avatarURL;
+    }
+
+    public String getProfileBannerURL() {
+        return profileBannerURL;
     }
 
     public String getUsername() {

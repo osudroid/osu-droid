@@ -1,0 +1,57 @@
+package com.osudroid.utils
+
+import com.osudroid.GameMode
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.SliderPath
+import com.osudroid.beatmaps.hitobjects.SliderPathType
+import com.osudroid.beatmaps.sections.BeatmapControlPoints
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.math.Vector2
+import org.junit.Assert
+import org.junit.Test
+
+class HitObjectGenerationUtilsTest {
+    @Test
+    fun `Test horizontal reflection`() {
+        createSlider().apply {
+            HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(this)
+
+            Assert.assertEquals(Vector2(412, 100), position)
+            Assert.assertEquals(Vector2(212, 100), endPosition)
+            Assert.assertEquals(Vector2(312, 100), nestedHitObjects[1].position)
+        }
+    }
+
+    @Test
+    fun `Test vertical reflection`() {
+        createSlider().apply {
+            HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(this)
+
+            Assert.assertEquals(Vector2(100, 284), position)
+            Assert.assertEquals(Vector2(300, 284), endPosition)
+            Assert.assertEquals(Vector2(200, 284), nestedHitObjects[1].position)
+        }
+    }
+
+    @Test
+    fun `Test flip slider in place horizontally`() {
+        val slider = createSlider()
+
+        HitObjectGenerationUtils.flipSliderInPlaceHorizontally(slider)
+
+        slider.apply {
+            Assert.assertEquals(Vector2(100, 100), position)
+            Assert.assertEquals(Vector2(100, 100), head.position)
+            Assert.assertEquals(Vector2(0, 100), nestedHitObjects[1].position)
+            Assert.assertEquals(Vector2(-100, 100), endPosition)
+            Assert.assertEquals(Vector2(-100, 100), tail.position)
+            Assert.assertEquals(Vector2(-200, 0), path.controlPoints[1])
+        }
+    }
+
+    private fun createSlider() = Slider(
+        0.0, Vector2(100, 100), 0, SliderPath(
+            SliderPathType.Linear, listOf(Vector2(0), Vector2(200, 0)), 200.0
+        ), true, 0, mutableListOf()
+    ).apply { applyDefaults(BeatmapControlPoints(), BeatmapDifficulty(), GameMode.Droid) }
+}

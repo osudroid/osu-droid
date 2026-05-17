@@ -42,6 +42,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.debug.DebugPlaygroundScene;
+import com.osudroid.ui.FPSCounter;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
@@ -54,7 +55,7 @@ import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.reco1l.osu.ui.MessageDialog;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -126,6 +127,7 @@ public class MainActivity extends BaseGameActivity implements
         crashlytics = FirebaseCrashlytics.getInstance();
         Config.loadConfig(this);
         initialGameDirectory();
+        Multiplayer.initLog();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
@@ -308,6 +310,7 @@ public class MainActivity extends BaseGameActivity implements
         if (BuildSettings.DEBUG_PLAYGROUND) {
             return DebugPlaygroundScene.INSTANCE;
         }
+
         return SplashScene.INSTANCE.getScene();
     }
 
@@ -315,6 +318,7 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
+            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();

@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.reco1l.osu.ui.MessageDialog;
 
@@ -9,8 +8,6 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.MathUtils;
 
@@ -28,6 +25,7 @@ public class OnlinePanel extends Entity {
 
     private final ChangeableText rankText, nameText, ppText, accText;
     private final ChangeableText messageText, submessageText;
+    private Sprite profileBanner = null;
     private Sprite avatar = null;
 
     public OnlinePanel() {
@@ -148,23 +146,41 @@ public class OnlinePanel extends Entity {
         attachChild(onlineLayer);
     }
 
-    public void setAvatar()
-    {
-        var avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        var textureName = OnlineScoring.getInstance().isAvatarLoaded() && !avatarUrl.isEmpty() ? avatarUrl : null;
-        setAvatar(textureName);
-    }
+    public void setProfile(final String avatarTexName) {
+        if (profileBanner != null) {
+            profileBanner.detachSelf();
+        }
 
-    void setAvatar(final String texname) {
-        if (avatar != null)
+        if (avatar != null) {
             avatar.detachSelf();
-        avatar = null;
-        if (texname == null) return;
-        TextureRegion tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(texname);
-        if (tex == null) return;
+        }
 
-        Debug.i("Avatar is set!");
-        avatar = new Sprite(0, 0, 110, 110, tex);
+        profileBanner = null;
+        avatar = null;
+
+        var profileBannerUrl = OnlineManager.getInstance().getProfileBannerURL();
+
+        if (profileBannerUrl != null && !profileBannerUrl.isEmpty()) {
+            var bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(profileBannerUrl);
+
+            if (bannerTexture != null) {
+                profileBanner = new Sprite(0, 0, 410, 110, bannerTexture);
+                profileBanner.setColor(0.6f, 0.6f, 0.6f);
+                frontLayer.attachChild(profileBanner);
+            }
+        }
+
+        if (avatarTexName == null) {
+            return;
+        }
+
+        var avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avatarTexName);
+
+        if (avatarTexture == null) {
+            return;
+        }
+
+        avatar = new Sprite(0, 0, 110, 110, avatarTexture);
         frontLayer.attachChild(avatar);
     }
 }

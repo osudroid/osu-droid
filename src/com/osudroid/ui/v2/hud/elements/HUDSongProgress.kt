@@ -14,7 +14,7 @@ sealed class HUDSongProgress : HUDElement() {
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         if (gameScene.elapsedTime < gameScene.firstObjectStartTime) {
-            setProgress((gameScene.elapsedTime - gameScene.initialElapsedTime) / (gameScene.firstObjectStartTime - gameScene.initialElapsedTime), true)
+            setProgress((gameScene.elapsedTime - gameScene.initialStartTime) / (gameScene.firstObjectStartTime - gameScene.initialStartTime), true)
         } else {
             setProgress((gameScene.elapsedTime - gameScene.firstObjectStartTime) / (gameScene.lastObjectEndTime - gameScene.firstObjectStartTime), false)
         }
