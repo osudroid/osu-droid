@@ -147,6 +147,7 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
+        loadTexture("defaultapproachcircle", "gfx/approachcircle.png", false);
         loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
         loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);

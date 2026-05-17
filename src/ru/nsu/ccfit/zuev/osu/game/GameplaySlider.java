@@ -84,6 +84,7 @@ public class GameplaySlider extends GameObject {
 
     private int trackingCursorId = -1;
     private boolean isTracking;
+    private boolean spanStarted;
 
     private final UISprite followCircle;
 
@@ -154,7 +155,6 @@ public class GameplaySlider extends GameObject {
 
         approachCircle = new UISprite();
         approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
         startArrow = new UISprite();
         startArrow.setOrigin(Anchor.Center);
@@ -215,6 +215,7 @@ public class GameplaySlider extends GameObject {
 
         isOver = false;
         isInRadius = false;
+        spanStarted = false;
 
         reverse = false;
         startHit = false;
@@ -264,6 +265,9 @@ public class GameplaySlider extends GameObject {
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getHidden().getFirstObject() == beatmapSlider));
+
+        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture(
+                GameHelper.isTraceable() ? "defaultapproachcircle" : "approachcircle"));
 
         scene.attachChild(headCirclePiece, 0);
         scene.attachChild(approachCircle);
@@ -986,7 +990,12 @@ public class GameplaySlider extends GameObject {
 
         float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
-        if (!ball.hasParent()) {
+        // Note that this is not using ball.hasParent() because the ball's auto-detach animation can fire slightly
+        // before onSpanFinish() due to float/double precision differences in end-time computation, causing
+        // ball.hasParent() == false while followCircle is still attached.
+        if (!spanStarted) {
+            spanStarted = true;
+
             ball.setFrameTime(1f / ((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);

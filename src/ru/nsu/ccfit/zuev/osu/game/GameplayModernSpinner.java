@@ -167,11 +167,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
             }
         }
 
-        if (passedTime >= duration) {
-            removeFromScene();
-            return;
-        }
-
         updateSamples(dt);
         PointF mouse = null;
 
@@ -201,103 +196,116 @@ public class GameplayModernSpinner extends GameplaySpinner {
             }
         }
 
-        if (mouse == null)
-            return;
-
-        float degree = MathUtils.radToDeg(Utils.direction(currMouse));
-        top.setRotation(degree);
-        bottom.setRotation(degree / 2);
-
-        var len1 = Utils.length(currMouse);
-        var len2 = Utils.length(oldMouse);
-        var dFill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
-
-        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
-            dFill = 0;
-
-        if (autoPlay) {
-            dFill = 5 * 4 * dt;
-            degree = (rotations + dFill / 4f) * 360;
+        if (mouse != null) {
+            float degree = MathUtils.radToDeg(Utils.direction(currMouse));
             top.setRotation(degree);
-            //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
-                float pX = position.x + 50 * (float) Math.sin(degree);
-                float pY = position.y + 50 * (float) Math.cos(degree);
-                listener.updateAutoBasedPos(pX, pY);
+            bottom.setRotation(degree / 2);
+
+            var len1 = Utils.length(currMouse);
+            var len2 = Utils.length(oldMouse);
+            var dFill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
+            if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+                dFill = 0;
+
+            if (autoPlay) {
+                dFill = 5 * 4 * dt;
+                degree = (rotations + dFill / 4f) * 360;
+                top.setRotation(degree);
+                //auto时，FL光圈绕中心旋转
+                if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
+                    float pX = position.x + 50 * (float) Math.sin(degree);
+                    float pY = position.y + 50 * (float) Math.cos(degree);
+                    listener.updateAutoBasedPos(pX, pY);
+                }
+                // bottom.setRotation(-degree);
             }
-            // bottom.setRotation(-degree);
-        }
 
-        rotations += dFill / 4f;
-        float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
-        float percent = Math.min(percentFilled, 1);
+            rotations += dFill / 4f;
+            float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
+            float percent = Math.min(percentFilled, 1);
 
-        if (dFill != 0) {
-            updateSpinSampleFrequency(percentFilled);
-            spinnerSpinSample.play();
-        } else {
-            spinnerSpinSample.stopAll();
-        }
+            if (dFill != 0) {
+                updateSpinSampleFrequency(percentFilled);
+                spinnerSpinSample.play();
+            } else {
+                spinnerSpinSample.stopAll();
+            }
 
-        middle.setColor(1, 1 - percent, 1 - percent);
-        top.setScale(0.9f + percent * 0.1f);
-        bottom.setScale(0.9f + percent * 0.1f);
+            middle.setColor(1, 1 - percent, 1 - percent);
+            top.setScale(0.9f + percent * 0.1f);
+            bottom.setScale(0.9f + percent * 0.1f);
 
-        if (middle.isVisible()) {
-            middle.setScale(0.9f + percent * 0.1f);
-        }
+            if (middle.isVisible()) {
+                middle.setScale(0.9f + percent * 0.1f);
+            }
 
-        if (middle2.isVisible()) {
-            middle2.setScale(0.9f + percent * 0.1f);
-        }
+            if (middle2.isVisible()) {
+                middle2.setScale(0.9f + percent * 0.1f);
+            }
 
-        glow.setAlpha(percent * 0.8f);
-        glow.setScale(0.9f + percent * 0.1f);
+            glow.setAlpha(percent * 0.8f);
+            glow.setScale(0.9f + percent * 0.1f);
 
-        if (percentFilled > 1 || clear) {
-            if (!clear) {
-                // Clear Sprite
-                clear = true;
+            if (percentFilled > 1 || clear) {
+                if (!clear) {
+                    // Clear Sprite
+                    clear = true;
+
+                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
+                    // carried over, resulting in an early first spinner bonus score.
+                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
+                    // rotations instead of 6.6.
+                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
+                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
+                    }
+                }
+
+                if (Math.abs(rotations) > 1) {
+                    rotations -= 1 * Math.signum(rotations);
+                    bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    bonusScoreCounter++;
+                    if (!bonusScore.hasParent()) {
+                        scene.attachChild(bonusScore);
+                    }
+                    spinnerBonusSample.play();
+
+                    glow.beginModifierSequence(sequence -> {
+                        sequence.colorTo(0, 1, 0.8f)
+                                .colorTo(1, 1, 1, 0.1f)
+                                .then()
+                                .colorTo(1, 0, 1)
+                                .colorTo(0.8f, 1, 1, 0.1f);
+
+                        return Unit.INSTANCE;
+                    });
+
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
-                listener.onSpinnerHit(id, 1000, false, 0);
-                bonusScoreCounter++;
-                if (!bonusScore.hasParent()) {
-                    scene.attachChild(bonusScore);
+                if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
+                    fullRotations++;
+                    stat.registerSpinnerHit();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-                spinnerBonusSample.play();
-
-                glow.beginModifierSequence(sequence -> {
-                    sequence.colorTo(0, 1, 0.8f)
-                            .colorTo(1, 1, 1, 0.1f)
-                            .then()
-                            .colorTo(1, 0, 1)
-                            .colorTo(0.8f, 1, 1, 0.1f);
-
-                    return Unit.INSTANCE;
-                });
-
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
-        } else if (Math.abs(rotations) > 1) {
-            rotations -= 1 * Math.signum(rotations);
-            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
-                fullRotations++;
-                stat.registerSpinnerHit();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
-            }
+
+            oldMouse.set(currMouse);
         }
 
-        oldMouse.set(currMouse);
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
     }
 
     public void removeFromScene() {
