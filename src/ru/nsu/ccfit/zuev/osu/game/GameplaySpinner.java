@@ -435,16 +435,14 @@ public class GameplaySpinner extends GameObject {
     }
 
     protected void applySeekRotations() {
-        rotations = 5f * passedTime;
+        float totalRotations = 5f * passedTime;
+        int wholeRotations = (int) totalRotations;
 
-        while (Math.abs(rotations) >= 1f) {
-            float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
-
-            if (percentfill > 1f || clear) {
-                clear = true;
-                rotations -= Math.signum(rotations);
-                listener.onSpinnerHit(id, 1000, false, 0);
+        if (clear) {
+            // Already cleared (e.g. zero-duration spinner); all whole rotations are bonus.
+            for (int i = 0; i < wholeRotations; i++) {
                 bonusScoreCounter++;
+                listener.onSpinnerHit(id, 1000, false, 0);
                 float rate = 0.375f;
 
                 if (GameHelper.getHealthDrain() > 0) {
@@ -452,8 +450,16 @@ public class GameplaySpinner extends GameObject {
                 }
 
                 stat.changeHp(rate * 0.01f * duration / needRotations);
-            } else {
-                rotations -= Math.signum(rotations);
+            }
+        } else {
+            // The clear-transition does not decrement the rotation accumulator, so the triggering rotation persists and
+            // fires as the first bonus on the following frame. Therefore ceil(needRotations) - 1 rotations are
+            // pre-clear and all remaining (wholeRotations - preClear) are bonuses. This can overcount by 1 if
+            // passedTime falls within one frame of the clear-transition (before the re-fire), but that window is ~16 ms
+            // and unreachable in practice from a seek operation.
+            int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
+
+            for (int i = 0; i < preClear; i++) {
                 fullRotations++;
                 stat.registerSpinnerHit();
                 float rate = 0.375f;
@@ -464,7 +470,27 @@ public class GameplaySpinner extends GameObject {
 
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
+
+            if (wholeRotations > preClear) {
+                clear = true;
+                int bonus = wholeRotations - preClear;
+
+                for (int i = 0; i < bonus; i++) {
+                    bonusScoreCounter++;
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    float rate = 0.375f;
+
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
+            }
         }
+
+        // Carry the fractional sub-rotation so the update loop resumes from the correct position.
+        rotations = totalRotations - wholeRotations;
     }
 
     protected void reloadHitSounds() {

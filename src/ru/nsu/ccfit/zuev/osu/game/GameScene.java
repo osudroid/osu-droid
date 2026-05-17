@@ -3795,8 +3795,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             } else if (obj instanceof Slider slider) {
                 sliderIndex++;
                 applySliderResult(slider, data, endCombo);
-            } else if (obj instanceof Spinner) {
-                applySpinnerResult(data, endCombo);
+            } else if (obj instanceof Spinner parsedSpinner) {
+                applySpinnerResult(parsedSpinner, data, endCombo);
             }
 
             lastObjectId = i;
@@ -3920,12 +3920,40 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private void applySpinnerResult(@Nullable Replay.ReplayObjectData data, boolean endCombo) {
-        // Spinner accuracy encoding: totalSpins * 4 + resultCode.
-        int totalSpins = data != null ? (data.accuracy & 0xFFFF) >> 2 : 0;
+    private void applySpinnerResult(Spinner spinner, @Nullable Replay.ReplayObjectData data, boolean endCombo) {
+        if (data != null) {
+            // Spinner accuracy encoding: totalSpins * 4 + resultCode.
+            int totalSpins = (data.accuracy & 0xFFFF) >> 2;
 
-        for (int s = 0; s < totalSpins; s++) {
-            stat.registerHit(1000, false, false);
+            for (int s = 0; s < totalSpins; s++) {
+                stat.registerHit(1000, false, false);
+            }
+        } else {
+            // Autoplay always clears the spinner. Reconstruct the pre-clear (100 pts each) and bonus (1000 pts each)
+            // rotation split from the spinner's parameters.
+            float duration = (float) spinner.getDuration() / 1000;
+            float requiredRotations = (2 + 2 * playableBeatmap.getDifficulty().od / 10f) * duration;
+
+            if (duration < 0.05f) {
+                requiredRotations = 0.1f;
+            }
+
+            // The clear-transition does not decrement the rotation accumulator, so the triggering rotation persists and
+            // fires as the first bonus on the following frame. Therefore, ceil(requiredRotations) - 1 rotations are
+            // pre-clear and all remaining (totalRotations - preClear) are bonuses. This can overcount by 1 if the
+            // spinner clears on its very last frame and the bonus never fires, but that edge case is unreachable
+            // in practice.
+            int totalRotations = (int) (5f * duration);
+            int preClear = Math.min(totalRotations, (int) Math.ceil(requiredRotations) - 1);
+            int bonus = Math.max(0, totalRotations - preClear);
+
+            for (int s = 0; s < preClear; s++) {
+                stat.registerSpinnerHit();
+            }
+
+            for (int s = 0; s < bonus; s++) {
+                stat.registerHit(1000, false, false);
+            }
         }
 
         applyCircleResult(data, endCombo);
