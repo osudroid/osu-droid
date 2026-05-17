@@ -3768,9 +3768,26 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 double effectiveSecs = calculateEffectiveDrainDuration(segStartMs, segEndMs, localBreakIdx);
 
-                stat.changeHp((float) (-drainRate * 0.01 * effectiveSecs));
+                // Apply drain incrementally so that a large drain section can consume multiple Easy lives.
+                // A one-shot stat.changeHp clamps at 0 and loses the excess, causing at most one Easy revive per drain
+                // section regardless of how deep HP would have gone.
+                float remainingDrain = (float) (drainRate * 0.01 * effectiveSecs);
 
-                if (stat.getHp() <= 0 && stat.canFail) {
+                while (remainingDrain > 0) {
+                    float currentHp = stat.getHp();
+
+                    if (remainingDrain < currentHp) {
+                        stat.changeHp(-remainingDrain);
+                        break;
+                    }
+
+                    remainingDrain -= currentHp;
+                    stat.changeHp(-currentHp);
+
+                    if (!stat.canFail) {
+                        break;
+                    }
+
                     if (GameHelper.isEasy() && failcount < 3) {
                         failcount++;
                         stat.changeHp(1f);
