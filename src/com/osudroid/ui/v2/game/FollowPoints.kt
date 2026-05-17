@@ -81,7 +81,7 @@ object FollowPointConnection {
     @JvmStatic
     fun clearAll(scene: UIScene) {
         for (i in scene.childCount - 1 downTo 0) {
-            val child = scene.getChild(i)
+            val child = scene.getChildByIndex(i)
 
             if (child is PoolableFollowPoint || child is PoolableAnimatedFollowPoint) {
                 child.clearEntityModifiers()

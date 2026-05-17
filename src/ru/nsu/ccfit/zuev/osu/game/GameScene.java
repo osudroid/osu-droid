@@ -3613,7 +3613,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // Detach any lingering hit effects from the gameplay scene.
         for (int i = mgScene.getChildCount() - 1; i >= 0; --i) {
-            var child = mgScene.getChild(i);
+            var child = mgScene.getChildByIndex(i);
 
             if (child instanceof UISprite sprite) {
                 // Hit effects need to be pooled, so we cannot directly detach.
