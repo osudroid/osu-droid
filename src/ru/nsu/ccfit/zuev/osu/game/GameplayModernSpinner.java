@@ -153,6 +153,18 @@ public class GameplayModernSpinner extends GameplaySpinner {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                // Unlike GameplaySpinner, GameplayModernSpinner has no clearText sprite; clear state is applied
+                // visually on next frame.
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         if (passedTime >= duration) {

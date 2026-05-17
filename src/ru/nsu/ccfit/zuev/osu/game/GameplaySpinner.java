@@ -288,6 +288,20 @@ public class GameplaySpinner extends GameObject {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                if (clear) {
+                    scene.attachChild(clearText);
+                }
+
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         if (passedTime >= duration) {
@@ -418,6 +432,39 @@ public class GameplaySpinner extends GameObject {
         // In remove spinner lock mode, the spinner is assumed to be judged to allow other objects to be judged while
         // the spinner is still active.
         return Config.isRemoveSliderLock() || passedTime >= duration;
+    }
+
+    protected void applySeekRotations() {
+        rotations = 5f * passedTime;
+
+        while (Math.abs(rotations) >= 1f) {
+            float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
+
+            if (percentfill > 1f || clear) {
+                clear = true;
+                rotations -= Math.signum(rotations);
+                listener.onSpinnerHit(id, 1000, false, 0);
+                bonusScoreCounter++;
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            } else {
+                rotations -= Math.signum(rotations);
+                fullRotations++;
+                stat.registerSpinnerHit();
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+        }
     }
 
     protected void reloadHitSounds() {
