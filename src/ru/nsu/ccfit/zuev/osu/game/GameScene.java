@@ -2504,6 +2504,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         String scoreName = "hit0";
+        boolean judgementDeferred = false;
 
         switch (type) {
             case GameObjectListener.SLIDER_START:
@@ -2521,6 +2522,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         judgement.objectStartTime = objects[id].startTime;
 
                         enqueuePendingJudgement(judgement);
+                        judgementDeferred = true;
                     } else {
                         stat.registerHit(30, false, false);
                         stat.addSliderHeadHit();
@@ -2557,7 +2559,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         createHitEffect(judgementPos, scoreName, color);
 
-        hud.onNoteHit(stat);
+        if (!judgementDeferred) {
+            hud.onNoteHit(stat);
+        }
     }
 
     @Override
