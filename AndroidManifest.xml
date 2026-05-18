@@ -135,36 +135,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- file:// URIs matched by application/octet-stream and path extension -->
-            <intent-filter android:label="Import file">
+            <!-- file:// URIs matched by .osz extension -->
+            <intent-filter android:label="Import beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osk"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/zip" android:pathPattern=".*\\.osz" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.osz" />
             </intent-filter>
 
-            <!-- firefox and file explorer -->
-            <intent-filter android:label="Import file">
-                <action
-                    android:name="android.intent.action.VIEW" />
-                <category
-                    android:name="android.intent.category.DEFAULT" />
-                <category
-                    android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:mimeType="application/zip"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/x-zip-compressed"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/octet-stream"
-                    android:scheme="file" />
+            <!-- file:// URIs matched by .osk extension -->
+            <intent-filter android:label="Import skin">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osk" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/zip" android:pathPattern=".*\\.osk" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.osk" />
+            </intent-filter>
+
+            <!-- file:// URIs matched by .odr extension -->
+            <intent-filter android:label="Import replay">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr" />
             </intent-filter>
 
             <!-- qq -->
