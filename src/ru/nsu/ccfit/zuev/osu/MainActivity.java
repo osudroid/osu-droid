@@ -434,7 +434,7 @@ public class MainActivity extends BaseGameActivity implements
                 // LibraryManager.INSTANCE.sort();
                 fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".osk")) {
-                ToastLogger.showText(StringTable.get(com.osudroid.resources.R.string.library_skin_importing), false);
+                ToastLogger.showText(StringTable.get(R.string.library_skin_importing), false);
                 FileUtils.extractZip(fileToAdd, Config.getSkinTopPath());
                 fileToAdd = null;
             } else if (file.getName().endsWith(".odr")) {
