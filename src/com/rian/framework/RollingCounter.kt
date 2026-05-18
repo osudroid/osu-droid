@@ -2,7 +2,7 @@ package com.rian.framework
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.framework.interpolate
-import org.anddev.andengine.engine.handler.IUpdateHandler
+import org.andengine.engine.handler.IUpdateHandler
 
 /**
  * A counter that keeps track of its value over a rolling window of time.
