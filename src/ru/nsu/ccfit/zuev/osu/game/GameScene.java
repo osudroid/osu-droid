@@ -3969,12 +3969,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         } else {
             // Autoplay always clears the spinner. Reconstruct the pre-clear (100 pts each) and bonus (1000 pts each)
             // rotation split from the spinner's parameters.
-            // On clear, rotations is reset to only the excess beyond needRotations. Therefore, ceil(needRotations) - 1
-            // rotations are pre-clear and floor(totalRotations - needRotations) are bonus rotations.
+            // ceil(needRotations) - 1 rotations are pre-clear; bonus rotations begin at ceil(needRotations) total.
             float totalRotations = 5f * duration;
 
             preClear = (int) Math.ceil(needRotations) - 1;
-            bonus = Math.max(0, (int)(totalRotations - needRotations));
+            bonus = Math.max(0, (int) totalRotations - (int) Math.ceil(needRotations) + 1);
         }
 
         for (int s = 0; s < preClear; s++) {

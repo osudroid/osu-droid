@@ -376,13 +376,9 @@ public class GameplaySpinner extends GameObject {
 
                     clear = true;
 
-                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
-                    // carried over, resulting in an early first spinner bonus score.
-                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
-                    // rotations instead of 6.6.
-                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
-                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
-                    }
+                    // rotations is intentionally NOT reset here. Resetting would shift the first bonus threshold from
+                    // ceil(needRotations) to needRotations + 1, matching osu!stable but reducing the highest possible
+                    // obtainable score and altering leaderboard balance.
                 }
 
                 if (Math.abs(rotations) > 1) {
@@ -463,9 +459,7 @@ public class GameplaySpinner extends GameObject {
 
             rotations = totalRotations - wholeRotations;
         } else {
-            // On clear, rotations is reset to only the excess beyond needRotations (replay version 8+ behavior, which
-            // always applies for Autoplay). Therefore ceil(needRotations) - 1 rotations are pre-clear, and
-            // floor(totalRotations - needRotations) are bonus rotations.
+            // ceil(needRotations) - 1 rotations are pre-clear; bonus rotations begin at ceil(needRotations) total.
             int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
 
             for (int i = 0; i < preClear; i++) {
@@ -482,7 +476,7 @@ public class GameplaySpinner extends GameObject {
 
             if (totalRotations > needRotations) {
                 clear = true;
-                int bonus = (int)(totalRotations - needRotations);
+                int bonus = Math.max(0, wholeRotations - (int) Math.ceil(needRotations) + 1);
 
                 for (int i = 0; i < bonus; i++) {
                     bonusScoreCounter++;
@@ -496,7 +490,7 @@ public class GameplaySpinner extends GameObject {
                     stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
 
-                rotations = (totalRotations - needRotations) - bonus;
+                rotations = totalRotations - wholeRotations;
             } else {
                 rotations = totalRotations - wholeRotations;
             }
