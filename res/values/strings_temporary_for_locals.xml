@@ -85,8 +85,8 @@
     <string name="multi_mode_window_alert_title">Multi-window Mode</string>
     <string name="multi_mode_window_alert_message">osu!droid does not support multi-window mode. Please switch back to single-window mode to continue playing.</string>
 
-
     <string name="library_skin_importing">Importing skin...</string>
+    <string name="import_failed_open_file">Failed to open file for import.</string>
 
     <!--  Calibration Offset    -->
     <string name="opt_offset_calibration_title">Offset Calibration</string>

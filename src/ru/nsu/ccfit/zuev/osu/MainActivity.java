@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -657,17 +656,26 @@ public class MainActivity extends BaseGameActivity implements
         String displayName = null;
         String fileName;
 
-        try (Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+        try (var cursor = getContentResolver().query(uri, new String[]{ OpenableColumns.DISPLAY_NAME }, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 displayName = cursor.getString(0);
             }
+        } catch (IllegalArgumentException | SecurityException e) {
+            Debug.e("MainActivity.copyContentUriToCache: cannot query display name: " + e.getMessage(), e);
         }
 
         if (displayName != null && !displayName.isEmpty()) {
             // Strip any directory components a malicious provider might include.
             fileName = new File(displayName).getName();
         } else {
-            String mimeType = getContentResolver().getType(uri);
+            String mimeType = null;
+
+            try {
+                mimeType = getContentResolver().getType(uri);
+            } catch (SecurityException e) {
+                Debug.e("MainActivity.copyContentUriToCache: cannot query MIME type: " + e.getMessage(), e);
+            }
+
             String ext;
 
             if ("application/x-osu-beatmap-archive".equals(mimeType)) {
@@ -695,11 +703,16 @@ public class MainActivity extends BaseGameActivity implements
 
         try (var in = getContentResolver().openInputStream(uri);
              var sink = Okio.buffer(Okio.sink(tempFile))) {
-            if (in == null) return null;
+            if (in == null) {
+                ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
+                return null;
+            }
+
             sink.writeAll(Okio.source(in));
             return tempFile.getAbsolutePath();
-        } catch (IOException e) {
+        } catch (IOException | SecurityException e) {
             Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
+            ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
             return null;
         }
     }
