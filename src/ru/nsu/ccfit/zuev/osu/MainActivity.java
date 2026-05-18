@@ -7,6 +7,8 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -85,6 +87,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import okio.Okio;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -429,6 +432,9 @@ public class MainActivity extends BaseGameActivity implements
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                 // LibraryManager.INSTANCE.sort();
+            } else if (file.getName().toLowerCase().endsWith(".osk")) {
+                ToastLogger.showText("Importing skin...", false);
+                FileUtils.extractZip(beatmapToAdd, Config.getSkinTopPath());
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -625,11 +631,56 @@ public class MainActivity extends BaseGameActivity implements
                 if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
                     roomInviteLink = data;
 
-                if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
-                    beatmapToAdd = getIntent().getData().getPath();
+                String scheme = data.getScheme();
+
+                if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+                    beatmapToAdd = data.getPath();
+                } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+                    beatmapToAdd = copyContentUriToCache(data);
+                }
             }
         }
         super.onStart();
+    }
+
+    private String copyContentUriToCache(Uri uri) {
+        String displayName = null;
+        String fileName;
+
+        try (Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                displayName = cursor.getString(0);
+            }
+        }
+
+        if (displayName != null && !displayName.isEmpty()) {
+            fileName = displayName;
+        } else {
+            String mimeType = getContentResolver().getType(uri);
+            String ext;
+
+            if ("application/x-osu-beatmap-archive".equals(mimeType)) {
+                ext = ".osz";
+            } else if ("application/x-osu-skin-archive".equals(mimeType)) {
+                ext = ".osk";
+            } else {
+                ext = ".zip";
+            }
+
+            fileName = "import_" + System.currentTimeMillis() + ext;
+        }
+
+        var tempFile = new File(getCacheDir(), fileName);
+
+        try (var in = getContentResolver().openInputStream(uri);
+             var sink = Okio.buffer(Okio.sink(tempFile))) {
+            if (in == null) return null;
+            sink.writeAll(Okio.source(in));
+            return tempFile.getAbsolutePath();
+        } catch (IOException e) {
+            Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override
