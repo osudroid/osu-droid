@@ -438,7 +438,7 @@ public class MainActivity extends BaseGameActivity implements
                 ToastLogger.showText(StringTable.get(R.string.library_skin_importing), false);
                 FileUtils.extractZip(fileToAdd, Config.getSkinTopPath());
                 fileToAdd = null;
-            } else if (file.getName().endsWith(".odr")) {
+            } else if (file.getName().toLowerCase().endsWith(".odr")) {
                 willReplay = true;
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
