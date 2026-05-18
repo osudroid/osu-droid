@@ -182,6 +182,7 @@
             <intent-filter android:label="Import beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="content" android:mimeType="application/x-osu-beatmap-archive" />
             </intent-filter>
 
@@ -189,6 +190,7 @@
             <intent-filter android:label="Import skin">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="content" android:mimeType="application/x-osu-skin-archive" />
             </intent-filter>
 
