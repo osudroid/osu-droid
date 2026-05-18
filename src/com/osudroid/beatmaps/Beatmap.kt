@@ -3,6 +3,7 @@ package com.osudroid.beatmaps
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.beatmaps.sections.BeatmapColor
 import com.osudroid.beatmaps.sections.BeatmapControlPoints
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
@@ -73,26 +74,50 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         var combo = 0
         var score = 0
 
+        // Spinners need non-rate adjusted to calculate required spins.
+        val nonRateAdjustedDifficulty = difficulty.clone()
+
+        if (mods != null) {
+            ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, mode, mods.values)
+        }
+
         for (obj in hitObjects) {
-            if (obj !is Slider) {
-                score += (300 + 300 * combo * difficultyMultiplier / 25).toInt()
-                ++combo
-                continue
+            when (obj) {
+                is Slider -> {
+                    // Slider head
+                    score += 30
+                    ++combo
+
+                    // Slider repeats
+                    score += 30 * obj.repeatCount
+                    combo += obj.repeatCount
+
+                    // Slider ticks
+                    score += 10 * obj.tickCount
+                    combo += obj.tickCount
+
+                    // In osu!standard, slider end awards a 30. osu!droid does not do this.
+                    if (mode == GameMode.Standard) {
+                        score += 30
+                    }
+                }
+
+                is Spinner -> {
+                    // For each required rotations, a spinner tick (100 score) is awarded, but does not contribute to
+                    // combo.
+                    val minRps = when (mode) {
+                        GameMode.Droid -> 2 + 2 * nonRateAdjustedDifficulty.od / 10.0
+                        GameMode.Standard -> BeatmapDifficulty.difficultyRange(
+                            nonRateAdjustedDifficulty.od.toDouble(), 90.0, 150.0, 225.0
+                        ) / 60.0
+                    }
+
+                    val requiredRotations = (minRps * obj.duration / 1000).toInt()
+
+                    repeat(requiredRotations) { score += 100 }
+                }
             }
 
-            // Slider head
-            score += 30
-            ++combo
-
-            // Slider repeats
-            score += 30 * obj.repeatCount
-            combo += obj.repeatCount
-
-            // Slider ticks
-            score += 10 * obj.tickCount
-            combo += obj.tickCount
-
-            // Slider end
             score += (300 + 300 * combo * difficultyMultiplier / 25).toInt()
             ++combo
         }
