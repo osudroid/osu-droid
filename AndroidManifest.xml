@@ -194,6 +194,23 @@
                 <data android:scheme="content" android:mimeType="application/x-osu-skin-archive" />
             </intent-filter>
 
+            <!--
+                Fallback for content:// URIs with generic archive MIME types and opaque paths
+                (e.g. Downloads provider: content://downloads/public_downloads/1234).
+                Path-pattern filters above cannot match these since the URI contains no filename.
+                The label is intentionally generic — the file type cannot be determined until the
+                activity reads the display name at runtime via OpenableColumns.DISPLAY_NAME.
+            -->
+            <intent-filter android:label="Import file">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/zip" />
+                <data android:scheme="content" android:mimeType="application/octet-stream" />
+                <data android:scheme="content" android:mimeType="application/download" />
+                <data android:scheme="content" android:mimeType="application/x-zip" />
+                <data android:scheme="content" android:mimeType="application/x-zip-compressed" />
+            </intent-filter>
         </activity>
 
         <service
