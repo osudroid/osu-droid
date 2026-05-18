@@ -105,6 +105,7 @@ public class MainActivity extends BaseGameActivity implements
     public static SongService songService;
     public ServiceConnection connection;
     private String fileToAdd = null;
+    private Uri contentUriToAdd = null;
     private SaveServiceObject saveServiceObject;
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
@@ -421,6 +422,10 @@ public class MainActivity extends BaseGameActivity implements
 
     public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
+        if (contentUriToAdd != null) {
+            fileToAdd = copyContentUriToCache(contentUriToAdd);
+            contentUriToAdd = null;
+        }
         final File mainDir = new File(Config.getCorePath());
         final HashSet<String> forceImportedBeatmaps = new HashSet<>();
         if (fileToAdd != null) {
@@ -641,7 +646,7 @@ public class MainActivity extends BaseGameActivity implements
                 if (ContentResolver.SCHEME_FILE.equals(scheme)) {
                     fileToAdd = data.getPath();
                 } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-                    fileToAdd = copyContentUriToCache(data);
+                    contentUriToAdd = data;
                 }
             }
         }
