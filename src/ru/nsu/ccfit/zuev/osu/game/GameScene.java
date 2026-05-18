@@ -1452,16 +1452,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         final float mSecPassed = beatmapClock.getCurrentTime() * 1000;
 
         if (!isGameOver) {
-            float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
+            float modRate = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
-            if (replaySettingsPanel != null) {
-                currentSpeedMultiplier *= replaySettingsPanel.getPlaybackControl().getRateControl().getRate();
-            }
+            float replaySettingsRate = replaySettingsPanel != null
+                ? replaySettingsPanel.getPlaybackControl().getRateControl().getRate()
+                : 1f;
+
+            float currentSpeedMultiplier = modRate * replaySettingsRate;
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
-                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
                 beatmapClock.setRate(currentSpeedMultiplier);
+
+                var songService = GlobalManager.getInstance().getSongService();
+                songService.setSpeed(modRate);
+                songService.setPitchRate(replaySettingsRate);
             }
         }
 
