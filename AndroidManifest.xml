@@ -60,7 +60,7 @@
             android:exported="true">
 
             <!-- firefox and file explorer -->
-            <intent-filter>
+            <intent-filter android:label="Import replay">
                 <action
                     android:name="android.intent.action.VIEW" />
                 <category
@@ -79,13 +79,12 @@
             </intent-filter>
 
             <!-- qq -->
-            <intent-filter>
+            <intent-filter android:label="Import replay">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.edr" />
+                <data android:pathPattern=".*\.edr" />
             </intent-filter>
 
         </activity>
@@ -126,7 +125,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
+
+            <!-- file:// URIs matched by application/octet-stream and path extension -->
+            <intent-filter android:label="Import file">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -139,7 +140,7 @@
             </intent-filter>
 
             <!-- firefox and file explorer -->
-            <intent-filter>
+            <intent-filter android:label="Import file">
                 <action
                     android:name="android.intent.action.VIEW" />
                 <category
@@ -158,13 +159,12 @@
             </intent-filter>
 
             <!-- qq -->
-            <intent-filter>
+            <intent-filter android:label="Import beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.osz" />
+                <data android:pathPattern=".*\.osz" />
             </intent-filter>
         </activity>
 
