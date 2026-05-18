@@ -34,6 +34,7 @@ abstract class RollingCounter<T>(initialValue: T) {
     var targetValue = initialValue
         set(value) {
             if (field != value) {
+                rollingStartValue = currentValue
                 field = value
                 rollingTime = 0f
             }
@@ -45,6 +46,7 @@ abstract class RollingCounter<T>(initialValue: T) {
     val isRolling
         get() = currentValue != targetValue
 
+    private var rollingStartValue = initialValue
     private var rollingTime = 0f
 
     /**
@@ -63,7 +65,7 @@ abstract class RollingCounter<T>(initialValue: T) {
 
             val progress = rollingEasing.interpolate(rollingTime / rollingDuration)
 
-            currentValue = interpolate(currentValue, targetValue, progress)
+            currentValue = interpolate(rollingStartValue, targetValue, progress)
         } else {
             currentValue = targetValue
         }
@@ -75,6 +77,7 @@ abstract class RollingCounter<T>(initialValue: T) {
      * @param value The value to set immediately.
      */
     fun setValueWithoutRolling(value: T) {
+        rollingStartValue = value
         targetValue = value
         currentValue = value
         rollingTime = 0f

@@ -25,6 +25,31 @@ class RollingCounterTest {
     }
 
     @Test
+    fun `Test mid-roll retarget starts from current value`() {
+        val counter = TestRollingCounter(0)
+
+        counter.rollingEasing = Easing.None
+        counter.rollingDuration = 1000f
+
+        counter.targetValue = 100
+        counter.update(500f)
+
+        Assert.assertEquals(50, counter.currentValue)
+
+        // Retarget mid-roll: should start a fresh lerp from 50, not from 0
+        counter.targetValue = 200
+        counter.update(500f)
+
+        Assert.assertTrue(counter.isRolling)
+        Assert.assertEquals(125, counter.currentValue)
+
+        counter.update(500f)
+
+        Assert.assertFalse(counter.isRolling)
+        Assert.assertEquals(200, counter.currentValue)
+    }
+
+    @Test
     fun `Test zero rolling duration snaps immediately`() {
         val counter = TestRollingCounter(0)
 
