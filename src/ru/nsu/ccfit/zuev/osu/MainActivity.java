@@ -440,6 +440,8 @@ public class MainActivity extends BaseGameActivity implements
                 fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".odr")) {
                 willReplay = true;
+            } else {
+                fileToAdd = null;
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
