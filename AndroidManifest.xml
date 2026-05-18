@@ -150,6 +150,7 @@
             <intent-filter android:label="Import replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr" />
             </intent-filter>
 
