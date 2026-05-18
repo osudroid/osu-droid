@@ -109,5 +109,8 @@
     <string name="opt_offset_calibration_feedback_early">Early</string>
     <string name="opt_offset_calibration_feedback_tap_count">taps</string>
 
+    <string name="act_import_beatmap">Import beatmap into osu!droid</string>
+    <string name="act_import_file">Import file into osu!droid</string>
+    <string name="act_import_skin">Import skin into osu!droid</string>
 
 </resources>

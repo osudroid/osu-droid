@@ -60,7 +60,7 @@
             android:exported="true">
 
             <!-- firefox and file explorer -->
-            <intent-filter android:label="Import replay">
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -70,7 +70,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by .edr extension (modern file managers / browsers) -->
-            <intent-filter android:label="Import replay">
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -78,7 +78,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by generic archive MIME type and .edr path -->
-            <intent-filter android:label="Import replay">
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -127,7 +127,7 @@
             </intent-filter>
 
             <!-- file:// URIs matched by .osz extension -->
-            <intent-filter android:label="Import beatmap">
+            <intent-filter android:label="@string/act_import_beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -137,7 +137,7 @@
             </intent-filter>
 
             <!-- file:// URIs matched by .osk extension -->
-            <intent-filter android:label="Import skin">
+            <intent-filter android:label="@string/act_import_skin">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -147,7 +147,7 @@
             </intent-filter>
 
             <!-- file:// URIs matched by .odr extension -->
-            <intent-filter android:label="Import replay">
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -155,7 +155,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by .osz extension (modern file managers / browsers) -->
-            <intent-filter android:label="Import beatmap">
+            <intent-filter android:label="@string/act_import_beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -163,7 +163,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by .osk extension (modern file managers / browsers) -->
-            <intent-filter android:label="Import skin">
+            <intent-filter android:label="@string/act_import_skin">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -171,7 +171,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by .odr extension (modern file managers / browsers) -->
-            <intent-filter android:label="Import replay">
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -179,7 +179,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by osu beatmap MIME type -->
-            <intent-filter android:label="Import beatmap">
+            <intent-filter android:label="@string/act_import_beatmap">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -187,7 +187,7 @@
             </intent-filter>
 
             <!-- content:// URIs matched by osu skin MIME type -->
-            <intent-filter android:label="Import skin">
+            <intent-filter android:label="@string/act_import_skin">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -201,7 +201,7 @@
                 The label is intentionally generic — the file type cannot be determined until the
                 activity reads the display name at runtime via OpenableColumns.DISPLAY_NAME.
             -->
-            <intent-filter android:label="Import file">
+            <intent-filter android:label="@string/act_import_file">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
