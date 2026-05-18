@@ -194,17 +194,6 @@
                 <data android:scheme="content" android:mimeType="application/x-osu-skin-archive" />
             </intent-filter>
 
-            <!-- content:// URIs matched by generic archive MIME type -->
-            <intent-filter android:label="Import file">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" android:mimeType="application/zip" />
-                <data android:scheme="content" android:mimeType="application/octet-stream" />
-                <data android:scheme="content" android:mimeType="application/download" />
-                <data android:scheme="content" android:mimeType="application/x-zip" />
-                <data android:scheme="content" android:mimeType="application/x-zip-compressed" />
-            </intent-filter>
         </activity>
 
         <service
