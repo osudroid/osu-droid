@@ -28,9 +28,11 @@ public class ImportReplayActivity extends Activity {
         Uri data = getIntent().getData();
         if (data != null) {
             try {
-                InputStream inputStream;
+                final InputStream inputStream;
+
                 if (ContentResolver.SCHEME_CONTENT.equals(data.getScheme())) {
                     inputStream = getContentResolver().openInputStream(data);
+
                     if (inputStream == null) {
                         Toast.makeText(this, com.osudroid.resources.R.string.invalid_edr_file, Toast.LENGTH_SHORT).show();
                         finish();
@@ -38,32 +40,39 @@ public class ImportReplayActivity extends Activity {
                     }
                 } else {
                     File file = new File(data.getPath());
+
                     if (!file.exists() || file.isDirectory()) {
                         Toast.makeText(this, com.osudroid.resources.R.string.invalid_edr_file, Toast.LENGTH_SHORT).show();
                         finish();
                         return;
                     }
+
                     inputStream = new FileInputStream(file);
                 }
 
-                OsuDroidReplayPack.ReplayEntry entry = OsuDroidReplayPack.unpack(inputStream);
-                File rep = new File(entry.scoreInfo.getReplayPath());
-                if (!rep.exists()) {
-                    if (!rep.createNewFile()) {
+                try (inputStream) {
+                    OsuDroidReplayPack.ReplayEntry entry = OsuDroidReplayPack.unpack(inputStream);
+                    File rep = new File(entry.scoreInfo.getReplayPath());
+
+                    if (!rep.exists()) {
+                        if (!rep.createNewFile()) {
+                            Toast.makeText(this, com.osudroid.resources.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                    }
+
+                    try (var outputStream = new FileOutputStream(rep)) {
+                        outputStream.write(entry.replayFile);
+                    }
+
+                    if (DatabaseManager.getScoreInfoTable().insertScore(entry.scoreInfo) >= 0) {
+                        Toast.makeText(this, com.osudroid.resources.R.string.import_edr_successfully, Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
                         Toast.makeText(this, com.osudroid.resources.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
                         finish();
-                        return;
                     }
-                }
-                FileOutputStream outputStream = new FileOutputStream(rep);
-                outputStream.write(entry.replayFile);
-                outputStream.close();
-                if (DatabaseManager.getScoreInfoTable().insertScore(entry.scoreInfo) >= 0) {
-                    Toast.makeText(this, com.osudroid.resources.R.string.import_edr_successfully, Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(this, com.osudroid.resources.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
-                    finish();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
