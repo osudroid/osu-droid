@@ -104,7 +104,7 @@ public class MainActivity extends BaseGameActivity implements
     public static String versionName;
     public static SongService songService;
     public ServiceConnection connection;
-    private String beatmapToAdd = null;
+    private String fileToAdd = null;
     private SaveServiceObject saveServiceObject;
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
@@ -363,7 +363,7 @@ public class MainActivity extends BaseGameActivity implements
                 if (roomInviteLink != null) {
                     Multiplayer.connectFromLink(roomInviteLink);
                 } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
                     willReplay = false;
                 }
 
@@ -422,21 +422,21 @@ public class MainActivity extends BaseGameActivity implements
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         final HashSet<String> forceImportedBeatmaps = new HashSet<>();
-        if (beatmapToAdd != null) {
-            File file = new File(beatmapToAdd);
+        if (fileToAdd != null) {
+            File file = new File(fileToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
                         StringTable.get(com.osudroid.resources.R.string.library_importing),
                         false);
 
-                FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
+                FileUtils.extractZip(fileToAdd, Config.getBeatmapPath());
                 forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                 // LibraryManager.INSTANCE.sort();
-                beatmapToAdd = null;
+                fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".osk")) {
                 ToastLogger.showText("Importing skins...", false);
-                FileUtils.extractZip(beatmapToAdd, Config.getSkinTopPath());
-                beatmapToAdd = null;
+                FileUtils.extractZip(fileToAdd, Config.getSkinTopPath());
+                fileToAdd = null;
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -636,9 +636,9 @@ public class MainActivity extends BaseGameActivity implements
                 String scheme = data.getScheme();
 
                 if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-                    beatmapToAdd = data.getPath();
+                    fileToAdd = data.getPath();
                 } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-                    beatmapToAdd = copyContentUriToCache(data);
+                    fileToAdd = copyContentUriToCache(data);
                 }
             }
         }
