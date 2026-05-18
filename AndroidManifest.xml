@@ -87,6 +87,24 @@
                 <data android:pathPattern=".*\.edr" />
             </intent-filter>
 
+            <!-- content:// URIs matched by .edr extension (modern file managers / browsers) -->
+            <intent-filter android:label="Import replay">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.edr" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by generic archive MIME type -->
+            <intent-filter android:label="Import replay">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/zip" />
+                <data android:scheme="content" android:mimeType="application/x-zip-compressed" />
+                <data android:scheme="content" android:mimeType="application/octet-stream" />
+            </intent-filter>
+
         </activity>
 
         <activity
