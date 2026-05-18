@@ -34,19 +34,18 @@ class StarRatingBadge : UIBadge() {
 
             if (prev != value) {
                 counter.targetValue = value
-                counter.rollingDuration = 100 + 80 * abs(value - prev).toFloat()
+                counter.rollingDuration = 0.1f + 0.08f * abs(value - prev).toFloat()
             }
         }
 
     init {
         text = "0.00"
         leadingIcon = UISprite(ResourceManager.getInstance().getTexture("star-xs"))
+        registerUpdateHandler(counter)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         if (counter.isRolling) {
-            counter.update(deltaTimeSec * 1000)
-
             text = "%.2f".format(counter.currentValue)
             background?.color = OsuColors.getStarRatingColor(counter.currentValue)
 

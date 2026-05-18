@@ -22,22 +22,24 @@ class HUDScoreCounter : HUDElement() {
             }
         }
 
-    private val counter = RollingIntCounter(0).apply {
-        rollingDuration = 1000f
-    }
+    private val counter = RollingIntCounter(0).apply { rollingDuration = 1f }
 
     init {
         sprite.spacing = -OsuSkin.get().scoreOverlap
         sprite.text = format.format(0)
-        attachChild(sprite)
 
+        registerUpdateHandler(counter)
+        attachChild(sprite)
         onContentChanged()
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
-        counter.update(secondsElapsed * 1000)
         counter.targetValue = game.stat.totalScoreWithMultiplier
-        value = counter.currentValue
     }
 
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        value = counter.currentValue
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
 }

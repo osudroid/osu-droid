@@ -22,21 +22,22 @@ class HUDAccuracyCounter : HUDElement() {
             }
         }
 
-    private val counter = RollingFloatCounter(1f).apply {
-        rollingDuration = 1000f
-    }
+    private val counter = RollingFloatCounter(1f).apply { rollingDuration = 1f }
 
     init {
         sprite.text = "100.00%"
+        registerUpdateHandler(counter)
         attachChild(sprite)
         onContentChanged()
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
-        counter.update(secondsElapsed * 1000f)
-
         counter.targetValue = gameScene.stat.accuracy
-        value = counter.currentValue
     }
 
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        value = counter.currentValue
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
 }
