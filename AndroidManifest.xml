@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
@@ -63,32 +64,31 @@
             android:exported="true">
 
             <!-- firefox and file explorer -->
-            <intent-filter>
-                <action
-                    android:name="android.intent.action.VIEW" />
-                <category
-                    android:name="android.intent.category.DEFAULT" />
-                <category
-                    android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:mimeType="application/zip"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/x-zip-compressed"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/octet-stream"
-                    android:scheme="file" />
+            <intent-filter android:label="@string/act_import_replay">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:mimeType="application/zip" android:pathPattern=".*\\.edr" />
+                <data android:scheme="file" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.edr" />
+                <data android:scheme="file" android:mimeType="application/octet-stream" android:pathPattern=".*\\.edr" />
             </intent-filter>
 
-            <!-- qq -->
-            <intent-filter>
+            <!-- content:// URIs matched by .edr extension (modern file managers / browsers) -->
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.edr" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.edr" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by generic archive MIME type and .edr path -->
+            <intent-filter android:label="@string/act_import_replay">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="application/zip" android:pathPattern=".*\\.edr" />
+                <data android:scheme="content" android:host="*" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.edr" />
+                <data android:scheme="content" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.edr" />
             </intent-filter>
 
         </activity>
@@ -129,45 +129,91 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
+
+            <!-- file:// URIs matched by .osz extension -->
+            <intent-filter android:label="@string/act_import_beatmap">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" android:host="*"
-                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
-                <data android:scheme="file" android:host="*"
-                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
-                <data android:scheme="file" android:host="*"
-                    android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/zip" android:pathPattern=".*\\.osz" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.osz" />
             </intent-filter>
 
-            <!-- firefox and file explorer -->
-            <intent-filter>
-                <action
-                    android:name="android.intent.action.VIEW" />
-                <category
-                    android:name="android.intent.category.DEFAULT" />
-                <category
-                    android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:mimeType="application/zip"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/x-zip-compressed"
-                    android:scheme="file" />
-                <data
-                    android:mimeType="application/octet-stream"
-                    android:scheme="file" />
+            <!-- file:// URIs matched by .osk extension -->
+            <intent-filter android:label="@string/act_import_skin">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osk" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/zip" android:pathPattern=".*\\.osk" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/x-zip-compressed" android:pathPattern=".*\\.osk" />
             </intent-filter>
 
-            <!-- qq -->
-            <intent-filter>
+            <!-- file:// URIs matched by .odr extension -->
+            <intent-filter android:label="@string/act_import_replay">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.osz" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by .osz extension (modern file managers / browsers) -->
+            <intent-filter android:label="@string/act_import_beatmap">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.osz" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by .osk extension (modern file managers / browsers) -->
+            <intent-filter android:label="@string/act_import_skin">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.osk" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by .odr extension (modern file managers / browsers) -->
+            <intent-filter android:label="@string/act_import_replay">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.odr" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by osu beatmap MIME type -->
+            <intent-filter android:label="@string/act_import_beatmap">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/x-osu-beatmap-archive" />
+            </intent-filter>
+
+            <!-- content:// URIs matched by osu skin MIME type -->
+            <intent-filter android:label="@string/act_import_skin">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/x-osu-skin-archive" />
+            </intent-filter>
+
+            <!--
+                Fallback for content:// URIs with generic archive MIME types and opaque paths
+                (e.g. Downloads provider: content://downloads/public_downloads/1234).
+                Path-pattern filters above cannot match these since the URI contains no filename.
+                The label is intentionally generic — the file type cannot be determined until the
+                activity reads the display name at runtime via OpenableColumns.DISPLAY_NAME.
+            -->
+            <intent-filter android:label="@string/act_import_file">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/zip" />
+                <data android:scheme="content" android:mimeType="application/octet-stream" />
+                <data android:scheme="content" android:mimeType="application/download" />
+                <data android:scheme="content" android:mimeType="application/x-zip" />
+                <data android:scheme="content" android:mimeType="application/x-zip-compressed" />
             </intent-filter>
         </activity>
 
