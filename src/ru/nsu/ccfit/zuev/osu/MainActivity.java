@@ -432,9 +432,11 @@ public class MainActivity extends BaseGameActivity implements
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
                 // LibraryManager.INSTANCE.sort();
+                beatmapToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".osk")) {
                 ToastLogger.showText("Importing skins...", false);
                 FileUtils.extractZip(beatmapToAdd, Config.getSkinTopPath());
+                beatmapToAdd = null;
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
