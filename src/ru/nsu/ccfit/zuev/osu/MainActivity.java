@@ -656,7 +656,8 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (displayName != null && !displayName.isEmpty()) {
-            fileName = displayName;
+            // Strip any directory components a malicious provider might include.
+            fileName = new File(displayName).getName();
         } else {
             String mimeType = getContentResolver().getType(uri);
             String ext;
@@ -673,6 +674,16 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         var tempFile = new File(getCacheDir(), fileName);
+
+        try {
+            if (!tempFile.getCanonicalPath().startsWith(getCacheDir().getCanonicalPath() + File.separator)) {
+                Debug.e("MainActivity.copyContentUriToCache: rejected unsafe display name: " + displayName);
+                return null;
+            }
+        } catch (IOException e) {
+            Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
+            return null;
+        }
 
         try (var in = getContentResolver().openInputStream(uri);
              var sink = Okio.buffer(Okio.sink(tempFile))) {
