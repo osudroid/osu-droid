@@ -161,6 +161,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float leadOut = 0;
     private HitObject[] objects;
     private int objectIndex;
+    private int postSeekFrameCount;
     private ArrayList<Color4> comboColors;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
@@ -2013,6 +2014,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
             }
         }
+
+        if (postSeekFrameCount > 0) {
+            postSeekFrameCount--;
+        }
     }
 
     private void updateActiveObjects(float deltaTime) {
@@ -3256,6 +3261,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return beatmapClock.getCurrentTime();
     }
 
+    @Override
+    public boolean isAfterSeek() {
+        return postSeekFrameCount > 0;
+    }
+
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && !replaying) {
@@ -3717,6 +3727,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (videoEnabled && video != null) {
             video.seekTo(Math.max(0, (int) ((clampedTime - videoOffset) * 1000)));
         }
+
+        // Suppress hitsounds for nested slider objects that have already passed the seek target.
+        // Objects are spawned in the same frame as seekTo runs, but updated in the next frame,
+        // so the flag must survive 2 update frames.
+        postSeekFrameCount = 2;
     }
 
     private void reconstructStatAtTime(float targetMs) {

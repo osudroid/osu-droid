@@ -47,4 +47,10 @@ public interface GameObjectListener {
      * The current elapsed time relative to the start of the beatmap, in seconds.
      */
     float getElapsedTime();
+
+    /**
+     * Whether the game has just seeked and is in the first frame where active objects run their first update.
+     * Used to suppress hitsounds for nested slider objects that were already passed at the seek target.
+     */
+    boolean isAfterSeek();
 }

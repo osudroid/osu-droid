@@ -1188,7 +1188,9 @@ public class GameplaySlider extends GameObject {
             int type = isSliderTick ? GameObjectListener.SLIDER_TICK : GameObjectListener.SLIDER_REPEAT;
 
             if (isHit) {
-                playCurrentNestedObjectHitSound();
+                if (!listener.isAfterSeek()) {
+                    playCurrentNestedObjectHitSound();
+                }
                 ticksGot++;
                 tickSet.set(replayTickIndex++, true);
                 listener.onSliderHit(id, isSliderTick ? 10 : 30, tmpPoint, false, bodyColor, type, true);
