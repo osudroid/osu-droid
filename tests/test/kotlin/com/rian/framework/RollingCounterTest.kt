@@ -25,6 +25,18 @@ class RollingCounterTest {
     }
 
     @Test
+    fun `Test zero rolling duration snaps immediately`() {
+        val counter = TestRollingCounter(0)
+
+        // rollingDuration defaults to 0, so update should snap without dividing by zero.
+        counter.targetValue = 100
+        counter.update(16f)
+
+        Assert.assertFalse(counter.isRolling)
+        Assert.assertEquals(100, counter.currentValue)
+    }
+
+    @Test
     fun `Test setting value without rolling`() {
         val counter = TestRollingCounter(0)
 

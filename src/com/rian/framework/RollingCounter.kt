@@ -54,6 +54,11 @@ abstract class RollingCounter<T>(initialValue: T) {
      */
     fun update(deltaMs: Float) {
         if (isRolling) {
+            if (rollingDuration <= 0f) {
+                currentValue = targetValue
+                return
+            }
+
             rollingTime = (rollingTime + deltaMs).coerceAtMost(rollingDuration)
 
             val progress = rollingEasing.interpolate(rollingTime / rollingDuration)
