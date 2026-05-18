@@ -129,7 +129,6 @@
             <!-- file:// URIs matched by .osz extension -->
             <intent-filter android:label="Import beatmap">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz" />
@@ -140,7 +139,6 @@
             <!-- file:// URIs matched by .osk extension -->
             <intent-filter android:label="Import skin">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.osk" />
@@ -151,7 +149,6 @@
             <!-- file:// URIs matched by .odr extension -->
             <intent-filter android:label="Import replay">
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file" android:host="*" android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr" />
             </intent-filter>
