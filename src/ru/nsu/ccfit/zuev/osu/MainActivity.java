@@ -364,6 +364,7 @@ public class MainActivity extends BaseGameActivity implements
                     Multiplayer.connectFromLink(roomInviteLink);
                 } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
+                    fileToAdd = null;
                     willReplay = false;
                 }
 
