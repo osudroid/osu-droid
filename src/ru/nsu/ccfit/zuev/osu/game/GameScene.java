@@ -164,6 +164,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private float leadOut = 0;
     private HitObject[] objects;
     private int objectIndex;
+    private int postSeekFrameCount;
     private ArrayList<Color4> comboColors;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
@@ -1196,9 +1197,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
-        hud.setClock(beatmapClock);
-        // Main scene already processes the clock, so don't do it again.
-        hud.setProcessCustomClock(false);
 
         if (!replaying && !GameHelper.isAutoplay()) {
             // Since block areas are saved in device pixels, we need to map them to scaled pixels.
@@ -1458,16 +1456,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         final float mSecPassed = beatmapClock.getCurrentTime() * 1000;
 
         if (!isGameOver) {
-            float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
+            float modRate = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
-            if (replaySettingsPanel != null) {
-                currentSpeedMultiplier *= replaySettingsPanel.getPlaybackControl().getRateControl().getRate();
-            }
+            float replaySettingsRate = replaySettingsPanel != null
+                ? replaySettingsPanel.getPlaybackControl().getRateControl().getRate()
+                : 1f;
+
+            float currentSpeedMultiplier = modRate * replaySettingsRate;
 
             if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
-                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
                 beatmapClock.setRate(currentSpeedMultiplier);
+
+                var songService = GlobalManager.getInstance().getSongService();
+                songService.setSpeed(modRate);
+                songService.setPitchRate(replaySettingsRate);
             }
         }
 
@@ -2015,6 +2018,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     return;
                 }
             }
+        }
+
+        if (postSeekFrameCount > 0) {
+            postSeekFrameCount--;
         }
     }
 
@@ -3258,6 +3265,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return beatmapClock.getCurrentTime();
     }
 
+    @Override
+    public boolean isAfterSeek() {
+        return postSeekFrameCount > 0;
+    }
+
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && !replaying) {
@@ -3719,6 +3731,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (videoEnabled && video != null) {
             video.seekTo(Math.max(0, (int) ((clampedTime - videoOffset) * 1000)));
         }
+
+        // Suppress hitsounds for nested slider objects that have already passed the seek target.
+        // Objects are spawned in the same frame as seekTo runs, but updated in the next frame,
+        // so the flag must survive 2 update frames.
+        postSeekFrameCount = 2;
     }
 
     private void reconstructStatAtTime(float targetMs) {
@@ -3959,12 +3976,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         } else {
             // Autoplay always clears the spinner. Reconstruct the pre-clear (100 pts each) and bonus (1000 pts each)
             // rotation split from the spinner's parameters.
-            // On clear, rotations is reset to only the excess beyond needRotations. Therefore, ceil(needRotations) - 1
-            // rotations are pre-clear and floor(totalRotations - needRotations) are bonus rotations.
+            // ceil(needRotations) - 1 rotations are pre-clear; bonus rotations begin at ceil(needRotations) total.
             float totalRotations = 5f * duration;
 
             preClear = (int) Math.ceil(needRotations) - 1;
-            bonus = Math.max(0, (int)(totalRotations - needRotations));
+            bonus = Math.max(0, (int) totalRotations - (int) Math.ceil(needRotations) + 1);
         }
 
         for (int s = 0; s < preClear; s++) {

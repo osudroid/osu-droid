@@ -205,6 +205,12 @@ public class SongService extends Service {
         }
     }
 
+    public void setPitchRate(float pitchRate) {
+        if (audioFunc != null) {
+            audioFunc.setPitchRate(pitchRate);
+        }
+    }
+
     public void setFrequencyForcefully(float frequency) {
         if (audioFunc != null) {
             audioFunc.setFrequencyForcefully(frequency);
