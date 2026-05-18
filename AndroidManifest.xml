@@ -134,7 +134,7 @@
                 <data android:scheme="file" android:host="*"
                       android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
                 <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
+                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osk"/>
                 <data android:scheme="file" android:host="*"
                       android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
             </intent-filter>
