@@ -761,7 +761,11 @@ class MainMenuV2 : UIScene() {
             currentTimingPoint = tp
             currentEffectPoint  = ep
             bpmLength  = tp?.msPerBeat?.toFloat() ?: 1000f
-            kiaiActive = ep?.isKiai == true
+
+            val nowKiai = ep?.isKiai == true
+            if (!kiaiActive && nowKiai) onKiaiStart()
+            else if (kiaiActive && !nowKiai) onKiaiEnd()
+            kiaiActive = nowKiai
 
             // Update background for the new beatmap
             if (info.audioPath != lastBgAudioPath) {
