@@ -118,6 +118,10 @@ class MainMenuV2 : UIScene() {
 
     var isOnExitAnim = false
 
+    // Guards initOnlinePanel() so it only runs once per process lifetime,
+    // preventing duplicate panels on scene re-attach (onLoadComplete fires each time).
+    private var onlinePanelInitialised = false
+
     /**
      * set to true after a skin reload so the background texture is refreshed
      * on the next frame instead of doing two HashMap lookups every frame unconditionally.
@@ -418,7 +422,10 @@ class MainMenuV2 : UIScene() {
         if (songService != null && songService.status == Status.STOPPED)
             musicStarted = false
 
-        initOnlinePanel()
+        if (!onlinePanelInitialised) {
+            onlinePanelInitialised = true
+            initOnlinePanel()
+        }
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
