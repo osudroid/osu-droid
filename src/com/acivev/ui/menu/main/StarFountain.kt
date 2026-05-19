@@ -29,7 +29,8 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
     private val velRight = VelocityParticleInitializer<Sprite>(0f, 0f, -480f, -520f)
 
     // Shoot state
-    private var active = false
+    var isActive = false
+        private set
     private var order = 0
     private var beginMs = 0
 
@@ -72,7 +73,7 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
         // Pick direction: -1 = inward cross, 0 = straight up, 1 = outward spread
         order = listOf(-1, 0, 1).random()
         beginMs = songPosMs
-        active = true
+        isActive = true
 
         // first shoot / gap > 500 ms → stop loop, play one-shot
         // rapid shoot (< 500 ms) → start loop (if not already looping)
@@ -94,13 +95,13 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
     }
 
     fun update(songPosMs: Int) {
-        if (!active) return
+        if (!isActive) return
 
         val elapsed = (songPosMs - beginMs).toFloat() / 1000f
         if (elapsed >= SHOOT_DURATION_SEC) {
             systemLeft?.isParticlesSpawnEnabled  = false
             systemRight?.isParticlesSpawnEnabled = false
-            active = false
+            isActive = false
         } else {
             val sweep = SWEEP_X_VEL * (1f - 2f * elapsed / SHOOT_DURATION_SEC)
             applyVelocity(leftX = -order * sweep, rightX = order * sweep)
@@ -117,7 +118,7 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
     fun stop() {
         systemLeft?.isParticlesSpawnEnabled  = false
         systemRight?.isParticlesSpawnEnabled = false
-        active = false
+        isActive = false
         if (loopPlaying) { loopSound?.stop(); loopPlaying = false }
         // Reset so the next kiai onset always plays the shoot sound fresh,
         // even if it arrives within SHOOT_RETRIGGER_MS of this stop.
@@ -162,4 +163,3 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
         private const val SHOOT_RETRIGGER_MS = 500
     }
 }
-

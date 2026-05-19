@@ -470,7 +470,16 @@ class MainMenuV2 : UIScene() {
             else if (kiaiActive && !nowKiai) onKiaiEnd()
 
             kiaiActive = nowKiai
-            starFountain.update(songPos)
+
+            // Only drive the fountain while music is actively playing — songPos deltas
+            // are used to track burst duration and the loop-sound retrigger window, so a
+            // frozen position (paused/stopped) would leave emission and loop audio running
+            // indefinitely.
+            if (songService.status == Status.PLAYING) {
+                starFountain.update(songPos)
+            } else if (starFountain.isActive) {
+                starFountain.stop()
+            }
 
             if (musicStarted && songService.status != Status.PLAYING && songPos >= songService.getLength()) {
                 musicStarted = false   // allow the new preloaded track to start
