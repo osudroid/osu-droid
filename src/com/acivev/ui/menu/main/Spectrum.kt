@@ -97,7 +97,6 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
                 val sx = barStartX[total]; val sy = barStartY[total]
                 for (j in 0..5) vbo.putVertex(total * 6 + j, sx, sy)
             }
-            vbo.invalidateOnHardware()
             pendingClear = false
             wasVisible = false
             return
@@ -114,7 +113,6 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
                     val sx = barStartX[total]; val sy = barStartY[total]
                     for (j in 0..5) vbo.putVertex(total * 6 + j, sx, sy)
                 }
-                vbo.invalidateOnHardware()
                 wasVisible = false
             }
             return
@@ -165,8 +163,6 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
                 vbo.putVertex(vBase + 5, dx, dy)
             }
         }
-
-        vbo.invalidateOnHardware()
     }
 
     fun update(dt: Float, kiaiActive: Boolean) {
