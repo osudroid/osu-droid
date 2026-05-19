@@ -707,7 +707,7 @@ class MainMenuV2 : UIScene() {
                 GlobalManager.getInstance().mainActivity.checkNewSkins()
                 GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
                 GlobalManager.getInstance().songMenu.reload()
-                GlobalManager.getInstance().engine.scene = LobbyScene()
+                updateThread { GlobalManager.getInstance().engine.scene = LobbyScene() }
             }
         } else {
             closeMenu()
