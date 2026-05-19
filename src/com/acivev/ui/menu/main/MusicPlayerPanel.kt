@@ -46,6 +46,13 @@ class MusicPlayerPanel : UILinearContainer() {
     private var lastTitle = ""
     private var lastStatus: Status? = null
 
+    // Cached last-rendered seconds to avoid per-frame string allocations when the
+    // displayed time hasn't actually changed (formatTime result is the same for every
+    // ms within the same second).
+    private var lastPosSec = -1
+    private var lastLenSec = -1
+    private var lastSeekSec = -1
+
     private val autoCloseDelayMs = 5_000L
     private var lastInteractionTime = 0L
 
@@ -301,13 +308,25 @@ class MusicPlayerPanel : UILinearContainer() {
                 collapse()
             }
 
-            totalText.text = formatTime(len)
+            val lenSec = len / 1000
+            if (lenSec != lastLenSec) {
+                lastLenSec = lenSec
+                totalText.text = formatTime(len)
+            }
 
             if (!isDraggingSeek) {
                 seekSlider.value = progress
-                posText.text     = formatTime(pos)
+                val posSec = pos / 1000
+                if (posSec != lastPosSec) {
+                    lastPosSec = posSec
+                    posText.text = formatTime(pos)
+                }
             } else {
-                posText.text = formatTime((seekSlider.value * len).toInt())
+                val seekSec = (seekSlider.value * len).toInt() / 1000
+                if (seekSec != lastSeekSec) {
+                    lastSeekSec = seekSec
+                    posText.text = formatTime((seekSlider.value * len).toInt())
+                }
             }
 
             val status = songService.status
