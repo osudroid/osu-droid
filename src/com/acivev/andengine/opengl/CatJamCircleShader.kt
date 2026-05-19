@@ -83,11 +83,13 @@ class CatJamCircleShader private constructor() : ShaderProgram(VERTEX_SHADER, FR
                 float clip = 1.0 - smoothstep(edge - 0.02, edge, dist);
                 if (clip <= 0.0) discard;
                 vec4 cat = texture2D(u_texture_0, v_texCoord);
-                // Premultiplied alpha output: multiply ALL channels (including RGB) by the
-                // final alpha so that when sprite alpha is 0, gl_FragColor = (0,0,0,0)
-                // and the ONE blend factor adds nothing to the destination.
-                float finalAlpha = cat.a * clip * u_color.a;
-                gl_FragColor = vec4(cat.rgb * u_color.rgb * finalAlpha, finalAlpha);
+                // The atlas is uploaded with premultiplied alpha, so cat.rgb already
+                // includes cat.a. Preserve premultiplied output by applying only clip
+                // and sprite alpha to RGB here, while alpha tracks the full
+                // coverage/opacity product.
+                float colorScale = clip * u_color.a;
+                float finalAlpha = cat.a * colorScale;
+                gl_FragColor = vec4(cat.rgb * u_color.rgb * colorScale, finalAlpha);
             }
         """.trimIndent()
     }
