@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import com.acivev.ui.menu.main.MainMenuV2;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.UIEngine;
@@ -21,6 +22,7 @@ public class GlobalManager {
     private Camera camera;
     private GameScene gameScene;
     private MainScene mainScene;
+    private MainMenuV2 mainMenuV2;
     private ScoringScene scoring;
     private SongMenu songMenu;
     private MainActivity mainActivity;
@@ -51,8 +53,6 @@ public class GlobalManager {
         songService = saveServiceObject.getSongService();
         SongService.initBASS();
         setLoadingProgress(10);
-        setMainScene(new MainScene());
-        getMainScene().load(mainActivity);
         setInfo("Loading skin...");
         ResourceManager.getInstance().loadSkin(Config.getSkinPath());
         setLoadingProgress(30);
@@ -100,6 +100,14 @@ public class GlobalManager {
 
     public void setMainScene(MainScene mainScene) {
         this.mainScene = mainScene;
+    }
+
+    public MainMenuV2 getMainMenuV2() {
+        return mainMenuV2;
+    }
+
+    public void setMainMenuV2(MainMenuV2 mainMenuV2) {
+        this.mainMenuV2 = mainMenuV2;
     }
 
     public ScoringScene getScoring() {
