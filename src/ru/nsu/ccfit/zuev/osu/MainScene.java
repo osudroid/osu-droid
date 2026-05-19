@@ -1048,7 +1048,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
+        this.setBeatmap(beatmap);
         StatisticV2 stat = replay.getStat();
         stat.migrateLegacyMods(beatmap.getBeatmapDifficulty());
         stat.calculateModScoreMultiplier(beatmap.getBeatmapDifficulty());
