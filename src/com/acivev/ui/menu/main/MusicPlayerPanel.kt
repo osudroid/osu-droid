@@ -18,7 +18,6 @@ import com.reco1l.framework.math.Vec4
 import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
@@ -105,9 +104,9 @@ class MusicPlayerPanel : UILinearContainer() {
             val svc = GlobalManager.getInstance().songService
             if (svc != null) {
                 if (svc.status == Status.PLAYING)
-                    GlobalManager.getInstance().mainMenuV2?.musicControl(MainScene.MusicOption.PAUSE)
+                    GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PAUSE)
                 else
-                    GlobalManager.getInstance().mainMenuV2?.musicControl(MainScene.MusicOption.PLAY)
+                    GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PLAY)
             }
         }
     }
@@ -224,7 +223,7 @@ class MusicPlayerPanel : UILinearContainer() {
                     icon = ResourceManager.getInstance().getTexture("music_prev")
                     onActionUp = {
                         lastInteractionTime = System.currentTimeMillis()
-                        GlobalManager.getInstance().mainMenuV2?.musicControl(MainScene.MusicOption.PREV)
+                        GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PREV)
                         onTrackChanged?.invoke()
                     }
                 }
@@ -235,7 +234,7 @@ class MusicPlayerPanel : UILinearContainer() {
                     icon = ResourceManager.getInstance().getTexture("music_next")
                     onActionUp = {
                         lastInteractionTime = System.currentTimeMillis()
-                        GlobalManager.getInstance().mainMenuV2?.musicControl(MainScene.MusicOption.NEXT)
+                        GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.NEXT)
                         onTrackChanged?.invoke()
                     }
                 }
