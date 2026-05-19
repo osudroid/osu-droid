@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu;
 import com.acivev.ui.menu.main.MainMenuV2;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 
 import org.andengine.engine.camera.Camera;
@@ -57,9 +58,13 @@ public class GlobalManager {
         setInfo("Loading skin...");
         ResourceManager.getInstance().loadSkin(Config.getSkinPath());
         // Construct MainMenuV2 after loadSkin() so its eager getTexture()/getFont()
-        // calls in init blocks resolve the skin-provided resources, not fallbacks.
-        setMainMenuV2(new MainMenuV2());
-        setLoadingProgress(30);
+        // calls resolve skin-provided resources rather than fallbacks.
+        // Construction is posted to the update thread because MainMenuV2's init block
+        // performs scene-graph mutations (attachChild) that must not run off-thread.
+        Execution.updateThread(() -> {
+            setMainMenuV2(new MainMenuV2());
+            setLoadingProgress(30);
+        });
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
         setLoadingProgress(40);
