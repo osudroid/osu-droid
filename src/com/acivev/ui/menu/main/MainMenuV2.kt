@@ -891,6 +891,7 @@ class MainMenuV2 : UIScene() {
         updateThread {
             val currentPanel = OnlineScoring.getInstance().panel
             if (currentPanel != null) {
+                unregisterTouchArea(currentPanel.rect)
                 detachChild(currentPanel)
             }
             Config.loadOnlineConfig(GlobalManager.getInstance().mainActivity)
