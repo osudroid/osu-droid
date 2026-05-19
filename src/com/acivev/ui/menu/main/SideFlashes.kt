@@ -108,11 +108,11 @@ class SideFlashes(screenWidth: Float) {
 
     /** Skin's first combo color, skipping near-white and near-black. Falls back to [DEFAULT_COLOR]. */
     private fun resolveColor(): Color4 {
-        val c = OsuSkin.get().getComboColor().firstOrNull() ?: return DEFAULT_COLOR
-        val isNearWhite = c.red > 0.9f && c.green > 0.9f && c.blue > 0.9f
-        val isNearBlack = c.red < 0.1f && c.green < 0.1f && c.blue < 0.1f
-
-        return if (!isNearWhite && !isNearBlack) c else DEFAULT_COLOR
+        return OsuSkin.get().getComboColor().firstOrNull { c ->
+            val isNearWhite = c.red > 0.9f && c.green > 0.9f && c.blue > 0.9f
+            val isNearBlack = c.red < 0.1f && c.green < 0.1f && c.blue < 0.1f
+            !isNearWhite && !isNearBlack
+        } ?: DEFAULT_COLOR
     }
 
     /** Immediately stop any in-flight animations and hide both flash boxes. */
