@@ -1,6 +1,7 @@
 package com.osudroid.ui.v1
 
 import android.annotation.SuppressLint
+import com.osudroid.utils.updateThread
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -257,7 +258,7 @@ class SettingsFragment : SettingsFragment() {
 
         if (!Multiplayer.isMultiplayer) {
             GlobalManager.getInstance().mainMenuV2?.reloadOnlinePanel()
-            GlobalManager.getInstance().mainMenuV2?.reloadTimingPoints()
+            updateThread { GlobalManager.getInstance().mainMenuV2?.reloadTimingPoints() }
             GlobalManager.getInstance().songService.isGaming = false
         } else if (Multiplayer.isConnected) {
             Multiplayer.roomScene?.chat?.show()
