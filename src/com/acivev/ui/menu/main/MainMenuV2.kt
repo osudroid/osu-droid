@@ -674,14 +674,18 @@ class MainMenuV2 : UIScene() {
                 GlobalManager.getInstance().mainActivity.checkNewSkins()
                 GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
                 if (LibraryManager.getLibrary().isEmpty()) {
-                    GlobalManager.getInstance().songService?.isGaming = false
-                    GlobalManager.getInstance().engine.scene = this@MainMenuV2
-                    BeatmapListing().show()
+                    updateThread {
+                        GlobalManager.getInstance().songService?.isGaming = false
+                        GlobalManager.getInstance().engine.scene = this@MainMenuV2
+                        BeatmapListing().show()
+                    }
                 } else {
-                    musicControl(MainScene.MusicOption.PLAY)
-                    GlobalManager.getInstance().songMenu.reload()
-                    GlobalManager.getInstance().songMenu.show()
-                    GlobalManager.getInstance().songMenu.select()
+                    updateThread {
+                        musicControl(MainScene.MusicOption.PLAY)
+                        GlobalManager.getInstance().songMenu.reload()
+                        GlobalManager.getInstance().songMenu.show()
+                        GlobalManager.getInstance().songMenu.select()
+                    }
                 }
             }
         } else {
