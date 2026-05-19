@@ -113,4 +113,21 @@
     <string name="act_import_file">Import file into osu!droid</string>
     <string name="act_import_skin">Import skin into osu!droid</string>
 
+    <string name="opt_spectrum_quality_title">Spectrum visualizer</string>
+    <string name="opt_spectrum_quality_summary">Quality of the audio spectrum ring around the logo.</string>
+    <string name="opt_spectrum_quality_full">Full</string>
+    <string name="opt_spectrum_quality_low">Low</string>
+    <string name="opt_spectrum_quality_off">Off</string>
+
+    <string-array name="spectrum_quality_entries">
+        <item>@string/opt_spectrum_quality_full</item>
+        <item>@string/opt_spectrum_quality_low</item>
+        <item>@string/opt_spectrum_quality_off</item>
+    </string-array>
+    <string-array name="spectrum_quality_values">
+        <item>full</item>
+        <item>low</item>
+        <item>off</item>
+    </string-array>
+
 </resources>

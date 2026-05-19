@@ -82,7 +82,9 @@ public class Config {
         noChangeDimInBreaks,
         dimHitObjects,
         forceMaxRefreshRate,
-        shiftPitchInRateChange;
+        shiftPitchInRateChange,
+        kiaiCatJam;
+
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -230,6 +232,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
+        kiaiCatJam = prefs.getBoolean("kiaiCatJam", false);
         backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
@@ -784,6 +787,24 @@ public class Config {
 
     public static boolean isShiftPitchInRateChange() {
         return shiftPitchInRateChange;
+    }
+
+    public static boolean isKiaiCatJam() {
+        return kiaiCatJam;
+    }
+
+    public static void setKiaiCatJam(boolean value) {
+        kiaiCatJam = value;
+        setBoolean("kiaiCatJam", value);
+    }
+
+    /** Returns the spectrum quality: {@code "full"}, {@code "low"}, or {@code "off"}. */
+    public static String getSpectrumQuality() {
+        return getString("spectrumQuality", "full");
+    }
+
+    public static void setSpectrumQuality(String value) {
+        setString("spectrumQuality", value);
     }
 
     public static boolean isDisplayPlayfieldBorder() {
