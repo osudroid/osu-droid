@@ -40,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
+import com.acivev.ui.menu.main.MainMenuV2;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -384,6 +385,7 @@ public class MainActivity extends BaseGameActivity implements
     private void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
+            com.acivev.VibratorManager.INSTANCE.init(this);
             Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
@@ -403,10 +405,13 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    var mainMenuV2 = new MainMenuV2();
+                    GlobalManager.getInstance().setMainMenuV2(mainMenuV2);
+                    GlobalManager.getInstance().getEngine().setScene(mainMenuV2);
+                    mainMenuV2.initOnlinePanel();
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
+                GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
                 applyRefreshRateSetting(Config.isForceMaxRefreshRate());
@@ -420,12 +425,12 @@ public class MainActivity extends BaseGameActivity implements
                     roomInviteLink = null;
                     Multiplayer.connectFromLink(inviteLink);
                 } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
+                    GlobalManager.getInstance().getMainMenuV2().watchReplay(fileToAdd);
                     fileToAdd = null;
                     willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                GlobalManager.getInstance().getMainMenuV2().loadBannerSprite();
             });
         });
     }
@@ -1165,7 +1170,7 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
-                GlobalManager.getInstance().getMainScene().showExitDialog();
+                GlobalManager.getInstance().getMainMenuV2().showExitDialog();
             }
             return true;
         }
@@ -1191,8 +1196,10 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-        GlobalManager.getInstance().getMainScene().exit();
+        var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
+        if (mainMenuV2 != null) {
+            mainMenuV2.exit();
+        }
     }
 
     public long getVersionCode() {
