@@ -37,10 +37,6 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     private var activeRounds = VISUALISER_ROUNDS
     private var updateInterval = TIME_BETWEEN_UPDATES_FULL
 
-    // Set to true for one frame when quality transitions to "off" so the VBO is
-    // flushed to degenerate triangles before the dead-zone early-return takes over.
-    private var pendingClear = false
-
     // Tracks whether any bar was above the dead-zone on the previous frame so we
     // can flush the VBO once when the spectrum transitions from visible → silent.
     private var wasVisible = false
@@ -89,18 +85,6 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
 
     override fun onUpdateBuffer() {
         val vbo = buffer ?: return
-
-        // One-shot VBO flush when transitioning to "off": write all degenerate
-        // triangles so the GPU stops rendering the last visible frame.
-        if (pendingClear) {
-            for (total in barStartX.indices) {
-                val sx = barStartX[total]; val sy = barStartY[total]
-                for (j in 0..5) vbo.putVertex(total * 6 + j, sx, sy)
-            }
-            pendingClear = false
-            wasVisible = false
-            return
-        }
 
         val anyVisible = frequencyAmplitudes.any { it >= AMPLITUDE_DEAD_ZONE }
 
@@ -168,18 +152,20 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     fun update(dt: Float, kiaiActive: Boolean) {
         when (Config.getSpectrumQuality()) {
             "off" -> {
-                if (frequencyAmplitudes.any { it >= AMPLITUDE_DEAD_ZONE }) {
-                    // First frame after turning off: zero amplitudes and schedule a VBO flush.
-                    frequencyAmplitudes.fill(0f)
-                    pendingClear = true
-                }
+                // Hide the component entirely so UIBufferedComponent never calls
+                // updateBuffer() / invalidateOnHardware(), avoiding the per-frame
+                // VBO re-upload that occurred even when onUpdateBuffer() returned early.
+                isVisible = false
+                frequencyAmplitudes.fill(0f)
                 return
             }
             "low" -> {
+                isVisible = true
                 activeRounds = VISUALISER_ROUNDS_LOW
                 updateInterval = TIME_BETWEEN_UPDATES_LOW
             }
             else  -> { // "full"
+                isVisible = true
                 activeRounds = VISUALISER_ROUNDS
                 updateInterval = TIME_BETWEEN_UPDATES_FULL
             }
