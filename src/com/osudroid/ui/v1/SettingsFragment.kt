@@ -256,8 +256,8 @@ class SettingsFragment : SettingsFragment() {
         Config.loadConfig(requireActivity())
 
         if (!Multiplayer.isMultiplayer) {
-            GlobalManager.getInstance().mainScene.reloadOnlinePanel()
-            GlobalManager.getInstance().mainScene.loadTimingPoints(false)
+            GlobalManager.getInstance().mainMenuV2?.reloadOnlinePanel()
+            GlobalManager.getInstance().mainMenuV2?.reloadTimingPoints()
             GlobalManager.getInstance().songService.isGaming = false
         } else if (Multiplayer.isConnected) {
             Multiplayer.roomScene?.chat?.show()
@@ -412,7 +412,7 @@ class SettingsFragment : SettingsFragment() {
                         put(ModAutoplay::class)
                     }
 
-                    global.gameScene.setOldScene(global.mainScene.scene)
+                    global.gameScene.setOldScene(global.mainMenuV2)
                     global.gameScene.startGame(selectedBeatmap, null, modMap, true)
                 }
                 true

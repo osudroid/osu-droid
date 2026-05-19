@@ -283,7 +283,7 @@ class LobbyScene : UIScene() {
         Multiplayer.isMultiplayer = false
         GlobalManager.getInstance().songService.isGaming = false
 
-        GlobalManager.getInstance().mainScene.show()
+        GlobalManager.getInstance().mainMenuV2?.show()
     }
 
 
