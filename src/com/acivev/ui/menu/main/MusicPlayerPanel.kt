@@ -291,7 +291,7 @@ class MusicPlayerPanel : UILinearContainer() {
 
         val pos = songService.position
         val len = songService.getLength()
-        val progress = if (len > 0) pos.toFloat() / len.toFloat() else 0f
+        val progress = if (len > 0) (pos.toFloat() / len.toFloat()).coerceIn(0f, 1f) else 0f
 
         miniProgressFill.width = progress
 
