@@ -881,7 +881,10 @@ class MainMenuV2 : UIScene() {
     /** Detach and recreate the online panel (called after settings change). */
     fun reloadOnlinePanel() {
         updateThread {
-            detachChild(OnlineScoring.getInstance().panel)
+            val currentPanel = OnlineScoring.getInstance().panel
+            if (currentPanel != null) {
+                detachChild(currentPanel)
+            }
             Config.loadOnlineConfig(GlobalManager.getInstance().mainActivity)
             OnlineManager.getInstance().init()
 
