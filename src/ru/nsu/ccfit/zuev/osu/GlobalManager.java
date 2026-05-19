@@ -53,6 +53,7 @@ public class GlobalManager {
         songService = saveServiceObject.getSongService();
         SongService.initBASS();
         setLoadingProgress(10);
+        setMainMenuV2(new MainMenuV2());
         setInfo("Loading skin...");
         ResourceManager.getInstance().loadSkin(Config.getSkinPath());
         setLoadingProgress(30);
