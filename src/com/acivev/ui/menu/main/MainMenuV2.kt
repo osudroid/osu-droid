@@ -479,8 +479,10 @@ class MainMenuV2 : UIScene() {
 
             if (bpmLength > 0f) {
                 if (songService.status == Status.PLAYING) {
-                    beatPassTime = (songPos % bpmLength)
-                    val beat = (songPos / bpmLength).toInt()
+                    val timingPointStart = (currentTimingPoint?.time ?: 0.0).toFloat()
+                    val timingPointSongPos = (songPos - timingPointStart).coerceAtLeast(0f)
+                    beatPassTime = timingPointSongPos % bpmLength
+                    val beat = (timingPointSongPos / bpmLength).toInt()
                     if (beat != prevBeat) {
                         prevBeat = beat
                         sideFlashes.onNewBeat(
