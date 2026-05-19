@@ -44,8 +44,8 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import java.io.IOException
 import java.util.LinkedList
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import android.os.Handler
+import android.os.Looper
 
 class MainMenuV2 : UIScene() {
 
@@ -964,11 +964,11 @@ class MainMenuV2 : UIScene() {
         // Without this, the process stays alive and on the next launch from the task switcher
         // the new Engine's FontManager is unaware of fonts still held in ResourceManager
         // (registered against the old Engine), causing black fonts and black icon squares.
-        Executors.newSingleThreadScheduledExecutor().schedule({
+        Handler(Looper.getMainLooper()).postDelayed({
             val activity = GlobalManager.getInstance().mainActivity
             activity.killOnDestroy = true
             activity.finish()
-        }, 3000, TimeUnit.MILLISECONDS)
+        }, 3000)
     }
 
     /** Load a replay file and jump straight to the scoring scene. */
