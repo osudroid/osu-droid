@@ -1074,9 +1074,12 @@ public class MainScene implements IUpdateHandler {
         var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
         if (mainMenuV2 != null) {
             GlobalManager.getInstance().getEngine().setScene(mainMenuV2);
-        } else {
-            GlobalManager.getInstance().getEngine().setScene(getScene());
+            if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
+                mainMenuV2.setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
+            }
+            return;
         }
+        GlobalManager.getInstance().getEngine().setScene(getScene());
         if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
             setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
         }
