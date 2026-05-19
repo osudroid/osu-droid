@@ -8,6 +8,8 @@ import com.reco1l.andengine.UIEngine;
 
 import org.andengine.engine.camera.Camera;
 
+import java.util.concurrent.CountDownLatch;
+
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -61,10 +63,19 @@ public class GlobalManager {
         // calls resolve skin-provided resources rather than fallbacks.
         // Construction is posted to the update thread because MainMenuV2's init block
         // performs scene-graph mutations (attachChild) that must not run off-thread.
+        // The latch ensures init() does not return until mainMenuV2 is ready,
+        // so callers cannot observe a null mainMenuV2 after init() completes.
+        CountDownLatch latch = new CountDownLatch(1);
         Execution.updateThread(() -> {
             setMainMenuV2(new MainMenuV2());
             setLoadingProgress(30);
+            latch.countDown();
         });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
         setLoadingProgress(40);
