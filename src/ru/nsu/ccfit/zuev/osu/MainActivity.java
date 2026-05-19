@@ -425,12 +425,13 @@ public class MainActivity extends BaseGameActivity implements
                     roomInviteLink = null;
                     Multiplayer.connectFromLink(inviteLink);
                 } else if (willReplay) {
-                    GlobalManager.getInstance().getMainMenuV2().watchReplay(fileToAdd);
+                    final String replayFile = fileToAdd;
+                    Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile));
                     fileToAdd = null;
                     willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainMenuV2().loadBannerSprite();
+                Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
             });
         });
     }
