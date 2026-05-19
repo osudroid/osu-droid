@@ -54,9 +54,11 @@ public class GlobalManager {
         SongService.initBASS();
         setLoadingProgress(10);
         setMainScene(new MainScene());
-        setMainMenuV2(new MainMenuV2());
         setInfo("Loading skin...");
         ResourceManager.getInstance().loadSkin(Config.getSkinPath());
+        // Construct MainMenuV2 after loadSkin() so its eager getTexture()/getFont()
+        // calls in init blocks resolve the skin-provided resources, not fallbacks.
+        setMainMenuV2(new MainMenuV2());
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
