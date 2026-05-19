@@ -41,6 +41,10 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     // flushed to degenerate triangles before the dead-zone early-return takes over.
     private var pendingClear = false
 
+    // Tracks whether any bar was above the dead-zone on the previous frame so we
+    // can flush the VBO once when the spectrum transitions from visible → silent.
+    private var wasVisible = false
+
     fun configure(logoCX: Float, logoCY: Float, logoRadius: Float) {
         maxBarLen = BAR_LENGTH * logoRadius
         halfBarH  = (logoRadius * 2f *
@@ -95,11 +99,28 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
             }
             vbo.invalidateOnHardware()
             pendingClear = false
+            wasVisible = false
             return
         }
 
-        // Skip upload when no active bar exceeds the dead zone (paused / off).
-        if (frequencyAmplitudes.none { it >= AMPLITUDE_DEAD_ZONE }) return
+        val anyVisible = frequencyAmplitudes.any { it >= AMPLITUDE_DEAD_ZONE }
+
+        // One-shot VBO flush when transitioning from visible → all-below-dead-zone
+        // (e.g. music paused/silenced during full/low mode). Without this the GPU
+        // keeps rendering the last non-degenerate frame indefinitely.
+        if (!anyVisible) {
+            if (wasVisible) {
+                for (total in barStartX.indices) {
+                    val sx = barStartX[total]; val sy = barStartY[total]
+                    for (j in 0..5) vbo.putVertex(total * 6 + j, sx, sy)
+                }
+                vbo.invalidateOnHardware()
+                wasVisible = false
+            }
+            return
+        }
+
+        wasVisible = true
 
         val hh = halfBarH
         val ml = maxBarLen
