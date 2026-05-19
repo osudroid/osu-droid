@@ -91,8 +91,6 @@ class UIGradientBox(
             putVert(1, 0f, h,  r, g, b, fa)
             putVert(2, w,  0f, r, g, b, ta)
             putVert(3, w,  h,  r, g, b, ta)
-
-            invalidateOnHardware()
         }
 
         private fun putVert(idx: Int, x: Float, y: Float, r: Float, g: Float, b: Float, a: Float) {
