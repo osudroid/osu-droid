@@ -1300,12 +1300,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         resetMusicEffects();
         startMusicVolumeAnimation(0.5f);
-        var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
-        if (mainMenuV2 != null) {
-            mainMenuV2.show();
-        } else {
-            GlobalManager.getInstance().getMainScene().show();
-        }
+        GlobalManager.getInstance().getMainMenuV2().show();
     }
 
     private void resetMultiplayerRoomBeatmap() {
