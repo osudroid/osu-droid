@@ -202,7 +202,7 @@ public class Config {
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
-        spectrumQuality = prefs.getString("spectrumQuality", spectrumQuality);
+        spectrumQuality = normalizeSpectrumQuality(prefs.getString("spectrumQuality", spectrumQuality));
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
@@ -805,8 +805,16 @@ public class Config {
         return spectrumQuality;
     }
 
+    private static String normalizeSpectrumQuality(String value) {
+        if ("low".equals(value) || "off".equals(value) || "full".equals(value)) {
+            return value;
+        }
+        return "full";
+    }
+
     public static void setSpectrumQuality(String value) {
-        setString("spectrumQuality", value);
+        spectrumQuality = normalizeSpectrumQuality(value);
+        setString("spectrumQuality", spectrumQuality);
     }
 
     public static boolean isDisplayPlayfieldBorder() {
