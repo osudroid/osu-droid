@@ -396,10 +396,14 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainMenuV2());
+                    Execution.updateThread(() ->
+                        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainMenuV2())
+                    );
                 }
 
-                GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
+                Execution.updateThread(() ->
+                    GlobalManager.getInstance().getMainMenuV2().loadBeatmap()
+                );
                 initPreferences();
                 availableInternalMemory();
 
