@@ -776,7 +776,11 @@ class MainMenuV2 : UIScene() {
                 lastBgAudioPath = info.audioPath
                 crossfadeBackground(info)
             }
-        } catch (e: IOException) { Log.w("MainMenuV2", "Failed to load timing points", e) }
+        } catch (e: IOException) {
+            Log.w("MainMenuV2", "Failed to load timing points", e)
+        } catch (e: IllegalArgumentException) {
+            Log.w("MainMenuV2", "Failed to parse timing points for beatmap", e)
+        }
     }
 
     /** Load a random beatmap from the library and start playing it. */
