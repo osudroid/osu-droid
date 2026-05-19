@@ -1195,6 +1195,8 @@ public class MainActivity extends BaseGameActivity implements
         var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
         if (mainMenuV2 != null) {
             mainMenuV2.exit();
+        } else {
+            finish();
         }
     }
 
