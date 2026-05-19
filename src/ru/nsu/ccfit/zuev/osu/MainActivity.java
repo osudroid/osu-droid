@@ -39,7 +39,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
-import com.acivev.ui.menu.main.MainMenuV2;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -397,10 +396,7 @@ public class MainActivity extends BaseGameActivity implements
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    var mainMenuV2 = new MainMenuV2();
-                    GlobalManager.getInstance().setMainMenuV2(mainMenuV2);
-                    GlobalManager.getInstance().getEngine().setScene(mainMenuV2);
-                    mainMenuV2.initOnlinePanel();
+                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainMenuV2());
                 }
 
                 GlobalManager.getInstance().getMainMenuV2().loadBeatmap();

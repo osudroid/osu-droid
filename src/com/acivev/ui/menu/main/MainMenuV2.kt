@@ -417,6 +417,8 @@ class MainMenuV2 : UIScene() {
 
         if (songService != null && songService.status == Status.STOPPED)
             musicStarted = false
+
+        initOnlinePanel()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
