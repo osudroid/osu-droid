@@ -181,7 +181,7 @@ class MusicPlayerPanel : UILinearContainer() {
             +songTitleText
             +arrowTriangle
 
-            // White fill bar anchored to the bottomx
+            // White fill bar anchored to the bottom
             +UIContainer().apply {
                 anchor = Anchor.BottomLeft
                 origin = Anchor.BottomLeft
