@@ -40,7 +40,8 @@ public class Config {
         scorePath,
         onlineUsername,
         onlinePassword,
-        onlineDeviceID;
+        onlineDeviceID,
+        spectrumQuality = "full";
 
     private static boolean DELETE_OSZ,
         SCAN_DOWNLOAD,
@@ -201,6 +202,7 @@ public class Config {
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
+        spectrumQuality = prefs.getString("spectrumQuality", spectrumQuality);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
@@ -800,7 +802,7 @@ public class Config {
 
     /** Returns the spectrum quality: {@code "full"}, {@code "low"}, or {@code "off"}. */
     public static String getSpectrumQuality() {
-        return getString("spectrumQuality", "full");
+        return spectrumQuality;
     }
 
     public static void setSpectrumQuality(String value) {
