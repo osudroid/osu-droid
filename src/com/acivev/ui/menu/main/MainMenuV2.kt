@@ -474,7 +474,7 @@ class MainMenuV2 : UIScene() {
 
             if (musicStarted && songService.status != Status.PLAYING && songPos >= songService.getLength()) {
                 musicStarted = false   // allow the new preloaded track to start
-                musicControl(MainScene.MusicOption.NEXT)
+                musicControl(MusicOption.NEXT)
             }
 
             if (bpmLength > 0f) {
@@ -681,7 +681,7 @@ class MainMenuV2 : UIScene() {
                     }
                 } else {
                     updateThread {
-                        musicControl(MainScene.MusicOption.PLAY)
+                        musicControl(MusicOption.PLAY)
                         GlobalManager.getInstance().songMenu.reload()
                         GlobalManager.getInstance().songMenu.show()
                         GlobalManager.getInstance().songMenu.select()
@@ -800,16 +800,16 @@ class MainMenuV2 : UIScene() {
         beatmapInfo = info
         GlobalManager.getInstance().selectedBeatmap = info
         reloadTimingPoints()
-        musicControl(MainScene.MusicOption.SYNC)
+        musicControl(MusicOption.SYNC)
     }
 
     /** Handle PREV / PLAY / PAUSE / STOP / NEXT / SYNC music actions. */
-    fun musicControl(option: MainScene.MusicOption) {
+    fun musicControl(option: MusicOption) {
         val songService = GlobalManager.getInstance().songService ?: return
         if (beatmapInfo == null) return
 
         when (option) {
-            MainScene.MusicOption.PREV -> {
+            MusicOption.PREV -> {
                 if (songService.status == Status.PLAYING || songService.status == Status.PAUSED)
                     songService.stop()
 
@@ -821,7 +821,7 @@ class MainMenuV2 : UIScene() {
 
                 musicStarted = false
             }
-            MainScene.MusicOption.NEXT -> {
+            MusicOption.NEXT -> {
                 if (songService.status == Status.PLAYING || songService.status == Status.PAUSED)
                     songService.stop()
 
@@ -833,7 +833,7 @@ class MainMenuV2 : UIScene() {
 
                 musicStarted = false
             }
-            MainScene.MusicOption.PLAY -> {
+            MusicOption.PLAY -> {
                 if (songService.status == Status.PAUSED || songService.status == Status.STOPPED) {
                     if (songService.status == Status.STOPPED) {
                         songService.preLoad(beatmapInfo!!.audioPath)
@@ -841,14 +841,14 @@ class MainMenuV2 : UIScene() {
                     songService.play()
                 }
             }
-            MainScene.MusicOption.PAUSE -> {
+            MusicOption.PAUSE -> {
                 if (songService.status == Status.PLAYING) songService.pause()
             }
-            MainScene.MusicOption.STOP -> {
+            MusicOption.STOP -> {
                 if (songService.status == Status.PLAYING || songService.status == Status.PAUSED)
                     songService.stop()
             }
-            MainScene.MusicOption.SYNC -> { /* timing already handled by reloadTimingPoints */ }
+            MusicOption.SYNC -> { /* timing already handled by reloadTimingPoints */ }
         }
     }
 
