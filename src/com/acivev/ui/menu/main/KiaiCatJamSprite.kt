@@ -39,9 +39,11 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
     }
 
     override fun onTextureRegionChanged() {
-        val region = textureRegion ?: return
-        blendInfo = if (region.texture.textureOptions.mPreMultiplyAlpha)
-            BlendInfo.PreMultiply else BlendInfo.Mixture
+        textureRegion ?: return
+        // CatJamCircleShader always outputs premultiplied alpha (rgb * a, a),
+        // so PreMultiply blending must be used unconditionally regardless of
+        // whether the underlying texture was uploaded as premultiplied.
+        blendInfo = BlendInfo.PreMultiply
         uvBuffer.update(this)
         requestBufferUpdate()
     }
