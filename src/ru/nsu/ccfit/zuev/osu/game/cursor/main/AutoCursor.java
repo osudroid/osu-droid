@@ -12,7 +12,7 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     /**
      * The ID of the object that the cursor is currently active on.
      */
-    private int currentObjectId = -1;
+    protected int currentObjectId = -1;
 
     public AutoCursor() {
         super();

@@ -89,7 +89,6 @@ import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.options.TouchOptions;
 import org.andengine.engine.options.WakeLockOptions;
-import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.MoveXModifier;
@@ -125,6 +124,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoDanceCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -1143,7 +1143,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-            autoCursor = new AutoCursor();
+            autoCursor = GameHelper.isDanceCursor() ? new AutoDanceCursor() : new AutoCursor();
             autoCursor.attachToScene(fgScene);
         }
 

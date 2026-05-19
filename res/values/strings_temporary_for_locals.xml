@@ -3,6 +3,9 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_fancy_cursor_trail_title">Fancy cursor trail</string>
+    <string name="opt_fancy_cursor_trail_summary">Replace the particle cursor trail with a smooth rainbow ribbon trail</string>
+
     <string name="multiplayer_room_head_to_head">Head to head</string>
     <string name="multiplayer_room_team_versus">Team versus</string>
     <string name="multiplayer_room_players">Players</string>

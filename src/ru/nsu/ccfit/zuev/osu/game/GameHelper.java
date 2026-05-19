@@ -421,6 +421,10 @@ public class GameHelper {
         GameHelper.autoplay = autoplay;
     }
 
+    public static boolean isDanceCursor() {
+        return autoplay != null && autoplay.isDanceCursor();
+    }
+
     public static float Round(double value, int digits) throws NumberFormatException {
         if (Math.abs(value) < Double.MAX_VALUE) {
             float f1 = 0;

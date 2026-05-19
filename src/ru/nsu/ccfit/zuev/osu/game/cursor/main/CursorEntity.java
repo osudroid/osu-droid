@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import com.reco1l.andengine.component.UIComponent;
 
-import org.andengine.entity.Entity;
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.andengine.entity.scene.Scene;
 import org.andengine.opengl.texture.region.TextureRegion;
@@ -11,10 +10,12 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
+import ru.nsu.ccfit.zuev.osu.game.cursor.trail.FancyCursorTrail;
 
 public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
     private CursorTrail trail = null;
+    private FancyCursorTrail fancyTrail = null;
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
     private float particleOffsetX, particleOffsetY;
@@ -22,7 +23,9 @@ public class CursorEntity extends UIComponent {
     public CursorEntity() {
         cursorSprite = new CursorSprite();
 
-        if (Config.isUseParticles()) {
+        if (Config.isUseFancyCursorTrail()) {
+            fancyTrail = new FancyCursorTrail();
+        } else if (Config.isUseParticles()) {
             TextureRegion trailTex = ResourceManager.getInstance().getTexture("cursortrail");
 
             particleOffsetX = -trailTex.getWidth() / 2f;
@@ -47,6 +50,10 @@ public class CursorEntity extends UIComponent {
         setVisible(showing);
         if (trail != null)
             trail.setParticlesSpawnEnabled(showing);
+        if (fancyTrail != null) {
+            fancyTrail.setVisible(showing);
+            if (!showing) fancyTrail.resetTrail();
+        }
     }
 
     public void click() {
@@ -60,6 +67,12 @@ public class CursorEntity extends UIComponent {
             if (trail != null) {
                 trail.update();
             }
+
+            if (fancyTrail != null) {
+                fancyTrail.setCursorX(getX());
+                fancyTrail.setCursorY(getY());
+                fancyTrail.update(pSecondsElapsed);
+            }
         }
 
         super.onManagedUpdate(pSecondsElapsed);
@@ -68,6 +81,9 @@ public class CursorEntity extends UIComponent {
     public void attachToScene(Scene fgScene) {
         if (trail != null) {
             fgScene.attachChild(trail);
+        }
+        if (fancyTrail != null) {
+            fgScene.attachChild(fancyTrail);
         }
         fgScene.attachChild(this);
     }
