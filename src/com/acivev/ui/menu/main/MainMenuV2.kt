@@ -439,8 +439,10 @@ class MainMenuV2 : UIScene() {
         val songService = GlobalManager.getInstance().songService ?: return
         if (!musicStarted && songService.status == Status.STOPPED) {
             songService.play()
-            songService.volume = Config.getBgmVolume()
-            musicStarted = true
+            if (songService.status != Status.STOPPED) {
+                songService.volume = Config.getBgmVolume()
+                musicStarted = true
+            }
         }
 
         // Kiai cannot be active when there is no playback, clear it so CatJam
