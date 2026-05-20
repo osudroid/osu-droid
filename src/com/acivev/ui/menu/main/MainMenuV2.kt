@@ -762,42 +762,52 @@ class MainMenuV2 : UIScene() {
     // Timing
     fun reloadTimingPoints() {
         val info = beatmapInfo ?: return
-        try {
-            val beatmap = BeatmapCache.getBeatmap(info, false)
-            val allTiming = LinkedList(beatmap.controlPoints.timing.controlPoints)
-            val allEffect = LinkedList(beatmap.controlPoints.effect.controlPoints)
-            val pos = GlobalManager.getInstance().songService?.position ?: 0
+        async {
+            try {
+                val beatmap = BeatmapCache.getBeatmap(info, false)
+                val allTiming = LinkedList(beatmap.controlPoints.timing.controlPoints)
+                val allEffect = LinkedList(beatmap.controlPoints.effect.controlPoints)
+                val pos = GlobalManager.getInstance().songService?.position ?: 0
 
-            var tp: TimingControlPoint? = null
-            while (allTiming.isNotEmpty() && pos.toDouble() > (allTiming.peek()?.time ?: Double.MAX_VALUE))
-                tp = allTiming.poll()
+                var tp: TimingControlPoint? = null
+                while (allTiming.isNotEmpty() && pos.toDouble() > (allTiming.peek()?.time ?: Double.MAX_VALUE))
+                    tp = allTiming.poll()
 
-            var ep: EffectControlPoint? = null
-            while (allEffect.isNotEmpty() && pos.toDouble() > (allEffect.peek()?.time ?: Double.MAX_VALUE))
-                ep = allEffect.poll()
+                var ep: EffectControlPoint? = null
+                while (allEffect.isNotEmpty() && pos.toDouble() > (allEffect.peek()?.time ?: Double.MAX_VALUE))
+                    ep = allEffect.poll()
 
-            if (tp == null) tp = beatmap.controlPoints.timing.defaultControlPoint
-            if (ep == null) ep = beatmap.controlPoints.effect.defaultControlPoint
+                if (tp == null) tp = beatmap.controlPoints.timing.defaultControlPoint
+                if (ep == null) ep = beatmap.controlPoints.effect.defaultControlPoint
 
-            timingControlPoints = allTiming; effectControlPoints = allEffect
-            currentTimingPoint = tp
-            currentEffectPoint  = ep
-            bpmLength  = tp?.msPerBeat?.toFloat() ?: 1000f
+                val finalTp = tp
+                val finalEp = ep
 
-            val nowKiai = ep?.isKiai == true
-            if (!kiaiActive && nowKiai) onKiaiStart()
-            else if (kiaiActive && !nowKiai) onKiaiEnd()
-            kiaiActive = nowKiai
+                updateThread {
+                    // Discard stale result if the beatmap changed while we were parsing.
+                    if (beatmapInfo != info) return@updateThread
 
-            // Update background for the new beatmap
-            if (info.audioPath != lastBgAudioPath) {
-                lastBgAudioPath = info.audioPath
-                crossfadeBackground(info)
+                    timingControlPoints = allTiming; effectControlPoints = allEffect
+                    currentTimingPoint = finalTp
+                    currentEffectPoint  = finalEp
+                    bpmLength  = finalTp?.msPerBeat?.toFloat() ?: 1000f
+
+                    val nowKiai = finalEp?.isKiai == true
+                    if (!kiaiActive && nowKiai) onKiaiStart()
+                    else if (kiaiActive && !nowKiai) onKiaiEnd()
+                    kiaiActive = nowKiai
+
+                    // Update background for the new beatmap
+                    if (info.audioPath != lastBgAudioPath) {
+                        lastBgAudioPath = info.audioPath
+                        crossfadeBackground(info)
+                    }
+                }
+            } catch (e: IOException) {
+                Log.w("MainMenuV2", "Failed to load timing points", e)
+            } catch (e: IllegalArgumentException) {
+                Log.w("MainMenuV2", "Failed to parse timing points for beatmap", e)
             }
-        } catch (e: IOException) {
-            Log.w("MainMenuV2", "Failed to load timing points", e)
-        } catch (e: IllegalArgumentException) {
-            Log.w("MainMenuV2", "Failed to parse timing points for beatmap", e)
         }
     }
 
