@@ -454,9 +454,14 @@ class MainMenuV2 : UIScene() {
         val songPos = songService.position
 
         if (!isSeeking) {
+            val prevTimingPoint = currentTimingPoint
             while (timingControlPoints.isNotEmpty() &&
                 songPos.toDouble() > (timingControlPoints.peek()?.time ?: Double.MAX_VALUE))
                 currentTimingPoint = timingControlPoints.poll()
+
+            // When the timing point changes, reset prevBeat so the first beat of the new
+            // section doesn't fire a spurious onBeat() (which would jump spectrum indexOffset).
+            if (currentTimingPoint !== prevTimingPoint) prevBeat = -1
 
             currentTimingPoint?.let { bpmLength = it.msPerBeat.toFloat() }
 
