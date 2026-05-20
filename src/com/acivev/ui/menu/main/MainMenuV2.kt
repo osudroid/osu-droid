@@ -805,6 +805,8 @@ class MainMenuV2 : UIScene() {
                 }
             } catch (e: IOException) {
                 Log.w("MainMenuV2", "Failed to load timing points", e)
+            } catch (e: NumberFormatException) {
+                Log.w("MainMenuV2", "Failed to parse timing points for beatmap", e)
             } catch (e: IllegalArgumentException) {
                 Log.w("MainMenuV2", "Failed to parse timing points for beatmap", e)
             }
