@@ -6,6 +6,7 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.beatmaps.hitobjects.sliderobject.SliderRepeat
 import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
+import com.osudroid.math.Interpolation
 import com.osudroid.math.Precision.almostEquals
 import com.osudroid.math.Vector2
 import com.osudroid.mods.Mod
@@ -205,8 +206,11 @@ abstract class DifficultyHitObject(
     /**
      * This [DifficultyHitObject]'s immediate overall difficulty value calculated from the raw hit window.
      */
-    val overallDifficulty
-        get() = if (obj is Slider) obj.head.hitWindow?.overallDifficulty ?: 0.0 else obj.hitWindow?.overallDifficulty ?: 0.0
+    open val overallDifficulty
+        get() = hitWindow?.overallDifficulty ?: 0.0
+
+    protected val hitWindow
+        get() = if (obj is Slider) obj.head.hitWindow else obj.hitWindow
 
     protected abstract val mode: GameMode
 
@@ -305,7 +309,14 @@ abstract class DifficultyHitObject(
         val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
         val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(5)
 
-        return 1 - speedRatio.pow(1 - windowRatio)
+        // Doubletapping is impossible if objects do not intersect.
+        val distanceFactor = Interpolation.reverseLinear(
+            lazyJumpDistance,
+            normalizedDiameter.toDouble(),
+            normalizedRadius.toDouble()
+        ).pow(2)
+
+        return 1 - speedRatio.pow(distanceFactor * (1 - windowRatio))
     }
 
     private fun setDistances(clockRate: Double) {
