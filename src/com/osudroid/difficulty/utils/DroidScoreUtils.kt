@@ -4,6 +4,8 @@ import com.osudroid.beatmaps.PlayableBeatmap
 import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.utils.ModUtils
 import kotlin.math.PI
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.max
 
 object DroidScoreUtils {
@@ -40,7 +42,11 @@ object DroidScoreUtils {
             val spinsRequiredBeforeBonus = duration * minimumRotationsPerSecond
             val totalPossibleSpins = duration * maximumRotationsPerSecond
 
-            val maximumPossibleBonusSpins = max(0.0, totalPossibleSpins - spinsRequiredBeforeBonus).toInt()
+            // Spinner bonus points are awarded for each full rotation every nth spin after the required spins.
+            // For example, if a spinner requires 5.6 spins before bonus, the first bonus will be awarded at 6 spins
+            // instead of 6.6 spins.
+            val maximumPossibleBonusSpins =
+                max(0.0, floor(totalPossibleSpins) - ceil(spinsRequiredBeforeBonus)).toInt()
 
             bonus += maximumPossibleBonusSpins * 1000
         }
