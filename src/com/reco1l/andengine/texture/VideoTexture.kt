@@ -128,7 +128,6 @@ class VideoTexture(val source: String) : Texture(
     override fun bind(pGLState: GLState) {
         if (isLoadedToHardware) {
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
-            surfaceTexture?.updateTexImage()
         }
     }
 
