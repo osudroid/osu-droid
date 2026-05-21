@@ -104,7 +104,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         }
 
         if (ModFlashlight::class in beatmap.mods) {
-            skills.add(DroidFlashlight(mods))
+            skills.add(DroidFlashlight(mods, beatmap.hitObjects.objects.size))
         }
 
         skills.add(DroidReading(mods, beatmap.speedMultiplier.toDouble(), beatmap.hitObjects.objects))
