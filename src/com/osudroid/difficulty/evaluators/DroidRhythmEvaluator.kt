@@ -4,6 +4,7 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
+import com.osudroid.math.Interpolation
 import kotlin.math.*
 
 /**
@@ -12,8 +13,8 @@ import kotlin.math.*
 object DroidRhythmEvaluator {
     private const val HISTORY_TIME_MAX = 5 * 1000 // 5 seconds of calculateRhythmBonus max.
     private const val HISTORY_OBJECTS_MAX = 32
-    private const val RHYTHM_OVERALL_MULTIPLIER = 0.8
-    private const val RHYTHM_RATIO_MULTIPLIER = 32.0
+    private const val RHYTHM_OVERALL_MULTIPLIER = 0.95
+    private const val RHYTHM_RATIO_MULTIPLIER = 26.0
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
@@ -87,6 +88,12 @@ object DroidRhythmEvaluator {
             val prevDelta = prevObject.deltaTime.coerceAtLeast(1e-7)
             val lastDelta = lastObject.deltaTime.coerceAtLeast(1e-7)
 
+            // Make sure to always have the current island initialized.
+            // If we don't do it here, it will only initialize on the next rhythm change.
+            if (island.delta == Int.MAX_VALUE) {
+                island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
+            }
+
             // Calculate how much current delta difference deserves a rhythm bonus
             // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
             val deltaDifference = max(prevDelta, currentDelta) / min(prevDelta, currentDelta)
@@ -117,11 +124,15 @@ object DroidRhythmEvaluator {
                 effectiveRatio = min(sliderEffectiveRatio, effectiveRatio)
             }
 
+            val isSpeedingUp = prevDelta > currentDelta + deltaDifferenceEpsilon
+
+            if (abs(prevDelta - currentDelta) < deltaDifferenceEpsilon) {
+                // Island is still progressing
+                island.addDelta(currentDelta.toInt())
+            }
+
             if (firstDeltaSwitch) {
-                if (abs(prevDelta - currentDelta) < deltaDifferenceEpsilon) {
-                    // Island is still progressing, count size.
-                    island.addDelta(currentDelta.toInt())
-                } else {
+                if (abs(prevDelta - currentDelta) > deltaDifferenceEpsilon) {
                     // BPM change is into slider, this is easy acc window.
                     if (!useSliderAccuracy && currentObject.obj is Slider) {
                         effectiveRatio /= 2
@@ -144,33 +155,27 @@ object DroidRhythmEvaluator {
                         effectiveRatio /= 2
                     }
 
-                    var islandFound = false
+                    if (isSpeedingUp) {
+                        effectiveRatio *= 0.65
+                    }
 
-                    for (counter in islandCounts) {
-                        if (island != counter.island) {
-                            continue
-                        }
+                    val islandCount = islandCounts.find { it.island == island }
 
-                        islandFound = true
-
+                    if (islandCount != null) {
                         // Only add island to island counts if they're going one after another.
                         if (previousIsland == island) {
-                            counter.count++
+                            ++islandCount.count
                         }
 
                         // Repeated island (ex: triplet -> triplet)
                         effectiveRatio *= min(
-                            3.0 / counter.count,
-                            (1.0 / counter.count).pow(
+                            3.0 / islandCount.count,
+                            (1.0 / islandCount.count).pow(
                                 DifficultyCalculationUtils.logistic(island.delta.toDouble(), 58.33, 0.24, 2.75)
                             )
                         )
-
-                        break
-                    }
-
-                    if (!islandFound) {
-                        islandCounts.add(IslandCounter(island, 1))
+                    } else if (island.deltaCount > 0) {
+                        islandCounts += IslandCounter(island, 1)
                     }
 
                     // Scale down the difficulty if the object is doubletappable.
@@ -189,7 +194,7 @@ object DroidRhythmEvaluator {
 
                     island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
                 }
-            } else if (prevDelta > currentDelta + deltaDifferenceEpsilon) {
+            } else if (isSpeedingUp) {
                 // We are speeding up.
                 // Begin counting island until we change speed again.
                 firstDeltaSwitch = true
@@ -213,6 +218,9 @@ object DroidRhythmEvaluator {
             lastObject = prevObject
             prevObject = currentObject
         }
+
+        // If the current island is long we don't want the sum to have as big of an effect.
+        rhythmComplexitySum *= Interpolation.reverseLinear(island.deltaCount.toDouble(), 22.0, 3.0)
 
         return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2
     }
