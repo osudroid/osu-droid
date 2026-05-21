@@ -64,7 +64,7 @@ class VideoTexture(val source: String) : Texture(
 
     override fun bind(pGL: GL10) {
         if (isLoadedToHardware) {
-            surfaceTexture!!.updateTexImage()
+            surfaceTexture?.updateTexImage()
         }
     }
 
