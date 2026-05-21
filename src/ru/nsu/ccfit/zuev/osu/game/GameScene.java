@@ -360,11 +360,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             storyboardSprite = null;
         }
 
-        if (video != null) {
-            video.release();
-            video.detachSelf();
-            video = null;
-        }
+        releaseVideo();
 
         var playableBeatmap = this.playableBeatmap;
 
@@ -498,6 +494,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (videoLoadingJob != null) {
             videoLoadingJob.cancel(new CancellationException("Video loading job cancelled"));
             videoLoadingJob = null;
+        }
+    }
+
+    private void releaseVideo() {
+        if (video != null) {
+            video.release();
+            video = null;
+            videoStarted = false;
         }
     }
 
@@ -2175,12 +2179,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             storyboardSprite = null;
         }
 
-        if (video != null) {
-            video.release();
-            video = null;
-            videoStarted = false;
-        }
-
         if (sceneBorder != null) {
             sceneBorder.detachSelf();
             sceneBorder = null;
@@ -2193,10 +2191,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (Multiplayer.isMultiplayer)
         {
             Multiplayer.roomScene.show();
+            releaseVideo();
             return;
         }
         ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
+        releaseVideo();
 
         // Resume difficulty calculation.
         DifficultyCalculationManager.calculateDifficulties();
