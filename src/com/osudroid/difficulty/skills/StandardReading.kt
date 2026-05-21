@@ -76,7 +76,7 @@ class StandardReading(
             difficulty *= 0.1
         }
 
-        difficulty *= 0.825 + max(0.0, current.overallDifficulty).pow(2) / 1125
+        difficulty *= 0.825 + max(0.0, current.overallDifficulty).pow(2.2) / 1125
 
         return difficulty
     }
