@@ -5,6 +5,7 @@ import android.media.*
 import android.opengl.*
 import android.opengl.GLES20.GL_CLAMP_TO_EDGE
 import android.opengl.GLES20.GL_LINEAR
+import android.opengl.GLES20.GL_NEAREST
 import android.util.Log
 import android.view.*
 import org.andengine.opengl.texture.*
@@ -16,7 +17,7 @@ class VideoTexture(val source: String) : Texture(
     null,
     PixelFormat.UNDEFINED,
     TextureOptions(
-        GL_LINEAR,
+        GL_NEAREST,
         GL_LINEAR,
         GL_CLAMP_TO_EDGE,
         GL_CLAMP_TO_EDGE,
@@ -26,15 +27,15 @@ class VideoTexture(val source: String) : Texture(
 ) {
 
     val player = MediaPlayer().apply {
-        try {
-            setDataSource(source)
-            setVolume(0f, 0f)
-            isLooping = false
-            prepare()
-        } catch (e: Exception) {
-            Log.e("VideoTexture", "Failed to prepare MediaPlayer for source: $source", e)
-            throw e
+
+        setDataSource(source)
+        setVolume(0f, 0f)
+        isLooping = false
+        setOnErrorListener { _, what, extra ->
+            Log.e("VideoTexture", "MediaPlayer error: what=$what extra=$extra")
+            true
         }
+        prepare()
     }
 
     // Cache video dimensions after prepare(); some decoders report 0×0 until
@@ -127,6 +128,7 @@ class VideoTexture(val source: String) : Texture(
     override fun bind(pGLState: GLState) {
         if (isLoadedToHardware) {
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+            surfaceTexture?.updateTexImage()
         }
     }
 
