@@ -202,6 +202,12 @@ abstract class DifficultyHitObject(
      */
     abstract val smallCircleBonus: Double
 
+    /**
+     * This [DifficultyHitObject]'s immediate overall difficulty value calculated from the raw hit window.
+     */
+    val overallDifficulty
+        get() = if (obj is Slider) obj.head.hitWindow?.overallDifficulty ?: 0.0 else obj.hitWindow?.overallDifficulty ?: 0.0
+
     protected abstract val mode: GameMode
 
     protected open val maximumSliderRadius

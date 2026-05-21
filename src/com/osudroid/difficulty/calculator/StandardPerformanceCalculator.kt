@@ -1,6 +1,8 @@
 package com.osudroid.difficulty.calculator
 
 import com.osudroid.beatmaps.StandardHitWindow
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.difficulty.attributes.StandardDifficultyAttributes
 import com.osudroid.difficulty.attributes.StandardPerformanceAttributes
 import com.osudroid.difficulty.skills.HarmonicSkill
@@ -58,8 +60,8 @@ class StandardPerformanceCalculator(
         okWindow = hitWindow.okWindow / this.attributes.clockRate
         mehWindow = hitWindow.mehWindow / this.attributes.clockRate
 
-        approachRate = StandardDifficultyCalculator.calculateRateAdjustedApproachRate(this.attributes.approachRate, this.attributes.clockRate)
-        overallDifficulty = StandardDifficultyCalculator.calculateRateAdjustedOverallDifficulty(this.attributes.overallDifficulty, this.attributes.clockRate)
+        approachRate = calculateRateAdjustedApproachRate(this.attributes.approachRate, this.attributes.clockRate)
+        overallDifficulty = (79.5 - greatWindow) / 6
 
         if (this.attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
@@ -456,6 +458,22 @@ class StandardPerformanceCalculator(
     private val comboScalingFactor by lazy {
         if (difficultyAttributes.maxCombo <= 0) 0.0
         else min((scoreMaxCombo.toDouble() / difficultyAttributes.maxCombo).pow(0.8), 1.0)
+    }
+
+    private fun calculateRateAdjustedApproachRate(approachRate: Double, clockRate: Double): Double {
+        val preempt = BeatmapDifficulty.difficultyRange(
+            approachRate,
+            HitObject.PREEMPT_MAX,
+            HitObject.PREEMPT_MID,
+            HitObject.PREEMPT_MIN
+        ) / clockRate
+
+        return BeatmapDifficulty.inverseDifficultyRange(
+            preempt,
+            HitObject.PREEMPT_MAX,
+            HitObject.PREEMPT_MID,
+            HitObject.PREEMPT_MIN
+        )
     }
 
     companion object {

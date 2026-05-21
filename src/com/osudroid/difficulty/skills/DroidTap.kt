@@ -5,6 +5,7 @@ import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.evaluators.DroidTapEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModRelax
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.pow
@@ -68,6 +69,10 @@ class DroidTap(
     }
 
     override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
+        if (mods.any { it is ModRelax }) {
+            return 0.0
+        }
+
         val decay = strainDecay(current.strainTime)
 
         currentDifficulty *= decay

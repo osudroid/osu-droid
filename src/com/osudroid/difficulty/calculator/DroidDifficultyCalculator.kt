@@ -30,6 +30,7 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -60,13 +61,11 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         overallDifficulty = playableBeatmap.difficulty.od.toDouble()
         maximumScore = beatmap.calculateMaximumScore(playableBeatmap.mods) + DroidScoreUtils.calculateMaximumSpinnerBonus(playableBeatmap)
 
-        val ratingCalculator = DroidRatingCalculator(playableBeatmap.mods, playableBeatmap.hitObjects.objects.size)
-
-        populateAimAttributes(skills, ratingCalculator, forReplay)
-        populateTapAttributes(skills, ratingCalculator, objects, forReplay)
-        populateRhythmAttributes(skills, ratingCalculator)
-        populateFlashlightAttributes(skills, ratingCalculator)
-        populateReadingAttributes(skills, ratingCalculator)
+        populateAimAttributes(skills, forReplay)
+        populateTapAttributes(skills, objects, forReplay)
+        populateRhythmAttributes(skills)
+        populateFlashlightAttributes(skills)
+        populateReadingAttributes(skills)
 
         val baseAimPerformance = VariableLengthStrainSkill.difficultyToPerformance(aimDifficulty)
         val baseTapPerformance = HarmonicSkill.difficultyToPerformance(tapDifficulty)
@@ -143,7 +142,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     private fun DroidDifficultyAttributes.populateAimAttributes(
         skills: Array<Skill<DroidDifficultyHitObject>>,
-        ratingCalculator: DroidRatingCalculator,
         forReplay: Boolean
     ) {
         val aim = skills.find<DroidAim> { it.withSliders } ?: return
@@ -152,16 +150,14 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val aimDifficultyValue = aim.difficultyValue()
         val aimNoSliderDifficultyValue = aimNoSlider.difficultyValue()
 
-        aimDifficulty = ratingCalculator.computeAimRating(aimDifficultyValue)
+        aimDifficulty = calculateAimDifficultyRating(aimDifficultyValue)
         aimDifficultStrainCount = aim.countTopWeightedStrains(aimDifficultyValue)
         aimDifficultSliderCount = aim.countDifficultSliders()
 
-        if (aimDifficulty > 0) {
-            aimSliderFactor = DroidRatingCalculator.calculateMechanicalDifficultyRating(aimNoSliderDifficultyValue) /
-                DroidRatingCalculator.calculateMechanicalDifficultyRating(aimDifficultyValue)
-        } else {
-            aimSliderFactor = 1.0
-        }
+        aimSliderFactor = if (aimDifficulty > 0) {
+            calculateAimDifficultyRating(aimNoSliderDifficultyValue) /
+                    calculateAimDifficultyRating(aimDifficultyValue)
+        } else 1.0
 
         val aimNoSliderTopWeightedSliderCount = aimNoSlider.countTopWeightedSliders(aimNoSliderDifficultyValue)
         val aimNoSliderDifficultStrainCount = aimNoSlider.countTopWeightedStrains(aimNoSliderDifficultyValue)
@@ -192,7 +188,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     private fun DroidDifficultyAttributes.populateTapAttributes(
         skills: Array<Skill<DroidDifficultyHitObject>>,
-        ratingCalculator: DroidRatingCalculator,
         objects: Array<DroidDifficultyHitObject>,
         forReplay: Boolean
     ) {
@@ -200,7 +195,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         val tapDifficultyValue = tap.difficultyValue()
 
-        tapDifficulty = ratingCalculator.computeTapRating(tapDifficultyValue)
+        tapDifficulty = calculateDifficultyRating(tapDifficultyValue)
         tapDifficultStrainCount = tap.countTopWeightedObjectDifficulties(tapDifficulty)
         speedNoteCount = tap.relevantNoteCount()
 
@@ -262,33 +257,33 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     private fun DroidDifficultyAttributes.populateRhythmAttributes(
-        skills: Array<Skill<DroidDifficultyHitObject>>,
-        ratingCalculator: DroidRatingCalculator
+        skills: Array<Skill<DroidDifficultyHitObject>>
     ) {
         val rhythm = skills.find<DroidRhythm>() ?: return
 
-        rhythmDifficulty = ratingCalculator.computeRhythmRating(rhythm.difficultyValue())
+        rhythmDifficulty = calculateDifficultyRating(rhythm.difficultyValue())
     }
 
     private fun DroidDifficultyAttributes.populateFlashlightAttributes(
-        skills: Array<Skill<DroidDifficultyHitObject>>,
-        ratingCalculator: DroidRatingCalculator
+        skills: Array<Skill<DroidDifficultyHitObject>>
     ) {
         val flashlight = skills.find<DroidFlashlight>() ?: return
 
-        flashlightDifficulty = ratingCalculator.computeFlashlightRating(flashlight.difficultyValue())
+        flashlightDifficulty = sqrt(flashlight.difficultyValue()) * 0.18
     }
 
     private fun DroidDifficultyAttributes.populateReadingAttributes(
-        skills: Array<Skill<DroidDifficultyHitObject>>,
-        ratingCalculator: DroidRatingCalculator
+        skills: Array<Skill<DroidDifficultyHitObject>>
     ) {
         val reading = skills.find<DroidReading>() ?: return
         val readingDifficultyValue = reading.difficultyValue()
 
-        readingDifficulty = ratingCalculator.computeReadingRating(readingDifficultyValue)
+        readingDifficulty = calculateDifficultyRating(readingDifficultyValue)
         readingDifficultNoteCount = reading.countTopWeightedObjectDifficulties(readingDifficultyValue)
     }
+
+    private fun calculateAimDifficultyRating(difficultyValue: Double) = difficultyValue.pow(0.63) * 0.02275
+    private fun calculateDifficultyRating(difficultyValue: Double) = sqrt(difficultyValue) * 0.0675
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)

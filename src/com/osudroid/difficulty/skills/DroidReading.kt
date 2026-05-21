@@ -6,6 +6,8 @@ import com.osudroid.difficulty.evaluators.DroidReadingEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.math.Interpolation
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModAutopilot
+import com.osudroid.mods.ModRelax
 import kotlin.math.log10
 import kotlin.math.min
 import kotlin.math.pow
@@ -27,7 +29,7 @@ class DroidReading(
         val decay = difficultyDecay(current.deltaTime)
 
         currentDifficulty *= decay
-        currentDifficulty += DroidReadingEvaluator.evaluateDifficultyOf(current, mods) * (1 - decay) * skillMultiplier
+        currentDifficulty += calculateAdjustedDifficulty(current) * (1 - decay) * skillMultiplier
 
         return currentDifficulty
     }
@@ -62,6 +64,18 @@ class DroidReading(
                 )
             )
         }
+    }
+
+    private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
+        var difficulty = DroidReadingEvaluator.evaluateDifficultyOf(current, mods)
+
+        if (mods.any { it is ModRelax }) {
+            difficulty *= 0.4
+        } else if (mods.any { it is ModAutopilot }) {
+            difficulty *= 0.1
+        }
+
+        return difficulty
     }
 
     private fun calculateReducedNoteCount(): Int {

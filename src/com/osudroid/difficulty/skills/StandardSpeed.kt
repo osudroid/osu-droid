@@ -6,6 +6,7 @@ import com.osudroid.difficulty.evaluators.StandardRhythmEvaluator
 import com.osudroid.difficulty.evaluators.StandardSpeedEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModAutopilot
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.pow
@@ -66,7 +67,7 @@ class StandardSpeed(
         val decay = strainDecay(current.strainTime)
 
         currentDifficulty *= decay
-        currentDifficulty += StandardSpeedEvaluator.evaluateDifficultyOf(current) * (1 - decay) * skillMultiplier
+        currentDifficulty += calculateAdjustedDifficulty(current) * (1 - decay) * skillMultiplier
 
         val currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
 
@@ -75,6 +76,16 @@ class StandardSpeed(
 
         if (current.obj is Slider) {
             sliderDifficulties.add(difficulty)
+        }
+
+        return difficulty
+    }
+
+    private fun calculateAdjustedDifficulty(current: StandardDifficultyHitObject): Double {
+        var difficulty = StandardSpeedEvaluator.evaluateDifficultyOf(current)
+
+        if (mods.any { it is ModAutopilot }) {
+            difficulty *= 0.5
         }
 
         return difficulty

@@ -8,6 +8,7 @@ import com.osudroid.difficulty.evaluators.StandardSnapAimEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.math.Interpolation
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModAutopilot
 import com.osudroid.mods.ModRelax
 import kotlin.math.exp
 import kotlin.math.ln
@@ -78,16 +79,14 @@ class StandardAim(
     }
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
+        if (mods.any { it is ModAutopilot }) {
+            return 0.0
+        }
+
         val decay = strainDecay(current.strainTime)
 
-        val snapDifficulty = StandardSnapAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierSnap
-        val agilityDifficulty = StandardAgilityEvaluator.evaluateDifficultyOf(current) * skillMultiplierAgility
-        val flowDifficulty = StandardFlowAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierFlow
-
-        val totalDifficulty = calculateTotalValue(snapDifficulty, agilityDifficulty, flowDifficulty)
-
         currentStrain *= decay
-        currentStrain += totalDifficulty * (1 - decay)
+        currentStrain += calculateAdjustedDifficulty(current) * (1 - decay)
 
         if (current.obj is Slider) {
             sliderStrains += currentStrain
@@ -99,6 +98,17 @@ class StandardAim(
 
     override fun calculateInitialStrain(time: Double, current: StandardDifficultyHitObject) =
         currentStrain * strainDecay(time - (current.previous(0)?.startTime ?: 0.0))
+
+    private fun calculateAdjustedDifficulty(current: StandardDifficultyHitObject): Double {
+        val snapDifficulty = StandardSnapAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierSnap
+        val agilityDifficulty = StandardAgilityEvaluator.evaluateDifficultyOf(current) * skillMultiplierAgility
+        val flowDifficulty = StandardFlowAimEvaluator.evaluateDifficultyOf(current, withSliders) * skillMultiplierFlow
+
+        var totalDifficulty = calculateTotalValue(snapDifficulty, agilityDifficulty, flowDifficulty)
+        totalDifficulty *= 0.985 + max(0.0, current.overallDifficulty).pow(2) / 4000
+
+        return totalDifficulty
+    }
 
     private fun calculateTotalValue(snapDifficulty: Double, agilityDifficulty: Double, flowDifficulty: Double): Double {
         var flowDifficulty = flowDifficulty

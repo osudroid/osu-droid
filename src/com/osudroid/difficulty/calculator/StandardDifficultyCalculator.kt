@@ -2,10 +2,7 @@ package com.osudroid.difficulty.calculator
 
 import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.PlayableBeatmap
-import com.osudroid.beatmaps.StandardHitWindow
 import com.osudroid.beatmaps.StandardPlayableBeatmap
-import com.osudroid.beatmaps.hitobjects.HitObject
-import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.difficulty.StandardDifficultyHitObject
 import com.osudroid.difficulty.attributes.StandardDifficultyAttributes
 import com.osudroid.difficulty.skills.HarmonicSkill
@@ -22,6 +19,8 @@ import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModRelax
 import kotlin.math.cbrt
 import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -59,8 +58,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         aimDifficultStrainCount = aim?.countTopWeightedStrains(aimDifficultyValue) ?: 0.0
 
         aimSliderFactor = if (aimDifficultyValue > 0) {
-            StandardRatingCalculator.calculateDifficultyRating(aimNoSliderDifficultyValue) /
-                StandardRatingCalculator.calculateDifficultyRating(aimDifficultyValue)
+            calculateAimDifficultyRating(aimNoSliderDifficultyValue) / calculateAimDifficultyRating(aimDifficultyValue)
         } else 1.0
 
         val aimNoSliderTopWeightedSliderCount = aimNoSlider?.countTopWeightedSliders(aimNoSliderDifficultyValue) ?: 0.0
@@ -86,16 +84,10 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         readingDifficultNoteCount = reading?.countTopWeightedObjectDifficulties(readingDifficultyValue) ?: 0.0
 
         // Final rating
-        val ratingCalculator = StandardRatingCalculator(
-            playableBeatmap.mods,
-            playableBeatmap.hitObjects.objects.size,
-            calculateRateAdjustedOverallDifficulty(overallDifficulty, clockRate)
-        )
-
-        aimDifficulty = ratingCalculator.computeAimRating(aimDifficultyValue)
-        speedDifficulty = ratingCalculator.computeSpeedRating(speedDifficultyValue)
-        flashlightDifficulty = ratingCalculator.computeFlashlightRating(flashlight?.difficultyValue() ?: 0.0)
-        readingDifficulty = ratingCalculator.computeReadingRating(readingDifficultyValue)
+        aimDifficulty = calculateAimDifficultyRating(aimDifficultyValue)
+        speedDifficulty = calculateDifficultyRating(speedDifficultyValue)
+        flashlightDifficulty = calculateDifficultyRating(flashlight?.difficultyValue() ?: 0.0)
+        readingDifficulty = calculateDifficultyRating(readingDifficultyValue)
 
         val baseAimPerformance = VariableLengthStrainSkill.difficultyToPerformance(aimDifficulty)
         val baseSpeedPerformance = HarmonicSkill.difficultyToPerformance(speedDifficulty)
@@ -127,7 +119,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         }
 
         if (ModFlashlight::class in beatmap.mods) {
-            skills.add(StandardFlashlight(mods))
+            skills.add(StandardFlashlight(mods, beatmap.hitObjects.objects.size))
         }
 
         skills.add(StandardReading(mods, beatmap.speedMultiplier.toDouble(), beatmap.hitObjects.objects))
@@ -163,6 +155,9 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     override fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?) =
         beatmap.createStandardPlayableBeatmap(mods, scope)
 
+    private fun calculateAimDifficultyRating(difficultyValue: Double) = difficultyValue.pow(0.63) * 0.02275
+    private fun calculateDifficultyRating(difficultyValue: Double) = sqrt(difficultyValue) * 0.0675
+
     companion object {
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
@@ -178,31 +173,6 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
                 reading,
                 flashlight * (flashlight / reading).coerceIn(0.25, 1.0)
             )
-        }
-
-        @JvmStatic
-        fun calculateRateAdjustedApproachRate(approachRate: Double, clockRate: Double): Double {
-            val preempt = BeatmapDifficulty.difficultyRange(
-                approachRate,
-                HitObject.PREEMPT_MAX,
-                HitObject.PREEMPT_MID,
-                HitObject.PREEMPT_MIN
-            ) / clockRate
-
-            return BeatmapDifficulty.inverseDifficultyRange(
-                preempt,
-                HitObject.PREEMPT_MAX,
-                HitObject.PREEMPT_MID,
-                HitObject.PREEMPT_MIN
-            )
-        }
-
-        @JvmStatic
-        fun calculateRateAdjustedOverallDifficulty(overallDifficulty: Double, clockRate: Double): Double {
-            val hitWindow = StandardHitWindow(overallDifficulty)
-            val greatWindow = hitWindow.greatWindow / clockRate
-
-            return (79.5 - greatWindow) / 6
         }
     }
 }

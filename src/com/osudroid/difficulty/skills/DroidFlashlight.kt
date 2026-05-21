@@ -3,6 +3,7 @@ package com.osudroid.difficulty.skills
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.evaluators.DroidFlashlightEvaluator
 import com.osudroid.mods.Mod
+import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -12,7 +13,9 @@ class DroidFlashlight(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: Iterable<Mod>
+    mods: Iterable<Mod>,
+
+    private val totalObjects: Int
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.06
 
@@ -23,7 +26,15 @@ class DroidFlashlight(
     private val skillMultiplier = 0.023
     private val strainDecayBase = 0.15
 
-    override fun difficultyValue() = currentStrainPeaks.sum() * starsPerDouble
+    override fun difficultyValue(): Double {
+        var sum = currentStrainPeaks.sum() * starsPerDouble
+
+        // Account for shorter beatmaps having a higher ratio of 0 combo/100 combo flashlight radius.
+        sum *= 0.7 + 0.1 * min(1, totalObjects / 200) +
+            (if (totalObjects > 200) 0.2 * min(1, (totalObjects - 200) / 200) else 0.0)
+
+        return sum
+    }
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
