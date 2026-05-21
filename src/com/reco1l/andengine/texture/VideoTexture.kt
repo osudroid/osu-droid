@@ -3,6 +3,7 @@ package com.reco1l.andengine.texture
 import android.graphics.*
 import android.media.*
 import android.opengl.*
+import android.util.Log
 import android.view.*
 import org.anddev.andengine.opengl.texture.*
 import java.io.*
@@ -26,6 +27,10 @@ class VideoTexture(val source: String) : Texture(
         setDataSource(source)
         setVolume(0f, 0f)
         isLooping = false
+        setOnErrorListener { _, what, extra ->
+            Log.e("VideoTexture", "MediaPlayer error: what=$what extra=$extra")
+            true
+        }
         prepare()
     }
 
