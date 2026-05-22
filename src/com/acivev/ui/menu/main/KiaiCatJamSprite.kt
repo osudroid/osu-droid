@@ -1,6 +1,6 @@
 package com.acivev.ui.menu.main
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.acivev.andengine.opengl.CatJamCircleShader
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.BlendInfo
@@ -54,16 +54,16 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
         shader.bindProgram(pGLState)
 
         if (shader.uniformMVP >= 0)
-            GLES20.glUniformMatrix4fv(shader.uniformMVP, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
+            GLES32.glUniformMatrix4fv(shader.uniformMVP, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
         if (shader.uniformCatjam >= 0)
-            GLES20.glUniform1i(shader.uniformCatjam, 0)
+            GLES32.glUniform1i(shader.uniformCatjam, 0)
         if (shader.uniformColor >= 0)
-            GLES20.glUniform4f(shader.uniformColor, drawRed, drawGreen, drawBlue, drawAlpha)
+            GLES32.glUniform4f(shader.uniformColor, drawRed, drawGreen, drawBlue, drawAlpha)
         if (shader.uniformRadius >= 0)
-            GLES20.glUniform1f(shader.uniformRadius, clipRadius)
+            GLES32.glUniform1f(shader.uniformRadius, clipRadius)
 
         // This shader does not use per-vertex color
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Catjam atlas UVs at attribute 3
         uvBuffer.beginDraw(pGLState)
@@ -75,7 +75,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
     override fun onDrawBuffer(pGLState: GLState) {
         textureRegion?.texture?.bind(pGLState)
         super.onDrawBuffer(pGLState)
-        GLES20.glDisableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
+        GLES32.glDisableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
     }
 
 
@@ -85,10 +85,10 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
      * Vertex order matches [SpriteVBO]: top-left, bottom-left, top-right, bottom-right.
      */
     private class QuadPosBuffer : VertexBuffer(
-        drawTopology = GLES20.GL_TRIANGLE_STRIP,
+        drawTopology = GLES32.GL_TRIANGLE_STRIP,
         vertexCount = 4,
         vertexSize = VERTEX_2D,
-        bufferUsage = GLES20.GL_STATIC_DRAW
+        bufferUsage = GLES32.GL_STATIC_DRAW
     ) {
         init {
             putVertex(0, 0f, 0f) // top-left
@@ -100,10 +100,10 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
 
         fun bindAsQuadPosAttribute() {
             bindAndUpload()
-            GLES20.glVertexAttribPointer(
+            GLES32.glVertexAttribPointer(
                 CatJamCircleShader.QUAD_POS_LOCATION,
-                VERTEX_2D, GLES20.GL_FLOAT, false, 0, 0)
-            GLES20.glEnableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
+                VERTEX_2D, GLES32.GL_FLOAT, false, 0, 0)
+            GLES32.glEnableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
         }
     }
 
