@@ -8,7 +8,7 @@ import org.andengine.opengl.util.GLState;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -94,10 +94,10 @@ public class ScreenGrabber extends Entity {
 		final IntBuffer sourceBuffer = IntBuffer.wrap(source);
 		sourceBuffer.position(0);
 
-		// TODO Check availability of OpenGL and GLES20.GL_RGBA combinations that require less conversion operations.
+		// TODO Check availability of OpenGL and GLES32.GL_RGBA combinations that require less conversion operations.
 		// Note: There is (said to be) a bug with glReadPixels when 'y != 0', so we simply read starting from 'y == 0'.
 		// TODO Does that bug still exist?
-		GLES20.glReadPixels(pGrabX, 0, pGrabWidth, pGrabY + pGrabHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, sourceBuffer);
+		GLES32.glReadPixels(pGrabX, 0, pGrabWidth, pGrabY + pGrabHeight, GLES32.GL_RGBA, GLES32.GL_UNSIGNED_BYTE, sourceBuffer);
 
 		final int[] pixels = new int[pGrabWidth * pGrabHeight];
 

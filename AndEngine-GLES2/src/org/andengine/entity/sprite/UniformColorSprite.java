@@ -13,7 +13,7 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -37,8 +37,8 @@ public class UniformColorSprite extends Sprite {
 	public static final int SPRITE_SIZE = UniformColorSprite.VERTEX_SIZE * UniformColorSprite.VERTICES_PER_SPRITE;
 
 	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(2)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES20.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES20.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES32.GL_FLOAT, false)
 		.build();
 
 	// ===========================================================
@@ -109,12 +109,12 @@ public class UniformColorSprite extends Sprite {
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
 		super.preDraw(pGLState, pCamera);
 
-		GLES20.glUniform4f(PositionTextureCoordinatesUniformColorShaderProgram.getInstance().getUniformColorLocation(), this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
+		GLES32.glUniform4f(PositionTextureCoordinatesUniformColorShaderProgram.getInstance().getUniformColorLocation(), this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
 	}
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		this.mSpriteVertexBufferObject.draw(GLES20.GL_TRIANGLE_STRIP, UniformColorSprite.VERTICES_PER_SPRITE);
+		this.mSpriteVertexBufferObject.draw(GLES32.GL_TRIANGLE_STRIP, UniformColorSprite.VERTICES_PER_SPRITE);
 	}
 
 	// ===========================================================

@@ -10,7 +10,7 @@ import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderP
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.*
 import org.andengine.opengl.util.*
-import android.opengl.GLES20
+import android.opengl.GLES32
 import kotlin.math.*
 
 /**
@@ -157,7 +157,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
         // Upload MVP matrix
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
@@ -165,19 +165,19 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
         // Upload texture unit sampler
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color uniform
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
         // Disable color vertex attribute (this shader uses uniform color)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Set up UV coordinates at attribute 3
         uvBuffer.beginDraw(pGLState)

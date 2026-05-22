@@ -18,7 +18,7 @@ import org.andengine.util.algorithm.collision.LineCollisionChecker;
 import org.andengine.util.algorithm.collision.RectangularShapeCollisionChecker;
 import org.andengine.util.exception.MethodNotSupportedException;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -43,8 +43,8 @@ public class Line extends Shape {
 	public static final int LINE_SIZE = Line.VERTEX_SIZE * Line.VERTICES_PER_LINE;
 
 	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(2)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES20.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES20.GL_UNSIGNED_BYTE, true)
+		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES32.GL_UNSIGNED_BYTE, true)
 		.build();
 
 	// ===========================================================
@@ -233,7 +233,7 @@ public class Line extends Shape {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		this.mLineVertexBufferObject.draw(GLES20.GL_LINES, Line.VERTICES_PER_LINE);
+		this.mLineVertexBufferObject.draw(GLES32.GL_LINES, Line.VERTICES_PER_LINE);
 	}
 
 	@Override

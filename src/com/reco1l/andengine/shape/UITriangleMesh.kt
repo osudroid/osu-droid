@@ -1,6 +1,6 @@
 package com.reco1l.andengine.shape
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
 import com.reco1l.andengine.buffered.UIBufferedComponent
@@ -57,18 +57,18 @@ class UITriangleMesh : UIComponent() {
         // Clearing
         var clearMask = 0
 
-        if (clearInfo.depthBuffer) clearMask = clearMask or GLES20.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) clearMask = clearMask or GLES20.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES20.GL_STENCIL_BUFFER_BIT
+        if (clearInfo.depthBuffer) clearMask = clearMask or GLES32.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GLES32.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
-            GLES20.glClear(clearMask)
+            GLES32.glClear(clearMask)
         }
 
         // Depth testing
         if (depthInfo.test) {
-            GLES20.glDepthFunc(depthInfo.function)
-            GLES20.glDepthMask(depthInfo.mask)
+            GLES32.glDepthFunc(depthInfo.function)
+            GLES32.glDepthMask(depthInfo.mask)
 
             pGLState.enableDepthTest()
         } else {
@@ -115,28 +115,28 @@ class UITriangleMesh : UIComponent() {
 
         // Upload MVP matrix
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }
 
         // Provide constant color (disable per-vertex color array)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
 
         // Disable texture coordinates
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Ensure position attribute array is enabled
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
 
 
         TriangleRenderer.get().renderTriangles(vertices, pGLState)
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Disable depth test after drawing so subsequent entities (sprites, circles, etc.)
         // are not accidentally depth-tested against values we wrote.

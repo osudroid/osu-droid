@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.andengine.opengl.util.GLState;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich

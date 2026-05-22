@@ -7,7 +7,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.util.GLState;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -100,8 +100,8 @@ public class DoubleSceneSplitScreenEngine extends Engine {
 
 		/* First Screen. With first camera, on the left half of the screens width. */
 		if(super.mScene != null) {
-			GLES20.glScissor(0, 0, surfaceWidthHalf, surfaceHeight);
-			GLES20.glViewport(0, 0, surfaceWidthHalf, surfaceHeight);
+			GLES32.glScissor(0, 0, surfaceWidthHalf, surfaceHeight);
+			GLES32.glViewport(0, 0, surfaceWidthHalf, surfaceHeight);
 
 			super.mScene.onDraw(pGLState, pFirstCamera);
 			pFirstCamera.onDrawHUD(pGLState);
@@ -109,8 +109,8 @@ public class DoubleSceneSplitScreenEngine extends Engine {
 
 		/* Second Screen. With second camera, on the right half of the screens width. */
 		if(this.mSecondScene != null) {
-			GLES20.glScissor(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
-			GLES20.glViewport(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
+			GLES32.glScissor(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
+			GLES32.glViewport(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
 
 			this.mSecondScene.onDraw(pGLState, secondCamera);
 			secondCamera.onDrawHUD(pGLState);

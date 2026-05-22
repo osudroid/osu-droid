@@ -11,7 +11,7 @@ import org.andengine.opengl.texture.compressed.pvr.PVRTexture.PVRTextureHeader;
 import org.andengine.util.StreamUtils;
 import org.andengine.util.exception.AndEngineRuntimeException;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -57,7 +57,7 @@ public class SmartPVRTexturePixelBufferStrategy implements IPVRTexturePixelBuffe
 		final int glType = pPixelFormat.getGLType();
 
 		/* Create the texture with the required parameters but without data. */
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, pLevel, pPixelFormat.getGLInternalFormat(), pWidth, pHeight, 0, glFormat, glType, null);
+		GLES32.glTexImage2D(GLES32.GL_TEXTURE_2D, pLevel, pPixelFormat.getGLInternalFormat(), pWidth, pHeight, 0, glFormat, glType, null);
 
 		final int bytesPerRow = pWidth * pBytesPerPixel;
 		final int stripeHeight = Math.max(1, this.mAllocationSizeMaximum / bytesPerRow);
@@ -73,7 +73,7 @@ public class SmartPVRTexturePixelBufferStrategy implements IPVRTexturePixelBuffe
 			final Buffer pixelBuffer = pPVRTexturePixelBufferStrategyManager.getPixelBuffer(PVRTextureHeader.SIZE + currentStripePixelDataOffset, currentStripePixelDataSize);
 
 			/* Send to hardware. */
-			GLES20.glTexSubImage2D(GLES20.GL_TEXTURE_2D, pLevel, 0, currentStripeOffsetY, pWidth, currentStripeHeight, glFormat, glType, pixelBuffer);
+			GLES32.glTexSubImage2D(GLES32.GL_TEXTURE_2D, pLevel, 0, currentStripeOffsetY, pWidth, currentStripeHeight, glFormat, glType, pixelBuffer);
 
 			currentStripePixelDataOffset += currentStripePixelDataSize;
 			currentStripeOffsetY += currentStripeHeight;

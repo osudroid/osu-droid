@@ -1,6 +1,6 @@
 package com.edlplan.andengine;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 import com.edlplan.framework.utils.FloatArraySlice;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -61,20 +61,20 @@ public class TriangleRenderer {
         // Create the VBO on first use (or after a context-loss reset).
         if (mVboId == 0) {
             final int[] ids = new int[1];
-            GLES20.glGenBuffers(1, ids, 0);
+            GLES32.glGenBuffers(1, ids, 0);
             mVboId = ids[0];
         }
 
         // Upload data to the GPU. Route through GLState to keep its internal cache in sync.
         pGLState.bindArrayBuffer(mVboId);
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, byteCount, mStagingBuffer, GLES20.GL_DYNAMIC_DRAW);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, byteCount, mStagingBuffer, GLES32.GL_DYNAMIC_DRAW);
 
         // Point the position attribute at offset 0 inside the currently bound VBO.
-        GLES20.glVertexAttribPointer(
+        GLES32.glVertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
-            2, GLES20.GL_FLOAT, false, 0, 0
+            2, GLES32.GL_FLOAT, false, 0, 0
         );
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, floatCount / 2);
+        GLES32.glDrawArrays(GLES32.GL_TRIANGLES, 0, floatCount / 2);
 
         // Leave no VBO bound. Use pGLState so its cache stays in sync with the actual GL state,
         // preventing a false cache hit that would cause the next VBO bind to be skipped.

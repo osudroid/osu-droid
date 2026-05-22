@@ -1,6 +1,6 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
@@ -154,7 +154,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         // Upload MVP matrix
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
@@ -162,19 +162,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         // Upload texture unit sampler
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color uniform
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
         // Disable color vertex attribute (this shader uses uniform color)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         // UV (attr 3) is already set up by TextTextureBuffer inside the CompoundBuffer.beginDraw()
     }
 
@@ -294,7 +294,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UIText
-            GLES20.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
+            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
         }
     }
 
