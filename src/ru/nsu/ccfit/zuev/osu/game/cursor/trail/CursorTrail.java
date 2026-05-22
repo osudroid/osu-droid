@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.trail;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 import org.andengine.entity.particle.SpriteParticleSystem;
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
@@ -33,7 +33,7 @@ public class CursorTrail extends SpriteParticleSystem {
         addParticleInitializer(new ExpireParticleInitializer(0.1f * GameHelper.getSpeedMultiplier()));
         addParticleModifier(new AlphaParticleModifier(0.0f, 0.1f * GameHelper.getSpeedMultiplier(), 1.0f, 0.0f));
 
-        addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
+        addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA));
         addParticleInitializer(new ScaleParticleInitializer(cursor.baseSize));
         setParticlesSpawnEnabled(false);
         updateRotation();

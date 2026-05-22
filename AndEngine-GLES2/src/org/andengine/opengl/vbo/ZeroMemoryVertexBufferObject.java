@@ -9,7 +9,7 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.util.adt.DataConstants;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * Compared to a {@link HighPerformanceVertexBufferObject} or a {@link LowMemoryVertexBufferObject}, the {@link ZeroMemoryVertexBufferObject} uses <b><u>no</u> permanent heap memory</b>,
@@ -157,7 +157,7 @@ public abstract class ZeroMemoryVertexBufferObject implements IVertexBufferObjec
 
 				this.onPopulateBufferData(byteBuffer);
 	
-				GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, byteBuffer.limit(), byteBuffer, this.mUsage);
+				GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, byteBuffer.limit(), byteBuffer, this.mUsage);
 			} finally {
 				if(byteBuffer != null) {
 					this.releaseByteBuffer(byteBuffer);
@@ -191,12 +191,12 @@ public abstract class ZeroMemoryVertexBufferObject implements IVertexBufferObjec
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pCount) {
-		GLES20.glDrawArrays(pPrimitiveType, 0, pCount);
+		GLES32.glDrawArrays(pPrimitiveType, 0, pCount);
 	}
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pOffset, final int pCount) {
-		GLES20.glDrawArrays(pPrimitiveType, pOffset, pCount);
+		GLES32.glDrawArrays(pPrimitiveType, pOffset, pCount);
 	}
 
 	@Override

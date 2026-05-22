@@ -17,7 +17,7 @@ import org.andengine.util.math.MathUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLUtils;
 
 /**
@@ -110,19 +110,19 @@ public class BitmapTexture extends Texture {
 		final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && (this.mPixelFormat == PixelFormat.RGBA_8888);
 		if(!useDefaultAlignment) {
 			/* Adjust unpack alignment. */
-			GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+			GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
 		}
 
 		final boolean preMultipyAlpha = this.mTextureOptions.mPreMultiplyAlpha;
 		if(preMultipyAlpha) {
-			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+			GLUtils.texImage2D(GLES32.GL_TEXTURE_2D, 0, bitmap, 0);
 		} else {
-			pGLState.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0, this.mPixelFormat);
+			pGLState.glTexImage2D(GLES32.GL_TEXTURE_2D, 0, bitmap, 0, this.mPixelFormat);
 		}
 
 		if(!useDefaultAlignment) {
 			/* Restore default unpack alignment. */
-			GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+			GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
 		}
 
 		bitmap.recycle();

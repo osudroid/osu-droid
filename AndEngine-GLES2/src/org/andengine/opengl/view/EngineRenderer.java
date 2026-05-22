@@ -9,7 +9,7 @@ import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.debug.Debug;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLSurfaceView;
 
 /**
@@ -67,26 +67,26 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 			ShaderProgram.resetAllForContextLoss();
 
 			// TODO Check if available and make available through EngineOptions-RenderOptions
-//			GLES20.glEnable(GLES20.GL_POLYGON_SMOOTH);
-//			GLES20.glHint(GLES20.GL_POLYGON_SMOOTH_HINT, GLES20.GL_NICEST);
-//			GLES20.glEnable(GLES20.GL_LINE_SMOOTH);
-//			GLES20.glHint(GLES20.GL_LINE_SMOOTH_HINT, GLES20.GL_NICEST);
-//			GLES20.glEnable(GLES20.GL_POINT_SMOOTH);
-//			GLES20.glHint(GLES20.GL_POINT_SMOOTH_HINT, GLES20.GL_NICEST);
+//			GLES32.glEnable(GLES32.GL_POLYGON_SMOOTH);
+//			GLES32.glHint(GLES32.GL_POLYGON_SMOOTH_HINT, GLES32.GL_NICEST);
+//			GLES32.glEnable(GLES32.GL_LINE_SMOOTH);
+//			GLES32.glHint(GLES32.GL_LINE_SMOOTH_HINT, GLES32.GL_NICEST);
+//			GLES32.glEnable(GLES32.GL_POINT_SMOOTH);
+//			GLES32.glHint(GLES32.GL_POINT_SMOOTH_HINT, GLES32.GL_NICEST);
 
 			this.mGLState.disableDepthTest();
 			// Ensure initial depth clear value is 1.0 (maximum) so that GL_LESS tests
 			// pass on first draw and per-entity ClearInfo.ClearDepthBuffer calls work correctly.
-			GLES20.glClearDepthf(1.0f);
-			GLES20.glDepthFunc(GLES20.GL_LESS);
-			GLES20.glDepthMask(true);
+			GLES32.glClearDepthf(1.0f);
+			GLES32.glDepthFunc(GLES32.GL_LESS);
+			GLES32.glDepthMask(true);
 			this.mGLState.enableBlend();
 			this.mGLState.setDitherEnabled(renderOptions.isDithering());
 
 			/* Enabling culling doesn't really make sense, because triangles are never drawn 'backwards' on purpose. */
 //			this.mGLState.enableCulling();
-//			GLES20.glFrontFace(GLES20.GL_CCW);
-//			GLES20.glCullFace(GLES20.GL_BACK);
+//			GLES32.glFrontFace(GLES32.GL_CCW);
+//			GLES32.glCullFace(GLES32.GL_BACK);
 
 			if(this.mRendererListener != null) {
 				this.mRendererListener.onSurfaceCreated(this.mGLState);
@@ -97,7 +97,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(final GL10 pGL, final int pWidth, final int pHeight) {
 		this.mEngine.setSurfaceSize(pWidth, pHeight);
-		GLES20.glViewport(0, 0, pWidth, pHeight);
+		GLES32.glViewport(0, 0, pWidth, pHeight);
 		this.mGLState.loadProjectionGLMatrixIdentity();
 
 		if(this.mRendererListener != null) {
@@ -110,13 +110,13 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 		synchronized(GLState.class) {
 			if (this.mMultiSampling && this.mConfigChooser.isCoverageMultiSampling()) {
 				final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
-				GLES20.glClear(GL_COVERAGE_BUFFER_BIT_NV);
+				GLES32.glClear(GL_COVERAGE_BUFFER_BIT_NV);
 			}
 
 			// Clear the depth buffer at the start of every frame so leftover depth values
 			// from the previous frame (written by slider-body triangle meshes) never bleed
 			// into the current frame and cause artifacts on sprites / circles.
-			GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+			GLES32.glClear(GLES32.GL_DEPTH_BUFFER_BIT);
 
 			try {
 				this.mEngine.onDrawFrame(this.mGLState);

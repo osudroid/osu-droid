@@ -1,6 +1,6 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
@@ -129,24 +129,24 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         shader.bindProgram(pGLState)
 
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }
 
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
     }
 
     override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
@@ -208,7 +208,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         }
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            GLES20.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
+            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
         }
     }
 

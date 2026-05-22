@@ -11,7 +11,7 @@ import org.andengine.opengl.vbo.VertexBufferObject;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2012
@@ -34,8 +34,8 @@ public class TextureWarmUpVertexBufferObject extends VertexBufferObject {
 	public static final int VERTEXBUFFEROBJECT_SIZE = TextureWarmUpVertexBufferObject.VERTEX_SIZE * TextureWarmUpVertexBufferObject.VERTICES_PER_VERTEXBUFFEROBJECT_SIZE;
 
 	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(2)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES20.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES20.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES32.GL_FLOAT, false)
 		.build();
 
 	// ===========================================================
@@ -89,7 +89,7 @@ public class TextureWarmUpVertexBufferObject extends VertexBufferObject {
 
 	@Override
 	protected void onBufferData() {
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, this.mByteBuffer.limit(), this.mByteBuffer, this.mUsage);
+		GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, this.mByteBuffer.limit(), this.mByteBuffer, this.mUsage);
 	}
 
 	public void warmup(final GLState pGLState, final ITexture pTexture) {
@@ -103,7 +103,7 @@ public class TextureWarmUpVertexBufferObject extends VertexBufferObject {
 			pGLState.translateModelViewGLMatrixf(1000000, 1000000, 0);
 			pGLState.scaleModelViewGLMatrixf(0.0001f, 0.0001f, 0);
 	
-			this.draw(GLES20.GL_TRIANGLES, VERTICES_PER_VERTEXBUFFEROBJECT_SIZE);
+			this.draw(GLES32.GL_TRIANGLES, VERTICES_PER_VERTEXBUFFEROBJECT_SIZE);
 		}
 		pGLState.popModelViewGLMatrix();
 

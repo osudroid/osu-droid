@@ -1,6 +1,6 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.text.UITextureText.*
 import org.andengine.engine.camera.*
@@ -139,8 +139,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Reset GL buffer binding so legacy VBO binding is not tricked by a stale
         // cache entry left over from Buffer.bindAndUpload(), which calls glBindBuffer
@@ -164,19 +164,19 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
         // Upload texture unit
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
         // Disable per-vertex color array
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Set up full-range UV VBO at attribute 3
         fullUVBuffer.beginDraw(pGLState)
@@ -187,7 +187,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         // Re-upload MVP matrix per character since each character is translated differently.
         val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, gl.modelViewProjectionGLMatrix, 0
             )

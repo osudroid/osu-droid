@@ -6,7 +6,7 @@ import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * Shader program for rendering Android {@link android.graphics.SurfaceTexture} video frames,
@@ -40,11 +40,12 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     // ===========================================================
 
     public static final String VERTEXSHADER =
+            "#version 320 es\n" +
             "uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
             "uniform mat4 u_stMatrix;\n" +
-            "attribute vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
-            "attribute vec2 " + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ";\n" +
-            "varying vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+            "in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
+            "in vec2 " + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ";\n" +
+            "out vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
             "void main() {\n" +
             "    " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + " = " +
             "        (u_stMatrix * vec4(" + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ", 0.0, 1.0)).xy;\n" +
@@ -53,14 +54,16 @@ public class ExternalOESShaderProgram extends ShaderProgram {
             "}";
 
     public static final String FRAGMENTSHADER =
-            "#extension GL_OES_EGL_image_external : require\n" +
+            "#version 320 es\n" +
+            "#extension GL_OES_EGL_image_external_essl3 : require\n" +
             "precision mediump float;\n" +
             "uniform samplerExternalOES " + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ";\n" +
             "uniform vec4 " + ShaderProgramConstants.UNIFORM_COLOR + ";\n" +
-            "varying mediump vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+            "in mediump vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+            "out vec4 fragColor;\n" +
             "void main() {\n" +
-            "    gl_FragColor = " + ShaderProgramConstants.UNIFORM_COLOR +
-            "        * texture2D(" + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ", " +
+            "    fragColor = " + ShaderProgramConstants.UNIFORM_COLOR +
+            "        * texture(" + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ", " +
             ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ");\n" +
             "}";
 
@@ -93,10 +96,10 @@ public class ExternalOESShaderProgram extends ShaderProgram {
 
     @Override
     protected void link(final GLState pGLState) throws ShaderProgramLinkException {
-        GLES20.glBindAttribLocation(this.mProgramID,
+        GLES32.glBindAttribLocation(this.mProgramID,
                 ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
                 ShaderProgramConstants.ATTRIBUTE_POSITION);
-        GLES20.glBindAttribLocation(this.mProgramID,
+        GLES32.glBindAttribLocation(this.mProgramID,
                 ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION,
                 ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES);
 
@@ -115,13 +118,13 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     @Override
     public void bind(final GLState pGLState,
                      final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
         super.bind(pGLState, pVertexBufferObjectAttributes);
     }
 
     @Override
     public void unbind(final GLState pGLState) {
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
         super.unbind(pGLState);
     }
 

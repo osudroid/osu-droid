@@ -15,7 +15,7 @@ import org.andengine.util.StreamUtils;
 
 import android.opengl.ETC1;
 import android.opengl.ETC1Util;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * TODO if(!SystemUtils.isAndroidVersionOrHigher(Build.VERSION_CODES.FROYO)) --> Meaningful Exception!
@@ -89,7 +89,7 @@ public abstract class ETC1Texture extends Texture {
 	@Override
 	protected void writeTextureToHardware(final GLState pGLState) throws IOException {
 		final InputStream inputStream = this.getInputStream();
-		ETC1Util.loadTexture(GLES20.GL_TEXTURE_2D, 0, 0, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), inputStream);
+		ETC1Util.loadTexture(GLES32.GL_TEXTURE_2D, 0, 0, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), inputStream);
 	}
 
 	// ===========================================================

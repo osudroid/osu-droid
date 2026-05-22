@@ -6,7 +6,7 @@ import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ModifierList;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 
 /**
@@ -132,8 +132,8 @@ public class Background implements IBackground {
 	@Override
 	public void onDraw(final GLState pGLState, final Camera pCamera) {
 		if(this.mColorEnabled) {
-			GLES20.glClearColor(this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
-			GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT); // TODO Does this cause problems when multisampling?
+			GLES32.glClearColor(this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
+			GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT); // TODO Does this cause problems when multisampling?
 		}
 	}
 

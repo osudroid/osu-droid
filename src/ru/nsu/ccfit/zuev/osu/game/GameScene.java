@@ -82,7 +82,7 @@ import com.osudroid.mods.*;
 import com.osudroid.utils.ModHashMap;
 import com.osudroid.utils.ModUtils;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
@@ -2974,7 +2974,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Reference https://github.com/ppy/osu/blob/a7e110f6693beca6f6e6a20efb69a6913d58550e/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuJudgement.cs#L71-L88
 
             var light = GameObjectPool.getInstance().getEffect("lighting");
-            light.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA);
+            light.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_DST_ALPHA);
             light.setColor(color);
             light.init(
                 bgScene,

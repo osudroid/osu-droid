@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.shape.Shape.*
@@ -116,10 +116,10 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         onDeclarePointers(pGLState)
         onDrawBuffer(pGLState)
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
         // Reset GL buffer binding through GLState to keep its internal cache in sync with the
-        // actual GL state. The new Buffer.bindAndUpload() calls GLES20.glBindBuffer() directly,
+        // actual GL state. The new Buffer.bindAndUpload() calls GLES32.glBindBuffer() directly,
         // bypassing GLState.mCurrentArrayBufferID. Without this reset, legacy VBO binding would
         // skip the actual glBindBuffer call (false cache hit), causing sprites to render from the
         // wrong VBO.
@@ -138,18 +138,18 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         // Clearing
         var clearMask = 0
 
-        if (clearInfo.depthBuffer) clearMask = clearMask or GLES20.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) clearMask = clearMask or GLES20.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES20.GL_STENCIL_BUFFER_BIT
+        if (clearInfo.depthBuffer) clearMask = clearMask or GLES32.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GLES32.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
-            GLES20.glClear(clearMask)
+            GLES32.glClear(clearMask)
         }
 
         // Depth testing
         if (depthInfo.test) {
-            GLES20.glDepthFunc(depthInfo.function)
-            GLES20.glDepthMask(depthInfo.mask)
+            GLES32.glDepthFunc(depthInfo.function)
+            GLES32.glDepthMask(depthInfo.mask)
             pGLState.enableDepthTest()
         } else {
             pGLState.disableDepthTest()
@@ -195,18 +195,18 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
         // Upload MVP matrix
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
         }
 
         // Provide color as constant vertex attribute (disable per-vertex array)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
 
         // Disable texture coordinates (not needed for solid-color shapes)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     private fun updateBuffer() {

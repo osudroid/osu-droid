@@ -1,6 +1,6 @@
 package org.andengine.opengl.vbo;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2012
@@ -13,9 +13,9 @@ public enum DrawType {
 	// Elements
 	// ===========================================================
 
-	STATIC(GLES20.GL_STATIC_DRAW),
-	DYNAMIC(GLES20.GL_DYNAMIC_DRAW),
-	STREAM(GLES20.GL_STREAM_DRAW);
+	STATIC(GLES32.GL_STATIC_DRAW),
+	DYNAMIC(GLES32.GL_DYNAMIC_DRAW),
+	STREAM(GLES32.GL_STREAM_DRAW);
 
 	// ===========================================================
 	// Constants

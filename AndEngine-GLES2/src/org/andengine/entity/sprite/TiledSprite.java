@@ -11,7 +11,7 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.DrawType;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -114,7 +114,7 @@ public class TiledSprite extends Sprite {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		this.mTiledSpriteVertexBufferObject.draw(GLES20.GL_TRIANGLES, this.mCurrentTileIndex * TiledSprite.VERTICES_PER_TILEDSPRITE, TiledSprite.VERTICES_PER_TILEDSPRITE);
+		this.mTiledSpriteVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mCurrentTileIndex * TiledSprite.VERTICES_PER_TILEDSPRITE, TiledSprite.VERTICES_PER_TILEDSPRITE);
 	}
 
 	@Override

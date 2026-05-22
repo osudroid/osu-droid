@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
 
+    <!-- OpenGL ES 3.2 is required; 3.0 is the fallback minimum at runtime -->
+    <uses-feature android:glEsVersion="0x00030002" android:required="true" />
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>

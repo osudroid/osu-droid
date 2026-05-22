@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * Compared to a {@link HighPerformanceVertexBufferObject}, the {@link LowMemoryVertexBufferObject} uses <b><u>50%</u> less heap memory</b>, 
@@ -67,7 +67,7 @@ public class LowMemoryVertexBufferObject extends VertexBufferObject {
 
 	@Override
 	protected void onBufferData() {
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, this.mByteBuffer.limit(), this.mByteBuffer, this.mUsage);
+		GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, this.mByteBuffer.limit(), this.mByteBuffer, this.mUsage);
 	}
 
 	// ===========================================================

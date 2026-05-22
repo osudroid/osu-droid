@@ -22,7 +22,7 @@ import org.andengine.util.adt.io.out.ByteBufferOutputStream;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -107,10 +107,10 @@ public abstract class PVRTexture extends Texture {
 
 		if(this.hasMipMaps()) {
 			switch(pTextureOptions.mMinFilter){
-				case GLES20.GL_NEAREST_MIPMAP_NEAREST:
-				case GLES20.GL_NEAREST_MIPMAP_LINEAR:
-				case GLES20.GL_LINEAR_MIPMAP_NEAREST:
-				case GLES20.GL_LINEAR_MIPMAP_LINEAR:
+				case GLES32.GL_NEAREST_MIPMAP_NEAREST:
+				case GLES32.GL_NEAREST_MIPMAP_LINEAR:
+				case GLES32.GL_LINEAR_MIPMAP_NEAREST:
+				case GLES32.GL_LINEAR_MIPMAP_LINEAR:
 					break;
 				default:
 					if(BuildConfig.DEBUG) {
@@ -166,7 +166,7 @@ public abstract class PVRTexture extends Texture {
 		final int bytesPerPixel = this.mPVRTextureHeader.getBitsPerPixel() / DataConstants.BITS_PER_BYTE;
 
 		/* Adjust unpack alignment. */
-		GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+		GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
 
 		int currentLevel = 0;
 		int currentPixelDataOffset = 0;
@@ -190,7 +190,7 @@ public abstract class PVRTexture extends Texture {
 		}
 
 		/* Restore default unpack alignment. */
-		GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+		GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
 	}
 
 	// ===========================================================

@@ -1,10 +1,10 @@
 package com.edlplan.framework.support.batch;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.util.Log;
 
 /**
- * Minimal GLES20 shader program for {@link TextureQuadBatch}.
+ * GLSL ES 3.20 shader program for {@link TextureQuadBatch}.
  *
  * Vertex layout per vertex (8 floats / 32 bytes):
  *   [x, y,  u, v,  r, g, b, a]
@@ -19,12 +19,13 @@ public class StoryboardBatchShader {
     private static final String TAG = "StoryboardBatchShader";
 
     private static final String VERTEX_SHADER =
+            "#version 320 es\n" +
             "uniform mat4 u_mvpMatrix;\n" +
-            "attribute vec2 a_position;\n" +
-            "attribute vec2 a_texCoord;\n" +
-            "attribute vec4 a_color;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "varying vec4 v_color;\n" +
+            "in vec2 a_position;\n" +
+            "in vec2 a_texCoord;\n" +
+            "in vec4 a_color;\n" +
+            "out vec2 v_texCoord;\n" +
+            "out vec4 v_color;\n" +
             "void main() {\n" +
             "    gl_Position = u_mvpMatrix * vec4(a_position, 0.0, 1.0);\n" +
             "    v_texCoord  = a_texCoord;\n" +
@@ -32,12 +33,14 @@ public class StoryboardBatchShader {
             "}\n";
 
     private static final String FRAGMENT_SHADER =
+            "#version 320 es\n" +
             "precision mediump float;\n" +
             "uniform sampler2D s_texture;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "varying vec4 v_color;\n" +
+            "in vec2 v_texCoord;\n" +
+            "in vec4 v_color;\n" +
+            "out vec4 fragColor;\n" +
             "void main() {\n" +
-            "    gl_FragColor = v_color * texture2D(s_texture, v_texCoord);\n" +
+            "    fragColor = v_color * texture(s_texture, v_texCoord);\n" +
             "}\n";
 
     // Singleton ------------------------------------------------------------------
@@ -76,33 +79,33 @@ public class StoryboardBatchShader {
     public boolean ensureCompiled() {
         if (programID != -1) return true;
 
-        int vs = compileShader(GLES20.GL_VERTEX_SHADER,   VERTEX_SHADER);
+        int vs = compileShader(GLES32.GL_VERTEX_SHADER,   VERTEX_SHADER);
         if (vs == 0) return false;
-        int fs = compileShader(GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
-        if (fs == 0) { GLES20.glDeleteShader(vs); return false; }
+        int fs = compileShader(GLES32.GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
+        if (fs == 0) { GLES32.glDeleteShader(vs); return false; }
 
-        int prog = GLES20.glCreateProgram();
-        GLES20.glAttachShader(prog, vs);
-        GLES20.glAttachShader(prog, fs);
-        GLES20.glBindAttribLocation(prog, ATTRIB_POSITION, "a_position");
-        GLES20.glBindAttribLocation(prog, ATTRIB_TEXCOORD, "a_texCoord");
-        GLES20.glBindAttribLocation(prog, ATTRIB_COLOR,    "a_color");
-        GLES20.glLinkProgram(prog);
+        int prog = GLES32.glCreateProgram();
+        GLES32.glAttachShader(prog, vs);
+        GLES32.glAttachShader(prog, fs);
+        GLES32.glBindAttribLocation(prog, ATTRIB_POSITION, "a_position");
+        GLES32.glBindAttribLocation(prog, ATTRIB_TEXCOORD, "a_texCoord");
+        GLES32.glBindAttribLocation(prog, ATTRIB_COLOR,    "a_color");
+        GLES32.glLinkProgram(prog);
 
-        GLES20.glDeleteShader(vs);
-        GLES20.glDeleteShader(fs);
+        GLES32.glDeleteShader(vs);
+        GLES32.glDeleteShader(fs);
 
         int[] status = new int[1];
-        GLES20.glGetProgramiv(prog, GLES20.GL_LINK_STATUS, status, 0);
+        GLES32.glGetProgramiv(prog, GLES32.GL_LINK_STATUS, status, 0);
         if (status[0] == 0) {
-            Log.e(TAG, "Storyboard shader link error: " + GLES20.glGetProgramInfoLog(prog));
-            GLES20.glDeleteProgram(prog);
+            Log.e(TAG, "Storyboard shader link error: " + GLES32.glGetProgramInfoLog(prog));
+            GLES32.glDeleteProgram(prog);
             return false;
         }
 
         programID   = prog;
-        uMVPLoc     = GLES20.glGetUniformLocation(prog, "u_mvpMatrix");
-        uTextureLoc = GLES20.glGetUniformLocation(prog, "s_texture");
+        uMVPLoc     = GLES32.glGetUniformLocation(prog, "u_mvpMatrix");
+        uTextureLoc = GLES32.glGetUniformLocation(prog, "s_texture");
         return true;
     }
 
@@ -114,15 +117,15 @@ public class StoryboardBatchShader {
     // Helpers --------------------------------------------------------------------
 
     private static int compileShader(int type, String src) {
-        int shader = GLES20.glCreateShader(type);
+        int shader = GLES32.glCreateShader(type);
         if (shader == 0) return 0;
-        GLES20.glShaderSource(shader, src);
-        GLES20.glCompileShader(shader);
+        GLES32.glShaderSource(shader, src);
+        GLES32.glCompileShader(shader);
         int[] status = new int[1];
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
+        GLES32.glGetShaderiv(shader, GLES32.GL_COMPILE_STATUS, status, 0);
         if (status[0] == 0) {
-            Log.e(TAG, "Storyboard shader compile error: " + GLES20.glGetShaderInfoLog(shader));
-            GLES20.glDeleteShader(shader);
+            Log.e(TAG, "Storyboard shader compile error: " + GLES32.glGetShaderInfoLog(shader));
+            GLES32.glDeleteShader(shader);
             return 0;
         }
         return shader;

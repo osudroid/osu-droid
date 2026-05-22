@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.toolkt.*
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
@@ -18,8 +18,8 @@ abstract class VertexBuffer(
     override fun beginDraw(gl: GLState) {
         bindAndUpload()
         // Attribute 0 = position (matches standard position attribute location in shaders)
-        GLES20.glVertexAttribPointer(0, vertexSize, GLES20.GL_FLOAT, false, 0, 0)
-        GLES20.glEnableVertexAttribArray(0)
+        GLES32.glVertexAttribPointer(0, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
+        GLES32.glEnableVertexAttribArray(0)
     }
 
     override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
@@ -27,7 +27,7 @@ abstract class VertexBuffer(
     }
 
     override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-        GLES20.glDrawArrays(drawTopology, 0, vertexCount)
+        GLES32.glDrawArrays(drawTopology, 0, vertexCount)
     }
 
     //endregion

@@ -3,7 +3,7 @@ package org.andengine.opengl.vbo.attribute;
 import org.andengine.util.adt.DataConstants;
 import org.andengine.util.exception.AndEngineRuntimeException;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -52,10 +52,10 @@ public class VertexBufferObjectAttributesBuilder {
 		this.mVertexBufferObjectAttributes[this.mIndex] = new VertexBufferObjectAttribute(pLocation, pName, pSize, pType, pNormalized, this.mOffset);
 
 		switch(pType) {
-			case GLES20.GL_FLOAT:
+			case GLES32.GL_FLOAT:
 				this.mOffset += pSize * DataConstants.BYTES_PER_FLOAT;
 				break;
-			case GLES20.GL_UNSIGNED_BYTE:
+			case GLES32.GL_UNSIGNED_BYTE:
 				this.mOffset += pSize * DataConstants.BYTES_PER_BYTE;
 				break;
 			default:

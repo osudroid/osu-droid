@@ -1,7 +1,7 @@
 package com.reco1l.andengine.sprite
 
 import android.media.*
-import android.opengl.GLES20
+import android.opengl.GLES32
 import android.os.*
 import android.util.Log
 import com.acivev.andengine.opengl.ExternalOESShaderProgram
@@ -61,7 +61,7 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
         shader.bindProgram(pGLState)
 
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
@@ -69,24 +69,24 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
 
         // ST-transform: corrects Y-flip and any other orientation from the hardware decoder.
         if (shader.uniformSTMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformSTMatrixLocation,
                 1, false, videoTexture.getTransformMatrix(), 0
             )
         }
 
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // UV attribute (attribute location 3).
         uvBuffer.beginDraw(pGLState)

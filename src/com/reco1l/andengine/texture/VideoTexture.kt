@@ -3,8 +3,8 @@ package com.reco1l.andengine.texture
 import android.graphics.*
 import android.media.*
 import android.opengl.*
-import android.opengl.GLES20.GL_CLAMP_TO_EDGE
-import android.opengl.GLES20.GL_LINEAR
+import android.opengl.GLES32.GL_CLAMP_TO_EDGE
+import android.opengl.GLES32.GL_LINEAR
 import android.opengl.GLES20.GL_NEAREST
 import android.util.Log
 import android.view.*
@@ -89,23 +89,23 @@ class VideoTexture(val source: String) : Texture(
         surfaceTexture = null
 
         val textures = IntArray(1)
-        GLES20.glGenTextures(1, textures, 0)
+        GLES32.glGenTextures(1, textures, 0)
         mHardwareTextureID = textures[0]
 
         // OES external textures must be bound to the OES target.
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+        GLES32.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
         // Required filter settings for GL_TEXTURE_EXTERNAL_OES.
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER,
+        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_MIN_FILTER,
             GL_LINEAR
         )
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER,
+        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_MAG_FILTER,
             GL_LINEAR
         )
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S,
+        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_WRAP_S,
             GL_CLAMP_TO_EDGE
         )
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T,
+        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_WRAP_T,
             GL_CLAMP_TO_EDGE
         )
 
@@ -127,7 +127,7 @@ class VideoTexture(val source: String) : Texture(
     /** Binds the OES texture. Call [latch] first to update the frame and ST matrix. */
     override fun bind(pGLState: GLState) {
         if (isLoadedToHardware) {
-            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+            GLES32.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
         }
     }
 

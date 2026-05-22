@@ -17,7 +17,7 @@ import org.andengine.opengl.view.ConfigChooser;
 import org.andengine.util.debug.Debug;
 
 import android.graphics.Bitmap;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
@@ -57,7 +57,7 @@ public class GLState {
 	// osu!droid fix: GL_TEXTURE31 - GL_TEXTURE0 = 31, but there are 32 texture units (indices 0..31).
 	// The old size of 31 would throw ArrayIndexOutOfBoundsException for any code that activates
 	// GL_TEXTURE31 (index 31) and then calls bindTexture / deleteTexture.
-	private final int[] mCurrentBoundTextureIDs = new int[GLES20.GL_TEXTURE31 - GLES20.GL_TEXTURE0 + 1];
+	private final int[] mCurrentBoundTextureIDs = new int[GLES32.GL_TEXTURE31 - GLES32.GL_TEXTURE0 + 1];
 	private int mCurrentFramebufferID = -1;
 	private int mCurrentActiveTextureIndex = 0;
 
@@ -121,15 +121,15 @@ public class GLState {
 	// ===========================================================
 
 	public void reset(final RenderOptions pRenderOptions, final ConfigChooser pConfigChooser, final EGLConfig pEGLConfig) {
-		this.mVersion = GLES20.glGetString(GLES20.GL_VERSION);
-		this.mRenderer = GLES20.glGetString(GLES20.GL_RENDERER);
-		this.mExtensions = GLES20.glGetString(GLES20.GL_EXTENSIONS);
+		this.mVersion = GLES32.glGetString(GLES32.GL_VERSION);
+		this.mRenderer = GLES32.glGetString(GLES32.GL_RENDERER);
+		this.mExtensions = GLES32.glGetString(GLES32.GL_EXTENSIONS);
 
-		this.mMaximumVertexAttributeCount = this.getInteger(GLES20.GL_MAX_VERTEX_ATTRIBS);
-		this.mMaximumVertexShaderUniformVectorCount = this.getInteger(GLES20.GL_MAX_VERTEX_UNIFORM_VECTORS);
-		this.mMaximumFragmentShaderUniformVectorCount = this.getInteger(GLES20.GL_MAX_FRAGMENT_UNIFORM_VECTORS);
-		this.mMaximumTextureUnits = this.getInteger(GLES20.GL_MAX_TEXTURE_IMAGE_UNITS);
-		this.mMaximumTextureSize = this.getInteger(GLES20.GL_MAX_TEXTURE_SIZE);
+		this.mMaximumVertexAttributeCount = this.getInteger(GLES32.GL_MAX_VERTEX_ATTRIBS);
+		this.mMaximumVertexShaderUniformVectorCount = this.getInteger(GLES32.GL_MAX_VERTEX_UNIFORM_VECTORS);
+		this.mMaximumFragmentShaderUniformVectorCount = this.getInteger(GLES32.GL_MAX_FRAGMENT_UNIFORM_VECTORS);
+		this.mMaximumTextureUnits = this.getInteger(GLES32.GL_MAX_TEXTURE_IMAGE_UNITS);
+		this.mMaximumTextureSize = this.getInteger(GLES32.GL_MAX_TEXTURE_SIZE);
 
 		if(BuildConfig.DEBUG) {
 			Debug.d("VERSION: " + this.mVersion);
@@ -168,9 +168,9 @@ public class GLState {
 		this.disableBlend();
 		this.disableCulling();
 
-		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
-		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
+		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 
 		this.mLineWidth = 1;
 	}
@@ -187,7 +187,7 @@ public class GLState {
 		}
 		
 		this.mScissorTestEnabled = true;
-		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+		GLES32.glEnable(GLES32.GL_SCISSOR_TEST);
 		return false;
 	}
 	/**
@@ -199,7 +199,7 @@ public class GLState {
 		}
 
 		this.mScissorTestEnabled = false;
-		GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
+		GLES32.glDisable(GLES32.GL_SCISSOR_TEST);
 		return true;
 	}
 	/**
@@ -225,7 +225,7 @@ public class GLState {
 		}
 
 		this.mBlendEnabled = true;
-		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES32.glEnable(GLES32.GL_BLEND);
 		return false;
 	}
 	/**
@@ -237,7 +237,7 @@ public class GLState {
 		}
 
 		this.mBlendEnabled = false;
-		GLES20.glDisable(GLES20.GL_BLEND);
+		GLES32.glDisable(GLES32.GL_BLEND);
 		return true;
 	}
 	/**
@@ -263,7 +263,7 @@ public class GLState {
 		}
 
 		this.mCullingEnabled = true;
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES32.glEnable(GLES32.GL_CULL_FACE);
 		return false;
 	}
 	/**
@@ -275,7 +275,7 @@ public class GLState {
 		}
 
 		this.mCullingEnabled = false;
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES32.glDisable(GLES32.GL_CULL_FACE);
 		return true;
 	}
 	/**
@@ -301,7 +301,7 @@ public class GLState {
 		}
 
 		this.mDitherEnabled = true;
-		GLES20.glEnable(GLES20.GL_DITHER);
+		GLES32.glEnable(GLES32.GL_DITHER);
 		return false;
 	}
 	/**
@@ -313,7 +313,7 @@ public class GLState {
 		}
 
 		this.mDitherEnabled = false;
-		GLES20.glDisable(GLES20.GL_DITHER);
+		GLES32.glDisable(GLES32.GL_DITHER);
 		return true;
 	}
 	/**
@@ -339,7 +339,7 @@ public class GLState {
 		}
 
 		this.mDepthTestEnabled = true;
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES32.glEnable(GLES32.GL_DEPTH_TEST);
 		return false;
 	}
 	/**
@@ -351,7 +351,7 @@ public class GLState {
 		}
 
 		this.mDepthTestEnabled = false;
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GLES32.glDisable(GLES32.GL_DEPTH_TEST);
 		return true;
 	}
 	/**
@@ -366,16 +366,16 @@ public class GLState {
 	}
 
 	public int generateBuffer() {
-		GLES20.glGenBuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
 		return this.mHardwareIDContainer[0];
 	}
 
 	public int generateArrayBuffer(final int pSize, final int pUsage) {
-		GLES20.glGenBuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
 		final int hardwareBufferID = this.mHardwareIDContainer[0];
 
 		this.bindArrayBuffer(hardwareBufferID);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, pSize, null, pUsage);
+		GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, pSize, null, pUsage);
 		this.bindArrayBuffer(0);
 
 		return hardwareBufferID;
@@ -384,7 +384,7 @@ public class GLState {
 	public void bindArrayBuffer(final int pHardwareBufferID) {
 		if(this.mCurrentArrayBufferID != pHardwareBufferID) {
 			this.mCurrentArrayBufferID = pHardwareBufferID;
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pHardwareBufferID);
+			GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, pHardwareBufferID);
 		}
 	}
 
@@ -393,15 +393,15 @@ public class GLState {
 			this.mCurrentArrayBufferID = -1;
 		}
 		this.mHardwareIDContainer[0] = pHardwareBufferID;
-		GLES20.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
 	}
 
 	public int generateIndexBuffer(final int pSize, final int pUsage) {
-		GLES20.glGenBuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
 		final int hardwareBufferID = this.mHardwareIDContainer[0];
 		
 		this.bindIndexBuffer(hardwareBufferID);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, pSize, null, pUsage);
+		GLES32.glBufferData(GLES32.GL_ELEMENT_ARRAY_BUFFER, pSize, null, pUsage);
 		this.bindIndexBuffer(0);
 		
 		return hardwareBufferID;
@@ -410,7 +410,7 @@ public class GLState {
 	public void bindIndexBuffer(final int pHardwareBufferID) {
 		if(this.mCurrentIndexBufferID != pHardwareBufferID) {
 			this.mCurrentIndexBufferID = pHardwareBufferID;
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, pHardwareBufferID);
+			GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, pHardwareBufferID);
 		}
 	}
 
@@ -419,11 +419,11 @@ public class GLState {
 			this.mCurrentIndexBufferID = -1;
 		}
 		this.mHardwareIDContainer[0] = pHardwareBufferID;
-		GLES20.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
 	}
 
 	public int generateFramebuffer() {
-		GLES20.glGenFramebuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glGenFramebuffers(1, this.mHardwareIDContainer, 0);
 		return this.mHardwareIDContainer[0];
 	}
 
@@ -434,26 +434,26 @@ public class GLState {
 		// deleteFramebuffer()'s invalidation check always false.
 		if(this.mCurrentFramebufferID != pFramebufferID) {
 			this.mCurrentFramebufferID = pFramebufferID;
-			GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, pFramebufferID);
+			GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, pFramebufferID);
 		}
 	}
 
 	public int getFramebufferStatus() {
-		return GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+		return GLES32.glCheckFramebufferStatus(GLES32.GL_FRAMEBUFFER);
 	}
 
 	public void checkFramebufferStatus() throws GLFrameBufferException, GLException {
 		final int framebufferStatus = this.getFramebufferStatus();
 		switch(framebufferStatus) {
-			case GLES20.GL_FRAMEBUFFER_COMPLETE:
+			case GLES32.GL_FRAMEBUFFER_COMPLETE:
 				return;
-			case GLES20.GL_FRAMEBUFFER_UNSUPPORTED:
+			case GLES32.GL_FRAMEBUFFER_UNSUPPORTED:
 				throw new GLFrameBufferException(framebufferStatus, "GL_FRAMEBUFFER_UNSUPPORTED");
-			case GLES20.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			case GLES32.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 				throw new GLFrameBufferException(framebufferStatus, "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-			case GLES20.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+			case GLES32.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
 				throw new GLFrameBufferException(framebufferStatus, "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-			case GLES20.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			case GLES32.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 				throw new GLFrameBufferException(framebufferStatus, "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
 			case 0:
 				this.checkError();
@@ -463,7 +463,7 @@ public class GLState {
 	}
 
 	public int getActiveFramebuffer() {
-		return this.getInteger(GLES20.GL_FRAMEBUFFER_BINDING);
+		return this.getInteger(GLES32.GL_FRAMEBUFFER_BINDING);
 	}
 
 	public void deleteFramebuffer(final int pHardwareFramebufferID) {
@@ -471,13 +471,13 @@ public class GLState {
 			this.mCurrentFramebufferID = -1;
 		}
 		this.mHardwareIDContainer[0] = pHardwareFramebufferID;
-		GLES20.glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
+		GLES32.glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
 	}
 
 	public void useProgram(final int pShaderProgramID) {
 		if(this.mCurrentShaderProgramID != pShaderProgramID) {
 			this.mCurrentShaderProgramID = pShaderProgramID;
-			GLES20.glUseProgram(pShaderProgramID);
+			GLES32.glUseProgram(pShaderProgramID);
 		}
 	}
 
@@ -485,36 +485,36 @@ public class GLState {
 		if(this.mCurrentShaderProgramID == pShaderProgramID) {
 			this.mCurrentShaderProgramID = -1;
 		}
-		GLES20.glDeleteProgram(pShaderProgramID);
+		GLES32.glDeleteProgram(pShaderProgramID);
 	}
 
 	public int generateTexture() {
-		GLES20.glGenTextures(1, this.mHardwareIDContainer, 0);
+		GLES32.glGenTextures(1, this.mHardwareIDContainer, 0);
 		return this.mHardwareIDContainer[0];
 	}
 
 	public boolean isTexture(final int pHardwareTextureID) {
-		return GLES20.glIsTexture(pHardwareTextureID);
+		return GLES32.glIsTexture(pHardwareTextureID);
 	}
 
 	/**
 	 * @return {@link GLES20#GL_TEXTURE0} to {@link GLES20#GL_TEXTURE31}
 	 */
 	public int getActiveTexture() {
-		return this.mCurrentActiveTextureIndex + GLES20.GL_TEXTURE0;
+		return this.mCurrentActiveTextureIndex + GLES32.GL_TEXTURE0;
 	}
 
 	/**
 	 * @param pGLActiveTexture from {@link GLES20#GL_TEXTURE0} to {@link GLES20#GL_TEXTURE31}.
 	 */
 	public void activeTexture(final int pGLActiveTexture) {
-		final int activeTextureIndex = pGLActiveTexture - GLES20.GL_TEXTURE0;
+		final int activeTextureIndex = pGLActiveTexture - GLES32.GL_TEXTURE0;
 		// osu!droid fix: compare the 0-based index against mCurrentActiveTextureIndex, not the raw
 		// GL enum. The old code compared e.g. GL_TEXTURE0 (33984) against index 0 — always unequal,
 		// so glActiveTexture was called on every invocation and the cache was never used.
 		if(activeTextureIndex != this.mCurrentActiveTextureIndex) {
 			this.mCurrentActiveTextureIndex = activeTextureIndex;
-			GLES20.glActiveTexture(pGLActiveTexture);
+			GLES32.glActiveTexture(pGLActiveTexture);
 		}
 	}
 
@@ -527,7 +527,7 @@ public class GLState {
 	public void bindTexture(final int pHardwareTextureID) {
 		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] != pHardwareTextureID) {
 			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = pHardwareTextureID;
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, pHardwareTextureID);
+			GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, pHardwareTextureID);
 		}
 	}
 
@@ -536,21 +536,21 @@ public class GLState {
 			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = -1;
 		}
 		this.mHardwareIDContainer[0] = pHardwareTextureID;
-		GLES20.glDeleteTextures(1, this.mHardwareIDContainer, 0);
+		GLES32.glDeleteTextures(1, this.mHardwareIDContainer, 0);
 	}
 
 	public void blendFunction(final int pSourceBlendMode, final int pDestinationBlendMode) {
 		if(this.mCurrentSourceBlendMode != pSourceBlendMode || this.mCurrentDestinationBlendMode != pDestinationBlendMode) {
 			this.mCurrentSourceBlendMode = pSourceBlendMode;
 			this.mCurrentDestinationBlendMode = pDestinationBlendMode;
-			GLES20.glBlendFunc(pSourceBlendMode, pDestinationBlendMode);
+			GLES32.glBlendFunc(pSourceBlendMode, pDestinationBlendMode);
 		}
 	}
 
 	public void lineWidth(final float pLineWidth) {
 		if(this.mLineWidth  != pLineWidth) {
 			this.mLineWidth = pLineWidth;
-			GLES20.glLineWidth(pLineWidth);
+			GLES32.glLineWidth(pLineWidth);
 		}
 	}
 
@@ -656,7 +656,7 @@ public class GLState {
 	public void glTexImage2D(final int pTarget, final int pLevel, final Bitmap pBitmap, final int pBorder, final PixelFormat pPixelFormat) {
 		final Buffer pixelBuffer = GLHelper.getPixels(pBitmap, pPixelFormat, ByteOrder.BIG_ENDIAN);
 
-		GLES20.glTexImage2D(pTarget, pLevel, pPixelFormat.getGLInternalFormat(), pBitmap.getWidth(), pBitmap.getHeight(), pBorder, pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
+		GLES32.glTexImage2D(pTarget, pLevel, pPixelFormat.getGLInternalFormat(), pBitmap.getWidth(), pBitmap.getHeight(), pBorder, pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
 	}
 
 	/**
@@ -668,7 +668,7 @@ public class GLState {
 	public void glTexSubImage2D(final int pTarget, final int pLevel, final int pX, final int pY, final Bitmap pBitmap, final PixelFormat pPixelFormat) {
 		final Buffer pixelBuffer = GLHelper.getPixels(pBitmap, pPixelFormat, ByteOrder.BIG_ENDIAN);
 
-		GLES20.glTexSubImage2D(pTarget, pLevel, pX, pY, pBitmap.getWidth(), pBitmap.getHeight(), pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
+		GLES32.glTexSubImage2D(pTarget, pLevel, pX, pY, pBitmap.getWidth(), pBitmap.getHeight(), pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
 	}
 
 	/**
@@ -678,7 +678,7 @@ public class GLState {
 	 * 		{@link RenderTexture#end(GLState, boolean, boolean)}.
 	 */
 	public void flush() {
-		GLES20.glFlush();
+		GLES32.glFlush();
 	}
 
 	/**
@@ -690,27 +690,27 @@ public class GLState {
 	 * 		{@link RenderTexture#end(GLState, boolean, boolean)}.
 	 */
 	public void finish() {
-		GLES20.glFinish();
+		GLES32.glFinish();
 	}
 
 	public int getInteger(final int pAttribute) {
-		GLES20.glGetIntegerv(pAttribute, this.mHardwareIDContainer, 0);
+		GLES32.glGetIntegerv(pAttribute, this.mHardwareIDContainer, 0);
 		return this.mHardwareIDContainer[0];
 	}
 
 	public int getError() {
-		return GLES20.glGetError();
+		return GLES32.glGetError();
 	}
 
 	public void checkError() throws GLException {
-		final int error = GLES20.glGetError();
-		if(error != GLES20.GL_NO_ERROR) {
+		final int error = GLES32.glGetError();
+		if(error != GLES32.GL_NO_ERROR) {
 			throw new GLException(error);
 		}
 	}
 
 	public void clearError() {
-		GLES20.glGetError();
+		GLES32.glGetError();
 	}
 
 	// ===========================================================
