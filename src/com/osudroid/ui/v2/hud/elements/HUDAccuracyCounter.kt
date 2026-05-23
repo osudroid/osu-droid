@@ -25,6 +25,19 @@ class HUDAccuracyCounter : HUDElement() {
     private val counter = RollingFloatCounter(1f).apply { rollingDuration = 1f }
 
     init {
+        val digitRange = '0'..'9'
+        val maxDigitWidth = digitRange.maxOfOrNull { sprite.characters[it]?.width?.toFloat() ?: 0f } ?: 0f
+
+        sprite.fixedCharWidths = buildMap {
+            for (c in digitRange) {
+                put(c, maxDigitWidth)
+            }
+
+            sprite.characters['.']?.let { put('.', it.width.toFloat()) }
+            sprite.characters['%']?.let { put('%', it.width.toFloat()) }
+        }
+
+        sprite.measureText = "100.00%"
         sprite.text = "100.00%"
         registerUpdateHandler(counter)
         attachChild(sprite)
