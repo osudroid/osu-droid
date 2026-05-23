@@ -985,6 +985,13 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
+        // If we entered this phase without going through the approach phase (e.g., after a seek), the snake-in
+        // animation may not have completed yet. Force the body to its full length here.
+        if (!preStageFinish && Config.isSnakingInSliders() && superPath != null && sliderBody != null) {
+            applySnakeBodyLength(false, superPathMaxLength, true);
+            preStageFinish = true;
+        }
+
         sliderSlideSample.update(dt);
         sliderWhistleSample.update(dt);
 
