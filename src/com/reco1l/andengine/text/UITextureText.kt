@@ -58,8 +58,34 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
             }
         }
 
+    /**
+     * When set, each character is placed in a fixed-width cell (unscaled pixels) looked up by
+     * character. Characters absent from the map use their natural texture width. Useful for
+     * preventing layout shifts when glyphs in the same role have varying widths.
+     */
+    var fixedCharWidths: Map<Char, Float>? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
 
-    private val textureRegions = mutableListOf<TextureRegion>()
+    /**
+     * When set, content size (width/height) is measured from this string instead of [text].
+     * The rendered text is still [text]. Use this to give the component a stable bounding box
+     * sized for the widest value it can display, so surrounding elements don't shift.
+     */
+    var measureText: String? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
+
+
+    private val textureRegions = mutableListOf<Pair<Char, TextureRegion>>()
 
 
     init {
@@ -75,21 +101,22 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
 
     private fun onUpdateText() {
+        textureRegions.clear()
+
+        for (char in text) {
+            val textureRegion = characters[char] ?: continue
+            textureRegions.add(char to textureRegion)
+        }
 
         var contentWidth = 0f
         var contentHeight = 0f
 
-        textureRegions.clear()
-        for (i in text.indices) {
+        for (char in measureText ?: text) {
+            val textureRegion = characters[char] ?: continue
+            val cellWidth = (fixedCharWidths?.get(char) ?: textureRegion.width.toFloat()) * textureScaleX
 
-            val textureRegion = characters[text[i]] ?: continue
-            val textureWidth = textureRegion.width * textureScaleX
-            val textureHeight = textureRegion.height * textureScaleY
-
-            textureRegions.add(textureRegion)
-
-            contentWidth += textureWidth + spacing
-            contentHeight = max(contentHeight, textureHeight)
+            contentWidth += cellWidth + spacing
+            contentHeight = max(contentHeight, textureRegion.height * textureScaleY)
         }
 
         contentWidth -= spacing
@@ -112,12 +139,13 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
         for (i in textureRegions.indices) {
 
-            val texture = textureRegions[i]
+            val (char, texture) = textureRegions[i]
             val textureWidth = texture.width * textureScaleX
             val textureHeight = texture.height * textureScaleY
+            val cellWidth = (fixedCharWidths?.get(char) ?: texture.width.toFloat()) * textureScaleX
 
             gl.glPushMatrix()
-            gl.glTranslatef(offsetX, 0f, 0f)
+            gl.glTranslatef(offsetX + (cellWidth - textureWidth) / 2f, 0f, 0f)
 
             buffer?.update(textureWidth, textureHeight)
             texture.onApply(gl)
@@ -127,7 +155,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
             gl.glPopMatrix()
 
-            offsetX += textureWidth + spacing
+            offsetX += cellWidth + spacing
         }
     }
 
