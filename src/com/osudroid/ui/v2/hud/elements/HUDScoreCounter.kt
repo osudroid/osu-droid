@@ -26,6 +26,11 @@ class HUDScoreCounter : HUDElement() {
 
     init {
         sprite.spacing = -OsuSkin.get().scoreOverlap
+
+        val digitRange = '0'..'9'
+        val maxDigitWidth = digitRange.maxOfOrNull { sprite.characters[it]?.width?.toFloat() ?: 0f } ?: 0f
+
+        sprite.fixedCharWidths = digitRange.associateWith { maxDigitWidth }
         sprite.text = format.format(0)
 
         registerUpdateHandler(counter)
