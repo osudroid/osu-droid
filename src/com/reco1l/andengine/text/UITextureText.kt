@@ -139,7 +139,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         // Nothing to do here, buffer is updated in `doDraw`.
     }
 
-    inner class TextureTextVertexBuffer : VertexBuffer(
+    class TextureTextVertexBuffer : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
         vertexCount = 4,
         vertexSize = VERTEX_2D,
