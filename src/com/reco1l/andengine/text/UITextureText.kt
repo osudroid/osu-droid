@@ -171,7 +171,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         drawTopology = GL_TRIANGLE_STRIP,
         vertexCount = 4,
         vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        bufferUsage = GL_DYNAMIC_DRAW
     ) {
         fun update(textureWidth: Float, textureHeight: Float) {
             addQuad(0, 0f, 0f, textureWidth, textureHeight)
