@@ -1013,6 +1013,11 @@ public class GameplaySlider extends GameObject {
                 followCircle.setScale(scale);
             }
 
+            // isInRadius may already be true if the slider head was hit during the approach phase,
+            // before this block ran. Reset it so updateFollowCircleTrackingState correctly enters
+            // the "tracking starts" branch and makes the follow circle visible.
+            isInRadius = false;
+
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
