@@ -307,6 +307,7 @@ object Multiplayer {
 
         attemptCount = 0
         reconnectionStartTimeMS = System.currentTimeMillis()
+        lastAttemptResponseTimeMS = 0L
 
         reconnectionJob = scope.launch {
 
