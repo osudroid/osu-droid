@@ -32,6 +32,7 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
@@ -831,6 +832,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ensureActive(scope.getCoroutineContext());
         }
 
+        FollowPointConnection.renew(16);
+        SliderTickSprite.renew(16);
+
         // TODO replay
         offsetSum = 0;
         offsetRegs = 0;
@@ -1200,6 +1204,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
+        if (hud != null) {
+            hud.detachSelf();
+        }
+
         hud = new GameplayHUD();
 
         if (!replaying && !GameHelper.isAutoplay()) {
@@ -2114,6 +2122,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (expiredObjects != null) {
                 expiredObjects.clear();
             }
+            hud.detachSelf();
             breakPeriods = null;
             replaySettingsPanel = null;
             objects = null;
