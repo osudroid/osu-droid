@@ -395,15 +395,28 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
+                // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
+                // Never enqueue a bare setScene() and a follow-up action as two separate
+                // Execution.updateThread() calls, the follow-up would run first (LIFO) and then
+                // setScene would overwrite whatever scene the follow-up set.
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    Execution.updateThread(() ->
-                        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainMenuV2())
-                    );
+                    if (willReplay) {
+                        final String replayFile = fileToAdd;
+                        fileToAdd = null;
+                        willReplay = false;
+                        Execution.updateThread(() -> {
+                            GlobalManager.getInstance().getEngine().setScene(
+                                    GlobalManager.getInstance().getMainMenuV2());
+                            GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile);
+                        });
+                    } else {
+                        Execution.updateThread(() -> {
+                            GlobalManager.getInstance().getEngine().setScene(
+                                    GlobalManager.getInstance().getMainMenuV2());
+                            GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
+                        });
+                    }
                 }
-
-                Execution.updateThread(() ->
-                    GlobalManager.getInstance().getMainMenuV2().loadBeatmap()
-                );
                 initPreferences();
                 availableInternalMemory();
 
@@ -423,11 +436,6 @@ public class MainActivity extends BaseGameActivity implements
 
                 if (roomInviteLink != null) {
                     Multiplayer.connectFromLink(roomInviteLink);
-                } else if (willReplay) {
-                    final String replayFile = fileToAdd;
-                    Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile));
-                    fileToAdd = null;
-                    willReplay = false;
                 }
 
                 Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
@@ -689,6 +697,56 @@ public class MainActivity extends BaseGameActivity implements
         }
         GlobalManager.getInstance().setSongService(songService);
         GlobalManager.getInstance().setSaveServiceObject(saveServiceObject);
+    }
+
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent); // updates getIntent() so onStart sees the new intent too
+
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction())) {
+            return;
+        }
+
+        final Uri data = intent.getData();
+        if (data == null) return;
+
+        // onNewIntent is only called on an ALREADY-RUNNING instance (warm start / foreground open).
+        // The game is fully initialized here, so we can dispatch watchReplay directly without
+        // going through the cold-start loadBeatmapLibrary → willReplay path.
+        final String scheme = data.getScheme();
+
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            final String path = data.getPath();
+            if (path != null) dispatchIncomingFile(path);
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            // Copy asynchronously, content resolver I/O must not block the main thread.
+            Execution.async(() -> {
+                final String path = copyContentUriToCache(data);
+                if (path != null) dispatchIncomingFile(path);
+            });
+        }
+    }
+
+    /**
+     * Dispatches an already-resolved local file path coming from an external intent.
+     * Called from both the warm-start path (onNewIntent) and can be used to validate
+     * what path was handed to watchReplay.
+     */
+    private void dispatchIncomingFile(final String path) {
+        final String lower = new File(path).getName().toLowerCase();
+
+        if (lower.endsWith(".odr")) {
+            final com.acivev.ui.menu.main.MainMenuV2 menu =
+                    GlobalManager.getInstance().getMainMenuV2();
+            if (menu != null) {
+                Execution.updateThread(() -> menu.watchReplay(path));
+            } else {
+                // Extremely rare: onNewIntent fired before init() completed.
+                // Store for the cold start path to pick up.
+                fileToAdd = path;
+                willReplay = true;
+            }
+        }
     }
 
     @Override
