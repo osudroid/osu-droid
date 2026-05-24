@@ -654,12 +654,9 @@ public class MainScene implements IUpdateHandler {
                 button.setX(menuBarX - 100);
                 button.setAlpha(0f);
 
-                button.beginModifierSequence(sequence -> {
-                    sequence.moveToX(menuBarX, 0.5f, Easing.OutElastic)
-                            .fadeTo(0.9f, 0.5f, Easing.OutCubic);
-
-                    return Unit.INSTANCE;
-                });
+                button.beginModifierSequence(sequence -> sequence
+                        .moveToX(menuBarX, 0.5f, Easing.OutElastic)
+                        .fadeTo(0.9f, 0.5f, Easing.OutCubic));
             }
 
             isMenuShowed = true;
@@ -678,13 +675,10 @@ public class MainScene implements IUpdateHandler {
                     button.setX(menuBarX);
                     button.setAlpha(0.9f);
 
-                    button.beginModifierSequence(sequence -> {
-                        sequence.moveToX(menuBarX - 50, 1f, Easing.OutExpo)
-                                .fadeOut(1f, Easing.OutExpo)
-                                .after(IEntity::detachSelf);
-
-                        return Unit.INSTANCE;
-                    });
+                    button.beginModifierSequence(sequence -> sequence
+                            .moveToX(menuBarX - 50, 1f, Easing.OutExpo)
+                            .fadeOut(1f, Easing.OutExpo)
+                            .after(IEntity::detachSelf));
                 }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,

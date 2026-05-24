@@ -92,6 +92,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import okio.Okio;
+import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -256,7 +257,7 @@ public class MainActivity extends BaseGameActivity implements
             if (dm.densityDpi > DisplayMetrics.DENSITY_MEDIUM) {
                 editor.putBoolean("lowtextures", false);
             } else {
-                editor.putBoolean("lowtextures", true);
+                editor.putBoolean("lowtextures", false);
             }
             editor.commit();
         }
@@ -798,6 +799,12 @@ public class MainActivity extends BaseGameActivity implements
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             mEngine.onReloadResources();
+        } else {
+            var songService = GlobalManager.getInstance().getSongService();
+
+            if (songService != null && songService.getStatus() == Status.PAUSED) {
+                songService.play();
+            }
         }
     }
 

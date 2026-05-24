@@ -1786,12 +1786,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ++objectIndex;
 
             if (unrankedSprite != null) {
-                unrankedSprite.beginAbsoluteSequence(1.5f, sequence -> {
-                    sequence.scaleTo(1.5f, 0.5f)
-                            .fadeOut(0.5f);
-
-                    return Unit.INSTANCE;
-                });
+                unrankedSprite.beginAbsoluteSequence(1.5f, sequence -> sequence
+                        .scaleTo(1.5f, 0.5f)
+                        .fadeOut(0.5f));
 
                 // Make it null to avoid multiple entity modifier registration
                 unrankedSprite = null;
@@ -2756,10 +2753,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         beatmapClock.stop();
         paused = true;
+
         scene.setIgnoreUpdate(true);
+        hud.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
     }
 
     public void gameover() {
@@ -2793,6 +2792,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             beatmapClock.stop();
             paused = true;
             scene.setIgnoreUpdate(true);
+            hud.setIgnoreUpdate(true);
             return;
         }
 
@@ -2881,10 +2881,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     paused = true;
 
                     scene.setIgnoreUpdate(true);
+                    hud.setIgnoreUpdate(true);
+
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
                 }
             }
 
@@ -2900,6 +2902,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         scene.setIgnoreUpdate(false);
+        hud.setIgnoreUpdate(false);
+
         UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
@@ -2944,7 +2948,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     mgScene,
                     pos,
                     scale,
-                    sequence -> sequence.fadeIn(fadeInLength)
+                    sequence -> sequence
+                            .fadeIn(fadeInLength)
                             .then(fadeOutDelay)
                             .fadeOut(fadeOutLength)
                 );
@@ -2953,13 +2958,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     mgScene,
                     pos,
                     scale * 1.6f,
-                    sequence -> sequence.fadeIn(fadeInLength)
+                    sequence -> sequence
+                            .fadeIn(fadeInLength)
                             .then(fadeOutDelay)
                             .fadeOut(fadeOutLength),
-                    sequence -> sequence.scaleTo(scale, 0.1f, Easing.InQuad)
+                    sequence -> sequence
+                            .scaleTo(scale, 0.1f, Easing.InQuad)
                             .translateToY(-5)
                             .translateToY(80, fadeOutDelay + fadeOutLength, Easing.InQuad),
-                    sequence -> sequence.rotateTo(0)
+                    sequence -> sequence
+                            .rotateTo(0)
                             .rotateTo(rotation, fadeInLength)
                             .then()
                             .rotateTo(rotation * 2, fadeOutDelay + fadeOutLength - fadeInLength, Easing.InQuad)
@@ -3380,14 +3388,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 for (int i = 0, size = modIcons.size(); i < size; i++) {
                     float finalTimeOffset = i * 0.25f;
 
-                    modIcons.get(i).beginModifierSequence(sequence -> {
-                        sequence.scaleTo(1, 0.25f)
-                                .delay(2 - finalTimeOffset)
-                                .fadeOut(0.5f)
-                                .scaleTo(1.5f, 0.5f);
-
-                        return Unit.INSTANCE;
-                    });
+                    modIcons.get(i).beginModifierSequence(sequence -> sequence
+                            .scaleTo(1, 0.25f)
+                            .delay(2 - finalTimeOffset)
+                            .fadeOut(0.5f)
+                            .scaleTo(1.5f, 0.5f));
                 }
 
                 modIcons.clear();
@@ -3682,8 +3687,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             effectControlPointIndex++;
         }
 
-        activeTimingPoint = timingControlPoints[timingControlPointIndex];
-        activeEffectPoint = effectControlPoints[effectControlPointIndex];
+        var controlPoints = playableBeatmap.getControlPoints();
+
+        activeTimingPoint = timingControlPoints.length > 0 ?
+            timingControlPoints[timingControlPointIndex] : controlPoints.timing.defaultControlPoint;
+
+        activeEffectPoint = effectControlPoints.length > 0 ?
+            effectControlPoints[effectControlPointIndex] : controlPoints.effect.defaultControlPoint;
 
         // Advance break period index past fully elapsed breaks.
         breakPeriodIndex = 0;
