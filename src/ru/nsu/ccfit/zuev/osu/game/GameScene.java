@@ -2754,10 +2754,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         beatmapClock.stop();
         paused = true;
+
         scene.setIgnoreUpdate(true);
+        hud.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+        UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
     }
 
     public void gameover() {
@@ -2791,6 +2793,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             beatmapClock.stop();
             paused = true;
             scene.setIgnoreUpdate(true);
+            hud.setIgnoreUpdate(true);
             return;
         }
 
@@ -2879,10 +2882,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     paused = true;
 
                     scene.setIgnoreUpdate(true);
+                    hud.setIgnoreUpdate(true);
+
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, true, true);
+                    UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
                 }
             }
 
@@ -2898,6 +2903,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         scene.setIgnoreUpdate(false);
+        hud.setIgnoreUpdate(false);
+
         UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
