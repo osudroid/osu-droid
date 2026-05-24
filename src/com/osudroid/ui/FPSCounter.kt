@@ -1,5 +1,6 @@
 package com.osudroid.ui
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.framework.Color4
 import com.osudroid.math.Interpolation
 import com.reco1l.andengine.Anchor
@@ -54,6 +55,14 @@ class FPSCounter : UIText() {
     private var timeSinceLastUpdate = 0f
     private val updateInterval = 0.1f
 
+    private var isDisplayed = false
+    private var timeSinceLastSignificantChange = 0f
+    private var wasVisible = false
+
+    private val idleAlpha = 0.7f
+    private val displayTimeout = 2f
+    private val fadeDuration = 0.3f
+
     private val minimumTextColor = Color4(0xed1121)
     private val middleTextColor = Color4(0xebc247)
     private val maximumTextColor = Color4(0xccff99)
@@ -78,10 +87,33 @@ class FPSCounter : UIText() {
         isVisible = Config.isShowFPS()
 
         if (isVisible) {
+            if (!wasVisible) {
+                requestDisplay()
+            }
+
+            wasVisible = true
+            timeSinceLastSignificantChange += updateClock.timeInfo.elapsed
+
             updateFPS()
+
+            if (isDisplayed && timeSinceLastSignificantChange > displayTimeout) {
+                fadeTo(idleAlpha, fadeDuration, Easing.OutQuint)
+                isDisplayed = false
+            }
+        } else {
+            wasVisible = false
         }
 
         super.onManagedUpdate(deltaTimeSec)
+    }
+
+    private fun requestDisplay() {
+        timeSinceLastSignificantChange = 0f
+
+        if (!isDisplayed) {
+            fadeIn(fadeDuration, Easing.OutQuint)
+            isDisplayed = true
+        }
     }
 
     private fun updateFPS() {
@@ -120,6 +152,10 @@ class FPSCounter : UIText() {
 
         // Force update if we are below the target by a certain threshold.
         val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || displayedFpsCount < aimFPS * 0.6f
+
+        if (hasSignificantChanges) {
+            requestDisplay()
+        }
 
         timeSinceLastUpdate += updateClock.timeInfo.elapsed
 
@@ -210,6 +246,9 @@ class FPSCounter : UIText() {
         lastDisplayedFps = 0
         lastDisplayedFrameTime = 0f
         timeSinceLastUpdate = 0f
+        isDisplayed = false
+        timeSinceLastSignificantChange = 0f
+        wasVisible = false
     }
 
     //endregion
