@@ -669,11 +669,10 @@ public class MainScene implements IUpdateHandler {
                     button.setX(menuBarX);
                     button.setAlpha(0.9f);
 
-                    button.beginModifierSequence(sequence -> {
-                        sequence.moveToX(menuBarX - 50, 1f, Easing.OutExpo)
-                                .fadeOut(1f, Easing.OutExpo)
-                                .after(IEntity::detachSelf);
-                    });
+                    button.beginModifierSequence(sequence -> sequence
+                            .moveToX(menuBarX - 50, 1f, Easing.OutExpo)
+                            .fadeOut(1f, Easing.OutExpo)
+                            .after(IEntity::detachSelf));
                 }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,

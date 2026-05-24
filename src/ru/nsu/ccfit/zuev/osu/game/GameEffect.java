@@ -83,13 +83,11 @@ public class GameEffect extends GameObject {
             });
         }
 
-        hit.beginDelayedSequence(duration, sequence -> {
-            sequence.after(e -> Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            }));
-        });
+        hit.beginDelayedSequence(duration, sequence -> sequence.after(e -> Execution.updateThread(() -> {
+            hit.detachSelf();
+            hit.clearEntityModifiers();
+            GameObjectPool.getInstance().putEffect(GameEffect.this);
+        })));
     }
 
     public void setBlendFunction(int sourceBlend, int destBlend) {

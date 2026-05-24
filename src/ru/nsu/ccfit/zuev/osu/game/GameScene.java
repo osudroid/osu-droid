@@ -3386,12 +3386,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 for (int i = 0, size = modIcons.size(); i < size; i++) {
                     float finalTimeOffset = i * 0.25f;
 
-                    modIcons.get(i).beginModifierSequence(sequence -> {
-                        sequence.scaleTo(1, 0.25f)
-                                .delay(2 - finalTimeOffset)
-                                .fadeOut(0.5f)
-                                .scaleTo(1.5f, 0.5f);
-                    });
+                    modIcons.get(i).beginModifierSequence(sequence -> sequence
+                            .scaleTo(1, 0.25f)
+                            .delay(2 - finalTimeOffset)
+                            .fadeOut(0.5f)
+                            .scaleTo(1.5f, 0.5f));
                 }
 
                 modIcons.clear();
