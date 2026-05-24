@@ -93,6 +93,19 @@ object FollowPointConnection {
     }
 
     @JvmStatic
+    fun renew(size: Int) {
+        pool.clear()
+        val isAnimated = ResourceManager.getInstance().isTextureLoaded("followpoint-0")
+
+        repeat(size) {
+            pool.release(
+                if (isAnimated) PoolableAnimatedFollowPoint("followpoint", true, OsuSkin.get().animationFramerate)
+                else PoolableFollowPoint(ResourceManager.getInstance().getTexture("followpoint"))
+            )
+        }
+    }
+
+    @JvmStatic
     fun addConnection(scene: UIScene, start: HitObject, end: HitObject) {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs

@@ -32,6 +32,7 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
@@ -825,6 +826,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }
+
+        FollowPointConnection.renew(16);
+        SliderTickSprite.renew(16);
 
         // TODO replay
         offsetSum = 0;
