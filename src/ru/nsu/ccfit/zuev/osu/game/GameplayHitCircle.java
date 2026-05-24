@@ -14,11 +14,8 @@ import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.mods.ModHidden;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
 import java.util.ArrayList;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -116,18 +113,13 @@ public class GameplayHitCircle extends GameObject {
                 float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
                 sequence.then().fadeOut(fadeOutDuration);
             }
-
-            return Unit.INSTANCE;
         });
 
         if (!fadeOutCircle && circlePiece.isVisible()) {
             float okWindow = (float) beatmapCircle.hitWindow.getOkWindow() / 1000;
 
-            circlePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sequence.fadeOut(mehWindow - okWindow);
-
-                return Unit.INSTANCE;
-            });
+            circlePiece.beginAbsoluteSequence(hitTime + okWindow,
+                    sequence -> sequence.fadeOut(mehWindow - okWindow));
         }
 
         if (approachCircle.isVisible()) {
@@ -141,13 +133,10 @@ public class GameplayHitCircle extends GameObject {
                 easing = Easing.None;
             }
 
-            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
-                        .scaleTo(scale, timePreempt, easing)
-                        .after(e -> e.setAlpha(0));
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                    .scaleTo(scale, timePreempt, easing)
+                    .after(e -> e.setAlpha(0)));
         }
 
         if (Config.isDimHitObjects() && circlePiece.isVisible()) {
@@ -155,11 +144,8 @@ public class GameplayHitCircle extends GameObject {
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);
-            circlePiece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000, sequence -> {
-                sequence.colorTo(1, 1, 1, 0.1f);
-
-                return Unit.INSTANCE;
-            });
+            circlePiece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000,
+                    sequence -> sequence.colorTo(1, 1, 1, 0.1f));
         }
 
         // Initialize samples

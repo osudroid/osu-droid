@@ -9,7 +9,6 @@ import com.osudroid.beatmaps.hitobjects.Spinner;
 
 import org.anddev.andengine.util.MathUtils;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -134,11 +133,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
     private void fadeIn(UISprite sprite) {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
 
-        sprite.beginAbsoluteSequence(hitTime - timePreempt, sequence -> {
-            sequence.fadeIn(timePreempt);
-
-            return Unit.INSTANCE;
-        });
+        sprite.beginAbsoluteSequence(hitTime - timePreempt,
+                sequence -> sequence.fadeIn(timePreempt));
     }
 
     @Override
@@ -267,15 +263,12 @@ public class GameplayModernSpinner extends GameplaySpinner {
                     }
                     spinnerBonusSample.play();
 
-                    glow.beginModifierSequence(sequence -> {
-                        sequence.colorTo(0, 1, 0.8f)
-                                .colorTo(1, 1, 1, 0.1f)
-                                .then()
-                                .colorTo(1, 0, 1)
-                                .colorTo(0.8f, 1, 1, 0.1f);
-
-                        return Unit.INSTANCE;
-                    });
+                    glow.beginModifierSequence(sequence -> sequence
+                            .colorTo(0, 1, 0.8f)
+                            .colorTo(1, 1, 1, 0.1f)
+                            .then()
+                            .colorTo(1, 0, 1)
+                            .colorTo(0.8f, 1, 1, 0.1f));
 
                     float rate = 0.375f;
                     if (GameHelper.getHealthDrain() > 0) {

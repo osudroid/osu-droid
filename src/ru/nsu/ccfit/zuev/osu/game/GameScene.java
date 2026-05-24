@@ -1782,12 +1782,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ++objectIndex;
 
             if (unrankedSprite != null) {
-                unrankedSprite.beginAbsoluteSequence(1.5f, sequence -> {
-                    sequence.scaleTo(1.5f, 0.5f)
-                            .fadeOut(0.5f);
-
-                    return Unit.INSTANCE;
-                });
+                unrankedSprite.beginAbsoluteSequence(1.5f, sequence -> sequence
+                        .scaleTo(1.5f, 0.5f)
+                        .fadeOut(0.5f));
 
                 // Make it null to avoid multiple entity modifier registration
                 unrankedSprite = null;
@@ -2949,7 +2946,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     mgScene,
                     pos,
                     scale,
-                    sequence -> sequence.fadeIn(fadeInLength)
+                    sequence -> sequence
+                            .fadeIn(fadeInLength)
                             .then(fadeOutDelay)
                             .fadeOut(fadeOutLength)
                 );
@@ -2958,13 +2956,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     mgScene,
                     pos,
                     scale * 1.6f,
-                    sequence -> sequence.fadeIn(fadeInLength)
+                    sequence -> sequence
+                            .fadeIn(fadeInLength)
                             .then(fadeOutDelay)
                             .fadeOut(fadeOutLength),
-                    sequence -> sequence.scaleTo(scale, 0.1f, Easing.InQuad)
+                    sequence -> sequence
+                            .scaleTo(scale, 0.1f, Easing.InQuad)
                             .translateToY(-5)
                             .translateToY(80, fadeOutDelay + fadeOutLength, Easing.InQuad),
-                    sequence -> sequence.rotateTo(0)
+                    sequence -> sequence
+                            .rotateTo(0)
                             .rotateTo(rotation, fadeInLength)
                             .then()
                             .rotateTo(rotation * 2, fadeOutDelay + fadeOutLength - fadeInLength, Easing.InQuad)
@@ -3390,8 +3391,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                                 .delay(2 - finalTimeOffset)
                                 .fadeOut(0.5f)
                                 .scaleTo(1.5f, 0.5f);
-
-                        return Unit.INSTANCE;
                     });
                 }
 

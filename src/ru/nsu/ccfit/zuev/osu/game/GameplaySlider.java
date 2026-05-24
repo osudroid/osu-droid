@@ -34,7 +34,6 @@ import com.rian.andengine.modifier.UniversalModifier;
 
 import org.anddev.andengine.util.MathUtils;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -324,12 +323,9 @@ public class GameplaySlider extends GameObject {
 
             scene.attachChild(endArrow, 0);
 
-            endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeIn(fadeInDuration));
         }
 
         scene.attachChild(tailCirclePiece, 0);
@@ -338,47 +334,32 @@ public class GameplaySlider extends GameObject {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
-            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeIn(fadeInDuration)
-                        .then()
-                        .fadeOut(fadeOutDuration);
+            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeIn(fadeInDuration)
+                    .then()
+                    .fadeOut(fadeOutDuration));
 
-                return Unit.INSTANCE;
-            });
-
-            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeTo(finalTailAlpha, fadeInDuration - fadeInDelay)
-                        .then()
-                        .fadeOut(fadeOutDuration);
-
-                return Unit.INSTANCE;
-            });
+            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeTo(finalTailAlpha, fadeInDuration - fadeInDelay)
+                    .then()
+                    .fadeOut(fadeOutDuration));
         } else {
-            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            headCirclePiece.beginAbsoluteSequence(initialModifierTime,
+                    sequence -> sequence.fadeIn(fadeInDuration));
 
             float mehWindow = (float) hitWindow.getMehWindow() / 1000;
             float okWindow = (float) hitWindow.getOkWindow() / 1000;
 
-            headCirclePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sliderHeadLateMissFadeModifier = sequence
-                        .fadeOut(mehWindow - okWindow)
-                        .after(e -> sliderHeadLateMissFadeModifier = null)
-                        .getLastActiveModifier();
+            headCirclePiece.beginAbsoluteSequence(hitTime + okWindow,
+                    sequence -> sliderHeadLateMissFadeModifier = sequence
+                            .fadeOut(mehWindow - okWindow)
+                            .after(e -> sliderHeadLateMissFadeModifier = null)
+                            .getLastActiveModifier());
 
-                return Unit.INSTANCE;
-            });
-
-            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeIn(fadeInDuration));
         }
 
         if (approachCircle.isVisible()) {
@@ -392,13 +373,10 @@ public class GameplaySlider extends GameObject {
                 easing = Easing.None;
             }
 
-            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
-                        .scaleTo(scale, timePreempt, easing)
-                        .after(e -> e.setAlpha(0));
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                    .scaleTo(scale, timePreempt, easing)
+                    .after(e -> e.setAlpha(0)));
         }
 
         // Slider track
@@ -459,8 +437,6 @@ public class GameplaySlider extends GameObject {
 
                 sequence.then().fadeOut(fadeOutDuration, Easing.Out);
             }
-
-            return Unit.INSTANCE;
         });
 
         setLifetimeEnd(Float.MAX_VALUE);
@@ -584,8 +560,6 @@ public class GameplaySlider extends GameObject {
                         .fadeOut(0.2f, Easing.In);
 
                 extendLifetime(sequence);
-
-                return Unit.INSTANCE;
             });
         } else {
             followCircle.detachSelf();
@@ -600,8 +574,6 @@ public class GameplaySlider extends GameObject {
                         .after(e -> Execution.updateThread(e::detachSelf));
 
                 extendLifetime(sequence);
-
-                return Unit.INSTANCE;
             });
         }
 
@@ -1021,11 +993,8 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
-            ball.beginAbsoluteSequence((float) beatmapSlider.getEndTime() / 1000, sequence -> {
-                sequence.fadeOut().after(e -> Execution.updateThread(e::detachSelf));
-
-                return Unit.INSTANCE;
-            });
+            ball.beginAbsoluteSequence((float) beatmapSlider.getEndTime() / 1000,
+                    sequence -> sequence.fadeOut().after(e -> Execution.updateThread(e::detachSelf)));
         }
 
         approachCircle.clearEntityModifiers();
@@ -1390,11 +1359,8 @@ public class GameplaySlider extends GameObject {
         float colorDim = 195f / 255f;
 
         piece.setColor(colorDim, colorDim, colorDim);
-        piece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000, sequence -> {
-            sequence.colorTo(1, 1, 1, 0.1f);
-
-            return Unit.INSTANCE;
-        });
+        piece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000,
+                sequence -> sequence.colorTo(1, 1, 1, 0.1f));
     }
 
     @Override

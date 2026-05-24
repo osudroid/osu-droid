@@ -68,7 +68,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.game.LinearSongProgress;
@@ -649,12 +648,9 @@ public class MainScene implements IUpdateHandler {
                 button.setX(menuBarX - 100);
                 button.setAlpha(0f);
 
-                button.beginModifierSequence(sequence -> {
-                    sequence.moveToX(menuBarX, 0.5f, Easing.OutElastic)
-                            .fadeTo(0.9f, 0.5f, Easing.OutCubic);
-
-                    return Unit.INSTANCE;
-                });
+                button.beginModifierSequence(sequence -> sequence
+                        .moveToX(menuBarX, 0.5f, Easing.OutElastic)
+                        .fadeTo(0.9f, 0.5f, Easing.OutCubic));
             }
 
             isMenuShowed = true;
@@ -677,8 +673,6 @@ public class MainScene implements IUpdateHandler {
                         sequence.moveToX(menuBarX - 50, 1f, Easing.OutExpo)
                                 .fadeOut(1f, Easing.OutExpo)
                                 .after(IEntity::detachSelf);
-
-                        return Unit.INSTANCE;
                     });
                 }
 
