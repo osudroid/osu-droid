@@ -804,18 +804,17 @@ class RoomScene(
 
             Multiplayer.onReconnectAttempt(true)
 
-            // If the status returned by server is PLAYING then it means the match was forced to start while the player
-            // was disconnected.
             val player = Multiplayer.player ?: return
-            if (player.status == PlayerStatus.Playing) {
-                // Handling special case when the beatmap could have been changed and match was started while player was
-                // disconnected.
-                if (GlobalManager.getInstance().selectedBeatmap != null) {
-                    onRoomMatchPlay()
-                } else {
-                    invalidateStatus()
-                }
+
+            // If the server reports Playing, the match started while the player was disconnected.
+            if (player.status == PlayerStatus.Playing && GlobalManager.getInstance().selectedBeatmap != null) {
+                onRoomMatchPlay()
+            } else {
+                // Always re-sync status after reconnection so that the isWaitingForStatusChange lock
+                // (set in onRoomDisconnect) is cleared and the player can toggle ready again.
+                invalidateStatus()
             }
+
             return
         }
 
