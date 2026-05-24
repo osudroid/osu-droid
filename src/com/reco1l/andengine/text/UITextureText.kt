@@ -84,8 +84,19 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
             }
         }
 
+    /**
+     * Horizontal alignment of the rendered text within the content bounds.
+     */
+    var textAlign = TextAlign.Left
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
 
     private val textureRegions = mutableListOf<Pair<Char, TextureRegion>>()
+    private var textContentWidth = 0f
 
 
     init {
@@ -102,10 +113,17 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
     private fun onUpdateText() {
         textureRegions.clear()
+        textContentWidth = 0f
 
         for (char in text) {
             val textureRegion = characters[char] ?: continue
+            val cellWidth = (fixedCharWidths?.get(char) ?: textureRegion.width.toFloat()) * textureScaleX
             textureRegions.add(char to textureRegion)
+            textContentWidth += cellWidth + spacing
+        }
+
+        if (textureRegions.isNotEmpty()) {
+            textContentWidth -= spacing
         }
 
         var contentWidth = 0f
@@ -135,7 +153,11 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     override fun doDraw(gl: GL10, camera: Camera) {
         beginDraw(gl)
 
-        var offsetX = 0f
+        var offsetX = when (textAlign) {
+            TextAlign.Left -> 0f
+            TextAlign.Center -> 0.5f
+            TextAlign.Right -> 1f
+        } * (contentWidth - textContentWidth)
 
         for (i in textureRegions.indices) {
 
@@ -178,3 +200,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
     }
 }
+
+/**
+ * Determines the horizontal alignment of the rendered text within the content bounds.
+ */
+enum class TextAlign { Left, Center, Right }
