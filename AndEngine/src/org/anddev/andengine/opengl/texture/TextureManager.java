@@ -106,7 +106,14 @@ public class TextureManager {
 			texture.setLoadedToHardware(false);
 		}
 
-		this.mTexturesToBeLoaded.addAll(this.mTexturesLoaded); // TODO Check if addAll uses iterator internally!
+		// BEGIN osu!droid modified: exclude textures scheduled for unloading. Re-adding them would cancel their unload.
+		for(final ITexture texture : this.mTexturesLoaded) {
+			if(!this.mTexturesToBeUnloaded.contains(texture)) {
+				this.mTexturesToBeLoaded.add(texture);
+			}
+		}
+		// END osu!droid modified
+
 		this.mTexturesLoaded.clear();
 
 		this.mTexturesManaged.removeAll(this.mTexturesToBeUnloaded); // TODO Check if removeAll uses iterator internally!
