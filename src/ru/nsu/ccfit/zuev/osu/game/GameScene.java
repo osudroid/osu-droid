@@ -1195,6 +1195,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
+        if (hud != null) {
+            hud.detachSelf();
+        }
+
         hud = new GameplayHUD();
 
         if (!replaying && !GameHelper.isAutoplay()) {
@@ -2111,6 +2115,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (expiredObjects != null) {
                 expiredObjects.clear();
             }
+            hud.detachSelf();
             breakPeriods = null;
             replaySettingsPanel = null;
             objects = null;
