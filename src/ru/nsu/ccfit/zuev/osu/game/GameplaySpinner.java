@@ -470,11 +470,9 @@ public class GameplaySpinner extends GameObject {
 
                     stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-
-                rotations = totalRotations - wholeRotations;
-            } else {
-                rotations = totalRotations - wholeRotations;
             }
+
+            rotations = totalRotations - wholeRotations;
         }
     }
 
