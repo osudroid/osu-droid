@@ -3687,8 +3687,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             effectControlPointIndex++;
         }
 
-        activeTimingPoint = timingControlPoints[timingControlPointIndex];
-        activeEffectPoint = effectControlPoints[effectControlPointIndex];
+        var controlPoints = playableBeatmap.getControlPoints();
+
+        activeTimingPoint = timingControlPoints.length > 0 ?
+            timingControlPoints[timingControlPointIndex] : controlPoints.timing.defaultControlPoint;
+
+        activeEffectPoint = effectControlPoints.length > 0 ?
+            effectControlPoints[effectControlPointIndex] : controlPoints.effect.defaultControlPoint;
 
         // Advance break period index past fully elapsed breaks.
         breakPeriodIndex = 0;
