@@ -818,13 +818,21 @@ class MainMenuV2 : UIScene() {
         LibraryManager.shuffleLibrary()
         if (LibraryManager.getSizeOfBeatmaps() == 0) return
 
-        beatmapInfo = LibraryManager.getCurrentBeatmapSet()[0]
-        GlobalManager.getInstance().selectedBeatmap = beatmapInfo
+        val info = LibraryManager.getCurrentBeatmapSet()[0]
+        beatmapInfo = info
+        GlobalManager.getInstance().selectedBeatmap = info
+
+        // Load the background immediately reloadTimingPoints() is async and
+        // may silently fail. gating the background
+        // on it means a parse error leaves a blank/stale background forever.
+        if (info.audioPath != lastBgAudioPath) {
+            lastBgAudioPath = info.audioPath
+            crossfadeBackground(info)
+        }
         reloadTimingPoints()
 
         val svc = GlobalManager.getInstance().songService ?: return
-        svc.preLoad(beatmapInfo!!.audioPath)
-
+        svc.preLoad(info.audioPath)
         musicStarted = false
     }
 
@@ -833,6 +841,12 @@ class MainMenuV2 : UIScene() {
         LibraryManager.findBeatmapSetIndex(info)
         beatmapInfo = info
         GlobalManager.getInstance().selectedBeatmap = info
+
+        // Same reasoning as loadBeatmap(): load background immediately.
+        if (info.audioPath != lastBgAudioPath) {
+            lastBgAudioPath = info.audioPath
+            crossfadeBackground(info)
+        }
         reloadTimingPoints()
         musicControl(MusicOption.SYNC)
     }
@@ -1019,10 +1033,27 @@ class MainMenuV2 : UIScene() {
 
     /** Load a replay file and jump straight to the scoring scene. */
     fun watchReplay(replayFile: String) {
-        val replay = Replay()
-        if (!replay.load(replayFile, false) || replay.replayVersion < 3) return
+        Log.d("MainMenuV2", "watchReplay: loading $replayFile")
 
-        val beatmap = LibraryManager.findBeatmapByMD5(replay.md5) ?: return
+        val replay = Replay()
+        if (!replay.load(replayFile, false)) {
+            Log.w("MainMenuV2", "watchReplay: failed to load replay file")
+            ToastLogger.showText("Failed to load replay file.", true)
+            return
+        }
+        if (replay.replayVersion < 3) {
+            Log.w("MainMenuV2", "watchReplay: replay version ${replay.replayVersion} is too old (need >= 3)")
+            ToastLogger.showText("Replay version is too old to watch.", true)
+            return
+        }
+
+        val beatmap = LibraryManager.findBeatmapByMD5(replay.md5)
+        if (beatmap == null) {
+            Log.w("MainMenuV2", "watchReplay: beatmap with MD5 ${replay.md5} not found in library")
+            ToastLogger.showText("The beatmap for this replay is not found in library.", true)
+            return
+        }
+
         setBeatmap(beatmap)
 
         val stat = replay.getStat()
@@ -1039,6 +1070,7 @@ class MainMenuV2 : UIScene() {
         scoring.load(stat, null, songService, replayFile, null, beatmap)
 
         GlobalManager.getInstance().engine.setScene(scoring.scene)
+        Log.d("MainMenuV2", "watchReplay: navigated to scoring scene")
     }
 
     /** Return to this scene (called from SongMenu / LobbyScene on back). */
