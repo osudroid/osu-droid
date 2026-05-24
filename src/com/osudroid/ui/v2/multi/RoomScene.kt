@@ -835,8 +835,16 @@ class RoomScene(
             isWaitingForStatusChange.set(true)
             isWaitingForModsChange.set(true)
 
-            chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
-            Multiplayer.onReconnect()
+            if (Multiplayer.isReconnecting) {
+                // A reconnection-attempt socket dropped before receiving initialConnection.
+                // Fail the current attempt so the loop retries immediately rather than staying
+                // stuck in the isWaitingAttemptResponse polling branch until the 30s timeout.
+                Multiplayer.onReconnectAttempt(false)
+            } else {
+                chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
+                Multiplayer.onReconnect()
+            }
+
             return
         }
 

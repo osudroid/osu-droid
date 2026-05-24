@@ -335,12 +335,19 @@ object Multiplayer {
                     continue
                 }
 
+                // Snapshot room once — it can be nulled on another thread by teardownSession()
+                // between the isReconnecting guard above and the connectToRoom call below.
+                val room = room ?: run {
+                    abandonReconnection()
+                    return@launch
+                }
+
                 try {
                     RoomAPI.connectToRoom(
-                        roomId = room!!.id,
+                        roomId = room.id,
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
-                        multiplayerSessionID = room!!.sessionID
+                        multiplayerSessionID = room.sessionID
                     )
 
                     isWaitingAttemptResponse = true
