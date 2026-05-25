@@ -16,6 +16,9 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+/**
+ * An evaluator for calculating osu!standard reading difficulty.
+ */
 object StandardReadingEvaluator {
     private const val READING_WINDOW_SIZE = 3000.0
     private const val HIDDEN_MULTIPLIER = 0.28
