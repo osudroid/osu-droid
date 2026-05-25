@@ -365,9 +365,9 @@ object ModMenu : UIScene() {
                 DatabaseManager.beatmapInfoTable.update(newInfo)
             }
 
-            enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+            enabledMods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().fastForEach { mod ->
                 ensureActive()
-                mod.applyFromBeatmap(beatmap)
+                mod.applyFromBeatmapDifficulty(beatmap.difficulty)
             }
             customizationMenu.updateComponents()
 

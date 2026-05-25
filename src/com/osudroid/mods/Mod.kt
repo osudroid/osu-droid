@@ -90,7 +90,7 @@ abstract class Mod {
      * The score multiplier for this [Mod].
      *
      * Note that some [Mod]s may require additional configuration to have a score multiplier (i.e., [ModDifficultyAdjust]
-     * needs [IModRequiresOriginalBeatmap.applyFromBeatmap] to be called first).
+     * needs [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] to be called first).
      */
     open val scoreMultiplier = 1f
 
