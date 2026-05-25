@@ -36,6 +36,44 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
         return ResourceManager.getInstance().getTexture(mod.iconTextureName)?.takeUnless { it is BlankTextureRegion }
     }
 
+    private fun setupContent() {
+        detachChildren()
+
+        val texture = fetchTextureRegion()
+
+        if (texture != null) {
+            background = null
+
+            attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
+                width = FillParent
+                height = FillParent
+                buffer = sharedSpriteVBO
+            })
+        } else {
+            background = UIBox().apply {
+                applyTheme = { color = it.accentColor * 0.1f }
+            }
+
+            attachChild(UIText().apply {
+                anchor = Anchor.Center
+                origin = Anchor.Center
+                text = mod.acronym
+                font = ResourceManager.getInstance().getFont("smallFont")
+                applyTheme = { color = it.accentColor }
+            })
+        }
+
+        shouldUpdateTexture = false
+    }
+
+
+    override fun onAttached() {
+        if (shouldUpdateTexture) {
+            setupContent()
+        }
+
+        super.onAttached()
+    }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
@@ -51,33 +89,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         if (shouldUpdateTexture) {
-            detachChildren()
-
-            val texture = fetchTextureRegion()
-
-            if (texture != null) {
-                background = null
-
-                attachChild(OsuSkinnableSprite(mod.iconTextureName).apply {
-                    width = FillParent
-                    height = FillParent
-                    buffer = sharedSpriteVBO
-                })
-            } else {
-                background = UIBox().apply {
-                    applyTheme = { color = it.accentColor * 0.1f }
-                }
-
-                attachChild(UIText().apply {
-                    anchor = Anchor.Center
-                    origin = Anchor.Center
-                    text = mod.acronym
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    applyTheme = { color = it.accentColor }
-                })
-            }
-
-            shouldUpdateTexture = false
+            setupContent()
         }
 
         super.onManagedUpdate(deltaTimeSec)
