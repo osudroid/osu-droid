@@ -24,7 +24,7 @@ object DroidReadingEvaluator {
     private const val HIDDEN_MULTIPLIER = 0.28
     private const val DENSITY_MULTIPLIER = 2.4
     private const val DENSITY_DIFFICULTY_BASE = 2.5
-    private const val PREEMPT_BALANCING_FACTOR = 140000.0
+    private const val PREEMPT_BALANCING_FACTOR = 150000.0
     private const val PREEMPT_STARTING_POINT = 500 // AR 9.66 in milliseconds
     private const val MINIMUM_ANGLE_RELEVANCY_TIME = 2000.0 // 2 seconds
     private const val MAXIMUM_ANGLE_RELEVANCY_TIME = 200.0
@@ -276,7 +276,7 @@ object DroidReadingEvaluator {
                     // Be sure that one of the angles is very sharp, when other is wide.
                     val weight =
                         Interpolation.reverseLinear(min(loopObjAngle, loopObjPrev0Angle).toDegrees(), 20.0, 5.0) *
-                        Interpolation.reverseLinear(max(loopObjAngle, loopObjPrev0Angle).toDegrees(), 60.0, 120.0)
+                                Interpolation.reverseLinear(max(loopObjAngle, loopObjPrev0Angle).toDegrees(), 60.0, 120.0)
 
                     // Interpolate between max angle difference and rescaled alternating difference, with
                     // harsher scaling compared to normal difference.
