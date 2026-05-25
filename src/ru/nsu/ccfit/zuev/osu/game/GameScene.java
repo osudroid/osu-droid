@@ -3876,23 +3876,33 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return obj.startTime + mehWindow;
     }
 
+    private void reconstructHitOffset(double accSeconds) {
+        if (Math.abs(accSeconds) <= hitWindow.getMehWindow() / 1000) {
+            stat.addHitOffset(accSeconds);
+        }
+    }
+
     private void applyCircleResult(@Nullable Replay.ReplayObjectData data, boolean endCombo) {
         byte result = data != null ? data.result : ResultType.HIT300.getId();
 
         if (result == ResultType.MISS.getId()) {
             comboWasMissed = true;
             stat.registerHit(0, false, false);
-        } else if (result == ResultType.HIT50.getId()) {
-            stat.registerHit(50, false, false);
-            comboWas100 = true;
-        } else if (result == ResultType.HIT100.getId()) {
-            comboWas100 = true;
-            stat.registerHit(100, endCombo && !comboWasMissed, false);
         } else {
-            if (endCombo && !comboWasMissed) {
-                stat.registerHit(300, true, !comboWas100);
+            reconstructHitOffset(data != null ? data.accuracy / 1000.0 : 0.0);
+
+            if (result == ResultType.HIT50.getId()) {
+                stat.registerHit(50, false, false);
+                comboWas100 = true;
+            } else if (result == ResultType.HIT100.getId()) {
+                comboWas100 = true;
+                stat.registerHit(100, endCombo && !comboWasMissed, false);
             } else {
-                stat.registerHit(300, false, false);
+                if (endCombo && !comboWasMissed) {
+                    stat.registerHit(300, true, !comboWas100);
+                } else {
+                    stat.registerHit(300, false, false);
+                }
             }
         }
 
@@ -3918,6 +3928,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Slider head was tracked.
+        reconstructHitOffset(data != null ? data.accuracy / 1000.0 : 0.0);
         stat.registerHit(30, false, false);
         stat.addSliderHeadHit();
 
