@@ -1062,10 +1062,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         this.videoLoadingJob = null;
         this.ppCalculationJob = null;
 
-        var jobCancellation = Execution.stopAsync(gameLoadingJob)
-                .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
-                .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob))
-                .thenCompose((ignored) -> Execution.stopAsync(ppCalculationJob));
+        var jobCancellation = CompletableFuture.allOf(
+            Execution.stopAsync(gameLoadingJob),
+            Execution.stopAsync(storyboardLoadingJob),
+            Execution.stopAsync(videoLoadingJob),
+            Execution.stopAsync(ppCalculationJob)
+        );
 
         var pipelineDrain = loadingPipeline != null
             ? loadingPipeline.exceptionally((error) -> null)
