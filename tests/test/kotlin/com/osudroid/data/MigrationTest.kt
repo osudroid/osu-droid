@@ -255,4 +255,84 @@ class MigrationTest {
             }
         }
     }
+
+    @Test
+    @Throws(IOException::class)
+    fun `Test migration from version 4 to 5`() {
+        val beatmapMD5 = "md5"
+        val missingBeatmapMD5 = "md5_missing"
+
+        // Beatmap difficulty used to compute DA mod's score multiplier during migration.
+        val difficulty = BeatmapDifficulty(4f, 9f, 8f, 6f)
+
+        helper.createDatabase(testDb, 4).apply {
+            execSQL(
+                "INSERT INTO BeatmapInfo (filename, md5, audioFilename, setDirectory, title, titleUnicode, artist, " +
+                "artistUnicode, creator, version, tags, source, dateImported, approachRate, overallDifficulty, " +
+                "circleSize, hpDrainRate, bpmMax, bpmMin, mostCommonBPM, length, previewTime, hitCircleCount, " +
+                "sliderCount, spinnerCount, maxCombo, epilepsyWarning) VALUES " +
+                "('', '$beatmapMD5', '', '', '', '', '', '', '', '', '', '', 0, " +
+                "${difficulty.ar}, ${difficulty.od}, ${difficulty.difficultyCS}, ${difficulty.hp}, 60.0, 0.0, 60.0, " +
+                "0, 0, 0, 0, 0, 0, 0)"
+            )
+
+            val hdMods = ModHashMap().apply { put(ModHidden()) }.serializeMods()
+
+            // Call applyFromBeatmapDifficulty before serialization. This sets CS' default value to 4 while the value is
+            // 7, which will allow the custom CS to be serialized.
+            val daMods = ModHashMap().apply {
+                put(ModDifficultyAdjust(cs = 7f).also { it.applyFromBeatmapDifficulty(difficulty) })
+            }.serializeMods()
+
+            fun insertScore(md5: String, mods: String, score: Int) {
+                execSQL(
+                    "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
+                    "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderHeadHits, sliderTickHits, " +
+                    "sliderRepeatHits, sliderEndHits) VALUES " +
+                    "('$md5', '', '', '$mods', $score, 0, '', 0, 0, 0, 0, 0, 0, 0, null, null, null, null)"
+                )
+            }
+
+            // Multiplier = 1.0; effectiveScore = 1000; expected raw = 1000
+            insertScore(beatmapMD5, "", 1000)
+            // Multiplier = 1.06; effectiveScore = round(1000 * 1.06) = 1060; expected raw = 1000
+            insertScore(beatmapMD5, hdMods, 1060)
+            // Multiplier = 1 + 0.0075 * (7-4)^1.5 ≈ 1.038971; effectiveScore = round(1000 * 1.038971) = 1039; expected raw = 1000
+            insertScore(beatmapMD5, daMods, 1039)
+            // DA mod, beatmap absent; sentinel -1
+            insertScore(missingBeatmapMD5, daMods, 1039)
+
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 5, true, MIGRATION_4_5)
+
+        db.query("SELECT id, score, needsScoreMigration FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+                val needsScoreMigration = it.getInt(2) != 0
+
+                when (id) {
+                    1L -> {
+                        Assert.assertEquals("no-mods score unchanged", 1000, score)
+                        Assert.assertFalse("no-mods score needs no migration", needsScoreMigration)
+                    }
+                    2L -> {
+                        Assert.assertEquals("HD score divided by 1.06", 1000, score)
+                        Assert.assertFalse("HD score needs no migration", needsScoreMigration)
+                    }
+                    3L -> {
+                        Assert.assertEquals("DA score divided using beatmap difficulty", 1000, score)
+                        Assert.assertFalse("DA score with beatmap needs no migration", needsScoreMigration)
+                    }
+                    4L -> {
+                        Assert.assertEquals("DA score without beatmap kept as-is", 1039, score)
+                        Assert.assertTrue("DA score without beatmap flagged for migration", needsScoreMigration)
+                    }
+                    else -> throw IllegalStateException("Unknown score ID: $id")
+                }
+            }
+        }
+    }
 }
