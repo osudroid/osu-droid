@@ -1,19 +1,20 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import androidx.annotation.Nullable;
+
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
+import com.osudroid.mods.IModRequiresBeatmapDifficulty;
 import com.osudroid.multiplayer.api.data.RoomTeam;
 import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.beatmaps.Beatmap;
 import com.osudroid.beatmaps.sections.BeatmapDifficulty;
 import com.osudroid.mods.IMigratableMod;
-import com.osudroid.mods.IModRequiresOriginalBeatmap;
 import com.osudroid.mods.ModFlashlight;
 import com.osudroid.mods.ModHidden;
 import com.osudroid.utils.ModHashMap;
@@ -153,7 +154,7 @@ public class StatisticV2 implements Serializable {
         if (forcedScore > 0)
             return forcedScore;
 
-        return (int) (totalScore * modScoreMultiplier);
+        return Math.round(totalScore * modScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -633,7 +634,7 @@ public class StatisticV2 implements Serializable {
             playerName,
             replayFilename,
             mod.serializeMods(false),
-            getTotalScoreWithMultiplier(),
+            getTotalScore(),
             scoreMaxCombo,
             getMark(),
             hit300k,
@@ -650,10 +651,12 @@ public class StatisticV2 implements Serializable {
         );
     }
 
-    public void calculateModScoreMultiplier(final Beatmap beatmap) {
-        for (var m : mod.values()) {
-            if (m instanceof IModRequiresOriginalBeatmap requiresOriginalBeatmap) {
-                requiresOriginalBeatmap.applyFromBeatmap(beatmap);
+    public void calculateModScoreMultiplier(@Nullable final BeatmapDifficulty difficulty) {
+        if (difficulty != null) {
+            for (var m : mod.values()) {
+                if (m instanceof IModRequiresBeatmapDifficulty requiresBeatmapDifficulty) {
+                    requiresBeatmapDifficulty.applyFromBeatmapDifficulty(difficulty);
+                }
             }
         }
 
