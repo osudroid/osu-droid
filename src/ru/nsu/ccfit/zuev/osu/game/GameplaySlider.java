@@ -1188,6 +1188,11 @@ public class GameplaySlider extends GameObject {
             currentNestedObjectIndex++;
         }
 
+        // Recalculate elapsedSpanTime using the now-correct completedSpanCount so that
+        // getGameplayPassedTimeMilliseconds() and percentage reflect the actual playback position
+        // rather than an inflated value that would trigger premature span finishes or tick judgements.
+        elapsedSpanTime = listener.getElapsedTime() - hitTime - completedSpanCount * spanDuration;
+
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
                 headCirclePiece.removeModifier(sliderHeadLateMissFadeModifier);
