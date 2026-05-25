@@ -102,7 +102,7 @@ public class StatisticV2 implements Serializable {
         if (params.length < 6) return;
 
         mod = ModUtils.deserializeMods(params[0]);
-        setForcedScore(Integer.parseInt(params[1]));
+        setTotalScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
         hit300k = Integer.parseInt(params[4]);
@@ -124,6 +124,8 @@ public class StatisticV2 implements Serializable {
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
         }
+
+        calculateModScoreMultiplier(originalDifficulty);
     }
 
     public float getHp() {
@@ -505,7 +507,7 @@ public class StatisticV2 implements Serializable {
         StringBuilder builder = new StringBuilder();
         builder.append(mod.serializeMods(false));
         builder.append(' ');
-        builder.append(getTotalScoreWithMultiplier());
+        builder.append(getTotalScore());
         builder.append(' ');
         builder.append(getScoreMaxCombo());
         builder.append(' ');
