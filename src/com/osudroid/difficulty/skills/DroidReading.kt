@@ -67,7 +67,7 @@ class DroidReading(
     }
 
     private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
-        var difficulty = DroidReadingEvaluator.evaluateDifficultyOf(current, mods)
+        var difficulty = DroidReadingEvaluator.evaluateDifficultyOf(current, mods).pow(0.89)
 
         if (mods.any { it is ModRelax }) {
             difficulty *= 0.4
