@@ -3732,6 +3732,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         hud.onNoteHit(stat);
+        updatePPValue(objectIndex - 1);
 
         // Seek the beatmap clock (also seeks the audio source).
         beatmapClock.seek(clampedTime);
