@@ -40,8 +40,8 @@ class DroidDifficultyCalculatorTest {
             Assert.assertEquals(1.8685609988004601, aimDifficulty, 1e-5)
             Assert.assertEquals(1.492734818431125, tapDifficulty, 1e-5)
             Assert.assertEquals(0.5910394950606784, rhythmDifficulty, 1e-5)
-            Assert.assertEquals(0.0801694219632239, readingDifficulty, 1e-5)
-            Assert.assertEquals(3.5861666096034437, starRating, 1e-6)
+            Assert.assertEquals(0.06580340868058408, readingDifficulty, 1e-5)
+            Assert.assertEquals(3.5861557886585147, starRating, 1e-6)
         }
 
         calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
