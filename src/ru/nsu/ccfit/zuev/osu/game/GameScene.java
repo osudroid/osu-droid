@@ -214,8 +214,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Job gameLoadingJob;
 
     private PerformanceCalculationParameters performanceCalculationParameters;
-    private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
-    private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
+    private volatile TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
+    private volatile TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
+
+    @Nullable
+    private Job ppCalculationJob;
 
     private ReplaySettingsPanel replaySettingsPanel;
 
@@ -644,6 +647,35 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         this.playableBeatmap = playableBeatmap;
 
+        if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
+            switch (Config.getDifficultyAlgorithm()) {
+                case droid -> {
+                    performanceCalculationParameters = new DroidPerformanceCalculationParameters();
+
+                    if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
+                        final var beatmap = playableBeatmap;
+
+                        ppCalculationJob = Execution.async(ppScope -> {
+                            droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(beatmap, ppScope);
+                        });
+                    }
+                }
+
+                case standard -> {
+                    performanceCalculationParameters = new StandardPerformanceCalculationParameters();
+
+                    if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
+                        final var beatmap = parsedBeatmap;
+                        final var modValues = mods.values();
+
+                        ppCalculationJob = Execution.async(ppScope -> {
+                            standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(beatmap, modValues, ppScope);
+                        });
+                    }
+                }
+            }
+        }
+
         // Load backgrounds early to minimize waiting time.
         loadBackground();
         loadStoryboard(beatmapInfo);
@@ -876,29 +908,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameObjectPool.getInstance().preload();
 
-        if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
-            // Calculate timed difficulty attributes
-            switch (Config.getDifficultyAlgorithm()) {
-                case droid -> {
-                    performanceCalculationParameters = new DroidPerformanceCalculationParameters();
-
-                    if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
-                    }
-                }
-
-                case standard -> {
-                    performanceCalculationParameters = new StandardPerformanceCalculationParameters();
-
-                    if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                            parsedBeatmap, mods.values(), scope
-                        );
-                    }
-                }
-            }
-        }
-
         sliderIndex = 0;
 
         if (sliderPaths == null || sliderRenderPaths == null || differentPlayableBeatmap) {
@@ -1045,15 +1054,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var gameLoadingJob = this.gameLoadingJob;
         var storyboardLoadingJob = this.storyboardLoadingJob;
         var videoLoadingJob = this.videoLoadingJob;
+        var ppCalculationJob = this.ppCalculationJob;
         var loadingPipeline = this.loadingPipeline;
 
         this.gameLoadingJob = null;
         this.storyboardLoadingJob = null;
         this.videoLoadingJob = null;
+        this.ppCalculationJob = null;
 
         var jobCancellation = Execution.stopAsync(gameLoadingJob)
                 .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
-                .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob));
+                .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob))
+                .thenCompose((ignored) -> Execution.stopAsync(ppCalculationJob));
 
         var pipelineDrain = loadingPipeline != null
             ? loadingPipeline.exceptionally((error) -> null)
