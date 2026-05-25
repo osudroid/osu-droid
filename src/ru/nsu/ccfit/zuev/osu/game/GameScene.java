@@ -3919,10 +3919,32 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        // Slider head was tracked.
-        reconstructHitOffset(data != null ? data.accuracy / 1000.0 : 0.0);
-        stat.registerHit(30, false, false);
-        stat.addSliderHeadHit();
+        // Slider head: HIT300 implies all ticks were hit; autoplay (data==null) always hits.
+        // For HIT50/HIT100, reconstruct whether the head was actually within the hit window,
+        // mirroring GameplaySlider.onSliderHeadHit.
+        double accSeconds = data != null ? data.accuracy / 1000.0 : 0.0;
+        boolean headHit;
+
+        if (data == null || result == ResultType.HIT300.getId()) {
+            headHit = true;
+        } else {
+            int replayVersion = GameHelper.getReplayVersion();
+            double mehWindowSecs = hitWindow.getMehWindow() / 1000.0;
+            double sliderDurationSecs = slider.getDuration() / 1000.0;
+            double lateHitThreshold = replayVersion <= 7 ? Math.min(mehWindowSecs, sliderDurationSecs) : mehWindowSecs;
+
+            if (replayVersion >= 6 || mehWindowSecs <= sliderDurationSecs) {
+                headHit = -mehWindowSecs <= accSeconds && accSeconds <= lateHitThreshold;
+            } else {
+                headHit = accSeconds <= sliderDurationSecs;
+            }
+        }
+
+        if (headHit) {
+            reconstructHitOffset(accSeconds);
+            stat.registerHit(30, false, false);
+            stat.addSliderHeadHit();
+        }
 
         // Ticks and repeats from tickSet.
         var nested = slider.getNestedHitObjects();
