@@ -3741,7 +3741,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.seekTo(Math.max(0, (int) ((clampedTime - videoOffset) * 1000)));
         }
 
-        // Suppress hitsounds for nested slider objects that have already passed the seek target.
+        // Suppress hitsounds for slider objects (head, ticks, repeats) that have already passed the seek target.
         // Objects are spawned in the same frame as seekTo runs, but updated in the next frame,
         // so the flag must survive 2 update frames.
         postSeekFrameCount = 2;
