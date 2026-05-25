@@ -108,7 +108,7 @@ public class BeatmapItem extends Sprite {
         if (beatmapInfo == null) {
             return;
         }
-        var newmark = DatabaseManager.getScoreInfoTable().getBestMark(beatmapInfo.getMD5());
+        var newmark = DatabaseManager.getScoreInfoTable().getBestMark(beatmapInfo.getMD5(), beatmapInfo.getBeatmapDifficulty());
         if (currentMark != null && currentMark.equals(newmark)) {
             return;
         }
