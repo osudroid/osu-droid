@@ -33,6 +33,18 @@ open class SynchronizedPool<T : IPoolable>(maxPoolSize: Int) : Pools.Pool<T> {
         pool = arrayOfNulls(maxPoolSize)
     }
 
+    /**
+     * Clears this [SynchronizedPool], removing all pooled instances.
+     */
+    fun clear() = synchronized(lock) {
+        for (i in 0 until size) {
+            pool[i]?.isRecycled = false
+            pool[i] = null
+        }
+
+        size = 0
+    }
+
     override fun acquire(): T? = synchronized(lock) {
         if (size == 0) {
             return@synchronized null

@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -81,20 +80,14 @@ public class GameEffect extends GameObject {
             hit.beginModifierSequence(sequence -> {
                 consumer.accept(sequence);
                 duration = Math.max(duration, sequence.getDuration());
-
-                return Unit.INSTANCE;
             });
         }
 
-        hit.beginDelayedSequence(duration, sequence -> {
-            sequence.after(e -> Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            }));
-
-            return Unit.INSTANCE;
-        });
+        hit.beginDelayedSequence(duration, sequence -> sequence.after(e -> Execution.updateThread(() -> {
+            hit.detachSelf();
+            hit.clearEntityModifiers();
+            GameObjectPool.getInstance().putEffect(GameEffect.this);
+        })));
     }
 
     public void setBlendFunction(int sourceBlend, int destBlend) {

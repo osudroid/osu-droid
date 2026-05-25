@@ -655,7 +655,11 @@ object ModMenu : UIScene() {
     ) : UILabeledBadge() {
         private val counter = RollingFloatCounter(0f).apply {
             rollingEasing = Easing.OutQuint
-            rollingDuration = 300f
+            rollingDuration = 0.3f
+        }
+
+        init {
+            registerUpdateHandler(counter)
         }
 
         fun updateValue(initialValue: Float, finalValue: Float) {
@@ -670,12 +674,11 @@ object ModMenu : UIScene() {
                 initialValue < finalValue -> 0xFFF78383
                 initialValue > finalValue -> 0xFF40CF5D
                 else -> 0xFFFFFFFF
-            }), counter.rollingDuration / 1000, counter.rollingEasing)
+            }), counter.rollingDuration, counter.rollingEasing)
         }
 
         override fun onManagedUpdate(deltaTimeSec: Float) {
             if (counter.isRolling) {
-                counter.update(deltaTimeSec * 1000)
                 valueEntity.text = formatter(counter.currentValue)
             }
 

@@ -14,6 +14,7 @@ public class BassAudioFunc {
 
     private int channel = 0;
     private float speed = 1f;
+    private float pitchRate = 1f;
     private boolean adjustPitch;
     private final BASS.BASS_CHANNELINFO channelInfo = new BASS.BASS_CHANNELINFO();
 
@@ -60,6 +61,7 @@ public class BassAudioFunc {
         BASS.BASS_ChannelGetInfo(channel, channelInfo);
         frequency = channelInfo.freq;
 
+        this.pitchRate = 1f;
         setSpeed(speed);
         setAdjustPitch(adjustPitch);
 
@@ -176,6 +178,11 @@ public class BassAudioFunc {
         onAudioEffectChange();
     }
 
+    public void setPitchRate(float pitchRate) {
+        this.pitchRate = pitchRate;
+        onAudioEffectChange();
+    }
+
     public void setFrequencyForcefully(float frequency) {
         if (channel == 0) {
             return;
@@ -225,15 +232,16 @@ public class BassAudioFunc {
             return;
         }
 
+        frequency = channelInfo.freq * pitchRate;
 
+        // If adjust pitch is used, speed also scales the pitch's frequency.
         if (adjustPitch) {
-            frequency = channelInfo.freq * speed;
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0);
-        } else {
-            frequency = channelInfo.freq;
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
+            frequency *= speed;
         }
+
+        BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
+
+        // No need to adjust TEMPO in adjustPitch mode since speed is already accounted for in TEMPO_FREQ.
+        BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, adjustPitch ? 0 : (speed - 1) * 100);
     }
 }

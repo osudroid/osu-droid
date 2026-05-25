@@ -6,8 +6,7 @@ import com.rian.andengine.modifier.ModifierType;
 import com.rian.andengine.modifier.OnModifierFinished;
 import com.rian.andengine.modifier.UniversalModifierSequence;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import java.util.function.Consumer;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
@@ -22,13 +21,10 @@ public class CursorSprite extends UISprite implements ISliderListener {
         startRotationModifierLoop();
     };
 
-    private final Function1<UniversalModifierSequence, Unit> clickSequence = sequence -> {
+    private final Consumer<UniversalModifierSequence> clickSequence = sequence ->
         sequence.scaleTo(baseSize * 1.25f, clickAnimationTime)
                 .then()
                 .scaleTo(baseSize, clickAnimationTime);
-
-        return Unit.INSTANCE;
-    };
 
     public CursorSprite() {
         super();

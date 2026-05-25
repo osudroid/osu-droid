@@ -137,10 +137,25 @@ class SliderTickSprite : UISprite(), IPoolable {
         private val pool = SynchronizedPool<SliderTickSprite>(20).apply { release(SliderTickSprite()) }
 
         /**
+         * Renews the [SliderTickSprite] pool with fresh instances.
+         *
+         * @param size The number of [SliderTickSprite] instances to pre-populate the pool with.
+         */
+        @JvmStatic
+        fun renew(size: Int) {
+            pool.clear()
+            repeat(size) { pool.release(SliderTickSprite()) }
+        }
+
+        /**
          * Obtains a [SliderTickSprite] from the pool, or creates a new one if the pool is empty.
          */
         @JvmStatic
-        fun obtain() = pool.acquire() ?: SliderTickSprite()
+        fun obtain(): SliderTickSprite {
+            val sprite = pool.acquire() ?: return SliderTickSprite()
+            sprite.textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
+            return sprite
+        }
     }
 
 }

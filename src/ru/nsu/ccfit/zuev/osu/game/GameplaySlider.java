@@ -34,7 +34,6 @@ import com.rian.andengine.modifier.UniversalModifier;
 
 import org.anddev.andengine.util.MathUtils;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -324,12 +323,9 @@ public class GameplaySlider extends GameObject {
 
             scene.attachChild(endArrow, 0);
 
-            endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeIn(fadeInDuration));
         }
 
         scene.attachChild(tailCirclePiece, 0);
@@ -338,47 +334,32 @@ public class GameplaySlider extends GameObject {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
-            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeIn(fadeInDuration)
-                        .then()
-                        .fadeOut(fadeOutDuration);
+            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeIn(fadeInDuration)
+                    .then()
+                    .fadeOut(fadeOutDuration));
 
-                return Unit.INSTANCE;
-            });
-
-            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeTo(finalTailAlpha, fadeInDuration - fadeInDelay)
-                        .then()
-                        .fadeOut(fadeOutDuration);
-
-                return Unit.INSTANCE;
-            });
+            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeTo(finalTailAlpha, fadeInDuration - fadeInDelay)
+                    .then()
+                    .fadeOut(fadeOutDuration));
         } else {
-            headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            headCirclePiece.beginAbsoluteSequence(initialModifierTime,
+                    sequence -> sequence.fadeIn(fadeInDuration));
 
             float mehWindow = (float) hitWindow.getMehWindow() / 1000;
             float okWindow = (float) hitWindow.getOkWindow() / 1000;
 
-            headCirclePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sliderHeadLateMissFadeModifier = sequence
-                        .fadeOut(mehWindow - okWindow)
-                        .after(e -> sliderHeadLateMissFadeModifier = null)
-                        .getLastActiveModifier();
+            headCirclePiece.beginAbsoluteSequence(hitTime + okWindow,
+                    sequence -> sliderHeadLateMissFadeModifier = sequence
+                            .fadeOut(mehWindow - okWindow)
+                            .after(e -> sliderHeadLateMissFadeModifier = null)
+                            .getLastActiveModifier());
 
-                return Unit.INSTANCE;
-            });
-
-            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.delay(fadeInDelay)
-                        .fadeIn(fadeInDuration);
-
-                return Unit.INSTANCE;
-            });
+            tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .delay(fadeInDelay)
+                    .fadeIn(fadeInDuration));
         }
 
         if (approachCircle.isVisible()) {
@@ -392,13 +373,10 @@ public class GameplaySlider extends GameObject {
                 easing = Easing.None;
             }
 
-            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
-                        .scaleTo(scale, timePreempt, easing)
-                        .after(e -> e.setAlpha(0));
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                    .scaleTo(scale, timePreempt, easing)
+                    .after(e -> e.setAlpha(0)));
         }
 
         // Slider track
@@ -459,8 +437,6 @@ public class GameplaySlider extends GameObject {
 
                 sequence.then().fadeOut(fadeOutDuration, Easing.Out);
             }
-
-            return Unit.INSTANCE;
         });
 
         setLifetimeEnd(Float.MAX_VALUE);
@@ -584,8 +560,6 @@ public class GameplaySlider extends GameObject {
                         .fadeOut(0.2f, Easing.In);
 
                 extendLifetime(sequence);
-
-                return Unit.INSTANCE;
             });
         } else {
             followCircle.detachSelf();
@@ -600,8 +574,6 @@ public class GameplaySlider extends GameObject {
                         .after(e -> Execution.updateThread(e::detachSelf));
 
                 extendLifetime(sequence);
-
-                return Unit.INSTANCE;
             });
         }
 
@@ -985,6 +957,13 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
+        // If we entered this phase without going through the approach phase (e.g., after a seek), the snake-in
+        // animation may not have completed yet. Force the body to its full length here.
+        if (!preStageFinish && Config.isSnakingInSliders() && superPath != null && sliderBody != null) {
+            applySnakeBodyLength(false, superPathMaxLength, true);
+            preStageFinish = true;
+        }
+
         sliderSlideSample.update(dt);
         sliderWhistleSample.update(dt);
 
@@ -1006,14 +985,16 @@ public class GameplaySlider extends GameObject {
                 followCircle.setScale(scale);
             }
 
+            // isInRadius may already be true if the slider head was hit during the approach phase,
+            // before this block ran. Reset it so updateFollowCircleTrackingState correctly enters
+            // the "tracking starts" branch and makes the follow circle visible.
+            isInRadius = false;
+
             scene.attachChild(ball);
             scene.attachChild(followCircle);
 
-            ball.beginAbsoluteSequence((float) beatmapSlider.getEndTime() / 1000, sequence -> {
-                sequence.fadeOut().after(e -> Execution.updateThread(e::detachSelf));
-
-                return Unit.INSTANCE;
-            });
+            ball.beginAbsoluteSequence((float) beatmapSlider.getEndTime() / 1000,
+                    sequence -> sequence.fadeOut().after(e -> Execution.updateThread(e::detachSelf)));
         }
 
         approachCircle.clearEntityModifiers();
@@ -1092,7 +1073,9 @@ public class GameplaySlider extends GameObject {
             headWasHit = -mehWindow <= hitOffset && hitOffset <= getLateHitThreshold();
 
             if (headWasHit) {
-                playCurrentNestedObjectHitSound();
+                if (!listener.isAfterSeek()) {
+                    playCurrentNestedObjectHitSound();
+                }
                 ticksGot++;
                 shouldSnakeOut = true;
                 listener.onSliderHit(id, 30, position,
@@ -1107,7 +1090,9 @@ public class GameplaySlider extends GameObject {
             // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(HitObjectType.Slider, hitOffset);
             headWasHit = true;
-            playCurrentNestedObjectHitSound();
+            if (!listener.isAfterSeek()) {
+                playCurrentNestedObjectHitSound();
+            }
             ticksGot++;
             shouldSnakeOut = true;
             listener.onSliderHit(id, 30, position,
@@ -1139,24 +1124,31 @@ public class GameplaySlider extends GameObject {
         if (isTracking() && replayObjectData == null) {
             allTicksInRange = true;
 
-            // Do not judge the slider end as it will be judged in onSpanFinish.
-            for (int i = 1; i < nestedObjects.size() - 1; ++i) {
-                var nestedObject = nestedObjects.get(i);
+            // In Autoplay, the cursor is always at the ball's exact position, so the distance check below
+            // is always satisfied and can be skipped. This also avoids false misses after seeking: when
+            // seeking into the middle of a slider, elapsedSpanTime > 0 immediately, so past ticks are
+            // evaluated with the ball already ahead of them — their positions would fail the distance
+            // check even though Autoplay would always have tracked them.
+            if (!autoPlay) {
+                // Do not judge the slider end as it will be judged in onSpanFinish.
+                for (int i = 1; i < nestedObjects.size() - 1; ++i) {
+                    var nestedObject = nestedObjects.get(i);
 
-                // Stop the process when a nested object that can't be hit before the current time is reached.
-                if (nestedObject.startTime > currentTime) {
-                    break;
-                }
+                    // Stop the process when a nested object that can't be hit before the current time is reached.
+                    if (nestedObject.startTime > currentTime) {
+                        break;
+                    }
 
-                // When the first nested object that is further outside the follow area is reached,
-                // forcefully miss all other nested objects that would otherwise be valid to be hit.
-                // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
-                var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
-                var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
+                    // When the first nested object that is further outside the follow area is reached,
+                    // forcefully miss all other nested objects that would otherwise be valid to be hit.
+                    // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
+                    var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
+                    var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
 
-                if (distanceSquared > distanceTrackingThresholdSquared) {
-                    allTicksInRange = false;
-                    break;
+                    if (distanceSquared > distanceTrackingThresholdSquared) {
+                        allTicksInRange = false;
+                        break;
+                    }
                 }
             }
         }
@@ -1181,7 +1173,9 @@ public class GameplaySlider extends GameObject {
             int type = isSliderTick ? GameObjectListener.SLIDER_TICK : GameObjectListener.SLIDER_REPEAT;
 
             if (isHit) {
-                playCurrentNestedObjectHitSound();
+                if (!listener.isAfterSeek()) {
+                    playCurrentNestedObjectHitSound();
+                }
                 ticksGot++;
                 tickSet.set(replayTickIndex++, true);
                 listener.onSliderHit(id, isSliderTick ? 10 : 30, tmpPoint, false, bodyColor, type, true);
@@ -1197,6 +1191,11 @@ public class GameplaySlider extends GameObject {
 
             currentNestedObjectIndex++;
         }
+
+        // Recalculate elapsedSpanTime using the now-correct completedSpanCount so that
+        // getGameplayPassedTimeMilliseconds() and percentage reflect the actual playback position
+        // rather than an inflated value that would trigger premature span finishes or tick judgements.
+        elapsedSpanTime = listener.getElapsedTime() - hitTime - completedSpanCount * spanDuration;
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
@@ -1369,11 +1368,8 @@ public class GameplaySlider extends GameObject {
         float colorDim = 195f / 255f;
 
         piece.setColor(colorDim, colorDim, colorDim);
-        piece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000, sequence -> {
-            sequence.colorTo(1, 1, 1, 0.1f);
-
-            return Unit.INSTANCE;
-        });
+        piece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000,
+                sequence -> sequence.colorTo(1, 1, 1, 0.1f));
     }
 
     @Override

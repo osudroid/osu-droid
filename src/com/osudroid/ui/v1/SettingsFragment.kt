@@ -703,11 +703,10 @@ class SettingsFragment : SettingsFragment() {
             // the correct skin path.
             Config.setSkinPath(path)
             ResourceManager.getInstance().loadSkin(path)
-            GlobalManager.getInstance().engine.textureManager.reloadTextures()
+            GlobalManager.getInstance().engine.onResume()
 
             mainThread {
                 loading.dismiss()
-                context.startActivity(Intent(context, MainActivity::class.java))
                 Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
             }
         }

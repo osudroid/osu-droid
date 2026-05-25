@@ -576,6 +576,11 @@ public class StatisticV2 implements Serializable {
         }
     }
 
+    public double getAverageHitOffset() {
+        int count = positiveHitOffsetCount + negativeHitOffsetCount;
+        return count > 0 ? (positiveHitOffsetSum + negativeHitOffsetSum) / count : 0;
+    }
+
     public double getNegativeHitError() {
         return negativeHitOffsetCount == 0 ? 0 : negativeHitOffsetSum / negativeHitOffsetCount;
     }

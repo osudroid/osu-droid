@@ -16,7 +16,6 @@ import org.anddev.andengine.util.MathUtils;
 
 import java.util.ArrayList;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -148,14 +147,11 @@ public class GameplaySpinner extends GameObject {
             scene.attachChild(approachCircle, 0);
             approachCircle.setAlpha(0);
 
-            approachCircle.beginAbsoluteSequence(hitTime, sequence -> {
-                sequence.fadeTo(0.75f)
-                        .fadeTo(1, duration)
-                        .scaleTo(2)
-                        .scaleTo(0, duration);
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(hitTime, sequence -> sequence
+                    .fadeTo(0.75f)
+                    .fadeTo(1, duration)
+                    .scaleTo(2)
+                    .scaleTo(0, duration));
         }
 
         scene.attachChild(circle, 0);
@@ -167,38 +163,23 @@ public class GameplaySpinner extends GameObject {
 
         if (background.isVisible()) {
             background.setAlpha(0);
-            background.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-                sequence.fadeIn(fadeDuration);
-
-                return Unit.INSTANCE;
-            });
+            background.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
         }
 
         circle.setAlpha(0);
-        circle.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        circle.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
 
         metreY = background.getY() - background.getHeightScaled() / 2f;
         metre.setY(background.getY() + background.getHeightScaled() / 2f);
 
         metre.setAlpha(0);
-        metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        metre.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
 
         spinText.setAlpha(0);
-        spinText.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration)
-                    .then(timePreempt / 2)
-                    .fadeOut(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        spinText.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence
+                .fadeIn(fadeDuration)
+                .then(timePreempt / 2)
+                .fadeOut(fadeDuration));
 
         oldMouse = null;
 
@@ -288,6 +269,20 @@ public class GameplaySpinner extends GameObject {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                if (clear) {
+                    scene.attachChild(clearText);
+                }
+
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         updateSamples(dt);
@@ -362,13 +357,9 @@ public class GameplaySpinner extends GameObject {
 
                     clear = true;
 
-                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
-                    // carried over, resulting in an early first spinner bonus score.
-                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
-                    // rotations instead of 6.6.
-                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
-                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
-                    }
+                    // rotations is intentionally NOT reset here. Resetting would shift the first bonus threshold from
+                    // ceil(needRotations) to needRotations + 1, matching osu!stable but reducing the highest possible
+                    // obtainable score and altering leaderboard balance.
                 }
 
                 if (Math.abs(rotations) > 1) {
@@ -427,6 +418,62 @@ public class GameplaySpinner extends GameObject {
         // In remove spinner lock mode, the spinner is assumed to be judged to allow other objects to be judged while
         // the spinner is still active.
         return Config.isRemoveSliderLock() || passedTime >= duration;
+    }
+
+    protected void applySeekRotations() {
+        float totalRotations = 5f * passedTime;
+        int wholeRotations = (int) totalRotations;
+
+        if (clear) {
+            // Already cleared (e.g. zero-duration spinner); all whole rotations are bonus.
+            for (int i = 0; i < wholeRotations; i++) {
+                bonusScoreCounter++;
+                listener.onSpinnerHit(id, 1000, false, 0);
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            rotations = totalRotations - wholeRotations;
+        } else {
+            // ceil(needRotations) - 1 rotations are pre-clear; bonus rotations begin at ceil(needRotations) total.
+            int preClear = Math.min(wholeRotations, (int) Math.ceil(needRotations) - 1);
+
+            for (int i = 0; i < preClear; i++) {
+                fullRotations++;
+                stat.registerSpinnerHit();
+                float rate = 0.375f;
+
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                }
+
+                stat.changeHp(rate * 0.01f * duration / needRotations);
+            }
+
+            if (totalRotations > needRotations) {
+                clear = true;
+                int bonus = Math.max(0, wholeRotations - (int) Math.ceil(needRotations) + 1);
+
+                for (int i = 0; i < bonus; i++) {
+                    bonusScoreCounter++;
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    float rate = 0.375f;
+
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
+            }
+
+            rotations = totalRotations - wholeRotations;
+        }
     }
 
     protected void reloadHitSounds() {

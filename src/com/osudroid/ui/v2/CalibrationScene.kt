@@ -5,7 +5,6 @@ import androidx.annotation.IdRes
 import com.edlplan.framework.easing.Easing
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.utils.mainThread
-import com.osudroid.utils.standardDeviation
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.UIEngine
@@ -38,8 +37,11 @@ import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.PromptDialog
 import com.osudroid.beatmaps.DroidHitWindow
 import com.osudroid.math.Interpolation
+import com.osudroid.utils.median
+import com.osudroid.utils.standardDeviation
 import com.rian.andengine.modifier.ModifierType
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.roundToInt
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.audio.Status
@@ -547,7 +549,7 @@ object CalibrationScene : UIScene() {
             tapOffsets.removeAt(0)
         }
 
-        pendingOffset = tapOffsets.standardDeviation().roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
+        pendingOffset = computePendingOffset()
 
         val judgement = when {
             absErr < judgementHitWindow.greatWindow -> Judgement.PERFECT
@@ -783,5 +785,22 @@ object CalibrationScene : UIScene() {
     private fun applyOffset() {
         Config.setOffset(pendingOffset.toFloat())
         Config.setInt("offset", pendingOffset)
+    }
+
+    private fun computePendingOffset(): Int {
+        if (tapOffsets.isEmpty()) {
+            return 0
+        }
+
+        val unstableRate = tapOffsets.standardDeviation()
+        var offset = tapOffsets.median()
+
+        if (unstableRate >= 90) {
+            // A demonstrative graph of this algorithm is embedded in https://github.com/ppy/osu/discussions/30521.
+            // This prevents high unstable rate from suggesting potentially invalid offsets.
+            offset *= exp(-0.0116 * (unstableRate - 90))
+        }
+
+        return offset.roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
     }
 }

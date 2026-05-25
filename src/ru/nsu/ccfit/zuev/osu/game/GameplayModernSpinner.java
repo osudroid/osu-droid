@@ -9,7 +9,6 @@ import com.osudroid.beatmaps.hitobjects.Spinner;
 
 import org.anddev.andengine.util.MathUtils;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -134,11 +133,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
     private void fadeIn(UISprite sprite) {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
 
-        sprite.beginAbsoluteSequence(hitTime - timePreempt, sequence -> {
-            sequence.fadeIn(timePreempt);
-
-            return Unit.INSTANCE;
-        });
+        sprite.beginAbsoluteSequence(hitTime - timePreempt,
+                sequence -> sequence.fadeIn(timePreempt));
     }
 
     @Override
@@ -153,6 +149,18 @@ public class GameplayModernSpinner extends GameplaySpinner {
         if (!startHit) {
             listener.onSpinnerStart(id);
             startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                // Unlike GameplaySpinner, GameplayModernSpinner has no clearText sprite; clear state is applied
+                // visually on next frame.
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         updateSamples(dt);
@@ -240,13 +248,9 @@ public class GameplayModernSpinner extends GameplaySpinner {
                     // Clear Sprite
                     clear = true;
 
-                    // In replay version 7 or older, rotations after the spinner is cleared for the first time is
-                    // carried over, resulting in an early first spinner bonus score.
-                    // For example, if a spinner requires 5.6 rotations, the first spinner bonus score was awarded at 6
-                    // rotations instead of 6.6.
-                    if (replayObjectData == null || GameHelper.getReplayVersion() >= 8) {
-                        rotations -= (needRotations - fullRotations) * Math.signum(rotations);
-                    }
+                    // rotations is intentionally NOT reset here. Resetting would shift the first bonus threshold
+                    // from ceil(needRotations) to needRotations + 1, matching osu!lazer but reducing Autoplay
+                    // scores and altering overall game balance.
                 }
 
                 if (Math.abs(rotations) > 1) {
@@ -259,15 +263,12 @@ public class GameplayModernSpinner extends GameplaySpinner {
                     }
                     spinnerBonusSample.play();
 
-                    glow.beginModifierSequence(sequence -> {
-                        sequence.colorTo(0, 1, 0.8f)
-                                .colorTo(1, 1, 1, 0.1f)
-                                .then()
-                                .colorTo(1, 0, 1)
-                                .colorTo(0.8f, 1, 1, 0.1f);
-
-                        return Unit.INSTANCE;
-                    });
+                    glow.beginModifierSequence(sequence -> sequence
+                            .colorTo(0, 1, 0.8f)
+                            .colorTo(1, 1, 1, 0.1f)
+                            .then()
+                            .colorTo(1, 0, 1)
+                            .colorTo(0.8f, 1, 1, 0.1f));
 
                     float rate = 0.375f;
                     if (GameHelper.getHealthDrain() > 0) {
