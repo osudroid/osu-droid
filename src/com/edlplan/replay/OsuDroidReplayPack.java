@@ -4,7 +4,9 @@ import static com.osudroid.data.Scores.ScoreInfo;
 
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.ScoreInfo;
+import com.osudroid.mods.IModRequiresBeatmapDifficulty;
 import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.utils.ModUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
@@ -72,7 +74,7 @@ public class OsuDroidReplayPack {
             //noinspection UnnecessaryUnboxing
             replayData.put("sliderEndHits", sliderEndHits != null ? sliderEndHits.intValue() : null);
 
-            entryJson.put("version", 3);
+            entryJson.put("version", 4);
             entryJson.put("replaydata", replayData);
 
             outputStream.write(entryJson.toString(2).getBytes());
@@ -140,7 +142,30 @@ public class OsuDroidReplayPack {
             replayData.remove("mod");
         }
 
+        boolean needsScoreMigration = false;
+
+        if (version < 4) {
+            // Exported replays older than v4 store the total score with mod multipliers; divide back to raw total score.
+            var mods = ModUtils.deserializeMods(replayData.getString("mods"));
+            for (var mod : mods.values()) {
+                if (mod instanceof IModRequiresBeatmapDifficulty) {
+                    needsScoreMigration = true;
+                    break;
+                }
+            }
+
+            // If migration is needed, keep the original score for on-the-fly migrations once the beatmap is available.
+            if (!needsScoreMigration) {
+                replayData.put("score", Math.round(replayData.getInt("score") / ModUtils.calculateScoreMultiplier(mods)));
+            }
+        }
+
         entry.scoreInfo = ScoreInfo(replayData);
+
+        if (needsScoreMigration) {
+            entry.scoreInfo.setNeedsScoreMigration(true);
+        }
+
         entry.replayFile = replayFile;
 
         return entry;
