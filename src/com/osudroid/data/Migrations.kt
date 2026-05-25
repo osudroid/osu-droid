@@ -5,15 +5,19 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
+import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModRateAdjust
 import com.osudroid.mods.ModReplayV6
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 /**
  * Base class for migrations. Backups the database file before performing the migration.
@@ -244,4 +248,70 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+/**
+ * Migration from version 4 to 5.
+ *
+ * Contains the following changes:
+ * - Adds the `needsScoreMigration` column to `ScoreInfo`.
+ * - Converts the `score` column in `ScoreInfo` from storing [StatisticV2.totalScoreWithMultiplier] to storing the raw
+ * [StatisticV2.totalScore], so that future mod multiplier changes can be applied without needing to reverse-engineer
+ * the old multiplier.
+ * - Scores whose mods require the original beatmap (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
+ * the library are flagged with `needsScoreMigration = 1`. Their `score` value is kept as-is and will be converted
+ * on-the-fly once the beatmap is detected.
+ */
+val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
+    override fun performMigration(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN needsScoreMigration INTEGER NOT NULL DEFAULT 0")
+
+        db.query("SELECT id, score, mods, beatmapMD5 FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+                val mods = ModUtils.deserializeMods(it.getString(2))
+                val beatmapMD5 = it.getString(3)
+
+                val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
+
+                if (hasBeatmapDependentMod) {
+                    val beatmapDifficulty = db.query(
+                        "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
+                        arrayOf(beatmapMD5)
+                    ).use { cursor ->
+                        if (!cursor.moveToFirst()) {
+                            return@use null
+                        }
+
+                        BeatmapDifficulty(
+                            cursor.getFloat(0),
+                            cursor.getFloat(1),
+                            cursor.getFloat(2),
+                            cursor.getFloat(3)
+                        )
+                    }
+
+                    if (beatmapDifficulty != null) {
+                        mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
+                            m.applyFromBeatmapDifficulty(beatmapDifficulty)
+                        }
+
+                        db.execSQL(
+                            "UPDATE ScoreInfo SET score = ? WHERE id = ?",
+                            arrayOf<Any>((score / ModUtils.calculateScoreMultiplier(mods)).roundToInt(), id)
+                        )
+                    } else {
+                        // Beatmap not in library; flag for on-the-fly migration once the beatmap is detected.
+                        db.execSQL("UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?", arrayOf<Any>(id))
+                    }
+                } else {
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET score = ? WHERE id = ?",
+                        arrayOf<Any>((score / ModUtils.calculateScoreMultiplier(mods)).roundToInt(), id)
+                    )
+                }
+            }
+        }
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
