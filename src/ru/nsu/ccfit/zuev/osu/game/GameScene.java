@@ -190,8 +190,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Replay replay;
     private boolean replaying;
     private String replayFilePath;
-    public float offsetSum;
-    public int offsetRegs;
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
@@ -831,9 +829,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         SliderTickSprite.renew(16);
 
         // TODO replay
-        offsetSum = 0;
-        offsetRegs = 0;
-
         replaying = false;
         replay = new Replay(true);
         replay.setObjectCount(hitObjects.size());
@@ -3101,10 +3096,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public void registerAccuracy(HitObjectType type, final double acc) {
         double mehWindow = hitWindow.getMehWindow() / 1000;
 
-        if (-mehWindow <= acc && acc <= mehWindow) {
-            offsetSum += (float) acc;
-            offsetRegs++;
-
+        if (Math.abs(acc) <= mehWindow) {
             if (type != HitObjectType.Spinner) {
                 stat.addHitOffset(acc);
             }
