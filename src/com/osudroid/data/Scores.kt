@@ -170,19 +170,15 @@ data class ScoreInfo @JvmOverloads constructor(
             return score
         }
 
-        val mods = try {
-            ModUtils.deserializeMods(mods)
-        } catch (_: Exception) {
-            return score
-        }
+        val modMap = ModUtils.deserializeMods(mods)
 
         if (difficulty != null) {
-            mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
+            modMap.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
                 m.applyFromBeatmapDifficulty(difficulty)
             }
         }
 
-        return (score * ModUtils.calculateScoreMultiplier(mods)).roundToInt()
+        return (score * ModUtils.calculateScoreMultiplier(modMap)).roundToInt()
     }
 
 
@@ -310,12 +306,7 @@ interface IScoreInfoDAO {
         }
 
         for (scoreInfo in pending) {
-            val mods = try {
-                ModUtils.deserializeMods(scoreInfo.mods)
-            } catch (_: Exception) {
-                // Skip invalid/corrupted/legacy rows.
-                continue
-            }
+            val mods = ModUtils.deserializeMods(scoreInfo.mods)
 
             mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach {
                 it.applyFromBeatmapDifficulty(difficulty)
