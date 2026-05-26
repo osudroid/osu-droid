@@ -100,7 +100,7 @@ object ReplayImporter {
                 if (mods.values.any { it is IModRequiresBeatmapDifficulty }) {
                     info.copy(needsScoreMigration = true)
                 } else {
-                    info.copy(score = (info.score / ModUtils.calculateScoreMultiplier(mods)).roundToInt())
+                    info.copy(score = (info.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt())
                 }
             } else {
                 info
