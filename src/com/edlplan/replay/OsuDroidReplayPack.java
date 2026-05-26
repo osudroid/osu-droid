@@ -74,6 +74,12 @@ public class OsuDroidReplayPack {
             //noinspection UnnecessaryUnboxing
             replayData.put("sliderEndHits", sliderEndHits != null ? sliderEndHits.intValue() : null);
 
+            // Pending-migration scores still hold the total score with multipliers. Flag them explicitly so import
+            // handles them correctly.
+            if (scoreInfo.getNeedsScoreMigration()) {
+                replayData.put("isScoreWithMultiplier", true);
+            }
+
             entryJson.put("version", 4);
             entryJson.put("replaydata", replayData);
 
@@ -142,11 +148,14 @@ public class OsuDroidReplayPack {
             replayData.remove("mod");
         }
 
+        // Version 4 or older packs with isScoreWithMultiplier=true are pending-migration scores exported before
+        // conversion, whereas packs older than v4 always stored the total score with multipliers.
+        boolean isScoreWithMultiplier = version < 4 || replayData.optBoolean("isScoreWithMultiplier", false);
         boolean needsScoreMigration = false;
 
-        if (version < 4) {
-            // Exported replays older than v4 store the total score with mod multipliers; divide back to raw total score.
+        if (isScoreWithMultiplier) {
             var mods = ModUtils.deserializeMods(replayData.getString("mods"));
+
             for (var mod : mods.values()) {
                 if (mod instanceof IModRequiresBeatmapDifficulty) {
                     needsScoreMigration = true;
