@@ -222,7 +222,7 @@ public class GameplayHitCircle extends GameObject {
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, hitOffset, position, endsCombo, replayObjectData.result, comboColor);
-                if (successfulHit) {
+                if (successfulHit && !listener.isAfterSeek()) {
                     playHitSamples();
                 }
                 removeFromScene();
@@ -272,7 +272,9 @@ public class GameplayHitCircle extends GameObject {
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             startHit = true;
             successfulHit = true;
-            playHitSamples();
+            if (!listener.isAfterSeek()) {
+                playHitSamples();
+            }
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();

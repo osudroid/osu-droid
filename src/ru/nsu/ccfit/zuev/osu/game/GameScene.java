@@ -193,8 +193,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Replay replay;
     private boolean replaying;
     private String replayFilePath;
-    public float offsetSum;
-    public int offsetRegs;
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
@@ -219,8 +217,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Job gameLoadingJob;
 
     private PerformanceCalculationParameters performanceCalculationParameters;
-    private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
-    private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
+    private volatile TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
+    private volatile TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
+
+    @Nullable
+    private Job ppCalculationJob;
 
     private ReplaySettingsPanel replaySettingsPanel;
 
@@ -651,6 +652,35 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         this.playableBeatmap = playableBeatmap;
 
+        if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
+            switch (Config.getDifficultyAlgorithm()) {
+                case droid -> {
+                    performanceCalculationParameters = new DroidPerformanceCalculationParameters();
+
+                    if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
+                        final var beatmap = playableBeatmap;
+
+                        ppCalculationJob = Execution.async(ppScope -> {
+                            droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(beatmap, ppScope);
+                        });
+                    }
+                }
+
+                case standard -> {
+                    performanceCalculationParameters = new StandardPerformanceCalculationParameters();
+
+                    if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
+                        final var beatmap = parsedBeatmap;
+                        final var modValues = mods.values();
+
+                        ppCalculationJob = Execution.async(ppScope -> {
+                            standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(beatmap, modValues, ppScope);
+                        });
+                    }
+                }
+            }
+        }
+
         // Load backgrounds early to minimize waiting time.
         loadBackground();
         loadStoryboard(beatmapInfo);
@@ -836,9 +866,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         SliderTickSprite.renew(16);
 
         // TODO replay
-        offsetSum = 0;
-        offsetRegs = 0;
-
         replaying = false;
         replay = new Replay(true);
         replay.setObjectCount(hitObjects.size());
@@ -885,29 +912,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         GameObjectPool.getInstance().preload();
-
-        if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
-            // Calculate timed difficulty attributes
-            switch (Config.getDifficultyAlgorithm()) {
-                case droid -> {
-                    performanceCalculationParameters = new DroidPerformanceCalculationParameters();
-
-                    if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
-                    }
-                }
-
-                case standard -> {
-                    performanceCalculationParameters = new StandardPerformanceCalculationParameters();
-
-                    if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                            parsedBeatmap, mods.values(), scope
-                        );
-                    }
-                }
-            }
-        }
 
         sliderIndex = 0;
 
@@ -1055,15 +1059,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var gameLoadingJob = this.gameLoadingJob;
         var storyboardLoadingJob = this.storyboardLoadingJob;
         var videoLoadingJob = this.videoLoadingJob;
+        var ppCalculationJob = this.ppCalculationJob;
         var loadingPipeline = this.loadingPipeline;
 
         this.gameLoadingJob = null;
         this.storyboardLoadingJob = null;
         this.videoLoadingJob = null;
+        this.ppCalculationJob = null;
 
-        var jobCancellation = Execution.stopAsync(gameLoadingJob)
-                .thenCompose((ignored) -> Execution.stopAsync(storyboardLoadingJob))
-                .thenCompose((ignored) -> Execution.stopAsync(videoLoadingJob));
+        var jobCancellation = CompletableFuture.allOf(
+            Execution.stopAsync(gameLoadingJob),
+            Execution.stopAsync(storyboardLoadingJob),
+            Execution.stopAsync(videoLoadingJob),
+            Execution.stopAsync(ppCalculationJob)
+        );
 
         var pipelineDrain = loadingPipeline != null
             ? loadingPipeline.exceptionally((error) -> null)
@@ -3103,10 +3112,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public void registerAccuracy(HitObjectType type, final double acc) {
         double mehWindow = hitWindow.getMehWindow() / 1000;
 
-        if (-mehWindow <= acc && acc <= mehWindow) {
-            offsetSum += (float) acc;
-            offsetRegs++;
-
+        if (Math.abs(acc) <= mehWindow) {
             if (type != HitObjectType.Spinner) {
                 stat.addHitOffset(acc);
             }
@@ -3742,6 +3748,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         hud.onNoteHit(stat);
+        updatePPValue(objectIndex - 1);
 
         // Seek the beatmap clock (also seeks the audio source).
         beatmapClock.seek(clampedTime);
@@ -3751,7 +3758,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             video.seekTo(Math.max(0, (int) ((clampedTime - videoOffset) * 1000)));
         }
 
-        // Suppress hitsounds for nested slider objects that have already passed the seek target.
+        // Suppress hitsounds for slider objects (head, ticks, repeats) that have already passed the seek target.
         // Objects are spawned in the same frame as seekTo runs, but updated in the next frame,
         // so the flag must survive 2 update frames.
         postSeekFrameCount = 2;
@@ -3878,23 +3885,33 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return obj.startTime + mehWindow;
     }
 
+    private void reconstructHitOffset(double accSeconds) {
+        if (Math.abs(accSeconds) <= hitWindow.getMehWindow() / 1000) {
+            stat.addHitOffset(accSeconds);
+        }
+    }
+
     private void applyCircleResult(@Nullable Replay.ReplayObjectData data, boolean endCombo) {
         byte result = data != null ? data.result : ResultType.HIT300.getId();
 
         if (result == ResultType.MISS.getId()) {
             comboWasMissed = true;
             stat.registerHit(0, false, false);
-        } else if (result == ResultType.HIT50.getId()) {
-            stat.registerHit(50, false, false);
-            comboWas100 = true;
-        } else if (result == ResultType.HIT100.getId()) {
-            comboWas100 = true;
-            stat.registerHit(100, endCombo && !comboWasMissed, false);
         } else {
-            if (endCombo && !comboWasMissed) {
-                stat.registerHit(300, true, !comboWas100);
+            reconstructHitOffset(data != null ? data.accuracy / 1000.0 : 0.0);
+
+            if (result == ResultType.HIT50.getId()) {
+                stat.registerHit(50, false, false);
+                comboWas100 = true;
+            } else if (result == ResultType.HIT100.getId()) {
+                comboWas100 = true;
+                stat.registerHit(100, endCombo && !comboWasMissed, false);
             } else {
-                stat.registerHit(300, false, false);
+                if (endCombo && !comboWasMissed) {
+                    stat.registerHit(300, true, !comboWas100);
+                } else {
+                    stat.registerHit(300, false, false);
+                }
             }
         }
 
@@ -3919,9 +3936,32 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        // Slider head was tracked.
-        stat.registerHit(30, false, false);
-        stat.addSliderHeadHit();
+        // Slider head: HIT300 implies all ticks were hit; autoplay (data==null) always hits.
+        // For HIT50/HIT100, reconstruct whether the head was actually within the hit window,
+        // mirroring GameplaySlider.onSliderHeadHit.
+        double accSeconds = data != null ? data.accuracy / 1000.0 : 0.0;
+        boolean headHit;
+
+        if (data == null || result == ResultType.HIT300.getId()) {
+            headHit = true;
+        } else {
+            int replayVersion = GameHelper.getReplayVersion();
+            double mehWindowSecs = hitWindow.getMehWindow() / 1000.0;
+            double sliderDurationSecs = slider.getDuration() / 1000.0;
+            double lateHitThreshold = replayVersion <= 7 ? Math.min(mehWindowSecs, sliderDurationSecs) : mehWindowSecs;
+
+            if (replayVersion >= 6 || mehWindowSecs <= sliderDurationSecs) {
+                headHit = -mehWindowSecs <= accSeconds && accSeconds <= lateHitThreshold;
+            } else {
+                headHit = accSeconds <= sliderDurationSecs;
+            }
+        }
+
+        if (headHit) {
+            reconstructHitOffset(accSeconds);
+            stat.registerHit(30, false, false);
+            stat.addSliderHeadHit();
+        }
 
         // Ticks and repeats from tickSet.
         var nested = slider.getNestedHitObjects();

@@ -1073,7 +1073,9 @@ public class GameplaySlider extends GameObject {
             headWasHit = -mehWindow <= hitOffset && hitOffset <= getLateHitThreshold();
 
             if (headWasHit) {
-                playCurrentNestedObjectHitSound();
+                if (!listener.isAfterSeek()) {
+                    playCurrentNestedObjectHitSound();
+                }
                 ticksGot++;
                 shouldSnakeOut = true;
                 listener.onSliderHit(id, 30, position,
@@ -1088,7 +1090,9 @@ public class GameplaySlider extends GameObject {
             // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(HitObjectType.Slider, hitOffset);
             headWasHit = true;
-            playCurrentNestedObjectHitSound();
+            if (!listener.isAfterSeek()) {
+                playCurrentNestedObjectHitSound();
+            }
             ticksGot++;
             shouldSnakeOut = true;
             listener.onSliderHit(id, 30, position,
@@ -1187,6 +1191,11 @@ public class GameplaySlider extends GameObject {
 
             currentNestedObjectIndex++;
         }
+
+        // Recalculate elapsedSpanTime using the now-correct completedSpanCount so that
+        // getGameplayPassedTimeMilliseconds() and percentage reflect the actual playback position
+        // rather than an inflated value that would trigger premature span finishes or tick judgements.
+        elapsedSpanTime = listener.getElapsedTime() - hitTime - completedSpanCount * spanDuration;
 
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
