@@ -304,7 +304,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
 
                         db.execSQL(
                             "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                            arrayOf<Any>((score / ModUtils.calculateScoreMultiplier(mods)).roundToInt(), id)
+                            arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
                         )
                     } else {
                         // Beatmap not in library; flag for on-the-fly migration once the beatmap is detected.
@@ -313,7 +313,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                 } else {
                     db.execSQL(
                         "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                        arrayOf<Any>((score / ModUtils.calculateScoreMultiplier(mods)).roundToInt(), id)
+                        arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
                     )
                 }
             }

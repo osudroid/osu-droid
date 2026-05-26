@@ -316,10 +316,10 @@ interface IScoreInfoDAO {
                 it.applyFromBeatmapDifficulty(difficulty)
             }
 
-            val multiplier = ModUtils.calculateScoreMultiplier(mods)
-            val rawScore = (scoreInfo.score / multiplier).roundToInt()
-
-            updateScore(scoreInfo.copy(score = rawScore, needsScoreMigration = false))
+            updateScore(scoreInfo.copy(
+                score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                needsScoreMigration = false
+            ))
         }
     }
 }
