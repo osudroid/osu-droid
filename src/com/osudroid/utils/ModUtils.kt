@@ -199,7 +199,37 @@ object ModUtils {
      * @return The score multiplier.
      */
     @JvmStatic
-    fun calculateScoreMultiplier(mods: Iterable<Mod>): Float {
+    fun calculateScoreMultiplier(mods: Iterable<Mod>) =
+        calculateScoreMultiplierInternal(mods, { scoreMultiplier }, { scoreMultiplier })
+
+    /**
+     * Calculates the score multiplier for the selected [Mod]s using [Mod.migrationScoreMultiplier] instead of
+     * [Mod.scoreMultiplier]. Use this when reverse-engineering raw scores from stored effective scores during migration
+     * from version 4 to 5.
+     *
+     * @param mods The selected [Mod]s.
+     * @return The migration score multiplier.
+     */
+    @JvmStatic
+    fun calculateMigrationScoreMultiplier(mods: ModHashMap) = calculateMigrationScoreMultiplier(mods.values)
+
+    /**
+     * Calculates the score multiplier for the selected [Mod]s using [Mod.migrationScoreMultiplier] instead of
+     * [Mod.scoreMultiplier]. Use this when reverse-engineering raw scores from stored effective scores during migration
+     * from version 4 to 5.
+     *
+     * @param mods The selected [Mod]s.
+     * @return The migration score multiplier.
+     */
+    @JvmStatic
+    fun calculateMigrationScoreMultiplier(mods: Iterable<Mod>) =
+        calculateScoreMultiplierInternal(mods, { migrationScoreMultiplier }, { migrationScoreMultiplier })
+
+    private inline fun calculateScoreMultiplierInternal(
+        mods: Iterable<Mod>,
+        crossinline modSelector: Mod.() -> Float,
+        crossinline helperSelector: ModRateAdjustHelper.() -> Float
+    ): Float {
         // Rate-adjusting mods combine their track rate multipliers together, then bunched together.
         var totalRateAdjustTrackRateMultiplier = 1f
         var scoreMultiplier = 1f
@@ -208,11 +238,11 @@ object ModUtils {
             if (mod is ModRateAdjust) {
                 totalRateAdjustTrackRateMultiplier *= mod.trackRateMultiplier
             } else {
-                scoreMultiplier *= mod.scoreMultiplier
+                scoreMultiplier *= mod.modSelector()
             }
         }
 
-        scoreMultiplier *= ModRateAdjustHelper(totalRateAdjustTrackRateMultiplier).scoreMultiplier
+        scoreMultiplier *= ModRateAdjustHelper(totalRateAdjustTrackRateMultiplier).helperSelector()
 
         return scoreMultiplier
     }
