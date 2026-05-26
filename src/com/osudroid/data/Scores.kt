@@ -164,6 +164,12 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     @JvmOverloads
     fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
+        // Pending-migration rows store totalScoreWithMultiplier directly, so multiplying again would apply the
+        // multiplier twice.
+        if (needsScoreMigration) {
+            return score
+        }
+
         val mods = ModUtils.deserializeMods(mods)
 
         if (difficulty != null) {
