@@ -164,7 +164,7 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     @JvmOverloads
     fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
-        // Pending-migration rows store totalScoreWithMultiplier directly, so multiplying again would apply the
+        // Pending-migration rows store total score with multipliers directly, so multiplying again would apply the
         // multiplier twice.
         if (needsScoreMigration) {
             return score
@@ -190,7 +190,15 @@ data class ScoreInfo @JvmOverloads constructor(
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
         it.mod = ModUtils.deserializeMods(mods)
-        it.totalScore = score
+
+        // Pending-migration rows store total score with multiplier, so we use forced score to prevent mod multipliers
+        // from multiplying again.
+        if (needsScoreMigration) {
+            it.setForcedScore(score)
+        } else {
+            it.totalScore = score
+        }
+
         it.scoreMaxCombo = maxCombo
         it.mark = mark
         it.hit300k = hit300k
