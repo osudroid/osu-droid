@@ -234,7 +234,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 }
 
                 DatabaseManager.getScoreInfoTable().migrateScores(beatmap.getMD5(), beatmap.getBeatmapDifficulty());
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScoresByTotalScore(beatmap.getMD5(), beatmap.getBeatmapDifficulty());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapLeaderboard(beatmap.getMD5(), beatmap.getBeatmapDifficulty());
 
                 if (scores.isEmpty() || !isActive()) {
 

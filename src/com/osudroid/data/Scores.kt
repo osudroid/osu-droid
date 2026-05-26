@@ -254,7 +254,7 @@ fun ScoreInfo(json: JSONObject) =
     )
 
 /**
- * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapScoresByTotalScore].
+ * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapLeaderboard].
  */
 data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Int)
 
@@ -264,7 +264,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5")
     fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
-    fun getBeatmapScoresByTotalScore(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
         getBeatmapScores(beatmapMD5)
             .map { ScoredScoreInfo(it, it.calculateEffectiveScore(difficulty)) }
             .sortedByDescending { it.effectiveScore }
