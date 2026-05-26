@@ -164,8 +164,8 @@ public class OsuDroidReplayPack {
             }
 
             // If migration is needed, keep the original score for on-the-fly migrations once the beatmap is available.
-            if (!needsScoreMigration) {
-                replayData.put("score", Math.round(replayData.getInt("score") / ModUtils.calculateScoreMultiplier(mods)));
+            if (needsScoreMigration) {
+                replayData.put("score", Math.round(replayData.getInt("score") / ModUtils.calculateMigrationScoreMultiplier(mods)));
             }
         }
 
