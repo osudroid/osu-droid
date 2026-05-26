@@ -170,7 +170,11 @@ data class ScoreInfo @JvmOverloads constructor(
             return score
         }
 
-        val mods = ModUtils.deserializeMods(mods)
+        val mods = try {
+            ModUtils.deserializeMods(mods)
+        } catch (_: Exception) {
+            return score
+        }
 
         if (difficulty != null) {
             mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
