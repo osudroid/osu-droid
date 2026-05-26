@@ -253,6 +253,11 @@ fun ScoreInfo(json: JSONObject) =
         sliderEndHits = json.optInt("sliderEndHits", -1).takeIf { it >= 0 }
     )
 
+/**
+ * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapScoresByTotalScore].
+ */
+data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Int)
+
 @Dao
 interface IScoreInfoDAO {
 
@@ -261,9 +266,8 @@ interface IScoreInfoDAO {
 
     fun getBeatmapScoresByTotalScore(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
         getBeatmapScores(beatmapMD5)
-            .map { it to it.calculateEffectiveScore(difficulty) }
-            .sortedByDescending { (_, effectiveScore) -> effectiveScore }
-            .map { (scoreInfo, _) -> scoreInfo }
+            .map { ScoredScoreInfo(it, it.calculateEffectiveScore(difficulty)) }
+            .sortedByDescending { it.effectiveScore }
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
