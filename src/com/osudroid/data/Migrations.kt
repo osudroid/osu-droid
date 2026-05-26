@@ -268,7 +268,14 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 val score = it.getInt(1)
-                val mods = ModUtils.deserializeMods(it.getString(2))
+
+                val mods = try {
+                    ModUtils.deserializeMods(it.getString(2))
+                } catch (e: Exception) {
+                    Log.w("MIGRATION_4_5", "Failed to deserialize mods for score $id, skipping conversion", e)
+                    continue
+                }
+
                 val beatmapMD5 = it.getString(3)
 
                 val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
