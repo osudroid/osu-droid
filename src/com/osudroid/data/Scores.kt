@@ -310,7 +310,12 @@ interface IScoreInfoDAO {
         }
 
         for (scoreInfo in pending) {
-            val mods = ModUtils.deserializeMods(scoreInfo.mods)
+            val mods = try {
+                ModUtils.deserializeMods(scoreInfo.mods)
+            } catch (_: Exception) {
+                // Skip invalid/corrupted/legacy rows.
+                continue
+            }
 
             mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach {
                 it.applyFromBeatmapDifficulty(difficulty)
