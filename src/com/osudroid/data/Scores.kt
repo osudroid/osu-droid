@@ -256,7 +256,10 @@ interface IScoreInfoDAO {
     fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
     fun getBeatmapScoresByTotalScore(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
-        getBeatmapScores(beatmapMD5).sortedByDescending { it.calculateEffectiveScore(difficulty) }
+        getBeatmapScores(beatmapMD5)
+            .map { it to it.calculateEffectiveScore(difficulty) }
+            .sortedByDescending { (_, effectiveScore) -> effectiveScore }
+            .map { (scoreInfo, _) -> scoreInfo }
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
