@@ -10,7 +10,7 @@ import com.rian.andengine.timing.IFrameBasedClock
 import org.andengine.engine.camera.hud.HUD as AndEngineHUD
 import org.andengine.entity.scene.Scene
 import org.andengine.engine.camera.Camera
-import javax.microedition.khronos.opengles.GL10
+import org.andengine.opengl.util.GLState
 
 /**
  * An [AndEngineHUD] that provides an [IFrameBasedClock] to its [UIComponent] children.
@@ -129,7 +129,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
 
     private var hudCamera: Camera? = null
 
-    override fun onDraw(pGL: GL10, pCamera: Camera) {
+    override fun onDraw(pGL: GLState, pCamera: Camera) {
         val mc = mCamera
         var cam = pCamera
 
