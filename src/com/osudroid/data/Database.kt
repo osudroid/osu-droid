@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.room.*
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
+import com.osudroid.mods.ModReplayV6
+import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import com.reco1l.toolkt.data.iterator
 import org.apache.commons.io.FilenameUtils
@@ -215,7 +217,7 @@ object DatabaseManager {
                                         else (legacyScore / ModUtils.calculateScoreMultiplier(legacyMods)).roundToInt()
                                 } else {
                                     // Mods can't be converted; keep effective score as-is.
-                                    modsString = legacyModString
+                                    modsString = ModHashMap().apply { put(ModReplayV6()) }.serializeMods()
                                     rawScore = legacyScore
                                     needsMigration = false
                                 }
