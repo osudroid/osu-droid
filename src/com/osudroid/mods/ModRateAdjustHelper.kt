@@ -11,7 +11,15 @@ class ModRateAdjustHelper(private val trackRateMultiplier: Float) {
     /**
      * The score multiplier based on the track rate multiplier.
      */
-    val scoreMultiplier: Float
+    val scoreMultiplier
         get() = if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
                 else 0.3f.pow((1 - trackRateMultiplier) * 4)
+
+    /**
+     * The score multiplier used during migration.
+     *
+     * @see [Mod.migrationScoreMultiplier]
+     */
+    val migrationScoreMultiplier
+        get() = scoreMultiplier
 }
