@@ -273,6 +273,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                     ModUtils.deserializeMods(it.getString(2))
                 } catch (e: Exception) {
                     Log.w("MIGRATION_4_5", "Failed to deserialize mods for score $id, skipping conversion", e)
+                    db.execSQL("UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?", arrayOf<Any>(id))
                     continue
                 }
 
