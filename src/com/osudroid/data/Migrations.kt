@@ -278,9 +278,11 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                     // We have done this in previous migrations, but at one point they were bugged and some scores may
                     // have been left with legacy mod strings, so we do it again. This should be the last time that we
                     // need to do this.
-                    val modMap = LegacyModConverter.convert(serializedMods, difficulty).apply {
-                        put(ModReplayV6())
-                    }
+                    val modMap = try {
+                        LegacyModConverter.convert(serializedMods, difficulty)
+                    } catch (_: Exception) {
+                        ModHashMap()
+                    }.apply { put(ModReplayV6()) }
 
                     db.execSQL(
                         "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
