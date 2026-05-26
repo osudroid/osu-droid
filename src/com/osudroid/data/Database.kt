@@ -199,35 +199,22 @@ object DatabaseManager {
                                 val legacyMods = try {
                                     LegacyModConverter.convert(legacyModString)
                                 } catch (_: Exception) {
-                                    null
-                                }
+                                    ModHashMap()
+                                }.apply { put(ModReplayV6()) }
 
                                 val legacyScore = it.getInt(it.getColumnIndexOrThrow("score"))
+                                val needsMigration = legacyMods.values.any { mod -> mod is IModRequiresBeatmapDifficulty }
 
-                                val modsString: String
-                                val rawScore: Int
-                                val needsMigration: Boolean
-
-                                if (legacyMods != null) {
-                                    modsString = legacyMods.serializeMods()
-                                    needsMigration = legacyMods.values.any { mod -> mod is IModRequiresBeatmapDifficulty }
-
-                                    rawScore =
-                                        if (needsMigration) legacyScore
-                                        else (legacyScore / ModUtils.calculateScoreMultiplier(legacyMods)).roundToInt()
-                                } else {
-                                    // Mods can't be converted; keep effective score as-is.
-                                    modsString = ModHashMap().apply { put(ModReplayV6()) }.serializeMods()
-                                    rawScore = legacyScore
-                                    needsMigration = false
-                                }
+                                val rawScore =
+                                    if (needsMigration) legacyScore
+                                    else (legacyScore / ModUtils.calculateMigrationScoreMultiplier(legacyMods)).roundToInt()
 
                                 scoreInfos += ScoreInfo(
                                     id = id,
                                     beatmapMD5 = replay.md5,
                                     playerName = it.getString(it.getColumnIndexOrThrow("playername")),
                                     replayFilename = FilenameUtils.getName(replayFilePath),
-                                    mods = modsString,
+                                    mods = legacyMods.serializeMods(),
                                     score = rawScore,
                                     maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
                                     mark = it.getString(it.getColumnIndexOrThrow("mark")),
