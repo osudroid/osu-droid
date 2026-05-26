@@ -256,7 +256,7 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
  * - Converts the `score` column in `ScoreInfo` from storing [StatisticV2.totalScoreWithMultiplier] to storing the raw
  * [StatisticV2.totalScore], so that future mod multiplier changes can be applied without needing to reverse-engineer
  * the old multiplier.
- * - Scores whose mods require the original beatmap (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
+ * - Scores whose mods require the beatmap's difficulty (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
  * the library are flagged with `needsScoreMigration = 1`. Their `score` value is kept as-is and will be converted
  * on-the-fly once the beatmap is detected.
  */
