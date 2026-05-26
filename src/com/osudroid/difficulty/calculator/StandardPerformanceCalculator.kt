@@ -205,10 +205,6 @@ class StandardPerformanceCalculator(
             accuracyValue *= 1 + 0.08 * Interpolation.reverseLinear(approachRate, 11.5, 10.0)
         }
 
-        if (mods.any { it is ModFlashlight }) {
-            accuracyValue *= 1.02
-        }
-
         accuracyValue
     }
 

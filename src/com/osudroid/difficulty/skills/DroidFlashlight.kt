@@ -23,7 +23,7 @@ class DroidFlashlight(
     override val reducedSectionBaseline = 1.0
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 0.023
+    private val skillMultiplier = 0.024
     private val strainDecayBase = 0.15
 
     override fun difficultyValue(): Double {

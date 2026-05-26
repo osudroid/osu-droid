@@ -229,10 +229,6 @@ class DroidPerformanceCalculator(
         // Penalize accuracy pp after the first miss.
         accuracyValue *= 0.97.pow(max(0.0, effectiveMissCount - 1))
 
-        if (mods.any { it is ModFlashlight }) {
-            accuracyValue *= 1.02
-        }
-
         accuracyValue
     }
 
