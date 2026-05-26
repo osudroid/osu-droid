@@ -268,39 +268,34 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 val score = it.getInt(1)
+                val serializedMods = it.getString(2)
+                val difficulty = db.getBeatmapDifficulty(it.getString(3))
 
                 val mods = try {
-                    ModUtils.deserializeMods(it.getString(2))
-                } catch (e: Exception) {
-                    Log.w("MIGRATION_4_5", "Failed to deserialize mods for score $id, skipping conversion", e)
-                    db.execSQL("UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?", arrayOf<Any>(id))
-                    continue
-                }
+                    ModUtils.deserializeMods(serializedMods)
+                } catch (_: Exception) {
+                    // If the mods are not deserializable, assume they are legacy mods that need to be migrated.
+                    // We have done this in previous migrations, but at one point they were bugged and some scores may
+                    // have been left with legacy mod strings, so we do it again. This should be the last time that we
+                    // need to do this.
+                    val modMap = LegacyModConverter.convert(serializedMods, difficulty).apply {
+                        put(ModReplayV6())
+                    }
 
-                val beatmapMD5 = it.getString(3)
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
+                        arrayOf<Any>(modMap.serializeMods(), id)
+                    )
+
+                    modMap
+                }
 
                 val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
 
                 if (hasBeatmapDependentMod) {
-                    val beatmapDifficulty = db.query(
-                        "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
-                        arrayOf(beatmapMD5)
-                    ).use { cursor ->
-                        if (!cursor.moveToFirst()) {
-                            return@use null
-                        }
-
-                        BeatmapDifficulty(
-                            cursor.getFloat(0),
-                            cursor.getFloat(1),
-                            cursor.getFloat(2),
-                            cursor.getFloat(3)
-                        )
-                    }
-
-                    if (beatmapDifficulty != null) {
+                    if (difficulty != null) {
                         mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                            m.applyFromBeatmapDifficulty(beatmapDifficulty)
+                            m.applyFromBeatmapDifficulty(difficulty)
                         }
 
                         db.execSQL(
@@ -319,6 +314,22 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                 }
             }
         }
+    }
+
+    private fun SupportSQLiteDatabase.getBeatmapDifficulty(beatmapMD5: String) = query(
+        "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
+        arrayOf(beatmapMD5)
+    ).use { cursor ->
+        if (!cursor.moveToFirst()) {
+            return@use null
+        }
+
+        BeatmapDifficulty(
+            cursor.getFloat(0),
+            cursor.getFloat(1),
+            cursor.getFloat(2),
+            cursor.getFloat(3)
+        )
     }
 }
 
