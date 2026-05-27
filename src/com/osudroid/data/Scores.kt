@@ -314,6 +314,7 @@ interface IScoreInfoDAO {
 
             updateScore(scoreInfo.copy(
                 score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                mods = mods.serializeMods(),
                 needsScoreMigration = false
             ))
         }
