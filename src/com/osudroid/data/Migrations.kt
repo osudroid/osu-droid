@@ -256,6 +256,8 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
  * - Converts the `score` column in `ScoreInfo` from storing [StatisticV2.totalScoreWithMultiplier] to storing the raw
  * [StatisticV2.totalScore], so that future mod multiplier changes can be applied without needing to reverse-engineer
  * the old multiplier.
+ * - Migrates [ModDifficultyAdjust]'s serialization into the new format (that also stores the original difficulty value).
+ * This allows for future score multiplier recalculations that are independent of their beatmaps.
  * - Scores whose mods require the beatmap's difficulty (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
  * the library are flagged with `needsScoreMigration = 1`. Their `score` value is kept as-is and will be converted
  * on-the-fly once the beatmap is detected.
@@ -301,12 +303,19 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                         }
 
                         db.execSQL(
-                            "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                            arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
+                            "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
+                            arrayOf<Any>(
+                                (score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                                mods.serializeMods(),
+                                id
+                            )
                         )
                     } else {
-                        // Beatmap not in library; flag for on-the-fly migration once the beatmap is detected.
-                        db.execSQL("UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?", arrayOf<Any>(id))
+                        // Beatmap not in library; upgrade mods to new format and flag for on-the-fly migration.
+                        db.execSQL(
+                            "UPDATE ScoreInfo SET mods = ?, needsScoreMigration = 1 WHERE id = ?",
+                            arrayOf<Any>(mods.serializeMods(), id)
+                        )
                     }
                 } else {
                     db.execSQL(
