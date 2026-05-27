@@ -189,10 +189,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     }
 
     override fun applyFromBeatmapDifficulty(difficulty: BeatmapDifficulty) {
-        updateDefaultValue(::cs, difficulty.gameplayCS)
-        updateDefaultValue(::ar, difficulty.ar)
-        updateDefaultValue(::od, difficulty.od)
-        updateDefaultValue(::hp, difficulty.hp)
+        updateBeatmapValue(::cs, difficulty.gameplayCS)
+        updateBeatmapValue(::ar, difficulty.ar)
+        updateBeatmapValue(::od, difficulty.od)
+        updateBeatmapValue(::hp, difficulty.hp)
     }
 
     private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
