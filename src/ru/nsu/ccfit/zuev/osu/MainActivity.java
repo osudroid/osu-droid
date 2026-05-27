@@ -4,6 +4,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -129,6 +130,11 @@ public class MainActivity extends BaseGameActivity implements
         }
         analytics = FirebaseAnalytics.getInstance(this);
         crashlytics = FirebaseCrashlytics.getInstance();
+
+        // Detect the device's maximum supported OpenGL ES version and report it to Firebase
+        // so we can see the GLES capability distribution across users.
+        reportGlesVersion();
+
         Config.loadConfig(this);
         initialGameDirectory();
         Multiplayer.initLog();
@@ -564,6 +570,43 @@ public class MainActivity extends BaseGameActivity implements
                     Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
                 }
             }
+        }
+    }
+
+    /**
+     * Detects the device's maximum supported OpenGL ES version via
+     * {@link ActivityManager#getDeviceConfigurationInfo()} and reports it to Firebase Analytics
+     * both as a persistent user property (for audience segmentation) and inside the APP_OPEN
+     * event bundle (for per-session inspection).
+     *
+     * <p>The version string format is {@code "<major>.<minor>"}, e.g. {@code "3.2"} or
+     * {@code "3.0"}.  Firebase user-property values are capped at 36 characters, so the short
+     * string is well within limits.
+     */
+    private void reportGlesVersion() {
+        try {
+            ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            // Use var so we never need to name the inner class ActivityManager.DeviceConfigurationInfo.
+            var configInfo = am.getDeviceConfigurationInfo();
+
+            // reqGlEsVersion encodes the version as (major << 16 | minor).
+            // Example: 0x00030002 → OpenGL ES 3.2
+            int reqGlEsVersion = configInfo.reqGlEsVersion;
+            int glesMajor = reqGlEsVersion >> 16;
+            int glesMinor = reqGlEsVersion & 0xFFFF;
+            String glesVersionStr = glesMajor + "." + glesMinor;
+
+            // Persist as a user property so the Firebase console can segment audiences
+            // by GLES version (e.g. "gles_version = 3.2" vs "3.0").
+            analytics.setUserProperty("gles_version", glesVersionStr);
+
+            // Also attach to Crashlytics so crash reports include the GLES capability.
+            crashlytics.setCustomKey("gles_version", glesVersionStr);
+
+            Debug.i("Device max GLES version: " + glesVersionStr
+                    + " (raw=0x" + Integer.toHexString(reqGlEsVersion) + ")");
+        } catch (Exception e) {
+            Debug.e("Failed to detect GLES version: " + e.getMessage(), e);
         }
     }
 
