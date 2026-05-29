@@ -378,7 +378,7 @@ class RoomPlayerCard : UILinearContainer() {
                     if (OnlineManager.getInstance().loadAvatarToTextureManager(avatarUrl)) {
                         ensureActive()
 
-                        val texture = resourceManager.getTextureIfLoaded(avatarKey)
+                        val texture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
 
                         updateThread {
                             if (lastPlayerId == userId) {
