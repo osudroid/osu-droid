@@ -354,7 +354,7 @@ public class MainActivity extends BaseGameActivity implements
                 availableInternalMemory();
                 applyRefreshRateSetting(Config.isForceMaxRefreshRate());
 
-                scheduledExecutor.scheduleAtFixedRate(() -> AccessibilityDetector.check(MainActivity.this), 0, 100, TimeUnit.MILLISECONDS);
+                AccessibilityDetector.register(MainActivity.this);
 
                 logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
@@ -831,6 +831,7 @@ public class MainActivity extends BaseGameActivity implements
         super.onDestroy();
 
         Multiplayer.flushLog();
+        AccessibilityDetector.unregister(this);
         ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
     }
 
