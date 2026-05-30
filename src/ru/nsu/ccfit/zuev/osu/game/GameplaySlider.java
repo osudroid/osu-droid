@@ -553,14 +553,16 @@ public class GameplaySlider extends GameObject {
         setLifetimeEnd(modifierStartTime);
 
         if (Config.isAnimateFollowCircle()) {
-            followCircle.clearEntityModifiers();
+            if (isInRadius) {
+                followCircle.clearEntityModifiers();
 
-            followCircle.beginAbsoluteSequence(modifierStartTime, sequence -> {
-                sequence.scaleTo(beatmapSlider.getScreenSpaceGameplayScale() * 0.8f, 0.2f, Easing.Out)
-                        .fadeOut(0.2f, Easing.In);
+                followCircle.beginAbsoluteSequence(modifierStartTime, sequence -> {
+                    sequence.scaleTo(beatmapSlider.getScreenSpaceGameplayScale() * 0.8f, 0.2f, Easing.Out)
+                            .fadeOut(0.2f, Easing.In);
 
-                extendLifetime(sequence);
-            });
+                    extendLifetime(sequence);
+                });
+            }
         } else {
             followCircle.detachSelf();
         }
