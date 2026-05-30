@@ -517,9 +517,13 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleAdvancedSectionPreferences() {
-        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.setOnPreferenceChangeListener { _, newValue ->
-            (requireActivity() as MainActivity).applyRefreshRateSetting(newValue as Boolean)
-            true
+        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.apply {
+            isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+
+            setOnPreferenceChangeListener { _, newValue ->
+                (requireActivity() as MainActivity).applyRefreshRateSetting(newValue as Boolean)
+                true
+            }
         }
 
         findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
