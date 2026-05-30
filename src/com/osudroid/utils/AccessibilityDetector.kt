@@ -45,6 +45,8 @@ object AccessibilityDetector {
         "com.miui.voiceassist",
         // Commonly used quick gesture application in Motorola devices
         "com.motorola.actions",
+        // System application in Transsion devices (TECNO, Infinix, Itel)
+        "com.transsion.aivoiceassistant",
     )
 
 
