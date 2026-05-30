@@ -5,15 +5,19 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
+import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModRateAdjust
 import com.osudroid.mods.ModReplayV6
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 /**
  * Base class for migrations. Backups the database file before performing the migration.
@@ -244,4 +248,100 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+/**
+ * Migration from version 4 to 5.
+ *
+ * Contains the following changes:
+ * - Adds the `needsScoreMigration` column to `ScoreInfo`.
+ * - Converts the `score` column in `ScoreInfo` from storing [StatisticV2.totalScoreWithMultiplier] to storing the raw
+ * [StatisticV2.totalScore], so that future mod multiplier changes can be applied without needing to reverse-engineer
+ * the old multiplier.
+ * - Migrates [ModDifficultyAdjust]'s serialization into the new format (that also stores the original difficulty value).
+ * This allows for future score multiplier recalculations that are independent of their beatmaps.
+ * - Scores whose mods require the beatmap's difficulty (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
+ * the library are flagged with `needsScoreMigration = 1`. Their `score` value is kept as-is and will be converted
+ * on-the-fly once the beatmap is detected.
+ */
+val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
+    override fun performMigration(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE ScoreInfo ADD COLUMN needsScoreMigration INTEGER NOT NULL DEFAULT 0")
+
+        db.query("SELECT id, score, mods, beatmapMD5 FROM ScoreInfo").use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val score = it.getInt(1)
+                val serializedMods = it.getString(2)
+                val difficulty = db.getBeatmapDifficulty(it.getString(3))
+
+                val mods = try {
+                    ModUtils.deserializeMods(serializedMods)
+                } catch (_: Exception) {
+                    // If the mods are not deserializable, assume they are legacy mods that need to be migrated.
+                    // We have done this in previous migrations, but at one point they were bugged and some scores may
+                    // have been left with legacy mod strings, so we do it again. This should be the last time that we
+                    // need to do this.
+                    val modMap = try {
+                        LegacyModConverter.convert(serializedMods, difficulty)
+                    } catch (_: Exception) {
+                        ModHashMap()
+                    }.apply { put(ModReplayV6()) }
+
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET mods = ? WHERE id = ?",
+                        arrayOf<Any>(modMap.serializeMods(), id)
+                    )
+
+                    modMap
+                }
+
+                val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
+
+                if (hasBeatmapDependentMod) {
+                    if (difficulty != null) {
+                        mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
+                            m.applyFromBeatmapDifficulty(difficulty)
+                        }
+
+                        db.execSQL(
+                            "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
+                            arrayOf<Any>(
+                                (score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                                mods.serializeMods(),
+                                id
+                            )
+                        )
+                    } else {
+                        // Beatmap not in library; upgrade mods to new format and flag for on-the-fly migration.
+                        db.execSQL(
+                            "UPDATE ScoreInfo SET mods = ?, needsScoreMigration = 1 WHERE id = ?",
+                            arrayOf<Any>(mods.serializeMods(), id)
+                        )
+                    }
+                } else {
+                    db.execSQL(
+                        "UPDATE ScoreInfo SET score = ? WHERE id = ?",
+                        arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun SupportSQLiteDatabase.getBeatmapDifficulty(beatmapMD5: String) = query(
+        "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
+        arrayOf(beatmapMD5)
+    ).use { cursor ->
+        if (!cursor.moveToFirst()) {
+            return@use null
+        }
+
+        BeatmapDifficulty(
+            cursor.getFloat(0),
+            cursor.getFloat(1),
+            cursor.getFloat(2),
+            cursor.getFloat(3)
+        )
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)

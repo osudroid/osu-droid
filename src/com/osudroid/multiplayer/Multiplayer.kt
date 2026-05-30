@@ -107,6 +107,9 @@ object Multiplayer {
     @Volatile
     private var isWaitingAttemptResponse = false
 
+    @Volatile
+    private var attemptStartTimeMS = 0L
+
     private val abandonReconnectionLock = Any()
 
     //region Connection
@@ -250,11 +253,22 @@ object Multiplayer {
      */
     private fun abandonReconnection() {
         synchronized(abandonReconnectionLock) {
-            if (!isReconnecting) return
+            if (!isReconnecting) {
+                return
+            }
+
             isReconnecting = false
 
             reconnectionJob?.cancel()
             reconnectionJob = null
+
+            // Release UI await-locks so the room scene is interactive after the error toast,
+            // even when navigation is deferred because a game session is still active.
+            roomScene?.apply {
+                isWaitingForBeatmapChange.set(false)
+                isWaitingForStatusChange.set(false)
+                isWaitingForModsChange.set(false)
+            }
 
             ToastLogger.showText(
                 "The connection to server has been lost, please check your internet connection.",
@@ -320,10 +334,16 @@ object Multiplayer {
                     return@launch
                 }
 
-                // Still waiting for the server to respond to the last attempt — poll cheaply
-                // instead of spinning at 100% CPU.
+                // Still waiting for the server to respond to the last attempt.
+                // If 8 seconds pass with no response (connect_error, disconnect, or initialConnection), treat it as a
+                // failure so the loop can retry rather than burning the entire 30s window on one unresponsive socket.
                 if (isWaitingAttemptResponse) {
-                    delay(250.milliseconds)
+                    if (currentTime - attemptStartTimeMS >= 8000) {
+                        onReconnectAttempt(false)
+                    } else {
+                        delay(250.milliseconds)
+                    }
+
                     continue
                 }
 
@@ -351,6 +371,7 @@ object Multiplayer {
                     )
 
                     isWaitingAttemptResponse = true
+                    attemptStartTimeMS = System.currentTimeMillis()
                 } catch (e: Exception) {
                     log(e)
 
