@@ -27,8 +27,8 @@ import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -118,6 +118,7 @@ public class MainActivity extends BaseGameActivity implements
     private DisplayManager.DisplayListener displayListener;
     private float currentRefreshRate = 60;
     private float maxRefreshRate = 60;
+    private int maxRefreshRateModeId = 0;
     private MessageDialog multiWindowAlert;
 
     // Multiplayer
@@ -166,11 +167,10 @@ public class MainActivity extends BaseGameActivity implements
 
         ((DisplayManager) getSystemService(DISPLAY_SERVICE)).registerDisplayListener(displayListener, null);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            for (var mode : display.getSupportedModes()) {
-                for (float rate : mode.getAlternativeRefreshRates()) {
-                    maxRefreshRate = Math.max(maxRefreshRate, rate);
-                }
+        for (var mode : display.getSupportedModes()) {
+            if (mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+                maxRefreshRateModeId = mode.getModeId();
             }
         }
 
@@ -352,18 +352,9 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
+                applyRefreshRateSetting(Config.isForceMaxRefreshRate());
 
-                scheduledExecutor.scheduleAtFixedRate(() -> {
-                    if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        float refreshRate = getRefreshRate();
-
-                        if (refreshRate != maxRefreshRate) {
-                            mRenderSurfaceView.getHolder().getSurface().setFrameRate(maxRefreshRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
-                        }
-                    }
-
-                    AccessibilityDetector.check(MainActivity.this);
-                }, 0, 100, TimeUnit.MILLISECONDS);
+                scheduledExecutor.scheduleAtFixedRate(() -> AccessibilityDetector.check(MainActivity.this), 0, 100, TimeUnit.MILLISECONDS);
 
                 logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
@@ -1071,6 +1062,14 @@ public class MainActivity extends BaseGameActivity implements
 
     public float getRefreshRate() {
         return currentRefreshRate;
+    }
+
+    public void applyRefreshRateSetting(boolean enable) {
+        runOnUiThread(() -> {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.preferredDisplayModeId = enable ? maxRefreshRateModeId : 0;
+            getWindow().setAttributes(lp);
+        });
     }
 
     private boolean checkPermissions() {
