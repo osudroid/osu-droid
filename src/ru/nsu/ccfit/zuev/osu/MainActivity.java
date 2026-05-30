@@ -922,8 +922,6 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         AccessibilityDetector.unregister(this);
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
-    }
 
         if (killOnDestroy) {
             // The user explicitly exited via the Main Menu.  The full lifecycle has now run:
