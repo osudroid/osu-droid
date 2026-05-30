@@ -517,10 +517,9 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleAdvancedSectionPreferences() {
-        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.apply {
-            // Obtaining supported refresh rates is only available on Android 12 and above.
-            // See https://developer.android.com/reference/android/view/Display.Mode#getAlternativeRefreshRates().
-            isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.setOnPreferenceChangeListener { _, newValue ->
+            (requireActivity() as MainActivity).applyRefreshRateSetting(newValue as Boolean)
+            true
         }
 
         findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
