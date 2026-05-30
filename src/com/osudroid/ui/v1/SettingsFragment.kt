@@ -305,7 +305,7 @@ class SettingsFragment : SettingsFragment() {
 
                 GlobalManager.getInstance().songService.volume = prefs.getInt("bgmvolume", 100) / 100f
 
-                loadSkin(context, prefs.getString("skinPath", "")!!).invokeOnCompletion {
+                loadSkin(prefs.getString("skinPath", "")!!).invokeOnCompletion {
                     mainThread {
                         ToastLogger.showText(string.config_backup_restore_info_success, true)
                         dismiss()
@@ -388,7 +388,7 @@ class SettingsFragment : SettingsFragment() {
             options = skins
 
             setOnPreferenceChangeListener { _, newValue ->
-                loadSkin(context, newValue.toString())
+                loadSkin(newValue.toString())
                 true
             }
         }
@@ -694,7 +694,7 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private fun loadSkin(context: Context, path: String): Job {
+    private fun loadSkin(path: String): Job {
         val loading = LoadingFragment()
 
         loading.isDismissOnBackPress = false
