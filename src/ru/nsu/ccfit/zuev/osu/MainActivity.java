@@ -1068,6 +1068,11 @@ public class MainActivity extends BaseGameActivity implements
         runOnUiThread(() -> {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.preferredDisplayModeId = enable ? maxRefreshRateModeId : 0;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                lp.preferMinimalPostProcessing = enable && display.isMinimalPostProcessingSupported();
+            }
+
             getWindow().setAttributes(lp);
         });
     }
