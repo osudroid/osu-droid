@@ -2,7 +2,6 @@ package com.osudroid.mods
 
 import com.reco1l.toolkt.*
 import com.osudroid.GameMode
-import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
@@ -22,7 +21,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresOriginalBeatmap {
+) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresBeatmapDifficulty {
 
     /**
      * The circle size to enforce.
@@ -189,9 +188,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
     }
 
-    override fun applyFromBeatmap(beatmap: Beatmap) {
-        val difficulty = beatmap.difficulty
-
+    override fun applyFromBeatmapDifficulty(difficulty: BeatmapDifficulty) {
         updateBeatmapValue(::cs, difficulty.gameplayCS)
         updateBeatmapValue(::ar, difficulty.ar)
         updateBeatmapValue(::od, difficulty.od)

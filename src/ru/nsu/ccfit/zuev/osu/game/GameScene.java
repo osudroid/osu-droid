@@ -1087,7 +1087,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stat = new StatisticV2();
         stat.setMod(lastMods);
         stat.migrateLegacyMods(parsedBeatmap.getDifficulty());
-        stat.calculateModScoreMultiplier(parsedBeatmap);
+        stat.calculateModScoreMultiplier(parsedBeatmap.getDifficulty());
         stat.canFail = !stat.getMod().contains(ModNoFail.class)
                 && !stat.getMod().contains(ModRelax.class)
                 && !stat.getMod().contains(ModAutopilot.class)

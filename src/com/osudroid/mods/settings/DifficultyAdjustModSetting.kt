@@ -1,6 +1,6 @@
 package com.osudroid.mods.settings
 
-import com.osudroid.mods.IModRequiresOriginalBeatmap
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import kotlinx.serialization.json.*
 
@@ -14,7 +14,7 @@ import kotlinx.serialization.json.*
  *
  * When [originalValue] is non-null, the score multiplier can be computed from the serialized format alone, without a
  * beatmap lookup. When `null` (old data or beatmap absent at migration time), the caller must invoke
- * [IModRequiresOriginalBeatmap.applyFromBeatmap] first.
+ * [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] first.
  *
  * Old scalar values (`"cs": 7.0`) are accepted on [load] for backward compatibility.
  */
@@ -41,7 +41,7 @@ class DifficultyAdjustModSetting(
     useManualInput = useManualInput
 ) {
     /**
-     * The beatmap's original value for this setting, populated by [IModRequiresOriginalBeatmap.applyFromBeatmap].
+     * The beatmap's original value for this setting, populated by [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty].
      *
      * Non-null means the score multiplier is self-contained; `null` means a beatmap lookup is needed.
      */

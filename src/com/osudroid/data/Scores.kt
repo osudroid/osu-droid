@@ -11,7 +11,10 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
+import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.utils.ModUtils
+import kotlin.math.roundToInt
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
@@ -119,7 +122,17 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The amount of slider ends that were hit.
      */
-    var sliderEndHits: Int?
+    var sliderEndHits: Int?,
+
+    /**
+     * Whether this score's [score] still holds [StatisticV2.totalScoreWithMultiplier] and needs on-the-fly conversion
+     * to raw [StatisticV2.totalScore] once the beatmap is available.
+     *
+     * This flag is set during database migration when a score uses a mod that requires beatmap data (e.g.
+     * [ModDifficultyAdjust]) and the beatmap was not present in the library at migration time. Call
+     * [IScoreInfoDAO.migrateScores] whenever the beatmap becomes available to complete the conversion.
+     */
+    var needsScoreMigration: Boolean = false
 ) {
 
     /**
@@ -140,6 +153,34 @@ data class ScoreInfo @JvmOverloads constructor(
     val accuracy
         get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
+    /**
+     * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods].
+     *
+     * Pass [difficulty] when available so that mods implementing [IModRequiresBeatmapDifficulty] (e.g.
+     * [ModDifficultyAdjust]) can apply their beatmap-dependent multiplier. Without it, their score multiplier is 1.
+     *
+     * Use [StatisticV2.getTotalScoreWithMultiplier] with a proper [StatisticV2.calculateModScoreMultiplier] call for
+     * display when the full [BeatmapDifficulty] is available.
+     */
+    @JvmOverloads
+    fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
+        // Pending-migration rows store total score with multipliers directly, so multiplying again would apply the
+        // multiplier twice.
+        if (needsScoreMigration) {
+            return score
+        }
+
+        val modMap = ModUtils.deserializeMods(mods)
+
+        if (difficulty != null) {
+            modMap.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
+                m.applyFromBeatmapDifficulty(difficulty)
+            }
+        }
+
+        return (score * ModUtils.calculateScoreMultiplier(modMap)).roundToInt()
+    }
+
 
     @JvmOverloads
     @Throws(IllegalArgumentException::class)
@@ -149,7 +190,15 @@ data class ScoreInfo @JvmOverloads constructor(
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
         it.mod = ModUtils.deserializeMods(mods)
-        it.setForcedScore(score)
+
+        // Pending-migration rows store total score with multiplier, so we use forced score to prevent mod multipliers
+        // from multiplying again.
+        if (needsScoreMigration) {
+            it.setForcedScore(score)
+        } else {
+            it.totalScore = score
+        }
+
         it.scoreMaxCombo = maxCombo
         it.mark = mark
         it.hit300k = hit300k
@@ -168,6 +217,7 @@ data class ScoreInfo @JvmOverloads constructor(
             it.migrateLegacyMods(difficulty)
         }
 
+        it.calculateModScoreMultiplier(difficulty)
     }
 
 
@@ -199,17 +249,27 @@ fun ScoreInfo(json: JSONObject) =
         sliderEndHits = json.optInt("sliderEndHits", -1).takeIf { it >= 0 }
     )
 
+/**
+ * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapLeaderboard].
+ */
+data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Int)
+
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC")
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5")
     fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
+
+    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+        getBeatmapScores(beatmapMD5)
+            .map { ScoredScoreInfo(it, it.calculateEffectiveScore(difficulty)) }
+            .sortedByDescending { it.effectiveScore }
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC LIMIT 1")
-    fun getBestMark(beatmapMD5: String): String?
+    fun getBestMark(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+        getBeatmapScores(beatmapMD5).maxByOrNull { it.calculateEffectiveScore(difficulty) }?.mark
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
@@ -226,4 +286,37 @@ interface IScoreInfoDAO {
     @Query("SELECT EXISTS(SELECT 1 FROM ScoreInfo WHERE id = :id)")
     fun scoreExists(id: Long): Boolean
 
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 AND needsScoreMigration = 1")
+    fun getScoresNeedingMigration(beatmapMD5: String): List<ScoreInfo>
+
+    /**
+     * Completes pending score migrations for a beatmap.
+     *
+     * Scores flagged with [ScoreInfo.needsScoreMigration] still hold the old [StatisticV2.totalScoreWithMultiplier]
+     * value because their beatmap was absent during the database migration. Now that [difficulty] is available, the
+     * correct mod multiplier can be computed and the raw [StatisticV2.totalScore] stored.
+     *
+     * Call this whenever the beatmap becomes available before displaying scores.
+     */
+    fun migrateScores(beatmapMD5: String, difficulty: BeatmapDifficulty) {
+        val pending = getScoresNeedingMigration(beatmapMD5)
+
+        if (pending.isEmpty()) {
+            return
+        }
+
+        for (scoreInfo in pending) {
+            val mods = ModUtils.deserializeMods(scoreInfo.mods)
+
+            mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach {
+                it.applyFromBeatmapDifficulty(difficulty)
+            }
+
+            updateScore(scoreInfo.copy(
+                score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                mods = mods.serializeMods(),
+                needsScoreMigration = false
+            ))
+        }
+    }
 }

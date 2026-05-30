@@ -2,9 +2,12 @@ package com.osudroid.replay
 
 import com.edlplan.replay.OsuDroidReplayPack
 import com.osudroid.data.DatabaseManager.scoreInfoTable
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
+import com.osudroid.utils.ModUtils
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import kotlin.math.roundToInt
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 /**
@@ -89,11 +92,26 @@ object ReplayImporter {
             throw Exception("Replay is too old. Must be a replay from osu!droid version 1.6.7 onwards")
         }
 
-        val scoreInfo = replay.stat.toScoreInfo().apply {
-            // For temporary replays, we need to change the extension of the replay to odr.
-            // While we are at it, rename the replay file into something meaningful and not conflict other replays.
-            if (replayFilename.startsWith("importedReplay") && replayFilename.endsWith(".tmp")) {
-                replayFilename = playerName + "_" + replay.beatmapsetName + "_" + replay.beatmapName + "_" + System.currentTimeMillis() + ".odr"
+        val scoreInfo = replay.stat.toScoreInfo().let { info ->
+            val adjusted = if (replay.replayVersion < 8) {
+                // Replays before version 8 store total score with mod multipliers; divide back to raw total score.
+                val mods = replay.stat.mod
+
+                if (mods.values.any { it is IModRequiresBeatmapDifficulty }) {
+                    info.copy(needsScoreMigration = true)
+                } else {
+                    info.copy(score = (info.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt())
+                }
+            } else {
+                info
+            }
+
+            adjusted.apply {
+                // For temporary replays, we need to change the extension of the replay to odr.
+                // While we are at it, rename the replay file into something meaningful and not conflict other replays.
+                if (replayFilename.startsWith("importedReplay") && replayFilename.endsWith(".tmp")) {
+                    replayFilename = playerName + "_" + replay.beatmapsetName + "_" + replay.beatmapName + "_" + System.currentTimeMillis() + ".odr"
+                }
             }
         }
 

@@ -16,7 +16,7 @@ import com.osudroid.mods.IModApplicableToDifficultyWithMods
 import com.osudroid.mods.IModApplicableToHitObject
 import com.osudroid.mods.IModApplicableToHitObjectWithMods
 import com.osudroid.mods.IModFacilitatesAdjustment
-import com.osudroid.mods.IModRequiresOriginalBeatmap
+import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.Mod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -96,9 +96,9 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
 
         val adjustmentMods = mods?.filterIsInstance<IModFacilitatesAdjustment>() ?: emptyList()
 
-        mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
+        mods?.filterIsInstance<IModRequiresBeatmapDifficulty>()?.forEach {
             scope?.ensureActive()
-            it.applyFromBeatmap(this)
+            it.applyFromBeatmapDifficulty(difficulty)
         }
 
         val converter = BeatmapConverter(this, scope)
