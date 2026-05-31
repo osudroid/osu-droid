@@ -481,8 +481,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 this.video = video;
 
-                // The video may only load after gameplay is started, in which case we must apply it immediately.
-                Execution.updateThread(this::applyBackground);
+                // applyBackground is called from the onReady callback once ExoPlayer reports the video dimensions via
+                // onVideoSizeChanged, rather than blocking here.
+                // If dimensions are already known (fast local file), the callback fires immediately.
+                video.setOnReady(() -> Execution.updateThread(this::applyBackground));
             } catch (Exception e) {
                 video = null;
                 Log.e("GameScene", "Error while loading video background.", e);
@@ -508,6 +510,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void applyBackground() {
+        // Guard: video sprite exists but dimensions not yet reported by ExoPlayer.
+        // onVideoSizeChanged will trigger another applyBackground call when they arrive.
+        if (video != null && (video.getWidth() == 0 || video.getHeight() == 0)) {
+            return;
+        }
+
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
