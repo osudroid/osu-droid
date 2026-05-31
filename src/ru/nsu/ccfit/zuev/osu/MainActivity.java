@@ -432,8 +432,9 @@ public class MainActivity extends BaseGameActivity implements
                         StringTable.get(com.osudroid.resources.R.string.library_importing),
                         false);
 
-                FileUtils.extractZip(fileToAdd, Config.getBeatmapPath());
-                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                FileUtils.extractBeatmapset(fileToAdd, Config.getBeatmapPath());
+                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                        .replaceAll("(?i) \\[no video]$", ""));
                 // LibraryManager.INSTANCE.sort();
                 fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".osk")) {
@@ -465,7 +466,8 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", ""));
                         }
                     } catch (IOException ignored) {
                     }
@@ -481,7 +483,8 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", ""));
                         }
                     } catch (IOException ignored) {
                     }
@@ -495,7 +498,7 @@ public class MainActivity extends BaseGameActivity implements
                         com.osudroid.resources.R.string.library_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
-                    FileUtils.extractZip(beatmap, Config.getBeatmapPath());
+                    FileUtils.extractBeatmapset(beatmap, Config.getBeatmapPath());
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
