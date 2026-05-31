@@ -472,6 +472,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
+        // Check if video file exists before attempting to load.
+        var videoFile = new File(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename);
+
+        if (!videoFile.exists()) {
+            return;
+        }
+
         videoLoadingJob = Execution.async(scope -> {
             try {
                 var video = new UIVideoSprite(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename, engine);
