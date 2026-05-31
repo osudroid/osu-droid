@@ -3,6 +3,7 @@ package com.reco1l.andengine.sprite
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
 import com.reco1l.andengine.texture.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
@@ -11,7 +12,7 @@ import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
-@UnstableApi
+@OptIn(UnstableApi::class)
 class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
     TextureRegion(it, 0, 0, it.width, it.height)
 }) {
