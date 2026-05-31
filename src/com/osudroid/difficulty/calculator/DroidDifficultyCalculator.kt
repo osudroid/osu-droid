@@ -24,6 +24,7 @@ import com.osudroid.mods.ModPrecise
 import com.osudroid.mods.ModRelax
 import com.osudroid.mods.ModReplayV6
 import com.osudroid.mods.ModScoreV2
+import com.osudroid.mods.ModTraceable
 import com.osudroid.utils.ModUtils
 import kotlin.math.cbrt
 import kotlin.math.ceil
@@ -39,7 +40,7 @@ import kotlinx.coroutines.ensureActive
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
-        setOf(ModPrecise::class, ModScoreV2::class, ModFreezeFrame::class, ModReplayV6::class)
+        setOf(ModPrecise::class, ModScoreV2::class, ModFreezeFrame::class, ModReplayV6::class, ModTraceable::class)
 
     private val minimumSectionObjectCount = 5
     private val threeFingerStrainThreshold = 175.0
