@@ -367,13 +367,14 @@ class StandardPerformanceCalculator(
         var estimatedSliderBreaks = min(nonMissMistakes.toDouble(), effectiveMissCount * topWeightedSliderFactor)
 
         // Scores with more Oks are more likely to have slider breaks.
-        val nonMissAdjustment = ((nonMissMistakes - estimatedSliderBreaks) + 0.5) / nonMissMistakes
+        // We add an arbitrary value to both sides of the division to make it more stable on extreme ends.
+        val nonMissMistakeAdjustment = (nonMissMistakes - estimatedSliderBreaks + 4.5) / (nonMissMistakes + 4)
 
         // There is a low probability of extra slider breaks on effective miss counts close to 1, as score based
         // calculations are good at indicating if only a single break occurred.
         estimatedSliderBreaks *= DifficultyCalculationUtils.smoothstep(effectiveMissCount, 1.0, 2.0)
 
-        return estimatedSliderBreaks * nonMissAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
+        return estimatedSliderBreaks * nonMissMistakeAdjustment * DifficultyCalculationUtils.logistic(missedComboPercent, 0.33, 15.0)
     }
 
     private fun calculateComboBasedEstimatedMissCount(): Double {
