@@ -10,6 +10,7 @@ import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
@@ -64,7 +65,7 @@ public class ScoringScene {
     private final Engine engine;
     private final GameScene game;
     private final SongMenu menu;
-    private Scene scene;
+    private UIScene scene;
     private SongService songService;
     private StatisticV2 replayStat;
     private int replayID = -1;
@@ -86,7 +87,7 @@ public class ScoringScene {
     public void load(final StatisticV2 stat, final BeatmapInfo beatmap,
                      final SongService player, final String replayPath, final String mapMD5,
                      final BeatmapInfo beatmapToReplay) {
-        scene = new Scene();
+        scene = new UIScene();
         songService = player;
         currentStatistic = stat;
         if (replayPath != null && beatmap == null) {
@@ -322,7 +323,6 @@ public class ScoringScene {
             scaledContainer.attachChild(perfect);
         }
 
-        scene.setTouchAreaBindingEnabled(true);
         if (beatmap != null && retryBtn != null) {
             scene.registerTouchArea(retryBtn);
         } else if (replayPath != null && replayBtn != null) {
@@ -608,9 +608,6 @@ public class ScoringScene {
                 Execution.updateThread(() -> {
                     oldSelector.detachSelf();
                     oldSelector.detachChildren();
-
-                    if (scene != null)
-                        scene.unregisterTouchArea(oldSelector);
                 });
             }
 
@@ -618,7 +615,6 @@ public class ScoringScene {
 
             if (scene != null) {
                 scene.attachChild(selector);
-                scene.registerTouchArea(selector);
             }
         }
     }
