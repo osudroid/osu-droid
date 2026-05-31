@@ -1,8 +1,8 @@
 package com.reco1l.andengine.sprite
 
-import android.media.*
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
-import android.os.*
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.util.UnstableApi
 import com.reco1l.andengine.texture.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
@@ -11,6 +11,7 @@ import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
+@UnstableApi
 class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
     TextureRegion(it, 0, 0, it.width, it.height)
 }) {
@@ -50,13 +51,17 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
     }
 
 
+    fun setOnReady(callback: Runnable) {
+        texture.onReady = callback
+    }
+
     fun release() {
         texture.player.release()
         engine.textureManager.unloadTexture(texture)
     }
 
     fun play() {
-        texture.player.start()
+        texture.player.play()
     }
 
     fun pause() {
@@ -64,16 +69,11 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
     }
 
     fun seekTo(ms: Int) {
-        // Unfortunately in old versions we can't seek at closest frame from the desired position.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            texture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
-        } else {
-            texture.player.seekTo(ms)
-        }
+        texture.player.seekTo(ms.toLong())
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
+        texture.player.playbackParameters = PlaybackParameters(speed)
     }
 
 
@@ -82,5 +82,3 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
         super.finalize()
     }
 }
-
-
