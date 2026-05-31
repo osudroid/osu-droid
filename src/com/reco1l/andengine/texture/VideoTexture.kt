@@ -88,26 +88,29 @@ class VideoTexture(val source: String) : Texture(
             }
         }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
 
+        // ExoPlayer's builder is thread-safe, but subsequent API calls are not.
+        // ExoPlayer enforces that they run on its designated looper (main thread here).
         player = ExoPlayer.Builder(context, renderersFactory)
             .setLooper(Looper.getMainLooper())
             .build()
-            .apply {
-                volume = 0f
-                repeatMode = Player.REPEAT_MODE_OFF
-                addListener(object : Player.Listener {
-                    override fun onVideoSizeChanged(videoSize: VideoSize) {
-                        videoWidth = videoSize.width
-                        videoHeight = videoSize.height
-                        onReady?.run()
-                    }
 
-                    override fun onPlayerError(error: PlaybackException) {
-                        Log.e("VideoTexture", "ExoPlayer error occurred", error)
-                    }
-                })
-                setMediaItem(MediaItem.fromUri(Uri.fromFile(File(source))))
-                prepare()
-            }
+        mainHandler.post {
+            player.volume = 0f
+            player.repeatMode = Player.REPEAT_MODE_OFF
+            player.addListener(object : Player.Listener {
+                override fun onVideoSizeChanged(videoSize: VideoSize) {
+                    videoWidth = videoSize.width
+                    videoHeight = videoSize.height
+                    onReady?.run()
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    Log.e("VideoTexture", "ExoPlayer error occurred", error)
+                }
+            })
+            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(source))))
+            player.prepare()
+        }
     }
 
     override fun writeTextureToHardware(pGL: GL10) {
@@ -120,15 +123,30 @@ class VideoTexture(val source: String) : Texture(
 
         surfaceTexture = SurfaceTexture(mHardwareTextureID)
 
+        // SurfaceTexture must be created on the GL thread (tied to the GL texture ID),
+        // but setVideoSurface must be called on ExoPlayer's main-thread looper.
         val surface = Surface(surfaceTexture)
-        player.setVideoSurface(surface)
-        surface.release()
+
+        mainHandler.post {
+            player.setVideoSurface(surface)
+            surface.release()
+        }
     }
 
     override fun deleteTextureOnHardware(pGL: GL10?) {
 
-        surfaceTexture?.release()
+        val st = surfaceTexture
         surfaceTexture = null
+
+        mainHandler.post {
+            // Detach the surface before releasing the SurfaceTexture so ExoPlayer
+            // stops rendering to it. Ignored silently if the player is already released.
+            try {
+                player.setVideoSurface(null)
+            } catch (_: Exception) {}
+
+            st?.release()
+        }
 
         super.deleteTextureOnHardware(pGL)
     }
@@ -143,4 +161,8 @@ class VideoTexture(val source: String) : Texture(
 
     override fun getWidth() = videoWidth
     override fun getHeight() = videoHeight
+
+    companion object {
+        private val mainHandler = Handler(Looper.getMainLooper())
+    }
 }

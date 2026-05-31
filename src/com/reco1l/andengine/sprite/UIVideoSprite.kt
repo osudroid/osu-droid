@@ -1,6 +1,8 @@
 package com.reco1l.andengine.sprite
 
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
@@ -57,24 +59,24 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
     }
 
     fun release() {
-        texture.player.release()
+        mainHandler.post { texture.player.release() }
         engine.textureManager.unloadTexture(texture)
     }
 
     fun play() {
-        texture.player.play()
+        mainHandler.post { texture.player.play() }
     }
 
     fun pause() {
-        texture.player.pause()
+        mainHandler.post { texture.player.pause() }
     }
 
     fun seekTo(ms: Int) {
-        texture.player.seekTo(ms.toLong())
+        mainHandler.post { texture.player.seekTo(ms.toLong()) }
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        texture.player.playbackParameters = PlaybackParameters(speed)
+        mainHandler.post { texture.player.playbackParameters = PlaybackParameters(speed) }
     }
 
 
@@ -86,5 +88,9 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
         } catch (_: Throwable) {}
 
         super.finalize()
+    }
+
+    companion object {
+        private val mainHandler = Handler(Looper.getMainLooper())
     }
 }
