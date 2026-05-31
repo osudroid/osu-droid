@@ -67,7 +67,8 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
     }
 
     fun release() {
-        mainHandler.post { texture.player.release() }
+        // Unloading the texture triggers deleteTextureOnHardware, which posts a single ordered block
+        // to the main handler: setVideoSurface(null) --> surface teardown --> player.release().
         engine.textureManager.unloadTexture(texture)
     }
 
