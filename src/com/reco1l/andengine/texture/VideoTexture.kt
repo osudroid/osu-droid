@@ -143,17 +143,4 @@ class VideoTexture(val source: String) : Texture(
 
     override fun getWidth() = videoWidth
     override fun getHeight() = videoHeight
-
-
-    companion object {
-
-        /**
-         * Checks if the file is a video that can be loaded. Since ExoPlayer with Media3's
-         * built-in extractors supports a broad range of container formats (MP4, MKV, WebM,
-         * AVI, FLV, …), we accept any file that exists and let playback fail gracefully if
-         * the format turns out to be unsupported.
-         */
-        fun isSupportedVideo(file: File) = file.exists()
-
-    }
 }
