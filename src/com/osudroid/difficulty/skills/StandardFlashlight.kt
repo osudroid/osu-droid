@@ -1,8 +1,12 @@
 package com.osudroid.difficulty.skills
 
 import com.osudroid.difficulty.StandardDifficultyHitObject
-import com.osudroid.difficulty.evaluators.StandardFlashlightEvaluator.evaluateDifficultyOf
+import com.osudroid.difficulty.evaluators.StandardFlashlightEvaluator
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModAutopilot
+import com.osudroid.mods.ModFlashlight
+import com.osudroid.mods.ModRelax
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -25,9 +29,15 @@ class StandardFlashlight(
     private val skillMultiplier = 0.058
     private val strainDecayBase = 0.15
 
+    private val hasFlashlight = mods.any { it is ModFlashlight }
+
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
+        if (!hasFlashlight) {
+            return 0.0
+        }
+
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += evaluateDifficultyOf(current, mods) * skillMultiplier
+        currentStrain += calculateAdjustedDifficulty(current) * skillMultiplier
 
         return currentStrain
     }
@@ -43,6 +53,20 @@ class StandardFlashlight(
             (if (totalObjects > 200) 0.2 * min(1, (totalObjects - 200) / 200) else 0.0)
 
         return sum
+    }
+
+    private fun calculateAdjustedDifficulty(current: StandardDifficultyHitObject): Double {
+        var difficulty = StandardFlashlightEvaluator.evaluateDifficultyOf(current, mods)
+
+        if (mods.any { it is ModRelax }) {
+            difficulty *= 0.7
+        } else if (mods.any { it is ModAutopilot }) {
+            difficulty *= 0.4
+        }
+
+        difficulty *= 0.985 + max(0.0, current.overallDifficulty).pow(2) / 4000
+
+        return difficulty
     }
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)

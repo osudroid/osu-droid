@@ -3,6 +3,8 @@ package com.osudroid.difficulty.skills
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.evaluators.DroidFlashlightEvaluator
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModAutopilot
+import com.osudroid.mods.ModRelax
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -45,6 +47,18 @@ class DroidFlashlight(
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
+
+    private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
+        var difficulty = DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods)
+
+        if (mods.any { it is ModRelax }) {
+            difficulty *= 0.7
+        } else if (mods.any { it is ModAutopilot }) {
+            difficulty *= 0.4
+        }
+
+        return difficulty
+    }
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
 
