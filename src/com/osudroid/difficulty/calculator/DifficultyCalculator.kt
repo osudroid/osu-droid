@@ -59,7 +59,6 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      */
     @JvmOverloads
     fun calculate(beatmap: Beatmap, playableBeatmap: TBeatmap, scope: CoroutineScope? = null): TAttributes {
-        val playableBeatmap = playableBeatmap ?: createPlayableBeatmap(beatmap, null, scope)
         val skills = createSkills(playableBeatmap, false)
         val objects = createDifficultyHitObjects(playableBeatmap, scope)
 
