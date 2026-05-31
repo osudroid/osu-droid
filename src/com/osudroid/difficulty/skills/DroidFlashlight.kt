@@ -40,7 +40,7 @@ class DroidFlashlight(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods) * skillMultiplier
+        currentStrain += calculateAdjustedDifficulty(current) * skillMultiplier
 
         return currentStrain
     }
