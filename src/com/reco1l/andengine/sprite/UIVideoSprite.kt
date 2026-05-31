@@ -55,7 +55,15 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
 
 
     fun setOnReady(callback: Runnable) {
-        texture.onReady = callback
+        texture.onReady = Runnable {
+            // Update the TextureRegion UV extents and Sprite vertex dimensions now that the actual video resolution is
+            // known.
+            // Both were constructed as 0×0 because ExoPlayer reports dimensions asynchronously via onVideoSizeChanged.
+            textureRegion.setWidth(texture.videoWidth)
+            textureRegion.setHeight(texture.videoHeight)
+            setSize(texture.videoWidth.toFloat(), texture.videoHeight.toFloat())
+            callback.run()
+        }
     }
 
     fun release() {
