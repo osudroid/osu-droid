@@ -1,6 +1,9 @@
 package com.osudroid.difficulty.evaluators
 
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.Spinner
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.difficulty.DroidDifficultyHitObject
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.math.Interpolation
@@ -8,6 +11,7 @@ import com.osudroid.math.toDegrees
 import com.osudroid.math.toRadians
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModHidden
+import com.osudroid.mods.ModTraceable
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -22,6 +26,7 @@ import kotlin.math.sqrt
 object DroidReadingEvaluator {
     private const val READING_WINDOW_SIZE = 3000.0
     private const val HIDDEN_MULTIPLIER = 0.28
+    private const val TRACEABLE_MULTIPLIER = 0.26
     private const val DENSITY_MULTIPLIER = 2.4
     private const val DENSITY_DIFFICULTY_BASE = 2.5
     private const val PREEMPT_BALANCING_FACTOR = 150000.0
@@ -55,9 +60,15 @@ object DroidReadingEvaluator {
             current, mods, pastObjectDifficultyInfluence, currentVisibleObjectDensity, velocity, constantAngleNerfFactor
         )
 
+        val traceableDifficulty = calculateTraceableDifficulty(
+            current, mods, distanceInfluenceThreshold, pastObjectDifficultyInfluence, currentVisibleObjectDensity, velocity, constantAngleNerfFactor
+        )
+
         val preemptDifficulty = calculatePreemptDifficulty(velocity, constantAngleNerfFactor, current.timePreempt)
 
-        var difficulty = DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
+        var difficulty = DifficultyCalculationUtils.norm(
+            1.5, preemptDifficulty, hiddenDifficulty, traceableDifficulty, noteDensityDifficulty
+        )
 
         // Having less time to process information is harder.
         difficulty *= highBpmBonus(current.strainTime)
@@ -161,6 +172,61 @@ object DroidReadingEvaluator {
         }
 
         return hiddenDifficulty
+    }
+
+    private fun calculateTraceableDifficulty(
+        current: DroidDifficultyHitObject,
+        mods: Iterable<Mod>,
+        distanceInfluenceThreshold: Double,
+        pastObjectDifficultyInfluence: Double,
+        currentVisibleObjectDensity: Double,
+        velocity: Double,
+        constantAngleNerfFactor: Double
+    ): Double {
+        if (mods.none { it is ModTraceable }) {
+            return 0.0
+        }
+
+        val approachRate = BeatmapDifficulty.difficultyRange(
+            current.timePreempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        )
+
+        var lowApproachRateSliderVisibilityFactor = 1.0
+        var highApproachRateSliderVisibilityFactor = 1.0
+
+        if (current.obj is Slider) {
+            // Sliders are easier to read as the slider body remains visible.
+            // Decrease difficulty as the slider becomes longer.
+            val distanceFactor = DifficultyCalculationUtils.smootherstep(
+                current.travelDistance, distanceInfluenceThreshold, 15.0
+            )
+
+            highApproachRateSliderVisibilityFactor = 0.5 + distanceFactor / 2
+            lowApproachRateSliderVisibilityFactor = distanceFactor
+        }
+
+        // Start from normal curve, rewarding lower AR up to AR7.
+        var preemptFactor = 0.1 + 0.05 * (12.0 - max(approachRate, 7.0)) * highApproachRateSliderVisibilityFactor
+
+        // For AR up to 0 - reduce reward for very low ARs when object is visible.
+        if (approachRate < 7) {
+            preemptFactor += 0.05 * (7.0 - max(approachRate, 0.0)) * lowApproachRateSliderVisibilityFactor
+        }
+
+        // Starting from AR0 - cap values so they won't grow to infinity.
+        if (approachRate < 0) {
+            preemptFactor += 0.05 * (1 - 1.5.pow(approachRate)) * lowApproachRateSliderVisibilityFactor
+        }
+
+        // Account for both past and current densities.
+        val densityFactor = (currentVisibleObjectDensity + pastObjectDifficultyInfluence).pow(2)
+
+        var traceableDifficulty = (preemptFactor + densityFactor) * constantAngleNerfFactor * velocity
+
+        // Apply a soft cap to general Traceable reading to account for partial memorization.
+        traceableDifficulty = traceableDifficulty.pow(0.45) * TRACEABLE_MULTIPLIER
+
+        return traceableDifficulty
     }
 
     private fun getPastObjectDifficultyInfluence(current: DroidDifficultyHitObject, distanceInfluenceThreshold: Double): Double {
