@@ -149,18 +149,18 @@ class VideoTexture(val source: String) : Texture(
         surface = null
 
         mainHandler.post {
-            // The order matters here:
-            // - Clear ExoPlayer's surface reference first so its playback thread stops writing to the native window
-            // - Release the Java wrapper
-            // - Release the SurfaceTexture
-            //
-            // Ignored silently if the player is already released.
+            // Order matters:
+            // 1. Clear ExoPlayer's surface so the codec thread stops writing to the native window.
+            // 2. Release the Java Surface wrapper.
+            // 3. Release the SurfaceTexture.
+            // 4. Release the player last, after the surface it was writing to is fully torn down.
             try {
                 player.setVideoSurface(null)
             } catch (_: Exception) {}
 
             s?.release()
             st?.release()
+            player.release()
         }
 
         super.deleteTextureOnHardware(pGL)
