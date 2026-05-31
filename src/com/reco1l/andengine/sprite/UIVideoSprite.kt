@@ -79,7 +79,12 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
 
 
     override fun finalize() {
-        release()
+        // Guard against a partially-constructed object: if VideoTexture's init threw,
+        // texture.player is null at the bytecode level despite Kotlin's non-null type.
+        try {
+            release()
+        } catch (_: Throwable) {}
+
         super.finalize()
     }
 }
