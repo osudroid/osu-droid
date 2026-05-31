@@ -218,6 +218,10 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
 
+    // Video playback
+    implementation "androidx.media3:media3-exoplayer:1.4.1"
+    implementation files('libs/media3-decoder-ffmpeg.aar')
+
     // Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
