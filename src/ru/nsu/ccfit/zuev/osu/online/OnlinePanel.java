@@ -165,7 +165,7 @@ public class OnlinePanel extends Entity {
 
             if (bannerTexture != null) {
                 profileBanner = new Sprite(0, 0, 410, 110, bannerTexture);
-                profileBanner.setColor(0.6f, 0.6f, 0.6f);
+                profileBanner.setColor(0.5f, 0.5f, 0.5f);
                 frontLayer.attachChild(profileBanner);
             }
         }
