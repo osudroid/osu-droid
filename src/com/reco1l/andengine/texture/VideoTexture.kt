@@ -61,7 +61,7 @@ class VideoTexture(val source: String) : Texture(
         private set
 
     private var surfaceTexture: SurfaceTexture? = null
-
+    private var surface: Surface? = null
 
     init {
         val context = GlobalManager.getInstance().mainActivity.applicationContext
@@ -125,26 +125,33 @@ class VideoTexture(val source: String) : Texture(
 
         // SurfaceTexture must be created on the GL thread (tied to the GL texture ID),
         // but setVideoSurface must be called on ExoPlayer's main-thread looper.
-        val surface = Surface(surfaceTexture)
+        // The Surface is stored as a field — releasing it immediately would free the native
+        // window before ExoPlayer's playback thread has a chance to configure MediaCodec against it.
+        surface = Surface(surfaceTexture)
 
-        mainHandler.post {
-            player.setVideoSurface(surface)
-            surface.release()
-        }
+        mainHandler.post { player.setVideoSurface(surface) }
     }
 
     override fun deleteTextureOnHardware(pGL: GL10?) {
 
         val st = surfaceTexture
+        val s = surface
+
         surfaceTexture = null
+        surface = null
 
         mainHandler.post {
-            // Detach the surface before releasing the SurfaceTexture so ExoPlayer
-            // stops rendering to it. Ignored silently if the player is already released.
+            // The order matters here:
+            // - Clear ExoPlayer's surface reference first so its playback thread stops writing to the native window
+            // - Release the Java wrapper
+            // - Release the SurfaceTexture
+            //
+            // Ignored silently if the player is already released.
             try {
                 player.setVideoSurface(null)
             } catch (_: Exception) {}
 
+            s?.release()
             st?.release()
         }
 
