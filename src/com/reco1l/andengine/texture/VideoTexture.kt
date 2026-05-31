@@ -103,6 +103,10 @@ class VideoTexture(val source: String) : Texture(
             player.repeatMode = Player.REPEAT_MODE_OFF
             player.addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
+                    if (videoSize.width == 0 || videoSize.height == 0) {
+                        return
+                    }
+
                     videoWidth = videoSize.width
                     videoHeight = videoSize.height
                     onReadyRef.getAndSet(null)?.run()
