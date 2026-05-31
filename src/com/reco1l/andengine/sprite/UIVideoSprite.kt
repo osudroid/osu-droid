@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.texture.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
@@ -56,13 +57,16 @@ class UIVideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f,
 
     fun setOnReady(callback: Runnable) {
         texture.onReady = Runnable {
-            // Update the TextureRegion UV extents and Sprite vertex dimensions now that the actual video resolution is
-            // known.
-            // Both were constructed as 0×0 because ExoPlayer reports dimensions asynchronously via onVideoSizeChanged.
-            textureRegion.setWidth(texture.videoWidth)
-            textureRegion.setHeight(texture.videoHeight)
-            setSize(texture.videoWidth.toFloat(), texture.videoHeight.toFloat())
-            callback.run()
+            updateThread {
+                // Update the TextureRegion UV extents and Sprite vertex dimensions now that the actual video resolution is
+                // known.
+                // Both were constructed as 0×0 because ExoPlayer reports dimensions asynchronously via onVideoSizeChanged.
+                textureRegion.setWidth(texture.videoWidth)
+                textureRegion.setHeight(texture.videoHeight)
+                setSize(texture.videoWidth.toFloat(), texture.videoHeight.toFloat())
+
+                mainHandler.post(callback)
+            }
         }
     }
 
