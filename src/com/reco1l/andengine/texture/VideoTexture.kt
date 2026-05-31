@@ -17,6 +17,7 @@ import androidx.media3.decoder.ffmpeg.ExperimentalFfmpegVideoRenderer
 import org.anddev.andengine.opengl.texture.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.*
+import java.util.concurrent.atomic.AtomicReference
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 
@@ -35,20 +36,23 @@ class VideoTexture(val source: String) : Texture(
 
     val player: ExoPlayer
 
+    private val onReadyRef = AtomicReference<Runnable?>()
+
     /**
      * The callback that is invoked when the video dimensions are available. This is necessary because the dimensions
      * are not known until the video is prepared, which happens asynchronously.
      *
-     * The callback will be invoked on the main thread.
+     * The callback will be invoked on the main thread exactly once.
      */
-    @Volatile
-    var onReady: Runnable? = null
+    var onReady
+        get() = onReadyRef.get()
         set(value) {
-            field = value
+            onReadyRef.set(value)
 
             // Handle the race where dimensions arrived before the callback was registered.
+            // Uses getAndSet(null) so only one caller (this path or onVideoSizeChanged) wins.
             if (videoWidth > 0) {
-                value?.run()
+                mainHandler.post { onReadyRef.getAndSet(null)?.run() }
             }
         }
 
@@ -101,7 +105,7 @@ class VideoTexture(val source: String) : Texture(
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     videoWidth = videoSize.width
                     videoHeight = videoSize.height
-                    onReady?.run()
+                    onReadyRef.getAndSet(null)?.run()
                 }
 
                 override fun onPlayerError(error: PlaybackException) {
