@@ -1781,13 +1781,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         {
             if (!videoStarted) {
                 video.play();
-                // Some devices do not support custom playback speed for whatever reason.
-                try {
-                    video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
-                } catch (Exception e) {
-                    Log.e("GameScene", "Failed to change video playback speed.", e);
-                    ToastLogger.showText(com.osudroid.resources.R.string.message_video_custom_speed_unsupported, false);
-                }
+                video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
                 videoStarted = true;
             }
 
@@ -2891,13 +2885,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
                     if (videoEnabled && video != null) {
-                        // In some devices this can throw an exception, unfortunately there's no
-                        // documentation that explains how to avoid that scenario. Thanks Google.
-                        try {
-                            video.setPlaybackSpeed(decreasedSpeed);
-                        } catch (Exception e) {
-                            Log.e("GameScene", "Failed to change video playback speed during game over animation.", e);
-                        }
+                        video.setPlaybackSpeed(decreasedSpeed);
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);
