@@ -413,7 +413,7 @@ class DroidPerformanceCalculator(
         val p = relevantCountGreat / n
 
         // We can be 99% confident that the population proportion is at least this value.
-        val pLowerBound = (n * p + z * z / 2) / (n + z * z) - z / (n + z * z) * sqrt(n * p * (1 - p) + z * z / 4)
+        val pLowerBound = min(p, (n * p + z * z / 2) / (n + z * z) - z / (n + z * z) * sqrt(n * p * (1 - p) + z * z / 4))
         var deviation: Double
 
         // Tested max precision for the deviation calculation.
