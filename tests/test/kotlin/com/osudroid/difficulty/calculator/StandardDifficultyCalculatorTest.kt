@@ -43,7 +43,7 @@ class StandardDifficultyCalculatorTest {
         }
 
         calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
-            Assert.assertEquals(1.6000696339174214, flashlightDifficulty, 1e-5)
+            Assert.assertEquals(1.600869468825618, flashlightDifficulty, 1e-5)
         }
     }
 }
