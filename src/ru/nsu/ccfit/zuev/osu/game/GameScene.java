@@ -1500,6 +1500,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
                 beatmapClock.setRate(currentSpeedMultiplier);
 
+                if (videoEnabled && video != null) {
+                    video.setPlaybackSpeed(currentSpeedMultiplier);
+                }
+
                 var songService = GlobalManager.getInstance().getSongService();
                 songService.setSpeed(modRate);
                 songService.setPitchRate(replaySettingsRate);
