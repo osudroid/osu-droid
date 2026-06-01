@@ -288,7 +288,7 @@ public class ScoringScene {
         Sprite replayBtn = null;
         var mods = stat.getMod();
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer && replayPath != null)
         {
             replayBtn = new Sprite(Utils.toRes(580), Utils.toRes(400),
                                                 ResourceManager.getInstance().getTexture("ranking-replay")) {

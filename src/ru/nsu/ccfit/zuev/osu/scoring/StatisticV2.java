@@ -112,14 +112,15 @@ public class StatisticV2 implements Serializable {
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
 
-        if (params.length >= 11) {
-            time = Long.parseLong(params[10]);
+        // params[10] is a flag that denotes whether a replay is available, which is not used here, so we skip it.
+        if (params.length >= 12) {
+            time = Long.parseLong(params[11]);
         }
 
-        sliderHeadHits = params.length >= 12 ? Integer.parseInt(params[11]) : -1;
-        sliderTickHits = params.length >= 13 ? Integer.parseInt(params[12]) : -1;
-        sliderRepeatHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
-        sliderEndHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+        sliderHeadHits = params.length >= 13 ? Integer.parseInt(params[12]) : -1;
+        sliderTickHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
+        sliderRepeatHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+        sliderEndHits = params.length >= 16 ? Integer.parseInt(params[15]) : -1;
 
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
