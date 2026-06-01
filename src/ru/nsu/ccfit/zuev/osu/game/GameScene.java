@@ -2141,7 +2141,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (expiredObjects != null) {
                 expiredObjects.clear();
             }
-            hud.detachSelf();
+            if (hud != null) {
+                hud.detachSelf();
+            }
             breakPeriods = null;
             replaySettingsPanel = null;
             objects = null;
