@@ -188,6 +188,12 @@ class DecouplingFramedClock @JvmOverloads constructor(
         // to start from an incorrect location (i.e., 0 in the case where we are tracking negative time).
         if (lastSeekFailed && allowDecoupling) {
             shouldBeRunning = true
+
+            // Reset the reference time so the first processFrame does not include any wall-clock time that elapsed
+            // between the last seek and this start call. Without this reset, the decoupled clock would jump forward
+            // by that gap on the first processFrame call.
+            lastReferenceTime = null
+
             return
         }
 

@@ -475,6 +475,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
+        // Check if video file exists before attempting to load.
+        var videoFile = new File(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename);
+
+        if (!videoFile.exists()) {
+            return;
+        }
+
         videoLoadingJob = Execution.async(scope -> {
             try {
                 var video = new UIVideoSprite(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename, engine);
@@ -484,8 +491,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 this.video = video;
 
-                // The video may only load after gameplay is started, in which case we must apply it immediately.
-                Execution.updateThread(this::applyBackground);
+                // applyBackground is called from the onReady callback once ExoPlayer reports the video dimensions via
+                // onVideoSizeChanged, rather than blocking here.
+                // If dimensions are already known (fast local file), the callback fires immediately.
+                video.setOnReady(() -> Execution.updateThread(this::applyBackground));
             } catch (Exception e) {
                 video = null;
                 Log.e("GameScene", "Error while loading video background.", e);
@@ -511,6 +520,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void applyBackground() {
+        // Guard: video sprite exists but dimensions not yet reported by ExoPlayer.
+        // onVideoSizeChanged will trigger another applyBackground call when they arrive.
+        if (video != null && (video.getWidth() == 0 || video.getHeight() == 0)) {
+            return;
+        }
+
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
@@ -1489,6 +1504,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
                 beatmapClock.setRate(currentSpeedMultiplier);
 
+                if (videoEnabled && video != null) {
+                    video.setPlaybackSpeed(currentSpeedMultiplier);
+                }
+
                 var songService = GlobalManager.getInstance().getSongService();
                 songService.setSpeed(modRate);
                 songService.setPitchRate(replaySettingsRate);
@@ -1770,13 +1789,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         {
             if (!videoStarted) {
                 video.play();
-                // Some devices do not support custom playback speed for whatever reason.
-                try {
-                    video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
-                } catch (Exception e) {
-                    Log.e("GameScene", "Failed to change video playback speed.", e);
-                    ToastLogger.showText(com.osudroid.resources.R.string.message_video_custom_speed_unsupported, false);
-                }
+                video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
                 videoStarted = true;
             }
 
@@ -2131,7 +2144,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (expiredObjects != null) {
                 expiredObjects.clear();
             }
-            hud.detachSelf();
+            if (hud != null) {
+                hud.detachSelf();
+            }
             breakPeriods = null;
             replaySettingsPanel = null;
             objects = null;
@@ -2878,13 +2893,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
                     if (videoEnabled && video != null) {
-                        // In some devices this can throw an exception, unfortunately there's no
-                        // documentation that explains how to avoid that scenario. Thanks Google.
-                        try {
-                            video.setPlaybackSpeed(decreasedSpeed);
-                        } catch (Exception e) {
-                            Log.e("GameScene", "Failed to change video playback speed during game over animation.", e);
-                        }
+                        video.setPlaybackSpeed(decreasedSpeed);
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);
