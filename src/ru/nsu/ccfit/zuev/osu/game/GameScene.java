@@ -705,7 +705,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // TODO skin manager
-        BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
+        if (shouldParseBeatmap) {
+            BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
+        }
 
         var breaks = playableBeatmap.getEvents().breaks;
 
@@ -2159,6 +2161,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             sliderPaths = null;
             sliderRenderPaths = null;
         });
+
+        BeatmapSkinManager.getInstance().clearSkin();
 
         cancelStoryboardLoading();
         cancelVideoLoading();
