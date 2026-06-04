@@ -1344,20 +1344,20 @@ abstract class UIComponent : Entity(0f, 0f),
         propagateChildren: Boolean = true,
         crossinline block: UniversalModifierSequence.() -> Unit
     ) {
-        addDelay(delay, propagateChildren)
         val oldDelay = modifierDelay
+        addDelay(delay, propagateChildren)
 
         try {
             beginModifierSequence(block)
+        } finally {
+            addDelay(-delay, propagateChildren)
 
             val newDelay = modifierDelay
 
             if (!Precision.almostEquals(oldDelay, newDelay)) {
                 throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence " +
-                        "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+                    "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
             }
-        } finally {
-            addDelay(-delay, propagateChildren)
         }
     }
 
