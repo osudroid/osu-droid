@@ -40,7 +40,8 @@ public class Config {
         scorePath,
         onlineUsername,
         onlinePassword,
-        onlineDeviceID;
+        onlineDeviceID,
+        spectrumQuality = "full";
 
     private static boolean DELETE_OSZ,
         SCAN_DOWNLOAD,
@@ -81,7 +82,9 @@ public class Config {
         noChangeDimInBreaks,
         dimHitObjects,
         forceMaxRefreshRate,
-        shiftPitchInRateChange;
+        shiftPitchInRateChange,
+        kiaiCatJam;
+
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -198,6 +201,7 @@ public class Config {
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
+        spectrumQuality = normalizeSpectrumQuality(prefs.getString("spectrumQuality", spectrumQuality));
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
@@ -228,6 +232,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
+        kiaiCatJam = prefs.getBoolean("kiaiCatJam", false);
         backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
@@ -778,6 +783,32 @@ public class Config {
 
     public static boolean isShiftPitchInRateChange() {
         return shiftPitchInRateChange;
+    }
+
+    public static boolean isKiaiCatJam() {
+        return kiaiCatJam;
+    }
+
+    public static void setKiaiCatJam(boolean value) {
+        kiaiCatJam = value;
+        setBoolean("kiaiCatJam", value);
+    }
+
+    /** Returns the spectrum quality: {@code "full"}, {@code "low"}, or {@code "off"}. */
+    public static String getSpectrumQuality() {
+        return spectrumQuality;
+    }
+
+    private static String normalizeSpectrumQuality(String value) {
+        if ("low".equals(value) || "off".equals(value) || "full".equals(value)) {
+            return value;
+        }
+        return "full";
+    }
+
+    public static void setSpectrumQuality(String value) {
+        spectrumQuality = normalizeSpectrumQuality(value);
+        setString("spectrumQuality", spectrumQuality);
     }
 
     public static boolean isDisplayPlayfieldBorder() {

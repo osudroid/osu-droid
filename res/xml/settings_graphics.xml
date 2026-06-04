@@ -143,7 +143,16 @@
             android:key="hitlighting"
             android:summary="@string/opt_hitlighting_summary"
             android:title="@string/opt_hitlighting_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="full"
+            android:entries="@array/spectrum_quality_entries"
+            android:entryValues="@array/spectrum_quality_values"
+            android:key="spectrumQuality"
+            android:summary="@string/opt_spectrum_quality_summary"
+            android:title="@string/opt_spectrum_quality_title"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 

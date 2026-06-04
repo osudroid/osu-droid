@@ -29,6 +29,7 @@ import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
+import com.acivev.ui.menu.main.MusicOption
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.osudroid.BuildSettings
@@ -55,7 +56,6 @@ import kotlinx.coroutines.SupervisorJob
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
@@ -716,13 +716,13 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                     stopPreview(true)
 
                     if (BeatmapListing.isPlayingMusic) {
-                        GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
+                        GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PLAY)
                     }
                 }
 
                 ensureActive()
 
-                GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
+                GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PAUSE)
 
                 previewStream!!.setVolume(Config.getBgmVolume())
                 previewStream!!.play()
@@ -777,7 +777,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
         }
 
         if (shouldResumeMusic && BeatmapListing.isPlayingMusic) {
-            GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
+            GlobalManager.getInstance().mainMenuV2?.musicControl(MusicOption.PLAY)
         }
     }
 

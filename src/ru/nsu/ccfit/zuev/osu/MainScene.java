@@ -1048,7 +1048,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
+        this.setBeatmap(beatmap);
         StatisticV2 stat = replay.getStat();
         stat.migrateLegacyMods(beatmap.getBeatmapDifficulty());
         stat.calculateModScoreMultiplier(beatmap.getBeatmapDifficulty());
@@ -1065,6 +1065,15 @@ public class MainScene implements IUpdateHandler {
 
     public void show() {
         GlobalManager.getInstance().getSongService().setGaming(false);
+        // Redirect to MainMenuV2 if it's active
+        var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
+        if (mainMenuV2 != null) {
+            GlobalManager.getInstance().getEngine().setScene(mainMenuV2);
+            if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
+                mainMenuV2.setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
+            }
+            return;
+        }
         GlobalManager.getInstance().getEngine().setScene(getScene());
         if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
             setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
