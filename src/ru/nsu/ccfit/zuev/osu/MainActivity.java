@@ -414,7 +414,9 @@ public class MainActivity extends BaseGameActivity implements
                 logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
                 if (roomInviteLink != null) {
-                    Multiplayer.connectFromLink(roomInviteLink);
+                    final Uri inviteLink = roomInviteLink;
+                    roomInviteLink = null;
+                    Multiplayer.connectFromLink(inviteLink);
                 } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
                     fileToAdd = null;
@@ -724,24 +726,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-
-            var data = getIntent().getData();
-
-            if (data != null) {
-
-                if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
-                    roomInviteLink = data;
-
-                String scheme = data.getScheme();
-
-                if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-                    fileToAdd = data.getPath();
-                } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-                    contentUriToAdd = data;
-                }
-            }
-        }
+        parseIntent(getIntent());
         super.onStart();
     }
 
@@ -807,6 +792,50 @@ public class MainActivity extends BaseGameActivity implements
             Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
             ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
             return null;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        if (parseIntent(intent)) {
+            var globalManager = GlobalManager.getInstance();
+
+            if (roomInviteLink != null) {
+                Execution.updateThread(() -> {
+                    if (mEngine != null) {
+                        var scene = mEngine.getScene();
+                        var gameScene = globalManager.getGameScene();
+
+                        // Ensure gameplay is cleaned up before joining the lobby to prevent any potential issues with
+                        // lingering game state.
+                        if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                            gameScene.quit();
+                        }
+                    }
+
+                    Multiplayer.connectFromLink(roomInviteLink);
+                    roomInviteLink = null;
+                });
+
+                return;
+            }
+
+            Execution.async(() -> {
+                loadBeatmapLibrary();
+
+                if (willReplay && fileToAdd != null) {
+                    final String replayFile = fileToAdd;
+
+                    Execution.updateThread(() -> {
+                        globalManager.getMainScene().watchReplay(replayFile);
+                        fileToAdd = null;
+                        willReplay = false;
+                    });
+                }
+            });
         }
     }
 
@@ -1228,5 +1257,31 @@ public class MainActivity extends BaseGameActivity implements
         if (multiWindowAlert != null) {
             multiWindowAlert.dismiss();
         }
+    }
+
+    private boolean parseIntent(Intent intent) {
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri data = intent.getData();
+
+            if (data != null) {
+                if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
+                    roomInviteLink = data;
+                } else {
+                    String scheme = data.getScheme();
+                    if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+                        fileToAdd = data.getPath();
+                    } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+                        contentUriToAdd = data;
+                    }
+                }
+
+                // Consume the action so it doesn't get repeatedly processed
+                // on subsequent onStart() or onResume() triggers.
+                intent.setAction(Intent.ACTION_MAIN);
+                return true;
+            }
+        }
+
+        return false;
     }
 }
