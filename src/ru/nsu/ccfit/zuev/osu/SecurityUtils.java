@@ -48,7 +48,6 @@ public final class SecurityUtils {
         x = (x & 0x00ff00ff) + ((x & 0xff00ff00) >> 8);
         x = (x & 0x0000ffff) + ((x & 0xffff0000) >> 16);
         return x;
-    }
 
     /**
      * @return 得到整数x高20位对3389取模后的结果
