@@ -49,7 +49,7 @@ class DroidFlashlight(
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
 
     private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
-        var difficulty = DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods)
+        var difficulty = DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods).pow(0.8)
 
         if (mods.any { it is ModRelax }) {
             difficulty *= 0.7
@@ -70,6 +70,6 @@ class DroidFlashlight(
          * @return The performance value.
          */
         @JvmStatic
-        fun difficultyToPerformance(difficulty: Double) = difficulty.pow(1.6) * 25
+        fun difficultyToPerformance(difficulty: Double) = difficulty.pow(2) * 25
     }
 }
