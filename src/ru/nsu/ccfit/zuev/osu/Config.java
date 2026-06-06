@@ -107,7 +107,8 @@ public class Config {
         "installID",
         "onlineUsername",
         "onlinePassword",
-        "starRatingVersion",
+        "droidStarRatingVersion",
+        "standardStarRatingVersion",
         "version"
     );
 
