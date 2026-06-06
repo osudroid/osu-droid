@@ -111,6 +111,20 @@ public class Config {
         "version"
     );
 
+    public static final Map<String, int[]> PREFERENCE_BOUNDS = Map.ofEntries(
+        Map.entry("bgmvolume", new int[] { 0, 100 }),
+        Map.entry("soundvolume", new int[] { 0, 100 }),
+        Map.entry("bgbrightness", new int[] { 0, 100 }),
+        Map.entry("offset", new int[] { -750, 750 }),
+        Map.entry("cursorSize", new int[] { 25, 300 }),
+        Map.entry("playfieldSize", new int[] { 50, 100 }),
+        Map.entry("playfieldHorizontalPosition", new int[] { 0, 100 }),
+        Map.entry("playfieldVerticalPosition", new int[] { 0, 100 }),
+        Map.entry("back_button_press_time", new int[] { 0, 300 }),
+        Map.entry("seekBarVibrateIntensity", new int[] { 1, 255 }),
+        Map.entry("room_max_players", new int[] { 2, 16 })
+    );
+
     /**
      * The shared preferences of the application.
      */
