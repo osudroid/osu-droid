@@ -99,9 +99,17 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
                 // Update the TextureRegion UV extents and Sprite vertex dimensions now that the actual video resolution is
                 // known.
                 // Both were constructed as 0×0 because ExoPlayer reports dimensions asynchronously via onVideoSizeChanged.
-                textureRegion?.setTextureWidth(texture.videoWidth.toFloat())
-                textureRegion?.setTextureHeight(texture.videoHeight.toFloat())
-                setSize(texture.videoWidth.toFloat(), texture.videoHeight.toFloat())
+                val w = texture.videoWidth.toFloat()
+                val h = texture.videoHeight.toFloat()
+                textureRegion?.setTextureWidth(w)
+                textureRegion?.setTextureHeight(h)
+                setSize(w, h)
+
+                // RectangularShape initializes mScaleCenterX/Y from constructor dimensions (0×0 here).
+                // setSize() updates mWidth/mHeight but not the scale center, so we must fix it manually.
+                // Without this, applyBackground's centering formula — which assumes scale is applied around
+                // the entity center — places the video at the wrong screen position.
+                setScaleCenter(w / 2f, h / 2f)
 
                 mainHandler.post(callback)
             }
