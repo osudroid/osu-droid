@@ -1,31 +1,32 @@
 package com.osudroid.difficulty.skills
 
 import com.osudroid.beatmaps.hitobjects.HitObject
-import com.osudroid.difficulty.DroidDifficultyHitObject
-import com.osudroid.difficulty.evaluators.DroidReadingEvaluator
+import com.osudroid.difficulty.StandardDifficultyHitObject
+import com.osudroid.difficulty.evaluators.StandardReadingEvaluator
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.math.Interpolation
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModAutopilot
 import com.osudroid.mods.ModRelax
 import kotlin.math.log10
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
 /**
  * Represents the skill required to read every object in the beatmap.
  */
-class DroidReading(
+class StandardReading(
     mods: Iterable<Mod>,
     private val clockRate: Double,
     private val hitObjects: List<HitObject>
-) : HarmonicSkill<DroidDifficultyHitObject>(mods) {
+) : HarmonicSkill<StandardDifficultyHitObject>(mods) {
     private var currentDifficulty = 0.0
 
     private val skillMultiplier = 2.5
     private val difficultyDecayBase = 0.8
 
-    override fun objectDifficultyOf(current: DroidDifficultyHitObject): Double {
+    override fun objectDifficultyOf(current: StandardDifficultyHitObject): Double {
         val decay = difficultyDecay(current.deltaTime)
 
         currentDifficulty *= decay
@@ -66,14 +67,16 @@ class DroidReading(
         }
     }
 
-    private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
-        var difficulty = DroidReadingEvaluator.evaluateDifficultyOf(current, mods)
+    private fun calculateAdjustedDifficulty(current: StandardDifficultyHitObject): Double {
+        var difficulty = StandardReadingEvaluator.evaluateDifficultyOf(current, mods)
 
         if (mods.any { it is ModRelax }) {
             difficulty *= 0.4
         } else if (mods.any { it is ModAutopilot }) {
             difficulty *= 0.1
         }
+
+        difficulty *= 0.825 + max(0.0, current.overallDifficulty).pow(2.2) / 1125
 
         return difficulty
     }

@@ -47,6 +47,12 @@ abstract class DifficultyAttributes {
     var flashlightDifficulty = 0.0
 
     /**
+     * The difficulty corresponding to the reading skill.
+     */
+    @JvmField
+    var readingDifficulty = 0.0
+
+    /**
      * The number of clickable objects weighted by difficulty.
      *
      * Related to speed difficulty.
@@ -85,6 +91,12 @@ abstract class DifficultyAttributes {
      */
     @JvmField
     var aimTopWeightedSliderFactor = 0.0
+
+    /**
+     * The amount of notes that are considered difficult with respect to the reading skill.
+     */
+    @JvmField
+    var readingDifficultNoteCount = 0.0
 
     /**
      * The perceived overall difficulty **exclusive** of [IModApplicableToTrackRate] [Mod]s (DT/HT/etc.).

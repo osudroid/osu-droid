@@ -16,7 +16,7 @@ abstract class PerformanceCalculator<
      * The [DifficultyAttributes] being calculated.
      */
     @JvmField
-    val difficultyAttributes: TDiffAttributes
+    val attributes: TDiffAttributes
 ) {
     /**
      * The maximum combo achieved.
@@ -98,20 +98,22 @@ abstract class PerformanceCalculator<
      * Calculates the performance value of the [DifficultyAttributes] with the specified parameters.
      *
      * @param parameters The parameters to create the attributes for. If omitted, the [Beatmap] was assumed to be SS.
+     * @param attributes The [PerformanceAttributes] to populate. This can be used to avoid extra allocations.
      * @return The performance attributes for the beatmap relating to the parameters.
      */
     @JvmOverloads
-    fun calculate(parameters: TPerfParameters? = null) = run {
+    fun calculate(parameters: TPerfParameters? = null, attributes: TPerfAttributes? = null) = run {
         processParameters(parameters)
-        createPerformanceAttributes()
+        createPerformanceAttributes(attributes)
     }
 
     /**
      * Creates the [PerformanceAttributes] of the [DifficultyAttributes].
      *
+     * @param attributes The [PerformanceAttributes] to populate. This can be used to avoid extra allocations
      * @return The [PerformanceAttributes] for the [Beatmap] relating to the parameters.
      */
-    protected abstract fun createPerformanceAttributes(): TPerfAttributes
+    protected abstract fun createPerformanceAttributes(attributes: TPerfAttributes? = null): TPerfAttributes
 
     protected open fun processParameters(parameters: TPerfParameters?) =
         parameters?.let {
@@ -131,8 +133,8 @@ abstract class PerformanceCalculator<
      * Resets this calculator to its original state.
      */
     protected open fun resetDefaults() {
-        scoreMaxCombo = difficultyAttributes.maxCombo
-        countGreat = difficultyAttributes.hitCircleCount + difficultyAttributes.sliderCount + difficultyAttributes.spinnerCount
+        scoreMaxCombo = attributes.maxCombo
+        countGreat = attributes.hitCircleCount + attributes.sliderCount + attributes.spinnerCount
         countOk = 0
         countMeh = 0
         countMiss = 0

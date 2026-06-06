@@ -29,6 +29,12 @@ abstract class PerformanceAttributes {
     var flashlight = 0.0
 
     /**
+     * The reading performance value.
+     */
+    @JvmField
+    var reading = 0.0
+
+    /**
      * The amount of misses including slider breaks.
      */
     @JvmField

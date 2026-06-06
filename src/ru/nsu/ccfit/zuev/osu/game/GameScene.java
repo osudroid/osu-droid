@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import com.osudroid.audio.SongServiceClock;
+import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.game.FramedBeatmapClock;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
@@ -59,7 +60,6 @@ import com.osudroid.beatmaps.ComboColor;
 import com.osudroid.beatmaps.DroidPlayableBeatmap;
 import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.constants.BeatmapCountdown;
-import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.beatmaps.hitobjects.HitObject;
 import com.osudroid.beatmaps.hitobjects.Slider;
@@ -72,7 +72,10 @@ import com.osudroid.beatmaps.timings.EffectControlPoint;
 import com.osudroid.beatmaps.timings.TimingControlPoint;
 import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import com.osudroid.difficulty.attributes.DroidDifficultyAttributes;
+import com.osudroid.difficulty.attributes.DroidPerformanceAttributes;
+import com.osudroid.difficulty.attributes.PerformanceAttributes;
 import com.osudroid.difficulty.attributes.StandardDifficultyAttributes;
+import com.osudroid.difficulty.attributes.StandardPerformanceAttributes;
 import com.osudroid.difficulty.attributes.TimedDifficultyAttributes;
 import com.osudroid.difficulty.calculator.DroidPerformanceCalculationParameters;
 import com.osudroid.difficulty.calculator.PerformanceCalculationParameters;
@@ -213,6 +216,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private CompletableFuture<?> loadingPipeline;
     private Job gameLoadingJob;
 
+    private PerformanceAttributes performanceAttributes;
     private PerformanceCalculationParameters performanceCalculationParameters;
     private volatile TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private volatile TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
@@ -663,28 +667,36 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         this.playableBeatmap = playableBeatmap;
 
         if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
+            final var finalParsedBeatmap = parsedBeatmap;
+
+            // Calculate timed difficulty attributes
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
+                    performanceAttributes = new DroidPerformanceAttributes();
                     performanceCalculationParameters = new DroidPerformanceCalculationParameters();
 
                     if (droidTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        final var beatmap = playableBeatmap;
+                        final var finalPlayableBeatmap = playableBeatmap;
 
                         ppCalculationJob = Execution.async(ppScope -> {
-                            droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(beatmap, ppScope);
+                            droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
+                                finalParsedBeatmap, finalPlayableBeatmap, ppScope
+                            );
                         });
                     }
                 }
 
                 case standard -> {
+                    performanceAttributes = new StandardPerformanceAttributes();
                     performanceCalculationParameters = new StandardPerformanceCalculationParameters();
 
                     if (standardTimedDifficultyAttributes == null || differentPlayableBeatmap) {
-                        final var beatmap = parsedBeatmap;
                         final var modValues = mods.values();
 
                         ppCalculationJob = Execution.async(ppScope -> {
-                            standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(beatmap, modValues, ppScope);
+                            standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
+                                finalParsedBeatmap, modValues, ppScope
+                            );
                         });
                     }
                 }
@@ -1946,6 +1958,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             breakPeriods = null;
             cursorSprites = null;
             this.playableBeatmap = null;
+            performanceAttributes = null;
             performanceCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
@@ -2155,6 +2168,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playableBeatmap = null;
             cursorSprites = null;
             lastMods = null;
+            performanceAttributes = null;
             performanceCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
@@ -3372,9 +3386,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         performanceCalculationParameters.populate(playableBeatmap, stat);
 
-        return BeatmapDifficultyCalculator.calculateDroidPerformance(
-            timedAttributes.attributes, (DroidPerformanceCalculationParameters) performanceCalculationParameters
-        ).total;
+        BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes,
+                (DroidPerformanceCalculationParameters) performanceCalculationParameters,
+                (DroidPerformanceAttributes) performanceAttributes);
+
+        return performanceAttributes.total;
     }
 
     private double getStandardPPAt(int objectId) {
@@ -3390,9 +3406,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         performanceCalculationParameters.populate(playableBeatmap, stat);
 
-        return BeatmapDifficultyCalculator.calculateStandardPerformance(
-            timedAttributes.attributes, (StandardPerformanceCalculationParameters) performanceCalculationParameters
-        ).total;
+        BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes,
+                (StandardPerformanceCalculationParameters) performanceCalculationParameters,
+                (StandardPerformanceAttributes) performanceAttributes);
+
+        return performanceAttributes.total;
     }
 
     private UIScene createMainScene() {

@@ -1,17 +1,13 @@
 package com.osudroid.difficulty.evaluators
 
-import com.osudroid.beatmaps.hitobjects.HitObject
-import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.hitobjects.Spinner
-import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.difficulty.DroidDifficultyHitObject
+import com.osudroid.difficulty.StandardDifficultyHitObject
 import com.osudroid.difficulty.utils.DifficultyCalculationUtils
 import com.osudroid.math.Interpolation
 import com.osudroid.math.toDegrees
 import com.osudroid.math.toRadians
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModHidden
-import com.osudroid.mods.ModTraceable
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -21,29 +17,28 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
- * An evaluator for calculating osu!droid reading difficulty.
+ * An evaluator for calculating osu!standard reading difficulty.
  */
-object DroidReadingEvaluator {
+object StandardReadingEvaluator {
     private const val READING_WINDOW_SIZE = 3000.0
     private const val HIDDEN_MULTIPLIER = 0.28
-    private const val TRACEABLE_MULTIPLIER = 0.26
     private const val DENSITY_MULTIPLIER = 2.4
     private const val DENSITY_DIFFICULTY_BASE = 2.5
-    private const val PREEMPT_BALANCING_FACTOR = 150000.0
+    private const val PREEMPT_BALANCING_FACTOR = 140000.0
     private const val PREEMPT_STARTING_POINT = 500 // AR 9.66 in milliseconds
     private const val MINIMUM_ANGLE_RELEVANCY_TIME = 2000.0 // 2 seconds
     private const val MAXIMUM_ANGLE_RELEVANCY_TIME = 200.0
 
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>): Double {
-        if (current.obj is Spinner || current.isOverlapping(true) || current.index <= 0) {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: Iterable<Mod>): Double {
+        if (current.obj is Spinner || current.index <= 0) {
             return 0.0
         }
 
-        val next = current.next(0) as? DroidDifficultyHitObject
+        val next = current.next(0) as? StandardDifficultyHitObject
 
-        // 1.25 circles distance between centers
-        val distanceInfluenceThreshold = current.normalizedDiameter * 1.25
+        // 1.5 circles distance between centers
+        val distanceInfluenceThreshold = current.normalizedDiameter * 1.5
 
         // Only allow velocity to buff
         val velocity = max(1.0, current.lazyJumpDistance / current.strainTime)
@@ -60,15 +55,9 @@ object DroidReadingEvaluator {
             current, mods, pastObjectDifficultyInfluence, currentVisibleObjectDensity, velocity, constantAngleNerfFactor
         )
 
-        val traceableDifficulty = calculateTraceableDifficulty(
-            current, mods, distanceInfluenceThreshold, pastObjectDifficultyInfluence, currentVisibleObjectDensity, velocity, constantAngleNerfFactor
-        )
-
         val preemptDifficulty = calculatePreemptDifficulty(velocity, constantAngleNerfFactor, current.timePreempt)
 
-        var difficulty = DifficultyCalculationUtils.norm(
-            1.5, preemptDifficulty, hiddenDifficulty, traceableDifficulty, noteDensityDifficulty
-        )
+        var difficulty = DifficultyCalculationUtils.norm(1.5, preemptDifficulty, hiddenDifficulty, noteDensityDifficulty)
 
         // Having less time to process information is harder.
         difficulty *= highBpmBonus(current.strainTime)
@@ -85,7 +74,7 @@ object DroidReadingEvaluator {
      * - density of objects visible when the current object needs to be clicked.
      */
     private fun calculateDensityDifficulty(
-        next: DroidDifficultyHitObject?,
+        next: StandardDifficultyHitObject?,
         distanceInfluenceThreshold: Double,
         velocity: Double,
         constantAngleNerfFactor: Double,
@@ -133,7 +122,7 @@ object DroidReadingEvaluator {
     }
 
     private fun calculateHiddenDifficulty(
-        current: DroidDifficultyHitObject,
+        current: StandardDifficultyHitObject,
         mods: Iterable<Mod>,
         pastObjectDifficultyInfluence: Double,
         currentVisibleObjectDensity: Double,
@@ -174,62 +163,7 @@ object DroidReadingEvaluator {
         return hiddenDifficulty
     }
 
-    private fun calculateTraceableDifficulty(
-        current: DroidDifficultyHitObject,
-        mods: Iterable<Mod>,
-        distanceInfluenceThreshold: Double,
-        pastObjectDifficultyInfluence: Double,
-        currentVisibleObjectDensity: Double,
-        velocity: Double,
-        constantAngleNerfFactor: Double
-    ): Double {
-        if (mods.none { it is ModTraceable }) {
-            return 0.0
-        }
-
-        val approachRate = BeatmapDifficulty.difficultyRange(
-            current.timePreempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
-        )
-
-        var lowApproachRateSliderVisibilityFactor = 1.0
-        var highApproachRateSliderVisibilityFactor = 1.0
-
-        if (current.obj is Slider) {
-            // Sliders are easier to read as the slider body remains visible.
-            // Decrease difficulty as the slider becomes longer.
-            val distanceFactor = DifficultyCalculationUtils.smootherstep(
-                current.travelDistance, distanceInfluenceThreshold, 15.0
-            )
-
-            highApproachRateSliderVisibilityFactor = 0.5 + distanceFactor / 2
-            lowApproachRateSliderVisibilityFactor = distanceFactor
-        }
-
-        // Start from normal curve, rewarding lower AR up to AR7.
-        var preemptFactor = 0.1 + 0.05 * (12.0 - max(approachRate, 7.0)) * highApproachRateSliderVisibilityFactor
-
-        // For AR up to 0 - reduce reward for very low ARs when object is visible.
-        if (approachRate < 7) {
-            preemptFactor += 0.05 * (7.0 - max(approachRate, 0.0)) * lowApproachRateSliderVisibilityFactor
-        }
-
-        // Starting from AR0 - cap values so they won't grow to infinity.
-        if (approachRate < 0) {
-            preemptFactor += 0.05 * (1 - 1.5.pow(approachRate)) * lowApproachRateSliderVisibilityFactor
-        }
-
-        // Account for both past and current densities.
-        val densityFactor = (currentVisibleObjectDensity + pastObjectDifficultyInfluence).pow(2)
-
-        var traceableDifficulty = (preemptFactor + densityFactor) * constantAngleNerfFactor * velocity
-
-        // Apply a soft cap to general Traceable reading to account for partial memorization.
-        traceableDifficulty = traceableDifficulty.pow(0.45) * TRACEABLE_MULTIPLIER
-
-        return traceableDifficulty
-    }
-
-    private fun getPastObjectDifficultyInfluence(current: DroidDifficultyHitObject, distanceInfluenceThreshold: Double): Double {
+    private fun getPastObjectDifficultyInfluence(current: StandardDifficultyHitObject, distanceInfluenceThreshold: Double): Double {
         var pastObjectDifficultyInfluence = 0.0
 
         for (loopObj in retrievePastVisibleObjects(current)) {
@@ -252,9 +186,9 @@ object DroidReadingEvaluator {
     /**
      * Returns the density of objects visible at the point in time the current object needs to be clicked capped by the reading window.
      */
-    private fun retrieveCurrentVisibleObjectDensity(current: DroidDifficultyHitObject): Double {
+    private fun retrieveCurrentVisibleObjectDensity(current: StandardDifficultyHitObject): Double {
         var visibleObjectCount = 0.0
-        var hitObject = current.next(0) as? DroidDifficultyHitObject
+        var hitObject = current.next(0) as? StandardDifficultyHitObject
 
         while (hitObject != null) {
             if (
@@ -265,15 +199,10 @@ object DroidReadingEvaluator {
                 break
             }
 
-            if (hitObject.isOverlapping(true)) {
-                hitObject = hitObject.next(0) as? DroidDifficultyHitObject
-                continue
-            }
-
             val timeNerfFactor = getTimeNerfFactor(hitObject.startTime - current.startTime)
             visibleObjectCount += hitObject.opacityAt(current.obj.startTime) * timeNerfFactor
 
-            hitObject = hitObject.next(0) as? DroidDifficultyHitObject
+            hitObject = hitObject.next(0) as? StandardDifficultyHitObject
         }
 
         return visibleObjectCount
@@ -284,18 +213,14 @@ object DroidReadingEvaluator {
      *
      * @param current The current object.
      */
-    private fun retrievePastVisibleObjects(current: DroidDifficultyHitObject) = sequence {
+    private fun retrievePastVisibleObjects(current: StandardDifficultyHitObject) = sequence {
         for (i in 0 until current.index) {
-            val hitObject = current.previous(i) as? DroidDifficultyHitObject ?: break
+            val hitObject = current.previous(i) as? StandardDifficultyHitObject ?: break
 
             if (current.startTime - hitObject.startTime > READING_WINDOW_SIZE ||
                 // The previous object is not visible at the time the current object needs to be hit.
                 hitObject.startTime < current.startTime - current.timePreempt) {
                 break
-            }
-
-            if (hitObject.isOverlapping(true)) {
-                continue
             }
 
             yield(hitObject)
@@ -309,7 +234,7 @@ object DroidReadingEvaluator {
      *
      * @param current The current object.
      */
-    private fun getConstantAngleNerfFactor(current: DroidDifficultyHitObject): Double {
+    private fun getConstantAngleNerfFactor(current: StandardDifficultyHitObject): Double {
         var constantAngleCount = 0.0
         var index = 0
         var currentTimeGap = 0.0
@@ -317,11 +242,11 @@ object DroidReadingEvaluator {
         val currentAngle = current.angle
 
         var loopObjPrev0 = current
-        var loopObjPrev1: DroidDifficultyHitObject? = null
-        var loopObjPrev2: DroidDifficultyHitObject? = null
+        var loopObjPrev1: StandardDifficultyHitObject? = null
+        var loopObjPrev2: StandardDifficultyHitObject? = null
 
         while (currentTimeGap < MINIMUM_ANGLE_RELEVANCY_TIME) {
-            val loopObj = current.previous(index) as? DroidDifficultyHitObject ?: break
+            val loopObj = current.previous(index) as? StandardDifficultyHitObject ?: break
             val loopObjAngle = loopObj.angle
 
             // Account less for objects that are close to the time limit.
