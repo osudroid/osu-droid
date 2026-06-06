@@ -44,6 +44,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.debug.DebugPlaygroundScene;
+import com.osudroid.resources.R;
 import com.osudroid.ui.FPSCounter;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
@@ -97,7 +98,6 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
@@ -189,7 +189,7 @@ public class MainActivity extends BaseGameActivity implements
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
-            ToastLogger.showText(StringTable.get(com.osudroid.resources.R.string.message_info_multitouch), false);
+            ToastLogger.showText(StringTable.get(R.string.message_info_multitouch), false);
         }
         engine.setTouchController(new MultiTouchController());
 
@@ -207,7 +207,7 @@ public class MainActivity extends BaseGameActivity implements
                 dir = new File(Config.getBeatmapPath());
                 if (!(dir.exists() || dir.mkdirs())) {
                     ToastLogger.showText(StringTable.format(
-                                    com.osudroid.resources.R.string.message_error_createdir, dir.getPath()),
+                                    R.string.message_error_createdir, dir.getPath()),
                             true);
                 } else {
                     final SharedPreferences prefs = PreferenceManager
@@ -386,7 +386,7 @@ public class MainActivity extends BaseGameActivity implements
         File internal = Environment.getDataDirectory();
         StatFs stat = new StatFs(internal.getPath());
         availableMemory = (double) stat.getAvailableBytes();
-        String toastMessage = String.format(StringTable.get(com.osudroid.resources.R.string.message_low_storage_space), df.format(availableMemory / minMem));
+        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
             Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
         }
@@ -431,7 +431,7 @@ public class MainActivity extends BaseGameActivity implements
             File file = new File(fileToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
-                        StringTable.get(com.osudroid.resources.R.string.library_importing),
+                        StringTable.get(R.string.library_importing),
                         false);
 
                 FileUtils.extractBeatmapset(fileToAdd, Config.getBeatmapPath());
@@ -497,7 +497,7 @@ public class MainActivity extends BaseGameActivity implements
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
-                        com.osudroid.resources.R.string.library_importing_several,
+                        R.string.library_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
                     FileUtils.extractBeatmapset(beatmap, Config.getBeatmapPath());
@@ -553,7 +553,7 @@ public class MainActivity extends BaseGameActivity implements
 
         if (skins.size() > 0) {
             ToastLogger.showText(StringTable.format(
-                    com.osudroid.resources.R.string.library_skin_importing_several,
+                    R.string.library_skin_importing_several,
                     skins.size()), false);
 
             for (final String skin : skins) {
@@ -561,7 +561,7 @@ public class MainActivity extends BaseGameActivity implements
                     String folderName = skin.substring(0, skin.length() - 4);
                     // We have imported the skin!
                     ToastLogger.showText(
-                            StringTable.format(com.osudroid.resources.R.string.library_imported, folderName),
+                            StringTable.format(R.string.library_imported, folderName),
                             true);
                     Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
                 }
@@ -1121,7 +1121,7 @@ public class MainActivity extends BaseGameActivity implements
         } else {
             Intent grantPermission = new Intent(this, PermissionActivity.class);
             startActivity(grantPermission);
-            overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
+            overridePendingTransition(ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap, ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap);
             finish();
             return false;
         }
@@ -1133,7 +1133,7 @@ public class MainActivity extends BaseGameActivity implements
                 .setTitle(getString(R.string.multi_mode_window_alert_title))
                 .setMessage(getString(R.string.multi_mode_window_alert_message))
                 .setAllowDismiss(false)
-                .addButton(getString(com.osudroid.resources.R.string.accessibility_detector_exit), (d) -> {
+                .addButton(getString(R.string.accessibility_detector_exit), (d) -> {
                     finish();
                     return null;
                 });

@@ -6,6 +6,7 @@ import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.*
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.utils.*
+import com.osudroid.resources.R
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -20,7 +21,6 @@ import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.LinkedList
 
 /**

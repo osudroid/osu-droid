@@ -11,6 +11,7 @@ import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.*
 import com.osudroid.utils.async
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -33,7 +34,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
-import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomPlayerCard : UILinearContainer() {
     private val teamColorBar: UIButton

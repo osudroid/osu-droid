@@ -6,6 +6,7 @@ import com.edlplan.framework.easing.Easing
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.utils.mainThread
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R.string
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
@@ -49,7 +50,6 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R.string
 
 object CalibrationScene : UIScene() {
     internal var OFFSET_MIN = -500
