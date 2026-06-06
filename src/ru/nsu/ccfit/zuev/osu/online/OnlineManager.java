@@ -35,7 +35,7 @@ public class OnlineManager {
     public static final String updateEndpoint = endpoint + "update.php?lang=";
     public static final String defaultAvatarURL = getAvatarURL(0);
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
-    private static final String onlineVersion = "60";
+    private static final String onlineVersion = "61";
 
     public static final OkHttpClient client = new OkHttpClient();
 
