@@ -1048,7 +1048,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         } finally {
                             if (requestId == loadingRequestId.get()) {
                                 if (!succeeded && !cancelled) {
-                                    quit();
+                                    Execution.updateThread(this::quit);
                                 }
 
                                 gameLoadingJob = null;
