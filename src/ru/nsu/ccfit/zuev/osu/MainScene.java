@@ -221,7 +221,7 @@ public class MainScene implements IUpdateHandler {
                             dialog.dismiss();
 
                             try {
-                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"));
+                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/gles/latest"));
                                 context.startActivity(intent);
                             } catch (Exception e) {
                                 android.util.Log.e("MainScene", "Failed to load changelog", e);
