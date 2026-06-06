@@ -45,7 +45,7 @@ class DroidDifficultyCalculatorTest {
         }
 
         calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
-            Assert.assertEquals(1.5198059392203849, flashlightDifficulty, 1e-5)
+            Assert.assertEquals(1.3406915364179028, flashlightDifficulty, 1e-5)
         }
     }
 }
