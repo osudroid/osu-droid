@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "764431452338",
     "project_id": "osudroid-1ee32",
-    "storage_bucket": "osudroid-1ee32.appspot.com"
+    "storage_bucket": "osudroid-1ee32.firebasestorage.app"
   },
   "client": [
     {
@@ -12,25 +12,18 @@
           "package_name": "ru.nsu.ccfit.zuev.osuplus"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "764431452338-uur7eihjek5cj4pk382mrp9aroiljq29.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyAyekXswNqa8XImxeBDcVhAdLLYtZ13-m8"
+        },
+        {
+          "current_key": "AIzaSyD6a0TaPCEjAF3Lbz4fLxG8OHy8WVzZ1kc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "764431452338-uur7eihjek5cj4pk382mrp9aroiljq29.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     },
@@ -41,25 +34,62 @@
           "package_name": "ru.nsu.ccfit.zuev.osuplus.debug"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "764431452338-uur7eihjek5cj4pk382mrp9aroiljq29.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyAyekXswNqa8XImxeBDcVhAdLLYtZ13-m8"
+        },
+        {
+          "current_key": "AIzaSyD6a0TaPCEjAF3Lbz4fLxG8OHy8WVzZ1kc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "764431452338-uur7eihjek5cj4pk382mrp9aroiljq29.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764431452338:android:7f5b03625e67b3737d21ab",
+        "android_client_info": {
+          "package_name": "ru.nsu.ccfit.zuev.osuplus.gles"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyekXswNqa8XImxeBDcVhAdLLYtZ13-m8"
+        },
+        {
+          "current_key": "AIzaSyD6a0TaPCEjAF3Lbz4fLxG8OHy8WVzZ1kc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764431452338:android:7f5b03625e67b3737d21ab",
+        "android_client_info": {
+          "package_name": "ru.nsu.ccfit.zuev.osuplus.gles.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyekXswNqa8XImxeBDcVhAdLLYtZ13-m8"
+        },
+        {
+          "current_key": "AIzaSyD6a0TaPCEjAF3Lbz4fLxG8OHy8WVzZ1kc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }

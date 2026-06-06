@@ -41,7 +41,7 @@ object UpdateManager: IFileRequestObserver
                 .addButton("Yes") {
                     it.dismiss()
 
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/gles/latest"))
                     GlobalManager.getInstance().mainActivity.startActivity(intent)
                 }
                 .addButton("No", clickListener = MessageDialog::dismiss)
