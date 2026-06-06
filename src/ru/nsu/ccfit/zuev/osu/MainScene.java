@@ -190,7 +190,7 @@ public class MainScene implements IUpdateHandler {
         UIBox box = new UIBox() {
 
             {
-                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid-GLES" + BuildConfig.VERSION_NAME, vbo);
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid-GLES-" + BuildConfig.VERSION_NAME, vbo);
                 attachChild(versionText, 0);
 
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
