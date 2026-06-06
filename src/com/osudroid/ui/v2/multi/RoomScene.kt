@@ -60,6 +60,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.kotlin.runSafe
 import com.osudroid.mods.ModScoreV2
 import org.json.JSONArray
+import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -748,6 +749,21 @@ class RoomScene(
         // will call invalidateStatus() with the correct beatmap context.
 
         chat.show()
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+
+        if (selectedBeatmap != null) {
+            val songService = GlobalManager.getInstance().songService
+
+            if (songService.status == Status.STOPPED) {
+                songService.preLoad(selectedBeatmap.audioPath)
+                songService.play()
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
