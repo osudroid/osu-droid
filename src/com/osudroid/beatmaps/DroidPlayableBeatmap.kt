@@ -10,7 +10,7 @@ import com.osudroid.mods.ModPrecise
 class DroidPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
     mods: Iterable<Mod>? = null
-) : PlayableBeatmap(baseBeatmap, GameMode.Droid, mods) {
+) : PlayableBeatmap(baseBeatmap, mods) {
     override fun createHitWindow() =
         if (ModPrecise::class in mods) PreciseDroidHitWindow(difficulty.od)
         else DroidHitWindow(difficulty.od)

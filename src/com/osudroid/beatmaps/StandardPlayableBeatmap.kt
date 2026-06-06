@@ -9,6 +9,6 @@ import com.osudroid.mods.Mod
 class StandardPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
     mods: Iterable<Mod>? = null
-) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods) {
+) : PlayableBeatmap(baseBeatmap, mods) {
     override fun createHitWindow() = StandardHitWindow(difficulty.od)
 }

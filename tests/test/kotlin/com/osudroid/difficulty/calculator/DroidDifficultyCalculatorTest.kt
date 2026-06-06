@@ -3,6 +3,7 @@ package com.osudroid.difficulty.calculator
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.parser.BeatmapParser
 import com.osudroid.mods.ModDoubleTime
+import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModNoFail
 import com.osudroid.mods.ModPrecise
 import org.junit.Assert
@@ -36,12 +37,15 @@ class DroidDifficultyCalculatorTest {
 
         calculator.calculate(beatmap).apply {
             // These results are off by a margin from server-side results due to floating point differences.
-            Assert.assertEquals(2.500529087864304, aimDifficulty, 1e-5)
-            Assert.assertEquals(1.4808324669581225, tapDifficulty, 1e-5)
-            Assert.assertEquals(0.812969288725491, rhythmDifficulty, 1e-5)
-            Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
-            Assert.assertEquals(0.7798882536263991, readingDifficulty, 1e-5)
-            Assert.assertEquals(3.8554857722148643, starRating, 1e-6)
+            Assert.assertEquals(1.8685609988004601, aimDifficulty, 1e-5)
+            Assert.assertEquals(1.492734818431125, tapDifficulty, 1e-5)
+            Assert.assertEquals(0.5910394950606784, rhythmDifficulty, 1e-5)
+            Assert.assertEquals(0.0801694219632239, readingDifficulty, 1e-5)
+            Assert.assertEquals(3.5861666096034437, starRating, 1e-6)
+        }
+
+        calculator.calculate(beatmap, listOf(ModFlashlight())).apply {
+            Assert.assertEquals(1.3406915364179028, flashlightDifficulty, 1e-5)
         }
     }
 }

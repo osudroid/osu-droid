@@ -20,8 +20,16 @@ class DroidPerformanceCalculationParameters : PerformanceCalculationParameters()
     @JvmField
     var sliderCheesePenalty = SliderCheesePenalty()
 
+    /**
+     * The total score achieved.
+     */
+    @JvmField
+    var totalScore = 0
+
     override fun populate(beatmap: IBeatmap, stat: StatisticV2) {
         super.populate(beatmap, stat)
+
+        totalScore = stat.totalScoreWithMultiplier
 
         comboBreakingSliderNestedMisses = if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
             beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
