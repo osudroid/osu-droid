@@ -32,6 +32,7 @@ import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
@@ -2236,10 +2237,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         resetPlayfieldSizeScale();
         scene = createMainScene();
 
-        if (Multiplayer.isMultiplayer)
-        {
-            Multiplayer.roomScene.show();
+        if (Multiplayer.isMultiplayer) {
             releaseVideo();
+            var roomScene = Multiplayer.roomScene;
+
+            if (Multiplayer.isConnected() && roomScene != null) {
+                roomScene.show();
+            } else {
+                engine.setScene(new LobbyScene());
+            }
+
             return;
         }
         ResourceManager.getInstance().getSound("failsound").stop();
