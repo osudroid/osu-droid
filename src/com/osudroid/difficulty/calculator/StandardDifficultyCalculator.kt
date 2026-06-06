@@ -162,7 +162,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         /**
          * The epoch time of the last change to difficulty calculation, in milliseconds.
          */
-        const val VERSION = 1762003732000
+        const val VERSION = 1780707920000
 
         @JvmStatic
         fun sumCognitionDifficulty(reading: Double, flashlight: Double) = when {
