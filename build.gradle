@@ -115,8 +115,8 @@ android {
 
         release {
             resValue "string", "app_name", "osu!droid-GLES"
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig = signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
@@ -126,9 +126,9 @@ android {
         pre_release {
             matchingFallbacks = ['release']
             resValue "string", "app_name", "osu!droid-GLES"
-            minifyEnabled true
+//            minifyEnabled true
 //            debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig = signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
