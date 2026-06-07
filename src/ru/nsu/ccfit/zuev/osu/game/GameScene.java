@@ -3778,6 +3778,44 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         hud.onNoteHit(stat);
+        hud.onSeek();
+
+        // Replay all touch-down events up to the seek target so HUD elements
+        // that depend on touch history can reconstruct their state correctly.
+        if (GameHelper.isAutoplay() || replaying) {
+            if (GameHelper.isAutoplay()) {
+                for (int i = 0; i < objects.length; ++i) {
+                    float tapTime = (float) objects[i].startTime / 1000f;
+
+                    if (tapTime > clampedTime) {
+                        break;
+                    }
+
+                    hud.onGameplayTouchDown(tapTime);
+                }
+            } else {
+                int cursorCount = replay.cursorMoves.size();
+
+                for (int i = 0; i < cursorCount; ++i) {
+                    var moveArray = replay.cursorMoves.get(i);
+
+                    for (int j = 0; j < moveArray.size; ++j) {
+                        var movement = moveArray.movements[j];
+
+                        float tapTime = movement.getTime() / 1000f;
+
+                        if (tapTime > clampedTime) {
+                            break;
+                        }
+
+                        if (movement.getTouchType() == TouchType.DOWN) {
+                            hud.onGameplayTouchDown(tapTime);
+                        }
+                    }
+                }
+            }
+        }
+
         updatePPValue(objectIndex - 1);
 
         // Seek the beatmap clock (also seeks the audio source).

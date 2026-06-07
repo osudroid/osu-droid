@@ -14,6 +14,10 @@ class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
         objects.add(obj)
     }
 
+    override fun onSeek() {
+        objects.clear()
+    }
+
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         val elapsedTimeMs = gameScene.elapsedTime * 1000
 

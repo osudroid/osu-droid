@@ -15,6 +15,10 @@ class HUDTapsPerSecondCounter : HUDStatisticCounter("Taps/sec") {
         updateThread { timestamps.add(time) }
     }
 
+    override fun onSeek() {
+        timestamps.clear()
+    }
+
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         val earliestElapsedTime = gameScene.elapsedTime - GameHelper.getSpeedMultiplier()
 
