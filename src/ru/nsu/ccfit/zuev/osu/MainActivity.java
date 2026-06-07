@@ -864,7 +864,12 @@ public class MainActivity extends BaseGameActivity implements
 
         Multiplayer.flushLog();
         AccessibilityDetector.unregister(this);
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+
+        var listener = displayListener;
+
+        if (listener != null) {
+            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(listener);
+        }
     }
 
     @Override
