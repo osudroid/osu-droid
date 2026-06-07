@@ -3381,17 +3381,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getDroidPPAt(int objectId) {
-        var playableBeatmap = this.playableBeatmap;
-
-        if (playableBeatmap == null || droidTimedDifficultyAttributes == null ||
-                performanceCalculationParameters == null || objectId < 0 ||
+        if (droidTimedDifficultyAttributes == null || performanceCalculationParameters == null || objectId < 0 ||
                 objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = droidTimedDifficultyAttributes[objectId];
 
-        performanceCalculationParameters.populate(playableBeatmap, stat);
+        performanceCalculationParameters.populate(stat, timedAttributes.sliderCount, timedAttributes.sliderTickCount, timedAttributes.sliderRepeatCount);
 
         BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes,
                 (DroidPerformanceCalculationParameters) performanceCalculationParameters,
@@ -3401,17 +3398,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getStandardPPAt(int objectId) {
-        var playableBeatmap = this.playableBeatmap;
-
-        if (playableBeatmap == null || standardTimedDifficultyAttributes == null ||
-                performanceCalculationParameters == null || objectId < 0 ||
+        if (standardTimedDifficultyAttributes == null || performanceCalculationParameters == null || objectId < 0 ||
                 objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
-        performanceCalculationParameters.populate(playableBeatmap, stat);
+        performanceCalculationParameters.populate(stat, timedAttributes.sliderCount, timedAttributes.sliderTickCount, timedAttributes.sliderRepeatCount);
 
         BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes,
                 (StandardPerformanceCalculationParameters) performanceCalculationParameters,
