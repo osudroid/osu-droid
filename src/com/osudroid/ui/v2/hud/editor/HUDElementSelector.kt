@@ -158,6 +158,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
         elements.fastForEach { it.onAccuracyRegister(type, accuracy) }
     }
 
+    override fun onSeek() {
+        elements.fastForEach { it.onSeek() }
+    }
+
     //endregion
 
 

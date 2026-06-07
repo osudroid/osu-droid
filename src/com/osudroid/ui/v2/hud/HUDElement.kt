@@ -195,6 +195,8 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
 
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {}
 
+    override fun onSeek() {}
+
     //endregion
 
     //region Entity events
