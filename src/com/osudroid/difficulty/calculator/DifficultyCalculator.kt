@@ -179,7 +179,10 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
                     skills,
                     difficultyObjects.sliceArray(0..<currentIndex),
                     false
-                )
+                ),
+                progressiveBeatmap.hitObjects.sliderCount,
+                progressiveBeatmap.hitObjects.sliderTickCount,
+                progressiveBeatmap.hitObjects.sliderRepeatCount
             )
         }
 
