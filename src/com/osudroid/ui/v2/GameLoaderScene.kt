@@ -173,16 +173,16 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             RoomAPI.setPlayerStatus(PlayerStatus.NotReady)
             Multiplayer.roomScene?.show()
             return
-        } else {
-            val global = GlobalManager.getInstance()
-            val songMenu = global.songMenu
-            val selectedBeatmap = songMenu.selectedBeatmap
+        }
 
-            global.engine.scene = songMenu.scene
+        val global = GlobalManager.getInstance()
+        val songMenu = global.songMenu
+        val selectedBeatmap = songMenu.selectedBeatmap
 
-            if (selectedBeatmap != null) {
-                songMenu.playMusic(selectedBeatmap.audioPath, selectedBeatmap.previewTime)
-            }
+        global.engine.scene = songMenu.scene
+
+        if (selectedBeatmap != null) {
+            songMenu.playMusic(selectedBeatmap.audioPath, selectedBeatmap.previewTime)
         }
     }
 
