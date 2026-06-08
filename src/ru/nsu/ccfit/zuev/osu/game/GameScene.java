@@ -1918,6 +1918,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
+        if (GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0) {
+            gameover();
+
+            if (!Multiplayer.isMultiplayer) {
+                restartGame();
+            }
+        }
+
         var mutedMod = GameHelper.getMuted();
 
         // 节拍器
@@ -2283,12 +2291,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             comboWasMissed = true;
             stat.registerHit(0, false, false, incrementCombo);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
-            if (GameHelper.isPerfect()) {
-                gameover();
-
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
-            }
             if (GameHelper.isSuddenDeath()) {
                 stat.changeHp(-1.0f);
                 gameover();
@@ -2305,12 +2307,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT50);
             scoreName = "hit50";
             comboWas100 = true;
-            if(GameHelper.isPerfect()){
-                gameover();
-
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
-            }
         } else if (score == 100) {
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
@@ -2320,11 +2316,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             } else {
                 stat.registerHit(100, false, false, incrementCombo);
                 scoreName = "hit100";
-            }
-            if(GameHelper.isPerfect()){
-                gameover();
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
