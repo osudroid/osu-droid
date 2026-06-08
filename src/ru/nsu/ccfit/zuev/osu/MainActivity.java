@@ -1047,7 +1047,9 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
-                } else if (currentScene instanceof GameLoaderScene loaderScene) {
+                }
+
+                if (currentScene instanceof GameLoaderScene loaderScene) {
                     loaderScene.cancel();
                     return true;
                 }

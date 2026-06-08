@@ -1072,11 +1072,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private CompletableFuture<Unit> cancelLoading(boolean invalidatePendingStart) {
-        // Do not cancel loading in multiplayer.
-        if (Multiplayer.isMultiplayer) {
-            return CompletableFuture.completedFuture(Unit.INSTANCE);
-        }
-
         if (invalidatePendingStart) {
             loadingRequestId.incrementAndGet();
         }
