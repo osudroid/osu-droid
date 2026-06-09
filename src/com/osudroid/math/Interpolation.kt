@@ -52,8 +52,19 @@ object Interpolation {
      * @return The output of the reverse linear interpolation function calculated at [x].
      */
     @JvmStatic
-    fun reverseLinear(x: Double, start: Double, end: Double) =
-        ((x - start) / (end - start)).coerceIn(0.0, 1.0)
+    fun reverseLinear(x: Float, start: Float, end: Float) = ((x - start) / (end - start)).coerceIn(0f, 1f)
+
+    /**
+     * Calculates the reverse [linear interpolation](https://en.wikipedia.org/wiki/Linear_interpolation)
+     * function at [x].
+     *
+     * @param x The value to calculate the function for.
+     * @param start The [x] value at which the function returns 0.
+     * @param end The [x] value at which the function returns 1.
+     * @return The output of the reverse linear interpolation function calculated at [x].
+     */
+    @JvmStatic
+    fun reverseLinear(x: Double, start: Double, end: Double) = ((x - start) / (end - start)).coerceIn(0.0, 1.0)
 
     /**
      * Interpolates between [start] and [end] using a given [base] and [exponent].

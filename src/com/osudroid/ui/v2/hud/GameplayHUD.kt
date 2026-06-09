@@ -303,6 +303,11 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
         elementSelector?.onAccuracyRegister(type, accuracy)
     }
 
+    override fun onSeek() {
+        forEachElement { it.onSeek() }
+        elementSelector?.onSeek()
+    }
+
     //endregion
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {

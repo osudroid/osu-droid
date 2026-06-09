@@ -25,4 +25,9 @@ interface IGameplayEvents {
 
     fun onAccuracyRegister(type: HitObjectType, accuracy: Float)
 
+    /**
+     * Called when the gameplay is seeked to a new position.
+     */
+    fun onSeek()
+
 }

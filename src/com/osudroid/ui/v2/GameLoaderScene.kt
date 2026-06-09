@@ -3,6 +3,8 @@ package com.osudroid.ui.v2
 import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.utils.ModHashMap
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -130,7 +132,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 anchor = Anchor.BottomLeft
                 origin = Anchor.BottomLeft
                 x = 60f
-                y = if (Multiplayer.isMultiplayer) -60f else -30f
+                y = -30f
                 spacing = 30f
 
                 +CircularProgressBar().apply {
@@ -138,23 +140,21 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                     height = 32f
                 }
 
-                if (!Multiplayer.isMultiplayer) {
-                    +UITextButton().apply {
-                        text = "Back"
+                +UITextButton().apply {
+                    text = "Back"
 
-                        leadingIcon = UISprite().apply {
-                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-                            width = 28f
-                            height = 28f
-                        }
-
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            cancel()
-                        }
-
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    leadingIcon = UISprite().apply {
+                        textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                        width = 28f
+                        height = 28f
                     }
+
+                    onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        cancel()
+                    }
+
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 }
             }
 
@@ -163,14 +163,17 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     }
 
     /**
-     * Cancels loading and goes back to the song menu.
+     * Cancels loading and goes back to the song menu, or to the multiplayer room if in multiplayer.
      */
     fun cancel() {
+        gameScene.cancelLoading()
+
         if (Multiplayer.isMultiplayer) {
+            // Inform that the player has canceled loading.
+            RoomAPI.setPlayerStatus(PlayerStatus.NotReady)
+            Multiplayer.roomScene?.show()
             return
         }
-
-        gameScene.cancelLoading()
 
         val global = GlobalManager.getInstance()
         val songMenu = global.songMenu

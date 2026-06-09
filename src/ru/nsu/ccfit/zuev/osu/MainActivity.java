@@ -946,13 +946,15 @@ public class MainActivity extends BaseGameActivity implements
         RoomAPI.INSTANCE.disconnect();
 
         Multiplayer.flushLog();
+
         // displayListener is only assigned when permissions are already granted.
         // Guard against null to avoid a NullPointerException on the very first launch
         // where the activity is finished before the listener is ever set up.
-        if (displayListener != null) {
-            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
-        }
+        var listener = displayListener;
 
+        if (listener != null) {
+            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(listener);
+        }
         AccessibilityDetector.unregister(this);
 
         if (killOnDestroy) {
@@ -965,6 +967,7 @@ public class MainActivity extends BaseGameActivity implements
             // broken textures) if the user re-launches from the task switcher.
             android.os.Process.killProcess(android.os.Process.myPid());
         }
+
     }
 
     @Override
@@ -1153,7 +1156,9 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
-                } else if (currentScene instanceof GameLoaderScene loaderScene) {
+                }
+
+                if (currentScene instanceof GameLoaderScene loaderScene) {
                     loaderScene.cancel();
                     return true;
                 }

@@ -111,10 +111,13 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
 
     //region Timekeeping
 
+    private var parentClockProvider: IClockProvider<*>? = null
+
     /**
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIScene]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null
@@ -167,6 +170,16 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
 
     //endregion
 
+    //region Parent-child handling
+
+    override fun setParent(pEntity: IEntity?) {
+        // Scene's setParent does not actually set the parent for a scene, which breaks clock propagation if this scene
+        // needs to inherit its parent's clock.
+        parentClockProvider = pEntity as? IClockProvider<*>
+
+        super.setParent(pEntity)
+    }
+
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
         this.childScene?.onDetached()
         super.setChildScene(childScene, modalDraw, modalUpdate, modalTouch)
@@ -179,7 +192,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
     }
 
     override fun onAttached() {
-        val inheritedClockProvider = (parent as? IClockProvider<*>) ?: (mParentScene as? IClockProvider<*>)
+        val inheritedClockProvider = parentClockProvider ?: mParentScene as? IClockProvider<*>
         updateClock(inheritedClockProvider?.clock as? IFrameBasedClock ?: UIEngine.current.clock)
 
         fun IEntity.propagateSkinChanges() {

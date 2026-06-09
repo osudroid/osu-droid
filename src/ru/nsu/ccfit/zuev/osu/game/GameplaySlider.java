@@ -22,7 +22,7 @@ import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick;
 import com.osudroid.beatmaps.sections.BeatmapControlPoints;
 import com.osudroid.game.GameplayHitSampleInfo;
 import com.osudroid.game.GameplaySequenceHitSampleInfo;
-import com.osudroid.math.Interpolation;
+import com.osudroid.math.Precision;
 import com.osudroid.mods.ModHidden;
 import com.osudroid.mods.ModSynesthesia;
 import com.osudroid.ui.v2.game.SliderTickSprite;
@@ -89,6 +89,7 @@ public class GameplaySlider extends GameObject {
 
     // Temporarily used PointF to avoid allocations
     private final PointF tmpPoint = new PointF();
+    private final PointF tmpTargetPoint = new PointF();
     private float ballAngle;
 
     private boolean kiai;
@@ -272,7 +273,8 @@ public class GameplaySlider extends GameObject {
         scene.attachChild(approachCircle);
 
         // End circle
-        pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
+        getPositionAt(1, false, false);
+        pathEndPosition.set(tmpPoint.x, tmpPoint.y);
 
         var initialTailColor = GameHelper.isSynesthesia() ?
             getSynesthesiaComboColor(beatmapSlider.startTime + beatmapSlider.getSpanDuration()) :
@@ -283,12 +285,6 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
-        if (Config.isSnakingInSliders()) {
-            tailCirclePiece.setPosition(this.position.x, this.position.y);
-        } else {
-            tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
-        }
-
         // Repeat arrow at start
         int spanCount = beatmapSlider.getSpanCount();
         if (spanCount > 2) {
@@ -296,8 +292,8 @@ public class GameplaySlider extends GameObject {
             startArrow.setScale(scale);
             startArrow.setPosition(this.position.x, this.position.y);
 
-            PointF nextPoint = getAbsolutePathPosition(1);
-            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y)));
+            getPositionAt(0, true, false);
+            startArrow.setRotation(ballAngle);
 
             scene.attachChild(startArrow, 0);
         }
@@ -312,12 +308,15 @@ public class GameplaySlider extends GameObject {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
 
-            PointF previousPoint = getAbsolutePathPosition(path.anchorCount - 2);
-            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
-
             if (Config.isSnakingInSliders()) {
-                endArrow.setPosition(this.position.x, this.position.y);
+                getPositionAt(0, false, true);
+
+                tailCirclePiece.setPosition(position.x, position.y);
+                endArrow.setPosition(position.x, position.y);
             } else {
+                getPositionAt(1, false, true);
+
+                tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
                 endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
             }
 
@@ -443,103 +442,77 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
+        int index = path.positionAt(tmpPoint, percentage);
+        tmpPoint.offset(position.x, position.y);
+
         if (path.anchorCount < 2) {
-            tmpPoint.set(position);
             return tmpPoint;
         }
 
-        if (percentage >= 1) {
-            PointF previousPoint = getAbsolutePathPosition(path.anchorCount - 2);
+        if (updateBallAngle || updateEndArrowRotation) {
+            // Ball rotation depends on the movement direction (reverse or forward).
+            // End arrows always point backward (towards the slider body) relative to the tip.
+            int direction = updateBallAngle ? (reverse ? -1 : 1) : -1;
 
-            if (updateBallAngle) {
-                ballAngle = MathUtils.radToDeg(Utils.direction(previousPoint.x, previousPoint.y, pathEndPosition.x, pathEndPosition.y));
+            // Search forward from the current segment index, or backward from the previous one.
+            int searchStart = direction > 0 ? index : index - 1;
+
+            boolean found = findRotationTarget(searchStart, direction, tmpPoint, tmpTargetPoint);
+
+            if (!found) {
+                // If we reached the end of the path in the intended direction without finding a valid point
+                // (e.g., at 0% or 100% progress), search in the opposite direction.
+                direction = -direction;
+                searchStart = direction > 0 ? index : index - 1;
+                found = findRotationTarget(searchStart, direction, tmpPoint, tmpTargetPoint);
+
+                if (found) {
+                    // Reflect the target point across the current position to maintain the original intended direction.
+                    tmpTargetPoint.set(tmpPoint.x * 2 - tmpTargetPoint.x, tmpPoint.y * 2 - tmpTargetPoint.y);
+                }
             }
 
-            if (updateEndArrowRotation) {
-                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
+            if (found) {
+                float aimRotation = MathUtils.radToDeg(Utils.direction(tmpPoint.x, tmpPoint.y, tmpTargetPoint.x, tmpTargetPoint.y));
+
+                if (updateBallAngle) {
+                    ballAngle = wrapRotation(aimRotation, ballAngle);
+                } else {
+                    endArrow.setRotation(wrapRotation(aimRotation, endArrow.getRotation()));
+                }
             }
-
-            tmpPoint.set(pathEndPosition);
-            return tmpPoint;
-        }
-
-        if (percentage <= 0) {
-            PointF nextPoint = getAbsolutePathPosition(1);
-
-            if (updateBallAngle) {
-                ballAngle = MathUtils.radToDeg(Utils.direction(nextPoint.x, nextPoint.y, position.x, position.y));
-            }
-
-            if (updateEndArrowRotation) {
-                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y)));
-            }
-
-            tmpPoint.set(position);
-            return tmpPoint;
-        }
-
-        // Directly taken from library-owned SliderPath
-        int left = 0;
-        int right = path.anchorCount - 2;
-        float currentLength = percentage * path.getLength(path.anchorCount - 1);
-
-        while (left <= right) {
-            int pivot = left + ((right - left) >> 1);
-            float length = path.getLength(pivot);
-
-            if (length < currentLength) {
-                left = pivot + 1;
-            } else if (length > currentLength) {
-                right = pivot - 1;
-            } else {
-                break;
-            }
-        }
-
-        int index = left - 1;
-
-        // Theoretically, this case should never be reached as it means the percentage would be less than 0
-        // (which is already covered by the case above). However, people seem to be having IndexOutOfBoundsException
-        // crashes here, so we'll just return the first point in the path.
-        if (index < 0) {
-            var nextPoint = getAbsolutePathPosition(1);
-
-            if (updateBallAngle) {
-                ballAngle = MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y));
-            }
-
-            if (updateEndArrowRotation) {
-                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(nextPoint.x, nextPoint.y, position.x, position.y)));
-            }
-
-            tmpPoint.set(position);
-            return tmpPoint;
-        }
-
-        float lengthProgress = (currentLength - path.getLength(index)) / (path.getLength(index + 1) - path.getLength(index));
-
-        PointF currentPoint = getAbsolutePathPosition(index);
-        var currentPointX = currentPoint.x;
-        var currentPointY = currentPoint.y;
-
-        PointF nextPoint = getAbsolutePathPosition(index + 1);
-        var nextPointX = nextPoint.x;
-        var nextPointY = nextPoint.y;
-
-        tmpPoint.set(
-            Interpolation.linear(currentPointX, nextPointX, lengthProgress),
-            Interpolation.linear(currentPointY, nextPointY, lengthProgress)
-        );
-
-        if (updateBallAngle) {
-            ballAngle = MathUtils.radToDeg(Utils.direction(currentPointX, currentPointY, nextPointX, nextPointY));
-        }
-
-        if (updateEndArrowRotation) {
-            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(nextPointX, nextPointY, currentPointX, currentPointY)));
         }
 
         return tmpPoint;
+    }
+
+    /**
+     * Searches for the nearest point on the path that is spatially distinct from the current position.
+     * This ensures a stable direction vector even when the path contains duplicate points.
+     */
+    private boolean findRotationTarget(int startIndex, int direction, PointF currentPos, PointF outTarget) {
+        for (int i = startIndex; i >= 0 && i < path.anchorCount; i += direction) {
+            float xi = path.getX(i) + position.x;
+            float yi = path.getY(i) + position.y;
+
+            if (!Precision.almostEquals(currentPos.x, xi) || !Precision.almostEquals(currentPos.y, yi)) {
+                outTarget.set(xi, yi);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Wraps the target rotation so that it takes the shortest path (<= 180 degrees) from the current rotation.
+     * Prevents visual glitches where sprites might spin 360 degrees when crossing the 180/-180 degree boundary.
+     */
+    private float wrapRotation(float rotation, float currentRotation) {
+        while (Math.abs(rotation - currentRotation) > 180) {
+            rotation += rotation < currentRotation ? 360 : -360;
+        }
+
+        return rotation;
     }
 
     private void removeFromScene() {
@@ -948,10 +921,7 @@ public class GameplaySlider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    if (path.anchorCount >= 2) {
-                        PointF lastPoint = getAbsolutePathPosition(path.anchorCount - 2);
-                        endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, lastPoint.x, lastPoint.y)));
-                    }
+                    getPositionAt(1, false, true);
 
                     tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
                     endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
@@ -1415,17 +1385,6 @@ public class GameplaySlider extends GameObject {
 
     private Color4 getSynesthesiaComboColor(double time) {
         return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
-    }
-
-    /**
-     * Gets the absolute position of a point on the path taking into account the slider's position.
-     */
-    private PointF getAbsolutePathPosition(int pathPointIndex) {
-        tmpPoint.set(
-            position.x + path.getX(pathPointIndex),
-            position.y + path.getY(pathPointIndex)
-        );
-        return tmpPoint;
     }
 
     private void applySnakeBodyLength(boolean updateStartLength, float targetLength, boolean force) {

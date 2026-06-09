@@ -75,6 +75,7 @@ class SliderTickContainer : UIContainer() {
 
 class SliderTickSprite : UISprite(), IPoolable {
     override var isRecycled = false
+    private var tick: SliderTick? = null
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
@@ -87,6 +88,8 @@ class SliderTickSprite : UISprite(), IPoolable {
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
      */
     fun init(tick: SliderTick) {
+        this.tick = tick
+
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
         val fadeInStartTime = startTime - timePreempt
@@ -117,13 +120,19 @@ class SliderTickSprite : UISprite(), IPoolable {
      * @param isSuccessful Whether the hit resulted in a successful hit.
      */
     fun onHit(isSuccessful: Boolean) {
+        val tick = tick ?: return
+
         clearEntityModifiers()
 
-        fadeOut(ANIM_DURATION, Easing.OutQuint)
+        beginAbsoluteSequence(tick.startTime.toFloat() / 1000) {
+            fadeOut(ANIM_DURATION, Easing.OutQuint)
 
-        if (isSuccessful) {
-            scaleTo(1.5f, ANIM_DURATION, Easing.Out)
+            if (isSuccessful) {
+                scaleTo(1.5f, ANIM_DURATION, Easing.Out)
+            }
         }
+
+        this.tick = null
     }
 
     override fun onDetached() {

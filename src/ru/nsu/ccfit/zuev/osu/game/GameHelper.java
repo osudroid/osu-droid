@@ -2,12 +2,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import static kotlinx.coroutines.JobKt.ensureActive;
 
+import android.graphics.PointF;
+
 import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.osudroid.beatmaps.hitobjects.Slider;
 import com.osudroid.beatmaps.hitobjects.SliderPathType;
+import com.osudroid.math.Interpolation;
+import com.osudroid.math.Precision;
 import com.osudroid.mods.*;
 import com.osudroid.utils.PathApproximation;
 
@@ -482,6 +486,73 @@ public class GameHelper {
 
         public float getLength(int index) {
             return getData(index, offsetLength);
+        }
+
+        public int positionAt(PointF out, float percentage) {
+            if (anchorCount == 0) {
+                out.set(0, 0);
+                return 0;
+            }
+
+            float distance = percentage * getLength(anchorCount - 1);
+            int index = getIndexOfDistance(distance);
+
+            interpolate(out, index, distance);
+
+            return index;
+        }
+
+        private void interpolate(PointF out, int index, float distance) {
+            if (index <= 0) {
+                out.set(getX(0), getY(0));
+                return;
+            }
+
+            if (index >= anchorCount) {
+                out.set(getX(anchorCount - 1), getY(anchorCount - 1));
+                return;
+            }
+
+            float d0 = getLength(index - 1);
+            float d1 = getLength(index);
+
+            if (Precision.almostEquals(d0, d1)) {
+                out.set(getX(index - 1), getY(index - 1));
+                return;
+            }
+
+            float t = Interpolation.reverseLinear(distance, d0, d1);
+
+            out.x = Interpolation.linear(getX(index - 1), getX(index), t);
+            out.y = Interpolation.linear(getY(index - 1), getY(index), t);
+        }
+
+        private int getIndexOfDistance(float d) {
+            if (anchorCount == 0 || d < getLength(0)) {
+                return 0;
+            }
+
+            if (d >= getLength(anchorCount - 1)) {
+                return anchorCount;
+            }
+
+            int l = 0;
+            int r = anchorCount - 2;
+
+            while (l <= r) {
+                int pivot = l + ((r - l) >> 1);
+                float length = getLength(pivot);
+
+                if (length < d) {
+                    l = pivot + 1;
+                } else if (length > d) {
+                    r = pivot - 1;
+                } else {
+                    return pivot;
+                }
+            }
+
+            return l;
         }
 
         private float getData(int index, int offset) {

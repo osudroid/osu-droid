@@ -179,7 +179,10 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
                     skills,
                     difficultyObjects.sliceArray(0..<currentIndex),
                     false
-                )
+                ),
+                progressiveBeatmap.hitObjects.sliderCount,
+                progressiveBeatmap.hitObjects.sliderTickCount,
+                progressiveBeatmap.hitObjects.sliderRepeatCount
             )
         }
 
@@ -255,14 +258,24 @@ private class ProgressiveCalculationBeatmap(
         override fun add(obj: HitObject) {
             super.add(obj)
 
-            maxCombo += if (obj is Slider) obj.nestedHitObjects.size else 1
+            if (obj is Slider) {
+                maxCombo += obj.nestedHitObjects.size
+                sliderRepeatCount += obj.repeatCount
+            } else {
+                maxCombo++
+            }
         }
 
         override fun remove(obj: HitObject): Boolean {
             val removed = super.remove(obj)
 
             if (removed) {
-                maxCombo -= if (obj is Slider) obj.nestedHitObjects.size else 1
+                if (obj is Slider) {
+                    maxCombo -= obj.nestedHitObjects.size
+                    sliderRepeatCount -= obj.repeatCount
+                } else {
+                    maxCombo--
+                }
             }
 
             return removed
@@ -272,7 +285,12 @@ private class ProgressiveCalculationBeatmap(
             val removed = super.remove(index)
 
             if (removed != null) {
-                maxCombo -= if (removed is Slider) removed.nestedHitObjects.size else 1
+                if (removed is Slider) {
+                    maxCombo -= removed.nestedHitObjects.size
+                    sliderRepeatCount -= removed.repeatCount
+                } else {
+                    maxCombo--
+                }
             }
 
             return removed

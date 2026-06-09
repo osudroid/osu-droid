@@ -1077,11 +1077,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private CompletableFuture<Unit> cancelLoading(boolean invalidatePendingStart) {
-        // Do not cancel loading in multiplayer.
-        if (Multiplayer.isMultiplayer) {
-            return CompletableFuture.completedFuture(Unit.INSTANCE);
-        }
-
         if (invalidatePendingStart) {
             loadingRequestId.incrementAndGet();
         }
@@ -1922,6 +1917,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
+        if (GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0) {
+            gameover();
+
+            if (!Multiplayer.isMultiplayer) {
+                restartGame();
+            }
+        }
+
         var mutedMod = GameHelper.getMuted();
 
         // 节拍器
@@ -2285,12 +2288,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             comboWasMissed = true;
             stat.registerHit(0, false, false, incrementCombo);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
-            if (GameHelper.isPerfect()) {
-                gameover();
-
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
-            }
             if (GameHelper.isSuddenDeath()) {
                 stat.changeHp(-1.0f);
                 gameover();
@@ -2307,12 +2304,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT50);
             scoreName = "hit50";
             comboWas100 = true;
-            if(GameHelper.isPerfect()){
-                gameover();
-
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
-            }
         } else if (score == 100) {
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
@@ -2322,11 +2313,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             } else {
                 stat.registerHit(100, false, false, incrementCombo);
                 scoreName = "hit100";
-            }
-            if(GameHelper.isPerfect()){
-                gameover();
-                if (!Multiplayer.isMultiplayer)
-                    restartGame();
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
@@ -3383,17 +3369,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getDroidPPAt(int objectId) {
-        var playableBeatmap = this.playableBeatmap;
-
-        if (playableBeatmap == null || droidTimedDifficultyAttributes == null ||
-                performanceCalculationParameters == null || objectId < 0 ||
+        if (droidTimedDifficultyAttributes == null || performanceCalculationParameters == null || objectId < 0 ||
                 objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = droidTimedDifficultyAttributes[objectId];
 
-        performanceCalculationParameters.populate(playableBeatmap, stat);
+        performanceCalculationParameters.populate(stat, timedAttributes.sliderCount, timedAttributes.sliderTickCount, timedAttributes.sliderRepeatCount);
 
         BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes,
                 (DroidPerformanceCalculationParameters) performanceCalculationParameters,
@@ -3403,17 +3386,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private double getStandardPPAt(int objectId) {
-        var playableBeatmap = this.playableBeatmap;
-
-        if (playableBeatmap == null || standardTimedDifficultyAttributes == null ||
-                performanceCalculationParameters == null || objectId < 0 ||
+        if (standardTimedDifficultyAttributes == null || performanceCalculationParameters == null || objectId < 0 ||
                 objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
-        performanceCalculationParameters.populate(playableBeatmap, stat);
+        performanceCalculationParameters.populate(stat, timedAttributes.sliderCount, timedAttributes.sliderTickCount, timedAttributes.sliderRepeatCount);
 
         BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes,
                 (StandardPerformanceCalculationParameters) performanceCalculationParameters,
@@ -3786,6 +3766,44 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         hud.onNoteHit(stat);
+        hud.onSeek();
+
+        // Replay all touch-down events up to the seek target so HUD elements
+        // that depend on touch history can reconstruct their state correctly.
+        if (GameHelper.isAutoplay() || replaying) {
+            if (GameHelper.isAutoplay()) {
+                for (int i = 0; i < objects.length; ++i) {
+                    float tapTime = (float) objects[i].startTime / 1000f;
+
+                    if (tapTime > clampedTime) {
+                        break;
+                    }
+
+                    hud.onGameplayTouchDown(tapTime);
+                }
+            } else {
+                int cursorCount = replay.cursorMoves.size();
+
+                for (int i = 0; i < cursorCount; ++i) {
+                    var moveArray = replay.cursorMoves.get(i);
+
+                    for (int j = 0; j < moveArray.size; ++j) {
+                        var movement = moveArray.movements[j];
+
+                        float tapTime = movement.getTime() / 1000f;
+
+                        if (tapTime > clampedTime) {
+                            break;
+                        }
+
+                        if (movement.getTouchType() == TouchType.DOWN) {
+                            hud.onGameplayTouchDown(tapTime);
+                        }
+                    }
+                }
+            }
+        }
+
         updatePPValue(objectIndex - 1);
 
         // Seek the beatmap clock (also seeks the audio source).
