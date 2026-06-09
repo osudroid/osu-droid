@@ -1784,6 +1784,7 @@ abstract class UIComponent : Entity(0f, 0f),
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIComponent]'s [customClock] in
      * [onUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null

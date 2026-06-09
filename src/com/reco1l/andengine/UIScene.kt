@@ -114,6 +114,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIScene]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null

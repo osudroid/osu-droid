@@ -20,6 +20,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [HUD]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null
