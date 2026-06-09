@@ -33,11 +33,26 @@ public class CursorTrail extends ParticleSystem {
         setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
         addParticleInitializer(new ScaleInitializer(cursor.baseSize));
         setParticlesSpawnEnabled(false);
+        prewarm();
         updateRotation();
     }
 
     public void update() {
         updateRotation();
+    }
+
+    private void prewarm() {
+        setParticlesSpawnEnabled(true);
+        // Fill every particle slot with one large-delta update.
+        onManagedUpdate(10.0f);
+        // Drain the spawn accumulator (rate * 10 - max) back to ~0.
+        // Each 0.3 s pass spawns a batch and lets it fully expire, consuming
+        // the surplus without leaving a burst on the first real gameplay frame.
+        // 20 passes covers all realistic spawn rates and speed multipliers.
+        for (int i = 0; i < 20; i++) {
+            onManagedUpdate(0.3f);
+        }
+        setParticlesSpawnEnabled(false);
     }
 
     private void updateRotation() {
