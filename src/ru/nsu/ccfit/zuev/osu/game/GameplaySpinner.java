@@ -417,7 +417,12 @@ public class GameplaySpinner extends GameObject {
     public boolean isJudged() {
         // In remove spinner lock mode, the spinner is assumed to be judged to allow other objects to be judged while
         // the spinner is still active.
-        return Config.isRemoveSliderLock() || passedTime >= duration;
+        return Config.isRemoveSliderLock() || isCompleted();
+    }
+
+    @Override
+    public boolean isCompleted() {
+        return passedTime >= duration;
     }
 
     protected void applySeekRotations() {

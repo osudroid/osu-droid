@@ -1013,7 +1013,12 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public boolean isJudged() {
-        return Config.isRemoveSliderLock() ? startHit : isOver;
+        return Config.isRemoveSliderLock() ? startHit : isCompleted();
+    }
+
+    @Override
+    public boolean isCompleted() {
+        return isOver;
     }
 
     private float getTrackingDistanceThresholdSquared(boolean isTracking) {

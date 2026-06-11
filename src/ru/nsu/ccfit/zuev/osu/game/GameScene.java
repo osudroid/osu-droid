@@ -83,6 +83,7 @@ import com.osudroid.difficulty.calculator.DroidPerformanceCalculationParameters;
 import com.osudroid.difficulty.calculator.PerformanceCalculationParameters;
 import com.osudroid.difficulty.calculator.StandardPerformanceCalculationParameters;
 import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.game.Judgement;
 import com.osudroid.math.Interpolation;
 import com.osudroid.mods.*;
 import com.osudroid.utils.ModHashMap;
@@ -176,6 +177,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ArrayList<GameObject> expiredObjects;
     private final Set<GameObject> processedExpiredObjects = Collections.newSetFromMap(new IdentityHashMap<>());
     private GameObject judgeableObject;
+    @Nullable private GameObject currentUpdatingObject;
+    private final ArrayList<Judgement> pendingJudgements = new ArrayList<>();
+    private final PointF tempJudgementPos = new PointF();
     private BreakPeriod[] breakPeriods;
     private int breakPeriodIndex;
     private Metronome metronome;
@@ -807,6 +811,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         } else {
             expiredObjects = new ArrayList<>(estimatedMaxActiveObjects);
         }
+
+        clearPendingJudgements();
 
         float firstObjectTimePreempt = (float) firstObject.timePreempt / 1000;
         float skipTargetTime = firstObjectStartTime - Math.max(2f, firstObjectTimePreempt);
@@ -2080,7 +2086,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             var obj = activeObjects.get(i);
+
+            currentUpdatingObject = obj;
             obj.update(deltaTime);
+            currentUpdatingObject = null;
 
             // Advance to the next judgeable object if the current judgeable object is judged.
             // In remove slider lock mode, do this as soon as the current judgeable object is hit instead.
@@ -2092,6 +2101,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 expiredObjects.add(obj);
             }
         }
+
+        flushPendingJudgements();
     }
 
     private void updatePassiveObjects(float deltaTime) {
@@ -2116,6 +2127,83 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         return null;
+    }
+
+    /**
+     * Returns {@code true} if any active {@link GameObject} with a start time earlier than
+     * {@link Judgement#objectStartTime} has not yet completed. Used to determine whether a {@link Judgement} must be
+     * deferred to preserve start-time ordered {@link Judgement}s.
+     */
+    private boolean hasPrecedingActiveObject(double objectStartTime) {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            var obj = activeObjects.get(i);
+
+            if (!obj.isCompleted() && objects[obj.id].startTime < objectStartTime) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void enqueuePendingJudgement(Judgement judgement) {
+        int i = pendingJudgements.size();
+
+        while (i > 0 && pendingJudgements.get(i - 1).objectStartTime > judgement.objectStartTime) {
+            i--;
+        }
+
+        pendingJudgements.add(i, judgement);
+    }
+
+    private void flushPendingJudgements() {
+        // pendingJudgements is sorted ascending by objectStartTime. If entry i is blocked by some
+        // incomplete preceding object, every entry j > i shares the same blocker (its startTime is
+        // still less than j's objectStartTime), so we can stop at the first blocked entry.
+        while (!pendingJudgements.isEmpty()) {
+            var judgement = pendingJudgements.get(0);
+
+            if (hasPrecedingActiveObject(judgement.objectStartTime)) {
+                break;
+            }
+
+            applyPendingJudgement(judgement);
+            pendingJudgements.remove(0);
+            judgement.release();
+        }
+    }
+
+    private void applyPendingJudgement(Judgement judgement) {
+        switch (judgement.type) {
+            case CIRCLE_HIT:
+                String scoreName = registerHit(judgement.objectId, judgement.score, judgement.endCombo);
+
+                if (judgement.showHitEffect) {
+                    tempJudgementPos.set(judgement.posX, judgement.posY);
+                    createHitEffect(tempJudgementPos, scoreName, judgement.color);
+                    hud.onNoteHit(stat);
+                }
+
+                break;
+
+            case SLIDER_HEAD:
+                stat.registerHit(30, false, false);
+                stat.addSliderHeadHit();
+                hud.onNoteHit(stat);
+                break;
+
+            case REGISTER_ACCURACY:
+                applyAccuracy(judgement.hitObjectType, judgement.accuracy);
+                break;
+        }
+    }
+
+    private void clearPendingJudgements() {
+        for (int i = 0, size = pendingJudgements.size(); i < size; ++i) {
+            pendingJudgements.get(i).release();
+        }
+
+        pendingJudgements.clear();
     }
 
     public void skip() {
@@ -2157,6 +2245,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             stopLoopingSamples();
+            clearPendingJudgements();
             if (activeObjects != null) {
                 activeObjects.clear();
             }
@@ -2376,27 +2465,50 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         VibratorManager.INSTANCE.circleVibration();
 
-        if (accuracy > playableBeatmap.getHitWindow().getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
+        int score;
+        var hitWindowObj = playableBeatmap.getHitWindow();
+
+        if (accuracy > hitWindowObj.getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
+            score = 0;
+        } else if (forcedScore == ResultType.HIT300.getId() ||
+                forcedScore == 0 && accuracy <= hitWindowObj.getGreatWindow() / 1000) {
+            score = 300;
+        } else if (forcedScore == ResultType.HIT100.getId() ||
+                forcedScore == 0 && accuracy <= hitWindowObj.getOkWindow() / 1000) {
+            score = 100;
+        } else {
+            score = 50;
+        }
+
+        if (score == 0) {
             createHitEffect(pos, "hit0", color);
-            registerHit(id, 0, endCombo);
+        } else {
+            createBurstEffect(pos, color);
+        }
+
+        if (Config.isRemoveSliderLock() && hasPrecedingActiveObject(objects[id].startTime)) {
+            var judgement = Judgement.obtain();
+
+            judgement.type = Judgement.Type.CIRCLE_HIT;
+            judgement.objectStartTime = objects[id].startTime;
+            judgement.objectId = id;
+            judgement.score = score;
+            judgement.endCombo = endCombo;
+            judgement.showHitEffect = score != 0;
+            judgement.posX = pos.x;
+            judgement.posY = pos.y;
+            judgement.color = color;
+
+            enqueuePendingJudgement(judgement);
             return;
         }
 
-        String scoreName;
-        if (forcedScore == ResultType.HIT300.getId() ||
-                forcedScore == 0 && accuracy <= playableBeatmap.getHitWindow().getGreatWindow() / 1000) {
-            scoreName = registerHit(id, 300, endCombo);
-        } else if (forcedScore == ResultType.HIT100.getId() ||
-                forcedScore == 0 && accuracy <= playableBeatmap.getHitWindow().getOkWindow() / 1000) {
-            scoreName = registerHit(id, 100, endCombo);
-        } else {
-            scoreName = registerHit(id, 50, endCombo);
+        String scoreName = registerHit(id, score, endCombo);
+
+        if (score != 0) {
+            createHitEffect(pos, scoreName, color);
+            hud.onNoteHit(stat);
         }
-
-        createBurstEffect(pos, color);
-        createHitEffect(pos, scoreName, color);
-
-        hud.onNoteHit(stat);
     }
 
     public void onSliderReverse(PointF pos, float ang, Color4 color) {
@@ -2443,16 +2555,28 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         String scoreName = "hit0";
+        boolean judgementDeferred = false;
 
         switch (type) {
             case GameObjectListener.SLIDER_START:
                 if (incrementCombo) {
                     scoreName = "sliderpoint30";
-                    stat.registerHit(30, false, false);
-                    stat.addSliderHeadHit();
                     createBurstEffectSliderStart(judgementPos, color);
                     if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+                    }
+
+                    if (Config.isRemoveSliderLock() && hasPrecedingActiveObject(objects[id].startTime)) {
+                        var judgement = Judgement.obtain();
+
+                        judgement.type = Judgement.Type.SLIDER_HEAD;
+                        judgement.objectStartTime = objects[id].startTime;
+
+                        enqueuePendingJudgement(judgement);
+                        judgementDeferred = true;
+                    } else {
+                        stat.registerHit(30, false, false);
+                        stat.addSliderHeadHit();
                     }
                 }
                 break;
@@ -2486,7 +2610,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         createHitEffect(judgementPos, scoreName, color);
 
-        hud.onNoteHit(stat);
+        if (!judgementDeferred) {
+            hud.onNoteHit(stat);
+        }
     }
 
     @Override
@@ -3131,6 +3257,23 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     public void registerAccuracy(HitObjectType type, final double acc) {
+        if (Config.isRemoveSliderLock() && currentUpdatingObject != null
+                && hasPrecedingActiveObject(objects[currentUpdatingObject.id].startTime)) {
+            var judgement = Judgement.obtain();
+
+            judgement.type = Judgement.Type.REGISTER_ACCURACY;
+            judgement.objectStartTime = objects[currentUpdatingObject.id].startTime;
+            judgement.hitObjectType = type;
+            judgement.accuracy = acc;
+
+            enqueuePendingJudgement(judgement);
+            return;
+        }
+
+        applyAccuracy(type, acc);
+    }
+
+    private void applyAccuracy(HitObjectType type, double acc) {
         double mehWindow = hitWindow.getMehWindow() / 1000;
 
         if (Math.abs(acc) <= mehWindow) {
