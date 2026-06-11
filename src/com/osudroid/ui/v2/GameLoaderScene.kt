@@ -27,6 +27,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
     private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
+    private var multiplayerLoadElapsed = 0f
 
     private val dimBox: UIBox
     private val mainContainer: UIContainer
@@ -201,6 +202,20 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (!isStarting) {
+
+            if (Multiplayer.isMultiplayer && !gameScene.isReadyToStart) {
+                multiplayerLoadElapsed += deltaTimeSec
+
+                if (multiplayerLoadElapsed >= MULTIPLAYER_LOAD_TIMEOUT_SEC) {
+                    ToastLogger.showText(
+                        "You have been moved back as you took too long to load the beatmap.",
+                        true
+                    )
+
+                    cancel()
+                    return
+                }
+            }
 
             if (gameScene.isReadyToStart) {
 
@@ -403,5 +418,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     companion object {
         private var beatmapCardCollapsed = false
         private var settingsCardCollapsed = false
+
+        private const val MULTIPLAYER_LOAD_TIMEOUT_SEC = 60f
     }
 }
