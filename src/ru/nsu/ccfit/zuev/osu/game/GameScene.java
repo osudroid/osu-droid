@@ -87,6 +87,7 @@ import com.osudroid.math.Interpolation;
 import com.osudroid.mods.*;
 import com.osudroid.utils.ModHashMap;
 import com.osudroid.utils.ModUtils;
+import com.rian.andengine.timing.Stopwatch;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
@@ -3404,6 +3405,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private UIScene createMainScene() {
         return new UIScene() {
+            private final Stopwatch stopwatch = new Stopwatch();
+
             // Reused buffer to avoid allocations.
             private final float[] fastPathSurfaceCoords = new float[2];
 
@@ -3429,6 +3432,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
 
                 modIcons.clear();
+            }
+
+            @Override
+            public void onUpdate(float deltaTimeSec) {
+                stopwatch.restart();
+
+                do {
+                    super.onUpdate(deltaTimeSec);
+                    // 10ms of allowance when catching up.
+                } while (gameplayClock.requiresCatchUp() && stopwatch.getElapsedSeconds() < 0.01f);
             }
 
             @Override
