@@ -78,10 +78,11 @@ class LoadingBadgeFragment : BaseFragment() {
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
                 textSize = 21f
             }
+
             val fontMetrics = paint.fontMetrics
             val lineHeight = -fontMetrics.ascent + fontMetrics.descent
             val scale = resources.displayMetrics.widthPixels.toFloat() / Config.getRES_WIDTH()
-            val fpsHeight = ((lineHeight + 8f) * scale).roundToInt()
+            val fpsHeight = ((lineHeight + 4f) * scale).roundToInt()
 
             findViewById<LinearLayout>(R.id.container)!!.updateLayoutParams<RelativeLayout.LayoutParams> {
                 bottomMargin = 16f.dp.roundToInt() + fpsHeight

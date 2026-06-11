@@ -101,3 +101,5 @@ Socket.IO for real-time lobby/room events. REST calls use OkHttp3. Firebase Mess
 - New gameplay/beatmap/difficulty code goes in `com/osudroid/` (Kotlin).
 - UI components that extend AndEngine belong in `com/reco1l/andengine/` or `com/rian/andengine/` (Kotlin).
 - Legacy Java files in `ru/nsu/ccfit/zuev/osu/` are modified in-place; avoid moving them.
+
+@CLAUDE.local.md

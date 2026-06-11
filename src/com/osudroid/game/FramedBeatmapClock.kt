@@ -2,10 +2,8 @@ package com.osudroid.game
 
 import com.rian.andengine.timing.DecouplingFramedClock
 import com.rian.andengine.timing.FramedOffsetClock
-import com.rian.andengine.timing.IAdjustableClock
 import com.rian.andengine.timing.IClock
 import com.rian.andengine.timing.IFrameBasedClock
-import com.rian.andengine.timing.ISourceChangeableClock
 import com.rian.andengine.timing.InterpolatingFramedClock
 import com.rian.andengine.timing.OffsetCorrectionClock
 
@@ -16,9 +14,11 @@ import com.rian.andengine.timing.OffsetCorrectionClock
  *  - Optionally applies beatmap and user offsets.
  *  - Adjusts seek operations to account for any applied offsets (seeking in raw beatmap time values).
  */
-class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requireDecoupling: Boolean = false, source: IClock? = null) :
-    IFrameBasedClock, IAdjustableClock, ISourceChangeableClock {
-
+class FramedBeatmapClock @JvmOverloads constructor(
+    applyOffsets: Boolean,
+    requireDecoupling: Boolean = false,
+    source: IClock? = null
+) : IGameplayClock {
     private val decoupledTrack = DecouplingFramedClock(source).apply { allowDecoupling = requireDecoupling }
     private val interpolatedTrack = InterpolatingFramedClock(decoupledTrack).apply { driftRecoveryHalfLife = 0.08f }
 
@@ -42,28 +42,19 @@ class FramedBeatmapClock @JvmOverloads constructor(applyOffsets: Boolean, requir
         }
     }
 
-    /**
-     * The offset applied globally to all beatmaps, set via settings.
-     */
-    var userGlobalOffset
+    override var userGlobalOffset
         get() = userGlobalOffsetClock?.offset ?: 0f
         set(value) {
             userGlobalOffsetClock?.offset = value
         }
 
-    /**
-     * The offset applied to the current beatmap, set via beatmap options.
-     */
-    var userBeatmapOffset
+    override var userBeatmapOffset
         get() = userBeatmapOffsetClock?.offset ?: 0f
         set(value) {
             userBeatmapOffsetClock?.offset = value
         }
 
-    /**
-     * The sum of applied offsets (global + beatmap).
-     */
-    val totalAppliedOffset
+    override val totalAppliedOffset
         get() = (userGlobalOffsetClock?.rateAdjustedOffset ?: 0f) + (userBeatmapOffsetClock?.offset ?: 0f)
 
     // IFrameBasedClock delegations to the final clock with offsets applied

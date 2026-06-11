@@ -151,11 +151,11 @@ public class MainActivity extends BaseGameActivity implements
         reportGlesVersion();
 
         Config.loadConfig(this);
+        StringTable.setContext(this);
+        ToastLogger.init(this);
         initialGameDirectory();
         Multiplayer.initLog();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
-        StringTable.setContext(this);
-        ToastLogger.init(this);
         OnlineManager.getInstance().init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 

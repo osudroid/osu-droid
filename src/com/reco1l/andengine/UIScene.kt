@@ -52,7 +52,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
 
     //region Update
 
-    final override fun onUpdate(deltaTimeSec: Float) {
+    override fun onUpdate(deltaTimeSec: Float) {
         if (loadState == LoadState.NotLoaded) {
             return
         }
