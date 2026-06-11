@@ -149,7 +149,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private final UIEngine engine;
     private Cursor[] cursors = new Cursor[CursorCount];
     public String audioFilePath = null;
-    private UIScene scene;
+    private GameUIScene scene;
     private UIScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private UIBox sceneBorder;
@@ -336,7 +336,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public GameScene(final UIEngine engine) {
         this.engine = engine;
         gameplayClock = new GameplayFrameStabilityClock(new FramedBeatmapClock(true, true));
-        scene = createMainScene();
+        scene = new GameUIScene();
         bgScene = new UIScene();
         fgScene = new UIScene();
         mgScene = new UIScene();
@@ -985,7 +985,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         startedFromHUDEditor = isHUDEditor;
         resetPlayfieldSizeScale();
 
-        scene = createMainScene();
+        scene = new GameUIScene();
         bgScene = new UIScene();
         mgScene = new UIScene();
         mgScene.setClipToBounds(true);
@@ -1953,7 +1953,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 return;
             }
 
-            scene = createMainScene();
+            scene = new GameUIScene();
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             timingControlPoints = null;
@@ -2241,7 +2241,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         onExit();
         resetPlayfieldSizeScale();
-        scene = createMainScene();
+        scene = new GameUIScene();
 
         if (Multiplayer.isMultiplayer) {
             releaseVideo();
@@ -3403,165 +3403,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return performanceAttributes.total;
     }
 
-    private UIScene createMainScene() {
-        return new UIScene() {
-            private final Stopwatch stopwatch = new Stopwatch();
-
-            // Reused buffer to avoid allocations.
-            private final float[] fastPathSurfaceCoords = new float[2];
-
-            // Stable fallback cache per pointer (surface space).
-            private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
-            private final float[] fastPathLastStableX = new float[CursorCount];
-            private final float[] fastPathLastStableY = new float[CursorCount];
-
-            {
-                setClock(gameplayClock);
-            }
-
-            @Override
-            protected void onLoadComplete() {
-                for (int i = 0, size = modIcons.size(); i < size; i++) {
-                    float finalTimeOffset = i * 0.25f;
-
-                    modIcons.get(i).beginModifierSequence(sequence -> sequence
-                            .scaleTo(1, 0.25f)
-                            .delay(2 - finalTimeOffset)
-                            .fadeOut(0.5f)
-                            .scaleTo(1.5f, 0.5f));
-                }
-
-                modIcons.clear();
-            }
-
-            @Override
-            public void onUpdate(float deltaTimeSec) {
-                stopwatch.restart();
-
-                do {
-                    super.onUpdate(deltaTimeSec);
-                    // 10ms of allowance when catching up.
-                } while (gameplayClock.requiresCatchUp() && stopwatch.getElapsedSeconds() < 0.01f);
-            }
-
-            @Override
-            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
-                applyRawPointerFastPath(pCamera);
-
-                super.onManagedDraw(pGL, pCamera);
-            }
-
-            @Override
-            protected void onManagedUpdate(float secElapsed) {
-                update(secElapsed);
-
-                //noinspection ForLoopReplaceableByForEach
-                for (int i = 0; i < cursors.length; ++i) {
-                    cursors[i].reset(previousFrameTime, gameplayClock.getCurrentTime() * 1000);
-                }
-
-                super.onManagedUpdate(secElapsed);
-            }
-
-            private void applyRawPointerFastPath(final Camera camera) {
-                var touchController = engine.getTouchController();
-
-                if (touchController == null || !touchController.isUseRawPointers()) {
-                    return;
-                }
-
-                if (replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
-                    return;
-                }
-
-                var sprites = cursorSprites;
-
-                if (sprites == null) {
-                    return;
-                }
-
-                // Use update thread's active state to determine visibility of the sprites to respect the maximum
-                // active cursor limitation.
-                int count = Math.min(Math.min(getCursorsCount(), sprites.length), touchController.getRawPointerCapacity());
-                int updatePathActiveCount = 0;
-
-                for (int i = 0; i < count; ++i) {
-                    var sprite = sprites[i];
-
-                    if (sprite == null) {
-                        continue;
-                    }
-
-                    var cursor = cursors[i];
-                    boolean isUpdatePathDown = cursor != null && cursor.isMouseDown();
-
-                    sprite.setShowing(isUpdatePathDown);
-
-                    if (!isUpdatePathDown) {
-                        fastPathHasStableSnapshot[i] = false;
-                        continue;
-                    }
-
-                    if (updatePathActiveCount >= maximumActiveCursorCount) {
-                        continue;
-                    }
-
-                    ++updatePathActiveCount;
-
-                    if (tryReadRawPointer(i)) {
-                        fastPathLastStableX[i] = fastPathSurfaceCoords[0];
-                        fastPathLastStableY[i] = fastPathSurfaceCoords[1];
-                        fastPathHasStableSnapshot[i] = true;
-                    } else if (fastPathHasStableSnapshot[i]) {
-                        // Revert to latest stable coordinates if read fails.
-                        fastPathSurfaceCoords[0] = fastPathLastStableX[i];
-                        fastPathSurfaceCoords[1] = fastPathLastStableY[i];
-                    } else {
-                        // No stable sample yet. Keep update thread position.
-                        continue;
-                    }
-
-                    // Per underlying implementation, this is thread-safe since the camera is never rotated (thus the
-                    // shared array is never used). When this is not the case, this must be revisited.
-                    float[] sceneCoords = Cameras.convertSurfaceToSceneCoordinates(camera, fastPathSurfaceCoords);
-
-                    sprite.setPosition(sceneCoords[0], sceneCoords[1]);
-                }
-            }
-
-            private boolean tryReadRawPointer(int pointerId) {
-                var touchController = engine.getTouchController();
-
-                if (touchController == null) {
-                    return false;
-                }
-
-                for (int attempt = 0; attempt < 2; ++attempt) {
-                    int versionBefore = touchController.getRawPointerVersion(pointerId);
-
-                    // An odd version means the main thread is updating this pointer, so we wait.
-                    if ((versionBefore & 1) != 0) {
-                        continue;
-                    }
-
-                    float x = touchController.getRawPointerSurfaceX(pointerId);
-                    float y = touchController.getRawPointerSurfaceY(pointerId);
-
-                    int versionAfter = touchController.getRawPointerVersion(pointerId);
-
-                    if (versionBefore == versionAfter && (versionAfter & 1) == 0) {
-                        // Successfully read a consistent snapshot.
-                        fastPathSurfaceCoords[0] = x;
-                        fastPathSurfaceCoords[1] = y;
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        };
-    }
-
     private void applyPlayfieldSizeScale() {
         // IMPORTANT: This MUST be called only when the game scene is displayed, otherwise it will scale the currently
         // displayed scene (the one before gameplay starts), which is not what we want.
@@ -4154,4 +3995,163 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     //endregion
+
+    private class GameUIScene extends UIScene {
+        private final Stopwatch stopwatch = new Stopwatch();
+
+        // Reused buffer to avoid allocations.
+        private final float[] fastPathSurfaceCoords = new float[2];
+
+        // Stable fallback cache per pointer (surface space).
+        private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
+        private final float[] fastPathLastStableX = new float[CursorCount];
+        private final float[] fastPathLastStableY = new float[CursorCount];
+
+        public GameUIScene() {
+            super();
+
+            setClock(gameplayClock);
+        }
+
+        @Override
+        protected void onLoadComplete() {
+            for (int i = 0, size = modIcons.size(); i < size; i++) {
+                float finalTimeOffset = i * 0.25f;
+
+                modIcons.get(i).beginModifierSequence(sequence -> sequence
+                        .scaleTo(1, 0.25f)
+                        .delay(2 - finalTimeOffset)
+                        .fadeOut(0.5f)
+                        .scaleTo(1.5f, 0.5f));
+            }
+
+            modIcons.clear();
+        }
+
+        @Override
+        public void onUpdate(float deltaTimeSec) {
+            stopwatch.restart();
+
+            do {
+                super.onUpdate(deltaTimeSec);
+                // 10ms of allowance when catching up.
+            } while (gameplayClock.requiresCatchUp() && stopwatch.getElapsedSeconds() < 0.01f);
+        }
+
+        @Override
+        protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+            applyRawPointerFastPath(pCamera);
+
+            super.onManagedDraw(pGL, pCamera);
+        }
+
+        @Override
+        protected void onManagedUpdate(float secElapsed) {
+            update(secElapsed);
+
+            //noinspection ForLoopReplaceableByForEach
+            for (int i = 0; i < cursors.length; ++i) {
+                cursors[i].reset(previousFrameTime, gameplayClock.getCurrentTime() * 1000);
+            }
+
+            super.onManagedUpdate(secElapsed);
+        }
+
+        private void applyRawPointerFastPath(final Camera camera) {
+            var touchController = engine.getTouchController();
+
+            if (touchController == null || !touchController.isUseRawPointers()) {
+                return;
+            }
+
+            if (replaying || GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
+                return;
+            }
+
+            var sprites = cursorSprites;
+
+            if (sprites == null) {
+                return;
+            }
+
+            // Use update thread's active state to determine visibility of the sprites to respect the maximum
+            // active cursor limitation.
+            int count = Math.min(Math.min(getCursorsCount(), sprites.length), touchController.getRawPointerCapacity());
+            int updatePathActiveCount = 0;
+
+            for (int i = 0; i < count; ++i) {
+                var sprite = sprites[i];
+
+                if (sprite == null) {
+                    continue;
+                }
+
+                var cursor = cursors[i];
+                boolean isUpdatePathDown = cursor != null && cursor.isMouseDown();
+
+                sprite.setShowing(isUpdatePathDown);
+
+                if (!isUpdatePathDown) {
+                    fastPathHasStableSnapshot[i] = false;
+                    continue;
+                }
+
+                if (updatePathActiveCount >= maximumActiveCursorCount) {
+                    continue;
+                }
+
+                ++updatePathActiveCount;
+
+                if (tryReadRawPointer(i)) {
+                    fastPathLastStableX[i] = fastPathSurfaceCoords[0];
+                    fastPathLastStableY[i] = fastPathSurfaceCoords[1];
+                    fastPathHasStableSnapshot[i] = true;
+                } else if (fastPathHasStableSnapshot[i]) {
+                    // Revert to latest stable coordinates if read fails.
+                    fastPathSurfaceCoords[0] = fastPathLastStableX[i];
+                    fastPathSurfaceCoords[1] = fastPathLastStableY[i];
+                } else {
+                    // No stable sample yet. Keep update thread position.
+                    continue;
+                }
+
+                // Per underlying implementation, this is thread-safe since the camera is never rotated (thus the
+                // shared array is never used). When this is not the case, this must be revisited.
+                float[] sceneCoords = Cameras.convertSurfaceToSceneCoordinates(camera, fastPathSurfaceCoords);
+
+                sprite.setPosition(sceneCoords[0], sceneCoords[1]);
+            }
+        }
+
+        private boolean tryReadRawPointer(int pointerId) {
+            var touchController = engine.getTouchController();
+
+            if (touchController == null) {
+                return false;
+            }
+
+            for (int attempt = 0; attempt < 2; ++attempt) {
+                int versionBefore = touchController.getRawPointerVersion(pointerId);
+
+                // An odd version means the main thread is updating this pointer, so we wait.
+                if ((versionBefore & 1) != 0) {
+                    continue;
+                }
+
+                float x = touchController.getRawPointerSurfaceX(pointerId);
+                float y = touchController.getRawPointerSurfaceY(pointerId);
+
+                int versionAfter = touchController.getRawPointerVersion(pointerId);
+
+                if (versionBefore == versionAfter && (versionAfter & 1) == 0) {
+                    // Successfully read a consistent snapshot.
+                    fastPathSurfaceCoords[0] = x;
+                    fastPathSurfaceCoords[1] = y;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 }
