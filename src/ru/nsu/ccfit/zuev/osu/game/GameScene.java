@@ -4041,10 +4041,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         @Override
-        protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+        protected void onManagedDraw(GLState pGLState, Camera pCamera) {
             applyRawPointerFastPath(pCamera);
 
-            super.onManagedDraw(pGL, pCamera);
+            super.onManagedDraw(pGLState, pCamera);
         }
 
         @Override
@@ -4062,7 +4062,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         private void applyRawPointerFastPath(final Camera camera) {
             var touchController = engine.getTouchController();
 
-            if (touchController == null || !touchController.isUseRawPointers()) {
+            if (touchController == null || !touchController.isUseRawPointer()) {
                 return;
             }
 
