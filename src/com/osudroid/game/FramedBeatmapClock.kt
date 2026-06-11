@@ -2,10 +2,8 @@ package com.osudroid.game
 
 import com.rian.andengine.timing.DecouplingFramedClock
 import com.rian.andengine.timing.FramedOffsetClock
-import com.rian.andengine.timing.IAdjustableClock
 import com.rian.andengine.timing.IClock
 import com.rian.andengine.timing.IFrameBasedClock
-import com.rian.andengine.timing.ISourceChangeableClock
 import com.rian.andengine.timing.InterpolatingFramedClock
 import com.rian.andengine.timing.OffsetCorrectionClock
 
