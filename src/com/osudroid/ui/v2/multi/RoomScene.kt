@@ -138,6 +138,7 @@ class RoomScene(
 
 
     private var currentPlayers = LongArray(0)
+    private var allowAutomaticPlaybackRestart = true
 
 
     init {
@@ -749,10 +750,11 @@ class RoomScene(
         // will call invalidateStatus() with the correct beatmap context.
 
         chat.show()
+        allowAutomaticPlaybackRestart = true
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        if (Config.isPlayMusicPreview()) {
+        if (Config.isPlayMusicPreview() && allowAutomaticPlaybackRestart) {
             val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
 
             if (selectedBeatmap != null) {
@@ -1081,6 +1083,7 @@ class RoomScene(
                     return@updateThread
                 }
 
+                allowAutomaticPlaybackRestart = false
                 global.songMenu.stopMusic()
                 global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
 
