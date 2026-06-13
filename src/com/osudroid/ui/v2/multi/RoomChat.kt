@@ -216,7 +216,7 @@ class RoomChat : UILinearContainer() {
     }
 
 
-    fun onRoomChatMessage(player: RoomPlayer, message: String) = mainThread {
+    fun onRoomChatMessage(player: RoomPlayer, message: String) = updateThread {
         appendMessage(
             PlayerMessage(
                 player = player,
@@ -225,7 +225,7 @@ class RoomChat : UILinearContainer() {
         )
     }
 
-    fun onSystemChatMessage(message: String, color: String) = mainThread {
+    fun onSystemChatMessage(message: String, color: String) = updateThread {
         Multiplayer.log("System message: $message")
 
         appendMessage(
