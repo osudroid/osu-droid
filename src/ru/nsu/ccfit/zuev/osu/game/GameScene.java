@@ -3050,6 +3050,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         .scaleTo(scale * 1.1f, fadeInLength * 0.8f) // t = 0.8
                         .then(fadeInLength * 0.2f) // t = 1.0
                         .scaleTo(scale * 0.9f, fadeInLength * 0.2f) // t = 1.2
+                        .then()
 
                         // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
                         // so we need to force the current value to be correct at 1.2 (0.95) then complete the
