@@ -772,7 +772,7 @@ class RoomScene(
     // Communication
 
     override fun onServerError(error: String) {
-        mainThread { ToastLogger.showText(error, true) }
+        ToastLogger.showText(error, true)
     }
 
     override fun onRoomChatMessage(uid: Long?, message: String) {
