@@ -752,14 +752,16 @@ class RoomScene(
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+        if (Config.isPlayMusicPreview()) {
+            val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
 
-        if (selectedBeatmap != null) {
-            val songService = GlobalManager.getInstance().songService
+            if (selectedBeatmap != null) {
+                val songService = GlobalManager.getInstance().songService
 
-            if (songService.status == Status.STOPPED) {
-                songService.preLoad(selectedBeatmap.audioPath)
-                songService.play()
+                if (songService.status == Status.STOPPED) {
+                    songService.preLoad(selectedBeatmap.audioPath)
+                    songService.play()
+                }
             }
         }
 
@@ -1071,6 +1073,7 @@ class RoomScene(
 
         updateThread {
             val global = GlobalManager.getInstance()
+
             if (player.status != PlayerStatus.MissingBeatmap && global.engine.scene != global.gameScene.scene) {
 
                 if (global.selectedBeatmap == null) {
