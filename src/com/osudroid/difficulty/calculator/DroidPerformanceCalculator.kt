@@ -66,6 +66,8 @@ class DroidPerformanceCalculator(
             effectiveMissCount = calculateComboBasedEstimatedMissCount()
         }
 
+        effectiveMissCount = effectiveMissCount.coerceIn(countMiss.toDouble(), totalHits.toDouble())
+
         if (this.attributes.mods.any { m -> m is ModNoFail }) {
             multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
         }

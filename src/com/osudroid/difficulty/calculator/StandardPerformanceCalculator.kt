@@ -52,7 +52,7 @@ class StandardPerformanceCalculator(
     override fun createPerformanceAttributes(attributes: StandardPerformanceAttributes?) = (attributes ?: StandardPerformanceAttributes()).also {
         var multiplier = FINAL_MULTIPLIER
 
-        effectiveMissCount = calculateComboBasedEstimatedMissCount()
+        effectiveMissCount = calculateComboBasedEstimatedMissCount().coerceIn(countMiss.toDouble(), totalHits.toDouble())
 
         val hitWindow = StandardHitWindow(this.attributes.overallDifficulty)
 
