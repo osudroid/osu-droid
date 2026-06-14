@@ -58,7 +58,7 @@ class DroidPerformanceCalculator(
             val remainingScore = this.attributes.maximumScore - totalScore
 
             // If there is less than one miss, let combo-based miss count decide whether this is full combo.
-            val scoreBasedMissCount = max(1.0, (totalScore - remainingScore) / remainingScore.toDouble())
+            val scoreBasedMissCount = max(1.0, (totalScore - remainingScore) / totalScore.toDouble())
 
             // Cap result by very harsh version of combo-based miss count.
             effectiveMissCount = min(scoreBasedMissCount, calculateMaximumComboBasedMissCount())
