@@ -685,6 +685,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
                                 finalParsedBeatmap, finalPlayableBeatmap, ppScope
                             );
+
+                            Execution.updateThread(() -> {
+                                if (objectIndex > 0) {
+                                    updatePPValue(objectIndex - 1);
+                                }
+                            });
                         });
                     }
                 }
@@ -700,6 +706,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                             standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
                                 finalParsedBeatmap, modValues, ppScope
                             );
+
+                            Execution.updateThread(() -> {
+                                if (objectIndex > 0) {
+                                    updatePPValue(objectIndex - 1);
+                                }
+                            });
                         });
                     }
                 }
