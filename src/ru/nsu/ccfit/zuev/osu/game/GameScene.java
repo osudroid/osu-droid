@@ -2474,11 +2474,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 break;
 
             case GameObjectListener.SLIDER_END:
-                // Slider end hit is tied to the final result of the slider.
+                // Register the slider end hit to statistics first before calling registerHit so that updatePPValue
+                // receives the correct slider end hit count.
+                if (incrementCombo) {
+                    stat.addSliderEndHit();
+                }
+
                 scoreName = registerHit(id, score, endCombo, incrementCombo);
 
                 if (incrementCombo) {
-                    stat.addSliderEndHit();
                     createBurstEffectSliderEnd(judgementPos, color);
                 }
                 break;
