@@ -16,7 +16,7 @@ abstract class PerformanceCalculator<
      * The [DifficultyAttributes] being calculated.
      */
     @JvmField
-    val attributes: TDiffAttributes
+    var attributes: TDiffAttributes
 ) {
     /**
      * The maximum combo achieved.
@@ -110,7 +110,7 @@ abstract class PerformanceCalculator<
     /**
      * Creates the [PerformanceAttributes] of the [DifficultyAttributes].
      *
-     * @param attributes The [PerformanceAttributes] to populate. This can be used to avoid extra allocations
+     * @param attributes The [PerformanceAttributes] to populate. This can be used to avoid extra allocations.
      * @return The [PerformanceAttributes] for the [Beatmap] relating to the parameters.
      */
     protected abstract fun createPerformanceAttributes(attributes: TPerfAttributes? = null): TPerfAttributes

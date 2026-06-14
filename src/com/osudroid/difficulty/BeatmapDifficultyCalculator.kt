@@ -21,6 +21,9 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay
 private val droidDifficultyCalculator = DroidDifficultyCalculator()
 private val standardDifficultyCalculator = StandardDifficultyCalculator()
 
+private var droidPerformanceCalculator: DroidPerformanceCalculator? = null
+private var standardPerformanceCalculator: StandardPerformanceCalculator? = null
+
 /**
  * A helper class for operations relating to difficulty and performance calculation.
  */
@@ -226,7 +229,15 @@ object BeatmapDifficultyCalculator {
         attributes: DroidDifficultyAttributes,
         parameters: DroidPerformanceCalculationParameters? = null,
         perfAttributes: DroidPerformanceAttributes? = null
-    ) = DroidPerformanceCalculator(attributes).calculate(parameters, perfAttributes)
+    ): DroidPerformanceAttributes {
+        val calculator = droidPerformanceCalculator ?: DroidPerformanceCalculator(attributes).also {
+            droidPerformanceCalculator = it
+        }
+
+        calculator.attributes = attributes
+
+        return calculator.calculate(parameters, perfAttributes)
+    }
 
     /**
      * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
@@ -335,7 +346,13 @@ object BeatmapDifficultyCalculator {
                 it.populateNestedSliderObjectParameters(beatmap, replay.objectData)
             }
 
-        return DroidPerformanceCalculator(attributes).calculate(actualParameters, perfAttributes)
+        val calculator = droidPerformanceCalculator ?: DroidPerformanceCalculator(attributes).also {
+            droidPerformanceCalculator = it
+        }
+
+        calculator.attributes = attributes
+
+        return calculator.calculate(actualParameters, perfAttributes)
     }
 
     /**
@@ -367,7 +384,15 @@ object BeatmapDifficultyCalculator {
         attributes: StandardDifficultyAttributes,
         parameters: StandardPerformanceCalculationParameters? = null,
         perfAttributes: StandardPerformanceAttributes? = null
-    ) = StandardPerformanceCalculator(attributes).calculate(parameters, perfAttributes)
+    ): StandardPerformanceAttributes {
+        val calculator = standardPerformanceCalculator ?: StandardPerformanceCalculator(attributes).also {
+            standardPerformanceCalculator = it
+        }
+
+        calculator.attributes = attributes
+
+        return calculator.calculate(parameters, perfAttributes)
+    }
 
     /**
      * Calculates the performance of a [StandardDifficultyAttributes] and applies necessary adjustments to
@@ -444,7 +469,13 @@ object BeatmapDifficultyCalculator {
                 it.populateNestedSliderObjectParameters(beatmap, replayObjectData)
             }
 
-        return StandardPerformanceCalculator(attributes).calculate(actualParameters, perfAttributes)
+        val calculator = standardPerformanceCalculator ?: StandardPerformanceCalculator(attributes).also {
+            standardPerformanceCalculator = it
+        }
+
+        calculator.attributes = attributes
+
+        return calculator.calculate(actualParameters, perfAttributes)
     }
 
     /**

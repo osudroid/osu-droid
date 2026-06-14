@@ -47,9 +47,8 @@ class DroidPerformanceCalculator(
     private var deviation = 0.0
     private var tapDeviation = 0.0
 
-    private val isPrecise by lazy {
-        difficultyAttributes.mods.any { it is ModPrecise }
-    }
+    private val isPrecise
+        get() = attributes.mods.any { it is ModPrecise }
 
     override fun createPerformanceAttributes(attributes: DroidPerformanceAttributes?) = (attributes ?: DroidPerformanceAttributes()).also {
         var multiplier = FINAL_MULTIPLIER
