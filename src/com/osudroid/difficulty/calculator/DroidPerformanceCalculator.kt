@@ -519,7 +519,7 @@ class DroidPerformanceCalculator(
             // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
             // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
             // achieve the most accurate result on average.
-            min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+            min(4 + likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
 
         if (scoreMaxCombo < fullComboThreshold) {
             missCount = (fullComboThreshold / max(1, scoreMaxCombo)).pow(2.5)
@@ -561,7 +561,7 @@ class DroidPerformanceCalculator(
                 // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
                 // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
                 // achieve the most accurate result on average.
-                min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+                min(4 + likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
 
             if (scoreMaxCombo < fullComboThreshold) {
                 missCount = fullComboThreshold / max(1, scoreMaxCombo)
