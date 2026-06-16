@@ -208,8 +208,8 @@ class DroidPerformanceCalculator(
         tapValue *= min(1.0, calculateDeviationBasedLengthScaling(min(attributes.speedNoteCount, totalHits / 1.45)))
 
         // An effective hit window is created based on the tap SR. The higher the tap difficulty, the shorter the hit window.
-        // For example, a tap SR of 4 leads to an effective hit window of 25ms, which is OD 10 with Precise mod.
-        val effectiveHitWindow = 25 * (4 / attributes.tapDifficulty).pow(1.5)
+        // For example, a tap SR of 4 leads to an effective hit window of 35ms.
+        val effectiveHitWindow = 35 * (4 / attributes.tapDifficulty).pow(1.8)
 
         // Find the proportion of 300s on speed notes assuming the hit window was the effective hit window.
         val effectiveAccuracy = ErrorFunction.erfFast(effectiveHitWindow / tapDeviation)
