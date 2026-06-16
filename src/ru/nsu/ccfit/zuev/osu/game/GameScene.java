@@ -364,11 +364,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             sceneBorder = null;
         }
 
-        if (storyboardSprite != null) {
-            storyboardSprite.detachSelf();
-            storyboardSprite = null;
-        }
-
+        releaseStoryboard();
         releaseVideo();
 
         var playableBeatmap = this.playableBeatmap;
@@ -397,10 +393,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void loadStoryboard(BeatmapInfo beatmapInfo) {
-        if (storyboardSprite != null) {
-            return;
-        }
-
         // This is used instead of getBackgroundBrightness to directly obtain the
         // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
@@ -408,6 +400,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (!isStoryboardEnabled) {
             cancelStoryboardLoading();
+            releaseStoryboard();
+            return;
+        }
+
+        if (storyboardSprite != null) {
             return;
         }
 
@@ -457,10 +454,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    private void releaseStoryboard() {
+        if (storyboardSprite != null) {
+            storyboardSprite.detachSelf();
+            storyboardOverlayProxy.detachSelf();
+            storyboardSprite.releaseStoryboard();
+            storyboardOverlayProxy.setDrawProxy(null);
+            storyboardSprite = null;
+            storyboardOverlayProxy = null;
+        }
+    }
+
     public void loadVideo(BeatmapInfo beatmapInfo) {
         var playableBeatmap = this.playableBeatmap;
 
-        if (playableBeatmap == null || video != null) {
+        if (playableBeatmap == null) {
             return;
         }
 
@@ -472,6 +480,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (!videoEnabled) {
             cancelVideoLoading();
+            releaseVideo();
+            return;
+        }
+
+        if (video != null) {
             return;
         }
 
@@ -572,6 +585,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         background.attachChild(dimRectangle);
 
         if (breakAnimator != null) {
+            breakAnimator.setDimBrightness(brightness);
             breakAnimator.setDimRectangle(dimRectangle);
         }
 
@@ -2238,13 +2252,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.getEngineOptions().setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
         GlobalManager.getInstance().getMainActivity().reapplyWakeLock();
 
-        if (storyboardSprite != null) {
-            storyboardSprite.detachSelf();
-            storyboardOverlayProxy.detachSelf();
-            storyboardSprite.releaseStoryboard();
-            storyboardOverlayProxy.setDrawProxy(null);
-            storyboardSprite = null;
-        }
+        releaseStoryboard();
 
         if (sceneBorder != null) {
             sceneBorder.detachSelf();
