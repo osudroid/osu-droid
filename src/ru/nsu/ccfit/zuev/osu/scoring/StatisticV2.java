@@ -65,6 +65,11 @@ public class StatisticV2 implements Serializable {
     private int life = 1;
 
     /**
+     * The player's UID, used in multiplayer to match the entry to the local player.
+     */
+    public long uid = -1;
+
+    /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
      * multiplayer.
      */
