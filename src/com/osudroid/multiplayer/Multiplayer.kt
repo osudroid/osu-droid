@@ -367,6 +367,7 @@ object Multiplayer {
                         roomId = room.id,
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
+                        roomPassword = RoomAPI.lastRoomPassword,
                         multiplayerSessionID = room.sessionID
                     )
 

@@ -46,6 +46,9 @@ object RoomAPI {
     @Volatile
     private var socket: Socket? = null
 
+    @Volatile
+    internal var lastRoomPassword: String? = null
+
 
     // https://gist.github.com/Rian8337/ceab4d3b179cbeee7dd548cfcf145b95
     // Back-to-back events
@@ -445,6 +448,8 @@ object RoomAPI {
      */
     fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
                       multiplayerSessionID: String? = null) {
+        lastRoomPassword = roomPassword
+
         val oldSocket = socket
         socket = null
 
