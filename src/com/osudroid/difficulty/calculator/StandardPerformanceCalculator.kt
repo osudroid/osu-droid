@@ -452,10 +452,10 @@ class StandardPerformanceCalculator(
         return traceableBonus
     }
 
-    private val comboScalingFactor by lazy {
-        if (difficultyAttributes.maxCombo <= 0) 0.0
-        else min((scoreMaxCombo.toDouble() / difficultyAttributes.maxCombo).pow(0.8), 1.0)
-    }
+    private val comboScalingFactor
+        get() =
+            if (attributes.maxCombo <= 0) 0.0
+            else min((scoreMaxCombo.toDouble() / attributes.maxCombo).pow(0.8), 1.0)
 
     private fun calculateRateAdjustedApproachRate(approachRate: Double, clockRate: Double): Double {
         val preempt = BeatmapDifficulty.difficultyRange(
