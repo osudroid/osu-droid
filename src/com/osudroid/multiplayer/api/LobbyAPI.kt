@@ -77,7 +77,7 @@ object LobbyAPI {
                         teamMode = TeamMode[json.getInt("teamMode")] ?: TeamMode.HeadToHead,
                         winCondition = WinCondition.from(json.getInt("winCondition")) ?: WinCondition.ScoreV1,
                         playerCount = json.getInt("playerCount"),
-                        playerNames = json.getString("playerNames"),
+                        playerNames = json.optString("playerNames", ""),
                         status = RoomStatus[json.getInt("status")]
                     )
 
