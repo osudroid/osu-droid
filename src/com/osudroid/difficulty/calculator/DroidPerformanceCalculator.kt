@@ -470,7 +470,7 @@ class DroidPerformanceCalculator(
             return 0.0
         }
 
-        val tapValue = (5 * max(1.0, attributes.tapDifficulty / 0.0675) - 4).pow(3) / 100000
+        val tapValue = HarmonicSkill.difficultyToPerformance(attributes.tapDifficulty)
 
         // Decide a point where the PP value achieved compared to the tap deviation is assumed to be tapped
         // improperly. Any PP above this point is considered "excess" tap difficulty. This is used to cause
