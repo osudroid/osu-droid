@@ -60,7 +60,9 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
                 text {
                     font = ResourceManager.getInstance().getFont("xs")
-                    text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
+                    text = room.playerNames.takeUnless { it.isEmpty() }
+                        ?: if (room.playerCount > 0) "${room.playerCount} player${if (room.playerCount != 1) "s" else ""}"
+                           else StringTable.get(string.multiplayer_room_no_players)
                     applyTheme = {
                         color = it.accentColor
                         alpha = 0.95f
