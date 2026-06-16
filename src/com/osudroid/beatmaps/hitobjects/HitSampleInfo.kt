@@ -17,5 +17,10 @@ open class HitSampleInfo protected constructor(
      */
     open val lookupNames = emptyList<String>()
 
+    /**
+     * Whether this [HitSampleInfo] can be resolved from the beatmap's own custom samples.
+     */
+    open val useBeatmapSample = true
+
     fun copy(volume: Int? = null) = HitSampleInfo(volume ?: this.volume)
 }
