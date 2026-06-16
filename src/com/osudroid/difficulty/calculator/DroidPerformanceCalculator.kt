@@ -237,7 +237,7 @@ class DroidPerformanceCalculator(
             else hitCircleCount
 
         // Bonus for many accuracy objects - it is harder to keep good accuracy up for longer.
-        accuracyValue *= (sqrt(ln(1 + (E - 1) * accuracyObjectCount / 1000))).pow(if (accuracyObjectCount < 1000) 0.5 else 0.25)
+        accuracyValue *= ln(1 + (E - 1) * accuracyObjectCount / 1000).pow(if (accuracyObjectCount < 1000) 0.5 else 0.25)
 
         // Scale the accuracy value with rhythm complexity.
         accuracyValue *= DifficultyCalculationUtils.logistic(rhythmDifficulty, 1.0, 0.5, 1.8)
