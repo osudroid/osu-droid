@@ -55,8 +55,10 @@ class DroidPerformanceCalculator(
 
     override fun createPerformanceAttributes(attributes: DroidPerformanceAttributes?) = (attributes ?: DroidPerformanceAttributes()).also {
         // Avoid allocating unnecessary hit windows.
-        if (isPrecise && hitWindow !is PreciseDroidHitWindow) {
-            hitWindow = PreciseDroidHitWindow(this.attributes.overallDifficulty)
+        if (isPrecise) {
+            if (hitWindow !is PreciseDroidHitWindow) {
+                hitWindow = PreciseDroidHitWindow(this.attributes.overallDifficulty)
+            }
         } else if (hitWindow !is DroidHitWindow) {
             hitWindow = DroidHitWindow(this.attributes.overallDifficulty)
         }
