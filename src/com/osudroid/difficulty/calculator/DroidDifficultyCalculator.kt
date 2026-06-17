@@ -274,7 +274,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     ) {
         val flashlight = skills.find<DroidFlashlight>() ?: return
 
-        flashlightDifficulty = sqrt(flashlight.difficultyValue()) * 0.18
+        flashlightDifficulty = calculateDifficultyRating(flashlight.difficultyValue())
     }
 
     private fun DroidDifficultyAttributes.populateReadingAttributes(

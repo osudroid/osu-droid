@@ -19,13 +19,13 @@ class DroidFlashlight(
 
     private val totalObjects: Int
 ) : DroidStrainSkill(mods) {
-    override val starsPerDouble = 1.06
+    override val starsPerDouble = 1.0
 
     override val reducedSectionCount = 0
     override val reducedSectionBaseline = 1.0
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 0.024
+    private val skillMultiplier = 0.058
     private val strainDecayBase = 0.15
 
     override fun difficultyValue(): Double {
@@ -49,7 +49,7 @@ class DroidFlashlight(
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
 
     private fun calculateAdjustedDifficulty(current: DroidDifficultyHitObject): Double {
-        var difficulty = DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods).pow(0.8)
+        var difficulty = DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods).pow(0.9)
 
         if (mods.any { it is ModRelax }) {
             difficulty *= 0.7
