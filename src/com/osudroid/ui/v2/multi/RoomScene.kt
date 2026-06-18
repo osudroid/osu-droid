@@ -404,7 +404,7 @@ class RoomScene(
                         }
 
                         if (!BuildSettings.MOCK_MULTIPLAYER) {
-                            if (room.teamMode == TeamMode.TeamVersus) {
+                            if (room.teamMode == TeamMode.TeamVS) {
                                 val teams = room.teamMap
 
                                 if (teams.values.any { it.isEmpty() }) {
@@ -456,7 +456,7 @@ class RoomScene(
                                     return@callback
                                 }
 
-                                if (room.teamMode == TeamMode.TeamVersus && player.team == null) {
+                                if (room.teamMode == TeamMode.TeamVS && player.team == null) {
                                     ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
                                     isWaitingForStatusChange.set(false)
                                     return@callback
@@ -504,15 +504,15 @@ class RoomScene(
             when (room.winCondition) {
                 WinCondition.ScoreV1 -> R.string.multiplayer_room_score_v1
                 WinCondition.ScoreV2 -> R.string.multiplayer_room_score_v2
-                WinCondition.HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
-                WinCondition.MaximumCombo -> R.string.multiplayer_room_maximum_combo
+                WinCondition.Accuracy -> R.string.multiplayer_room_highest_accuracy
+                WinCondition.MaxCombo -> R.string.multiplayer_room_maximum_combo
             }
         )
 
         teamModeBadge.setText(
             when (room.teamMode) {
                 TeamMode.HeadToHead -> R.string.multiplayer_room_head_to_head
-                TeamMode.TeamVersus -> R.string.multiplayer_room_team_versus
+                TeamMode.TeamVS -> R.string.multiplayer_room_team_versus
             }
         )
 
