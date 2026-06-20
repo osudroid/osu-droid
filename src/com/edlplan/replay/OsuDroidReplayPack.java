@@ -64,11 +64,17 @@ public class OsuDroidReplayPack {
             replayData.put("accuracy", scoreInfo.getAccuracy());
             replayData.put("time", scoreInfo.getTime());
 
+            var sliderHeadHits = scoreInfo.getSliderHeadHits();
+            var sliderRepeatHits = scoreInfo.getSliderRepeatHits();
             var sliderTickHits = scoreInfo.getSliderTickHits();
             var sliderEndHits = scoreInfo.getSliderEndHits();
 
             // Inspection will complain about unnecessary unboxing, but JSONObject.put internally casts
             // all Number types to doubles while we want to keep the original integer values.
+            //noinspection UnnecessaryUnboxing
+            replayData.put("sliderHeadHits", sliderHeadHits != null ? sliderHeadHits.intValue() : null);
+            //noinspection UnnecessaryUnboxing
+            replayData.put("sliderRepeatHits", sliderRepeatHits != null ? sliderRepeatHits.intValue() : null);
             //noinspection UnnecessaryUnboxing
             replayData.put("sliderTickHits", sliderTickHits != null ? sliderTickHits.intValue() : null);
             //noinspection UnnecessaryUnboxing
