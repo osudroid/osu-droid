@@ -335,11 +335,16 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
             return@use null
         }
 
+        // Before this migration, difficulty properties were not capped between 0 and 10 in BeatmapDifficultyParser.
+        // This has been fixed, but at the time of this migration the caps have not been applied to beatmaps in the
+        // database, so we do it here. Beatmaps will be reparsed with the correct caps when the user picks them in
+        // song select, so we do not need to update BeatmapInfo here. This also considers the fact that this migration
+        // has been run on most players, so updating BeatmapInfo here is not correct.
         BeatmapDifficulty(
-            cursor.getFloat(0),
-            cursor.getFloat(1),
-            cursor.getFloat(2),
-            cursor.getFloat(3)
+            cursor.getFloat(0).coerceIn(0f, 10f),
+            cursor.getFloat(1).coerceIn(0f, 10f),
+            cursor.getFloat(2).coerceIn(0f, 10f),
+            cursor.getFloat(3).coerceIn(0f, 10f)
         )
     }
 }
