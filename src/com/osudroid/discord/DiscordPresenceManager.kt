@@ -6,6 +6,7 @@ import android.util.Log
 import com.discord.socialsdk.DiscordSocialSdkInit
 import com.osudroid.BuildSettings
 import com.osudroid.utils.mainThread
+import java.net.URLEncoder
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -291,7 +292,11 @@ object DiscordPresenceManager {
      * tokens via the game server, then feeds the access token into the Discord SDK.
      */
     private suspend fun exchangeAuthorizationCode(code: String, verifier: String, redirectUri: String) {
-        val sign = SecurityUtils.signRequest("${code}_${verifier}") ?: run {
+        // This is not blocking, but IDE will warn due to UnsupportedEncodingException throw.
+        @Suppress("BlockingMethodInNonBlockingContext")
+        val encodedRedirectUri = URLEncoder.encode(redirectUri, "UTF-8")
+
+        val sign = SecurityUtils.signRequest("${code}_${verifier}_${encodedRedirectUri}") ?: run {
             Log.w(TAG, "exchangeAuthorizationCode: could not sign request (app signature unavailable).")
             isPendingAuthorization = false
             return
