@@ -1,6 +1,7 @@
 package com.osudroid.discord
 
 import dalvik.annotation.optimization.CriticalNative
+import dalvik.annotation.optimization.FastNative
 
 /**
  * JNI bridge to Discord's Social SDK.
@@ -68,6 +69,7 @@ internal object DiscordNative {
      * Returns the latest refresh token. Only valid when [hasNewRefreshToken] is `true`.
      */
     @JvmStatic
+    @FastNative
     external fun getRefreshToken(): String
 
     /**
