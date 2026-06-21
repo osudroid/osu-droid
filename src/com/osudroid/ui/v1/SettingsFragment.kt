@@ -36,7 +36,6 @@ import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.UpdateManager
 import com.osudroid.discord.DiscordPresenceManager
-import com.osudroid.discord.UserActivity
 import com.osudroid.data.DatabaseManager
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
@@ -327,7 +326,8 @@ class SettingsFragment : SettingsFragment() {
         findPreference<CheckBoxPreference>("discordRichPresence")!!.setOnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
                 if (DiscordPresenceManager.isConnected) {
-                    DiscordPresenceManager.setActivity(UserActivity.Idle)
+                    // Defer refreshing the activity to allow the preference to persist first.
+                    requireView().post { DiscordPresenceManager.refreshActivity() }
                 } else {
                     ToastLogger.showText(R.string.connect_to_discord_toast, true)
                 }
