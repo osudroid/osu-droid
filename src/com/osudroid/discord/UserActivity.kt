@@ -55,8 +55,8 @@ sealed class UserActivity {
     /**
      * User is watching a replay.
      */
-    class WatchingReplay(beatmapTitle: String) : InGame(beatmapTitle) {
-        override val status = "Watching a replay"
+    class WatchingReplay(playerName: String, beatmapTitle: String) : InGame(beatmapTitle) {
+        override val status = "Watching $playerName's replay"
     }
 
     /**

@@ -1484,7 +1484,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             DiscordPresenceManager.setActivity(new UserActivity.InMultiplayerGame(beatmapTitle, size, max));
         } else if (replaying || GameHelper.isAutoplay()) {
-            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(beatmapTitle));
+            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(stat.getPlayerName(), beatmapTitle));
         } else {
             DiscordPresenceManager.setActivity(new UserActivity.InSoloGame(beatmapTitle));
         }
