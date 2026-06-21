@@ -2051,6 +2051,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 engine.setScene(scoringScene.getScene());
             } else {
                 engine.setScene(oldScene);
+                updateDiscordActivityForOldScene();
             }
 
             // Resume difficulty calculation.
@@ -2295,11 +2296,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
         releaseVideo();
+        updateDiscordActivityForOldScene();
 
         // Resume difficulty calculation.
         DifficultyCalculationManager.calculateDifficulties();
     }
 
+    private void updateDiscordActivityForOldScene() {
+        if (oldScene == GlobalManager.getInstance().getMainScene().getScene()) {
+            DiscordPresenceManager.setActivity(UserActivity.Idle.INSTANCE);
+        } else {
+            DiscordPresenceManager.setActivity(UserActivity.ChoosingBeatmap.INSTANCE);
+        }
+    }
 
     public void reset() {
     }
