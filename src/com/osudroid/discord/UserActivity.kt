@@ -60,6 +60,13 @@ sealed class UserActivity {
     }
 
     /**
+     * User is searching for a multiplayer lobby.
+     */
+    data object SearchingForMultiplayerLobby : UserActivity() {
+        override val status = "Looking for a multiplayer lobby"
+    }
+
+    /**
      * User is in a multiplayer room lobby.
      */
     class InMultiplayerLobby(
