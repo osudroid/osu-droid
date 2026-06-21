@@ -288,9 +288,9 @@ class LobbyScene : UIScene() {
         GlobalManager.getInstance().mainScene.show()
     }
 
-    override fun show() {
+    override fun onAttached() {
         DiscordPresenceManager.setActivity(UserActivity.SearchingForMultiplayerLobby)
-        super.show()
+        super.onAttached()
     }
 
     companion object {
