@@ -101,12 +101,12 @@ Java_com_osudroid_discord_DiscordNative_create(JNIEnv*, jclass) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_isReady(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_isReady() {
     return g_isReady.load();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_isAuthorized(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_isAuthorized() {
     return g_isAuthorized.load();
 }
 
@@ -179,7 +179,7 @@ Java_com_osudroid_discord_DiscordNative_refreshTokenAndConnect(
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_hasNewRefreshToken(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_hasNewRefreshToken() {
     return g_hasNewRefreshToken.load();
 }
 
@@ -189,27 +189,27 @@ Java_com_osudroid_discord_DiscordNative_getRefreshToken(JNIEnv* env, jclass) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_clearNewRefreshTokenFlag(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_clearNewRefreshTokenFlag() {
     g_hasNewRefreshToken.store(false);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_needsReauth(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_needsReauth() {
     return g_needsReauth.load();
 }
 
 JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_clearNeedsReauth(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_clearNeedsReauth() {
     g_needsReauth.store(false);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_hasAuthorizationFailed(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_hasAuthorizationFailed() {
     return g_authorizationFailed.load();
 }
 
 JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_clearAuthorizationFailed(JNIEnv*, jclass) {
+Java_com_osudroid_discord_DiscordNative_clearAuthorizationFailed() {
     g_authorizationFailed.store(false);
 }
 

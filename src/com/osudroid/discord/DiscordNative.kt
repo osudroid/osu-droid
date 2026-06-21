@@ -1,5 +1,7 @@
 package com.osudroid.discord
 
+import dalvik.annotation.optimization.CriticalNative
+
 /**
  * JNI bridge to Discord's Social SDK.
  *
@@ -22,6 +24,7 @@ internal object DiscordNative {
      * Returns `true` once the client status reaches `Ready` (fully authenticated and connected).
      */
     @JvmStatic
+    @CriticalNative
     external fun isReady(): Boolean
 
     /**
@@ -29,6 +32,7 @@ internal object DiscordNative {
      * status. Used to detect OAuth completion so the game can be brought back to the foreground.
      */
     @JvmStatic
+    @CriticalNative
     external fun isAuthorized(): Boolean
 
     /**
@@ -57,6 +61,7 @@ internal object DiscordNative {
      * with [clearNewRefreshTokenFlag] after saving.
      */
     @JvmStatic
+    @CriticalNative
     external fun hasNewRefreshToken(): Boolean
 
     /**
@@ -69,6 +74,7 @@ internal object DiscordNative {
      * Clears the [hasNewRefreshToken] flag after the token has been saved.
      */
     @JvmStatic
+    @CriticalNative
     external fun clearNewRefreshTokenFlag()
 
     /**
@@ -76,12 +82,14 @@ internal object DiscordNative {
      * On detecting this, the caller should clear the stored token and call [authorize].
      */
     @JvmStatic
+    @CriticalNative
     external fun needsReauth(): Boolean
 
     /**
      * Clears the [needsReauth] flag after the caller has initiated re-authorization.
      */
     @JvmStatic
+    @CriticalNative
     external fun clearNeedsReauth()
 
     /**
@@ -89,12 +97,14 @@ internal object DiscordNative {
      * On detecting this, the caller should stop the callback loop and let the user retry manually.
      */
     @JvmStatic
+    @CriticalNative
     external fun hasAuthorizationFailed(): Boolean
 
     /**
      * Clears the [hasAuthorizationFailed] flag after the caller has handled the cancellation.
      */
     @JvmStatic
+    @CriticalNative
     external fun clearAuthorizationFailed()
 
     /**
