@@ -101,6 +101,21 @@ object DiscordPresenceManager {
             return
         }
 
+        if (isConnected) {
+            Log.d(TAG, "connect() ignored: already connected.")
+            return
+        }
+
+        if (isPendingAuthorization) {
+            Log.d(TAG, "connect() ignored: authorization already in progress.")
+            return
+        }
+
+        if (callbackJob?.isActive == true) {
+            Log.d(TAG, "connect() ignored: connection already in progress.")
+            return
+        }
+
         val savedRefreshToken = loadRefreshToken()
 
         if (savedRefreshToken != null) {
