@@ -166,7 +166,14 @@ android {
         ignoreWarnings true
     }
     buildFeatures {
+        prefab true
         buildConfig true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
     }
 
     testOptions {
@@ -221,6 +228,10 @@ dependencies {
     // Video playback
     implementation "androidx.media3:media3-exoplayer:1.4.1"
     implementation files('libs/media3-decoder-ffmpeg.aar')
+
+    // Discord Social SDK
+    implementation files("libs/discord_partner_sdk.aar")
+    implementation 'androidx.browser:browser:1.8.0'
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
