@@ -48,7 +48,7 @@ sealed class UserActivity {
     /**
      * User is playing a beatmap in single-player.
      */
-    class PlayingBeatmap(beatmapTitle: String) : InGame(beatmapTitle) {
+    class InSoloGame(beatmapTitle: String) : InGame(beatmapTitle) {
         override val status = "Playing"
     }
 
@@ -81,7 +81,7 @@ sealed class UserActivity {
     /**
      * User is playing a beatmap in a multiplayer room.
      */
-    class PlayingMultiplayer(
+    class InMultiplayerGame(
         beatmapTitle: String,
         override val partySize: Int,
         override val partyMax: Int,

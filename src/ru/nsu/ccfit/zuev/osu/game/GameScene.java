@@ -1482,11 +1482,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             int size = room != null ? room.getPlayerCount() : 0;
             int max = room != null ? room.getMaxPlayers() : 0;
 
-            DiscordPresenceManager.setActivity(new UserActivity.PlayingMultiplayer(beatmapTitle, size, max));
+            DiscordPresenceManager.setActivity(new UserActivity.InMultiplayerGame(beatmapTitle, size, max));
         } else if (replaying || GameHelper.isAutoplay()) {
             DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(beatmapTitle));
         } else {
-            DiscordPresenceManager.setActivity(new UserActivity.PlayingBeatmap(beatmapTitle));
+            DiscordPresenceManager.setActivity(new UserActivity.InSoloGame(beatmapTitle));
         }
 
         if (isHUDEditorMode) {
