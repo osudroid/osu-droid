@@ -11,4 +11,6 @@
     <string name="opt_discordRichPresence_title">Discord Rich Presence</string>
     <string name="opt_discordRichPresence_summary">Show your current activity on your Discord profile</string>
 
+    <string name="connect_to_discord_toast">Connect your Discord account using the "Connect to Discord" button to enable integration features.</string>
+
 </resources>

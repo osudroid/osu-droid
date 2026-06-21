@@ -329,7 +329,7 @@ class SettingsFragment : SettingsFragment() {
                 if (DiscordPresenceManager.isConnected) {
                     DiscordPresenceManager.setActivity(UserActivity.Idle)
                 } else {
-                    ToastLogger.showText("Connect your Discord account using the \"Connect to Discord\" button to enable rich presence.", true)
+                    ToastLogger.showText(R.string.connect_to_discord_toast, true)
                 }
             } else {
                 DiscordPresenceManager.clearActivity()
