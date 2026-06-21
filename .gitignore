@@ -1,3 +1,6 @@
+# clangd compilation database (machine-specific absolute paths)
+jni/compile_commands.json
+
 # built application files
 *.apk
 *.ap_

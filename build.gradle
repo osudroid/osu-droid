@@ -188,6 +188,28 @@ android {
             outputFileName = fileName
         }
     }
+
+    // Copy compile_commands.json for arm64-v8a into jni/ so clangd finds it when walking up from jni/discord_jni.cpp.
+    // Without this it falls back to the system compiler and produces false-positive errors for JNI and C++ standard library types.
+    tasks.configureEach { task ->
+        if (task.name ==~ /configureCMake.*/) {
+            task.doLast {
+                def ccFiles = fileTree('.cxx') {
+                    include '**/arm64-v8a/compile_commands.json'
+                    exclude '**/tools/**'
+                }
+
+                def ccFile = ccFiles.files.first()
+
+                if (ccFile?.exists()) {
+                    copy {
+                        from ccFile
+                        into 'jni'
+                    }
+                }
+            }
+        }
+    }
 }
 
 dependencies {
