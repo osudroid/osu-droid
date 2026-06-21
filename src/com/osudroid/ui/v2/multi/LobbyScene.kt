@@ -289,9 +289,8 @@ class LobbyScene : UIScene() {
     }
 
     override fun show() {
-        super.show()
-
         DiscordPresenceManager.setActivity(UserActivity.SearchingForMultiplayerLobby)
+        super.show()
     }
 
     companion object {
