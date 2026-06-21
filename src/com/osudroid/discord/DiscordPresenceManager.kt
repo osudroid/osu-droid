@@ -134,6 +134,8 @@ object DiscordPresenceManager {
      */
     @JvmStatic
     fun setActivity(activity: UserActivity) {
+        currentActivity = activity
+
         if (!Config.isDiscordRichPresenceEnabled() || !isConnected) {
             return
         }
@@ -144,7 +146,6 @@ object DiscordPresenceManager {
         val largeText = if (username.isNotEmpty() && rank > 0) "$username (rank #%,d)".format(rank)
                         else username
 
-        currentActivity = activity
         Log.d(TAG, "setActivity(${activity::class.simpleName}) details='${activity.details}' state='${activity.status}' party=${activity.partySize}/${activity.partyMax}")
         DiscordNative.updateRichPresence(activity.details ?: "", activity.status, activity.partySize, activity.partyMax, appStartTime, largeText)
     }
@@ -175,6 +176,7 @@ object DiscordPresenceManager {
     private fun startCallbackLoop() {
         callbackJob?.cancel()
         var didReturnToGame = false
+        var wasReady = false
 
         callbackJob = scope.launch {
             while (isActive) {
@@ -210,11 +212,18 @@ object DiscordPresenceManager {
                     DiscordNative.clearNewRefreshTokenFlag()
                 }
 
-                if (!isConnected && DiscordNative.isReady()) {
+                val isNowReady = DiscordNative.isReady()
+
+                if (isNowReady && !wasReady) {
                     isConnected = true
                     Log.d(TAG, "Discord ready.")
-                    setActivity(UserActivity.Idle)
+                    refreshActivity()
+                } else if (!isNowReady && wasReady) {
+                    isConnected = false
+                    Log.d(TAG, "Discord disconnected.")
                 }
+
+                wasReady = isNowReady
 
                 delay(callbackDelay)
             }
