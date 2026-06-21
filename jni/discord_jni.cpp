@@ -281,12 +281,7 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
             env->ReleaseStringUTFChars(jLargeText, s);
 
             if (largeText.size() >= 2) {
-                if (largeText.size() > 128) {
-                    largeText.resize(125);
-                    largeText += "...";
-                }
-
-                assets.SetLargeText(std::move(largeText));
+                assets.SetLargeText(clampLength(std::move(largeText)));
             }
         }
 
