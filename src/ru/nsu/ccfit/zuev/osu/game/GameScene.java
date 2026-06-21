@@ -29,7 +29,10 @@ import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.game.replay.ReplaySettingsPanel;
+import com.osudroid.discord.DiscordPresenceManager;
+import com.osudroid.discord.UserActivity;
 import com.osudroid.multiplayer.api.RoomAPI;
+import com.osudroid.multiplayer.api.data.Room;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
@@ -1472,6 +1475,20 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.setScene(scene);
         engine.getOverlay().attachChild(hud, 0);
 
+        var beatmapTitle = lastBeatmapInfo.getFullBeatmapName();
+
+        if (Multiplayer.isMultiplayer) {
+            Room room = Multiplayer.room;
+            int size = room != null ? room.getPlayerCount() : 0;
+            int max = room != null ? room.getMaxPlayers() : 0;
+
+            DiscordPresenceManager.setActivity(new UserActivity.PlayingMultiplayer(beatmapTitle, size, max));
+        } else if (replaying) {
+            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(beatmapTitle));
+        } else {
+            DiscordPresenceManager.setActivity(new UserActivity.PlayingBeatmap(beatmapTitle));
+        }
+
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
         }
@@ -2846,10 +2863,17 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
+            Room mpRoom = Multiplayer.room;
+            DiscordPresenceManager.setActivity(
+                new UserActivity.InMultiplayerLobby(
+                    mpRoom != null ? mpRoom.getName() : "",
+                    mpRoom != null ? mpRoom.getPlayerCount() : 0,
+                    mpRoom != null ? mpRoom.getMaxPlayers() : 0));
             quit();
             return;
         }
 
+        DiscordPresenceManager.clearActivity();
         stopLoopingSamples();
         SongService songService = GlobalManager.getInstance().getSongService();
 
