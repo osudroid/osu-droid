@@ -2873,7 +2873,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        DiscordPresenceManager.clearActivity();
         stopLoopingSamples();
         SongService songService = GlobalManager.getInstance().getSongService();
 
