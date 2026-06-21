@@ -518,7 +518,7 @@ public class Config {
     }
 
     public static boolean isStayOnline() {
-        return stayOnline && BuildType.hasOnlineAccess();
+        return stayOnline/* && BuildType.hasOnlineAccess()*/;
     }
 
     public static void setStayOnline(boolean stayOnline) {
@@ -703,6 +703,10 @@ public class Config {
 
     public static boolean isReceiveAnnouncements() {
         return receiveAnnouncements;
+    }
+
+    public static boolean isDiscordRichPresenceEnabled() {
+        return sharedPreferences.getBoolean("discordRichPresence", false);
     }
 
     public static void setReceiveAnnouncements(boolean receiveAnnouncements) {

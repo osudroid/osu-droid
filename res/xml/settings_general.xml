@@ -65,6 +65,23 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Discord">
+
+        <Preference
+            android:key="discordConnect"
+            android:summary="Link your Discord account to enable rich presence"
+            android:title="Connect to Discord"
+            app:layout="@layout/settings_preference" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="discordRichPresence"
+            android:summary="Show your current activity on your Discord profile"
+            android:title="Discord Rich Presence"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/opt_category_updates">
 
         <Preference
