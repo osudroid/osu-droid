@@ -194,6 +194,13 @@ Java_com_osudroid_discord_DiscordNative_clearAuthorizationFailed(JNIEnv*, jclass
 }
 
 JNIEXPORT void JNICALL
+Java_com_osudroid_discord_DiscordNative_abortAuthorize(JNIEnv*, jclass) {
+    if (g_client) {
+        g_client->AbortAuthorize();
+    }
+}
+
+JNIEXPORT void JNICALL
 Java_com_osudroid_discord_DiscordNative_runCallbacks(JNIEnv*, jclass) {
     discordpp::RunCallbacks();
 }

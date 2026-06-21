@@ -50,6 +50,9 @@ object DiscordPresenceManager {
     @Volatile
     private var isConnected = false
 
+    @Volatile
+    private var isPendingAuthorization = false
+
     private var currentActivity: UserActivity = UserActivity.Idle
 
     private val activity
@@ -80,7 +83,7 @@ object DiscordPresenceManager {
         isInitialized = true
         Log.d(TAG, "SDK initialized with client ID $clientId.")
 
-        if (Config.isDiscordRichPresenceEnabled()) {
+        if (Config.isDiscordRichPresenceEnabled() && loadRefreshToken() != null) {
             connect()
         }
     }
@@ -103,6 +106,7 @@ object DiscordPresenceManager {
         } else {
             Log.d(TAG, "No saved refresh token, starting authorization flow.")
             DiscordNative.authorize(clientId)
+            isPendingAuthorization = true
         }
 
         startCallbackLoop()
@@ -180,7 +184,16 @@ object DiscordPresenceManager {
                 // authorization.
                 if (!didReturnToGame && DiscordNative.isAuthorized()) {
                     didReturnToGame = true
+                    isPendingAuthorization = false
                     bringGameToFront()
+                }
+
+                if (DiscordNative.hasAuthorizationFailed()) {
+                    DiscordNative.clearAuthorizationFailed()
+                    isPendingAuthorization = false
+                    Log.w(TAG, "Authorization cancelled or rejected by user, stopping.")
+                    stopCallbackLoop()
+                    return@launch
                 }
 
                 if (DiscordNative.needsReauth()) {
@@ -204,6 +217,20 @@ object DiscordPresenceManager {
 
                 delay(callbackDelay)
             }
+        }
+    }
+
+    /**
+     * Called from [MainActivity.onResume]. If the user returned to the game while an OAuth
+     * authorization was still pending (e.g. they pressed back in Discord without authorizing),
+     * this aborts the flow so the SDK stops trying to re-open Discord on every callback tick.
+     * The abort fires the [DiscordNative.hasAuthorizationFailed] flag, which the callback loop
+     * handles on the next tick.
+     */
+    fun onActivityResume() {
+        if (isPendingAuthorization) {
+            Log.d(TAG, "onActivityResume: aborting pending authorization.")
+            DiscordNative.abortAuthorize()
         }
     }
 

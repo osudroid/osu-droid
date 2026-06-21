@@ -98,6 +98,13 @@ internal object DiscordNative {
     external fun clearAuthorizationFailed()
 
     /**
+     * Cancels an in-progress [authorize] call. Causes the [authorize] callback to fire with an
+     * `Aborted` error, which sets [hasAuthorizationFailed]. No-op if no authorization is pending.
+     */
+    @JvmStatic
+    external fun abortAuthorize()
+
+    /**
      * Pumps the SDK event loop. Must be called repeatedly for callbacks to fire.
      */
     @JvmStatic

@@ -792,6 +792,7 @@ public class MainActivity extends BaseGameActivity implements
         activityVisible = true;
 
         logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+        DiscordPresenceManager.INSTANCE.onActivityResume();
 
         if (mEngine == null) {
             return;
