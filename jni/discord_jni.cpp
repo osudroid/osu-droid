@@ -27,6 +27,10 @@ static std::atomic g_hasNewRefreshToken{false};
 // Kotlin polls this to know when to clear the stored token and re-authorize.
 static std::atomic g_needsReauth{false};
 
+// Set true when the user cancels or rejects the OAuth authorization prompt.
+// Kotlin polls this to stop the callback loop and let the user retry manually.
+static std::atomic g_authorizationFailed{false};
+
 static std::string g_pendingRefreshToken;
 
 // Shared handler for successful token exchange results from GetToken and RefreshToken.
@@ -105,6 +109,7 @@ Java_com_osudroid_discord_DiscordNative_authorize(JNIEnv*, jclass, jlong clientI
             const discordpp::ClientResult result, const std::string &code, const std::string &redirectUri) mutable {
             if (!result.Successful()) {
                 LOGE("Authorize failed: %s", result.Error().c_str());
+                g_authorizationFailed.store(true);
                 return;
             }
 
@@ -176,6 +181,16 @@ Java_com_osudroid_discord_DiscordNative_needsReauth(JNIEnv*, jclass) {
 JNIEXPORT void JNICALL
 Java_com_osudroid_discord_DiscordNative_clearNeedsReauth(JNIEnv*, jclass) {
     g_needsReauth.store(false);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_osudroid_discord_DiscordNative_hasAuthorizationFailed(JNIEnv*, jclass) {
+    return g_authorizationFailed.load();
+}
+
+JNIEXPORT void JNICALL
+Java_com_osudroid_discord_DiscordNative_clearAuthorizationFailed(JNIEnv*, jclass) {
+    g_authorizationFailed.store(false);
 }
 
 JNIEXPORT void JNICALL
@@ -281,6 +296,7 @@ Java_com_osudroid_discord_DiscordNative_destroy(JNIEnv*, jclass) {
     g_isAuthorized.store(false);
     g_hasNewRefreshToken.store(false);
     g_needsReauth.store(false);
+    g_authorizationFailed.store(false);
     g_pendingRefreshToken.clear();
     LOGI("Client destroyed");
 }

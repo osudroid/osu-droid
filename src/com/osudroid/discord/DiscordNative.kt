@@ -85,6 +85,19 @@ internal object DiscordNative {
     external fun clearNeedsReauth()
 
     /**
+     * Returns `true` when the user canceled or rejected the OAuth authorization prompt.
+     * On detecting this, the caller should stop the callback loop and let the user retry manually.
+     */
+    @JvmStatic
+    external fun hasAuthorizationFailed(): Boolean
+
+    /**
+     * Clears the [hasAuthorizationFailed] flag after the caller has handled the cancellation.
+     */
+    @JvmStatic
+    external fun clearAuthorizationFailed()
+
+    /**
      * Pumps the SDK event loop. Must be called repeatedly for callbacks to fire.
      */
     @JvmStatic
