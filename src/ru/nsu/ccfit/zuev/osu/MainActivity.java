@@ -138,7 +138,7 @@ public class MainActivity extends BaseGameActivity implements
         reportGlesVersion();
 
         Config.loadConfig(this);
-        DiscordPresenceManager.INSTANCE.init(this);
+        DiscordPresenceManager.init(this);
         StringTable.setContext(this);
         ToastLogger.init(this);
         initialGameDirectory();
@@ -867,7 +867,7 @@ public class MainActivity extends BaseGameActivity implements
 
         Multiplayer.flushLog();
         AccessibilityDetector.unregister(this);
-        DiscordPresenceManager.INSTANCE.disconnect();
+        DiscordPresenceManager.disconnect();
 
         var listener = displayListener;
 

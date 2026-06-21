@@ -71,6 +71,7 @@ object DiscordPresenceManager {
      * If rich presence is already enabled in settings, [connect] is called automatically so that
      * returning users reconnect on launch without needing to tap "Connect to Discord" again.
      */
+    @JvmStatic
     fun init(activity: MainActivity) {
         appStartTime = System.currentTimeMillis()
 
@@ -93,6 +94,7 @@ object DiscordPresenceManager {
      * Connects to Discord. If a saved refresh token exists, reconnects silently without opening
      * Discord or a browser. Otherwise, starts the OAuth2 PKCE flow (opens Discord for consent).
      */
+    @JvmStatic
     fun connect() {
         if (!isInitialized) {
             Log.w(TAG, "connect() called before init().")
@@ -116,6 +118,7 @@ object DiscordPresenceManager {
     /**
      * Clears presence, stops the callback loop, and marks the client as disconnected.
      */
+    @JvmStatic
     fun disconnect() {
         if (!isInitialized) {
             return
