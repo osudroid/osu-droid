@@ -1483,7 +1483,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             int max = room != null ? room.getMaxPlayers() : 0;
 
             DiscordPresenceManager.setActivity(new UserActivity.PlayingMultiplayer(beatmapTitle, size, max));
-        } else if (replaying) {
+        } else if (replaying || GameHelper.isAutoplay()) {
             DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(beatmapTitle));
         } else {
             DiscordPresenceManager.setActivity(new UserActivity.PlayingBeatmap(beatmapTitle));
