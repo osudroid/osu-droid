@@ -134,7 +134,7 @@ object DiscordPresenceManager {
         val online = OnlineManager.getInstance()
         val username = online.username
         val rank = online.rank
-        val largeText = if (username.isNotEmpty() && rank > 0) "$username (rank #$rank)"
+        val largeText = if (username.isNotEmpty() && rank > 0) "$username (rank #%,d)".format(rank)
                         else username
 
         Log.d(TAG, "setActivity(${activity::class.simpleName}) details='${activity.details}' state='${activity.status}' party=${activity.partySize}/${activity.partyMax}")
