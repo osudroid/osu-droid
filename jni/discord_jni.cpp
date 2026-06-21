@@ -13,19 +13,19 @@
 static std::unique_ptr<discordpp::Client> g_client;
 
 // Denotes that the client is ready.
-static std::atomic<bool> g_isReady{false};
+static std::atomic g_isReady{false};
 
 // Set true after Authorize + GetToken completes (user went through OAuth consent).
 // Used to detect that the game should be brought back to foreground.
-static std::atomic<bool> g_isAuthorized{false};
+static std::atomic g_isAuthorized{false};
 
 // Set true when a fresh refresh token arrives (from either GetToken or RefreshToken).
 // Kotlin polls this to know when to rotate the stored refresh token.
-static std::atomic<bool> g_hasNewRefreshToken{false};
+static std::atomic g_hasNewRefreshToken{false};
 
 // Set true when RefreshToken fails, meaning the stored token is stale.
 // Kotlin polls this to know when to clear the stored token and re-authorize.
-static std::atomic<bool> g_needsReauth{false};
+static std::atomic g_needsReauth{false};
 
 static std::string g_pendingRefreshToken;
 
