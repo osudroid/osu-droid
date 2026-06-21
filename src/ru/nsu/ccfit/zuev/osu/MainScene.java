@@ -12,6 +12,8 @@ import android.util.Log;
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.osudroid.beatmaps.BeatmapCache;
+import com.osudroid.discord.DiscordPresenceManager;
+import com.osudroid.discord.UserActivity;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.UIScene;
@@ -1036,6 +1038,7 @@ public class MainScene implements IUpdateHandler {
         if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
             setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
         }
+        DiscordPresenceManager.setActivity(UserActivity.Idle.INSTANCE);
     }
 
     public enum MusicOption {PREV, PLAY, PAUSE, STOP, NEXT, SYNC}
