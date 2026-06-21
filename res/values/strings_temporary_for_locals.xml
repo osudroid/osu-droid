@@ -7,6 +7,11 @@
 
     <string name="opt_discordConnect_title">Connect to Discord</string>
     <string name="opt_discordConnect_summary">Link your Discord account to enable Discord integration features</string>
+    <string name="opt_discordConnect_title_connected">Connected to Discord</string>
+    <string name="opt_discordConnect_summary_connected">Your Discord account is linked</string>
+
+    <string name="discord_authorization_pending_toast">Authorization in progress — check Discord</string>
+    <string name="discord_connecting_toast">Connecting to Discord…</string>
 
     <string name="opt_discordRichPresence_title">Discord Rich Presence</string>
     <string name="opt_discordRichPresence_summary">Show your current activity on your Discord profile</string>

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import com.discord.socialsdk.DiscordSocialSdkInit
 import com.osudroid.BuildSettings
+import com.osudroid.utils.mainThread
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +53,17 @@ object DiscordPresenceManager {
         private set
 
     @Volatile
-    private var isPendingAuthorization = false
+    var isPendingAuthorization = false
+        private set
 
+    /**
+     * `true` while a connection attempt is in progress but not yet fully established.
+     * Covers both the OAuth flow ([isPendingAuthorization]) and the silent refresh-token reconnect.
+     */
+    val isConnecting
+        get() = !isConnected && callbackJob?.isActive == true
+
+    private var connectionStateListener: (() -> Unit)? = null
     private var currentActivity: UserActivity = UserActivity.Idle
 
     private val activity
@@ -128,6 +138,16 @@ object DiscordPresenceManager {
         }
 
         startCallbackLoop()
+    }
+
+    /**
+     * Registers a listener that is invoked on the main thread whenever [isConnected] changes.
+     *
+     * Pass `null` to unregister.
+     */
+    @JvmStatic
+    fun setConnectionStateListener(listener: (() -> Unit)?) {
+        connectionStateListener = listener
     }
 
     /**
@@ -235,10 +255,12 @@ object DiscordPresenceManager {
                 if (isNowReady && !wasReady) {
                     isConnected = true
                     Log.d(TAG, "Discord ready.")
+                    mainThread { connectionStateListener?.invoke() }
                     refreshActivity()
                 } else if (!isNowReady && wasReady) {
                     isConnected = false
                     Log.d(TAG, "Discord disconnected.")
+                    mainThread { connectionStateListener?.invoke() }
                 }
 
                 wasReady = isNowReady
