@@ -2049,6 +2049,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());
+                DiscordPresenceManager.setActivity(UserActivity.Idle.INSTANCE);
             } else {
                 engine.setScene(oldScene);
                 updateDiscordActivityForOldScene();
