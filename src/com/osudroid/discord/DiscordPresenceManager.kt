@@ -48,7 +48,8 @@ object DiscordPresenceManager {
     private var isInitialized = false
 
     @Volatile
-    private var isConnected = false
+    var isConnected = false
+        private set
 
     @Volatile
     private var isPendingAuthorization = false

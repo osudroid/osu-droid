@@ -326,7 +326,11 @@ class SettingsFragment : SettingsFragment() {
 
         findPreference<CheckBoxPreference>("discordRichPresence")!!.setOnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
-                DiscordPresenceManager.setActivity(UserActivity.Idle)
+                if (DiscordPresenceManager.isConnected) {
+                    DiscordPresenceManager.setActivity(UserActivity.Idle)
+                } else {
+                    ToastLogger.showText("Connect your Discord account using the \"Connect to Discord\" button to enable rich presence.", true)
+                }
             } else {
                 DiscordPresenceManager.clearActivity()
             }
