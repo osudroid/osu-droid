@@ -40,22 +40,26 @@ sealed class UserActivity {
 
     /**
      * The player is in gameplay.
+     *
+     * @param beatmapId The beatmap ID.
      */
-    sealed class InGame(beatmapTitle: String) : UserActivity() {
+    sealed class InGame(beatmapTitle: String, beatmapId: Long?) : UserActivity() {
+        val beatmapUrl = if (beatmapId != null) "https://osu.ppy.sh/b/$beatmapId" else null
+
         override val details = beatmapTitle
     }
 
     /**
      * User is playing a beatmap in single-player.
      */
-    class InSoloGame(beatmapTitle: String) : InGame(beatmapTitle) {
+    class InSoloGame(beatmapTitle: String, beatmapId: Long?) : InGame(beatmapTitle, beatmapId) {
         override val status = "Playing"
     }
 
     /**
      * User is watching a replay.
      */
-    class WatchingReplay(playerName: String, beatmapTitle: String) : InGame(beatmapTitle) {
+    class WatchingReplay(playerName: String, beatmapTitle: String, beatmapId: Long?) : InGame(beatmapTitle, beatmapId) {
         override val status = "Watching $playerName's replay"
     }
 
@@ -83,9 +87,10 @@ sealed class UserActivity {
      */
     class InMultiplayerGame(
         beatmapTitle: String,
+        beatmapId: Long?,
         override val partySize: Int,
         override val partyMax: Int,
-    ) : InGame(beatmapTitle) {
+    ) : InGame(beatmapTitle, beatmapId) {
         override val status = "Playing with others"
     }
 }

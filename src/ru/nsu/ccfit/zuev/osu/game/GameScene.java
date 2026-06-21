@@ -1476,17 +1476,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.getOverlay().attachChild(hud, 0);
 
         var beatmapTitle = lastBeatmapInfo.getFullBeatmapName();
+        Long beatmapId = lastBeatmapInfo.getId();
 
         if (Multiplayer.isMultiplayer) {
             Room room = Multiplayer.room;
             int size = room != null ? room.getPlayerCount() : 0;
             int max = room != null ? room.getMaxPlayers() : 0;
 
-            DiscordPresenceManager.setActivity(new UserActivity.InMultiplayerGame(beatmapTitle, size, max));
+            DiscordPresenceManager.setActivity(new UserActivity.InMultiplayerGame(beatmapTitle, beatmapId, size, max));
         } else if (replaying || GameHelper.isAutoplay()) {
-            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(stat.getPlayerName(), beatmapTitle));
+            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(stat.getPlayerName(), beatmapTitle, beatmapId));
         } else {
-            DiscordPresenceManager.setActivity(new UserActivity.InSoloGame(beatmapTitle));
+            DiscordPresenceManager.setActivity(new UserActivity.InSoloGame(beatmapTitle, beatmapId));
         }
 
         if (isHUDEditorMode) {

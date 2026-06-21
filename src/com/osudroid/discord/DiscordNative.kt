@@ -13,7 +13,9 @@ import dalvik.annotation.optimization.FastNative
  * All calls should originate from [DiscordPresenceManager].
  */
 internal object DiscordNative {
-    init { System.loadLibrary("discord_jni") }
+    init {
+        System.loadLibrary("discord_jni")
+    }
 
     /**
      * Allocates the `discordpp::Client` and registers the status-changed callback.
@@ -121,9 +123,20 @@ internal object DiscordNative {
      * @param startTimestamp Unix epoch milliseconds for the "elapsed" timer. Pass `0` to omit.
      * @param largeText Tooltip text shown when hovering the large image (e.g. "username (#rank)").
      *   Pass an empty string to omit.
+     * @param buttonLabel Label for the action button (max 32 chars). Pass an empty string to omit.
+     * @param buttonUrl URL opened when the button is clicked. Pass an empty string to omit.
      */
     @JvmStatic
-    external fun updateRichPresence(details: String, state: String, partySize: Int, partyMax: Int, startTimestamp: Long, largeText: String)
+    external fun updateRichPresence(
+        details: String,
+        state: String,
+        partySize: Int,
+        partyMax: Int,
+        startTimestamp: Long,
+        largeText: String,
+        buttonLabel: String,
+        buttonUrl: String
+    )
 
     /**
      * Clears the user's Discord rich presence.

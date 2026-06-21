@@ -197,8 +197,15 @@ object DiscordPresenceManager {
         val largeText = if (username.isNotEmpty() && rank > 0) "$username (rank #%,d)".format(rank)
                         else username
 
+        val beatmapUrl = (activity as? UserActivity.InGame)?.beatmapUrl
+
         Log.d(TAG, "setActivity(${activity::class.simpleName}) details='${activity.details}' state='${activity.status}' party=${activity.partySize}/${activity.partyMax}")
-        DiscordNative.updateRichPresence(activity.details ?: "", activity.status, activity.partySize, activity.partyMax, appStartTime, largeText)
+
+        DiscordNative.updateRichPresence(
+            activity.details ?: "", activity.status,
+            activity.partySize, activity.partyMax, appStartTime, largeText,
+            if (beatmapUrl != null) "View beatmap" else "", beatmapUrl ?: ""
+        )
     }
 
     /**

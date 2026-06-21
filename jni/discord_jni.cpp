@@ -196,7 +196,7 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
         JNIEnv* env, jclass,
         const jstring jDetails, const jstring jState,
         const jint partySize, const jint partyMax, const jlong startTimestamp,
-        const jstring jLargeText) {
+        const jstring jLargeText, const jstring jButtonLabel, const jstring jButtonUrl) {
     if (!g_client || !g_isReady.load()) {
         return;
     }
@@ -252,6 +252,23 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
         }
 
         activity.SetAssets(std::move(assets));
+    }
+
+    if (jButtonLabel && jButtonUrl) {
+        const char* labelStr = env->GetStringUTFChars(jButtonLabel, nullptr);
+        std::string label(labelStr);
+        env->ReleaseStringUTFChars(jButtonLabel, labelStr);
+
+        const char* urlStr = env->GetStringUTFChars(jButtonUrl, nullptr);
+        std::string url(urlStr);
+        env->ReleaseStringUTFChars(jButtonUrl, urlStr);
+
+        if (!label.empty() && !url.empty()) {
+            discordpp::ActivityButton button{};
+            button.SetLabel(std::move(label));
+            button.SetUrl(std::move(url));
+            activity.AddButton(std::move(button));
+        }
     }
 
     g_client->UpdateRichPresence(std::move(activity), [](const discordpp::ClientResult r) {
