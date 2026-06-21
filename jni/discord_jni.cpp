@@ -15,23 +15,17 @@ static std::unique_ptr<discordpp::Client> g_client;
 // Denotes that the client is ready.
 static std::atomic g_isReady{false};
 
-// Set true after Authorize + GetToken completes (user went through OAuth consent).
-// Used to detect that the game should be brought back to foreground.
-static std::atomic g_isAuthorized{false};
-
-// Set true when a fresh refresh token arrives (from either GetToken or RefreshToken).
-// Kotlin polls this to know when to rotate the stored refresh token.
-static std::atomic g_hasNewRefreshToken{false};
-
-// Set true when RefreshToken fails, meaning the stored token is stale.
-// Kotlin polls this to know when to clear the stored token and re-authorize.
-static std::atomic g_needsReauth{false};
-
 // Set true when the user cancels or rejects the OAuth authorization prompt.
 // Kotlin polls this to stop the callback loop and let the user retry manually.
 static std::atomic g_authorizationFailed{false};
 
-static std::string g_pendingRefreshToken;
+// Set true when the Authorize callback fires successfully.
+// Kotlin reads the code + verifier and POSTs them to the game server for exchange.
+static std::atomic g_hasAuthorizationCode{false};
+
+static std::string g_pendingCode;
+static std::string g_pendingVerifier;
+static std::string g_pendingRedirectUri;
 
 // Trims a UTF-8 string to fit within Discord's 128-byte field limit.
 // Strips one Unicode codepoint at a time from the end (by walking back past continuation bytes)
@@ -53,17 +47,11 @@ static std::string clampLength(std::string str) {
     return str;
 }
 
-// Shared handler for successful token exchange results from GetToken and RefreshToken.
-// Stores the new refresh token for Kotlin to persist, then calls UpdateToken + Connect.
-static void handleTokenExchange(
-        std::string accessToken,
-        std::string refreshToken,
-        const discordpp::AuthorizationTokenType tokenType) {
-    g_pendingRefreshToken = std::move(refreshToken);
-    g_hasNewRefreshToken.store(true);
-
+// Calls UpdateToken with the given access token then Connect.
+// Token type is always Bearer for OAuth2.
+static void handleTokenExchange(std::string accessToken) {
     g_client->UpdateToken(
-        tokenType, std::move(accessToken),
+        discordpp::AuthorizationTokenType::Bearer, std::move(accessToken),
         [](const discordpp::ClientResult ur) {
             if (!ur.Successful()) {
                 LOGE("UpdateToken failed: %s", ur.Error().c_str());
@@ -105,13 +93,8 @@ Java_com_osudroid_discord_DiscordNative_isReady() {
     return g_isReady.load();
 }
 
-JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_isAuthorized() {
-    return g_isAuthorized.load();
-}
-
 JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_authorize(JNIEnv*, jclass, jlong clientId) {
+Java_com_osudroid_discord_DiscordNative_authorize(JNIEnv*, jclass, const jlong clientId) {
     if (!g_client) {
         LOGE("authorize: client not created");
         return;
@@ -125,7 +108,7 @@ Java_com_osudroid_discord_DiscordNative_authorize(JNIEnv*, jclass, jlong clientI
 
     g_client->Authorize(
         std::move(args),
-        [v = std::move(verifier), clientId](
+        [v = std::move(verifier)](
             const discordpp::ClientResult result, const std::string &code, const std::string &redirectUri) mutable {
             if (!result.Successful()) {
                 LOGE("Authorize failed: %s", result.Error().c_str());
@@ -133,74 +116,41 @@ Java_com_osudroid_discord_DiscordNative_authorize(JNIEnv*, jclass, jlong clientI
                 return;
             }
 
-            g_client->GetToken(
-                static_cast<uint64_t>(clientId), code, v.Verifier(), redirectUri,
-                [](const discordpp::ClientResult r, std::string accessToken, std::string refreshToken,
-                   const discordpp::AuthorizationTokenType tokenType, int32_t, std::string) {
-                    if (!r.Successful()) {
-                        LOGE("GetToken failed: %s", r.Error().c_str());
-                        return;
-                    }
-
-                    LOGI("Token obtained.");
-                    g_isAuthorized.store(true);
-                    handleTokenExchange(std::move(accessToken), std::move(refreshToken), tokenType);
-                });
-        });
-}
-
-// Called from Kotlin when a previously saved refresh token is available.
-// Exchanges it for a new access + refresh token pair, then connects. Skips OAuth consent.
-JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_refreshTokenAndConnect(
-        JNIEnv* env, jclass, const jlong clientId, const jstring jRefreshToken) {
-    if (!g_client) {
-        LOGE("refreshTokenAndConnect: client not created");
-        return;
-    }
-
-    const char* s = env->GetStringUTFChars(jRefreshToken, nullptr);
-    const std::string refreshToken(s);
-    env->ReleaseStringUTFChars(jRefreshToken, s);
-
-    g_client->RefreshToken(
-        static_cast<uint64_t>(clientId), refreshToken,
-        [](const discordpp::ClientResult r, std::string accessToken, std::string newRefreshToken,
-           const discordpp::AuthorizationTokenType tokenType, int32_t, std::string) {
-            if (!r.Successful()) {
-                LOGE("RefreshToken failed: %s", r.Error().c_str());
-                g_needsReauth.store(true);
-                return;
-            }
-
-            LOGI("Token refreshed.");
-            handleTokenExchange(std::move(accessToken), std::move(newRefreshToken), tokenType);
+            // Surface the code, verifier, and redirect URI to Kotlin for server-side exchange.
+            g_pendingCode = code;
+            g_pendingVerifier = v.Verifier();
+            g_pendingRedirectUri = redirectUri;
+            g_hasAuthorizationCode.store(true);
+            LOGI("Authorization code obtained, awaiting server-side exchange.");
         });
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_hasNewRefreshToken() {
-    return g_hasNewRefreshToken.load();
+Java_com_osudroid_discord_DiscordNative_hasAuthorizationCode() {
+    return g_hasAuthorizationCode.load();
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_osudroid_discord_DiscordNative_getRefreshToken(JNIEnv* env, jclass) {
-    return env->NewStringUTF(g_pendingRefreshToken.c_str());
+Java_com_osudroid_discord_DiscordNative_getAuthorizationCode(JNIEnv* env, jclass) {
+    return env->NewStringUTF(g_pendingCode.c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_osudroid_discord_DiscordNative_getVerifier(JNIEnv* env, jclass) {
+    return env->NewStringUTF(g_pendingVerifier.c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_osudroid_discord_DiscordNative_getRedirectUri(JNIEnv* env, jclass) {
+    return env->NewStringUTF(g_pendingRedirectUri.c_str());
 }
 
 JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_clearNewRefreshTokenFlag() {
-    g_hasNewRefreshToken.store(false);
-}
-
-JNIEXPORT jboolean JNICALL
-Java_com_osudroid_discord_DiscordNative_needsReauth() {
-    return g_needsReauth.load();
-}
-
-JNIEXPORT void JNICALL
-Java_com_osudroid_discord_DiscordNative_clearNeedsReauth() {
-    g_needsReauth.store(false);
+Java_com_osudroid_discord_DiscordNative_clearAuthorizationCode() {
+    g_hasAuthorizationCode.store(false);
+    g_pendingCode.clear();
+    g_pendingVerifier.clear();
+    g_pendingRedirectUri.clear();
 }
 
 JNIEXPORT jboolean JNICALL
@@ -218,6 +168,22 @@ Java_com_osudroid_discord_DiscordNative_abortAuthorize(JNIEnv*, jclass) {
     if (g_client) {
         g_client->AbortAuthorize();
     }
+}
+
+// Called from Kotlin after the server-side token exchange succeeds.
+// Feeds the access token into UpdateToken + Connect to complete authentication.
+JNIEXPORT void JNICALL
+Java_com_osudroid_discord_DiscordNative_provideTokens(JNIEnv* env, jclass, const jstring jAccessToken) {
+    if (!g_client) {
+        LOGE("provideTokens: client not created");
+        return;
+    }
+
+    const char* s = env->GetStringUTFChars(jAccessToken, nullptr);
+    std::string accessToken(s);
+    env->ReleaseStringUTFChars(jAccessToken, s);
+
+    handleTokenExchange(std::move(accessToken));
 }
 
 JNIEXPORT void JNICALL
@@ -308,11 +274,11 @@ JNIEXPORT void JNICALL
 Java_com_osudroid_discord_DiscordNative_destroy(JNIEnv*, jclass) {
     g_client.reset();
     g_isReady.store(false);
-    g_isAuthorized.store(false);
-    g_hasNewRefreshToken.store(false);
-    g_needsReauth.store(false);
     g_authorizationFailed.store(false);
-    g_pendingRefreshToken.clear();
+    g_hasAuthorizationCode.store(false);
+    g_pendingCode.clear();
+    g_pendingVerifier.clear();
+    g_pendingRedirectUri.clear();
     LOGI("Client destroyed");
 }
 

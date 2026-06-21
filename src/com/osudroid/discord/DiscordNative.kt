@@ -6,9 +6,9 @@ import dalvik.annotation.optimization.FastNative
 /**
  * JNI bridge to Discord's Social SDK.
  *
- * The native library must be initialized in order ([create] --> [authorize] or
- * [refreshTokenAndConnect] --> [runCallbacks] loop --> [updateRichPresence] /
- * [clearRichPresence] --> [destroy]) and is not thread-safe except where noted.
+ * The native library must be initialized in order ([create] --> [authorize] -->
+ * [runCallbacks] loop --> [provideTokens] --> [updateRichPresence] / [clearRichPresence] -->
+ * [destroy]) and is not thread-safe except where noted.
  *
  * All calls should originate from [DiscordPresenceManager].
  */
@@ -29,70 +29,52 @@ internal object DiscordNative {
     external fun isReady(): Boolean
 
     /**
-     * Returns `true` after [authorize]'s `GetToken` callback succeeds, regardless of connection
-     * status. Used to detect OAuth completion so the game can be brought back to the foreground.
-     */
-    @JvmStatic
-    @CriticalNative
-    external fun isAuthorized(): Boolean
-
-    /**
-     * Starts the OAuth2 PKCE flow: opens Discord (or a browser) for user consent, then exchanges
-     * the code for a token via `GetToken` --> `UpdateToken` --> `Connect`.
+     * Starts the OAuth2 PKCE flow. This opens Discord (or a browser) for user consent.
      *
-     * Call this only when no saved refresh token is available. On success, [hasNewRefreshToken]
-     * becomes `true` and the token can be read via [getRefreshToken] and persisted.
+     * On success, [hasAuthorizationCode] becomes `true` and the code and verifier can be read via
+     * [getAuthorizationCode] and [getVerifier] for server-side token exchange.
      */
     @JvmStatic
     external fun authorize(clientId: Long)
 
     /**
-     * Silently reconnects using a previously persisted refresh token, skipping OAuth consent.
-     * Calls `RefreshToken` --> `UpdateToken` --> `Connect`.
-     *
-     * The old refresh token is invalidated and [hasNewRefreshToken] becomes `true` with the replacement token
-     * to persist. If the token is rejected, [needsReauth] becomes `true` and [authorize] must be called.
-     */
-    @JvmStatic
-    external fun refreshTokenAndConnect(clientId: Long, refreshToken: String)
-
-    /**
-     * Returns `true` when a new refresh token is ready to be persisted, either after the initial
-     * [authorize] flow or after a [refreshTokenAndConnect] call rotates the token. Clear the flag
-     * with [clearNewRefreshTokenFlag] after saving.
+     * Returns `true` when the authorization code is ready for server-side exchange.
+     * Clear the flag with [clearAuthorizationCode] after reading the code and verifier.
      */
     @JvmStatic
     @CriticalNative
-    external fun hasNewRefreshToken(): Boolean
+    external fun hasAuthorizationCode(): Boolean
 
     /**
-     * Returns the latest refresh token. Only valid when [hasNewRefreshToken] is `true`.
+     * Returns the authorization code from the [authorize] callback. Only valid when [hasAuthorizationCode] is `true`.
      */
     @JvmStatic
     @FastNative
-    external fun getRefreshToken(): String
+    external fun getAuthorizationCode(): String
 
     /**
-     * Clears the [hasNewRefreshToken] flag after the token has been saved.
+     * Returns the PKCE verifier generated during [authorize]. Only valid when [hasAuthorizationCode] is `true`.
+     */
+    @JvmStatic
+    @FastNative
+    external fun getVerifier(): String
+
+    /**
+     * Returns the redirect URI used in the [authorize] callback. Only valid when
+     * [hasAuthorizationCode] is `true`. Must be forwarded to the server verbatim so Discord can
+     * validate it against the original authorization request.
+     */
+    @JvmStatic
+    @FastNative
+    external fun getRedirectUri(): String
+
+    /**
+     * Clears the [hasAuthorizationCode] flag and the pending code and verifier strings after the
+     * server-side exchange has been initiated.
      */
     @JvmStatic
     @CriticalNative
-    external fun clearNewRefreshTokenFlag()
-
-    /**
-     * Returns `true` when [refreshTokenAndConnect] fails, meaning the stored token is stale.
-     * On detecting this, the caller should clear the stored token and call [authorize].
-     */
-    @JvmStatic
-    @CriticalNative
-    external fun needsReauth(): Boolean
-
-    /**
-     * Clears the [needsReauth] flag after the caller has initiated re-authorization.
-     */
-    @JvmStatic
-    @CriticalNative
-    external fun clearNeedsReauth()
+    external fun clearAuthorizationCode()
 
     /**
      * Returns `true` when the user canceled or rejected the OAuth authorization prompt.
@@ -115,6 +97,13 @@ internal object DiscordNative {
      */
     @JvmStatic
     external fun abortAuthorize()
+
+    /**
+     * Called after a successful server-side token exchange. Feeds the access token into
+     * `UpdateToken` and `Connect` to complete authentication.
+     */
+    @JvmStatic
+    external fun provideTokens(accessToken: String)
 
     /**
      * Pumps the SDK event loop. Must be called repeatedly for callbacks to fire.

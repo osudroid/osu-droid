@@ -14,9 +14,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.FormBody
+import okhttp3.Request
+import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
+import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 /**
@@ -31,10 +36,16 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
  * 3. [setActivity] / [clearActivity]: called at scene transitions to update what Discord shows.
  * 4. [disconnect]: called when the app is destroyed to release native resources.
  *
+ * ## Token exchange
+ * All token operations (auth-code exchange and refresh) are performed server-side via the game server API. The JNI
+ * layer surfaces only the auth code and PKCE verifier. Refresh tokens are owned entirely by Kotlin and the server.
+ *
  * ## Threading
  * [setActivity] and [clearActivity] may be called from any thread. The underlying JNI calls are
  * safe because the SDK's `UpdateRichPresence` / `ClearRichPresence` are internally synchronized.
- * The callback loop runs on [Dispatchers.Default].
+ * The callback loop runs on [Dispatchers.Default], whereas HTTP calls run on [Dispatchers.IO].
+ *
+ * @see [DiscordNative]
  */
 object DiscordPresenceManager {
     private const val TAG = "DiscordPresenceManager"
@@ -130,14 +141,15 @@ object DiscordPresenceManager {
 
         if (savedRefreshToken != null) {
             Log.d(TAG, "Reconnecting with stored refresh token.")
-            DiscordNative.refreshTokenAndConnect(clientId, savedRefreshToken)
+            startCallbackLoop()
+
+            scope.launch { exchangeRefreshToken(savedRefreshToken) }
         } else {
             Log.d(TAG, "No saved refresh token, starting authorization flow.")
             DiscordNative.authorize(clientId)
             isPendingAuthorization = true
+            startCallbackLoop()
         }
-
-        startCallbackLoop()
     }
 
     /**
@@ -213,20 +225,19 @@ object DiscordPresenceManager {
 
     private fun startCallbackLoop() {
         callbackJob?.cancel()
-        var didReturnToGame = false
         var wasReady = false
 
         callbackJob = scope.launch {
             while (isActive) {
                 DiscordNative.runCallbacks()
 
-                // After authorization, the redirect URI does not bring us back to the game. This means we need to
-                // manually bring the game to the front after the user authorizes in Discord. We only do this once per
-                // authorization.
-                if (!didReturnToGame && DiscordNative.isAuthorized()) {
-                    didReturnToGame = true
-                    isPendingAuthorization = false
-                    bringGameToFront()
+                if (DiscordNative.hasAuthorizationCode()) {
+                    val code = DiscordNative.getAuthorizationCode()
+                    val verifier = DiscordNative.getVerifier()
+                    val redirectUri = DiscordNative.getRedirectUri()
+                    DiscordNative.clearAuthorizationCode()
+
+                    launch { exchangeAuthorizationCode(code, verifier, redirectUri) }
                 }
 
                 if (DiscordNative.hasAuthorizationFailed()) {
@@ -235,19 +246,6 @@ object DiscordPresenceManager {
                     Log.w(TAG, "Authorization cancelled or rejected by user, stopping.")
                     stopCallbackLoop()
                     return@launch
-                }
-
-                if (DiscordNative.needsReauth()) {
-                    DiscordNative.clearNeedsReauth()
-                    didReturnToGame = false
-                    clearSavedRefreshToken()
-                    Log.w(TAG, "Stored refresh token rejected, re-authorizing.")
-                    DiscordNative.authorize(clientId)
-                }
-
-                if (DiscordNative.hasNewRefreshToken()) {
-                    saveRefreshToken(DiscordNative.getRefreshToken())
-                    DiscordNative.clearNewRefreshTokenFlag()
                 }
 
                 val isNowReady = DiscordNative.isReady()
@@ -276,11 +274,116 @@ object DiscordPresenceManager {
      * this aborts the flow so the SDK stops trying to re-open Discord on every callback tick.
      * The abort fires the [DiscordNative.hasAuthorizationFailed] flag, which the callback loop
      * handles on the next tick.
+     *
+     * We skip the abort if the auth code has already been received — that means the user did
+     * authorize and the server exchange is in progress (or just completed). Aborting at that
+     * point would wrongly cancel a successful consent.
      */
     fun onActivityResume() {
-        if (isPendingAuthorization) {
+        if (isPendingAuthorization && !DiscordNative.hasAuthorizationCode()) {
             Log.d(TAG, "onActivityResume: aborting pending authorization.")
             DiscordNative.abortAuthorize()
+        }
+    }
+
+    /**
+     * Exchanges an authorization code (from the OAuth2 PKCE flow) for access and refresh
+     * tokens via the game server, then feeds the access token into the Discord SDK.
+     */
+    private suspend fun exchangeAuthorizationCode(code: String, verifier: String, redirectUri: String) {
+        val sign = SecurityUtils.signRequest("${code}_${verifier}") ?: run {
+            Log.w(TAG, "exchangeAuthorizationCode: could not sign request (app signature unavailable).")
+            isPendingAuthorization = false
+            return
+        }
+
+        try {
+            val responseJson = withContext(Dispatchers.IO) {
+                val body = FormBody.Builder()
+                    .add("code", code)
+                    .add("code_verifier", verifier)
+                    .add("redirect_uri", redirectUri)
+                    .add("sign", sign)
+                    .build()
+
+                val request = Request.Builder()
+                    .url(OnlineManager.endpoint + "discord_exchange.php")
+                    .post(body)
+                    .build()
+
+                OnlineManager.client.newCall(request).execute().use { response ->
+                    check(response.isSuccessful) { "HTTP ${response.code}" }
+                    JSONObject(response.body!!.string())
+                }
+            }
+
+            val accessToken = responseJson.getString("access_token")
+            val refreshToken = responseJson.getString("refresh_token")
+
+            saveRefreshToken(refreshToken)
+            DiscordNative.provideTokens(accessToken)
+            bringGameToFront()
+
+            Log.d(TAG, "Authorization code exchange successful.")
+        } catch (e: Exception) {
+            Log.w(TAG, "Authorization code exchange failed: ${e.message}")
+            // Stop the loop so the SDK doesn't remain in a state where it authorized but never
+            // received UpdateToken, which can cause it to re-open Discord on runCallbacks() ticks.
+            stopCallbackLoop()
+        } finally {
+            isPendingAuthorization = false
+        }
+    }
+
+    /**
+     * Exchanges a saved refresh token for a new access and refresh token pair via the game server.
+     *
+     * On a 401 (token revoked or expired), clears the saved token and stops. The user must reconnect manually via
+     * the "Connect to Discord" button, which will start a fresh OAuth flow.
+     *
+     * On network or server errors, this fails silently. The user can retry via the "Connect to Discord" button.
+     */
+    private suspend fun exchangeRefreshToken(savedToken: String) {
+        val sign = SecurityUtils.signRequest(savedToken) ?: run {
+            Log.w(TAG, "exchangeRefreshToken: could not sign request (app signature unavailable).")
+            return
+        }
+
+        try {
+            val (isRevoked, responseJson) = withContext(Dispatchers.IO) {
+                val body = FormBody.Builder()
+                    .add("refresh_token", savedToken)
+                    .add("sign", sign)
+                    .build()
+
+                val request = Request.Builder()
+                    .url(OnlineManager.endpoint + "discord_refresh.php")
+                    .post(body)
+                    .build()
+
+                OnlineManager.client.newCall(request).execute().use { response ->
+                    Pair(response.code == 401, if (response.isSuccessful) JSONObject(response.body!!.string()) else null)
+                }
+            }
+
+            if (isRevoked) {
+                Log.w(TAG, "Refresh token rejected (401), clearing token. User must reconnect manually.")
+                clearSavedRefreshToken()
+                stopCallbackLoop()
+                return
+            }
+
+            checkNotNull(responseJson) { "No response body" }
+
+            val accessToken = responseJson.getString("access_token")
+            val newRefreshToken = responseJson.getString("refresh_token")
+
+            saveRefreshToken(newRefreshToken)
+            DiscordNative.provideTokens(accessToken)
+
+            Log.d(TAG, "Refresh token exchange successful.")
+        } catch (e: Exception) {
+            Log.w(TAG, "Refresh token exchange failed: ${e.message}")
         }
     }
 
