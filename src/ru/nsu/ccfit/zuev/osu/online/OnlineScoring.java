@@ -173,6 +173,7 @@ public class OnlineScoring {
                         Execution.updateThread(this::updatePanels);
                         OnlineManager mgr = OnlineManager.getInstance();
                         panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
+                        DiscordPresenceManager.refreshActivity();
                         break;
                     }
 
