@@ -50,6 +50,8 @@ object DiscordPresenceManager {
     @Volatile
     private var isConnected = false
 
+    private var currentActivity: UserActivity = UserActivity.Idle
+
     private val activity
         get() = GlobalManager.getInstance().mainActivity
 
@@ -137,8 +139,19 @@ object DiscordPresenceManager {
         val largeText = if (username.isNotEmpty() && rank > 0) "$username (rank #%,d)".format(rank)
                         else username
 
+        currentActivity = activity
         Log.d(TAG, "setActivity(${activity::class.simpleName}) details='${activity.details}' state='${activity.status}' party=${activity.partySize}/${activity.partyMax}")
         DiscordNative.updateRichPresence(activity.details ?: "", activity.status, activity.partySize, activity.partyMax, appStartTime, largeText)
+    }
+
+    /**
+     * Refreshes the current activity.
+     *
+     * Call this to update data that would only be present after a certain time (e.g., online rank).
+     */
+    @JvmStatic
+    fun refreshActivity() {
+        setActivity(currentActivity)
     }
 
     /**
