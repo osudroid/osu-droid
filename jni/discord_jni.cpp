@@ -33,6 +33,26 @@ static std::atomic g_authorizationFailed{false};
 
 static std::string g_pendingRefreshToken;
 
+// Trims a UTF-8 string to fit within Discord's 128-byte field limit.
+// Strips one Unicode codepoint at a time from the end (by walking back past continuation bytes)
+// and appends U+2026 HORIZONTAL ELLIPSIS if truncation was needed.
+static std::string clampLength(std::string str) {
+    if (str.size() <= 128) return str;
+
+    // U+2026 HORIZONTAL ELLIPSIS in UTF-8: E2 80 A6 (3 bytes)
+    constexpr size_t ellipsis_bytes = 3;
+
+    size_t pos = 128 - ellipsis_bytes;
+    // Walk back past UTF-8 continuation bytes (0x80–0xBF) to a codepoint boundary
+    while (pos > 0 && (static_cast<unsigned char>(str[pos]) & 0xC0) == 0x80) {
+        --pos;
+    }
+
+    str.resize(pos);
+    str += "\xe2\x80\xa6";
+    return str;
+}
+
 // Shared handler for successful token exchange results from GetToken and RefreshToken.
 // Stores the new refresh token for Kotlin to persist, then calls UpdateToken + Connect.
 static void handleTokenExchange(
@@ -224,11 +244,7 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
         env->ReleaseStringUTFChars(jDetails, s);
 
         if (details.size() >= 2) {
-            if (details.size() > 128) {
-                details.resize(128);
-            }
-
-            activity.SetDetails(std::move(details));
+            activity.SetDetails(clampLength(std::move(details)));
         }
     }
 
@@ -237,11 +253,7 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
         std::string state(s);
         env->ReleaseStringUTFChars(jState, s);
         if (state.size() >= 2) {
-            if (state.size() > 128) {
-                state.resize(128);
-            }
-
-            activity.SetState(std::move(state));
+            activity.SetState(clampLength(std::move(state)));
         }
     }
 
@@ -270,7 +282,8 @@ Java_com_osudroid_discord_DiscordNative_updateRichPresence(
 
             if (largeText.size() >= 2) {
                 if (largeText.size() > 128) {
-                    largeText.resize(128);
+                    largeText.resize(125);
+                    largeText += "...";
                 }
 
                 assets.SetLargeText(std::move(largeText));
