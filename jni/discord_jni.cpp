@@ -46,7 +46,7 @@ static void handleTokenExchange(
                 return;
             }
 
-            LOGI("Token updated — connecting");
+            LOGI("Token updated, connecting");
             g_client->Connect();
         });
 }
