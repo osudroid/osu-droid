@@ -98,7 +98,7 @@ class DroidDifficultyHitObject(
             return false
         }
 
-        if (deltaTime >= 5) {
+        if (obj.startTime != previous.obj.startTime) {
             return false
         }
 
