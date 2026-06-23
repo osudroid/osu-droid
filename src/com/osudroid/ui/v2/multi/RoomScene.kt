@@ -752,6 +752,7 @@ class RoomScene(
         // will call invalidateStatus() with the correct beatmap context.
 
         chat.show()
+        updateDiscordActivity()
         allowAutomaticPlaybackRestart = true
     }
 
