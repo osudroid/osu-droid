@@ -255,7 +255,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 possibleThreeFingeredSections.add(HighStrainSection(
                     firstSpeedObjectIndex,
                     lastSpeedObjectIndex,
-                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex + 1))
                 ))
             }
         }
