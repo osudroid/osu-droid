@@ -2219,7 +2219,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var songService = GlobalManager.getInstance().getSongService();
         var songMenu = GlobalManager.getInstance().getSongMenu();
 
-        if (songService != null && selectedBeatmap != null) {
+        if (songService != null && selectedBeatmap != null && !Multiplayer.isMultiplayer) {
             // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
             boolean continuePreview = mSecPassed < totalLength - 10000 && mSecPassed / totalLength < 0.98f;
             int previewTime = continuePreview ? songService.getPosition() : selectedBeatmap.getPreviewTime();
@@ -2265,6 +2265,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (Multiplayer.isMultiplayer) {
             releaseVideo();
+
+            var songService = GlobalManager.getInstance().getSongService();
+            if (songService != null) {
+                songService.stop();
+            }
+
             var roomScene = Multiplayer.roomScene;
 
             if (Multiplayer.isConnected() && roomScene != null) {
