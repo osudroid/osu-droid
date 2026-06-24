@@ -3634,8 +3634,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (bp.startTime <= targetMs && targetMs < bp.endTime) {
                 gameStarted = false;
-                float remainingDuration = (float) ((bp.endTime - targetMs) / 1000.0);
-                breakAnimator.init(remainingDuration);
+                float totalDuration = bp.getDuration() / 1000f;
+                float elapsedTime = (float) ((targetMs - bp.startTime) / 1000.0);
+                breakAnimator.init(totalDuration, elapsedTime);
                 breakPeriodIndex++;
                 hud.onBreakStateChange(true);
             } else {
