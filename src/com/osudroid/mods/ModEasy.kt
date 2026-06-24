@@ -13,7 +13,6 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
     override val description = "Larger circles, more forgiving HP drain, less accuracy required, and three lives!"
     override val type = ModType.DifficultyReduction
     override val isRanked = true
-    override val scoreMultiplier = 0.5f
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
     override fun isCompatibleWith(other: Mod): Boolean {

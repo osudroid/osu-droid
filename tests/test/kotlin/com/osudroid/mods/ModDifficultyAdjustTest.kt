@@ -9,7 +9,6 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.math.Vector2
 import com.osudroid.mods.settings.DifficultyAdjustModSetting
 import com.osudroid.utils.ModUtils
-import kotlin.math.pow
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonObject
@@ -223,47 +222,6 @@ class ModDifficultyAdjustTest {
     }
 
     @Test
-    fun `Test score multiplier uses embedded original`() {
-        val mod = ModDifficultyAdjust().also {
-            it.cs = 7f
-            it.od = 9f
-            it.setOriginals(cs = 4f, od = 8f)
-        }
-
-        val csDiff = 7f - 4f
-        val odDiff = 9f - 8f
-        val expected = (1 + 0.0075f * csDiff.toDouble().pow(1.5).toFloat()) *
-                       (1 + 0.005f  * odDiff.toDouble().pow(1.3).toFloat())
-
-        Assert.assertEquals(expected, mod.scoreMultiplier, 1e-6f)
-    }
-
-    @Test
-    fun `Test score multiplier is 1 without original or default`() {
-        // value is set but both originalValue and defaultValue are null, so there is no delta to compute.
-        val mod = ModDifficultyAdjust().also {
-            it.cs = 7f
-            it.od = 9f
-        }
-
-        Assert.assertEquals(1f, mod.scoreMultiplier, 0f)
-    }
-
-    @Test
-    fun `Test score multiplier falls back to defaultValue when original is absent`() {
-        val mod = ModDifficultyAdjust().also {
-            it.cs = 7f
-            // Simulate applyFromBeatmap without embedded original.
-            it.csDelegate().defaultValue = 4f
-        }
-
-        val diff = 7f - 4f
-        val expected = 1 + 0.0075f * diff.toDouble().pow(1.5).toFloat()
-
-        Assert.assertEquals(expected, mod.scoreMultiplier, 1e-6f)
-    }
-
-    @Test
     fun `Test deep copy preserves original values`() {
         val mod = ModDifficultyAdjust().also {
             it.cs = 7f
@@ -285,7 +243,7 @@ class ModDifficultyAdjustTest {
     /**
      * Sets both [DifficultyAdjustModSetting.originalValue] and [DifficultyAdjustModSetting.defaultValue] for the
      * named dimensions, mirroring what [ModDifficultyAdjust.updateBeatmapValue] does when
-     * [com.osudroid.mods.IModRequiresOriginalBeatmap.applyFromBeatmap] is called.
+     * [com.osudroid.mods.IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] is called.
      */
     private fun ModDifficultyAdjust.setOriginals(cs: Float? = null, ar: Float? = null, od: Float? = null, hp: Float? = null) {
         cs?.let { getModSettingDelegate<DifficultyAdjustModSetting>(::cs).also { d -> d.defaultValue = it; d.originalValue = it } }

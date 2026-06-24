@@ -87,14 +87,6 @@ abstract class Mod {
     open val isValidForMultiplayerAsFreeMod = true
 
     /**
-     * The score multiplier for this [Mod].
-     *
-     * Note that some [Mod]s may require additional configuration to have a score multiplier (i.e., [ModDifficultyAdjust]
-     * needs [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] to be called first).
-     */
-    open val scoreMultiplier = 1f
-
-    /**
      * The [Mod]s this [Mod] cannot be enabled with. This is merely a static list of [KClass]es that this [Mod] is
      * incompatible with, regardless of the actual instance of the [Mod].
      *
