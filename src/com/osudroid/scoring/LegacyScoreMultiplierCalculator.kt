@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @param difficulty The [BeatmapDifficulty] for the beatmap that the multipliers are calculated for. This must be the
  * [BeatmapDifficulty] **before** any [Mod] application.
  */
-class LegacyScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty? = null) {
+class LegacyScoreMultiplierCalculator @JvmOverloads constructor(private val difficulty: BeatmapDifficulty? = null) {
     private val multipliers = mutableMapOf<KClass<out Mod>, (Mod) -> Float>()
 
     init {
