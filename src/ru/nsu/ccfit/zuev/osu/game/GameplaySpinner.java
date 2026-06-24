@@ -186,7 +186,7 @@ public class GameplaySpinner extends GameObject {
         setLifetimeEnd(Float.MAX_VALUE);
     }
 
-    void removeFromScene() {
+    protected void detachFromScene() {
         if (scene == null) {
             return;
         }
@@ -212,6 +212,14 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(bonusScore);
         setLifetimeEnd(hitTime + duration);
         scene = null;
+    }
+
+    void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
+        detachFromScene();
 
         int score = 0;
         if (replayObjectData != null) {
@@ -409,7 +417,14 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void onExpire() {
-        removeFromScene();
+        detachFromScene();
+        stopLoopingSamples();
+
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            hitSamples.get(i).release();
+        }
+
+        hitSamples.clear();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
