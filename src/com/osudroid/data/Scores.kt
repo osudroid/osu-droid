@@ -13,6 +13,7 @@ import androidx.room.Update
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
 import kotlin.math.roundToInt
 import org.apache.commons.io.FilenameUtils
@@ -313,7 +314,7 @@ interface IScoreInfoDAO {
             }
 
             updateScore(scoreInfo.copy(
-                score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
                 mods = mods.serializeMods(),
                 needsScoreMigration = false
             ))

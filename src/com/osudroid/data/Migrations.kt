@@ -11,6 +11,7 @@ import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModRateAdjust
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import java.io.File
@@ -305,7 +306,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                         db.execSQL(
                             "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
                             arrayOf<Any>(
-                                (score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                                (score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
                                 mods.serializeMods(),
                                 id
                             )
@@ -320,7 +321,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                 } else {
                     db.execSQL(
                         "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                        arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
+                        arrayOf<Any>((score / LegacyScoreMultiplierCalculator().calculateFor(mods.values)).roundToInt(), id)
                     )
                 }
             }

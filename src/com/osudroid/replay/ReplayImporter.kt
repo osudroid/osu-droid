@@ -3,7 +3,7 @@ package com.osudroid.replay
 import com.edlplan.replay.OsuDroidReplayPack
 import com.osudroid.data.DatabaseManager.scoreInfoTable
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
-import com.osudroid.utils.ModUtils
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -100,7 +100,7 @@ object ReplayImporter {
                 if (mods.values.any { it is IModRequiresBeatmapDifficulty }) {
                     info.copy(needsScoreMigration = true)
                 } else {
-                    info.copy(score = (info.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt())
+                    info.copy(score = (info.score / LegacyScoreMultiplierCalculator().calculateFor(mods.values)).roundToInt())
                 }
             } else {
                 info

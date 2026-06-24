@@ -202,29 +202,6 @@ object ModUtils {
     fun calculateScoreMultiplier(mods: Iterable<Mod>) =
         calculateScoreMultiplierInternal(mods, { scoreMultiplier }, { scoreMultiplier })
 
-    /**
-     * Calculates the score multiplier for the selected [Mod]s using [Mod.migrationScoreMultiplier] instead of
-     * [Mod.scoreMultiplier]. Use this when reverse-engineering raw scores from stored effective scores during migration
-     * from version 4 to 5.
-     *
-     * @param mods The selected [Mod]s.
-     * @return The migration score multiplier.
-     */
-    @JvmStatic
-    fun calculateMigrationScoreMultiplier(mods: ModHashMap) = calculateMigrationScoreMultiplier(mods.values)
-
-    /**
-     * Calculates the score multiplier for the selected [Mod]s using [Mod.migrationScoreMultiplier] instead of
-     * [Mod.scoreMultiplier]. Use this when reverse-engineering raw scores from stored effective scores during migration
-     * from version 4 to 5.
-     *
-     * @param mods The selected [Mod]s.
-     * @return The migration score multiplier.
-     */
-    @JvmStatic
-    fun calculateMigrationScoreMultiplier(mods: Iterable<Mod>) =
-        calculateScoreMultiplierInternal(mods, { migrationScoreMultiplier }, { migrationScoreMultiplier })
-
     private inline fun calculateScoreMultiplierInternal(
         mods: Iterable<Mod>,
         crossinline modSelector: Mod.() -> Float,

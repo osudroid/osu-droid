@@ -95,17 +95,6 @@ abstract class Mod {
     open val scoreMultiplier = 1f
 
     /**
-     * The score multiplier used when reverse-engineering raw scores from stored effective scores during database
-     * migration version 4 to 5. Defaults to [scoreMultiplier].
-     *
-     * **If [scoreMultiplier] is changed in the future, this must be overridden in the affected [Mod] subclass to
-     * return the old formula, so scores that need to be migrated on-fly are divided by the correct historical
-     * multiplier**.
-     */
-    open val migrationScoreMultiplier
-        get() = scoreMultiplier
-
-    /**
      * The [Mod]s this [Mod] cannot be enabled with. This is merely a static list of [KClass]es that this [Mod] is
      * incompatible with, regardless of the actual instance of the [Mod].
      *

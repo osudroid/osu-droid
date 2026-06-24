@@ -6,8 +6,8 @@ import androidx.room.*
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
-import com.osudroid.utils.ModUtils
 import com.reco1l.toolkt.data.iterator
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
@@ -207,7 +207,7 @@ object DatabaseManager {
 
                                 val rawScore =
                                     if (needsMigration) legacyScore
-                                    else (legacyScore / ModUtils.calculateMigrationScoreMultiplier(legacyMods)).roundToInt()
+                                    else (legacyScore / LegacyScoreMultiplierCalculator().calculateFor(legacyMods.values)).roundToInt()
 
                                 scoreInfos += ScoreInfo(
                                     id = id,
