@@ -15,6 +15,7 @@ import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import java.io.File
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -194,10 +195,14 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                     if (rateAdjustingMods.size >= 2) {
                         // Stacked ModRateAdjust mods - recalculate score.
                         val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
-                            acc * mod.scoreMultiplier
+                            val rate = mod.trackRateMultiplier
+                            acc * (if (rate > 1f) 1f + (rate - 1f) * 0.24f else 0.3f.pow((1f - rate) * 4f))
                         }
 
-                        val newScoreMultiplier = LegacyScoreMultiplierCalculator().calculateFor(rateAdjustingMods)
+                        val combinedRate = rateAdjustingMods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+                        val newScoreMultiplier =
+                            if (combinedRate > 1f) 1f + (combinedRate - 1f) * 0.24f
+                            else 0.3f.pow((1f - combinedRate) * 4f)
 
                         score = (score * newScoreMultiplier / oldScoreMultiplier).toInt()
                     }
