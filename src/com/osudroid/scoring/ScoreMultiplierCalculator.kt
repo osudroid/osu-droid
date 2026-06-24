@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 /**
  * Current score multiplier calculator. This is used to calculate score after version 5 database migration.
  */
-class ScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty) {
+class ScoreMultiplierCalculator @JvmOverloads constructor (private val difficulty: BeatmapDifficulty? = null) {
 
     private val singleMultipliers = mutableMapOf<KClass<out Mod>, (Mod) -> Double>()
     private val combinationMultipliers = mutableListOf<Pair<List<KClass<out Mod>>, (List<Mod>) -> Double>>()
@@ -115,7 +115,7 @@ class ScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty) {
         var multiplier = 1.0
 
         cs?.let { csValue ->
-            val diff = (csValue - difficulty.difficultyCS).toDouble()
+            val diff = (csValue - (difficulty?.difficultyCS ?: return@let)).toDouble()
 
             multiplier *=
                 if (diff >= 0) 1 + 0.0075 * diff.pow(1.5)
@@ -123,7 +123,7 @@ class ScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty) {
         }
 
         od?.let { odValue ->
-            val diff = (odValue - difficulty.od).toDouble()
+            val diff = (odValue - (difficulty?.od ?: return@let)).toDouble()
 
             multiplier *=
                 if (diff >= 0) 1.0 + 0.005 * diff.pow(1.3)
