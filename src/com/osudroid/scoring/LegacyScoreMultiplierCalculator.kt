@@ -8,14 +8,14 @@ import kotlin.math.pow
 import kotlin.reflect.KClass
 
 /**
- * Legacy score multiplier calculator. This is used to calculate score during version 4 to 5 migration by separating
- * the total score with mod multipliers from the multiplier itself. This allows future mod score multiplier changes to
- * be applied without database migrations.
+ * Legacy score multiplier calculator. This is used to calculate score during version 4 to 5 database migration by
+ * separating the total score with mod multipliers from the multiplier itself. This allows future mod score multiplier
+ * changes to be applied without database migrations.
  *
  * @param difficulty The [BeatmapDifficulty] for the beatmap that the multipliers are calculated for. This must be the
  * [BeatmapDifficulty] **before** any [Mod] application.
  */
-class LegacyScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty) {
+class LegacyScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty? = null) {
     private val multipliers = mutableMapOf<KClass<out Mod>, (Mod) -> Float>()
 
     init {
@@ -97,7 +97,7 @@ class LegacyScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty)
         var multiplier = 1f
 
         cs?.let { csValue ->
-            val diff = csValue - difficulty.difficultyCS
+            val diff = csValue - (difficulty?.difficultyCS ?: return@let)
 
             multiplier *=
                 if (diff >= 0f) 1f + 0.0075f * diff.pow(1.5f)
@@ -105,7 +105,7 @@ class LegacyScoreMultiplierCalculator(private val difficulty: BeatmapDifficulty)
         }
 
         od?.let { odValue ->
-            val diff = odValue - difficulty.od
+            val diff = odValue - (difficulty?.od ?: return@let)
 
             multiplier *=
                 if (diff >= 0f) 1f + 0.005f * diff.pow(1.3f)
