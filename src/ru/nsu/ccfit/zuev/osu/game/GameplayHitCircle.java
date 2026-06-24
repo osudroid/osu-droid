@@ -297,6 +297,12 @@ public class GameplayHitCircle extends GameObject {
         circlePiece.detachSelf();
         approachCircle.detachSelf();
 
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            hitSamples.get(i).release();
+        }
+
+        hitSamples.clear();
+
         GameObjectPool.getInstance().putCircle(this);
     }
 
