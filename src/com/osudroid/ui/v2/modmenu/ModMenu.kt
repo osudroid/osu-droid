@@ -30,6 +30,7 @@ import com.rian.framework.RollingFloatCounter
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.osudroid.mods.*
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
 import java.io.IOException
 import kotlinx.coroutines.*
@@ -387,7 +388,7 @@ object ModMenu : UIScene() {
                 hpBadge.updateValue(selectedBeatmap.hpDrainRate, difficulty.hp)
                 bpmBadge.updateValue(selectedBeatmap.mostCommonBPM, selectedBeatmap.mostCommonBPM * rate)
 
-                scoreMultiplierBadge.updateValue(1f, ModUtils.calculateScoreMultiplier(enabledMods))
+                scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(enabledMods.values).toFloat())
             }
 
             ensureActive()
@@ -590,7 +591,7 @@ object ModMenu : UIScene() {
                 if (!it.isSelected) enabledMods.any { m -> !it.mod.isCompatibleWith(m) } else false
         }
 
-        scoreMultiplierBadge.updateValue(1f, ModUtils.calculateScoreMultiplier(enabledMods))
+        scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator().calculateFor(enabledMods).toFloat())
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 

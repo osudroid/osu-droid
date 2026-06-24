@@ -197,7 +197,7 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                             acc * mod.scoreMultiplier
                         }
 
-                        val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods)
+                        val newScoreMultiplier = LegacyScoreMultiplierCalculator().calculateFor(rateAdjustingMods)
 
                         score = (score * newScoreMultiplier / oldScoreMultiplier).toInt()
                     }

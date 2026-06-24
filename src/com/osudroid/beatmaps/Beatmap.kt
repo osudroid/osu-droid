@@ -20,6 +20,7 @@ import com.osudroid.mods.IModFacilitatesAdjustment
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModScoreV2
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import kotlinx.coroutines.CoroutineScope
@@ -63,7 +64,7 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
      * @return The maximum score of this [Beatmap] with [mods] applied.
      */
     fun calculateMaximumScore(mods: ModHashMap?): Int {
-        val scoreMultiplier = if (mods != null) ModUtils.calculateScoreMultiplier(mods) else 1f
+        val scoreMultiplier = if (mods != null) ScoreMultiplierCalculator(difficulty).calculateFor(mods.values) else 1.0
 
         if (mods != null && ModScoreV2::class in mods) {
             return (1e6 * scoreMultiplier).toInt()

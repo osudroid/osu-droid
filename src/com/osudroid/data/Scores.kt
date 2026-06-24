@@ -14,6 +14,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
 import kotlin.math.roundToInt
 import org.apache.commons.io.FilenameUtils
@@ -157,8 +158,8 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods].
      *
-     * Pass [difficulty] when available so that mods implementing [IModRequiresBeatmapDifficulty] (e.g.
-     * [ModDifficultyAdjust]) can apply their beatmap-dependent multiplier. Without it, their score multiplier is 1.
+     * Pass [difficulty] when available so that [ModDifficultyAdjust] can apply its beatmap-dependent multiplier.
+     * Without it, the [ModDifficultyAdjust] score multiplier is 1.
      *
      * Use [StatisticV2.getTotalScoreWithMultiplier] with a proper [StatisticV2.calculateModScoreMultiplier] call for
      * display when the full [BeatmapDifficulty] is available.
@@ -173,13 +174,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
         val modMap = ModUtils.deserializeMods(mods)
 
-        if (difficulty != null) {
-            modMap.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                m.applyFromBeatmapDifficulty(difficulty)
-            }
-        }
-
-        return (score * ModUtils.calculateScoreMultiplier(modMap)).roundToInt()
+        return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToInt()
     }
 
 

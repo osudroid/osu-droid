@@ -2,7 +2,7 @@ package com.osudroid.difficulty.utils
 
 import com.osudroid.beatmaps.PlayableBeatmap
 import com.osudroid.beatmaps.hitobjects.Spinner
-import com.osudroid.utils.ModUtils
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -24,7 +24,7 @@ object DroidScoreUtils {
             return 0
         }
 
-        val scoreMultiplier = ModUtils.calculateScoreMultiplier(beatmap.mods)
+        val scoreMultiplier = ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(beatmap.mods.values)
         var bonus = 0
 
         // In reality, there is no time-based limit to spinner RPM, since the limit is π/2 rad/*frame* and not rad/second.
