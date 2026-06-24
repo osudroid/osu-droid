@@ -83,6 +83,7 @@ public class StatisticV2 implements Serializable {
     /**
      * The score multiplier from mods.
      */
+    // TODO: move to double
     private float modScoreMultiplier = 1;
 
     /**
