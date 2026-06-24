@@ -3687,6 +3687,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         updatePPValue(objectIndex - 1);
 
+        // For variable-rate mods (WindUp/WindDown), the rate at the seek target may differ from
+        // the current rate. FramedBeatmapClock.seek() subtracts (userGlobalOffset * rate) from the
+        // seek position to compute the audio byte offset, so the rate must be updated first.
+        if (!rateAdjustingMods.isEmpty()) {
+            float modRate = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, targetMs);
+
+            float replaySettingsRate = replaySettingsPanel != null
+                ? replaySettingsPanel.getPlaybackControl().getRateControl().getRate()
+                : 1f;
+
+            float targetSpeedMultiplier = modRate * replaySettingsRate;
+
+            if (targetSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
+                GameHelper.setSpeedMultiplier(targetSpeedMultiplier);
+                gameplayClock.setRate(targetSpeedMultiplier);
+            }
+        }
+
         // Seek the beatmap clock (also seeks the audio source).
         gameplayClock.seek(clampedTime);
 
