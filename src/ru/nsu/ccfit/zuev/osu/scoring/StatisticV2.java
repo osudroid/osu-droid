@@ -83,8 +83,7 @@ public class StatisticV2 implements Serializable {
     /**
      * The score multiplier from mods.
      */
-    // TODO: move to double
-    private float modScoreMultiplier = 1;
+    private double modScoreMultiplier = 1;
 
     /**
      * The MD5 hash of the beatmap.
@@ -161,7 +160,7 @@ public class StatisticV2 implements Serializable {
         if (forcedScore > 0)
             return forcedScore;
 
-        return Math.round((double) totalScore * modScoreMultiplier);
+        return Math.round(totalScore * modScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -659,7 +658,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public void calculateModScoreMultiplier(@Nullable final BeatmapDifficulty difficulty) {
-        modScoreMultiplier = (float) new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values());
+        modScoreMultiplier = new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values());
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
