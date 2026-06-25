@@ -45,13 +45,13 @@ public class StatisticV2 implements Serializable {
     private long time = 0;
     private int currentCombo = 0;
     private int scoreHash = 0;
-    private int totalScore;
+    private long totalScore;
     private float hp = 1;
     private float diffModifier = 1;
     private ModHashMap mod = new ModHashMap();
     private String playerName = Config.getOnlineUsername();
     private String replayFilename = "";
-    private int forcedScore = -1;
+    private long forcedScore = -1;
     private String mark = null;
     private int beatmapNoteCount = 0;
     private int beatmapMaxCombo = 0;
@@ -108,7 +108,7 @@ public class StatisticV2 implements Serializable {
         if (params.length < 6) return;
 
         mod = ModUtils.deserializeMods(params[0]);
-        setForcedScore(Integer.parseInt(params[1]));
+        setForcedScore(Long.parseLong(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
         hit300k = Integer.parseInt(params[4]);
@@ -153,15 +153,15 @@ public class StatisticV2 implements Serializable {
         }
     }
 
-    public int getTotalScore() {
+    public long getTotalScore() {
         return totalScore;
     }
 
-    public int getTotalScoreWithMultiplier() {
+    public long getTotalScoreWithMultiplier() {
         if (forcedScore > 0)
             return forcedScore;
 
-        return Math.round(totalScore * modScoreMultiplier);
+        return Math.round((double) totalScore * modScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -267,7 +267,7 @@ public class StatisticV2 implements Serializable {
             double comboPortion = scoreV2ComboPortion * currentMaxCombo / beatmapMaxCombo;
             double accuracyPortion = scoreV2AccPortion * Math.pow(getAccuracy(), 10) * getNotesHit() / beatmapNoteCount;
 
-            totalScore = (int) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
+            totalScore = (long) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
             // difficulty modifier, hence the prior check.
@@ -275,13 +275,13 @@ public class StatisticV2 implements Serializable {
             // In that case, just skip score addition to ensure score is always positive.
 
             //如果分数溢出或分数满了
-            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
-                totalScore = Integer.MAX_VALUE;
+            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Long.MAX_VALUE){
+                totalScore = Long.MAX_VALUE;
             }
             else{
                 totalScore += amount;
                 if (combo) {
-                    totalScore += (int) ((amount * currentCombo * diffModifier) / 25);
+                    totalScore += (long) ((amount * currentCombo * diffModifier) / 25);
                 }
             }
         }
@@ -327,7 +327,7 @@ public class StatisticV2 implements Serializable {
         this.mark = mark;
     }
 
-    public void setTotalScore(int totalScore) {
+    public void setTotalScore(long totalScore) {
         this.totalScore = totalScore;
     }
 
@@ -495,7 +495,7 @@ public class StatisticV2 implements Serializable {
         this.replayFilename = replayName;
     }
 
-    public void setForcedScore(int forcedScore) {
+    public void setForcedScore(long forcedScore) {
         this.forcedScore = forcedScore;
         totalScore = forcedScore;
     }
