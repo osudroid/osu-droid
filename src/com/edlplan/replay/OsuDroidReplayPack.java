@@ -7,6 +7,7 @@ import com.osudroid.data.ScoreInfo;
 import com.osudroid.mods.IModRequiresBeatmapDifficulty;
 import com.osudroid.mods.LegacyModConverter;
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator;
+import com.osudroid.utils.ModUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
