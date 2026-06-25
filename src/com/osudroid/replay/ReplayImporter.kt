@@ -7,7 +7,7 @@ import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 /**
@@ -100,7 +100,7 @@ object ReplayImporter {
                 if (mods.values.any { it is IModRequiresBeatmapDifficulty }) {
                     info.copy(needsScoreMigration = true)
                 } else {
-                    info.copy(score = (info.score / LegacyScoreMultiplierCalculator().calculateFor(mods.values)).roundToInt())
+                    info.copy(score = (info.score / LegacyScoreMultiplierCalculator().calculateFor(mods.values)).roundToLong())
                 }
             } else {
                 info
