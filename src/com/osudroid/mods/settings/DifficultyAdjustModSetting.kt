@@ -48,6 +48,7 @@ class DifficultyAdjustModSetting(
         val element = json[key]
 
         if (element is JsonObject) {
+            // TODO: Remove this branch in a future migration once all legacy {"adjusted","original"} scores are gone.
             value = element["adjusted"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull
 
             val original = element["original"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull

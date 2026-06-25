@@ -7,7 +7,6 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.ModUtils
-import kotlin.reflect.KProperty0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -78,12 +77,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     )
 
     init {
-        // We set the default values here so that resetting the settings would reset them to null.
-        updateDefaultValue(::cs, cs)
-        updateDefaultValue(::ar, ar)
-        updateDefaultValue(::od, od)
-        updateDefaultValue(::hp, hp)
-
         this.cs = cs
         this.ar = ar
         this.od = od
@@ -150,10 +143,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
                 applyOldFadeAdjustment(it, mods)
             }
         }
-    }
-
-    private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
-        getModSettingDelegate<DifficultyAdjustModSetting>(property).defaultValue = value
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
