@@ -20,7 +20,7 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
         single<ModEasy>(0.5f)
         single<ModNoFail>(0.5f)
         single<ModReallyEasy>(0.5f)
-        single<ModHalfTime> { rateAdjustMultiplier(trackRateMultiplier) }
+        single<ModHalfTime> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -28,8 +28,8 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
 
         single<ModHardRock>(1.06f)
         single<ModPrecise>(1.06f)
-        single<ModDoubleTime> { rateAdjustMultiplier(trackRateMultiplier) }
-        single<ModNightCore> { rateAdjustMultiplier(trackRateMultiplier) }
+        single<ModDoubleTime> { rateAdjustMultiplier() }
+        single<ModNightCore> { rateAdjustMultiplier() }
         single<ModOldNightCore>(1.12f)
         single<ModHidden> { if (usesDefaultSettings) 1.06f else 1f }
         single<ModTraceable>(1.06f)
@@ -40,7 +40,7 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        single<ModCustomSpeed> { rateAdjustMultiplier(trackRateMultiplier) }
+        single<ModCustomSpeed> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -86,14 +86,16 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
     }
 
     companion object {
-        private fun rateAdjustMultiplier(rate: Float) =
+        private fun ModRateAdjust.rateAdjustMultiplier() = rateMultiplier(trackRateMultiplier)
+
+        private fun rateMultiplier(rate: Float) =
             if (rate > 1f) 1f + (rate - 1f) * 0.24f
             else 0.3f.pow((1f - rate) * 4f)
 
         private fun ModTimeRamp.timeRampMultiplier() =
             Interpolation.linear(
-                rateAdjustMultiplier(initialRate),
-                rateAdjustMultiplier(finalRate),
+                rateMultiplier(initialRate),
+                rateMultiplier(finalRate),
                 ModTimeRamp.FINAL_RATE_PROGRESS.toFloat()
             )
     }
