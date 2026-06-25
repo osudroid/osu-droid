@@ -35,6 +35,11 @@ class DifficultyAdjustModSetting(
     orderPosition = orderPosition,
     useManualInput = useManualInput
 ) {
+    // "Default" means no override is active (value == null == initialValue), regardless of what
+    // defaultValue currently holds (which may be set to the beatmap's difficulty for UI hint display).
+    override val isDefault
+        get() = value == initialValue
+
     override fun load(json: JsonObject) {
         if (key == null) {
             return
