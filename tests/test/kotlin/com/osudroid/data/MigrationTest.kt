@@ -278,10 +278,8 @@ class MigrationTest {
 
             val hdMods = ModHashMap().apply { put(ModHidden()) }.serializeMods()
 
-            // Call applyFromBeatmapDifficulty before serialization. This sets CS' default value to 4 while the value is
-            // 7, which will allow the custom CS to be serialized.
             val daMods = ModHashMap().apply {
-                put(ModDifficultyAdjust(cs = 7f).also { it.applyFromBeatmapDifficulty(difficulty) })
+                put(ModDifficultyAdjust(cs = 7f))
             }.serializeMods()
 
             fun insertScore(md5: String, mods: String, score: Int) {

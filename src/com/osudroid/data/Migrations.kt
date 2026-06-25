@@ -5,7 +5,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModFlashlight
@@ -300,27 +299,22 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                     modMap
                 }
 
-                val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
+                val hasBeatmapDependentMod = mods.values.any { m -> m is ModDifficultyAdjust }
 
                 if (hasBeatmapDependentMod) {
                     if (difficulty != null) {
-                        mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                            m.applyFromBeatmapDifficulty(difficulty)
-                        }
-
                         db.execSQL(
-                            "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
+                            "UPDATE ScoreInfo SET score = ? WHERE id = ?",
                             arrayOf<Any>(
                                 (score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
-                                mods.serializeMods(),
                                 id
                             )
                         )
                     } else {
-                        // Beatmap not in library; upgrade mods to new format and flag for on-the-fly migration.
+                        // Beatmap not in library; flag for on-the-fly migration.
                         db.execSQL(
-                            "UPDATE ScoreInfo SET mods = ?, needsScoreMigration = 1 WHERE id = ?",
-                            arrayOf<Any>(mods.serializeMods(), id)
+                            "UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?",
+                            arrayOf<Any>(id)
                         )
                     }
                 } else {

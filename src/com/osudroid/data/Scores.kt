@@ -11,7 +11,6 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.scoring.ScoreMultiplierCalculator
@@ -303,10 +302,6 @@ interface IScoreInfoDAO {
 
         for (scoreInfo in pending) {
             val mods = ModUtils.deserializeMods(scoreInfo.mods)
-
-            mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach {
-                it.applyFromBeatmapDifficulty(difficulty)
-            }
 
             updateScore(scoreInfo.copy(
                 score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),

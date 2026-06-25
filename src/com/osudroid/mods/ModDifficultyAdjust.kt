@@ -19,7 +19,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresBeatmapDifficulty {
+) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods {
 
     /**
      * The circle size to enforce.
@@ -152,22 +152,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
     }
 
-    override fun applyFromBeatmapDifficulty(difficulty: BeatmapDifficulty) {
-        updateBeatmapValue(::cs, difficulty.gameplayCS)
-        updateBeatmapValue(::ar, difficulty.ar)
-        updateBeatmapValue(::od, difficulty.od)
-        updateBeatmapValue(::hp, difficulty.hp)
-    }
-
     private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
         getModSettingDelegate<DifficultyAdjustModSetting>(property).defaultValue = value
-    }
-
-    private fun updateBeatmapValue(property: KProperty0<Float?>, value: Float?) {
-        val delegate = getModSettingDelegate<DifficultyAdjustModSetting>(property)
-
-        delegate.defaultValue = value
-        delegate.originalValue = value
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {

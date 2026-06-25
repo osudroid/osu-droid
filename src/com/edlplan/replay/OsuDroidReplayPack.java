@@ -4,9 +4,10 @@ import static com.osudroid.data.Scores.ScoreInfo;
 
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.ScoreInfo;
-import com.osudroid.mods.IModRequiresBeatmapDifficulty;
+import com.osudroid.mods.ModDifficultyAdjust;
 import com.osudroid.mods.LegacyModConverter;
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator;
+import com.osudroid.utils.ModUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
@@ -163,7 +164,7 @@ public class OsuDroidReplayPack {
             var mods = ModUtils.deserializeMods(replayData.getString("mods"));
 
             for (var mod : mods.values()) {
-                if (mod instanceof IModRequiresBeatmapDifficulty) {
+                if (mod instanceof ModDifficultyAdjust) {
                     needsScoreMigration = true;
                     break;
                 }
