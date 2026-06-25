@@ -26,6 +26,13 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
     protected val combinationMultipliers = mutableListOf<Pair<List<KClass<out Mod>>, (List<Mod>) -> TMultiplier>>()
 
     /**
+     * Multipliers applied to all [Mod]s that are instances of a common base class, collected together so the
+     * multiplier function receives them as a group. During calculation, group multipliers take precedence over
+     * single multipliers for the matched mods.
+     */
+    protected val groupMultipliers = mutableListOf<Pair<(Mod) -> Boolean, (List<Mod>) -> TMultiplier>>()
+
+    /**
      * Defines a flat, setting-independent score multiplier for the given [TMod].
      */
     protected inline fun <reified TMod : Mod> single(multiplier: TMultiplier) {
@@ -49,6 +56,16 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
         combinationMultipliers += listOf(T1::class, T2::class) to { multiplier(it[0] as T1, it[1] as T2) }
     }
 
+    /**
+     * Defines a score multiplier for all [Mod]s that are instances of [TMod], applied as a group. The multiplier
+     * function receives the full list of matched [Mod]s, allowing their combined state to influence the result.
+     * Group multipliers take precedence over single multipliers for the same [Mod]s.
+     */
+    @Suppress("UNCHECKED_CAST")
+    protected inline fun <reified TMod : Mod> group(noinline multiplier: (List<TMod>) -> TMultiplier) {
+        groupMultipliers += { mod: Mod -> mod is TMod } to { mods: List<Mod> -> multiplier(mods as List<TMod>) }
+    }
+
     fun calculateFor(mods: Iterable<Mod>): TMultiplier {
         val modsByType = mods.associateBy { it::class }
 
@@ -68,6 +85,17 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
                     remaining.removeAll(types.toSet())
                 }
             }
+        }
+
+        for ((predicate, multiplier) in groupMultipliers) {
+            val matched = remaining.filter { predicate(modsByType.getValue(it)) }
+
+            if (matched.isEmpty()) {
+                continue
+            }
+
+            result = multiply(result, multiplier(matched.map { modsByType.getValue(it) }))
+            remaining.removeAll(matched.toSet())
         }
 
         for (type in remaining) {
