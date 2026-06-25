@@ -36,7 +36,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        group<ModRateAdjust> { rateAdjustMultiplier(it) }
+        group<ModRateAdjust> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -116,8 +116,8 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
             return 0.8 * minMultiplier + 0.2 * maxMultiplier
         }
 
-        private fun rateAdjustMultiplier(mods: List<ModRateAdjust>): Double {
-            val combinedRate = mods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+        private fun Iterable<ModRateAdjust>.rateAdjustMultiplier(): Double {
+            val combinedRate = fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
 
             return if (combinedRate < 1f) halfTimeMultiplier(combinedRate)
             else doubleTimeMultiplier(combinedRate)

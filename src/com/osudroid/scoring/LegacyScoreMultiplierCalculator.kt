@@ -36,7 +36,7 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        group<ModRateAdjust> { rateAdjustMultiplier(it) }
+        group<ModRateAdjust> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -82,8 +82,8 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
     }
 
     companion object {
-        private fun rateAdjustMultiplier(mods: Iterable<ModRateAdjust>): Float {
-            val combinedRate = mods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+        private fun Iterable<ModRateAdjust>.rateAdjustMultiplier(): Float {
+            val combinedRate = fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
 
             return rateMultiplier(combinedRate)
         }

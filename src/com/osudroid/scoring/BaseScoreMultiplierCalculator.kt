@@ -62,8 +62,8 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
      * Group multipliers take precedence over single multipliers for the same [Mod]s.
      */
     @Suppress("UNCHECKED_CAST")
-    protected inline fun <reified TMod : Mod> group(noinline multiplier: (List<TMod>) -> TMultiplier) {
-        groupMultipliers += { mod: Mod -> mod is TMod } to { mods: List<Mod> -> multiplier(mods as List<TMod>) }
+    protected inline fun <reified TMod : Mod> group(noinline multiplier: List<TMod>.() -> TMultiplier) {
+        groupMultipliers += { mod: Mod -> mod is TMod } to { mods: List<Mod> -> (mods as List<TMod>).multiplier() }
     }
 
     fun calculateFor(mods: Iterable<Mod>): TMultiplier {
