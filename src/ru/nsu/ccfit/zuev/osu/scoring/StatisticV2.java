@@ -659,7 +659,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public void calculateModScoreMultiplier(@Nullable final BeatmapDifficulty difficulty) {
-        modScoreMultiplier = (float) new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values());
+        modScoreMultiplier = new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values()).floatValue();
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {

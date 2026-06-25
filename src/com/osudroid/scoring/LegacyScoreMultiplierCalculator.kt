@@ -5,18 +5,14 @@ import com.osudroid.math.Interpolation
 import com.osudroid.mods.*
 import kotlin.math.exp
 import kotlin.math.pow
-import kotlin.reflect.KClass
 
 /**
  * Legacy score multiplier calculator. This is used to calculate score during version 4 to 5 database migration by
  * separating the total score with mod multipliers from the multiplier itself. This allows future mod score multiplier
  * changes to be applied without database migrations.
- *
- * @param difficulty The [BeatmapDifficulty] for the beatmap that the multipliers are calculated for. This must be the
- * [BeatmapDifficulty] **before** any [Mod] application.
  */
-class LegacyScoreMultiplierCalculator @JvmOverloads constructor(private val difficulty: BeatmapDifficulty? = null) {
-    private val multipliers = mutableMapOf<KClass<out Mod>, (Mod) -> Float>()
+class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDifficulty? = null) :
+    BaseScoreMultiplierCalculator<Float>(difficulty) {
 
     init {
         // region Difficulty Reduction
@@ -64,34 +60,8 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(private val diff
         // endregion
     }
 
-    private inline fun <reified TMod : Mod> single(multiplier: Float) {
-        multipliers[TMod::class] = { multiplier }
-    }
-
-    private inline fun <reified TMod : Mod> single(noinline multiplier: TMod.() -> Float) {
-        multipliers[TMod::class] = { mod -> (mod as TMod).multiplier() }
-    }
-
-    /**
-     * Calculates the multiplier to be applied to score with the given [mods].
-     */
-    fun calculateFor(mods: Iterable<Mod>): Float {
-        val modsByType = mods.associateBy { it::class }
-
-        if (modsByType.isEmpty()) {
-            return 1f
-        }
-
-        var result = 1f
-
-        for (type in modsByType.keys) {
-            val multiplier = multipliers[type] ?: continue
-
-            result *= multiplier(modsByType.getValue(type))
-        }
-
-        return result
-    }
+    override val defaultMultiplier = 1f
+    override fun multiply(a: Float, b: Float) = a * b
 
     private fun ModDifficultyAdjust.difficultyAdjustMultiplier(): Float {
         var multiplier = 1f

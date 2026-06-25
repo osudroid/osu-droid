@@ -6,15 +6,12 @@ import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.reflect.KClass
 
 /**
  * Current score multiplier calculator. This is used to calculate score after version 5 database migration.
  */
-class ScoreMultiplierCalculator @JvmOverloads constructor (private val difficulty: BeatmapDifficulty? = null) {
-
-    private val singleMultipliers = mutableMapOf<KClass<out Mod>, (Mod) -> Double>()
-    private val combinationMultipliers = mutableListOf<Pair<List<KClass<out Mod>>, (List<Mod>) -> Double>>()
+class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDifficulty? = null) :
+    BaseScoreMultiplierCalculator<Double>(difficulty) {
 
     init {
         // region Difficulty Reduction
@@ -64,52 +61,8 @@ class ScoreMultiplierCalculator @JvmOverloads constructor (private val difficult
         // endregion
     }
 
-    private inline fun <reified TMod : Mod> single(multiplier: Double) {
-        singleMultipliers[TMod::class] = { multiplier }
-    }
-
-    private inline fun <reified TMod : Mod> single(noinline multiplier: TMod.() -> Double) {
-        singleMultipliers[TMod::class] = { mod -> (mod as TMod).multiplier() }
-    }
-
-    private inline fun <reified T1 : Mod, reified T2 : Mod> combination(
-        noinline multiplier: (T1, T2) -> Double
-    ) {
-        combinationMultipliers.add(listOf(T1::class, T2::class) to { mods -> multiplier(mods[0] as T1, mods[1] as T2) })
-    }
-
-    /**
-     * Calculates the multiplier to be applied to score with the given [mods].
-     */
-    fun calculateFor(mods: Iterable<Mod>): Double {
-        val modsByType = mods.associateBy { it::class }
-
-        if (modsByType.isEmpty()) {
-            return 1.0
-        }
-
-        val remaining = modsByType.keys.toMutableSet()
-        var result = 1.0
-
-        if (modsByType.size > 1) {
-            for ((types, multiplier) in combinationMultipliers) {
-                if (remaining.containsAll(types)) {
-                    val instances = types.map { modsByType.getValue(it) }
-
-                    result *= multiplier(instances)
-                    remaining.removeAll(types.toSet())
-                }
-            }
-        }
-
-        for (type in remaining) {
-            val multiplier = singleMultipliers[type] ?: continue
-
-            result *= multiplier(modsByType.getValue(type))
-        }
-
-        return result
-    }
+    override val defaultMultiplier = 1.0
+    override fun multiply(a: Double, b: Double) = a * b
 
     private fun ModDifficultyAdjust.difficultyAdjustMultiplier(): Double {
         var multiplier = 1.0
