@@ -19,7 +19,6 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         single<ModEasy>(0.5)
         single<ModNoFail>(0.5)
         single<ModReallyEasy>(0.5)
-        single<ModHalfTime> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -27,8 +26,6 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
 
         single<ModHardRock>(1.06)
         single<ModPrecise>(1.06)
-        single<ModDoubleTime> { rateAdjustMultiplier() }
-        single<ModNightCore> { rateAdjustMultiplier() }
         single<ModHidden> { hiddenMultiplier() }
         single<ModTraceable>(1.06)
         combination<ModFlashlight, ModFreezeFrame> { flashlight, _ -> 1 + (flashlight.flashlightMultiplier() - 1) / 2 }
@@ -39,7 +36,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        single<ModCustomSpeed> { rateAdjustMultiplier() }
+        group<ModRateAdjust> { rateAdjustMultiplier(it) }
 
         // endregion
 
@@ -119,9 +116,12 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
             return 0.8 * minMultiplier + 0.2 * maxMultiplier
         }
 
-        private fun ModRateAdjust.rateAdjustMultiplier() =
-            if (trackRateMultiplier < 1f) halfTimeMultiplier(trackRateMultiplier)
-            else doubleTimeMultiplier(trackRateMultiplier)
+        private fun rateAdjustMultiplier(mods: List<ModRateAdjust>): Double {
+            val combinedRate = mods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+
+            return if (combinedRate < 1f) halfTimeMultiplier(combinedRate)
+            else doubleTimeMultiplier(combinedRate)
+        }
 
         private fun halfTimeMultiplier(speedChange: Float): Double {
             // 0.2x at 0.5x speed, +0.07x per 0.05x speed increment. Default HT (0.75x) = 0.55.

@@ -20,7 +20,6 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
         single<ModEasy>(0.5f)
         single<ModNoFail>(0.5f)
         single<ModReallyEasy>(0.5f)
-        single<ModHalfTime> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -28,9 +27,6 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
 
         single<ModHardRock>(1.06f)
         single<ModPrecise>(1.06f)
-        single<ModDoubleTime> { rateAdjustMultiplier() }
-        single<ModNightCore> { rateAdjustMultiplier() }
-        single<ModOldNightCore>(1.12f)
         single<ModHidden> { if (usesDefaultSettings) 1.06f else 1f }
         single<ModTraceable>(1.06f)
         single<ModFlashlight> { if (usesDefaultSettings) 1.12f else 1f }
@@ -40,7 +36,7 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        single<ModCustomSpeed> { rateAdjustMultiplier() }
+        group<ModRateAdjust> { rateAdjustMultiplier(it) }
 
         // endregion
 
@@ -86,7 +82,11 @@ class LegacyScoreMultiplierCalculator @JvmOverloads constructor(difficulty: Beat
     }
 
     companion object {
-        private fun ModRateAdjust.rateAdjustMultiplier() = rateMultiplier(trackRateMultiplier)
+        private fun rateAdjustMultiplier(mods: Iterable<ModRateAdjust>): Float {
+            val combinedRate = mods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+
+            return rateMultiplier(combinedRate)
+        }
 
         private fun rateMultiplier(rate: Float) =
             if (rate > 1f) 1f + (rate - 1f) * 0.24f
