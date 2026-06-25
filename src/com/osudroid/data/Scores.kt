@@ -16,7 +16,7 @@ import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
-import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
@@ -59,7 +59,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The total score.
      */
-    val score: Int,
+    val score: Long,
 
     /**
      * The maximum combo.
@@ -165,7 +165,7 @@ data class ScoreInfo @JvmOverloads constructor(
      * display when the full [BeatmapDifficulty] is available.
      */
     @JvmOverloads
-    fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
+    fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Long {
         // Pending-migration rows store total score with multipliers directly, so multiplying again would apply the
         // multiplier twice.
         if (needsScoreMigration) {
@@ -174,7 +174,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
         val modMap = ModUtils.deserializeMods(mods)
 
-        return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToInt()
+        return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToLong()
     }
 
 
@@ -229,7 +229,7 @@ fun ScoreInfo(json: JSONObject) =
         id = json.optLong("id", 0),
         playerName = json.getString("playername"),
         mods = json.getString("mods"),
-        score = json.getInt("score"),
+        score = json.getLong("score"),
         maxCombo = json.getInt("combo"),
         mark = json.getString("mark"),
         hit300k = json.getInt("h300k"),
@@ -248,7 +248,7 @@ fun ScoreInfo(json: JSONObject) =
 /**
  * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapLeaderboard].
  */
-data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Int)
+data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Long)
 
 @Dao
 interface IScoreInfoDAO {
@@ -309,7 +309,7 @@ interface IScoreInfoDAO {
             }
 
             updateScore(scoreInfo.copy(
-                score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
+                score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToLong(),
                 mods = mods.serializeMods(),
                 needsScoreMigration = false
             ))
