@@ -7,6 +7,7 @@ import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.roundToLong
 
 object DroidScoreUtils {
     /**
@@ -17,15 +18,15 @@ object DroidScoreUtils {
      * @returns The maximum spinner bonus.
      */
     @JvmStatic
-    fun calculateMaximumSpinnerBonus(beatmap: PlayableBeatmap): Int {
+    fun calculateMaximumSpinnerBonus(beatmap: PlayableBeatmap): Long {
         val hitObjects = beatmap.hitObjects
 
         if (hitObjects.spinnerCount == 0) {
-            return 0
+            return 0L
         }
 
         val scoreMultiplier = ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(beatmap.mods.values)
-        var bonus = 0
+        var bonus = 0L
 
         // In reality, there is no time-based limit to spinner RPM, since the limit is π/2 rad/*frame* and not rad/second.
         // For the purpose of this calculation, we assume that the frame rate is 120 FPS.
@@ -51,6 +52,6 @@ object DroidScoreUtils {
             bonus += maximumPossibleBonusSpins * 1000
         }
 
-        return (bonus * scoreMultiplier).toInt()
+        return (bonus * scoreMultiplier).roundToLong()
     }
 }

@@ -42,7 +42,7 @@ class DroidPerformanceCalculator(
     private var effectiveMissCount = 0.0
     private var sliderCheesePenalty = SliderCheesePenalty()
     private var tapPenalty = 1.0
-    private var totalScore = 0
+    private var totalScore = 0L
 
     private var aimEstimatedSliderBreaks = 0.0
     private var deviation = 0.0
