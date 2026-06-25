@@ -19,7 +19,6 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         single<ModEasy>(0.5)
         single<ModNoFail>(0.5)
         single<ModReallyEasy>(0.5)
-        single<ModHalfTime> { halfTimeMultiplier(trackRateMultiplier.toDouble()) }
 
         // endregion
 
@@ -27,12 +26,9 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
 
         single<ModHardRock>(1.06)
         single<ModPrecise>(1.06)
-        single<ModDoubleTime> { doubleTimeMultiplier(trackRateMultiplier.toDouble()) }
-        single<ModNightCore> { doubleTimeMultiplier(trackRateMultiplier.toDouble()) }
-        single<ModOldNightCore> { doubleTimeMultiplier(trackRateMultiplier.toDouble()) }
         single<ModHidden> { hiddenMultiplier() }
         single<ModTraceable>(1.06)
-        combination<ModFlashlight, ModFreezeFrame> { flashlight, _ -> 1.0 + (flashlight.flashlightMultiplier() - 1.0) / 2.0 }
+        combination<ModFlashlight, ModFreezeFrame> { flashlight, _ -> 1 + (flashlight.flashlightMultiplier() - 1) / 2 }
         single<ModFlashlight> { flashlightMultiplier() }
 
         // endregion
@@ -40,7 +36,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         // region Conversion
 
         single<ModDifficultyAdjust> { difficultyAdjustMultiplier() }
-        single<ModCustomSpeed> { rateMultiplier(trackRateMultiplier.toDouble()) }
+        group<ModRateAdjust> { rateAdjustMultiplier() }
 
         // endregion
 
@@ -100,40 +96,45 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
 
         private fun ModFlashlight.flashlightMultiplier(): Double {
             // 1.12x base, reduced by 0.02 per 0.1 increase in flashlight size.
-            val value = max(1.02, min(1.12, 1.12 - 0.2 * (sizeMultiplier.toDouble() - 1.0)))
+            val value = max(1.02, min(1.12, 1.12 - 0.2 * (sizeMultiplier.toDouble() - 1)))
 
-            return if (!comboBasedSize) 1.0 + (value - 1.0) / 5.0 else value
+            return if (!comboBasedSize) 1 + (value - 1) / 5 else value
         }
 
         private fun ModTimeRamp.timeRampMultiplier(): Double {
-            val minSpeed = minOf(initialRate, finalRate).toDouble()
-            val maxSpeed = maxOf(initialRate, finalRate).toDouble()
+            val minSpeed = min(initialRate, finalRate)
+            val maxSpeed = max(initialRate, finalRate)
 
             val minMultiplier =
-                if (minSpeed < 1.0) halfTimeMultiplier(minSpeed)
+                if (minSpeed < 1f) halfTimeMultiplier(minSpeed)
                 else doubleTimeMultiplier(minSpeed)
 
             val maxMultiplier =
-                if (maxSpeed < 1.0) halfTimeMultiplier(maxSpeed)
+                if (maxSpeed < 1f) halfTimeMultiplier(maxSpeed)
                 else doubleTimeMultiplier(maxSpeed)
 
             return 0.8 * minMultiplier + 0.2 * maxMultiplier
         }
 
-        private fun rateMultiplier(rate: Double) =
-            if (rate < 1.0) halfTimeMultiplier(rate) else doubleTimeMultiplier(rate)
+        private fun Iterable<ModRateAdjust>.rateAdjustMultiplier(): Double {
+            val combinedRate = fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
 
-        private fun halfTimeMultiplier(speedChange: Double): Double {
+            return if (combinedRate < 1f) halfTimeMultiplier(combinedRate)
+            else doubleTimeMultiplier(combinedRate)
+        }
+
+        private fun halfTimeMultiplier(speedChange: Float): Double {
             // 0.2x at 0.5x speed, +0.07x per 0.05x speed increment. Default HT (0.75x) = 0.55.
             return (speedChange * 20).toInt() / 20.0 * 1.4 - 0.5
         }
 
-        private fun doubleTimeMultiplier(speedChange: Double): Double {
+        private fun doubleTimeMultiplier(speedChange: Float): Double {
             // Floor to the nearest multiple of 0.1.
             val value = (speedChange * 10).toInt() / 10.0
             // 0.01 penalty for non-default rates. Linear from 1.0 to 1.46. Default DT (1.5x) = 1.23.
             val penalty = if (value != 1.5 && value != 1.0) 0.01 else 0.0
-            return (value - 1.0) * 0.46 + 1.0 - penalty
+
+            return (value - 1) * 0.46 + 1 - penalty
         }
     }
 }

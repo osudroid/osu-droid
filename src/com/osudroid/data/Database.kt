@@ -173,6 +173,7 @@ object DatabaseManager {
                     db.rawQuery("SELECT * FROM scores", null).use {
 
                         var pendingScores = it.count
+                        val scoreMultiplierCalculator = LegacyScoreMultiplierCalculator()
 
                         val scoreInfos = mutableListOf<ScoreInfo>()
                         while (it.moveToNext()) {
@@ -207,7 +208,7 @@ object DatabaseManager {
 
                                 val rawScore =
                                     if (needsMigration) legacyScore
-                                    else (legacyScore / LegacyScoreMultiplierCalculator().calculateFor(legacyMods.values)).roundToLong()
+                                    else (legacyScore / scoreMultiplierCalculator.calculateFor(legacyMods.values)).roundToLong()
 
                                 scoreInfos += ScoreInfo(
                                     id = id,

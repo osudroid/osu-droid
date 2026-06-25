@@ -196,7 +196,7 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                         // Stacked ModRateAdjust mods - recalculate score.
                         val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
                             val rate = mod.trackRateMultiplier
-                            acc * (if (rate > 1f) 1f + (rate - 1f) * 0.24f else 0.3f.pow((1f - rate) * 4f))
+                            acc * if (rate > 1f) 1f + (rate - 1f) * 0.24f else 0.3f.pow((1f - rate) * 4f)
                         }
 
                         val combinedRate = rateAdjustingMods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }

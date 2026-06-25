@@ -591,7 +591,8 @@ object ModMenu : UIScene() {
                 if (!it.isSelected) enabledMods.any { m -> !it.mod.isCompatibleWith(m) } else false
         }
 
-        scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator().calculateFor(enabledMods).toFloat())
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+        scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator(selectedBeatmap?.getBeatmapDifficulty()).calculateFor(enabledMods).toFloat())
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 
