@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui.entity
 
 import android.opengl.GLES32
-import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
+import com.osudroid.multiplayer.api.data.WinCondition.Accuracy
 import com.osudroid.multiplayer.Multiplayer
 import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
