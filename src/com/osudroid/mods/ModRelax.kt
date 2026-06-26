@@ -13,4 +13,11 @@ class ModRelax : Mod() {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModAutoplay::class, ModNoFail::class, ModAutopilot::class
     )
+
+    companion object {
+        /**
+         * How early before a hit object's start time (in milliseconds) a cursor flowing over it can trigger a hit.
+         */
+        const val RELAX_LENIENCY = 12.0
+    }
 }

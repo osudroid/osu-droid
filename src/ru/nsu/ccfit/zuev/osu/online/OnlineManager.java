@@ -207,6 +207,11 @@ public class OnlineManager {
         post.addParam("data", scoreData);
         post.addParam("version", onlineVersion);
 
+        post.addParam("cs", String.valueOf(beatmap.getCircleSize()));
+        post.addParam("ar", String.valueOf(beatmap.getApproachRate()));
+        post.addParam("od", String.valueOf(beatmap.getOverallDifficulty()));
+        post.addParam("hp", String.valueOf(beatmap.getHpDrainRate()));
+
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
 

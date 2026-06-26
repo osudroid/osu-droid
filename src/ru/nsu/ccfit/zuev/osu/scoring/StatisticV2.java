@@ -65,6 +65,11 @@ public class StatisticV2 implements Serializable {
     private int life = 1;
 
     /**
+     * The player's UID, used in multiplayer to match the entry to the local player.
+     */
+    public long uid = -1;
+
+    /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
      * multiplayer.
      */
@@ -621,7 +626,7 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MaximumCombo ? currentCombo : scoreMaxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MaxCombo ? currentCombo : scoreMaxCombo;
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracy(), isAlive);
     }

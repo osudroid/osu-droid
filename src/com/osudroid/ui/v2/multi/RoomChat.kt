@@ -121,6 +121,7 @@ class RoomChat : UILinearContainer() {
 
                     +UITextInput("").apply {
                         height = FillParent
+                        maxCharacters = 200
                         placeholder = "Type a message..."
                         onConfirm = { sendMessage() }
                         flexRules {
@@ -144,7 +145,7 @@ class RoomChat : UILinearContainer() {
 
     private fun sendMessage() {
 
-        val text = input.value.trim()
+        val text = input.value.trim().take(200)
         if (text.isEmpty()) {
             return
         }
@@ -216,7 +217,7 @@ class RoomChat : UILinearContainer() {
     }
 
 
-    fun onRoomChatMessage(player: RoomPlayer, message: String) = mainThread {
+    fun onRoomChatMessage(player: RoomPlayer, message: String) = updateThread {
         appendMessage(
             PlayerMessage(
                 player = player,
@@ -225,7 +226,7 @@ class RoomChat : UILinearContainer() {
         )
     }
 
-    fun onSystemChatMessage(message: String, color: String) = mainThread {
+    fun onSystemChatMessage(message: String, color: String) = updateThread {
         Multiplayer.log("System message: $message")
 
         appendMessage(

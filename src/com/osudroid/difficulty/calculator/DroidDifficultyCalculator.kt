@@ -60,7 +60,11 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         sliderCount = playableBeatmap.hitObjects.sliderCount
         spinnerCount = playableBeatmap.hitObjects.spinnerCount
         overallDifficulty = playableBeatmap.difficulty.od.toDouble()
-        maximumScore = beatmap.calculateMaximumScore(playableBeatmap.mods) + DroidScoreUtils.calculateMaximumSpinnerBonus(playableBeatmap)
+
+        maximumScore = (
+            beatmap.calculateMaximumScore(playableBeatmap.mods).toLong() +
+            DroidScoreUtils.calculateMaximumSpinnerBonus(playableBeatmap).toLong()
+        ).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
         populateAimAttributes(skills, forReplay)
         populateTapAttributes(skills, objects, forReplay)
@@ -251,7 +255,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 possibleThreeFingeredSections.add(HighStrainSection(
                     firstSpeedObjectIndex,
                     lastSpeedObjectIndex,
-                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex + 1))
                 ))
             }
         }
@@ -270,7 +274,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     ) {
         val flashlight = skills.find<DroidFlashlight>() ?: return
 
-        flashlightDifficulty = sqrt(flashlight.difficultyValue()) * 0.18
+        flashlightDifficulty = calculateDifficultyRating(flashlight.difficultyValue())
     }
 
     private fun DroidDifficultyAttributes.populateReadingAttributes(

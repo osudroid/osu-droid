@@ -52,7 +52,7 @@ class StandardPerformanceCalculator(
     override fun createPerformanceAttributes(attributes: StandardPerformanceAttributes?) = (attributes ?: StandardPerformanceAttributes()).also {
         var multiplier = FINAL_MULTIPLIER
 
-        effectiveMissCount = calculateComboBasedEstimatedMissCount()
+        effectiveMissCount = calculateComboBasedEstimatedMissCount().coerceIn(countMiss.toDouble(), totalHits.toDouble())
 
         val hitWindow = StandardHitWindow(this.attributes.overallDifficulty)
 
@@ -396,7 +396,7 @@ class StandardPerformanceCalculator(
                 // 4 was picked because in a lot of short stream beatmaps with small amount of sliders, there
                 // are 2-3 sliders on which sliderends are often dropped. This is a kind of optimization to
                 // achieve the most accurate result on average.
-                min(4 * likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
+                min(4 + likelyMissedSliderEndPortion * attributes.sliderCount, attributes.sliderCount.toDouble())
 
             if (scoreMaxCombo < fullComboThreshold) {
                 missCount = fullComboThreshold / max(1, scoreMaxCombo)
@@ -452,10 +452,10 @@ class StandardPerformanceCalculator(
         return traceableBonus
     }
 
-    private val comboScalingFactor by lazy {
-        if (difficultyAttributes.maxCombo <= 0) 0.0
-        else min((scoreMaxCombo.toDouble() / difficultyAttributes.maxCombo).pow(0.8), 1.0)
-    }
+    private val comboScalingFactor
+        get() =
+            if (attributes.maxCombo <= 0) 0.0
+            else min((scoreMaxCombo.toDouble() / attributes.maxCombo).pow(0.8), 1.0)
 
     private fun calculateRateAdjustedApproachRate(approachRate: Double, clockRate: Double): Double {
         val preempt = BeatmapDifficulty.difficultyRange(

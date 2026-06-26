@@ -50,6 +50,8 @@ class BankHitSampleInfo(
         it.add(name)
     }
 
+    override val useBeatmapSample = customSampleBank >= 1
+
     fun copy(name: String? = null, bank: SampleBank? = null, customSampleBank: Int? = null, volume: Int? = null, isLayered: Boolean? = null) =
         BankHitSampleInfo(name ?: this.name, bank ?: this.bank,
             customSampleBank ?: this.customSampleBank, volume ?: this.volume, isLayered ?: this.isLayered)

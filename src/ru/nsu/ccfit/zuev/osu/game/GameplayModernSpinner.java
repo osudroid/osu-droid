@@ -298,7 +298,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
         }
     }
 
-    public void removeFromScene() {
+    @Override
+    protected void detachFromScene() {
         if (scene == null) {
             return;
         }
@@ -322,6 +323,14 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         scene.detachChild(bonusScore);
         scene = null;
+    }
+
+    public void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
+        detachFromScene();
 
         int score = 0;
         if (replayObjectData != null) {

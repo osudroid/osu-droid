@@ -207,7 +207,7 @@ object Multiplayer {
         // Replace server statistics with local in Head-to-Head mode.
         if (room?.isTeamVersus == false) {
             val ownScore = GlobalManager.getInstance().gameScene.stat
-            val ownScoreIndex = list.indexOfFirst { it.playerName == OnlineManager.getInstance().username }.takeUnless { it == -1 }
+            val ownScoreIndex = list.indexOfFirst { it.uid == OnlineManager.getInstance().userId }.takeUnless { it == -1 }
 
             if (ownScore != null) {
                 if (ownScoreIndex == null) {
@@ -367,6 +367,7 @@ object Multiplayer {
                         roomId = room.id,
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
+                        roomPassword = RoomAPI.lastRoomPassword,
                         multiplayerSessionID = room.sessionID
                     )
 

@@ -46,6 +46,9 @@ object RoomAPI {
     @Volatile
     private var socket: Socket? = null
 
+    @Volatile
+    internal var lastRoomPassword: String? = null
+
 
     // https://gist.github.com/Rian8337/ceab4d3b179cbeee7dd548cfcf145b95
     // Back-to-back events
@@ -121,12 +124,12 @@ object RoomAPI {
             Multiplayer.log("WARNING: playerStatusChanged — unexpected id type: ${it.contentToString()}")
             return@Listener
         }
-        val statusOrdinal = it[1] as? Int ?: run {
+        val statusString = it[1] as? String ?: run {
             Multiplayer.log("WARNING: playerStatusChanged — unexpected status type: ${it.contentToString()}")
             return@Listener
         }
-        val status = PlayerStatus[statusOrdinal] ?: run {
-            Multiplayer.log("WARNING: playerStatusChanged — unknown PlayerStatus ordinal $statusOrdinal, ignoring event")
+        val status = PlayerStatus.fromWire(statusString) ?: run {
+            Multiplayer.log("WARNING: playerStatusChanged — unknown PlayerStatus value $statusString, ignoring event")
             return@Listener
         }
 
@@ -136,12 +139,12 @@ object RoomAPI {
     private val teamModeChanged = Listener {
         Multiplayer.log("RECEIVED: teamModeChanged -> ${it.contentToString()}")
 
-        val ordinal = it[0] as? Int ?: run {
+        val value = it[0] as? String ?: run {
             Multiplayer.log("WARNING: teamModeChanged — unexpected payload type: ${it.contentToString()}")
             return@Listener
         }
-        val mode = TeamMode[ordinal] ?: run {
-            Multiplayer.log("WARNING: teamModeChanged — unknown TeamMode ordinal $ordinal, ignoring event")
+        val mode = TeamMode.fromWire(value) ?: run {
+            Multiplayer.log("WARNING: teamModeChanged — unknown TeamMode value $value, ignoring event")
             return@Listener
         }
         roomEventListener?.onRoomTeamModeChange(mode)
@@ -150,12 +153,12 @@ object RoomAPI {
     private val winConditionChanged = Listener {
         Multiplayer.log("RECEIVED: winConditionChanged -> ${it.contentToString()}")
 
-        val ordinal = it[0] as? Int ?: run {
+        val value = it[0] as? String ?: run {
             Multiplayer.log("WARNING: winConditionChanged — unexpected payload type: ${it.contentToString()}")
             return@Listener
         }
-        val condition = WinCondition.from(ordinal) ?: run {
-            Multiplayer.log("WARNING: winConditionChanged — unknown WinCondition ordinal $ordinal, ignoring event")
+        val condition = WinCondition.fromWire(value) ?: run {
+            Multiplayer.log("WARNING: winConditionChanged — unknown WinCondition value $value, ignoring event")
             return@Listener
         }
         roomEventListener?.onRoomWinConditionChange(condition)
@@ -170,10 +173,10 @@ object RoomAPI {
         }
         val team = when {
             it[1] == null -> null
-            it[1] is Int  -> {
-                val n = it[1] as Int
-                RoomTeam[n] ?: run {
-                    Multiplayer.log("WARNING: teamChanged — unknown RoomTeam ordinal $n, ignoring event")
+            it[1] is String -> {
+                val s = it[1] as String
+                RoomTeam.fromWire(s) ?: run {
+                    Multiplayer.log("WARNING: teamChanged — unknown RoomTeam value $s, ignoring event")
                     return@Listener
                 }
             }
@@ -256,8 +259,8 @@ object RoomAPI {
                 maxPlayers = json.getInt("maxPlayers"),
                 mods = RoomMods(json.getJSONArray("mods")),
                 gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                teamMode = TeamMode[json.getInt("teamMode")] ?: TeamMode.HeadToHead,
-                winCondition = WinCondition.from(json.getInt("winCondition")) ?: WinCondition.ScoreV1,
+                teamMode = TeamMode.fromWire(json.getString("teamMode")) ?: TeamMode.HeadToHead,
+                winCondition = WinCondition.fromWire(json.getString("winCondition")) ?: WinCondition.ScoreV1,
                 playerCount = activePlayers.size,
                 playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
                 sessionID = json.getString("sessionId")
@@ -266,7 +269,7 @@ object RoomAPI {
             room.players = players
             room.host = json.getJSONObject("host").getString("id").toLong()
             room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
-            room.status = RoomStatus[json.getInt("status")]
+            room.status = RoomStatus.fromWire(json.getString("status"))
 
             val localPlayer = room.playersMap[OnlineManager.getInstance().userId]
 
@@ -445,6 +448,8 @@ object RoomAPI {
      */
     fun connectToRoom(roomId: Long, userId: Long, gameSessionId: String, roomPassword: String? = null,
                       multiplayerSessionID: String? = null) {
+        lastRoomPassword = roomPassword
+
         val oldSocket = socket
         socket = null
 
@@ -613,7 +618,7 @@ object RoomAPI {
      * Change room team mode.
      */
     fun setRoomTeamMode(mode: TeamMode) {
-        socket?.emit("teamModeChanged", mode.ordinal) ?: run {
+        socket?.emit("teamModeChanged", mode.name) ?: run {
             Multiplayer.log("WARNING: Tried to emit event 'teamModeChanged' while socket is null.")
             return
         }
@@ -624,7 +629,7 @@ object RoomAPI {
      * Change room win condition.
      */
     fun setRoomWinCondition(condition: WinCondition) {
-        socket?.emit("winConditionChanged", condition.ordinal) ?: run {
+        socket?.emit("winConditionChanged", condition.name) ?: run {
             Multiplayer.log("WARNING: Tried to emit event 'winConditionChanged' while socket is null.")
             return
         }
@@ -730,7 +735,7 @@ object RoomAPI {
      */
     @JvmStatic
     fun setPlayerStatus(status: PlayerStatus) {
-        socket?.emit("playerStatusChanged", status.ordinal) ?: run {
+        socket?.emit("playerStatusChanged", status.name) ?: run {
             Multiplayer.log("WARNING: Tried to emit event 'playerStatusChanged' while socket is null.")
             return
         }
@@ -754,7 +759,7 @@ object RoomAPI {
      * Change player team.
      */
     fun setPlayerTeam(team: RoomTeam) {
-        socket?.emit("teamChanged", team.ordinal) ?: run {
+        socket?.emit("teamChanged", team.name) ?: run {
             Multiplayer.log("WARNING: Tried to emit event 'teamChanged' while socket is null.")
             return
         }

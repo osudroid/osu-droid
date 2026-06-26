@@ -1670,6 +1670,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(
                 "selection-" + switch (cachedStatus) {
                     case ranked, approved, loved -> cachedStatus.name().toLowerCase();
+                    case qualified -> "approved";
                     default -> "question";
                 }
             ));

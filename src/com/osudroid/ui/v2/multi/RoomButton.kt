@@ -60,7 +60,9 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
 
                 text {
                     font = ResourceManager.getInstance().getFont("xs")
-                    text = room.playerNames.takeUnless { it.isEmpty() } ?: StringTable.get(string.multiplayer_room_no_players)
+                    text = room.playerNames.takeUnless { it.isEmpty() }
+                        ?: if (room.playerCount > 0) "${room.playerCount} player${if (room.playerCount != 1) "s" else ""}"
+                           else StringTable.get(string.multiplayer_room_no_players)
                     applyTheme = {
                         color = it.accentColor
                         alpha = 0.95f
@@ -74,7 +76,7 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                         sizeVariant = SizeVariant.Small
                         setText(when (room.teamMode) {
                             TeamMode.HeadToHead -> string.multiplayer_room_head_to_head
-                            TeamMode.TeamVersus -> string.multiplayer_room_team_versus
+                            TeamMode.TeamVS -> string.multiplayer_room_team_versus
                         })
                     }
 
@@ -83,8 +85,8 @@ class RoomButton(val lobbyScene: LobbyScene, val room: Room) : UIButton() {
                         setText(when (room.winCondition) {
                             WinCondition.ScoreV1 -> string.multiplayer_room_score_v1
                             WinCondition.ScoreV2 -> string.multiplayer_room_score_v2
-                            WinCondition.HighestAccuracy -> string.multiplayer_room_highest_accuracy
-                            WinCondition.MaximumCombo -> string.multiplayer_room_maximum_combo
+                            WinCondition.Accuracy -> string.multiplayer_room_highest_accuracy
+                            WinCondition.MaxCombo -> string.multiplayer_room_maximum_combo
                         })
                     }
 

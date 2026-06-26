@@ -76,6 +76,10 @@ object DroidRhythmEvaluator {
         for (i in rhythmStart downTo 1) {
             val currentObject = validPrevious[i - 1]
 
+            if (currentObject.obj is Spinner) {
+                continue
+            }
+
             // Scale note 0 to 1 from history to now.
             val timeDecay = (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
             val noteDecay = (validPrevious.size - i).toDouble() / validPrevious.size
@@ -181,7 +185,12 @@ object DroidRhythmEvaluator {
                     // Scale down the difficulty if the object is doubletappable.
                     effectiveRatio *= 1 - prevObject.getDoubletapness(currentObject) * 0.75
 
-                    rhythmComplexitySum += sqrt(effectiveRatio * startRatio) * currentHistoricalDecay
+                    rhythmComplexitySum += if (island.deltaCount > 1) {
+                        sqrt(effectiveRatio * startRatio) * currentHistoricalDecay
+                    } else {
+                        // Constant difficulty for single-note islands.
+                        0.7 * currentHistoricalDecay
+                    }
 
                     startRatio = effectiveRatio
                     previousIsland = island

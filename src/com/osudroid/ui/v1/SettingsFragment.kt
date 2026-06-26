@@ -590,11 +590,11 @@ class SettingsFragment : SettingsFragment() {
 
     private fun handlePlayerSectionPreferences() {
         findPreference<SelectPreference>("player_team")!!.apply {
-            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TeamVersus
+            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TeamVS
             value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
+                RoomAPI.setPlayerTeam(RoomTeam.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -668,7 +668,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()] ?: return@setOnPreferenceChangeListener false)
+                RoomAPI.setRoomTeamMode(TeamMode.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }
@@ -677,7 +677,7 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.winCondition.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
+                RoomAPI.setRoomWinCondition(WinCondition.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
                 true
             }
         }

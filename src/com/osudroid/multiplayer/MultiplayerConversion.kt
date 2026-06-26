@@ -27,6 +27,7 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
  */
 fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
 
+    uid = json.optLong("uid", -1L)
     playerName = json.getString("username")
     setForcedScore(json.getInt("score"))
     time = System.currentTimeMillis()
