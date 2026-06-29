@@ -146,8 +146,8 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         }
 
         private fun halfTimeMultiplier(speedChange: Float) =
-            // 0.2x at 0.5x speed, +0.07x per 0.05x speed increment. Default HT (0.75x) = 0.55.
-            speedChange * 1.4 - 0.5
+            // 0.25x at 0.5x speed, +0.075x per 0.05x speed increment. Default HT (0.75x) = 0.625.
+            speedChange * 1.5 - 0.5
 
         private fun doubleTimeMultiplier(speedChange: Float) =
             // Linear from 1.0 to 1.46.
