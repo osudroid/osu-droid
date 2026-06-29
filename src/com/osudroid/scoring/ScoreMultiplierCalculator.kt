@@ -1,7 +1,9 @@
 package com.osudroid.scoring
 
+import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
+import com.osudroid.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -12,6 +14,8 @@ import kotlin.math.pow
  */
 class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDifficulty? = null) :
     BaseScoreMultiplierCalculator<Double>(difficulty) {
+
+    private var appliedDifficulty: BeatmapDifficulty? = null
 
     init {
         // region Difficulty Reduction
@@ -55,6 +59,17 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         single<ModSynesthesia>(0.8)
 
         // endregion
+    }
+
+    override fun calculateFor(mods: Iterable<Mod>): Double {
+        val appliedDifficulty = difficulty?.clone()
+
+        if (appliedDifficulty != null) {
+            ModUtils.applyModsToBeatmapDifficulty(appliedDifficulty, GameMode.Droid, mods)
+            this.appliedDifficulty = appliedDifficulty
+        }
+
+        return super.calculateFor(mods)
     }
 
     override val defaultMultiplier = 1.0
