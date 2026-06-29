@@ -66,6 +66,9 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
         groupMultipliers += { mod: Mod -> mod is TMod } to { mods: List<Mod> -> (mods as List<TMod>).multiplier() }
     }
 
+    /**
+     * Calculates the multiplier to be applied to score with the given [mods].
+     */
     fun calculateFor(mods: Iterable<Mod>): TMultiplier {
         val modsByType = mods.associateBy { it::class }
 
