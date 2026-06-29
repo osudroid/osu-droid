@@ -31,7 +31,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         single<ModHardRock>(1.04)
         single<ModPrecise> { preciseMultiplier() }
         single<ModHidden> { hiddenMultiplier() }
-        single<ModTraceable>(1.02)
+        single<ModTraceable>(1.03)
         combination<ModFlashlight, ModFreezeFrame> { flashlight, _ -> 1 + (flashlight.flashlightMultiplier() - 1) / 2 }
         single<ModFlashlight> { flashlightMultiplier() }
 
@@ -147,7 +147,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
 
         private fun halfTimeMultiplier(speedChange: Float) =
             // 0.2x at 0.5x speed, +0.07x per 0.05x speed increment. Default HT (0.75x) = 0.55.
-            (speedChange * 20).toInt() / 20.0 * 1.4 - 0.5
+            speedChange * 1.4 - 0.5
 
         private fun doubleTimeMultiplier(speedChange: Float) =
             // Linear from 1.0 to 1.46.
