@@ -22,6 +22,7 @@ public class FontManager {
 	// ===========================================================
 
 	private final ArrayList<Font> mFontsManaged = new ArrayList<Font>();
+	private boolean mReloading;
 
 	// ===========================================================
 	// Constructors
@@ -78,7 +79,7 @@ public class FontManager {
 		}
 	}
 
-	public synchronized void updateFonts(final GLState pGLState) {
+	public synchronized boolean updateFonts(final GLState pGLState) {
 		final ArrayList<Font> fonts = this.mFontsManaged;
 		final int fontCount = fonts.size();
 		if(fontCount > 0){
@@ -86,9 +87,17 @@ public class FontManager {
 				fonts.get(i).update(pGLState);
 			}
 		}
+
+		if (this.mReloading) {
+			this.mReloading = false;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public synchronized void onReload() {
+		this.mReloading = true;
 		final ArrayList<Font> managedFonts = this.mFontsManaged;
 		for(int i = managedFonts.size() - 1; i >= 0; i--) {
 			managedFonts.get(i).invalidateLetters();
