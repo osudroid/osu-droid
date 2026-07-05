@@ -8,7 +8,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -24,43 +23,54 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.StatFs;
+import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
-
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
+import com.osudroid.UpdateManager;
 import com.osudroid.beatmaps.BeatmapCache;
+import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.debug.DebugPlaygroundScene;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.resources.R;
 import com.osudroid.ui.FPSCounter;
 import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.ui.v2.modmenu.ModMenu;
+import com.osudroid.ui.v2.multi.LobbyScene;
+import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
-import com.osudroid.multiplayer.api.LobbyAPI;
-import com.osudroid.utils.AccessibilityDetector;
-import com.osudroid.beatmaps.DifficultyCalculationManager;
-import com.osudroid.multiplayer.Multiplayer;
-import com.osudroid.UpdateManager;
-import com.osudroid.ui.v2.multi.LobbyScene;
-
-import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.reco1l.osu.ui.MessageDialog;
-import com.osudroid.difficulty.BeatmapDifficultyCalculator;
+import java.io.File;
+import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import net.lingala.zip4j.ZipFile;
-
+import okio.Okio;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
@@ -76,19 +86,6 @@ import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import okio.Okio;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -98,9 +95,12 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import ru.nsu.ccfit.zuev.osuplusplus.DirectInputSurfaceView;
 
-public class MainActivity extends BaseGameActivity implements
-        IAccelerometerListener {
+public class MainActivity
+    extends BaseGameActivity
+    implements IAccelerometerListener
+{
 
     public static String versionName;
     public static SongService songService;
@@ -112,7 +112,8 @@ public class MainActivity extends BaseGameActivity implements
     private FirebaseCrashlytics crashlytics;
     private boolean willReplay = false;
     private static boolean activityVisible = true;
-    private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService scheduledExecutor =
+        Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> logFlushFuture;
     private Display display;
     private DisplayManager.DisplayListener displayListener;
@@ -120,6 +121,13 @@ public class MainActivity extends BaseGameActivity implements
     private float maxRefreshRate = 60;
     private int maxRefreshRateModeId = 0;
     private MessageDialog multiWindowAlert;
+
+    // Direct input surface (low-latency touch handling)
+    private DirectInputSurfaceView directInputSurface;
+
+    // Choreographer-driven vsync timestamp (nanoseconds, 0 = not available)
+    private final java.util.concurrent.atomic.AtomicLong lastVsyncFrameTimeNanos =
+        new java.util.concurrent.atomic.AtomicLong(0);
 
     // Multiplayer
     private Uri roomInviteLink;
@@ -165,7 +173,9 @@ public class MainActivity extends BaseGameActivity implements
             }
         };
 
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).registerDisplayListener(displayListener, null);
+        (
+            (DisplayManager) getSystemService(DISPLAY_SERVICE)
+        ).registerDisplayListener(displayListener, null);
 
         for (var mode : display.getSupportedModes()) {
             if (mode.getRefreshRate() > maxRefreshRate) {
@@ -174,12 +184,24 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT(), 0, 1800, 1);
-        final EngineOptions opt = new EngineOptions(true,
-                null, new RatioResolutionPolicy(
-                Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
-                mCamera);
+        Camera mCamera = new SmoothCamera(
+            0,
+            0,
+            Config.getRES_WIDTH(),
+            Config.getRES_HEIGHT(),
+            0,
+            1800,
+            1
+        );
+        final EngineOptions opt = new EngineOptions(
+            true,
+            null,
+            new RatioResolutionPolicy(
+                Config.getRES_WIDTH(),
+                Config.getRES_HEIGHT()
+            ),
+            mCamera
+        );
         opt.setNeedsMusic(true);
         opt.setNeedsSound(true);
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
@@ -189,7 +211,10 @@ public class MainActivity extends BaseGameActivity implements
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
-            ToastLogger.showText(StringTable.get(R.string.message_info_multitouch), false);
+            ToastLogger.showText(
+                StringTable.get(R.string.message_info_multitouch),
+                false
+            );
         }
         engine.setTouchController(new MultiTouchController());
 
@@ -206,17 +231,20 @@ public class MainActivity extends BaseGameActivity implements
                 Config.setBeatmapPath(Config.getCorePath() + "Songs/");
                 dir = new File(Config.getBeatmapPath());
                 if (!(dir.exists() || dir.mkdirs())) {
-                    ToastLogger.showText(StringTable.format(
-                                    R.string.message_error_createdir, dir.getPath()),
-                            true);
+                    ToastLogger.showText(
+                        StringTable.format(
+                            R.string.message_error_createdir,
+                            dir.getPath()
+                        ),
+                        true
+                    );
                 } else {
-                    final SharedPreferences prefs = PreferenceManager
-                            .getDefaultSharedPreferences(this);
+                    final SharedPreferences prefs =
+                        PreferenceManager.getDefaultSharedPreferences(this);
                     final SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("directory", dir.getPath());
                     editor.commit();
                 }
-
             }
             final File nomedia = new File(dir.getParentFile(), ".nomedia");
             try {
@@ -234,8 +262,8 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     private void initPreferences() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
+        final SharedPreferences prefs =
+            PreferenceManager.getDefaultSharedPreferences(this);
 
         if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
@@ -252,7 +280,6 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (!prefs.getBoolean("onlineSet", false)) {
-
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
             editor.commit();
@@ -262,11 +289,25 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onLoadResources() {
         ResourceManager.getInstance().Init(mEngine, this);
-        ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
-        ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "welcome",
+            "gfx/welcome.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "loading_start",
+            "gfx/loading.png"
+        );
 
-        ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
-        ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+        ResourceManager.getInstance().loadSound(
+            "welcome",
+            "sfx/welcome.ogg",
+            false
+        );
+        ResourceManager.getInstance().loadSound(
+            "welcome_piano",
+            "sfx/welcome_piano.ogg",
+            false
+        );
 
         // Setting the scene as fast as we can
         getEngine().setScene(SplashScene.INSTANCE.getScene());
@@ -274,45 +315,132 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
         ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
-        ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "multi",
+            "multi.png"
+        );
         ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
-        ResourceManager.getInstance().loadHighQualityAsset("beatmap_downloader", "beatmap_downloader.png");
-        ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
-        ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
-        ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "beatmap_downloader",
+            "beatmap_downloader.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "options",
+            "options.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "offline-avatar",
+            "offline-avatar.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "star",
+            "gfx/star.png"
+        );
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
-        ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
-        ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
-        ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
-        ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "team_vs",
+            "team_vs.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "head_head",
+            "head_head.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "crown",
+            "crown.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "missing",
+            "missing.png"
+        );
         ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
-        ResourceManager.getInstance().loadHighQualityAsset("unlock", "unlock.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_next", "music_next.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_prev", "music_prev.png");
-        ResourceManager.getInstance().loadHighQualityAsset("music_np", "music_np.png");
-        ResourceManager.getInstance().loadHighQualityAsset("songselect-top", "songselect-top.png");
-        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
-        ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png");
-        ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "unlock",
+            "unlock.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_play",
+            "music_play.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_pause",
+            "music_pause.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_stop",
+            "music_stop.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_next",
+            "music_next.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_prev",
+            "music_prev.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "music_np",
+            "music_np.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "songselect-top",
+            "songselect-top.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "back-arrow",
+            "back-arrow.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "reset",
+            "reset.png"
+        );
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "check",
+            "check.png"
+        );
         ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png");
-        ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png");
+        ResourceManager.getInstance().loadHighQualityAsset(
+            "minus",
+            "minus.png"
+        );
 
         File bg;
-        if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
-                || (bg = new File(Config.getSkinPath() + "menu-background.jpg")).exists()) {
-            ResourceManager.getInstance().loadHighQualityFile("menu-background", bg);
+        if (
+            (bg = new File(
+                Config.getSkinPath() + "menu-background.png"
+            )).exists() ||
+            (bg = new File(
+                Config.getSkinPath() + "menu-background.jpg"
+            )).exists()
+        ) {
+            ResourceManager.getInstance().loadHighQualityFile(
+                "menu-background",
+                bg
+            );
         }
         // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-        ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
+        ResourceManager.getInstance().loadFont(
+            "smallFont",
+            null,
+            21,
+            Color.WHITE
+        );
         ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
-        ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
+        ResourceManager.getInstance().loadStrokeFont(
+            "strokeFont",
+            null,
+            36,
+            Color.BLACK,
+            Color.WHITE
+        );
 
-        ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
+        ResourceManager.getInstance().loadSound(
+            "heartbeat",
+            "sfx/heartbeat.ogg",
+            false
+        );
     }
 
     @Override
@@ -328,7 +456,9 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
-            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
+            Execution.updateThread(() ->
+                UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter())
+            );
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
@@ -339,14 +469,24 @@ public class MainActivity extends BaseGameActivity implements
             SplashScene.INSTANCE.playWelcomeAnimation();
 
             Execution.delayed(2500, () -> {
-
                 UpdateManager.onActivityStart();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
-                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+                ResourceManager.getInstance().loadFont(
+                    "font",
+                    null,
+                    28,
+                    Color.WHITE
+                );
 
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    GlobalManager.getInstance()
+                        .getEngine()
+                        .setScene(
+                            GlobalManager.getInstance()
+                                .getMainScene()
+                                .getScene()
+                        );
                 }
 
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
@@ -356,17 +496,54 @@ public class MainActivity extends BaseGameActivity implements
 
                 AccessibilityDetector.register(MainActivity.this);
 
-                logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+                logFlushFuture = scheduledExecutor.scheduleAtFixedRate(
+                    Multiplayer::flushLog,
+                    0,
+                    5,
+                    TimeUnit.SECONDS
+                );
 
                 if (roomInviteLink != null) {
                     final Uri inviteLink = roomInviteLink;
                     roomInviteLink = null;
                     Multiplayer.connectFromLink(inviteLink);
                 } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
+                    GlobalManager.getInstance()
+                        .getMainScene()
+                        .watchReplay(fileToAdd);
                     fileToAdd = null;
                     willReplay = false;
                 }
+
+                // Start periodic refresh rate forcing (API 30+)
+                // This runs every 100ms to ensure the display stays at max refresh
+                // if the user has enabled the force max refresh rate setting.
+                scheduledExecutor.scheduleAtFixedRate(
+                    () -> {
+                        if (
+                            Config.isForceMaxRefreshRate() &&
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                        ) {
+                            float refreshRate = getRefreshRate();
+
+                            if (refreshRate != maxRefreshRate) {
+                                mRenderSurfaceView
+                                    .getHolder()
+                                    .getSurface()
+                                    .setFrameRate(
+                                        maxRefreshRate,
+                                        Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
+                                    );
+                            }
+                        }
+                    },
+                    0,
+                    100,
+                    TimeUnit.MILLISECONDS
+                );
+
+                // Apply hardware acceleration flag
+                applyHardwareAcceleration();
 
                 GlobalManager.getInstance().getMainScene().loadBannerSprite();
             });
@@ -386,9 +563,15 @@ public class MainActivity extends BaseGameActivity implements
         File internal = Environment.getDataDirectory();
         StatFs stat = new StatFs(internal.getPath());
         availableMemory = (double) stat.getAvailableBytes();
-        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
-        if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
-            Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
+        String toastMessage = String.format(
+            StringTable.get(R.string.message_low_storage_space),
+            df.format(availableMemory / minMem)
+        );
+        if (availableMemory < 0.5 * minMem) {
+            //I set 512MiB as a minimum
+            Execution.mainThread(() ->
+                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+            );
         }
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
@@ -396,26 +579,45 @@ public class MainActivity extends BaseGameActivity implements
     @SuppressLint("ResourceType")
     @Override
     protected void onSetContentView() {
-        this.mRenderSurfaceView = new RenderSurfaceView(this);
+        // Use DirectInputSurfaceView for low-latency touch when high precision input is enabled
+        if (Config.isHighPrecisionInput()) {
+            this.directInputSurface = new DirectInputSurfaceView(this);
+            this.mRenderSurfaceView = this.directInputSurface;
+        } else {
+            this.directInputSurface = null;
+            this.mRenderSurfaceView = new RenderSurfaceView(this);
+        }
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
-        mainLayout.addView(mRenderSurfaceView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mainLayout.addView(
+            mRenderSurfaceView,
+            new LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        );
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.setId(View.generateViewId());
 
-        mainLayout.addView(frameLayout, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mainLayout.addView(
+            frameLayout,
+            new LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        );
 
         // Adding a dummy View somehow fixes an issue with Android layout system where the layouts
         // in the frame layout (where fragments are attached, see ActivityOverlay) are not properly
         // displayed on the screen.
-        mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mainLayout.addView(
+            new View(this),
+            new LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        );
 
-        setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        setContentView(
+            mainLayout,
+            new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        );
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
@@ -431,16 +633,24 @@ public class MainActivity extends BaseGameActivity implements
             File file = new File(fileToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
-                        StringTable.get(R.string.library_importing),
-                        false);
+                    StringTable.get(R.string.library_importing),
+                    false
+                );
 
                 FileUtils.extractBeatmapset(fileToAdd, Config.getBeatmapPath());
-                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
-                        .replaceAll("(?i) \\[no video]$", ""));
+                forceImportedBeatmaps.add(
+                    file
+                        .getName()
+                        .substring(0, file.getName().length() - 4)
+                        .replaceAll("(?i) \\[no video]$", "")
+                );
                 // LibraryManager.INSTANCE.sort();
                 fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".osk")) {
-                ToastLogger.showText(StringTable.get(R.string.library_skin_importing), false);
+                ToastLogger.showText(
+                    StringTable.get(R.string.library_skin_importing),
+                    false
+                );
                 FileUtils.extractZip(fileToAdd, Config.getSkinTopPath());
                 fileToAdd = null;
             } else if (file.getName().toLowerCase().endsWith(".odr")) {
@@ -456,51 +666,66 @@ public class MainActivity extends BaseGameActivity implements
                     if (zip.isValidZipFile()) {
                         beatmaps.add(file.getPath());
                     }
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
 
             File beatmapDir = new File(Config.getBeatmapPath());
-            if (beatmapDir.exists()
-                    && beatmapDir.isDirectory()) {
+            if (beatmapDir.exists() && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
-                                    .replaceAll("(?i) \\[no video]$", ""));
+                            forceImportedBeatmaps.add(
+                                file
+                                    .getName()
+                                    .substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", "")
+                            );
                         }
-                    } catch (IOException ignored) {
-                    }
+                    } catch (IOException ignored) {}
                 }
             }
 
-            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            if (Config.isSCAN_DOWNLOAD()
-                    && downloadDir.exists()
-                    && downloadDir.isDirectory()) {
+            File downloadDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS
+            );
+            if (
+                Config.isSCAN_DOWNLOAD() &&
+                downloadDir.exists() &&
+                downloadDir.isDirectory()
+            ) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
-                                    .replaceAll("(?i) \\[no video]$", ""));
+                            forceImportedBeatmaps.add(
+                                file
+                                    .getName()
+                                    .substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", "")
+                            );
                         }
-                    } catch (IOException ignored) {
-                    }
+                    } catch (IOException ignored) {}
                 }
             }
 
             if (beatmaps.size() > 0) {
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
-                ToastLogger.showText(StringTable.format(
+                ToastLogger.showText(
+                    StringTable.format(
                         R.string.library_importing_several,
-                        beatmaps.size()), false);
+                        beatmaps.size()
+                    ),
+                    false
+                );
                 for (final String beatmap : beatmaps) {
-                    FileUtils.extractBeatmapset(beatmap, Config.getBeatmapPath());
+                    FileUtils.extractBeatmapset(
+                        beatmap,
+                        Config.getBeatmapPath()
+                    );
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
@@ -528,17 +753,20 @@ public class MainActivity extends BaseGameActivity implements
                     if (zip.isValidZipFile()) {
                         skins.add(file.getPath());
                     }
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
         }
 
         // Scanning download directory
-        final File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        final File downloadDir = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_DOWNLOADS
+        );
 
-        if (Config.isSCAN_DOWNLOAD()
-                && downloadDir.exists()
-                && downloadDir.isDirectory()) {
+        if (
+            Config.isSCAN_DOWNLOAD() &&
+            downloadDir.exists() &&
+            downloadDir.isDirectory()
+        ) {
             final File[] files = FileUtils.listFiles(downloadDir, ".osk");
 
             for (final File file : files) {
@@ -546,24 +774,34 @@ public class MainActivity extends BaseGameActivity implements
                     if (zip.isValidZipFile()) {
                         skins.add(file.getPath());
                     }
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
         }
 
         if (skins.size() > 0) {
-            ToastLogger.showText(StringTable.format(
+            ToastLogger.showText(
+                StringTable.format(
                     R.string.library_skin_importing_several,
-                    skins.size()), false);
+                    skins.size()
+                ),
+                false
+            );
 
             for (final String skin : skins) {
                 if (FileUtils.extractZip(skin, Config.getSkinTopPath())) {
                     String folderName = skin.substring(0, skin.length() - 4);
                     // We have imported the skin!
                     ToastLogger.showText(
-                            StringTable.format(R.string.library_imported, folderName),
-                            true);
-                    Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
+                        StringTable.format(
+                            R.string.library_imported,
+                            folderName
+                        ),
+                        true
+                    );
+                    Config.addSkin(
+                        folderName.substring(folderName.lastIndexOf("/") + 1),
+                        skin
+                    );
                 }
             }
         }
@@ -581,7 +819,9 @@ public class MainActivity extends BaseGameActivity implements
      */
     private void reportGlesVersion() {
         try {
-            ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            ActivityManager am = (ActivityManager) getSystemService(
+                ACTIVITY_SERVICE
+            );
             // Use var so we never need to name the inner class ActivityManager.DeviceConfigurationInfo.
             var configInfo = am.getDeviceConfigurationInfo();
 
@@ -599,8 +839,13 @@ public class MainActivity extends BaseGameActivity implements
             // Also attach to Crashlytics so crash reports include the GLES capability.
             crashlytics.setCustomKey("gles_version", glesVersionStr);
 
-            Debug.i("Device max GLES version: " + glesVersionStr
-                    + " (raw=0x" + Integer.toHexString(reqGlEsVersion) + ")");
+            Debug.i(
+                "Device max GLES version: " +
+                    glesVersionStr +
+                    " (raw=0x" +
+                    Integer.toHexString(reqGlEsVersion) +
+                    ")"
+            );
         } catch (Exception e) {
             Debug.e("Failed to detect GLES version: " + e.getMessage(), e);
         }
@@ -623,9 +868,10 @@ public class MainActivity extends BaseGameActivity implements
         super.onCreate(pSavedInstanceState);
 
         try {
-            versionName = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionName;
-        } catch (Exception ignored) {
-        }
+            versionName = getPackageManager()
+                .getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES)
+                .versionName;
+        } catch (Exception ignored) {}
 
         if (this.mEngine == null) {
             return;
@@ -634,13 +880,15 @@ public class MainActivity extends BaseGameActivity implements
         if (BuildConfig.DEBUG) {
             //Toast.makeText(this,"this is debug version",Toast.LENGTH_LONG).show();
             try {
-                File d = new File(Environment.getExternalStorageDirectory(), "osu!droid/Log");
+                File d = new File(
+                    Environment.getExternalStorageDirectory(),
+                    "osu!droid/Log"
+                );
                 if (!d.exists()) d.mkdirs();
                 File f = new File(d, "rawlog.txt");
                 if (!f.exists()) f.createNewFile();
-                Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
-            } catch (IOException ignored) {
-            }
+                Runtime.getRuntime().exec("logcat -f " + f.getAbsolutePath());
+            } catch (IOException ignored) {}
         }
         onBeginBindService();
     }
@@ -649,21 +897,27 @@ public class MainActivity extends BaseGameActivity implements
         if (connection == null && songService == null) {
             connection = new ServiceConnection() {
                 @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    songService = ((SongService.ReturnBindObject) service).getObject();
+                public void onServiceConnected(
+                    ComponentName name,
+                    IBinder service
+                ) {
+                    songService = (
+                        (SongService.ReturnBindObject) service
+                    ).getObject();
                     saveServiceObject = (SaveServiceObject) getApplication();
                     saveServiceObject.setSongService(songService);
                     GlobalManager.getInstance().setSongService(songService);
                 }
 
                 @Override
-                public void onServiceDisconnected(ComponentName name) {
-
-                }
-
+                public void onServiceDisconnected(ComponentName name) {}
             };
 
-            bindService(new Intent(MainActivity.this, SongService.class), connection, BIND_AUTO_CREATE);
+            bindService(
+                new Intent(MainActivity.this, SongService.class),
+                connection,
+                BIND_AUTO_CREATE
+            );
         }
         GlobalManager.getInstance().setSongService(songService);
         GlobalManager.getInstance().setSaveServiceObject(saveServiceObject);
@@ -679,12 +933,24 @@ public class MainActivity extends BaseGameActivity implements
         String displayName = null;
         String fileName;
 
-        try (var cursor = getContentResolver().query(uri, new String[]{ OpenableColumns.DISPLAY_NAME }, null, null, null)) {
+        try (
+            var cursor = getContentResolver().query(
+                uri,
+                new String[] { OpenableColumns.DISPLAY_NAME },
+                null,
+                null,
+                null
+            )
+        ) {
             if (cursor != null && cursor.moveToFirst()) {
                 displayName = cursor.getString(0);
             }
         } catch (IllegalArgumentException | SecurityException e) {
-            Debug.e("MainActivity.copyContentUriToCache: cannot query display name: " + e.getMessage(), e);
+            Debug.e(
+                "MainActivity.copyContentUriToCache: cannot query display name: " +
+                    e.getMessage(),
+                e
+            );
         }
 
         if (displayName != null && !displayName.isEmpty()) {
@@ -696,7 +962,11 @@ public class MainActivity extends BaseGameActivity implements
             try {
                 mimeType = getContentResolver().getType(uri);
             } catch (SecurityException e) {
-                Debug.e("MainActivity.copyContentUriToCache: cannot query MIME type: " + e.getMessage(), e);
+                Debug.e(
+                    "MainActivity.copyContentUriToCache: cannot query MIME type: " +
+                        e.getMessage(),
+                    e
+                );
             }
 
             String ext;
@@ -715,8 +985,17 @@ public class MainActivity extends BaseGameActivity implements
         var tempFile = new File(getCacheDir(), fileName);
 
         try {
-            if (!tempFile.getCanonicalPath().startsWith(getCacheDir().getCanonicalPath() + File.separator)) {
-                Debug.e("MainActivity.copyContentUriToCache: rejected unsafe display name: " + displayName);
+            if (
+                !tempFile
+                    .getCanonicalPath()
+                    .startsWith(
+                        getCacheDir().getCanonicalPath() + File.separator
+                    )
+            ) {
+                Debug.e(
+                    "MainActivity.copyContentUriToCache: rejected unsafe display name: " +
+                        displayName
+                );
                 return null;
             }
         } catch (IOException e) {
@@ -724,10 +1003,15 @@ public class MainActivity extends BaseGameActivity implements
             return null;
         }
 
-        try (var in = getContentResolver().openInputStream(uri);
-             var sink = Okio.buffer(Okio.sink(tempFile))) {
+        try (
+            var in = getContentResolver().openInputStream(uri);
+            var sink = Okio.buffer(Okio.sink(tempFile))
+        ) {
             if (in == null) {
-                ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
+                ToastLogger.showText(
+                    StringTable.get(R.string.import_failed_open_file),
+                    false
+                );
                 return null;
             }
 
@@ -735,7 +1019,10 @@ public class MainActivity extends BaseGameActivity implements
             return tempFile.getAbsolutePath();
         } catch (IOException | SecurityException e) {
             Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
-            ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
+            ToastLogger.showText(
+                StringTable.get(R.string.import_failed_open_file),
+                false
+            );
             return null;
         }
     }
@@ -756,7 +1043,11 @@ public class MainActivity extends BaseGameActivity implements
 
                         // Ensure gameplay is cleaned up before joining the lobby to prevent any potential issues with
                         // lingering game state.
-                        if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                        if (
+                            scene != null &&
+                            gameScene != null &&
+                            scene == gameScene.getScene()
+                        ) {
                             gameScene.quit();
                         }
                     }
@@ -789,7 +1080,12 @@ public class MainActivity extends BaseGameActivity implements
         super.onResume();
         activityVisible = true;
 
-        logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+        logFlushFuture = scheduledExecutor.scheduleAtFixedRate(
+            Multiplayer::flushLog,
+            0,
+            5,
+            TimeUnit.SECONDS
+        );
 
         if (mEngine == null) {
             return;
@@ -807,7 +1103,9 @@ public class MainActivity extends BaseGameActivity implements
         } else {
             var songService = GlobalManager.getInstance().getSongService();
 
-            if (songService != null && songService.getStatus() == Status.PAUSED) {
+            if (
+                songService != null && songService.getStatus() == Status.PAUSED
+            ) {
                 songService.play();
             }
         }
@@ -868,7 +1166,9 @@ public class MainActivity extends BaseGameActivity implements
         var listener = displayListener;
 
         if (listener != null) {
-            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(listener);
+            (
+                (DisplayManager) getSystemService(DISPLAY_SERVICE)
+            ).unregisterDisplayListener(listener);
         }
     }
 
@@ -882,28 +1182,44 @@ public class MainActivity extends BaseGameActivity implements
         if (getEngine() != null && !hasFocus) {
             var gameScene = GlobalManager.getInstance().getGameScene();
 
-            if (gameScene != null && getEngine().getScene() == gameScene.getScene() && !gameScene.isPaused() && !Multiplayer.isMultiplayer) {
+            if (
+                gameScene != null &&
+                getEngine().getScene() == gameScene.getScene() &&
+                !gameScene.isPaused() &&
+                !Multiplayer.isMultiplayer
+            ) {
                 Execution.updateThread(gameScene::pause);
             }
 
-            if (Multiplayer.isConnected()
-                    && (getEngine().getScene() == Multiplayer.roomScene
-                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.async(() -> Execution.runSafe(Multiplayer.roomScene::invalidateStatus));
+            if (
+                Multiplayer.isConnected() &&
+                (getEngine().getScene() == Multiplayer.roomScene ||
+                    getEngine().getScene() ==
+                        GlobalManager.getInstance().getSongMenu().getScene())
+            ) {
+                Execution.async(() ->
+                    Execution.runSafe(Multiplayer.roomScene::invalidateStatus)
+                );
             }
         }
 
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        getWindow()
+            .getDecorView()
+            .setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            );
     }
 
     @Override
-    public void onMultiWindowModeChanged(boolean isInMultiWindowMode, @NonNull Configuration newConfig) {
+    public void onMultiWindowModeChanged(
+        boolean isInMultiWindowMode,
+        @NonNull Configuration newConfig
+    ) {
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
 
         if (isInMultiWindowMode) {
@@ -918,9 +1234,15 @@ public class MainActivity extends BaseGameActivity implements
         if (this.mEngine == null) {
             return;
         }
-        if (GlobalManager.getInstance().getCamera().getRotation() == 0 && arg0.getY() < -5) {
+        if (
+            GlobalManager.getInstance().getCamera().getRotation() == 0 &&
+            arg0.getY() < -5
+        ) {
             GlobalManager.getInstance().getCamera().setRotation(180);
-        } else if (GlobalManager.getInstance().getCamera().getRotation() == 180 && arg0.getY() > 5) {
+        } else if (
+            GlobalManager.getInstance().getCamera().getRotation() == 180 &&
+            arg0.getY() > 5
+        ) {
             GlobalManager.getInstance().getCamera().setRotation(0);
         }
     }
@@ -946,7 +1268,10 @@ public class MainActivity extends BaseGameActivity implements
         // - https://developer.android.com/reference/android/view/KeyEvent#ACTION_MULTIPLE
         // For now, we are only interested in using this for input to support characters that require multiple key
         // presses to be inputted.
-        if (action == KeyEvent.ACTION_MULTIPLE && UIEngine.getCurrent().onKeyPress(keyCode, event)) {
+        if (
+            action == KeyEvent.ACTION_MULTIPLE &&
+            UIEngine.getCurrent().onKeyPress(keyCode, event)
+        ) {
             return true;
         }
 
@@ -959,8 +1284,7 @@ public class MainActivity extends BaseGameActivity implements
             return false;
         }
 
-        if (AccessibilityDetector.isIllegalServiceDetected())
-            return false;
+        if (AccessibilityDetector.isIllegalServiceDetected()) return false;
 
         if (GlobalManager.getInstance().getEngine() == null) {
             return super.onKeyDown(keyCode, event);
@@ -976,14 +1300,22 @@ public class MainActivity extends BaseGameActivity implements
 
         Scene currentScene = GlobalManager.getInstance().getEngine().getScene();
 
-        if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
+        if (
+            event.getAction() == TouchEvent.ACTION_DOWN &&
+            keyCode == KeyEvent.KEYCODE_BACK &&
+            ActivityOverlay.onBackPress()
+        ) {
             return true;
         }
 
         var gameScene = GlobalManager.getInstance().getGameScene();
 
-        if (gameScene != null && currentScene == gameScene.getScene() &&
-                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+        if (
+            gameScene != null &&
+            currentScene == gameScene.getScene() &&
+            (keyCode == KeyEvent.KEYCODE_BACK ||
+                keyCode == KeyEvent.KEYCODE_MENU)
+        ) {
             if (gameScene.isPaused()) {
                 Execution.updateThread(gameScene::resume);
             } else {
@@ -994,18 +1326,30 @@ public class MainActivity extends BaseGameActivity implements
 
         var scoringScene = GlobalManager.getInstance().getScoring();
 
-        if (scoringScene != null && keyCode == KeyEvent.KEYCODE_BACK && currentScene == scoringScene.getScene()) {
+        if (
+            scoringScene != null &&
+            keyCode == KeyEvent.KEYCODE_BACK &&
+            currentScene == scoringScene.getScene()
+        ) {
             scoringScene.back();
             return true;
         }
 
         var songMenu = GlobalManager.getInstance().getSongMenu();
 
-        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
-                && songMenu != null && currentScene == songMenu.getScene() && songMenu.getScene().hasChildScene()) {
+        if (
+            (keyCode == KeyEvent.KEYCODE_BACK ||
+                keyCode == KeyEvent.KEYCODE_ENTER) &&
+            songMenu != null &&
+            currentScene == songMenu.getScene() &&
+            songMenu.getScene().hasChildScene()
+        ) {
             var searchBar = songMenu.getSearchBar();
 
-            if (searchBar != null && songMenu.getScene().getChildScene() == searchBar.getScene()) {
+            if (
+                searchBar != null &&
+                songMenu.getScene().getChildScene() == searchBar.getScene()
+            ) {
                 searchBar.hideMenu();
             }
 
@@ -1016,8 +1360,12 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
-        if (songMenu != null && keyCode == KeyEvent.KEYCODE_MENU
-                && currentScene == songMenu.getScene() && !songMenu.getScene().hasChildScene()) {
+        if (
+            songMenu != null &&
+            keyCode == KeyEvent.KEYCODE_MENU &&
+            currentScene == songMenu.getScene() &&
+            !songMenu.getScene().hasChildScene()
+        ) {
             songMenu.stopScroll(0);
             songMenu.showPropertiesMenu(null);
             return true;
@@ -1039,12 +1387,17 @@ public class MainActivity extends BaseGameActivity implements
                     }
 
                     if (currentScene == Multiplayer.roomScene) {
-
-                        if (Multiplayer.roomScene.hasChildScene() && Multiplayer.roomScene.getChildScene() == ModMenu.INSTANCE) {
+                        if (
+                            Multiplayer.roomScene.hasChildScene() &&
+                            Multiplayer.roomScene.getChildScene() ==
+                                ModMenu.INSTANCE
+                        ) {
                             ModMenu.INSTANCE.back();
                             return true;
                         }
-                        runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
+                        runOnUiThread(
+                            Multiplayer.roomScene.getLeaveDialog()::show
+                        );
                         return true;
                     }
                 }
@@ -1077,10 +1430,15 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public void forcedExit() {
-        if (GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
+        if (
+            GlobalManager.getInstance().getEngine().getScene() ==
+            GlobalManager.getInstance().getGameScene().getScene()
+        ) {
             GlobalManager.getInstance().getGameScene().quit();
         }
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+        GlobalManager.getInstance()
+            .getEngine()
+            .setScene(GlobalManager.getInstance().getMainScene().getScene());
         GlobalManager.getInstance().getMainScene().exit();
     }
 
@@ -1088,7 +1446,9 @@ public class MainActivity extends BaseGameActivity implements
         long versionCode = 0;
         try {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(
-                    getPackageName(), 0);
+                getPackageName(),
+                0
+            );
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 versionCode = packageInfo.getLongVersionCode();
             } else {
@@ -1110,25 +1470,117 @@ public class MainActivity extends BaseGameActivity implements
             lp.preferredDisplayModeId = enable ? maxRefreshRateModeId : 0;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                lp.preferMinimalPostProcessing = enable && display.isMinimalPostProcessingSupported();
+                lp.preferMinimalPostProcessing =
+                    enable && display.isMinimalPostProcessingSupported();
             }
 
             getWindow().setAttributes(lp);
         });
     }
 
+    /**
+     * Starts continuous Choreographer-driven frame callbacks for vsync-aligned
+     * input sampling and precise frame timing.
+     *
+     * On each vsync, this callback records the vsync timestamp and calls
+     * the onFrame Runnable for game-specific processing.
+     *
+     * Unlike the Engine's update thread which is locked to the render cycle,
+     * the Choreographer fires on EVERY vsync (60-144Hz), allowing input to be
+     * sampled at the display's native refresh rate independently of frame rendering.
+     */
+    public void startHighPrecisionInput(final Runnable onFrame) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) return;
+
+        final Choreographer.FrameCallback callback =
+            new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    // Record the vsync timestamp for precise timing
+                    lastVsyncFrameTimeNanos.set(frameTimeNanos);
+
+                    // Call the game's frame callback (reads raw pointers, updates cursors)
+                    if (onFrame != null) {
+                        try {
+                            onFrame.run();
+                        } catch (Exception e) {
+                            Debug.e("HighPrecisionInput callback error", e);
+                        }
+                    }
+
+                    // Re-register for the next vsync
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            };
+
+        // Start the callback chain immediately
+        runOnUiThread(() ->
+            Choreographer.getInstance().postFrameCallback(callback)
+        );
+    }
+
+    /**
+     * Stops the Choreographer-driven frame callbacks.
+     */
+    public void stopHighPrecisionInput() {
+        lastVsyncFrameTimeNanos.set(0);
+    }
+
+    /**
+     * Returns the last vsync frame time from Choreographer, in nanoseconds.
+     * Returns 0 if Choreographer is not active.
+     */
+    public long getLastVsyncFrameTimeNanos() {
+        return lastVsyncFrameTimeNanos.get();
+    }
+
+    /**
+     * Returns the DirectInputSurfaceView for direct pointer reads.
+     */
+    public DirectInputSurfaceView getDirectInputSurface() {
+        return directInputSurface;
+    }
+
+    /**
+     * Applies FLAG_HARDWARE_ACCELERATED to the window if high precision input is enabled.
+     */
+    private void applyHardwareAcceleration() {
+        if (Config.isHighPrecisionInput()) {
+            try {
+                Window w = getWindow();
+                if (w != null) {
+                    w.setFlags(
+                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    );
+                }
+            } catch (Exception e) {
+                Debug.e("Failed to set hardware acceleration", e);
+            }
+        }
+    }
+
     private boolean checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-                Environment.isExternalStorageManager()) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            Environment.isExternalStorageManager()
+        ) {
             return true;
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
-                PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PermissionChecker.PERMISSION_GRANTED) {
+        } else if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
+            PermissionChecker.checkCallingOrSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PermissionChecker.PERMISSION_GRANTED
+        ) {
             return true;
         } else {
             Intent grantPermission = new Intent(this, PermissionActivity.class);
             startActivity(grantPermission);
-            overridePendingTransition(ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap, ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap);
+            overridePendingTransition(
+                ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap,
+                ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap
+            );
             finish();
             return false;
         }
@@ -1140,10 +1592,13 @@ public class MainActivity extends BaseGameActivity implements
                 .setTitle(getString(R.string.multi_mode_window_alert_title))
                 .setMessage(getString(R.string.multi_mode_window_alert_message))
                 .setAllowDismiss(false)
-                .addButton(getString(R.string.accessibility_detector_exit), (d) -> {
-                    finish();
-                    return null;
-                });
+                .addButton(
+                    getString(R.string.accessibility_detector_exit),
+                    d -> {
+                        finish();
+                        return null;
+                    }
+                );
         }
 
         multiWindowAlert.show();

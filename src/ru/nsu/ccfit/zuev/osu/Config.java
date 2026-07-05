@@ -7,96 +7,31 @@ import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
-
 import com.google.firebase.messaging.FirebaseMessaging;
-
+import com.osudroid.multiplayer.Multiplayer;
+import com.reco1l.framework.Color4;
+import com.reco1l.framework.HexComposition;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import com.osudroid.multiplayer.Multiplayer;
-import com.reco1l.framework.Color4;
-import com.reco1l.framework.HexComposition;
-
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
-
 import org.anddev.andengine.util.Debug;
-
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
 public class Config {
-    private static String corePath,
-        defaultCorePath,
-        beatmapPath,
-        cachePath,
-        skinPath,
-        skinTopPath,
-        scorePath,
-        onlineUsername,
-        onlinePassword,
-        onlineDeviceID;
 
-    private static boolean DELETE_OSZ,
-        SCAN_DOWNLOAD,
-        deleteUnimportedBeatmaps,
-        showFirstApproachCircle,
-        comboburst,
-        useCustomSkins,
-        useCustomSounds,
-        corovans,
-        showFPS,
-        animateFollowCircle,
-        animateComboText,
-        snakingInSliders,
-        snakingOutSliders,
-        playMusicPreview,
-        showCursor,
-        enableExtension,
-        loadAvatar,
-        stayOnline,
-        burstEffects,
-        hitLighting,
-        useParticles,
-        useCustomComboColors,
-        forceRomanized,
-        fixFrameOffset,
-        removeSliderLock,
-        displayScoreStatistics,
-        hideReplayMarquee,
-        hideInGameUI,
-        receiveAnnouncements,
-        enableStoryboard,
-        safeBeatmapBg,
-        useNightcoreOnMultiplayer,
-        videoEnabled,
-        submitScoreOnMultiplayer,
-        preferModAcronymInMultiplayer,
-        keepBackgroundAspectRatio,
-        noChangeDimInBreaks,
-        dimHitObjects,
-        forceMaxRefreshRate,
-        shiftPitchInRateChange;
+    private static String corePath, defaultCorePath, beatmapPath, cachePath, skinPath, skinTopPath, scorePath, onlineUsername, onlinePassword, onlineDeviceID;
 
-    private static int RES_WIDTH,
-        RES_HEIGHT,
-        spinnerStyle,
-        metronomeSwitch,
-        backButtonPressTime;
+    private static boolean DELETE_OSZ, SCAN_DOWNLOAD, deleteUnimportedBeatmaps, showFirstApproachCircle, comboburst, useCustomSkins, useCustomSounds, corovans, showFPS, animateFollowCircle, animateComboText, snakingInSliders, snakingOutSliders, playMusicPreview, showCursor, enableExtension, loadAvatar, stayOnline, burstEffects, hitLighting, useParticles, useCustomComboColors, forceRomanized, fixFrameOffset, removeSliderLock, displayScoreStatistics, hideReplayMarquee, hideInGameUI, receiveAnnouncements, enableStoryboard, safeBeatmapBg, useNightcoreOnMultiplayer, videoEnabled, submitScoreOnMultiplayer, preferModAcronymInMultiplayer, keepBackgroundAspectRatio, noChangeDimInBreaks, dimHitObjects, forceMaxRefreshRate, highPrecisionInput, shiftPitchInRateChange;
 
-    private static float soundVolume,
-        bgmVolume,
-        offset,
-        backgroundBrightness,
-        playfieldSize,
-        playfieldHorizontalPosition,
-        playfieldVerticalPosition,
-        cursorSize;
+    private static int RES_WIDTH, RES_HEIGHT, spinnerStyle, metronomeSwitch, backButtonPressTime;
+
+    private static float soundVolume, bgmVolume, offset, backgroundBrightness, playfieldSize, playfieldHorizontalPosition, playfieldVerticalPosition, cursorSize;
 
     private static Map<String, String> skins;
 
@@ -131,10 +66,11 @@ public class Config {
      */
     private static SharedPreferences sharedPreferences;
 
-
     public static void loadConfig(final Context context) {
         Config.context = context;
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+            context
+        );
 
         final SharedPreferences prefs = sharedPreferences;
         // graphics
@@ -144,19 +80,29 @@ public class Config {
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", true);
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
-        showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
-        metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
+        showFirstApproachCircle = prefs.getBoolean(
+            "showfirstapproachcircle",
+            false
+        );
+        metronomeSwitch = Integer.parseInt(
+            prefs.getString("metronomeswitch", "1")
+        );
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         videoEnabled = prefs.getBoolean("enableVideo", false);
-        keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
+        keepBackgroundAspectRatio = prefs.getBoolean(
+            "keepBackgroundAspectRatio",
+            false
+        );
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
 
         measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
-        playfieldHorizontalPosition = prefs.getInt("playfieldHorizontalPosition", 50) / 100f;
-        playfieldVerticalPosition = prefs.getInt("playfieldVerticalPosition", 50) / 100f;
+        playfieldHorizontalPosition =
+            prefs.getInt("playfieldHorizontalPosition", 50) / 100f;
+        playfieldVerticalPosition =
+            prefs.getInt("playfieldVerticalPosition", 50) / 100f;
 
         animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
         animateComboText = prefs.getBoolean("animateComboText", true);
@@ -169,8 +115,10 @@ public class Config {
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
             cursorSize = prefs.getInt("cursorSize", 50) / 100f;
-        }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
-            prefs.edit()
+        } catch (RuntimeException e) {
+            // use valid integer since this makes the game crash on android m
+            prefs
+                .edit()
                 .putInt("offset", 0)
                 .putInt("bgbrightness", 25)
                 .putInt("soundvolume", 100)
@@ -182,7 +130,8 @@ public class Config {
         }
 
         //advanced
-        defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
+        defaultCorePath =
+            Environment.getExternalStorageDirectory() + "/osu!droid/";
         corePath = prefs.getString("corePath", defaultCorePath);
         if (corePath.length() == 0) {
             corePath = defaultCorePath;
@@ -208,21 +157,32 @@ public class Config {
             skinTopPath += "/";
         }
 
-        enableExtension = false;// prefs.getBoolean("enableExtension", false);
+        enableExtension = false; // prefs.getBoolean("enableExtension", false);
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
-        useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
+        useCustomComboColors = prefs.getBoolean(
+            "useCustomColors",
+            useCustomComboColors
+        );
         comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = new Color4(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)), HexComposition.RRGGBB);
+            comboColors[i - 1] = new Color4(
+                ColorPickerPreference.convertToRGB(
+                    prefs.getInt("combo" + i, 0xff000000)
+                ),
+                HexComposition.RRGGBB
+            );
         }
 
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
-        deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
+        deleteUnimportedBeatmaps = prefs.getBoolean(
+            "deleteUnimportedBeatmaps",
+            false
+        );
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
         if (beatmapPath.length() == 0) {
@@ -237,29 +197,45 @@ public class Config {
         showCursor = prefs.getBoolean("showcursor", false);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
+        displayScoreStatistics = prefs.getBoolean(
+            "displayScoreStatistics",
+            false
+        );
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
+        forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
+        highPrecisionInput = prefs.getBoolean("highPrecisionInput", false);
+        shiftPitchInRateChange = prefs.getBoolean(
+            "shiftPitchInRateChange",
+            false
+        );
         backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
         submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
-        preferModAcronymInMultiplayer = prefs.getBoolean("player_preferModAcronym", false);
+        preferModAcronymInMultiplayer = prefs.getBoolean(
+            "player_preferModAcronym",
+            false
+        );
 
-        if(receiveAnnouncements) {
+        if (receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
-        }else {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic("announcements"); 
+        } else {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(
+                "announcements"
+            );
         }
 
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
-            onlineDeviceID = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
+            onlineDeviceID = UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 32);
             Editor editor = prefs.edit();
             editor.putString("installID", onlineDeviceID);
             editor.putString("corePath", corePath);
@@ -272,22 +248,31 @@ public class Config {
     }
 
     public static void loadOnlineConfig(final Context context) {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        final SharedPreferences prefs =
+            PreferenceManager.getDefaultSharedPreferences(context);
 
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
-        loadAvatar = prefs.getBoolean("loadAvatar",false);
+        loadAvatar = prefs.getBoolean("loadAvatar", false);
     }
 
     public static void measureDisplaySize() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         Activity activity = (Activity) context;
-        activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+        activity
+            .getWindowManager()
+            .getDefaultDisplay()
+            .getRealMetrics(displayMetrics);
 
-        int width = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        int height = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        int width = Math.max(
+            displayMetrics.widthPixels,
+            displayMetrics.heightPixels
+        );
+        int height = Math.min(
+            displayMetrics.widthPixels,
+            displayMetrics.heightPixels
+        );
 
         // Tries to emulate the original behavior, the game was designed for 1280x720
         // resolution, so we try to approximate the scale factor.
@@ -296,7 +281,17 @@ public class Config {
         RES_WIDTH = (int) (width * ratio);
         RES_HEIGHT = (int) (height * ratio);
 
-        Log.v("Config", "Display size: " + width + "x" + height + "\nViewport size: " + RES_WIDTH + "x" + RES_HEIGHT);
+        Log.v(
+            "Config",
+            "Display size: " +
+                width +
+                "x" +
+                height +
+                "\nViewport size: " +
+                RES_WIDTH +
+                "x" +
+                RES_HEIGHT
+        );
     }
 
     public static boolean isEnableStoryboard() {
@@ -313,7 +308,9 @@ public class Config {
 
     public static boolean isRemoveSliderLock() {
         //noinspection DataFlowIssue
-        return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
+        return Multiplayer.isConnected()
+            ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock()
+            : removeSliderLock;
     }
 
     public static boolean isDisplayScoreStatistics() {
@@ -323,8 +320,8 @@ public class Config {
     @NonNull
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
         return Config.getString("difficultyAlgorithm", "0").equals("1")
-                ? DifficultyAlgorithm.standard
-                : DifficultyAlgorithm.droid;
+            ? DifficultyAlgorithm.standard
+            : DifficultyAlgorithm.droid;
     }
 
     public static boolean isEnableExtension() {
@@ -435,7 +432,9 @@ public class Config {
         return deleteUnimportedBeatmaps;
     }
 
-    public static void setDeleteUnimportedBeatmaps(boolean deleteUnimportedBeatmaps) {
+    public static void setDeleteUnimportedBeatmaps(
+        boolean deleteUnimportedBeatmaps
+    ) {
         Config.deleteUnimportedBeatmaps = deleteUnimportedBeatmaps;
     }
 
@@ -463,7 +462,9 @@ public class Config {
         return backgroundBrightness;
     }
 
-    public static void setBackgroundBrightness(final float backgroundBrightness) {
+    public static void setBackgroundBrightness(
+        final float backgroundBrightness
+    ) {
         Config.backgroundBrightness = backgroundBrightness;
     }
 
@@ -475,9 +476,7 @@ public class Config {
         return animateComboText;
     }
 
-
-    public static boolean isSnakingInSliders()
-    {
+    public static boolean isSnakingInSliders() {
         return snakingInSliders;
     }
 
@@ -526,11 +525,18 @@ public class Config {
     }
 
     public static BeatmapLeaderboardScoringMode getBeatmapLeaderboardScoringMode() {
-        return BeatmapLeaderboardScoringMode.parse(Integer.parseInt(getString("beatmapLeaderboardScoringMode", "0")));
+        return BeatmapLeaderboardScoringMode.parse(
+            Integer.parseInt(getString("beatmapLeaderboardScoringMode", "0"))
+        );
     }
 
-    public static void setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode) {
-        setString("beatmapLeaderboardScoringMode", String.valueOf(beatmapLeaderboardScoringMode.ordinal()));
+    public static void setBeatmapLeaderboardScoringMode(
+        BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode
+    ) {
+        setString(
+            "beatmapLeaderboardScoringMode",
+            String.valueOf(beatmapLeaderboardScoringMode.ordinal())
+        );
     }
 
     public static boolean getLoadAvatar() {
@@ -625,7 +631,9 @@ public class Config {
         return showFirstApproachCircle;
     }
 
-    public static void setShowFirstApproachCircle(boolean showFirstApproachCircle) {
+    public static void setShowFirstApproachCircle(
+        boolean showFirstApproachCircle
+    ) {
         Config.showFirstApproachCircle = showFirstApproachCircle;
     }
 
@@ -673,7 +681,9 @@ public class Config {
         return playfieldHorizontalPosition;
     }
 
-    public static void setPlayfieldHorizontalPosition(float playfieldHorizontalPosition) {
+    public static void setPlayfieldHorizontalPosition(
+        float playfieldHorizontalPosition
+    ) {
         Config.playfieldHorizontalPosition = playfieldHorizontalPosition;
     }
 
@@ -681,7 +691,9 @@ public class Config {
         return playfieldVerticalPosition;
     }
 
-    public static void setPlayfieldVerticalPosition(float playfieldVerticalPosition) {
+    public static void setPlayfieldVerticalPosition(
+        float playfieldVerticalPosition
+    ) {
         Config.playfieldVerticalPosition = playfieldVerticalPosition;
     }
 
@@ -726,20 +738,23 @@ public class Config {
     }
 
     public static void loadSkins() {
-        File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
+        File[] folders = FileUtils.listFiles(
+            new File(skinTopPath),
+            file -> file.isDirectory() && !file.getName().startsWith(".")
+        );
         skins = new HashMap<>();
-        for(File folder : folders) {
+        for (File folder : folders) {
             skins.put(folder.getName(), folder.getPath());
             Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
         }
     }
 
-    public static Map<String, String> getSkins(){
+    public static Map<String, String> getSkins() {
         return skins;
     }
 
     public static void addSkin(String name, String path) {
-        if(skins == null) skins = new HashMap<>();
+        if (skins == null) skins = new HashMap<>();
         skins.put(name, path);
     }
 
@@ -763,7 +778,9 @@ public class Config {
         return submitScoreOnMultiplayer;
     }
 
-    public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
+    public static void setSubmitScoreOnMultiplayer(
+        boolean submitScoreOnMultiplayer
+    ) {
         Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
     }
 
@@ -771,7 +788,9 @@ public class Config {
         return preferModAcronymInMultiplayer;
     }
 
-    public static void setPreferModAcronymInMultiplayer(boolean preferModAcronymInMultiplayer) {
+    public static void setPreferModAcronymInMultiplayer(
+        boolean preferModAcronymInMultiplayer
+    ) {
         Config.preferModAcronymInMultiplayer = preferModAcronymInMultiplayer;
     }
 
@@ -854,5 +873,4 @@ public class Config {
     public static void setFloat(String key, float value) {
         sharedPreferences.edit().putFloat(key, value).commit();
     }
-
 }
