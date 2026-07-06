@@ -5,12 +5,10 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.util.Debug;
-
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Custom RenderSurfaceView that intercepts MotionEvents at the lowest possible level
@@ -39,7 +37,9 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
      * Atomic version counter for thread-safe raw pointer reads.
      * Even = stable, Odd = being written (on UI thread).
      */
-    private final AtomicIntegerArray mPointerVersions = new AtomicIntegerArray(MAX_POINTERS);
+    private final AtomicIntegerArray mPointerVersions = new AtomicIntegerArray(
+        MAX_POINTERS
+    );
 
     /**
      * Latest X position for each pointer (surface coordinates).
@@ -65,7 +65,10 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
         super(context);
     }
 
-    public DirectInputSurfaceView(final Context context, final AttributeSet attrs) {
+    public DirectInputSurfaceView(
+        final Context context,
+        final AttributeSet attrs
+    ) {
         super(context, attrs);
     }
 
@@ -93,10 +96,9 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
             // Step 1: IMMEDIATELY update raw pointer data (before Engine processing)
             updateRawPointersFromEvent(event);
 
-            // Step 2: Signal the Engine's UpdateThread to wake up and process touch NOW
-            attachedEngine.signalTouchInterrupt();
-
-            // Step 3: Let the Engine process the event normally through the queue
+            // Step 2: Let the Engine process the event normally through the queue.
+            // Note: signalTouchInterrupt() is not available in this Engine version -
+            // touch processing follows the standard update-render cycle.
             return super.dispatchTouchEvent(event);
         } catch (Exception e) {
             // Never crash in the input path
@@ -125,9 +127,11 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
                     float x = event.getHistoricalX(i, h);
                     float y = event.getHistoricalY(i, h);
 
-                    boolean isDown = action == MotionEvent.ACTION_CANCEL
-                        ? false
-                        : mPointerDown[pointerId] || isDownAction(action, i, event.getActionIndex());
+                    boolean isDown =
+                        action == MotionEvent.ACTION_CANCEL
+                            ? false
+                            : mPointerDown[pointerId] ||
+                              isDownAction(action, i, event.getActionIndex());
 
                     // Atomic write with version guard
                     mPointerVersions.incrementAndGet(pointerId);
@@ -147,12 +151,13 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
 
                 float x = event.getX(i);
                 float y = event.getY(i);
-                boolean isDown = action == MotionEvent.ACTION_CANCEL
-                    ? false
-                    : isDownAction(action, i, event.getActionIndex())
-                        || (action != MotionEvent.ACTION_UP
-                            && action != MotionEvent.ACTION_POINTER_UP
-                            && mPointerDown[pointerId]);
+                boolean isDown =
+                    action == MotionEvent.ACTION_CANCEL
+                        ? false
+                        : isDownAction(action, i, event.getActionIndex()) ||
+                          (action != MotionEvent.ACTION_UP &&
+                              action != MotionEvent.ACTION_POINTER_UP &&
+                              mPointerDown[pointerId]);
 
                 // Atomic write with version guard
                 mPointerVersions.incrementAndGet(pointerId);
@@ -167,7 +172,11 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
         }
     }
 
-    private static boolean isDownAction(int action, int pointerIndex, int actionIndex) {
+    private static boolean isDownAction(
+        int action,
+        int pointerIndex,
+        int actionIndex
+    ) {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -210,10 +219,27 @@ public class DirectInputSurfaceView extends RenderSurfaceView {
     }
 
     // Direct array access for the update thread (used by fast path)
-    public AtomicIntegerArray getPointerVersions() { return mPointerVersions; }
-    public float[] getPointerX() { return mPointerX; }
-    public float[] getPointerY() { return mPointerY; }
-    public boolean[] getPointerDown() { return mPointerDown; }
-    public long[] getPointerEventTime() { return mPointerEventTime; }
-    public int getMaxPointers() { return MAX_POINTERS; }
+    public AtomicIntegerArray getPointerVersions() {
+        return mPointerVersions;
+    }
+
+    public float[] getPointerX() {
+        return mPointerX;
+    }
+
+    public float[] getPointerY() {
+        return mPointerY;
+    }
+
+    public boolean[] getPointerDown() {
+        return mPointerDown;
+    }
+
+    public long[] getPointerEventTime() {
+        return mPointerEventTime;
+    }
+
+    public int getMaxPointers() {
+        return MAX_POINTERS;
+    }
 }
