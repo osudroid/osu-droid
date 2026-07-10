@@ -69,7 +69,7 @@ abstract class BaseScoreMultiplierCalculator<TMultiplier : Number> @JvmOverloads
     /**
      * Calculates the multiplier to be applied to score with the given [mods].
      */
-    fun calculateFor(mods: Iterable<Mod>): TMultiplier {
+    open fun calculateFor(mods: Iterable<Mod>): TMultiplier {
         val modsByType = mods.associateBy { it::class }
 
         if (modsByType.isEmpty()) {

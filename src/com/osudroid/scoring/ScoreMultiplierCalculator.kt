@@ -1,7 +1,9 @@
 package com.osudroid.scoring
 
+import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
+import com.osudroid.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -13,21 +15,23 @@ import kotlin.math.pow
 class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDifficulty? = null) :
     BaseScoreMultiplierCalculator<Double>(difficulty) {
 
+    private var appliedDifficulty: BeatmapDifficulty? = null
+
     init {
         // region Difficulty Reduction
 
-        single<ModEasy>(0.5)
+        single<ModEasy>(0.8)
         single<ModNoFail>(0.5)
-        single<ModReallyEasy>(0.5)
+        single<ModReallyEasy>(0.3)
 
         // endregion
 
         // region Difficulty Increase
 
-        single<ModHardRock>(1.06)
-        single<ModPrecise>(1.06)
+        single<ModHardRock>(1.04)
+        single<ModPrecise> { preciseMultiplier() }
         single<ModHidden> { hiddenMultiplier() }
-        single<ModTraceable>(1.06)
+        single<ModTraceable>(1.03)
         combination<ModFlashlight, ModFreezeFrame> { flashlight, _ -> 1 + (flashlight.flashlightMultiplier() - 1) / 2 }
         single<ModFlashlight> { flashlightMultiplier() }
 
@@ -51,10 +55,22 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
 
         single<ModWindUp> { timeRampMultiplier() }
         single<ModWindDown> { timeRampMultiplier() }
+        single<ModRandom>(0.7)
         single<ModApproachDifferent>(0.7)
-        single<ModSynesthesia>(0.8)
+        single<ModSynesthesia>(0.99)
 
         // endregion
+    }
+
+    override fun calculateFor(mods: Iterable<Mod>): Double {
+        val appliedDifficulty = difficulty?.clone()
+
+        if (appliedDifficulty != null) {
+            ModUtils.applyModsToBeatmapDifficulty(appliedDifficulty, GameMode.Droid, mods)
+            this.appliedDifficulty = appliedDifficulty
+        }
+
+        return super.calculateFor(mods)
     }
 
     override val defaultMultiplier = 1.0
@@ -82,21 +98,27 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         return multiplier
     }
 
+    private fun preciseMultiplier(): Double {
+        // Keep original multiplier if applied difficulty is not present.
+        val appliedDifficulty = appliedDifficulty ?: return 1.06
+
+        return 1.02 + 0.08 * (appliedDifficulty.od / 10.0).pow(2)
+    }
+
     companion object {
-        // TODO: rebalancing, most of these are osu!lazer multipliers.
         private fun ModHidden.hiddenMultiplier(): Double {
-            var value = 1.04
+            var value = 1.06
 
             if (onlyFadeApproachCircles) {
-                value -= 0.02
+                value -= 0.03
             }
 
             return value
         }
 
         private fun ModFlashlight.flashlightMultiplier(): Double {
-            // 1.12x base, reduced by 0.02 per 0.1 increase in flashlight size.
-            val value = max(1.02, min(1.12, 1.12 - 0.2 * (sizeMultiplier.toDouble() - 1)))
+            // Multiplier of 1.2x, reduced by 0.02 per 0.1 increase in flashlight size.
+            val value = (1.2 - 0.2 * (sizeMultiplier - 1)).coerceIn(1.02, 1.2)
 
             return if (!comboBasedSize) 1 + (value - 1) / 5 else value
         }
@@ -123,18 +145,13 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
             else doubleTimeMultiplier(combinedRate)
         }
 
-        private fun halfTimeMultiplier(speedChange: Float): Double {
-            // 0.2x at 0.5x speed, +0.07x per 0.05x speed increment. Default HT (0.75x) = 0.55.
-            return (speedChange * 20).toInt() / 20.0 * 1.4 - 0.5
-        }
+        private fun halfTimeMultiplier(speedChange: Float) =
+            // 0.25x at 0.5x speed, +0.075x per 0.05x speed increment. Default HT (0.75x) = 0.625.
+            speedChange * 1.5 - 0.5
 
-        private fun doubleTimeMultiplier(speedChange: Float): Double {
-            // Floor to the nearest multiple of 0.1.
-            val value = (speedChange * 10).toInt() / 10.0
-            // 0.01 penalty for non-default rates. Linear from 1.0 to 1.46. Default DT (1.5x) = 1.23.
-            val penalty = if (value != 1.5 && value != 1.0) 0.01 else 0.0
-
-            return (value - 1) * 0.46 + 1 - penalty
-        }
+        private fun doubleTimeMultiplier(speedChange: Float) =
+            // Linear from 1.0 to 1.46.
+            // Default DT (1.5x) = 1.23
+            1 + (speedChange - 1) * 0.46
     }
 }
