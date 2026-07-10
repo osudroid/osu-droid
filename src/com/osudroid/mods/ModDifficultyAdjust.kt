@@ -93,6 +93,19 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val usesDefaultSettings
         get() = settings.all { it.value == it.initialValue }
 
+    /**
+     * Sets this [ModDifficultyAdjust]'s default difficulty values. This does not change the current values of the
+     * settings, but rather the default values that are used when the settings are reset.
+     *
+     * @param difficulty The [BeatmapDifficulty] to use as the default values.
+     */
+    fun setDefaultDifficulty(difficulty: BeatmapDifficulty) {
+        getModSettingDelegate<DifficultyAdjustModSetting>(::cs).defaultValue = difficulty.gameplayCS
+        getModSettingDelegate<DifficultyAdjustModSetting>(::ar).defaultValue = difficulty.ar
+        getModSettingDelegate<DifficultyAdjustModSetting>(::od).defaultValue = difficulty.od
+        getModSettingDelegate<DifficultyAdjustModSetting>(::hp).defaultValue = difficulty.hp
+    }
+
     override fun isCompatibleWith(other: Mod): Boolean {
         if (!super.isCompatibleWith(other)) {
             return false
