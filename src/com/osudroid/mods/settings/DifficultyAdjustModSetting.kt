@@ -1,20 +1,15 @@
 package com.osudroid.mods.settings
 
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import kotlinx.serialization.json.*
 
 /**
- * A [NullableFloatModSetting] variant for [ModDifficultyAdjust] that embeds the beatmap's original difficulty value
- * alongside the user's adjusted value in the serialized format:
+ * A [NullableFloatModSetting] variant for [ModDifficultyAdjust] that accepts the beatmap's original difficulty value
+ * alongside the user's adjusted value from the legacy serialized format:
  *
  * ```json
  * {"adjusted": 7.0, "original": 4.0}
  * ```
- *
- * When [originalValue] is non-null, the score multiplier can be computed from the serialized format alone, without a
- * beatmap lookup. When `null` (old data or beatmap absent at migration time), the caller must invoke
- * [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] first.
  *
  * Old scalar values (`"cs": 7.0`) are accepted on [load] for backward compatibility.
  */
@@ -40,12 +35,10 @@ class DifficultyAdjustModSetting(
     orderPosition = orderPosition,
     useManualInput = useManualInput
 ) {
-    /**
-     * The beatmap's original value for this setting, populated by [IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty].
-     *
-     * Non-null means the score multiplier is self-contained; `null` means a beatmap lookup is needed.
-     */
-    var originalValue: Float? = null
+    // "Default" means no override is active (value == null == initialValue), regardless of what
+    // defaultValue currently holds (which may be set to the beatmap's difficulty for UI hint display).
+    override val isDefault
+        get() = value == initialValue
 
     override fun load(json: JsonObject) {
         if (key == null) {
@@ -55,10 +48,10 @@ class DifficultyAdjustModSetting(
         val element = json[key]
 
         if (element is JsonObject) {
+            // TODO: Remove this branch in a future migration once all legacy {"adjusted","original"} scores are gone.
             value = element["adjusted"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull
 
             val original = element["original"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull
-            originalValue = original
 
             if (original != null) {
                 defaultValue = original
@@ -66,8 +59,6 @@ class DifficultyAdjustModSetting(
         } else {
             // This is in old scalar format (or null / JsonNull). Delegate to parent for backward compatibility.
             super.load(json)
-
-            originalValue = null
         }
     }
 
@@ -76,24 +67,6 @@ class DifficultyAdjustModSetting(
             return
         }
 
-        builder.put(key, buildJsonObject {
-            put("adjusted", value!!)
-
-            val original = originalValue
-
-            if (original != null) {
-                put("original", original)
-            } else {
-                put("original", JsonNull)
-            }
-        })
-    }
-
-    override fun copyFrom(other: ModSetting<Float?>) {
-        super.copyFrom(other)
-
-        if (other is DifficultyAdjustModSetting) {
-            originalValue = other.originalValue
-        }
+        builder.put(key, value!!)
     }
 }

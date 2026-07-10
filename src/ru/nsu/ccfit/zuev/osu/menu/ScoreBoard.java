@@ -76,7 +76,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mScrollDetector = new SurfaceScrollDetector(this);
     }
 
-    private String formatScore(StringBuilder sb, int score) {
+    private String formatScore(StringBuilder sb, long score) {
         sb.setLength(0);
         sb.append(Math.abs(score));
         for (int i = sb.length() - 3; i > 0; i -= 3) {
@@ -250,7 +250,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
 
-                int nextTotalScore;
+                long nextTotalScore;
 
                 for (int i = 0; i < scores.size() && isActive(); ++i) {
 
