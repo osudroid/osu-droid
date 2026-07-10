@@ -17,7 +17,6 @@ import com.osudroid.mods.IModApplicableToDifficultyWithMods
 import com.osudroid.mods.IModApplicableToHitObject
 import com.osudroid.mods.IModApplicableToHitObjectWithMods
 import com.osudroid.mods.IModFacilitatesAdjustment
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModScoreV2
 import com.osudroid.scoring.ScoreMultiplierCalculator
@@ -171,11 +170,6 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         }
 
         val adjustmentMods = mods?.filterIsInstance<IModFacilitatesAdjustment>() ?: emptyList()
-
-        mods?.filterIsInstance<IModRequiresBeatmapDifficulty>()?.forEach {
-            scope?.ensureActive()
-            it.applyFromBeatmapDifficulty(difficulty)
-        }
 
         val converter = BeatmapConverter(this, scope)
 
