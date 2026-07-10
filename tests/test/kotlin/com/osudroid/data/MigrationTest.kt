@@ -27,9 +27,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test all migrations`() {
-        helper.createDatabase(testDb, 1).apply {
-            close()
-        }
+        helper.createDatabase(testDb, 1).close()
 
         Room.databaseBuilder(
             InstrumentationRegistry.getInstrumentation().targetContext,
@@ -43,9 +41,9 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 1 to 2`() {
-        helper.createDatabase(testDb, 1).apply {
+        helper.createDatabase(testDb, 1).use {
             // Insert a fake beatmap.
-            execSQL(
+            it.execSQL(
                 "INSERT INTO BeatmapInfo (filename, md5, audioFilename, setDirectory, title, titleUnicode, artist, " +
                 "artistUnicode, creator, version, tags, source, dateImported, approachRate, overallDifficulty, " +
                 "circleSize, hpDrainRate, bpmMax, bpmMin, mostCommonBPM, length, previewTime, hitCircleCount, " +
@@ -66,7 +64,7 @@ class MigrationTest {
             // A score with mods that can be migrated and with a beatmap that is in the database.
             addScore("m")
 
-            execSQL(
+            it.execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time) VALUES " +
                 scores.joinToString(",")
@@ -114,7 +112,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 2 to 3`() {
-        helper.createDatabase(testDb, 2).apply {
+        helper.createDatabase(testDb, 2).use {
             val scores = mutableListOf<String>()
 
             fun addScore(mods: ModHashMap, time: Long = 1752863880000L) {
@@ -146,7 +144,7 @@ class MigrationTest {
                 put(ModCustomSpeed(0.85f))
             })
 
-            execSQL(
+            it.execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                         "hit300k, hit300, hit100k, hit100, hit50, misses, time) VALUES " +
                         scores.joinToString(",")
@@ -202,23 +200,23 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun `Test migration from version 3 to 4`() {
-        helper.createDatabase(testDb, 3).apply {
+        helper.createDatabase(testDb, 3).use {
             // A score without Flashlight mod. This should not be recalculated.
-            execSQL(
+            it.execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
                 "'', '', '', 1000, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
             )
 
             // A score with Flashlight mod in default settings. This should not be recalculated.
-            execSQL(
+            it.execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
                 "'', '', '[{\"acronym\":\"FL\"}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
             )
 
             // A score with Flashlight mod with custom settings. This should be recalculated.
-            execSQL(
+            it.execSQL(
                 "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                 "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderTickHits, sliderEndHits) VALUES ('md5', " +
                 "'', '', '[{\"acronym\":\"FL\",\"settings\":{\"areaFollowDelay\":0.24}}]', 1120, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0)"
@@ -265,8 +263,8 @@ class MigrationTest {
         // Beatmap difficulty used to compute DA mod's score multiplier during migration.
         val difficulty = BeatmapDifficulty(4f, 9f, 8f, 6f)
 
-        helper.createDatabase(testDb, 4).apply {
-            execSQL(
+        helper.createDatabase(testDb, 4).use {
+            it.execSQL(
                 "INSERT INTO BeatmapInfo (filename, md5, audioFilename, setDirectory, title, titleUnicode, artist, " +
                 "artistUnicode, creator, version, tags, source, dateImported, approachRate, overallDifficulty, " +
                 "circleSize, hpDrainRate, bpmMax, bpmMin, mostCommonBPM, length, previewTime, hitCircleCount, " +
@@ -278,14 +276,12 @@ class MigrationTest {
 
             val hdMods = ModHashMap().apply { put(ModHidden()) }.serializeMods()
 
-            // Call applyFromBeatmapDifficulty before serialization. This sets CS' default value to 4 while the value is
-            // 7, which will allow the custom CS to be serialized.
             val daMods = ModHashMap().apply {
-                put(ModDifficultyAdjust(cs = 7f).also { it.applyFromBeatmapDifficulty(difficulty) })
+                put(ModDifficultyAdjust(cs = 7f))
             }.serializeMods()
 
             fun insertScore(md5: String, mods: String, score: Int) {
-                execSQL(
+                it.execSQL(
                     "INSERT INTO ScoreInfo (beatmapMD5, playerName, replayFilename, mods, score, maxCombo, mark, " +
                     "hit300k, hit300, hit100k, hit100, hit50, misses, time, sliderHeadHits, sliderTickHits, " +
                     "sliderRepeatHits, sliderEndHits) VALUES " +
@@ -301,8 +297,6 @@ class MigrationTest {
             insertScore(beatmapMD5, daMods, 1039)
             // DA mod, beatmap absent; sentinel -1
             insertScore(missingBeatmapMD5, daMods, 1039)
-
-            close()
         }
 
         val db = helper.runMigrationsAndValidate(testDb, 5, true, MIGRATION_4_5)

@@ -366,10 +366,9 @@ object ModMenu : UIScene() {
                 DatabaseManager.beatmapInfoTable.update(newInfo)
             }
 
-            enabledMods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().fastForEach { mod ->
-                ensureActive()
-                mod.applyFromBeatmapDifficulty(beatmap.difficulty)
-            }
+            // This is needed to give the mod a reference to the beatmap's default difficulty values.
+            enabledMods.ofType<ModDifficultyAdjust>()?.setDefaultDifficulty(beatmap.difficulty)
+
             customizationMenu.updateComponents()
 
             // Copy the mods to avoid concurrent modification

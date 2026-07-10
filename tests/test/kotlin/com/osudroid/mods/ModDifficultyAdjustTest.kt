@@ -9,9 +9,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.math.Vector2
 import com.osudroid.mods.settings.DifficultyAdjustModSetting
 import com.osudroid.utils.ModUtils
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.float
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
@@ -163,42 +161,33 @@ class ModDifficultyAdjustTest {
     }
 
     @Test
-    fun `Test serialization embeds original value`() {
-        // Set adjusted values after construction so value != defaultValue (isDefault = false).
+    fun `Test serialization writes scalar value`() {
         ModDifficultyAdjust().also {
             it.cs = 7f
             it.od = 9f
-            it.setOriginals(cs = 4f, od = 8f)
         }.toAPIMod().settings!!.apply {
-            Assert.assertEquals(7f, get("cs")!!.jsonObject["adjusted"]!!.jsonPrimitive.float, 0f)
-            Assert.assertEquals(4f, get("cs")!!.jsonObject["original"]!!.jsonPrimitive.float, 0f)
-            Assert.assertEquals(9f, get("od")!!.jsonObject["adjusted"]!!.jsonPrimitive.float, 0f)
-            Assert.assertEquals(8f, get("od")!!.jsonObject["original"]!!.jsonPrimitive.float, 0f)
+            Assert.assertEquals(7f, get("cs")!!.jsonPrimitive.float, 0f)
+            Assert.assertEquals(9f, get("od")!!.jsonPrimitive.float, 0f)
         }
     }
 
     @Test
-    fun `Test serialization writes null original when beatmap is unknown`() {
+    fun `Test serialization omits null settings`() {
         ModDifficultyAdjust().also { it.cs = 7f }.toAPIMod().settings!!.apply {
-            Assert.assertEquals(7f, get("cs")!!.jsonObject["adjusted"]!!.jsonPrimitive.float, 0f)
-            Assert.assertSame(JsonNull, get("cs")!!.jsonObject["original"])
+            Assert.assertEquals(7f, get("cs")!!.jsonPrimitive.float, 0f)
+            Assert.assertNull(get("od"))
         }
     }
 
     @Test
-    fun `Test deserialization of new format`() {
-        val mod = ModDifficultyAdjust().also {
-            it.cs = 7f
-            it.od = 9f
-            it.setOriginals(cs = 4f, od = 8f)
-        }
-
-        val deserialized = mod.roundTrip()
+    fun `Test deserialization of old object format`() {
+        val json = """[{"acronym":"DA","settings":{"cs":{"adjusted":7.0,"original":4.0},"od":{"adjusted":9.0,"original":8.0}}}]"""
+        val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
-        Assert.assertEquals(4f, deserialized.csDelegate().originalValue)
+        Assert.assertEquals(4f, deserialized.csDelegate().defaultValue)
         Assert.assertEquals(9f, deserialized.od)
-        Assert.assertEquals(8f, deserialized.odDelegate().originalValue)
+        Assert.assertEquals(8f, deserialized.odDelegate().defaultValue)
     }
 
     @Test
@@ -207,51 +196,31 @@ class ModDifficultyAdjustTest {
         val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
-        Assert.assertNull(deserialized.csDelegate().originalValue)
         Assert.assertEquals(9f, deserialized.od)
-        Assert.assertNull(deserialized.odDelegate().originalValue)
     }
 
     @Test
-    fun `Test deserialization of new format with null original`() {
+    fun `Test deserialization of old object format with null original`() {
         val json = """[{"acronym":"DA","settings":{"cs":{"adjusted":7.0,"original":null}}}]"""
         val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
-        Assert.assertNull(deserialized.csDelegate().originalValue)
+        Assert.assertNull(deserialized.csDelegate().defaultValue)
     }
 
     @Test
-    fun `Test deep copy preserves original values`() {
+    fun `Test deep copy preserves values`() {
         val mod = ModDifficultyAdjust().also {
             it.cs = 7f
             it.od = 9f
-            it.setOriginals(cs = 4f, od = 8f)
         }
 
         val copy = mod.deepCopy() as ModDifficultyAdjust
 
         Assert.assertEquals(7f, copy.cs)
-        Assert.assertEquals(4f, copy.csDelegate().originalValue)
         Assert.assertEquals(9f, copy.od)
-        Assert.assertEquals(8f, copy.odDelegate().originalValue)
     }
 
     private fun ModDifficultyAdjust.csDelegate() = getModSettingDelegate<DifficultyAdjustModSetting>(::cs)
     private fun ModDifficultyAdjust.odDelegate() = getModSettingDelegate<DifficultyAdjustModSetting>(::od)
-
-    /**
-     * Sets both [DifficultyAdjustModSetting.originalValue] and [DifficultyAdjustModSetting.defaultValue] for the
-     * named dimensions, mirroring what [ModDifficultyAdjust.updateBeatmapValue] does when
-     * [com.osudroid.mods.IModRequiresBeatmapDifficulty.applyFromBeatmapDifficulty] is called.
-     */
-    private fun ModDifficultyAdjust.setOriginals(cs: Float? = null, ar: Float? = null, od: Float? = null, hp: Float? = null) {
-        cs?.let { getModSettingDelegate<DifficultyAdjustModSetting>(::cs).also { d -> d.defaultValue = it; d.originalValue = it } }
-        ar?.let { getModSettingDelegate<DifficultyAdjustModSetting>(::ar).also { d -> d.defaultValue = it; d.originalValue = it } }
-        od?.let { getModSettingDelegate<DifficultyAdjustModSetting>(::od).also { d -> d.defaultValue = it; d.originalValue = it } }
-        hp?.let { getModSettingDelegate<DifficultyAdjustModSetting>(::hp).also { d -> d.defaultValue = it; d.originalValue = it } }
-    }
-
-    private fun ModDifficultyAdjust.roundTrip() =
-        ModUtils.deserializeMods(ModUtils.serializeMods(listOf(this))).ofType<ModDifficultyAdjust>()!!
 }

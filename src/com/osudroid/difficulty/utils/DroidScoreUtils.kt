@@ -1,5 +1,6 @@
 package com.osudroid.difficulty.utils
 
+import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.PlayableBeatmap
 import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.scoring.ScoreMultiplierCalculator
@@ -14,25 +15,26 @@ object DroidScoreUtils {
      * Calculates the maximum possible spinner bonus for a [PlayableBeatmap]. Only works for osu!droid but is typed
      * as [PlayableBeatmap] to support other subtypes (i.e., live calculation).
      *
-     * @param beatmap The [PlayableBeatmap] to calculate the maximum spinner bonus for.
+     * @param beatmap The [Beatmap] to calculate the maximum spinner bonus for.
+     * @param playableBeatmap The [PlayableBeatmap] to calculate the maximum spinner bonus for.
      * @returns The maximum spinner bonus.
      */
     @JvmStatic
-    fun calculateMaximumSpinnerBonus(beatmap: PlayableBeatmap): Long {
+    fun calculateMaximumSpinnerBonus(beatmap: Beatmap, playableBeatmap: PlayableBeatmap): Long {
         val hitObjects = beatmap.hitObjects
 
         if (hitObjects.spinnerCount == 0) {
             return 0L
         }
 
-        val scoreMultiplier = ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(beatmap.mods.values)
+        val scoreMultiplier = ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(playableBeatmap.mods.values)
         var bonus = 0L
 
         // In reality, there is no time-based limit to spinner RPM, since the limit is π/2 rad/*frame* and not rad/second.
         // For the purpose of this calculation, we assume that the frame rate is 120 FPS.
         // For scores that were set in a higher refresh rate, this estimation will underestimate the actual maximum spinner bonus.
         val maximumRotationsPerSecond = PI / 2 * 120
-        val minimumRotationsPerSecond = 2 + 2 * beatmap.difficulty.od / 10
+        val minimumRotationsPerSecond = 2 + 2 * playableBeatmap.difficulty.od / 10
 
         for (obj in hitObjects) {
             if (obj !is Spinner) {
