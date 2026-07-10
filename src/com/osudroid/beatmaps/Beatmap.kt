@@ -22,6 +22,7 @@ import com.osudroid.mods.ModScoreV2
 import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
+import kotlin.math.roundToLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -62,17 +63,17 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
      * @param mods The [ModHashMap] to calculate the maximum score with.
      * @return The maximum score of this [Beatmap] with [mods] applied.
      */
-    fun calculateMaximumScore(mods: ModHashMap?): Int {
+    fun calculateMaximumScore(mods: ModHashMap?): Long {
         val scoreMultiplier = if (mods != null) ScoreMultiplierCalculator(difficulty).calculateFor(mods.values) else 1.0
 
         if (mods != null && ModScoreV2::class in mods) {
-            return (1e6 * scoreMultiplier).toInt()
+            return (1e6 * scoreMultiplier).toLong()
         }
 
         val difficultyMultiplier = 1 + difficulty.od / 10 + difficulty.hp / 10 + (difficulty.difficultyCS - 3) / 4
 
         var combo = 0
-        var score = 0
+        var score = 0L
 
         // Spinners need non-rate adjusted to calculate required spins.
         val nonRateAdjustedDifficulty = difficulty.clone()
@@ -118,11 +119,11 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
                 }
             }
 
-            score += (300 + 300 * combo * difficultyMultiplier / 25).toInt()
+            score += (300 + 300 * combo * difficultyMultiplier / 25).toLong()
             ++combo
         }
 
-        return (score * scoreMultiplier).toInt()
+        return (score * scoreMultiplier).roundToLong()
     }
 
     /**

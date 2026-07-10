@@ -2,7 +2,7 @@ package com.osudroid.ui.v2.hud.elements
 
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.SpriteFont
-import com.rian.framework.RollingIntCounter
+import com.rian.framework.RollingLongCounter
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.DecimalFormat
@@ -14,7 +14,7 @@ class HUDScoreCounter : HUDElement() {
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
     private val format = DecimalFormat("00000000", DecimalFormatSymbols(Locale.US))
 
-    private var value = 0
+    private var value = 0L
         set(value) {
             if (field != value) {
                 field = value
@@ -22,7 +22,7 @@ class HUDScoreCounter : HUDElement() {
             }
         }
 
-    private val counter = RollingIntCounter(0).apply { rollingDuration = 1f }
+    private val counter = RollingLongCounter(0L).apply { rollingDuration = 1f }
 
     init {
         sprite.spacing = -OsuSkin.get().scoreOverlap
