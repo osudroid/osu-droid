@@ -63,7 +63,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         maximumScore = (
             beatmap.calculateMaximumScore(playableBeatmap.mods).toLong() +
-            DroidScoreUtils.calculateMaximumSpinnerBonus(playableBeatmap).toLong()
+            DroidScoreUtils.calculateMaximumSpinnerBonus(beatmap, playableBeatmap).toLong()
         ).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
         populateAimAttributes(skills, forReplay)
