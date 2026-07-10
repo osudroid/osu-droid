@@ -13,6 +13,8 @@ import androidx.room.Update
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
 import kotlin.math.roundToInt
 import org.apache.commons.io.FilenameUtils
@@ -154,16 +156,9 @@ data class ScoreInfo @JvmOverloads constructor(
         get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
     /**
-     * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods].
-     *
-     * Pass [difficulty] when available so that mods implementing [IModRequiresBeatmapDifficulty] (e.g.
-     * [ModDifficultyAdjust]) can apply their beatmap-dependent multiplier. Without it, their score multiplier is 1.
-     *
-     * Use [StatisticV2.getTotalScoreWithMultiplier] with a proper [StatisticV2.calculateModScoreMultiplier] call for
-     * display when the full [BeatmapDifficulty] is available.
+     * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods] and [BeatmapDifficulty].
      */
-    @JvmOverloads
-    fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
+    fun calculateEffectiveScore(difficulty: BeatmapDifficulty): Int {
         // Pending-migration rows store total score with multipliers directly, so multiplying again would apply the
         // multiplier twice.
         if (needsScoreMigration) {
@@ -172,13 +167,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
         val modMap = ModUtils.deserializeMods(mods)
 
-        if (difficulty != null) {
-            modMap.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                m.applyFromBeatmapDifficulty(difficulty)
-            }
-        }
-
-        return (score * ModUtils.calculateScoreMultiplier(modMap)).roundToInt()
+        return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToInt()
     }
 
 
@@ -260,7 +249,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5")
     fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
-    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty) =
         getBeatmapScores(beatmapMD5)
             .map { ScoredScoreInfo(it, it.calculateEffectiveScore(difficulty)) }
             .sortedByDescending { it.effectiveScore }
@@ -268,7 +257,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    fun getBestMark(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+    fun getBestMark(beatmapMD5: String, difficulty: BeatmapDifficulty) =
         getBeatmapScores(beatmapMD5).maxByOrNull { it.calculateEffectiveScore(difficulty) }?.mark
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -313,7 +302,7 @@ interface IScoreInfoDAO {
             }
 
             updateScore(scoreInfo.copy(
-                score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
                 mods = mods.serializeMods(),
                 needsScoreMigration = false
             ))

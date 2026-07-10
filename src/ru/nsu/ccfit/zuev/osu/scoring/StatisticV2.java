@@ -8,7 +8,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
-import com.osudroid.mods.IModRequiresBeatmapDifficulty;
 import com.osudroid.multiplayer.api.data.RoomTeam;
 import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.data.ScoreInfo;
@@ -17,6 +16,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty;
 import com.osudroid.mods.IMigratableMod;
 import com.osudroid.mods.ModFlashlight;
 import com.osudroid.mods.ModHidden;
+import com.osudroid.scoring.ScoreMultiplierCalculator;
 import com.osudroid.utils.ModHashMap;
 import com.osudroid.utils.ModUtils;
 
@@ -83,6 +83,7 @@ public class StatisticV2 implements Serializable {
     /**
      * The score multiplier from mods.
      */
+    // TODO: move to double
     private float modScoreMultiplier = 1;
 
     /**
@@ -658,15 +659,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public void calculateModScoreMultiplier(@Nullable final BeatmapDifficulty difficulty) {
-        if (difficulty != null) {
-            for (var m : mod.values()) {
-                if (m instanceof IModRequiresBeatmapDifficulty requiresBeatmapDifficulty) {
-                    requiresBeatmapDifficulty.applyFromBeatmapDifficulty(difficulty);
-                }
-            }
-        }
-
-        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod);
+        modScoreMultiplier = new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values()).floatValue();
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {

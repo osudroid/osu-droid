@@ -7,8 +7,6 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.ModUtils
-import kotlin.math.exp
-import kotlin.math.pow
 import kotlin.reflect.KProperty0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -101,40 +99,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     // This mod has a different default than others as the default value of settings change based on the beatmap.
     override val usesDefaultSettings
         get() = settings.all { it.value == it.initialValue }
-
-    override val scoreMultiplier: Float
-        get() {
-            // Graph: https://www.desmos.com/calculator/yrggkhrkzz
-            var multiplier = 1f
-            val cs = getModSettingDelegate<DifficultyAdjustModSetting>(::cs)
-            val od = getModSettingDelegate<DifficultyAdjustModSetting>(::od)
-
-            if (cs.value != null) {
-                val original = cs.originalValue ?: cs.defaultValue
-
-                if (original != null) {
-                    val diff = cs.value!! - original
-
-                    multiplier *=
-                        if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
-                        else 2 / (1 + exp(-0.5f * diff))
-                }
-            }
-
-            if (od.value != null) {
-                val original = od.originalValue ?: od.defaultValue
-
-                if (original != null) {
-                    val diff = od.value!! - original
-
-                    multiplier *=
-                        if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
-                        else 2 / (1 + exp(-0.25f * diff))
-                }
-            }
-
-            return multiplier
-        }
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (!super.isCompatibleWith(other)) {

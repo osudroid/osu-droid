@@ -6,6 +6,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.ScoreInfo;
 import com.osudroid.mods.IModRequiresBeatmapDifficulty;
 import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator;
 import com.osudroid.utils.ModUtils;
 
 import org.apache.commons.io.FilenameUtils;
@@ -171,7 +172,7 @@ public class OsuDroidReplayPack {
 
             // If migration is needed, keep the original score for on-the-fly migrations once the beatmap is available.
             if (!needsScoreMigration) {
-                replayData.put("score", Math.round(replayData.getInt("score") / ModUtils.calculateMigrationScoreMultiplier(mods)));
+                replayData.put("score", Math.round(replayData.getInt("score") / new LegacyScoreMultiplierCalculator().calculateFor(mods.values())));
             }
         }
 

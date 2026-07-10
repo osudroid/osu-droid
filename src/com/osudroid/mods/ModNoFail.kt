@@ -9,7 +9,6 @@ class ModNoFail : Mod() {
     override val description = "You can't fail, no matter what."
     override val type = ModType.DifficultyReduction
     override val isRanked = true
-    override val scoreMultiplier = 0.5f
 
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModPerfect::class, ModSuddenDeath::class, ModAutopilot::class, ModRelax::class
