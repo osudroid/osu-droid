@@ -354,7 +354,7 @@ class StandardPerformanceCalculator(
     // to make it more punishing on maps with lower amount of hard sections.
     private fun calculateMissPenalty(missCount: Double, difficultStrainCount: Double) =
         if (missCount == 0.0) 1.0
-        else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
+        else 0.93 / (missCount / (4 * ln(max(1.0, difficultStrainCount))) + 1)
 
     private fun calculateEstimatedSliderBreaks(topWeightedSliderFactor: Double): Double {
         val nonMissMistakes = countOk + countMeh

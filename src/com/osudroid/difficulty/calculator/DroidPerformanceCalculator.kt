@@ -291,7 +291,7 @@ class DroidPerformanceCalculator(
 
     private fun calculateStrainBasedMissPenalty(missCount: Double, difficultStrainCount: Double) =
         if (missCount == 0.0) 1.0
-        else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
+        else 0.93 / (missCount / (4 * ln(max(1.0, difficultStrainCount))) + 1)
 
     private val proportionalMissPenalty: Double
         get() {

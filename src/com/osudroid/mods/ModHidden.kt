@@ -44,7 +44,10 @@ class ModHidden : ModWithVisibilityAdjustment() {
         fun applyFadeInAdjustment(hitObject: HitObject) {
             scope?.ensureActive()
 
-            hitObject.timeFadeIn = hitObject.timePreempt * FADE_IN_DURATION_MULTIPLIER
+            // Sliders keep their default fade-in time to match osu!stable.
+            if (hitObject !is Slider) {
+                hitObject.timeFadeIn = hitObject.timePreempt * FADE_IN_DURATION_MULTIPLIER
+            }
 
             if (hitObject is Slider) {
                 hitObject.nestedHitObjects.forEach { applyFadeInAdjustment(it) }
