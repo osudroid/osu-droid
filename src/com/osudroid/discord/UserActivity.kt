@@ -51,7 +51,7 @@ sealed class UserActivity {
      * @param beatmapId The beatmap ID.
      */
     sealed class InGame(beatmapTitle: String, beatmapId: Long?) : UserActivity() {
-        val beatmapUrl = if (beatmapId != null) "https://osu.ppy.sh/b/$beatmapId" else null
+        val beatmapUrl = if (beatmapId != null && beatmapId != -1L) "https://osu.ppy.sh/b/$beatmapId" else null
 
         override val details = beatmapTitle
     }
