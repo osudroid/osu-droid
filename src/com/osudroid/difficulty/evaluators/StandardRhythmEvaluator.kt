@@ -57,6 +57,10 @@ object StandardRhythmEvaluator {
         for (i in rhythmStart downTo 1) {
             val currentObject = current.previous(i - 1)!!
 
+            if (currentObject.obj is Spinner) {
+                continue
+            }
+
             // Scale note 0 to 1 from history to now.
             val timeDecay = (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
             val noteDecay = (historicalNoteCount - i).toDouble() / historicalNoteCount

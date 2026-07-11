@@ -23,7 +23,7 @@ class DroidPerformanceCalculationParameters : PerformanceCalculationParameters()
      * The total score achieved.
      */
     @JvmField
-    var totalScore = 0
+    var totalScore = 0L
 
     override fun populate(stat: StatisticV2, sliderCount: Int, sliderTickCount: Int, sliderRepeatCount: Int) {
         super.populate(stat, sliderCount, sliderTickCount, sliderRepeatCount)

@@ -603,6 +603,22 @@ public class GameplaySlider extends GameObject {
 
         sliderHeadLateMissFadeModifier = null;
 
+        // removeFromScene() stops looping sounds and releases hit samples, but during a seek, onExpire() fires without
+        // removeFromScene(). This causes looping sounds to continuously play after a seek, and nested hit samples
+        // remain populated, so when the pool reuses this slider, reloadHitSounds() appends to them instead of an empty
+        // list, resulting in doubled hitsounds at every tick/repeat.
+        stopLoopingSamples();
+
+        for (int i = 0, iSize = nestedHitSamples.size(); i < iSize; ++i) {
+            var hitSamples = nestedHitSamples.get(i);
+
+            for (int j = hitSamples.size() - 1; j >= 0; --j) {
+                hitSamples.get(j).release();
+            }
+
+            hitSamples.clear();
+        }
+
         GameObjectPool.getInstance().putSlider(this);
     }
 

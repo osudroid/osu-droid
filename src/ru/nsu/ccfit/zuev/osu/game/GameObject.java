@@ -5,9 +5,10 @@ import android.graphics.PointF;
 import androidx.annotation.Nullable;
 
 import com.edlplan.framework.math.FMath;
-import com.osudroid.game.CursorEvent;
 import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.hitobjects.HitObject;
+import com.osudroid.game.CursorEvent;
+import com.osudroid.mods.ModRelax;
 import com.rian.andengine.modifier.UniversalModifier;
 import com.rian.andengine.modifier.UniversalModifierSequence;
 
@@ -119,7 +120,7 @@ public abstract class GameObject {
                         }
 
                         // Case 2
-                        if (objectElapsedTime >= 0 && isHit) {
+                        if (objectElapsedTime >= -ModRelax.RELAX_LENIENCY / 1000 && isHit) {
                             return event;
                         }
                     }
@@ -130,7 +131,7 @@ public abstract class GameObject {
 
                     // Only consider case 2 in this scenario, as the event should logically be marked as a move event
                     // even if it's a down event (no new events mean the user keeps pressing on the same spot).
-                    if (event != null && !event.isActionUp() && objectElapsedTime >= 0 && isHit(hitObject, event)) {
+                    if (event != null && !event.isActionUp() && objectElapsedTime >= -ModRelax.RELAX_LENIENCY / 1000 && isHit(hitObject, event)) {
                         return event;
                     }
                 }

@@ -11,10 +11,11 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
-import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
@@ -57,7 +58,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The total score.
      */
-    val score: Int,
+    val score: Long,
 
     /**
      * The maximum combo.
@@ -154,16 +155,9 @@ data class ScoreInfo @JvmOverloads constructor(
         get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
     /**
-     * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods].
-     *
-     * Pass [difficulty] when available so that mods implementing [IModRequiresBeatmapDifficulty] (e.g.
-     * [ModDifficultyAdjust]) can apply their beatmap-dependent multiplier. Without it, their score multiplier is 1.
-     *
-     * Use [StatisticV2.getTotalScoreWithMultiplier] with a proper [StatisticV2.calculateModScoreMultiplier] call for
-     * display when the full [BeatmapDifficulty] is available.
+     * Calculates the score of this [ScoreInfo] after applying score multipliers from [mods] and [BeatmapDifficulty].
      */
-    @JvmOverloads
-    fun calculateEffectiveScore(difficulty: BeatmapDifficulty? = null): Int {
+    fun calculateEffectiveScore(difficulty: BeatmapDifficulty): Long {
         // Pending-migration rows store total score with multipliers directly, so multiplying again would apply the
         // multiplier twice.
         if (needsScoreMigration) {
@@ -172,13 +166,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
         val modMap = ModUtils.deserializeMods(mods)
 
-        if (difficulty != null) {
-            modMap.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                m.applyFromBeatmapDifficulty(difficulty)
-            }
-        }
-
-        return (score * ModUtils.calculateScoreMultiplier(modMap)).roundToInt()
+        return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToLong()
     }
 
 
@@ -233,7 +221,7 @@ fun ScoreInfo(json: JSONObject) =
         id = json.optLong("id", 0),
         playerName = json.getString("playername"),
         mods = json.getString("mods"),
-        score = json.getInt("score"),
+        score = json.getLong("score"),
         maxCombo = json.getInt("combo"),
         mark = json.getString("mark"),
         hit300k = json.getInt("h300k"),
@@ -252,7 +240,7 @@ fun ScoreInfo(json: JSONObject) =
 /**
  * A [ScoreInfo] paired with its precomputed effective score, as returned by [IScoreInfoDAO.getBeatmapLeaderboard].
  */
-data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Int)
+data class ScoredScoreInfo(val scoreInfo: ScoreInfo, val effectiveScore: Long)
 
 @Dao
 interface IScoreInfoDAO {
@@ -260,7 +248,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5")
     fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
-    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+    fun getBeatmapLeaderboard(beatmapMD5: String, difficulty: BeatmapDifficulty) =
         getBeatmapScores(beatmapMD5)
             .map { ScoredScoreInfo(it, it.calculateEffectiveScore(difficulty)) }
             .sortedByDescending { it.effectiveScore }
@@ -268,7 +256,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    fun getBestMark(beatmapMD5: String, difficulty: BeatmapDifficulty? = null) =
+    fun getBestMark(beatmapMD5: String, difficulty: BeatmapDifficulty) =
         getBeatmapScores(beatmapMD5).maxByOrNull { it.calculateEffectiveScore(difficulty) }?.mark
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -308,12 +296,8 @@ interface IScoreInfoDAO {
         for (scoreInfo in pending) {
             val mods = ModUtils.deserializeMods(scoreInfo.mods)
 
-            mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach {
-                it.applyFromBeatmapDifficulty(difficulty)
-            }
-
             updateScore(scoreInfo.copy(
-                score = (scoreInfo.score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
+                score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToLong(),
                 mods = mods.serializeMods(),
                 needsScoreMigration = false
             ))

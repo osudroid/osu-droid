@@ -51,5 +51,5 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      * The maximum score obtainable on the beatmap.
      */
     @JvmField
-    var maximumScore = 0
+    var maximumScore = 0L
 }

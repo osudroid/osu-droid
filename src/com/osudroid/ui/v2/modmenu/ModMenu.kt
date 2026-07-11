@@ -30,6 +30,7 @@ import com.rian.framework.RollingFloatCounter
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.osudroid.mods.*
+import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
 import java.io.IOException
 import kotlinx.coroutines.*
@@ -365,10 +366,9 @@ object ModMenu : UIScene() {
                 DatabaseManager.beatmapInfoTable.update(newInfo)
             }
 
-            enabledMods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().fastForEach { mod ->
-                ensureActive()
-                mod.applyFromBeatmapDifficulty(beatmap.difficulty)
-            }
+            // This is needed to give the mod a reference to the beatmap's default difficulty values.
+            enabledMods.ofType<ModDifficultyAdjust>()?.setDefaultDifficulty(beatmap.difficulty)
+
             customizationMenu.updateComponents()
 
             // Copy the mods to avoid concurrent modification
@@ -387,7 +387,7 @@ object ModMenu : UIScene() {
                 hpBadge.updateValue(selectedBeatmap.hpDrainRate, difficulty.hp)
                 bpmBadge.updateValue(selectedBeatmap.mostCommonBPM, selectedBeatmap.mostCommonBPM * rate)
 
-                scoreMultiplierBadge.updateValue(1f, ModUtils.calculateScoreMultiplier(enabledMods))
+                scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator(beatmap.difficulty).calculateFor(enabledMods.values).toFloat())
             }
 
             ensureActive()
@@ -590,7 +590,8 @@ object ModMenu : UIScene() {
                 if (!it.isSelected) enabledMods.any { m -> !it.mod.isCompatibleWith(m) } else false
         }
 
-        scoreMultiplierBadge.updateValue(1f, ModUtils.calculateScoreMultiplier(enabledMods))
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+        scoreMultiplierBadge.updateValue(1f, ScoreMultiplierCalculator(selectedBeatmap?.getBeatmapDifficulty()).calculateFor(enabledMods).toFloat())
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 

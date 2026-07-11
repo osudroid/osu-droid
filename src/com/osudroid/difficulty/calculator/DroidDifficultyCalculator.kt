@@ -61,10 +61,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         spinnerCount = playableBeatmap.hitObjects.spinnerCount
         overallDifficulty = playableBeatmap.difficulty.od.toDouble()
 
-        maximumScore = (
-            beatmap.calculateMaximumScore(playableBeatmap.mods).toLong() +
-            DroidScoreUtils.calculateMaximumSpinnerBonus(playableBeatmap).toLong()
-        ).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        maximumScore =
+            beatmap.calculateMaximumScore(playableBeatmap.mods) +
+            DroidScoreUtils.calculateMaximumSpinnerBonus(beatmap, playableBeatmap)
 
         populateAimAttributes(skills, forReplay)
         populateTapAttributes(skills, objects, forReplay)
@@ -255,7 +254,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 possibleThreeFingeredSections.add(HighStrainSection(
                     firstSpeedObjectIndex,
                     lastSpeedObjectIndex,
-                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex))
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectDifficulties.subList(firstSpeedObjectIndex, lastSpeedObjectIndex + 1))
                 ))
             }
         }

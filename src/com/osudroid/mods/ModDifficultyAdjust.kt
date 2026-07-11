@@ -7,9 +7,6 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.ModUtils
-import kotlin.math.exp
-import kotlin.math.pow
-import kotlin.reflect.KProperty0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -21,7 +18,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresBeatmapDifficulty {
+) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods {
 
     /**
      * The circle size to enforce.
@@ -80,12 +77,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     )
 
     init {
-        // We set the default values here so that resetting the settings would reset them to null.
-        updateDefaultValue(::cs, cs)
-        updateDefaultValue(::ar, ar)
-        updateDefaultValue(::od, od)
-        updateDefaultValue(::hp, hp)
-
         this.cs = cs
         this.ar = ar
         this.od = od
@@ -102,39 +93,18 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val usesDefaultSettings
         get() = settings.all { it.value == it.initialValue }
 
-    override val scoreMultiplier: Float
-        get() {
-            // Graph: https://www.desmos.com/calculator/yrggkhrkzz
-            var multiplier = 1f
-            val cs = getModSettingDelegate<DifficultyAdjustModSetting>(::cs)
-            val od = getModSettingDelegate<DifficultyAdjustModSetting>(::od)
-
-            if (cs.value != null) {
-                val original = cs.originalValue ?: cs.defaultValue
-
-                if (original != null) {
-                    val diff = cs.value!! - original
-
-                    multiplier *=
-                        if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
-                        else 2 / (1 + exp(-0.5f * diff))
-                }
-            }
-
-            if (od.value != null) {
-                val original = od.originalValue ?: od.defaultValue
-
-                if (original != null) {
-                    val diff = od.value!! - original
-
-                    multiplier *=
-                        if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
-                        else 2 / (1 + exp(-0.25f * diff))
-                }
-            }
-
-            return multiplier
-        }
+    /**
+     * Sets this [ModDifficultyAdjust]'s default difficulty values. This does not change the current values of the
+     * settings, but rather the default values that are used when the settings are reset.
+     *
+     * @param difficulty The [BeatmapDifficulty] to use as the default values.
+     */
+    fun setDefaultDifficulty(difficulty: BeatmapDifficulty) {
+        getModSettingDelegate<DifficultyAdjustModSetting>(::cs).defaultValue = difficulty.gameplayCS
+        getModSettingDelegate<DifficultyAdjustModSetting>(::ar).defaultValue = difficulty.ar
+        getModSettingDelegate<DifficultyAdjustModSetting>(::od).defaultValue = difficulty.od
+        getModSettingDelegate<DifficultyAdjustModSetting>(::hp).defaultValue = difficulty.hp
+    }
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (!super.isCompatibleWith(other)) {
@@ -186,24 +156,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
                 applyOldFadeAdjustment(it, mods)
             }
         }
-    }
-
-    override fun applyFromBeatmapDifficulty(difficulty: BeatmapDifficulty) {
-        updateBeatmapValue(::cs, difficulty.gameplayCS)
-        updateBeatmapValue(::ar, difficulty.ar)
-        updateBeatmapValue(::od, difficulty.od)
-        updateBeatmapValue(::hp, difficulty.hp)
-    }
-
-    private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
-        getModSettingDelegate<DifficultyAdjustModSetting>(property).defaultValue = value
-    }
-
-    private fun updateBeatmapValue(property: KProperty0<Float?>, value: Float?) {
-        val delegate = getModSettingDelegate<DifficultyAdjustModSetting>(property)
-
-        delegate.defaultValue = value
-        delegate.originalValue = value
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {

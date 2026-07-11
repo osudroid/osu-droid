@@ -2239,7 +2239,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var songService = GlobalManager.getInstance().getSongService();
         var songMenu = GlobalManager.getInstance().getSongMenu();
 
-        if (songService != null && selectedBeatmap != null) {
+        if (songService != null && selectedBeatmap != null && !Multiplayer.isMultiplayer) {
             // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
             boolean continuePreview = mSecPassed < totalLength - 10000 && mSecPassed / totalLength < 0.98f;
             int previewTime = continuePreview ? songService.getPosition() : selectedBeatmap.getPreviewTime();
@@ -2285,6 +2285,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (Multiplayer.isMultiplayer) {
             releaseVideo();
+
+            var songService = GlobalManager.getInstance().getSongService();
+            if (songService != null) {
+                songService.stop();
+            }
+
             var roomScene = Multiplayer.roomScene;
 
             if (Multiplayer.isConnected() && roomScene != null) {
@@ -3668,8 +3674,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (bp.startTime <= targetMs && targetMs < bp.endTime) {
                 gameStarted = false;
-                float remainingDuration = (float) ((bp.endTime - targetMs) / 1000.0);
-                breakAnimator.init(remainingDuration);
+                float totalDuration = bp.getDuration() / 1000f;
+                float elapsedTime = (float) ((targetMs - bp.startTime) / 1000.0);
+                breakAnimator.init(totalDuration, elapsedTime);
+                breakPeriodIndex++;
                 hud.onBreakStateChange(true);
             } else {
                 hud.onBreakStateChange(false);
@@ -3718,6 +3726,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         updatePPValue(objectIndex - 1);
+
+        // For variable-rate mods (WindUp/WindDown), the rate at the seek target may differ from
+        // the current rate. FramedBeatmapClock.seek() subtracts (userGlobalOffset * rate) from the
+        // seek position to compute the audio byte offset, so the rate must be updated first.
+        if (!rateAdjustingMods.isEmpty()) {
+            float modRate = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, targetMs);
+
+            float replaySettingsRate = replaySettingsPanel != null
+                ? replaySettingsPanel.getPlaybackControl().getRateControl().getRate()
+                : 1f;
+
+            float targetSpeedMultiplier = modRate * replaySettingsRate;
+
+            if (targetSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
+                GameHelper.setSpeedMultiplier(targetSpeedMultiplier);
+                gameplayClock.setRate(targetSpeedMultiplier);
+            }
+        }
 
         // Seek the beatmap clock (also seeks the audio source).
         gameplayClock.seek(clampedTime);
