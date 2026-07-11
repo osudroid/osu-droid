@@ -37,6 +37,9 @@ import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
+import com.osudroid.discord.DiscordPresenceManager
+import com.osudroid.discord.UserActivity
+import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.OsuColors
 import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.Option
@@ -311,12 +314,19 @@ class BeatmapListing : BaseFragment(),
 
     override fun show() {
         isPlayingMusic = GlobalManager.getInstance().songService.status == Status.PLAYING
+        DiscordPresenceManager.setActivity(UserActivity.SearchingBeatmap)
         super.show()
     }
 
     override fun dismiss() {
 
         stopPreviews(true)
+
+        if (Multiplayer.isMultiplayer && Multiplayer.roomScene != null) {
+            Multiplayer.roomScene?.updateDiscordActivity()
+        } else {
+            DiscordPresenceManager.setActivity(UserActivity.Idle)
+        }
 
         pendingRequest?.cancel()
 

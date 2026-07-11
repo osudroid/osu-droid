@@ -39,6 +39,13 @@ sealed class UserActivity {
     }
 
     /**
+     * User is searching beatmaps in beatmap listing.
+     */
+    data object SearchingBeatmap : UserActivity() {
+        override val status = "Searching for beatmaps"
+    }
+
+    /**
      * The player is in gameplay.
      *
      * @param beatmapId The beatmap ID.

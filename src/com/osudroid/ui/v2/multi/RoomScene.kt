@@ -776,10 +776,10 @@ class RoomScene(
 
     // Communication
 
-    private fun updateDiscordActivity() {
-        val activity = UserActivity.InMultiplayerLobby(room.name, room.playerCount, room.maxPlayers)
-
-        DiscordPresenceManager.setActivity(activity)
+    fun updateDiscordActivity() {
+        DiscordPresenceManager.setActivity(
+            UserActivity.InMultiplayerLobby(room.name, room.playerCount, room.maxPlayers)
+        )
     }
 
     override fun onServerError(error: String) {
