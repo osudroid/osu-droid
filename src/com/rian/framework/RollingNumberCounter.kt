@@ -1,6 +1,6 @@
 package com.rian.framework
 
-import com.rian.osu.math.Interpolation
+import com.osudroid.math.Interpolation
 
 /**
  * A [RollingCounter] for [Int] values.
@@ -24,4 +24,12 @@ class RollingFloatCounter(initialValue: Float) : RollingCounter<Float>(initialVa
 class RollingDoubleCounter(initialValue: Double) : RollingCounter<Double>(initialValue) {
     override fun interpolate(startValue: Double, endValue: Double, progress: Float) =
         Interpolation.linear(startValue, endValue, progress.toDouble())
+}
+
+/**
+ * A [RollingCounter] for [Long] values.
+ */
+class RollingLongCounter(initialValue: Long) : RollingCounter<Long>(initialValue) {
+    override fun interpolate(startValue: Long, endValue: Long, progress: Float) =
+        Interpolation.linear(startValue.toDouble(), endValue.toDouble(), progress.toDouble()).toLong()
 }

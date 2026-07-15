@@ -4,7 +4,10 @@ import static com.osudroid.data.Scores.ScoreInfo;
 
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.ScoreInfo;
-import com.rian.osu.mods.LegacyModConverter;
+import com.osudroid.mods.ModDifficultyAdjust;
+import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator;
+import com.osudroid.utils.ModUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
@@ -62,17 +65,29 @@ public class OsuDroidReplayPack {
             replayData.put("accuracy", scoreInfo.getAccuracy());
             replayData.put("time", scoreInfo.getTime());
 
+            var sliderHeadHits = scoreInfo.getSliderHeadHits();
+            var sliderRepeatHits = scoreInfo.getSliderRepeatHits();
             var sliderTickHits = scoreInfo.getSliderTickHits();
             var sliderEndHits = scoreInfo.getSliderEndHits();
 
             // Inspection will complain about unnecessary unboxing, but JSONObject.put internally casts
             // all Number types to doubles while we want to keep the original integer values.
             //noinspection UnnecessaryUnboxing
+            replayData.put("sliderHeadHits", sliderHeadHits != null ? sliderHeadHits.intValue() : null);
+            //noinspection UnnecessaryUnboxing
+            replayData.put("sliderRepeatHits", sliderRepeatHits != null ? sliderRepeatHits.intValue() : null);
+            //noinspection UnnecessaryUnboxing
             replayData.put("sliderTickHits", sliderTickHits != null ? sliderTickHits.intValue() : null);
             //noinspection UnnecessaryUnboxing
             replayData.put("sliderEndHits", sliderEndHits != null ? sliderEndHits.intValue() : null);
 
-            entryJson.put("version", 3);
+            // Pending-migration scores still hold the total score with multipliers. Flag them explicitly so import
+            // handles them correctly.
+            if (scoreInfo.getNeedsScoreMigration()) {
+                replayData.put("isScoreWithMultiplier", true);
+            }
+
+            entryJson.put("version", 4);
             entryJson.put("replaydata", replayData);
 
             outputStream.write(entryJson.toString(2).getBytes());
@@ -140,7 +155,33 @@ public class OsuDroidReplayPack {
             replayData.remove("mod");
         }
 
+        // Version 4 or older packs with isScoreWithMultiplier=true are pending-migration scores exported before
+        // conversion, whereas packs older than v4 always stored the total score with multipliers.
+        boolean isScoreWithMultiplier = version < 4 || replayData.optBoolean("isScoreWithMultiplier", false);
+        boolean needsScoreMigration = false;
+
+        if (isScoreWithMultiplier) {
+            var mods = ModUtils.deserializeMods(replayData.getString("mods"));
+
+            for (var mod : mods.values()) {
+                if (mod instanceof ModDifficultyAdjust) {
+                    needsScoreMigration = true;
+                    break;
+                }
+            }
+
+            // If migration is needed, keep the original score for on-the-fly migrations once the beatmap is available.
+            if (!needsScoreMigration) {
+                replayData.put("score", Math.round(replayData.getInt("score") / new LegacyScoreMultiplierCalculator().calculateFor(mods.values())));
+            }
+        }
+
         entry.scoreInfo = ScoreInfo(replayData);
+
+        if (needsScoreMigration) {
+            entry.scoreInfo.setNeedsScoreMigration(true);
+        }
+
         entry.replayFile = replayFile;
 
         return entry;

@@ -3,8 +3,8 @@ package com.reco1l.andengine.ui
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
@@ -49,7 +49,7 @@ open class UICheckbox(initialValue: Boolean = false) : UIControl<Boolean>(initia
         super.onValueChanged()
 
         background!!.clearModifiers(ModifierType.Color)
-        checkSprite.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+        checkSprite.clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
 
         if (value) {
             background!!.colorTo(Theme.current.accentColor * 0.5f, 0.1f)

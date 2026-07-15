@@ -5,8 +5,8 @@ import androidx.annotation.IdRes
 import com.edlplan.framework.easing.Easing
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.utils.mainThread
-import com.osudroid.utils.standardDeviation
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R.string
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.UIScene
@@ -22,7 +22,6 @@ import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.flexContainer
 import com.reco1l.andengine.linearContainer
-import com.reco1l.andengine.modifier.ModifierType
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.shape.UICircle
@@ -37,9 +36,13 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.PromptDialog
-import com.rian.osu.beatmap.DroidHitWindow
-import com.rian.osu.math.Interpolation
+import com.osudroid.beatmaps.DroidHitWindow
+import com.osudroid.math.Interpolation
+import com.osudroid.utils.median
+import com.osudroid.utils.standardDeviation
+import com.rian.andengine.modifier.ModifierType
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.roundToInt
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.audio.Status
@@ -47,7 +50,6 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R.string
 
 object CalibrationScene : UIScene() {
     internal var OFFSET_MIN = -500
@@ -547,7 +549,7 @@ object CalibrationScene : UIScene() {
             tapOffsets.removeAt(0)
         }
 
-        pendingOffset = tapOffsets.standardDeviation().roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
+        pendingOffset = computePendingOffset()
 
         val judgement = when {
             absErr < judgementHitWindow.greatWindow -> Judgement.PERFECT
@@ -587,7 +589,7 @@ object CalibrationScene : UIScene() {
     /** Pop-in judgement badge above the hit circle: scale 0.7 → 1.1 → fade out. */
     private fun showJudgement(judgement: Judgement) {
         judgementText.apply {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             setText(judgement.label)
             color = judgement.color
             setScale(0.7f)
@@ -603,7 +605,7 @@ object CalibrationScene : UIScene() {
     /** Expanding outline ring that bursts outward and fades – colored by judgement. */
     private fun triggerRipple(judgement: Judgement) {
         rippleCircle.apply {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             color = judgement.color
             setScale(1f)
             alpha = 0.75f
@@ -783,5 +785,22 @@ object CalibrationScene : UIScene() {
     private fun applyOffset() {
         Config.setOffset(pendingOffset.toFloat())
         Config.setInt("offset", pendingOffset)
+    }
+
+    private fun computePendingOffset(): Int {
+        if (tapOffsets.isEmpty()) {
+            return 0
+        }
+
+        val unstableRate = tapOffsets.standardDeviation()
+        var offset = tapOffsets.median()
+
+        if (unstableRate >= 90) {
+            // A demonstrative graph of this algorithm is embedded in https://github.com/ppy/osu/discussions/30521.
+            // This prevents high unstable rate from suggesting potentially invalid offsets.
+            offset *= exp(-0.0116 * (unstableRate - 90))
+        }
+
+        return offset.roundToInt().coerceIn(OFFSET_MIN, OFFSET_MAX)
     }
 }

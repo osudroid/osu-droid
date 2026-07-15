@@ -10,23 +10,24 @@ import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
-import com.rian.osu.GameMode;
-import com.rian.osu.beatmap.Beatmap;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.attributes.DifficultyAttributes;
-import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
-import com.rian.osu.difficulty.attributes.PerformanceAttributes;
-import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
-import com.rian.osu.mods.ModAutoplay;
-import com.rian.osu.mods.ModCustomSpeed;
-import com.rian.osu.mods.ModDifficultyAdjust;
-import com.rian.osu.mods.ModFlashlight;
-import com.rian.osu.mods.ModNightCore;
-import com.rian.osu.mods.ModOldNightCore;
-import com.rian.osu.ui.SendingPanel;
+import com.osudroid.GameMode;
+import com.osudroid.beatmaps.Beatmap;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.difficulty.attributes.DifficultyAttributes;
+import com.osudroid.difficulty.attributes.DroidDifficultyAttributes;
+import com.osudroid.difficulty.attributes.PerformanceAttributes;
+import com.osudroid.difficulty.attributes.StandardDifficultyAttributes;
+import com.osudroid.mods.ModAutoplay;
+import com.osudroid.mods.ModCustomSpeed;
+import com.osudroid.mods.ModDifficultyAdjust;
+import com.osudroid.mods.ModFlashlight;
+import com.osudroid.mods.ModNightCore;
+import com.osudroid.mods.ModOldNightCore;
+import com.osudroid.ui.SendingPanel;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -64,7 +65,7 @@ public class ScoringScene {
     private final Engine engine;
     private final GameScene game;
     private final SongMenu menu;
-    private Scene scene;
+    private UIScene scene;
     private SongService songService;
     private StatisticV2 replayStat;
     private int replayID = -1;
@@ -86,7 +87,7 @@ public class ScoringScene {
     public void load(final StatisticV2 stat, final BeatmapInfo beatmap,
                      final SongService player, final String replayPath, final String mapMD5,
                      final BeatmapInfo beatmapToReplay) {
-        scene = new Scene();
+        scene = new UIScene();
         songService = player;
         currentStatistic = stat;
         if (replayPath != null && beatmap == null) {
@@ -287,7 +288,7 @@ public class ScoringScene {
         Sprite replayBtn = null;
         var mods = stat.getMod();
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer && replayPath != null)
         {
             replayBtn = new Sprite(Utils.toRes(580), Utils.toRes(400),
                                                 ResourceManager.getInstance().getTexture("ranking-replay")) {
@@ -322,7 +323,6 @@ public class ScoringScene {
             scaledContainer.attachChild(perfect);
         }
 
-        scene.setTouchAreaBindingEnabled(true);
         if (beatmap != null && retryBtn != null) {
             scene.registerTouchArea(retryBtn);
         } else if (replayPath != null && replayBtn != null) {
@@ -465,7 +465,7 @@ public class ScoringScene {
                             case droid -> {
                                 var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
 
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficultyForReplay(playableBeatmap);
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficultyForReplay(beatmapData, playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, (DroidDifficultyAttributes) difficultyAttributes, replay, stat
@@ -475,7 +475,7 @@ public class ScoringScene {
                             case standard -> {
                                 var playableBeatmap = beatmapData.createStandardPlayableBeatmap(copiedMods.values());
 
-                                difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(playableBeatmap);
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, playableBeatmap);
 
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformanceWithReplayStat(
                                     playableBeatmap, (StandardDifficultyAttributes) difficultyAttributes,
@@ -608,9 +608,6 @@ public class ScoringScene {
                 Execution.updateThread(() -> {
                     oldSelector.detachSelf();
                     oldSelector.detachChildren();
-
-                    if (scene != null)
-                        scene.unregisterTouchArea(oldSelector);
                 });
             }
 
@@ -618,7 +615,6 @@ public class ScoringScene {
 
             if (scene != null) {
                 scene.attachChild(selector);
-                scene.registerTouchArea(selector);
             }
         }
     }

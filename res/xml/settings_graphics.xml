@@ -34,6 +34,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/opt_category_hud">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fps"
+            android:summary="@string/opt_fps_summary"
+            android:title="@string/opt_fps_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/opt_category_cursor">
 
         <CheckBoxPreference
@@ -43,7 +54,7 @@
             android:title="@string/opt_showcursor_title"
             app:layout="@layout/settings_preference_checkbox" />
 
-        <com.rian.osu.ui.EditableSeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="cursorSize"
             android:max="300"

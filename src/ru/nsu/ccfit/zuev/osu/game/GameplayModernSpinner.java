@@ -2,13 +2,11 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.osudroid.utils.Execution;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.rian.osu.beatmap.hitobject.Spinner;
+import com.osudroid.beatmaps.hitobjects.Spinner;
 
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -67,12 +65,13 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     @Override
-    public void init(final GameObjectListener listener, final Scene scene,
+    public void init(final GameObjectListener listener, final UIScene scene,
                      final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
         this.stat = stat;
+        hitTime = (float) beatmapSpinner.startTime / 1000;
         duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
         needRotations = rps * duration;
 
@@ -84,7 +83,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         fullRotations = 0;
         rotations = 0;
         bonusScoreCounter = 1;
-        spinnable = false;
+        startHit = false;
 
         reloadHitSounds();
 
@@ -95,15 +94,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         boolean isBackgroundVisible = (!GameHelper.isTraceable() ||
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
-        middle.setVisible(isBackgroundVisible);
-        if (middle.isVisible()) {
-            middle.setAlpha(0f);
+        if (isBackgroundVisible) {
+            middle.setAlpha(0);
             middle.setScale(0.9f);
-        }
-
-        middle2.setVisible(isBackgroundVisible);
-        if (middle2.isVisible()) {
-            middle2.setAlpha(0f);
+            middle2.setAlpha(0);
             middle2.setScale(0.9f);
         }
 
@@ -116,29 +110,57 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.attachChild(glow);
         scene.attachChild(bottom);
         scene.attachChild(top);
-        scene.attachChild(middle);
-        scene.attachChild(middle2);
+
+        if (isBackgroundVisible) {
+            scene.attachChild(middle);
+            scene.attachChild(middle2);
+        }
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+        passedTime = -timePreempt;
 
-        top.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.fadeIn(timePreempt, e -> {
-                    spinnable = true;
-                    listener.onSpinnerStart(id);
-            }),
-            Modifiers.delay(duration)
-        ));
+        fadeIn(top);
+        fadeIn(bottom);
 
-        bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+        if (isBackgroundVisible) {
+            fadeIn(middle);
+            fadeIn(middle2);
+        }
+
+        setLifetimeEnd(Float.MAX_VALUE);
+    }
+
+    private void fadeIn(UISprite sprite) {
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+
+        sprite.beginAbsoluteSequence(hitTime - timePreempt,
+                sequence -> sequence.fadeIn(timePreempt));
     }
 
     @Override
-    public void update(float dt) {
+    public void update(final float dt) {
+        passedTime = listener.getElapsedTime() - hitTime;
+
         // Allow the spinner to fully fade in first before receiving spins.
-        if (!spinnable) {
+        if (passedTime < 0) {
             return;
+        }
+
+        if (!startHit) {
+            listener.onSpinnerStart(id);
+            startHit = true;
+
+            // Fast-forward rotation state when spawned mid-spinner after a seek in Autoplay.
+            if (autoPlay && passedTime > 0) {
+                applySeekRotations();
+
+                // Unlike GameplaySpinner, GameplayModernSpinner has no clearText sprite; clear state is applied
+                // visually on next frame.
+                if (bonusScoreCounter > 1) {
+                    bonusScore.setText(String.valueOf((bonusScoreCounter - 1) * 1000));
+                    scene.attachChild(bonusScore);
+                }
+            }
         }
 
         updateSamples(dt);
@@ -170,101 +192,119 @@ public class GameplayModernSpinner extends GameplaySpinner {
             }
         }
 
-        if (mouse == null)
-            return;
-
-        float degree = MathUtils.radToDeg(Utils.direction(currMouse));
-        top.setRotation(degree);
-        bottom.setRotation(degree / 2);
-
-        var len1 = Utils.length(currMouse);
-        var len2 = Utils.length(oldMouse);
-        var dFill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
-
-        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
-            dFill = 0;
-
-        if (autoPlay) {
-            dFill = 5 * 4 * dt;
-            degree = (rotations + dFill / 4f) * 360;
+        if (mouse != null) {
+            float degree = MathUtils.radToDeg(Utils.direction(currMouse));
             top.setRotation(degree);
-            //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
-                float pX = position.x + 50 * (float) Math.sin(degree);
-                float pY = position.y + 50 * (float) Math.cos(degree);
-                listener.updateAutoBasedPos(pX, pY);
+            bottom.setRotation(degree / 2);
+
+            var len1 = Utils.length(currMouse);
+            var len2 = Utils.length(oldMouse);
+            var dFill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
+            if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+                dFill = 0;
+
+            if (autoPlay) {
+                dFill = 5 * 4 * dt;
+                degree = (rotations + dFill / 4f) * 360;
+                top.setRotation(degree);
+                //auto时，FL光圈绕中心旋转
+                if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
+                    float pX = position.x + 50 * (float) Math.sin(degree);
+                    float pY = position.y + 50 * (float) Math.cos(degree);
+                    listener.updateAutoBasedPos(pX, pY);
+                }
+                // bottom.setRotation(-degree);
             }
-            // bottom.setRotation(-degree);
-        }
 
-        rotations += dFill / 4f;
-        float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
-        float percent = Math.min(percentFilled, 1);
+            rotations += dFill / 4f;
+            float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
+            float percent = Math.min(percentFilled, 1);
 
-        if (dFill != 0) {
-            updateSpinSampleFrequency(percentFilled);
-            spinnerSpinSample.play();
-        } else {
-            spinnerSpinSample.stop();
-        }
+            if (dFill != 0) {
+                updateSpinSampleFrequency(percentFilled);
+                spinnerSpinSample.play();
+            } else {
+                spinnerSpinSample.stopAll();
+            }
 
-        middle.setColor(1, 1 - percent, 1 - percent);
-        top.setScale(0.9f + percent * 0.1f);
-        bottom.setScale(0.9f + percent * 0.1f);
+            middle.setColor(1, 1 - percent, 1 - percent);
+            top.setScale(0.9f + percent * 0.1f);
+            bottom.setScale(0.9f + percent * 0.1f);
 
-        if (middle.isVisible()) {
-            middle.setScale(0.9f + percent * 0.1f);
-        }
+            if (middle.isVisible()) {
+                middle.setScale(0.9f + percent * 0.1f);
+            }
 
-        if (middle2.isVisible()) {
-            middle2.setScale(0.9f + percent * 0.1f);
-        }
+            if (middle2.isVisible()) {
+                middle2.setScale(0.9f + percent * 0.1f);
+            }
 
-        glow.setAlpha(percent * 0.8f);
-        glow.setScale(0.9f + percent * 0.1f);
+            glow.setAlpha(percent * 0.8f);
+            glow.setScale(0.9f + percent * 0.1f);
 
-        if (percentFilled > 1 || clear) {
-            if (!clear) {
-                // Clear Sprite
-                clear = true;
+            if (percentFilled > 1 || clear) {
+                if (!clear) {
+                    // Clear Sprite
+                    clear = true;
+
+                    // rotations is intentionally NOT reset here. Resetting would shift the first bonus threshold
+                    // from ceil(needRotations) to needRotations + 1, matching osu!lazer but reducing Autoplay
+                    // scores and altering overall game balance.
+                }
+
+                if (Math.abs(rotations) > 1) {
+                    rotations -= 1 * Math.signum(rotations);
+                    bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
+                    listener.onSpinnerHit(id, 1000, false, 0);
+                    bonusScoreCounter++;
+                    if (!bonusScore.hasParent()) {
+                        scene.attachChild(bonusScore);
+                    }
+                    spinnerBonusSample.play();
+
+                    glow.beginModifierSequence(sequence -> sequence
+                            .colorTo(0, 1, 0.8f)
+                            .colorTo(1, 1, 1, 0.1f)
+                            .then()
+                            .colorTo(1, 0, 1)
+                            .colorTo(0.8f, 1, 1, 0.1f));
+
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 4f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
+                }
             } else if (Math.abs(rotations) > 1) {
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
-                listener.onSpinnerHit(id, 1000, false, 0);
-                bonusScoreCounter++;
-                if (!bonusScore.hasParent()) {
-                    scene.attachChild(bonusScore);
+                if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
+                    fullRotations++;
+                    stat.registerSpinnerHit();
+                    float rate = 0.375f;
+                    if (GameHelper.getHealthDrain() > 0) {
+                        rate = 1 + (GameHelper.getHealthDrain() / 2f);
+                    }
+                    stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-                spinnerBonusSample.play();
-                glow.registerEntityModifier(
-                    Modifiers.sequence(
-                        Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        Modifiers.color(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
-                    )
-                );
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
-        } else if (Math.abs(rotations) > 1) {
-            rotations -= 1 * Math.signum(rotations);
-            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
-                fullRotations++;
-                stat.registerSpinnerHit();
-                float rate = 0.375f;
-                if (GameHelper.getHealthDrain() > 0) {
-                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
-                }
-                stat.changeHp(rate * 0.01f * duration / needRotations);
-            }
+
+            oldMouse.set(currMouse);
         }
 
-        oldMouse.set(currMouse);
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
     }
 
-    public void removeFromScene() {
+    @Override
+    protected void detachFromScene() {
+        if (scene == null) {
+            return;
+        }
+
+        setLifetimeEnd((float) beatmapSpinner.getEndTime() / 1000);
+
         middle.clearEntityModifiers();
         scene.detachChild(middle);
 
@@ -281,22 +321,23 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.detachChild(glow);
 
         scene.detachChild(bonusScore);
+        scene = null;
+    }
 
-        listener.removeObject(GameplayModernSpinner.this);
+    public void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
 
-        Execution.updateThread(() -> GameObjectPool.getInstance().putSpinner(this));
+        detachFromScene();
 
         int score = 0;
         if (replayObjectData != null) {
-            if (fullRotations < replayObjectData.accuracy / 4)
-                fullRotations = replayObjectData.accuracy / 4;
-            if (fullRotations >= needRotations)
-                clear = true;
-            int bonusRot = (int) (replayObjectData.accuracy / 4f - needRotations + 1);
-            while (bonusRot < score) {
-                bonusRot++;
+            while (fullRotations + bonusScoreCounter < replayObjectData.accuracy / 4 + 1) {
+                fullRotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
+            clear = fullRotations >= needRotations;
         }
         float percentFilled = (Math.abs(rotations) + fullRotations)
                 / needRotations;

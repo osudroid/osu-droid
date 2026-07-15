@@ -2,7 +2,7 @@
 
 package com.osudroid.multiplayer
 
-import com.rian.osu.utils.ModUtils
+import com.osudroid.utils.ModUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
 
     userName = json.getString("username")
-    playScore = json.getInt("score")
+    playScore = json.getLong("score")
     maxCombo = json.getInt("combo")
     accuracy = json.getDouble("accuracy").toFloat()
     isAlive = json.getBoolean("isAlive")
@@ -27,8 +27,9 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
  */
 fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
 
+    uid = json.optLong("uid", -1L)
     playerName = json.getString("username")
-    setForcedScore(json.getInt("score"))
+    setForcedScore(json.getLong("score"))
     time = System.currentTimeMillis()
     mod = ModUtils.deserializeMods(json.optJSONArray("mods")?.toString() ?: "")
     scoreMaxCombo = json.optInt("maxCombo")

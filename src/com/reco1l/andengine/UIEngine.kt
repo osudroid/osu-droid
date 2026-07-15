@@ -6,8 +6,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
+import com.rian.andengine.HUD
+import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.ThrottledFrameClock
 import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
@@ -16,14 +18,14 @@ import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 import org.anddev.andengine.engine.camera.Camera
 
-class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
+    IClockProvider<ThrottledFrameClock> {
+    override val clock = ThrottledFrameClock()
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
      */
-    val overlay = HUD().apply {
-        setOnAreaTouchTraversalFrontToBack()
-    }
+    val overlay = HUD().also { it.updateClock(clock) }
 
     /**
      * The resource manager for loading and accessing UI resources (fonts, textures, etc).
@@ -65,7 +67,6 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
 
 
     override fun onDrawScene(pGL: GL10) {
-
         val focusedEntity = focusedEntity
 
         if (focusedEntity != null) {
@@ -191,6 +192,11 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options) 
         return super.onTouchScene(scene, event)
     }
 
+    override fun onUpdate(pNanosecondsElapsed: Long) {
+        clock.processFrame()
+
+        super.onUpdate((clock.elapsedFrameTime * 1e9).toLong())
+    }
 
     override fun setScene(scene: Scene?) {
         mScene?.onDetached()

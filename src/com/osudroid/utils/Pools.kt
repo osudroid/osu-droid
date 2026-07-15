@@ -30,7 +30,19 @@ open class SynchronizedPool<T : IPoolable>(maxPoolSize: Int) : Pools.Pool<T> {
 
     init {
         require(maxPoolSize > 0) { "The max pool size must be > 0" }
-        pool = arrayOfNulls<IPoolable>(maxPoolSize)
+        pool = arrayOfNulls(maxPoolSize)
+    }
+
+    /**
+     * Clears this [SynchronizedPool], removing all pooled instances.
+     */
+    fun clear() = synchronized(lock) {
+        for (i in 0 until size) {
+            pool[i]?.isRecycled = false
+            pool[i] = null
+        }
+
+        size = 0
     }
 
     override fun acquire(): T? = synchronized(lock) {

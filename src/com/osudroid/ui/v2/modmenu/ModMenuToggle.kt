@@ -1,16 +1,16 @@
 package com.osudroid.ui.v2.modmenu
 
+import com.osudroid.mods.*
 import com.osudroid.multiplayer.*
 import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.rian.osu.mods.*
+import com.rian.andengine.modifier.ModifierType
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuToggle(var mod: Mod): UIButton() {

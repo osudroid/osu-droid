@@ -60,9 +60,6 @@ public class ModifierList<T> extends SmartList<IModifier<T>> implements IUpdateH
 				modifier.onUpdate(pSecondsElapsed, this.mTarget);
 				if(modifier.isFinished() && modifier.isRemoveWhenFinished()) {
 					modifiers.remove(i);
-					// BEGIN osu!droid modified
-					modifier.onUnregister();
-					// END osu!droid modified
 				}
 			}
 		}

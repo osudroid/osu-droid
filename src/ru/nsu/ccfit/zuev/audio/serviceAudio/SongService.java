@@ -33,7 +33,11 @@ public class SongService extends Service {
         // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
 
-        BASS.BASS_Init(-1, defaultFrequency, BASS.BASS_DEVICE_LATENCY);
+        // Disable this to keep BASS audio output from pausing on device processing timeout.
+        // See https://www.un4seen.com/forum/?topic=19601 for more information.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_TIMEOUT, 0);
+
+        BASS.BASS_Init(-1, defaultFrequency, 0);
 
         Log.i("BASS-Config", "BASS initialized");
         Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
@@ -83,8 +87,7 @@ public class SongService extends Service {
                 return false;
             }
 
-            audioFunc.setLoop(isLoop);
-            return audioFunc.preLoad(filePath, speed, adjustPitch);
+            return audioFunc.preLoad(filePath, speed, adjustPitch, isLoop);
         }
         return false;
     }
@@ -182,6 +185,13 @@ public class SongService extends Service {
         }
     }
 
+    public float getSpeed() {
+        if (audioFunc != null) {
+            return audioFunc.getSpeed();
+        }
+        return 0;
+    }
+
     public void setSpeed(float speed) {
         if (audioFunc != null) {
             audioFunc.setSpeed(speed);
@@ -191,6 +201,12 @@ public class SongService extends Service {
     public void setAdjustPitch(boolean adjustPitch) {
         if (audioFunc != null) {
             audioFunc.setAdjustPitch(adjustPitch);
+        }
+    }
+
+    public void setPitchRate(float pitchRate) {
+        if (audioFunc != null) {
+            audioFunc.setPitchRate(pitchRate);
         }
     }
 

@@ -1,15 +1,15 @@
 package com.osudroid.ui.v2.game
 
 import com.edlplan.framework.easing.*
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.utils.IPoolable
+import com.osudroid.utils.SynchronizedPool
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
-import com.rian.osu.beatmap.hitobject.*
-import org.anddev.andengine.entity.scene.*
+import com.rian.andengine.modifier.OnModifierFinished
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
@@ -20,36 +20,45 @@ object FollowPointConnection {
 
     private const val SPACING = 32
 
-    private const val MAX_PREEMPT = 800
+    private const val PREEMPT = 800
 
+    private val pool = SynchronizedPool<IPoolable>(20)
 
-    @JvmStatic
-    val pool = Pool {
+    private fun obtainFollowPoint(): UISprite {
+        val sprite = pool.acquire()
 
-        // For optimization, we avoid using AnimatedSprite if there's one frame.
-        if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
-            UIAnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
-                sprite.frames.fastForEach {
-                    it?.applyFollowPointMaxSize()
-                }
+        if (sprite != null) {
+            return sprite as UISprite
+        }
+
+        return if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
+            PoolableAnimatedFollowPoint("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
+                sprite.frames.fastForEach { it?.applyFollowPointMaxSize() }
 
                 sprite.invalidate(InvalidationFlag.Content)
                 sprite.isLoop = false
             }
         } else {
-            UISprite(ResourceManager.getInstance().getTexture("followpoint")).also {
+            PoolableFollowPoint(ResourceManager.getInstance().getTexture("followpoint")).also {
                 it.textureRegion?.applyFollowPointMaxSize()
                 it.invalidate(InvalidationFlag.Content)
             }
         }
     }
 
-
     private val expire = OnModifierFinished { fp ->
         updateThread {
+            val poolable = fp as IPoolable
+
+            // `clearAll` may have already recycled this follow point, so we need to check if it's already recycled
+            // before releasing it again.
+            if (poolable.isRecycled) {
+                return@updateThread
+            }
+
             fp.detachSelf()
             fp.reset()
-            pool.free(fp as UISprite)
+            pool.release(poolable)
         }
     }
 
@@ -70,7 +79,34 @@ object FollowPointConnection {
     }
 
     @JvmStatic
-    fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
+    fun clearAll(scene: UIScene) {
+        for (i in scene.childCount - 1 downTo 0) {
+            val child = scene.getChild(i)
+
+            if (child is PoolableFollowPoint || child is PoolableAnimatedFollowPoint) {
+                child.clearEntityModifiers()
+                child.detachSelf()
+                child.reset()
+                pool.release(child as IPoolable)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun renew(size: Int) {
+        pool.clear()
+        val isAnimated = ResourceManager.getInstance().isTextureLoaded("followpoint-0")
+
+        repeat(size) {
+            pool.release(
+                if (isAnimated) PoolableAnimatedFollowPoint("followpoint", true, OsuSkin.get().animationFramerate)
+                else PoolableFollowPoint(ResourceManager.getInstance().getTexture("followpoint"))
+            )
+        }
+    }
+
+    @JvmStatic
+    fun addConnection(scene: UIScene, start: HitObject, end: HitObject) {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
 
@@ -90,7 +126,7 @@ object FollowPointConnection {
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
         // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear preempt function.
         // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
-        val preempt = min(MAX_PREEMPT.toFloat(), start.timePreempt.toFloat()) * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN).toFloat() / 1000f
+        val preempt = PREEMPT * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN).toFloat() / 1000f
 
         // Since the unit of spacing is in osu!pixels, we cannot directly port the reference code. As such, we need to
         // approach it with another method. We use the distance between the start and end positions in osu!pixels to
@@ -114,7 +150,7 @@ object FollowPointConnection {
             val fadeOutTime = startTime + fraction * duration
             val fadeInTime = fadeOutTime - preempt
 
-            val fp = pool.obtain()
+            val fp = obtainFollowPoint()
 
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
@@ -123,23 +159,31 @@ object FollowPointConnection {
             fp.rotation = rotation
             fp.alpha = 0f
 
-            fp.registerEntityModifier(
-                Modifiers.sequence(expire,
-                    Modifiers.delay(fadeInTime - secPassed),
-                    Modifiers.parallel(null,
-                        Modifiers.fadeIn(endFadeInTime),
-                        Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
-                        Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
-                        Modifiers.sequence(null,
-                            Modifiers.delay(fadeOutTime - fadeInTime),
-                            Modifiers.fadeOut(endFadeInTime)
-                        )
-                    )
-                )
-            )
-
             scene.attachChild(fp, 0)
+
+            fp.beginAbsoluteSequence(fadeInTime) {
+                fadeIn(endFadeInTime)
+                scaleTo(scale, endFadeInTime, Easing.Out)
+                moveTo(pointEndX, pointEndY, endFadeInTime, Easing.Out)
+
+                delay(fadeOutTime - fadeInTime)
+                fadeOut(endFadeInTime)
+                after(expire)
+            }
+
             d += SPACING
         }
+    }
+
+    private class PoolableFollowPoint(textureRegion: TextureRegion? = null) : UISprite(textureRegion), IPoolable {
+        override var isRecycled = false
+    }
+
+    private class PoolableAnimatedFollowPoint(
+        textureName: String,
+        withHyphen: Boolean,
+        framePerSecond: Float
+    ) : UIAnimatedSprite(textureName, withHyphen, framePerSecond), IPoolable {
+        override var isRecycled = false
     }
 }

@@ -14,7 +14,7 @@ import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.removeSelf
-import com.rian.osu.math.Vector2
+import com.osudroid.math.Vector2
 import ru.nsu.ccfit.zuev.osuplus.R
 
 

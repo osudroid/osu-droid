@@ -1,0 +1,28 @@
+name: "Setup JDK and Gradle"
+description: "Sets up JDK and Gradle."
+
+inputs:
+  distribution:
+    description: "The JDK distribution to use."
+    required: false
+    default: "temurin"
+  java-version:
+    description: "The Java version to use."
+    required: false
+    default: "17"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Setup JDK ${{ inputs.java-version }}"
+      uses: actions/setup-java@v5
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+
+    - name: "Grant execute permission for gradlew"
+      run: chmod +x gradlew
+      shell: bash
+
+    - name: "Setup Gradle"
+      uses: gradle/actions/setup-gradle@v6

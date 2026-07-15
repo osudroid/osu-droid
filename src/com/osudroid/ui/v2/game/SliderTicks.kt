@@ -1,13 +1,13 @@
 package com.osudroid.ui.v2.game
 
 import com.edlplan.framework.easing.Easing
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
+import com.osudroid.utils.IPoolable
+import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.modifier.Modifiers
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.framework.*
-import com.rian.osu.beatmap.hitobject.*
-import com.rian.osu.beatmap.hitobject.sliderobject.*
 import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 class SliderTickContainer : UIContainer() {
     private var slider: Slider? = null
 
-    fun init(currentTimeSec: Double, beatmapSlider: Slider) {
+    fun init(beatmapSlider: Slider) {
         slider = beatmapSlider
 
         detachChildren()
@@ -29,18 +29,18 @@ class SliderTickContainer : UIContainer() {
             val tick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
             val tickPosition = tick.screenSpaceGameplayStackedPosition
 
-            val sprite = SliderTickSprite.pool.obtain()
+            val sprite = SliderTickSprite.obtain()
 
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
-            sprite.init(currentTimeSec, tick)
-
             attachChild(sprite)
+
+            sprite.init(tick)
         }
     }
 
-    fun onNewSpan(currentTimeSec: Double, newSpanIndex: Int) {
+    fun onNewSpan(newSpanIndex: Int) {
         if (slider == null) {
             return
         }
@@ -61,7 +61,7 @@ class SliderTickContainer : UIContainer() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            sprite.init(currentTimeSec, tick)
+            sprite.init(tick)
         }
     }
 
@@ -73,7 +73,9 @@ class SliderTickContainer : UIContainer() {
 }
 
 
-class SliderTickSprite : UISprite() {
+class SliderTickSprite : UISprite(), IPoolable {
+    override var isRecycled = false
+    private var tick: SliderTick? = null
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
@@ -83,13 +85,13 @@ class SliderTickSprite : UISprite() {
     /**
      * Initializes this [SliderTickSprite] with the given [SliderTick].
      *
-     * @param currentTimeSec The current time in seconds.
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
      */
-    fun init(currentTimeSec: Double, tick: SliderTick) {
+    fun init(tick: SliderTick) {
+        this.tick = tick
+
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
-
         val fadeInStartTime = startTime - timePreempt
 
         clearEntityModifiers()
@@ -97,26 +99,18 @@ class SliderTickSprite : UISprite() {
         alpha = 0f
         setScale(0.5f)
 
-        registerEntityModifier(
-            Modifiers.sequence(null,
-                Modifiers.delay(fadeInStartTime - currentTimeSec.toFloat()),
-                Modifiers.parallel(null,
-                    Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
-                    Modifiers.fadeIn(ANIM_DURATION)
-                )
-            )
-        )
+        beginAbsoluteSequence(fadeInStartTime) {
+            scaleTo(1f, ANIM_DURATION * 4, Easing.OutElasticHalf)
+            fadeIn(ANIM_DURATION)
+        }
 
         if (GameHelper.isHidden() && !GameHelper.getHidden().onlyFadeApproachCircles) {
             val fadeOutDuration = min(timePreempt - ANIM_DURATION, 1f)
             val fadeOutStartTime = startTime - fadeOutDuration
 
-            registerEntityModifier(
-                Modifiers.sequence(null,
-                    Modifiers.delay(fadeOutStartTime - currentTimeSec.toFloat()),
-                    Modifiers.fadeOut(fadeOutDuration)
-                )
-            )
+            beginAbsoluteSequence(fadeOutStartTime) {
+                fadeOut(fadeOutDuration)
+            }
         }
     }
 
@@ -126,27 +120,51 @@ class SliderTickSprite : UISprite() {
      * @param isSuccessful Whether the hit resulted in a successful hit.
      */
     fun onHit(isSuccessful: Boolean) {
+        val tick = tick ?: return
+
         clearEntityModifiers()
 
-        registerEntityModifier(Modifiers.alpha(ANIM_DURATION, alpha, 0f, easing = Easing.OutQuint))
+        beginAbsoluteSequence(tick.startTime.toFloat() / 1000) {
+            fadeOut(ANIM_DURATION, Easing.OutQuint)
 
-        if (isSuccessful) {
-            registerEntityModifier(Modifiers.scale(ANIM_DURATION, 1f, 1.5f, easing = Easing.Out))
+            if (isSuccessful) {
+                scaleTo(1.5f, ANIM_DURATION, Easing.Out)
+            }
         }
+
+        this.tick = null
     }
 
     override fun onDetached() {
         super.onDetached()
         clearEntityModifiers()
-        pool.free(this)
+        pool.release(this)
     }
 
     companion object {
         private const val ANIM_DURATION = 0.15f
+        private val pool = SynchronizedPool<SliderTickSprite>(20).apply { release(SliderTickSprite()) }
 
+        /**
+         * Renews the [SliderTickSprite] pool with fresh instances.
+         *
+         * @param size The number of [SliderTickSprite] instances to pre-populate the pool with.
+         */
         @JvmStatic
-        val pool = Pool { SliderTickSprite() }
+        fun renew(size: Int) {
+            pool.clear()
+            repeat(size) { pool.release(SliderTickSprite()) }
+        }
 
+        /**
+         * Obtains a [SliderTickSprite] from the pool, or creates a new one if the pool is empty.
+         */
+        @JvmStatic
+        fun obtain(): SliderTickSprite {
+            val sprite = pool.acquire() ?: return SliderTickSprite()
+            sprite.textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
+            return sprite
+        }
     }
 
 }

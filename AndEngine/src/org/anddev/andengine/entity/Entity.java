@@ -690,15 +690,7 @@ public class Entity implements IEntity {
 			return false;
 		}
 
-		// BEGIN osu!droid modified
-        boolean removed = this.mEntityModifiers.remove(pEntityModifier);
-
-        if (removed) {
-            pEntityModifier.onUnregister();
-        }
-
-        return removed;
-        // END osu!droid modified
+        return this.mEntityModifiers.remove(pEntityModifier);
 	}
 
 	@Override
@@ -715,7 +707,6 @@ public class Entity implements IEntity {
 		while (iterator.hasNext()) {
 			IModifier<IEntity> modifier = iterator.next();
 			if (pEntityModifierMatcher.matches(modifier)) {
-				modifier.onUnregister();
 				iterator.remove();
 				result = true;
 			}
@@ -730,12 +721,6 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return;
 		}
-
-		// BEGIN osu!droid modified
-		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
-			this.mEntityModifiers.get(i).onUnregister();
-		}
-		// END osu!droid modified
 
 		this.mEntityModifiers.clear();
 	}
@@ -996,11 +981,13 @@ public class Entity implements IEntity {
 	// END osu!droid modified
 
 	@Override
-	public final void onUpdate(final float pSecondsElapsed) {
+	// BEGIN osu!droid modified: Make this method overrideable.
+	public /*final*/ void onUpdate(final float pSecondsElapsed) {
 		if(!this.mIgnoreUpdate) {
 			this.onManagedUpdate(pSecondsElapsed);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public void reset() {

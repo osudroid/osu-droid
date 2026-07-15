@@ -1,0 +1,138 @@
+package com.osudroid.mods.settings
+
+import com.osudroid.math.preciseRoundBy
+
+interface IModSettingWithPrecision {
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    var precision: Int?
+}
+
+/**
+ * A [ModSetting] that represents a [Float] value with range constraints.
+ */
+open class FloatModSetting(
+    name: String,
+    key: String? = null,
+    valueFormatter: ModSetting<Float>.(Float) -> String = { it.toString() },
+    defaultValue: Float,
+    minValue: Float = 0f,
+    maxValue: Float = Float.MAX_VALUE,
+    step: Float = 0f,
+    precision: Int? = null,
+    orderPosition: Int? = null,
+    useManualInput: Boolean = false
+) : NumberModSetting<Float>(
+    name,
+    key,
+    valueFormatter,
+    if (precision != null) defaultValue.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step,
+    orderPosition,
+    useManualInput
+), IModSettingWithPrecision {
+    override var precision = precision
+        set(value) {
+            if (field != value) {
+                require(value == null || value >= 0) { "precision must be greater than or equal to 0." }
+
+                field = value
+
+                if (value != null) {
+                    // Trigger processValue to ensure the value is within the new range
+                    this.value = this.value
+                }
+            }
+        }
+
+    init {
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+    }
+
+    override fun processValue(value: Float): Float {
+        val precision = precision
+        var processedValue = super.processValue(value)
+
+        if (precision != null) {
+           processedValue = processedValue.preciseRoundBy(precision)
+        }
+
+        return processedValue
+    }
+
+    override fun copyFrom(other: ModSetting<Float>) {
+        if (other is FloatModSetting) {
+            precision = other.precision
+        }
+
+        super.copyFrom(other)
+    }
+}
+
+/**
+ * A [ModSetting] that represents a nullable [Float] value with range constraints.
+ */
+open class NullableFloatModSetting(
+    name: String,
+    key: String? = null,
+    valueFormatter: ModSetting<Float?>.(Float?) -> String = { it.toString() },
+    defaultValue: Float?,
+    minValue: Float = 0f,
+    maxValue: Float = Float.MAX_VALUE,
+    step: Float = 0f,
+    precision: Int? = null,
+    orderPosition: Int? = null,
+    useManualInput: Boolean = false
+) : NullableNumberModSetting<Float>(
+    name,
+    key,
+    valueFormatter,
+    if (precision != null) defaultValue?.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step,
+    orderPosition,
+    useManualInput
+), IModSettingWithPrecision {
+    override var precision = precision
+        set(value) {
+            if (value != null && value < 0) {
+                throw IllegalArgumentException("precision must be greater than or equal to 0.")
+            }
+
+            field = value
+
+            if (value != null) {
+                // Trigger processValue to ensure the value is within the new range
+                this.value = this.value
+            }
+        }
+
+    init {
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+    }
+
+    override fun processValue(value: Float?): Float? {
+        val precision = precision
+        var processedValue = super.processValue(value)
+
+        if (precision != null && processedValue != null) {
+           processedValue = processedValue.preciseRoundBy(precision)
+        }
+
+        return processedValue
+    }
+
+    override fun copyFrom(other: ModSetting<Float?>) {
+        if (other is NullableFloatModSetting) {
+            precision = other.precision
+        }
+
+        super.copyFrom(other)
+    }
+}
