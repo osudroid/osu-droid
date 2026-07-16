@@ -50,6 +50,9 @@ import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class ResourceManager {
+    private static final int FONT_TEXTURE_SIZE = 1024;
+    private static final int STROKE_FONT_TEXTURE_WIDTH = 1024;
+    private static final int STROKE_FONT_TEXTURE_HEIGHT = 512;
 
     /**
      * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
@@ -416,7 +419,7 @@ public class ResourceManager {
     public Font loadFont(final String resname, final String file, int size,
                          final int color) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512,
+        final BitmapTextureAtlas texture = new BitmapTextureAtlas(FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE,
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         Font font;
         if (file == null) {
@@ -435,7 +438,7 @@ public class ResourceManager {
     public StrokeFont loadStrokeFont(final String resname, final String file,
                                      int size, final int color1, final int color2) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256,
+        final BitmapTextureAtlas texture = new BitmapTextureAtlas(STROKE_FONT_TEXTURE_WIDTH, STROKE_FONT_TEXTURE_HEIGHT,
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         StrokeFont font;
         if (file == null) {
