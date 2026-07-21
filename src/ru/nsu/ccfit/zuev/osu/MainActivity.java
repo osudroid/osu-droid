@@ -43,6 +43,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.beatmaps.BeatmapCache;
+import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
 import com.osudroid.resources.R;
 import com.osudroid.ui.FPSCounter;
@@ -341,6 +342,7 @@ public class MainActivity extends BaseGameActivity implements
             Execution.delayed(2500, () -> {
 
                 UpdateManager.onActivityStart();
+                DatabaseManager.notifyIfResetDueToDowngrade();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
