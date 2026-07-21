@@ -1,7 +1,7 @@
 buildscript {
     ext {
         kotlin_version = '2.1.10'
-        room_version = '2.6.1'
+        room_version = '2.7.2'
     }
     repositories {
         google()
