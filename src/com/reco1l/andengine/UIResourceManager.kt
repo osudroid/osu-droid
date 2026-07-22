@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.util.Log
 import com.reco1l.andengine.component.UIComponent
 import org.anddev.andengine.opengl.font.Font
+import org.anddev.andengine.opengl.texture.ITexture
 import org.anddev.andengine.opengl.texture.TextureOptions
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.anddev.andengine.opengl.util.GLHelper
@@ -30,16 +31,19 @@ class UIResourceManager(private val context: Context) {
 
         Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${GLHelper.GlMaxTextureWidth / 2}x${GLHelper.GlMaxTextureWidth / 2}")
 
-        val texture = BitmapTextureAtlas(
-            GLHelper.GlMaxTextureWidth / 2,
-            GLHelper.GlMaxTextureWidth / 2,
-            TextureOptions.BILINEAR_PREMULTIPLYALPHA
-        )
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
-        val font = Font(texture, typeface, size, true, Color.WHITE)
+
+        val pageFactory = Supplier<ITexture> {
+            val sideLength = GLHelper.GlMaxTextureWidth / 2
+            val page = BitmapTextureAtlas(sideLength, sideLength, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
+
+            UIEngine.current.textureManager.loadTexture(page)
+            page
+        }
+
+        val font = Font(pageFactory, typeface, size, true, Color.WHITE)
 
         UIEngine.current.apply {
-            textureManager.loadTexture(texture)
             fontManager.loadFont(font)
 
             fonts[fontIdentifier] = font
