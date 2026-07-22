@@ -2,11 +2,14 @@ package org.anddev.andengine.opengl.font;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import org.anddev.andengine.opengl.texture.ITexture;
+import org.anddev.andengine.opengl.texture.TextureOptions;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -30,6 +33,8 @@ import android.util.SparseArray;
 // osu!droid modified:
 // * Support for UTF-16 characters by using String instead of Char where needed.
 // * Removal of non-sense padding.
+// * Use multiple atlas pages instead of overflowing a single fixed-size texture,
+//   so already-placed glyphs remain valid.
 public class Font {
 	// ===========================================================
 	// Constants
@@ -44,9 +49,10 @@ public class Font {
 	// Fields
 	// ===========================================================
 
-	private final ITexture mTexture;
-	private final float mTextureWidth;
-	private final float mTextureHeight;
+	private final List<ITexture> mPages = new ArrayList<>();
+	private final Supplier<ITexture> mPageFactory;
+	private final float mPageWidth;
+	private final float mPageHeight;
 	private int mCurrentTextureX = 0;
 	private int mCurrentTextureY = 0;
 
@@ -72,10 +78,18 @@ public class Font {
 	// Constructors
 	// ===========================================================
 
-	public Font(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor) {
-		this.mTexture = pTexture;
-		this.mTextureWidth = pTexture.getWidth();
-		this.mTextureHeight = pTexture.getHeight();
+	/**
+	 * @param pPageFactory creates and registers (e.g. with the {@link org.anddev.andengine.opengl.texture.TextureManager})
+	 *                     an atlas page, invoked once immediately for the first page and again whenever the current
+	 *                     page runs out of room for new glyphs. Every page it produces <b>must</b> share the same dimensions
+	 *                     and options, since those of the first page are cached and reused for all subsequent pages.
+	 */
+	public Font(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor) {
+		final ITexture firstPage = pPageFactory.get();
+		this.mPages.add(firstPage);
+		this.mPageFactory = pPageFactory;
+		this.mPageWidth = firstPage.getWidth();
+		this.mPageHeight = firstPage.getHeight();
 
 		this.mPaint = new Paint();
 		this.mPaint.setTypeface(pTypeface);
@@ -105,7 +119,15 @@ public class Font {
 	}
 
 	public ITexture getTexture() {
-		return this.mTexture;
+		return this.mPages.get(0);
+	}
+
+	public synchronized TextureOptions getTextureOptions() {
+		return this.mPages.get(0).getTextureOptions();
+	}
+
+	private ITexture getCurrentPage() {
+		return this.mPages.get(this.mPages.size() - 1);
 	}
 
 	// ===========================================================
@@ -185,8 +207,8 @@ public class Font {
 	}
 
 	private Letter createLetter(final String pCharacter) {
-		final float textureWidth = this.mTextureWidth;
-		final float textureHeight = this.mTextureHeight;
+		final float textureWidth = this.mPageWidth;
+		final float textureHeight = this.mPageHeight;
 
 		final Size createLetterTemporarySize = this.mCreateLetterTemporarySize;
 		this.getLetterBounds(pCharacter, createLetterTemporarySize);
@@ -199,27 +221,47 @@ public class Font {
 			this.mCurrentTextureY += this.getLineGap() + this.getLineHeight();
 		}
 
+		if (this.mCurrentTextureY + letterHeight > textureHeight) {
+			this.addPage();
+		}
+
 		final float letterTextureX = this.mCurrentTextureX / textureWidth;
 		final float letterTextureY = this.mCurrentTextureY / textureHeight;
 		final float letterTextureWidth = letterWidth / textureWidth;
 		final float letterTextureHeight = letterHeight / textureHeight;
 
-		final Letter letter = new Letter(pCharacter, this.getLetterAdvance(pCharacter), (int)letterWidth, (int)letterHeight, letterTextureX, letterTextureY, letterTextureWidth, letterTextureHeight);
+		final Letter letter = new Letter(this.getCurrentPage(), pCharacter, this.getLetterAdvance(pCharacter), (int)letterWidth, (int)letterHeight, letterTextureX, letterTextureY, letterTextureWidth, letterTextureHeight);
 		this.mCurrentTextureX += letterWidth;
 
 		return letter;
 	}
 
+	/**
+	 * Allocates a new, empty atlas page rather than reusing/clearing the current one, so that
+	 * {@link Letter}s already handed out (and any {@link org.anddev.andengine.entity.text.Text}
+	 * built from them) keep pointing at valid, unmodified texture data.
+	 */
+	private void addPage() {
+		this.mPages.add(this.mPageFactory.get());
+		this.mCurrentTextureX = 0;
+		this.mCurrentTextureY = 0;
+	}
+
 	public synchronized void update(final GL10 pGL) {
 		final ArrayList<Letter> lettersPendingToBeDrawnToTexture = this.mLettersPendingToBeDrawnToTexture;
 		if(lettersPendingToBeDrawnToTexture.size() > 0) {
-			this.mTexture.bind(pGL);
+			final float textureWidth = this.mPageWidth;
+			final float textureHeight = this.mPageHeight;
 
-			final float textureWidth = this.mTextureWidth;
-			final float textureHeight = this.mTextureHeight;
-
+			ITexture boundPage = null;
 			for(int i = lettersPendingToBeDrawnToTexture.size() - 1; i >= 0; i--) {
 				final Letter letter = lettersPendingToBeDrawnToTexture.get(i);
+				final ITexture page = letter.getTexture();
+				if (page != boundPage) {
+					page.bind(pGL);
+					boundPage = page;
+				}
+
 				final Bitmap bitmap = this.getLetterBitmap(letter.mCharacter);
 
 				// TODO What about premultiplyalpha of the textureOptions?

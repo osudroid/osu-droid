@@ -1,5 +1,7 @@
 package org.anddev.andengine.opengl.font;
 
+import java.util.function.Supplier;
+
 import org.anddev.andengine.opengl.texture.ITexture;
 
 import android.graphics.Paint;
@@ -13,6 +15,8 @@ import android.graphics.Typeface;
  * @author Nicolas Gramlich
  * @since 10:39:33 - 03.04.2010
  */
+// osu!droid modified: Constructors now take a Supplier<ITexture> pPageFactory, forwarded to
+// Font to allocate additional atlas pages on overflow.
 public class StrokeFont extends Font {
 	// ===========================================================
 	// Constants
@@ -29,12 +33,12 @@ public class StrokeFont extends Font {
 	// Constructors
 	// ===========================================================
 
-	public StrokeFont(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
-		this(pTexture, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, false);
+	public StrokeFont(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
+		this(pPageFactory, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, false);
 	}
 
-	public StrokeFont(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
-		super(pTexture, pTypeface, pSize, pAntiAlias, pColor);
+	public StrokeFont(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
+		super(pPageFactory, pTypeface, pSize, pAntiAlias, pColor);
 		this.mStrokePaint = new Paint();
 		this.mStrokePaint.setTypeface(pTypeface);
 		this.mStrokePaint.setStyle(Style.STROKE);
