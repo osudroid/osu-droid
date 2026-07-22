@@ -478,19 +478,16 @@ public class OnlineManager {
             return true;
         }
 
-        boolean reuseKey = AttestationState.isKeyValid() &&
-                AttestationState.getAttestationChain() != null;
-
-        if (reuseKey && AttestationState.getPendingToken() != null) {
+        // Reuse key whenever possible.
+        if (AttestationState.isKeyValid() &&
+                AttestationState.getAttestationChain() != null &&
+                AttestationState.getPendingToken() != null) {
             return true;
         }
 
-        if (reuseKey) {
-            // Key is valid but no pending token, fetch a fresh one.
-            fetchAttestationChallenge();
-            return AttestationState.getPendingToken() != null;
-        }
-
+        // The pending token (if any) belongs to whatever challenge is currently baked into the
+        // cached key's attestation chain. A freshly fetched challenge cannot be paired with that
+        // chain, so the key must always be regenerated alongside a new challenge.
         AttestationState.clearSession();
         fetchAttestationChallenge();
 
