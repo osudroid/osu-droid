@@ -8,6 +8,7 @@ import org.anddev.andengine.opengl.vertex.TextVertexBuffer;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class TextTextureBuffer extends BufferObject {
 	// Fields
 	// ===========================================================
 
-	private final List<PageRun> mPageRuns = new ArrayList<>();
+	private volatile List<PageRun> mPageRuns = Collections.emptyList();
 
 	// ===========================================================
 	// Constructors
@@ -42,7 +43,7 @@ public class TextTextureBuffer extends BufferObject {
 	// Getter & Setter
 	// ===========================================================
 
-	public synchronized List<PageRun> getPageRuns() {
+	public List<PageRun> getPageRuns() {
 		return this.mPageRuns;
 	}
 
@@ -58,7 +59,7 @@ public class TextTextureBuffer extends BufferObject {
 		final FloatBuffer textureFloatBuffer = this.mFloatBuffer;
 		textureFloatBuffer.position(0);
 
-        this.mPageRuns.clear();
+		final List<PageRun> pageRuns = new ArrayList<>();
 
 		final Font font = pFont;
 		final String[] lines = pLines;
@@ -94,16 +95,16 @@ public class TextTextureBuffer extends BufferObject {
 				textureFloatBuffer.put(letterTextureX);
 				textureFloatBuffer.put(letterTextureY);
 
-				this.appendToPageRuns(letter.getTexture());
+				appendToPageRuns(pageRuns, letter.getTexture());
 			}
 		}
 		textureFloatBuffer.position(0);
 
+		this.mPageRuns = pageRuns;
 		this.setHardwareBufferNeedsUpdate();
 	}
 
-	private void appendToPageRuns(final ITexture pTexture) {
-		final List<PageRun> pPageRuns = this.mPageRuns;
+	private static void appendToPageRuns(final List<PageRun> pPageRuns, final ITexture pTexture) {
 		final int vertexCount = TextVertexBuffer.VERTICES_PER_CHARACTER;
 
 		if (!pPageRuns.isEmpty()) {
