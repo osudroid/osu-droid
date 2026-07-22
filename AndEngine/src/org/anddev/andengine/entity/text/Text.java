@@ -135,6 +135,10 @@ public class Text extends RectangularShape {
 		return (TextVertexBuffer)this.mVertexBuffer;
 	}
 
+	protected List<TextTextureBuffer.PageRun> getPageRuns() {
+		return this.mTextTextureBuffer.getPageRuns();
+	}
+
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
@@ -150,7 +154,7 @@ public class Text extends RectangularShape {
 	protected void drawVertices(final GL10 pGL, final Camera pCamera) {
 		// osu!droid modified: A Font may span multiple atlas pages, so this text's characters can
 		// reference more than one texture. Bind and draw each contiguous same-page run separately.
-		final List<TextTextureBuffer.PageRun> pageRuns = this.mTextTextureBuffer.getPageRuns();
+		final List<TextTextureBuffer.PageRun> pageRuns = this.getPageRuns();
 		final int pageRunCount = pageRuns.size();
 
 		for (int i = 0; i < pageRunCount; i++) {
