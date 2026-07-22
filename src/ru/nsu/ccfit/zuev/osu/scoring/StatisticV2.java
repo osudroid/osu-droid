@@ -700,7 +700,7 @@ public class StatisticV2 implements Serializable {
         scoreMaxCombo = 0;
         currentCombo = 0;
         totalScore = 0;
-        scoreHash = SecurityUtils.getHigh16Bits(0);
+        scoreHash = getHigh16Bits(0);
         hp = 1;
         life = 1;
         isAlive = true;
@@ -717,7 +717,7 @@ public class StatisticV2 implements Serializable {
     /**
      * @return 得到整数x高20位对3389取模后的结果
      */
-    private static int getHigh16Bits(int x) {
-        return (x >> 12) % 3389;
+    private static int getHigh16Bits(long x) {
+        return (int) (x >> 12) % 3389;
     }
 }
