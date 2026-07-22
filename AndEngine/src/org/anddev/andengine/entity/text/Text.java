@@ -1,5 +1,7 @@
 package org.anddev.andengine.entity.text;
 
+import java.util.List;
+
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
@@ -19,6 +21,9 @@ import org.anddev.andengine.util.StringUtils;
  * @author Nicolas Gramlich
  * @since 10:54:59 - 03.04.2010
  */
+// osu!droid modified:
+// * A Font may now span multiple atlas pages. drawVertices() and applyTexture() bind each
+//   page run's texture separately instead of assuming every character shares one texture.
 public class Text extends RectangularShape {
 	// ===========================================================
 	// Constants
@@ -143,7 +148,16 @@ public class Text extends RectangularShape {
 
 	@Override
 	protected void drawVertices(final GL10 pGL, final Camera pCamera) {
-		pGL.glDrawArrays(GL10.GL_TRIANGLES, 0, this.mVertexCount);
+		// osu!droid modified: A Font may span multiple atlas pages, so this text's characters can
+		// reference more than one texture. Bind and draw each contiguous same-page run separately.
+		final List<TextTextureBuffer.PageRun> pageRuns = this.mTextTextureBuffer.getPageRuns();
+		final int pageRunCount = pageRuns.size();
+
+		for (int i = 0; i < pageRunCount; i++) {
+			final TextTextureBuffer.PageRun pageRun = pageRuns.get(i);
+			pageRun.texture.bind(pGL);
+			pGL.glDrawArrays(GL10.GL_TRIANGLES, pageRun.startVertex, pageRun.vertexCount);
+		}
 	}
 
 	@Override
@@ -173,21 +187,21 @@ public class Text extends RectangularShape {
 	// ===========================================================
 
 	private void initBlendFunction() {
-		if(this.mFont.getTexture().getTextureOptions().mPreMultipyAlpha) {
+		if(this.mFont.getTextureOptions().mPreMultipyAlpha) {
 			this.setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT);
 		}
 	}
 
 	private void applyTexture(final GL10 pGL) {
+		// osu!droid modified: Texture binding now happens per page run in drawVertices(), since a
+		// Font may span multiple atlas pages. This method only sets up the texture coordinate pointer.
 		if(GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
 			final GL11 gl11 = (GL11)pGL;
 
 			this.mTextTextureBuffer.selectOnHardware(gl11);
 
-			this.mFont.getTexture().bind(pGL);
 			GLHelper.texCoordZeroPointer(gl11);
 		} else {
-			this.mFont.getTexture().bind(pGL);
 			GLHelper.texCoordPointer(pGL, this.mTextTextureBuffer.getFloatBuffer());
 		}
 	}
