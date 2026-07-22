@@ -13,6 +13,7 @@ import org.anddev.andengine.opengl.texture.TextureOptions
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.anddev.andengine.opengl.util.GLHelper
 import java.lang.ref.WeakReference
+import java.util.function.Supplier
 
 class UIResourceManager(private val context: Context) {
 
@@ -73,7 +74,7 @@ class UIResourceManager(private val context: Context) {
 
             UIEngine.current.apply {
                 fontManager.unloadFont(font)
-                textureManager.unloadTexture(font.texture)
+                font.pages.forEach { textureManager.unloadTexture(it) }
             }
         }
     }

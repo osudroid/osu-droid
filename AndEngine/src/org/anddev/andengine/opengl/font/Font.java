@@ -122,6 +122,10 @@ public class Font {
 		return this.mPages.get(0);
 	}
 
+	public synchronized List<ITexture> getPages() {
+		return List.copyOf(this.mPages);
+	}
+
 	public synchronized TextureOptions getTextureOptions() {
 		return this.mPages.get(0).getTextureOptions();
 	}
