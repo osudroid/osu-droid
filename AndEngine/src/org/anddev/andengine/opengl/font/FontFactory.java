@@ -1,5 +1,7 @@
 package org.anddev.andengine.opengl.font;
 
+import java.util.function.Supplier;
+
 import org.anddev.andengine.opengl.texture.ITexture;
 
 import android.content.Context;
@@ -12,6 +14,9 @@ import android.graphics.Typeface;
  * @author Nicolas Gramlich
  * @since 17:17:28 - 16.06.2010
  */
+// osu!droid modified: Factory methods now take a Supplier<ITexture> pPageFactory in place of a
+// single texture. Font uses it to create the first atlas page as well as any additional ones
+// allocated on overflow.
 public class FontFactory {
 	// ===========================================================
 	// Constants
@@ -54,28 +59,28 @@ public class FontFactory {
 	// Methods
 	// ===========================================================
 
-	public static Font create(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor) {
-		return new Font(pTexture, pTypeface, pSize, pAntiAlias, pColor);
+	public static Font create(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor) {
+		return new Font(pPageFactory, pTypeface, pSize, pAntiAlias, pColor);
 	}
 
-	public static StrokeFont createStroke(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
-		return new StrokeFont(pTexture, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor);
+	public static StrokeFont createStroke(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
+		return new StrokeFont(pPageFactory, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor);
 	}
 
-	public static StrokeFont createStroke(final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
-		return new StrokeFont(pTexture, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, pStrokeOnly);
+	public static StrokeFont createStroke(final Supplier<ITexture> pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
+		return new StrokeFont(pPageFactory, pTypeface, pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, pStrokeOnly);
 	}
 
-	public static Font createFromAsset(final ITexture pTexture, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor) {
-		return new Font(pTexture, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor);
+	public static Font createFromAsset(final Supplier<ITexture> pPageFactory, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor) {
+		return new Font(pPageFactory, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor);
 	}
 
-	public static StrokeFont createStrokeFromAsset(final ITexture pTexture, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
-		return new StrokeFont(pTexture, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor);
+	public static StrokeFont createStrokeFromAsset(final Supplier<ITexture> pPageFactory, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor) {
+		return new StrokeFont(pPageFactory, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor);
 	}
 
-	public static StrokeFont createStrokeFromAsset(final ITexture pTexture, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
-		return new StrokeFont(pTexture, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, pStrokeOnly);
+	public static StrokeFont createStrokeFromAsset(final Supplier<ITexture> pPageFactory, final Context pContext, final String pAssetPath, final float pSize, final boolean pAntiAlias, final int pColor, final float pStrokeWidth, final int pStrokeColor, final boolean pStrokeOnly) {
+		return new StrokeFont(pPageFactory, Typeface.createFromAsset(pContext.getAssets(), FontFactory.sAssetBasePath + pAssetPath), pSize, pAntiAlias, pColor, pStrokeWidth, pStrokeColor, pStrokeOnly);
 	}
 
 	// ===========================================================
