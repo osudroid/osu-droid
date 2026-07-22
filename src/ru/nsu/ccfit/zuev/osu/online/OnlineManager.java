@@ -302,6 +302,7 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
+        post.addParam("ssid", ssid);
 
         if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) {
             post.addParam("type", "pp");
