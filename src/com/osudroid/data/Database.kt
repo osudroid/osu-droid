@@ -27,6 +27,11 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay
 // Ported from rimu! project
 
 /**
+ * The current schema version of [DroidDatabase].
+ */
+const val DATABASE_VERSION = 5
+
+/**
  * The osu!droid database manager.
  */
 object DatabaseManager {
@@ -155,16 +160,14 @@ object DatabaseManager {
             return false
         }
 
-        val appVersion = DroidDatabase::class.java.getAnnotation(Database::class.java)!!.version
-
-        if (fileVersion <= appVersion) {
+        if (fileVersion <= DATABASE_VERSION) {
             return false
         }
 
         Log.w(
             "DatabaseManager",
             "Database was created by a newer version of the game (file version $fileVersion, game version " +
-                "$appVersion) and will be reset. The previous database will be backed up."
+                "$DATABASE_VERSION) and will be reset. The previous database will be backed up."
         )
 
         try {
@@ -348,7 +351,7 @@ object DatabaseManager {
 }
 
 @Database(
-    version = 5,
+    version = DATABASE_VERSION,
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,
