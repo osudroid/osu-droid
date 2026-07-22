@@ -3,8 +3,13 @@ package org.anddev.andengine.opengl.texture.buffer;
 import org.anddev.andengine.opengl.buffer.BufferObject;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.Letter;
+import org.anddev.andengine.opengl.texture.ITexture;
+import org.anddev.andengine.opengl.vertex.TextVertexBuffer;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -13,6 +18,8 @@ import java.nio.FloatBuffer;
  * @author Nicolas Gramlich
  * @since 11:05:56 - 03.04.2010
  */
+// osu!droid modified: Track which atlas page each character's glyph came from, since a Font may now span multiple pages.
+// This is exposed as compressed PageRuns for Text to issue one draw call per contiguous run of same-page characters.
 public class TextTextureBuffer extends BufferObject {
 	// ===========================================================
 	// Constants
@@ -21,6 +28,8 @@ public class TextTextureBuffer extends BufferObject {
 	// ===========================================================
 	// Fields
 	// ===========================================================
+
+	private volatile List<PageRun> mPageRuns = Collections.emptyList();
 
 	// ===========================================================
 	// Constructors
@@ -34,6 +43,10 @@ public class TextTextureBuffer extends BufferObject {
 	// Getter & Setter
 	// ===========================================================
 
+	public List<PageRun> getPageRuns() {
+		return this.mPageRuns;
+	}
+
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
@@ -45,6 +58,8 @@ public class TextTextureBuffer extends BufferObject {
 	public synchronized void update(final Font pFont, final String[] pLines) {
 		final FloatBuffer textureFloatBuffer = this.mFloatBuffer;
 		textureFloatBuffer.position(0);
+
+		final List<PageRun> pageRuns = new ArrayList<>();
 
 		final Font font = pFont;
 		final String[] lines = pLines;
@@ -79,14 +94,49 @@ public class TextTextureBuffer extends BufferObject {
 
 				textureFloatBuffer.put(letterTextureX);
 				textureFloatBuffer.put(letterTextureY);
+
+				appendToPageRuns(pageRuns, letter.getTexture());
 			}
 		}
 		textureFloatBuffer.position(0);
 
+		this.mPageRuns = pageRuns;
 		this.setHardwareBufferNeedsUpdate();
+	}
+
+	private static void appendToPageRuns(final List<PageRun> pPageRuns, final ITexture pTexture) {
+		final int vertexCount = TextVertexBuffer.VERTICES_PER_CHARACTER;
+
+		if (!pPageRuns.isEmpty()) {
+			final PageRun lastRun = pPageRuns.get(pPageRuns.size() - 1);
+
+			if (lastRun.texture == pTexture) {
+				lastRun.vertexCount += vertexCount;
+				return;
+			}
+		}
+
+		final int startVertex = pPageRuns.isEmpty() ? 0 : pPageRuns.get(pPageRuns.size() - 1).startVertex + pPageRuns.get(pPageRuns.size() - 1).vertexCount;
+		pPageRuns.add(new PageRun(pTexture, startVertex, vertexCount));
 	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
+
+	/**
+	 * A contiguous run of vertices (in {@link TextVertexBuffer}/{@link TextTextureBuffer} order) that all sample the
+	 * same atlas page.
+	 */
+	public static final class PageRun {
+		public final ITexture texture;
+		public final int startVertex;
+		public int vertexCount;
+
+		PageRun(final ITexture pTexture, final int pStartVertex, final int pVertexCount) {
+			this.texture = pTexture;
+			this.startVertex = pStartVertex;
+			this.vertexCount = pVertexCount;
+		}
+	}
 }
