@@ -511,6 +511,12 @@ public class OnlineManager {
             return AttestationState.getPendingToken() != null;
         } catch (Exception e) {
             failMessage = "Hardware attestation failed";
+
+            // Debug.e() is compiled out in release builds, so record the raw cause (e.g. a
+            // Keystore/RKP failure) to Crashlytics to get visibility into why real devices
+            // fail attestation key generation.
+            FirebaseCrashlytics.getInstance().recordException(e);
+
             throw new OnlineManagerException(failMessage, e);
         }
     }
