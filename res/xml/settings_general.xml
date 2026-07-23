@@ -65,6 +65,23 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/opt_category_discord">
+
+        <Preference
+            android:key="discordConnect"
+            android:summary="@string/opt_discordConnect_summary"
+            android:title="@string/opt_discordConnect_title"
+            app:layout="@layout/settings_preference" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="discordRichPresence"
+            android:summary="@string/opt_discordRichPresence_summary"
+            android:title="@string/opt_discordRichPresence_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/opt_category_updates">
 
         <Preference

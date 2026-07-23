@@ -29,7 +29,10 @@ import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.game.replay.ReplaySettingsPanel;
+import com.osudroid.discord.DiscordPresenceManager;
+import com.osudroid.discord.UserActivity;
 import com.osudroid.multiplayer.api.RoomAPI;
+import com.osudroid.multiplayer.api.data.Room;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
@@ -1472,6 +1475,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         engine.setScene(scene);
         engine.getOverlay().attachChild(hud, 0);
 
+        var beatmapTitle = lastBeatmapInfo.getFullBeatmapName();
+        Long beatmapId = lastBeatmapInfo.getId();
+
+        if (Multiplayer.isMultiplayer) {
+            Room room = Multiplayer.room;
+            int size = room != null ? room.getPlayerCount() : 0;
+            int max = room != null ? room.getMaxPlayers() : 0;
+
+            DiscordPresenceManager.setActivity(new UserActivity.InMultiplayerGame(beatmapTitle, beatmapId, size, max));
+        } else if (replaying || GameHelper.isAutoplay()) {
+            DiscordPresenceManager.setActivity(new UserActivity.WatchingReplay(stat.getPlayerName(), beatmapTitle, beatmapId));
+        } else {
+            DiscordPresenceManager.setActivity(new UserActivity.InSoloGame(beatmapTitle, beatmapId));
+        }
+
         if (isHUDEditorMode) {
             ToastLogger.showText(R.string.hudEditor_back_for_menu, false);
         }
@@ -2032,8 +2050,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());
+                DiscordPresenceManager.setActivity(UserActivity.Idle.INSTANCE);
             } else {
                 engine.setScene(oldScene);
+                updateDiscordActivityForOldScene();
             }
 
             // Resume difficulty calculation.
@@ -2284,11 +2304,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
         releaseVideo();
+        updateDiscordActivityForOldScene();
 
         // Resume difficulty calculation.
         DifficultyCalculationManager.calculateDifficulties();
     }
 
+    private void updateDiscordActivityForOldScene() {
+        if (oldScene == GlobalManager.getInstance().getMainScene().getScene()) {
+            DiscordPresenceManager.setActivity(UserActivity.Idle.INSTANCE);
+        } else {
+            DiscordPresenceManager.setActivity(UserActivity.ChoosingBeatmap.INSTANCE);
+        }
+    }
 
     public void reset() {
     }
@@ -2852,6 +2880,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
+            Room mpRoom = Multiplayer.room;
+            DiscordPresenceManager.setActivity(
+                new UserActivity.InMultiplayerLobby(
+                    mpRoom != null ? mpRoom.getName() : "",
+                    mpRoom != null ? mpRoom.getPlayerCount() : 0,
+                    mpRoom != null ? mpRoom.getMaxPlayers() : 0));
             quit();
             return;
         }

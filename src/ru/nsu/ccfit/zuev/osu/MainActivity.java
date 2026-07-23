@@ -54,6 +54,7 @@ import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.utils.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.discord.DiscordPresenceManager;
 import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
 
@@ -138,6 +139,7 @@ public class MainActivity extends BaseGameActivity implements
         reportGlesVersion();
 
         Config.loadConfig(this);
+        DiscordPresenceManager.init(this);
         StringTable.setContext(this);
         ToastLogger.init(this);
         initialGameDirectory();
@@ -792,6 +794,7 @@ public class MainActivity extends BaseGameActivity implements
         activityVisible = true;
 
         logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+        DiscordPresenceManager.INSTANCE.onActivityResume();
 
         if (mEngine == null) {
             return;
@@ -866,6 +869,7 @@ public class MainActivity extends BaseGameActivity implements
 
         Multiplayer.flushLog();
         AccessibilityDetector.unregister(this);
+        DiscordPresenceManager.disconnect();
 
         var listener = displayListener;
 

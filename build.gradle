@@ -166,7 +166,14 @@ android {
         ignoreWarnings true
     }
     buildFeatures {
+        prefab true
         buildConfig true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
     }
 
     testOptions {
@@ -179,6 +186,28 @@ android {
         variant.outputs.configureEach { output ->
             def fileName = "osudroid-${defaultConfig.versionName}-${variant.buildType.name}.apk"
             outputFileName = fileName
+        }
+    }
+
+    // Copy compile_commands.json for arm64-v8a into jni/ so clangd finds it when walking up from jni/discord_jni.cpp.
+    // Without this it falls back to the system compiler and produces false-positive errors for JNI and C++ standard library types.
+    tasks.configureEach { task ->
+        if (task.name ==~ /configureCMake.*/) {
+            task.doLast {
+                def ccFiles = fileTree('.cxx') {
+                    include '**/arm64-v8a/compile_commands.json'
+                    exclude '**/tools/**'
+                }
+
+                def ccFile = ccFiles.files.first()
+
+                if (ccFile?.exists()) {
+                    copy {
+                        from ccFile
+                        into 'jni'
+                    }
+                }
+            }
         }
     }
 }
@@ -221,6 +250,10 @@ dependencies {
     // Video playback
     implementation "androidx.media3:media3-exoplayer:1.4.1"
     implementation files('libs/media3-decoder-ffmpeg.aar')
+
+    // Discord Social SDK
+    implementation files("libs/discord_partner_sdk.aar")
+    implementation 'androidx.browser:browser:1.8.0'
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
