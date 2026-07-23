@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Base64;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.osudroid.BuildSettings;
 import com.osudroid.data.BeatmapInfo;
