@@ -135,8 +135,6 @@ public class ResourceManager {
         customSounds.clear();
         customTextures.clear();
         customFrameCount.clear();
-
-        initSecurityUtils();
     }
 
     public void loadSkin(String folder) {
@@ -850,10 +848,6 @@ public class ResourceManager {
         for (var key : toRemove) {
             textures.remove(key);
         }
-    }
-
-    public void initSecurityUtils() {
-        SecurityUtils.getAppSignature(context, context.getPackageName());
     }
 
     public void clearCustomResources() {

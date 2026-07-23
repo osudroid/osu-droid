@@ -45,12 +45,6 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                         )
                     }
 
-                    var signStr = "${OnlineManager.getInstance().userId}_${name}_${capacity}"
-                    if (password != null) {
-                        signStr += "_${password}"
-                    }
-                    signStr += "_${RoomAPI.API_VERSION}_${OnlineManager.getInstance().sessionId}"
-
                     try {
 
                         val roomId = LobbyAPI.createRoom(
@@ -58,7 +52,6 @@ class RoomCreateDialog(lobbyScene: LobbyScene) : UIDialog<UIScrollableContainer>
                             beatmap = beatmap,
                             hostUID = OnlineManager.getInstance().userId,
                             sessionId = OnlineManager.getInstance().sessionId,
-                            sign = SecurityUtils.signRequest(signStr),
                             password = password,
                             maxPlayers = capacity
                         )

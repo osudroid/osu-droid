@@ -3,10 +3,16 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.osudroid.BuildSettings;
 import com.osudroid.data.BeatmapInfo;
+import com.osudroid.online.AttestationState;
+import com.osudroid.online.HardwareAttestationManager;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -33,6 +39,7 @@ public class OnlineManager {
     public static final String hostname = "osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
+    public static final String attestationChallengeEndpoint = endpoint + "attestation_challenge.php";
     public static final String defaultAvatarURL = getAvatarURL(0);
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
     private static final String onlineVersion = "61";
@@ -136,49 +143,82 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
-        PostBuilder post = new URLEncodedPostBuilder();
-        post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calculator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
-        post.addParam("version", onlineVersion);
+        boolean canRetry = true;
 
-        ArrayList<String> response = sendRequest(post, endpoint + "login.php");
+        while (true) {
+            if (!prepareAttestationForLogin()) {
+                return false;
+            }
 
-        if (response == null) {
-            return false;
+            var chain = AttestationState.getAttestationChain();
+
+            if (chain == null || chain.isEmpty()) {
+                failMessage = "Attestation failed";
+                return false;
+            }
+
+            PostBuilder post = new URLEncodedPostBuilder();
+            post.addParam("username", username);
+            post.addParam(
+                    "password",
+                    MD5Calculator.getStringMD5(
+                            escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
+                    ));
+            post.addParam("version", onlineVersion);
+            post.addParam("attestationChain", chain);
+
+            var token = AttestationState.getPendingToken();
+
+            if (token != null) {
+                post.addParam("attestationToken", token);
+            }
+
+            ArrayList<String> response = sendRequest(post, endpoint + "login.php");
+
+            if (response == null) {
+                // Only retry on challenge expiry once.
+                if (failMessage.equals("CHALLENGE_EXPIRED") && canRetry) {
+                    AttestationState.clearSession();
+                    canRetry = false;
+                    continue;
+                }
+
+                return false;
+            }
+
+            if (response.size() < 2) {
+                failMessage = "Invalid server response";
+                return false;
+            }
+
+            String[] params = response.get(1).split("\\s+");
+            if (params.length < 6) {
+                failMessage = "Invalid server response";
+                return false;
+            }
+            userId = Long.parseLong(params[0]);
+            ssid = params[1];
+            rank = Integer.parseInt(params[2]);
+            score = Long.parseLong(params[3]);
+            pp = Float.parseFloat(params[4]);
+            accuracy = Float.parseFloat(params[5]);
+            this.username = params[6];
+            if (params.length >= 8) {
+                avatarURL = params[7];
+            } else {
+                avatarURL = "";
+            }
+            profileBannerURL = getProfileBannerURL(userId);
+
+            Bundle bParams = new Bundle();
+            bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
+            GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
+
+            AttestationState.setPendingToken(null);
+            AttestationState.setSessionAttestationReady(true);
+
+            return true;
         }
-        if (response.size() < 2) {
-            failMessage = "Invalid server response";
-            return false;
-        }
-
-        String[] params = response.get(1).split("\\s+");
-        if (params.length < 7) {
-            failMessage = "Invalid server response";
-            return false;
-        }
-        userId = Long.parseLong(params[0]);
-        ssid = params[1];
-        rank = Integer.parseInt(params[2]);
-        score = Long.parseLong(params[3]);
-        pp = Float.parseFloat(params[4]);
-        accuracy = Float.parseFloat(params[5]);
-        this.username = params[6];
-        if (params.length >= 8) {
-            avatarURL = params[7];
-        } else {
-            avatarURL = "";
-        }
-        profileBannerURL = getProfileBannerURL(userId);
-
-        Bundle bParams = new Bundle();
-        bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
-
-        return true;
     }
 
     boolean tryToLogIn() throws OnlineManagerException {
@@ -190,6 +230,10 @@ public class OnlineManager {
     }
 
     public boolean sendRecord(BeatmapInfo beatmap, String scoreData, String replayPath) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return false;
+        }
+
         Debug.i("Sending record...");
 
         File replayFile = new File(replayPath);
@@ -211,6 +255,10 @@ public class OnlineManager {
         post.addParam("ar", String.valueOf(beatmap.getApproachRate()));
         post.addParam("od", String.valueOf(beatmap.getOverallDifficulty()));
         post.addParam("hp", String.valueOf(beatmap.getHpDrainRate()));
+
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + beatmap.getMD5() + "|" + scoreData)) {
+            return false;
+        }
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
@@ -248,14 +296,23 @@ public class OnlineManager {
     }
 
     public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return new ArrayList<>();
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
+        post.addParam("ssid", ssid);
 
         if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) {
             post.addParam("type", "pp");
         } else {
             post.addParam("type", "score");
+        }
+
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + hash)) {
+            return new ArrayList<>();
         }
 
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
@@ -388,6 +445,10 @@ public class OnlineManager {
     }
 
     public String getScorePack(int playid) throws OnlineManagerException {
+        if (!ensureAttestationReady()) {
+            return "";
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
@@ -397,6 +458,10 @@ public class OnlineManager {
             post.addParam("type", "score");
         }
 
+        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + playid)) {
+            return "";
+        }
+
         ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
 
         if (response == null || response.size() < 2) {
@@ -404,6 +469,116 @@ public class OnlineManager {
         }
 
         return response.get(1);
+    }
+
+    private boolean prepareAttestationForLogin() throws OnlineManagerException {
+        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
+            AttestationState.setAttestationChain(BuildSettings.getDEBUG_ATTESTATION_SIGN());
+            // Login requires a token to be present, but we can send a dummy one.
+            AttestationState.setPendingToken("debug_bypass_token");
+            return true;
+        }
+
+        // Reuse key whenever possible.
+        if (AttestationState.isKeyValid() &&
+                AttestationState.getAttestationChain() != null &&
+                AttestationState.getPendingToken() != null) {
+            return true;
+        }
+
+        // The pending token (if any) belongs to whatever challenge is currently baked into the
+        // cached key's attestation chain. A freshly fetched challenge cannot be paired with that
+        // chain, so the key must always be regenerated alongside a new challenge.
+        AttestationState.clearSession();
+        fetchAttestationChallenge();
+
+        var challenge = AttestationState.getPendingChallenge();
+
+        if (challenge == null || challenge.length == 0) {
+            failMessage = "Cannot obtain attestation challenge";
+            return false;
+        }
+
+        try {
+            HardwareAttestationManager.generateKeyPair(challenge);
+            var chain = HardwareAttestationManager.getAttestationChainPem();
+
+            if (chain == null || chain.isEmpty()) {
+                failMessage = "Cannot create attestation chain";
+                return false;
+            }
+
+            AttestationState.setAttestationChain(chain);
+            return AttestationState.getPendingToken() != null;
+        } catch (Exception e) {
+            failMessage = "Hardware attestation failed";
+
+            // Debug.e() is compiled out in release builds, so record the raw cause (e.g. a
+            // Keystore/RKP failure) to Crashlytics to get visibility into why real devices
+            // fail attestation key generation.
+            FirebaseCrashlytics.getInstance().recordException(e);
+
+            throw new OnlineManagerException(failMessage, e);
+        }
+    }
+
+    private void fetchAttestationChallenge() {
+        var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
+
+        try (var response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                failMessage = "Failed to fetch attestation challenge";
+                return;
+            }
+
+            var body = response.body().string();
+            var json = new JSONObject(body);
+
+            var challengeBase64 = json.optString("challenge");
+            var token = json.optString("token");
+
+            if (challengeBase64.isEmpty() || token.isEmpty()) {
+                failMessage = "Invalid attestation challenge response";
+                return;
+            }
+
+            AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
+            AttestationState.setPendingToken(token);
+        } catch (Exception e) {
+            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+        }
+    }
+
+    private boolean ensureAttestationReady() {
+        if (AttestationState.getSessionAttestationReady()) {
+            return true;
+        }
+
+        failMessage = "Attestation required";
+        return false;
+    }
+
+    private boolean attachAttestationSignature(PostBuilder post, String payload) throws OnlineManagerException {
+        if (BuildSettings.getDEBUG_SKIP_ATTESTATION()) {
+            post.addParam("sign", BuildSettings.getDEBUG_ATTESTATION_SIGN());
+            return true;
+        }
+
+        try {
+            String signature = HardwareAttestationManager.signToBase64(payload);
+
+            if (signature == null || signature.isEmpty()) {
+                failMessage = "Cannot sign with hardware key";
+                return false;
+            }
+
+            post.addParam("sign", signature);
+
+            return true;
+        } catch (Exception e) {
+            failMessage = "Hardware signing failed";
+            throw new OnlineManagerException("Hardware signing failed", e);
+        }
     }
 
     public String getFailMessage() {
