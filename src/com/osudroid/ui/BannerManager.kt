@@ -6,7 +6,6 @@ import android.util.Log
 import com.reco1l.andengine.sprite.UISprite
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.WebRequest
-import com.reco1l.toolkt.data.writeToFile
 import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.texture.region.TextureRegion
@@ -50,7 +49,11 @@ object BannerManager {
                             bannerFile.createNewFile()
 
                             imageRequest.execute()
-                            imageRequest.responseBody.byteStream().writeToFile(bannerFile)
+                            imageRequest.responseBody.byteStream().use { input ->
+                                bannerFile.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
 
                             ResourceManager.getInstance().loadHighQualityFile("banner@${i}", bannerFile)
                         }

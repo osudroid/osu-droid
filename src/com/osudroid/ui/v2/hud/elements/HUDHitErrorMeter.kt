@@ -1,9 +1,12 @@
 package com.osudroid.ui.v2.hud.elements
 
-import com.reco1l.framework.Color4
-import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.beatmaps.HitWindow
 import com.osudroid.beatmaps.constants.HitObjectType
+import com.osudroid.ui.v2.hud.HUDElement
+import com.osudroid.utils.*
+import com.reco1l.andengine.component.*
+import com.reco1l.framework.Color4
+import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import kotlin.math.abs
 

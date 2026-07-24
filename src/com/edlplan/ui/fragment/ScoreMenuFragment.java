@@ -17,9 +17,8 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
+import com.reco1l.framework.android.ViewsKt;
 import com.reco1l.osu.ui.MessageDialog;
-import com.reco1l.toolkt.android.Dimensions;
-import com.reco1l.toolkt.android.Views;
 
 import java.io.File;
 import java.util.Locale;
@@ -119,7 +118,7 @@ public class ScoreMenuFragment extends BaseFragment {
         });
 
         playOnLoadAnim();
-        Views.setCornerRadius(findViewById(R.id.fullLayout), Dimensions.getDp(14f));
+        ViewsKt.setCornerRadius(findViewById(R.id.fullLayout), ViewsKt.getDp(14f));
     }
 
     @Override

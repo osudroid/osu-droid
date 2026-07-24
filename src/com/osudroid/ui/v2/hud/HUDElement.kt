@@ -8,7 +8,6 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.capitalize
 import com.osudroid.beatmaps.constants.HitObjectType
 import com.osudroid.beatmaps.hitobjects.HitObject
 import org.anddev.andengine.input.touch.TouchEvent

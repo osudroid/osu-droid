@@ -8,7 +8,6 @@ import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.andengine.modifier.OnModifierFinished
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -33,7 +32,7 @@ object FollowPointConnection {
 
         return if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
             PoolableAnimatedFollowPoint("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
-                sprite.frames.fastForEach { it?.applyFollowPointMaxSize() }
+                sprite.frames.forEach { it?.applyFollowPointMaxSize() }
 
                 sprite.invalidate(InvalidationFlag.Content)
                 sprite.isLoop = false

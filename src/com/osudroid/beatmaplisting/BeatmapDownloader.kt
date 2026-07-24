@@ -8,7 +8,7 @@ import com.reco1l.framework.net.IFileRequestObserver
 import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v1.DownloadFragment
-import com.reco1l.toolkt.kotlin.async
+import com.osudroid.utils.async
 import net.lingala.zip4j.ZipFile
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

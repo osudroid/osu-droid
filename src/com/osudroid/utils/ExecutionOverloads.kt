@@ -1,18 +1,19 @@
 @file:JvmName("Execution")
+@file:Suppress("OPT_IN_USAGE")
 
 package com.osudroid.utils
 
 import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
+import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import com.reco1l.toolkt.kotlin.async as toolktAsync
-import com.reco1l.toolkt.kotlin.delayed as toolktDelayed
-import com.reco1l.toolkt.kotlin.runSafe as toolktRunSafe
 
 /**
  * A [Runnable] intended specifically for Java interoperability with Kotlin coroutines.
@@ -26,40 +27,52 @@ interface CoroutineRunnable {
 /**
  * Run a task on asynchronous using global scope.
  */
-fun async(block: Runnable) = toolktAsync { block.run() }
+fun async(block: Runnable) = GlobalScope.launch { block.run() }
 
 /**
  * Run a task on asynchronous using global scope.
  */
-fun async(block: CoroutineScope.() -> Unit) = toolktAsync(block)
+fun async(block: CoroutineScope.() -> Unit) = GlobalScope.launch(block = block)
 
 /**
  * Run a task on asynchronous using global scope.
  */
-fun async(block: CoroutineRunnable) = toolktAsync { block(this) }
+fun async(block: CoroutineRunnable) = GlobalScope.launch { block(this) }
 
 
 /**
  * Run a block of code ignoring any exceptions.
  */
-fun runSafe(block: Runnable) = toolktRunSafe { block.run() }
+fun runSafe(block: Runnable) = try {
+    block.run()
+} catch (e: Exception) {
+    e.printStackTrace()
+}
 
 
 /**
  * Run a delayed task on asynchronous using global scope.
  */
-fun delayed(time: Long, block: Runnable) = toolktDelayed(time) { block.run() }
+fun delayed(time: Long, block: Runnable) = GlobalScope.launch {
+    delay(time)
+    block.run()
+}
 
 /**
  * Run a delayed task on asynchronous using global scope.
  */
-fun delayed(time: Long, block: CoroutineScope.() -> Unit) = toolktDelayed(time) { block() }
+fun delayed(time: Long, block: CoroutineScope.() -> Unit) = GlobalScope.launch {
+    delay(time)
+    block()
+}
 
 /**
  * Run a delayed task on asynchronous using global scope.
  */
-fun delayed(time: Long, block: CoroutineRunnable) = toolktDelayed(time) { block(this) }
-
+fun delayed(time: Long, block: CoroutineRunnable) = GlobalScope.launch {
+    delay(time)
+    block(this)
+}
 
 /**
  * Run a task on the main thread.

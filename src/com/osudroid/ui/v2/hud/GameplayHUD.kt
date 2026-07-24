@@ -10,7 +10,6 @@ import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import com.osudroid.beatmaps.constants.HitObjectType
 import com.osudroid.beatmaps.hitobjects.HitObject
 import org.anddev.andengine.entity.IEntity
@@ -247,7 +246,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
         // Cannot use forEachElement {} because we're modifying the list.
-        mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
+        mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
     }
 
     override fun onAttached() {
@@ -268,7 +267,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
      * using another method such as `filterIsInstance<HUDElement>()`.
      */
     fun forEachElement(action: (HUDElement) -> Unit) {
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             (it as? HUDElement)?.let(action)
         }
     }

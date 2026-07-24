@@ -5,7 +5,6 @@ import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import com.osudroid.beatmaps.constants.HitObjectType
 import org.anddev.andengine.engine.camera.*
 import javax.microedition.khronos.opengles.*
@@ -99,7 +98,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
         super.onDrawChildren(gl, camera)
-        activeIndicators.fastForEach {
+        activeIndicators.forEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
@@ -108,7 +107,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        activeIndicators.fastForEach(Indicator::update)
+        activeIndicators.forEach(Indicator::update)
         super.onManagedUpdate(deltaTimeSec)
     }
 

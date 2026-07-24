@@ -11,7 +11,7 @@ import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.toolkt.data.iterator
+import com.reco1l.framework.iterator
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.*
