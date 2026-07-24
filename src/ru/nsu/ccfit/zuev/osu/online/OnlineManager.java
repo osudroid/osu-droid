@@ -138,11 +138,7 @@ public class OnlineManager {
 
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calculator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
+        post.addParam("password", MD5Calculator.getStringMD5(password.trim() + "taikotaiko"));
         post.addParam("version", onlineVersion);
 
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
@@ -478,19 +474,4 @@ public class OnlineManager {
         }
     }
 
-    private String escapeHTMLSpecialCharacters(String str) {
-        return str
-                .replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
-
-    private String addSlashes(String str) {
-        return str
-                .replace("'", "\\'")
-                .replace("\"", "\\\"")
-                .replace("\\", "\\\\");
-    }
 }
