@@ -3,7 +3,6 @@ package com.osudroid.ui.v2.hud.elements
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.osudroid.beatmaps.constants.HitObjectType
 import javax.microedition.khronos.opengles.GL10
 import org.anddev.andengine.engine.camera.Camera
@@ -36,7 +35,7 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
     }
 
     override fun addResult(type: HitObjectType, accuracy: Float, color: Color4) {
-        indicators.fastForEach { it.alpha = (it.alpha - ALPHA_RAMP).coerceAtLeast(0f) }
+        indicators.forEach { it.alpha = (it.alpha - ALPHA_RAMP).coerceAtLeast(0f) }
 
         val indicator = indicators[currentIndicatorIndex]
 
@@ -49,7 +48,7 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
     override fun onDrawChildren(gl: GL10, camera: Camera) {
         super.onDrawChildren(gl, camera)
 
-        indicators.fastForEach {
+        indicators.forEach {
             indicatorBox.x = INDICATOR_SPACING + it.index * (INDICATOR_SIZE + INDICATOR_SPACING)
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha

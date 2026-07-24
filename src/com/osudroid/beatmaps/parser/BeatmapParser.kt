@@ -3,7 +3,6 @@ package com.osudroid.beatmaps.parser
 import android.util.Log
 import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.BeatmapProcessor
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.constants.BeatmapSection
 import com.osudroid.beatmaps.parser.sections.BeatmapColorParser

@@ -1087,13 +1087,13 @@ abstract class UIComponent : Entity(0f, 0f),
     }
 
     private fun updateModifiers(time: Float) {
-        universalModifierTrackers.fastForEach { it.update(time) }
+        universalModifierTrackers.forEach { it.update(time) }
     }
 
     override fun clearEntityModifiers() {
         super.clearEntityModifiers()
 
-        universalModifierTrackers.fastForEach { it.clear() }
+        universalModifierTrackers.forEach { it.clear() }
     }
 
     /**
@@ -1107,10 +1107,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clear(type) }
+        universalModifierTrackers.forEach { it.clear(type) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(type, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(type, true) }
         }
     }
 
@@ -1122,10 +1122,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.fastForEach { it.clear(*types) }
+        universalModifierTrackers.forEach { it.clear(*types) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(true, *types) }
         }
     }
 
@@ -1137,10 +1137,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time) }
+        universalModifierTrackers.forEach { it.clearAfter(time) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
         }
     }
 
@@ -1153,10 +1153,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time, type) }
+        universalModifierTrackers.forEach { it.clearAfter(time, type) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
         }
     }
 
@@ -1169,10 +1169,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time, *types) }
+        universalModifierTrackers.forEach { it.clearAfter(time, *types) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
         }
     }
 
@@ -1188,11 +1188,11 @@ abstract class UIComponent : Entity(0f, 0f),
         if (type != null) {
             getTrackerFor(type)?.finish()
         } else {
-            universalModifierTrackers.fastForEach { it.finish() }
+            universalModifierTrackers.forEach { it.finish() }
         }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.finishModifiers(true, type) }
+            mChildren?.forEach { (it as? UIComponent)?.finishModifiers(true, type) }
         }
     }
 
@@ -1224,7 +1224,7 @@ abstract class UIComponent : Entity(0f, 0f),
         modifierDelay += duration
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.addDelay(duration, true) }
+            mChildren?.forEach { (it as? UIComponent)?.addDelay(duration, true) }
         }
     }
 
@@ -1300,7 +1300,7 @@ abstract class UIComponent : Entity(0f, 0f),
         modifierDelay += newModifierStartTime - modifierStartTime
 
         if (propagateChildren) {
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 (child as? UIComponent)?.adjustAbsoluteSequenceTime(newModifierStartTime)
             }
         }
@@ -1324,7 +1324,7 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 (child as? UIComponent)?.restoreAbsoluteSequenceTime(prevModifierStartTime)
             }
         }
@@ -1828,7 +1828,7 @@ abstract class UIComponent : Entity(0f, 0f),
         background?.updateClock(currentClock)
         foreground?.updateClock(currentClock)
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             @Suppress("UNCHECKED_CAST")
             (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }

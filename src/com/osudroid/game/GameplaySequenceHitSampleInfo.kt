@@ -56,7 +56,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
 
         samples.ensureCapacity(sampleInfo.samples.size)
 
-        sampleInfo.samples.fastForEach { (time, sample) ->
+        sampleInfo.samples.forEach { (time, sample) ->
             val gameplaySampleInfo = GameplayHitSampleInfo.obtain().also {
                 it.init(sample)
                 it.time = time

@@ -58,6 +58,7 @@ import com.reco1l.framework.android.topMargin
 import com.osudroid.mods.ModAutoplay
 import com.osudroid.replay.ReplayImporter
 import com.osudroid.utils.ModHashMap
+import com.reco1l.framework.android.bottomMargin
 import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt

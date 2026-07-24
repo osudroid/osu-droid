@@ -3,7 +3,6 @@ package com.rian.andengine
 import com.reco1l.andengine.LoadState
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.UIComponent
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
@@ -66,7 +65,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
             loadState = LoadState.NotLoaded
         }
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             @Suppress("UNCHECKED_CAST")
             (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
