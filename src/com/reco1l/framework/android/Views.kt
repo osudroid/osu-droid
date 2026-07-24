@@ -71,11 +71,16 @@ val Int.dp
 
 
 /**
- * Returns the [MarginLayoutParams] of this view. If the view does not have a [MarginLayoutParams]
- * a new one is created (inherithing dimensions from the current layout params) and set to this view.
+ * Returns the [MarginLayoutParams] of this [View]. If the [View] does not have a [MarginLayoutParams]
+ * a new one is created (inheriting dimensions from the current [LayoutParams]) and set to this [View].
  */
-val View.marginLayoutParams
-    get() = layoutParams as? MarginLayoutParams ?: MarginLayoutParams(layoutParams)
+val View.marginLayoutParams: MarginLayoutParams
+    get() {
+        ensureLayoutParams()
+        val current = layoutParams
+
+        return (current as? MarginLayoutParams) ?: MarginLayoutParams(current).also { layoutParams = it }
+    }
 
 
 var View.topMargin
