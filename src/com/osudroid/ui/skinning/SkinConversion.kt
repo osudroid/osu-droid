@@ -83,7 +83,7 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
             }
         }
 
-        put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]) ?: "#FFFFFF")
+        put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]))
     })
 
     put("Color", JSONObject().apply {

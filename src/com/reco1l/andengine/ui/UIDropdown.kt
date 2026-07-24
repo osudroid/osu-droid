@@ -5,21 +5,23 @@ import com.osudroid.utils.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
+import com.rian.andengine.modifier.ModifierType
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
+import org.anddev.andengine.entity.scene.Scene
 
 class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
+    private var currentScene: Scene? = null
 
     /**
      * Whether the dropdown menu is currently expanded or not.
      */
-    val isExpanded: Boolean
-        get() = wrapper.hasParent()
+    val isExpanded
+        get() = currentScene != null
 
 
     private val wrapper = object : UIContainer() {
@@ -29,9 +31,14 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         }
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+            if (!event.isActionDown) {
+                return super.onAreaTouched(event, localX, localY)
+            }
+
             if (!super.onAreaTouched(event, localX, localY) && !this@UIDropdown.contains(localX, localY)) {
                 hide()
             }
+
             return true
         }
     }
@@ -64,13 +71,18 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (isExpanded) {
-            var minWidth = trigger.width
+            if (currentScene == UIEngine.current.scene) {
+                var minWidth = trigger.width
 
-            optionsContainer.forEach { it as UITextButton
-                minWidth = max(minWidth, it.contentWidth + it.padding.horizontal)
+                optionsContainer.forEach { it as UITextButton
+                    minWidth = max(minWidth, it.contentWidth + it.padding.horizontal + optionsContainer.padding.horizontal)
+                }
+
+                optionsContainer.minWidth = max(minWidth, width)
+            } else {
+                // Scene was changed - hide the dropdown.
+                hide()
             }
-
-            optionsContainer.minWidth = minWidth
         }
 
         super.onManagedUpdate(deltaTimeSec)
@@ -128,14 +140,14 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
                 if (event.isActionDown) {
                     background!!.apply {
                         clearModifiers(ModifierType.Alpha)
-                        fadeTo(0.2f, 0.3f).eased(Easing.Out)
+                        fadeTo(0.2f, 0.3f, Easing.Out)
                     }
                 }
 
                 if ((event.isActionUp || event.isActionCancel) && background!!.alpha != 0f) {
                     background!!.apply {
                         clearModifiers(ModifierType.Alpha)
-                        fadeOut(0.4f).eased(Easing.OutExpo)
+                        fadeOut(0.4f, Easing.OutExpo)
                     }
                 }
             }
@@ -159,24 +171,23 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
 
     fun show() {
         if (!isExpanded) {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             fadeTo(1f, 0.2f)
             scaleTo(1f, 0.2f)
 
             wrapper.detachSelf()
 
-            val scene = UIEngine.current.scene
-            if (scene.hasChildScene()) {
-                scene.childScene.attachChild(wrapper)
-            } else {
-                scene.attachChild(wrapper)
-            }
+            // Workaround to ensure that the wrapper is always on the top while also ensuring that it does not leak
+            // across scenes.
+            currentScene = UIEngine.current.scene
+            UIEngine.current.overlay.attachChild(wrapper)
         }
     }
 
     fun hide() {
         if (isExpanded) {
-            clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+            currentScene = null
+            clearModifiers(false, ModifierType.Alpha, ModifierType.ScaleXY)
             scaleTo(0.9f, 0.2f)
             fadeTo(0f, 0.2f).after {
                 updateThread {

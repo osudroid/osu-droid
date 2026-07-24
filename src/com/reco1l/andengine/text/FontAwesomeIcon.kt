@@ -132,11 +132,14 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
     }
 
 
-    override fun finalize() {
-        super.finalize()
+    override fun onDetached() {
+        super.onDetached()
 
         val font = font ?: return
         UIEngine.current.resources.unsubscribeFromFont(font, this)
+
+        this.font = null
+        fontSettingsChanged = true
     }
 
 

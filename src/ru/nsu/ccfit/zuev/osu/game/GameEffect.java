@@ -5,18 +5,18 @@ import android.graphics.PointF;
 
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
+import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
 import com.reco1l.andengine.sprite.UISprite;
-import com.reco1l.andengine.modifier.Modifiers;
-import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.framework.Color4;
+import com.rian.andengine.modifier.UniversalModifierSequence;
 
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +30,8 @@ public class GameEffect extends GameObject {
 
     UISprite hit;
     String texname;
+
+    private float duration;
 
     public GameEffect(final String texname) {
         this.texname = texname;
@@ -56,25 +58,36 @@ public class GameEffect extends GameObject {
         }
     }
 
-    public void init(final Scene scene, final PointF pos, final float scale,
-                     final UniversalModifier... entityModifiers) {
+    @SafeVarargs
+    public final void init(final UIScene scene, final PointF pos, final float scale,
+                           final Consumer<UniversalModifierSequence>... sequenceConsumers) {
         if (hit instanceof UIAnimatedSprite animatedHit) {
             animatedHit.reset();
         }
         hit.setPosition(pos.x, pos.y);
         hit.setOrigin(Anchor.Center);
-        hit.registerEntityModifier(Modifiers.parallel(entity -> {
-            Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            });
-        }, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);
         hit.detachSelf();
         hit.setBlendFunction(Shape.BLENDFUNCTION_SOURCE_DEFAULT, Shape.BLENDFUNCTION_DESTINATION_DEFAULT);
         scene.attachChild(hit);
+
+        duration = 0;
+
+        for (int i = 0; i < sequenceConsumers.length; ++i) {
+            var consumer = sequenceConsumers[i];
+
+            hit.beginModifierSequence(sequence -> {
+                consumer.accept(sequence);
+                duration = Math.max(duration, sequence.getDuration());
+            });
+        }
+
+        hit.beginDelayedSequence(duration, sequence -> sequence.after(e -> Execution.updateThread(() -> {
+            hit.detachSelf();
+            hit.clearEntityModifiers();
+            GameObjectPool.getInstance().putEffect(GameEffect.this);
+        })));
     }
 
     public void setBlendFunction(int sourceBlend, int destBlend) {

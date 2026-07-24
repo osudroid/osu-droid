@@ -27,6 +27,9 @@ enum class PlayerStatus {
 
 
     companion object {
-        operator fun get(ordinal: Int) = entries[ordinal]
+        /**
+         * Returns the [PlayerStatus] for the given wire string, or `null` if not recognized.
+         */
+        fun fromWire(value: String): PlayerStatus? = runCatching { enumValueOf<PlayerStatus>(value) }.getOrNull()
     }
 }

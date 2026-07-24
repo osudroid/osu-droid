@@ -23,24 +23,26 @@ class HUDPPCounter : HUDElement() {
             }
         }
 
-    private val counter = RollingDoubleCounter(0.0).apply {
-        rollingDuration = 1000f
-    }
+    private val counter = RollingDoubleCounter(0.0).apply { rollingDuration = 1f }
 
     init {
+        registerUpdateHandler(counter)
         attachChild(sprite)
         updateText()
         onContentChanged()
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
-        counter.update(secondsElapsed * 1000)
-
         // The NaN check here is necessary as calculations may result in NaN values, which should not be displayed.
         // This is not a foolproof solution, but is enough to prevent crashes from happening.
         // Until the source of the NaN values is found and fixed, this must remain in place.
         counter.targetValue = game.stat.pp.takeIf { !it.isNaN() } ?: 0.0
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         value = counter.currentValue.roundToInt()
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     private fun updateText() {

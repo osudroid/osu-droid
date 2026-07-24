@@ -162,7 +162,6 @@ class BeatmapListing : BaseFragment(),
                 .setOnSelectListener { value ->
                     value as Int
                     if (value != mirror.ordinal) {
-                        Config.setInt("beatmapMirror", value)
                         mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
 
                         logoView.text = mirror.description
@@ -338,7 +337,11 @@ class BeatmapListing : BaseFragment(),
         /**
          * The current selected beatmap mirror.
          */
-        var mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+        var mirror
+            get() = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+            set(value) {
+                Config.setInt("beatmapMirror", value.ordinal)
+            }
 
         /**
          * Whether is a beatmap preview music playing or not.

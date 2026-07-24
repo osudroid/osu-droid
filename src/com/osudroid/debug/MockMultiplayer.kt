@@ -115,6 +115,7 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
                 put(JSONObject().apply {
                     put("id", uid)
                     put("username", Config.getOnlineUsername())
+                    put("rank", 1)
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)
                     put("mods", JSONArray())

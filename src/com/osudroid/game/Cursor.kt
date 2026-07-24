@@ -108,6 +108,40 @@ class Cursor {
     }
 
     /**
+     * Obtains the latest [TouchEvent.ACTION_DOWN] [CursorEvent].
+     */
+    fun getLatestDownEvent(): CursorEvent? {
+        if (!events.isEmpty()) {
+            for (i in events.size - 1 downTo 0) {
+                val event = events[i]
+
+                if (event.action == TouchEvent.ACTION_DOWN) {
+                    return event
+                }
+            }
+        }
+
+        return latestEvent?.takeIf { it.action == TouchEvent.ACTION_DOWN }
+    }
+
+    /**
+     * Obtains the latest non-[TouchEvent.ACTION_UP] [CursorEvent].
+     */
+    fun getLatestNonUpEvent(): CursorEvent? {
+        if (!events.isEmpty()) {
+            for (i in events.size - 1 downTo 0) {
+                val event = events[i]
+
+                if (event.action != TouchEvent.ACTION_UP) {
+                    return event
+                }
+            }
+        }
+
+        return latestEvent?.takeIf { it.action != TouchEvent.ACTION_UP }
+    }
+
+    /**
      * Obtains the closest [CursorEvent] before the specified system time.
      *
      * @param systemTime The system time to search for, in the [SystemClock.uptimeMillis] time base.

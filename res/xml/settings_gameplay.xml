@@ -2,38 +2,6 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/opt_category_skin">
-
-        <com.reco1l.osu.ui.SelectPreference
-            android:entries="@array/placeholder_array"
-            android:entryValues="@array/placeholder_array"
-            android:key="skinPath"
-            android:summary="@string/opt_skinpath_summary"
-            android:title="@string/opt_skinpath_title" />
-
-        <Preference
-            android:key="hud_editor"
-            android:summary="@string/opt_hudEditor_summary"
-            android:title="@string/opt_hudEditor_title"
-            app:layout="@layout/settings_preference" />
-
-        <com.reco1l.osu.ui.SelectPreference
-            android:defaultValue="1"
-            android:entries="@array/spinner_style_names"
-            android:entryValues="@array/spinner_style_values"
-            android:key="spinnerstyle"
-            android:summary="@string/opt_spinner_style_summary"
-            android:title="@string/opt_spinner_style_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="skin"
-            android:summary="@string/opt_skin_summary"
-            android:title="@string/opt_skin_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
-
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/opt_category_hit_objects">
 
         <CheckBoxPreference
@@ -47,7 +15,7 @@
 
     <PreferenceCategory android:title="@string/opt_category_background">
 
-        <SeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="25"
             android:key="bgbrightness"
             android:summary="@string/opt_bgbrightness_summary"
@@ -77,7 +45,7 @@
 
     <PreferenceCategory android:title="@string/opt_category_playfield">
 
-        <SeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="100"
             android:key="playfieldSize"
             android:max="100"
@@ -87,7 +55,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <SeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="playfieldHorizontalPosition"
             android:max="100"
@@ -96,7 +64,7 @@
             app:showSeekBarValue="true"
             app:layout="@layout/settings_preference_seekbar" />
 
-        <SeekBarPreference
+        <com.osudroid.ui.EditableSeekBarPreference
             android:defaultValue="50"
             android:key="playfieldVerticalPosition"
             android:max="100"
@@ -128,13 +96,6 @@
             android:key="hideReplayMarquee"
             android:summary="@string/opt_hide_replay_marquee_summary"
             android:title="@string/opt_hide_replay_marquee_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="fps"
-            android:summary="@string/opt_fps_summary"
-            android:title="@string/opt_fps_title"
             app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference

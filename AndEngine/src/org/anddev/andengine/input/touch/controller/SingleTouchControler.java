@@ -36,6 +36,13 @@ public class SingleTouchControler extends BaseTouchController {
 
 	@Override
 	public boolean onHandleMotionEvent(final MotionEvent pMotionEvent) {
+		// BEGIN osu!droid modified - update raw pointer state
+		final int action = pMotionEvent.getAction();
+		final boolean isDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE;
+
+		updateRawPointer(0, pMotionEvent.getX(), pMotionEvent.getY(), isDown, pMotionEvent.getEventTime());
+		// END osu!droid modified
+
 		return this.fireTouchEvent(pMotionEvent.getX(), pMotionEvent.getY(), pMotionEvent.getAction(), 0, pMotionEvent);
 	}
 

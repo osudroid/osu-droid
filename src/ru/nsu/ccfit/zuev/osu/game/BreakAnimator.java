@@ -29,6 +29,7 @@ public class BreakAnimator extends GameObject {
     private UISprite mark = null;
     private boolean isbreak = false;
     private boolean over = false;
+    private float dimBrightness = Config.getBackgroundBrightness();
 
     public BreakAnimator(final Scene scene, final StatisticV2 stat, GameplayHUD hud) {
         length = 0;
@@ -64,6 +65,10 @@ public class BreakAnimator extends GameObject {
         this.dimRectangle = dimRectangle;
     }
 
+    public void setDimBrightness(float brightness) {
+        dimBrightness = brightness;
+    }
+
     public boolean isBreak() {
         return isbreak;
     }
@@ -74,14 +79,41 @@ public class BreakAnimator extends GameObject {
         return isover;
     }
 
+    public void reset() {
+        isbreak = false;
+        over = false;
+        length = 0;
+        time = 0;
+
+        if (mark != null) {
+            mark.detachSelf();
+            mark = null;
+        }
+
+        if (passfail != null) {
+            passfail.detachSelf();
+            passfail = null;
+        }
+
+        for (final Sprite sp : arrows) {
+            sp.detachSelf();
+        }
+
+        resumeBgFade();
+    }
+
     public void init(final float length) {
+        init(length, 0);
+    }
+
+    public void init(final float length, final float initialTime) {
         if (this.length > 0 && time < this.length) {
             return;
         }
         isbreak = true;
         over = false;
         this.length = length;
-        time = 0;
+        time = initialTime;
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
 
         passfail = new UISprite();
@@ -93,8 +125,11 @@ public class BreakAnimator extends GameObject {
         passfail.setVisible(false);
 
         for (int i = 0; i < 4; i++) {
-            arrows[i].setVisible(false);
-            arrows[i].setIgnoreUpdate(true);
+            // If we are seeking into a break that is already within 1 second of ending,
+            // the warning arrows should be visible immediately.
+            boolean arrowsVisible = length - initialTime <= 1;
+            arrows[i].setVisible(arrowsVisible);
+            arrows[i].setIgnoreUpdate(!arrowsVisible);
             scene.attachChild(arrows[i], 0);
         }
 
@@ -105,17 +140,30 @@ public class BreakAnimator extends GameObject {
         mark.setPosition(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5);
         mark.setScale(1.2f);
         hud.attachChild(mark, 0);
+
+        // Apply the background brightness that matches the current position within the break.
+        // The update() loop only uses crossing-event checks to set this, so we must prime it
+        // here for seek cases where time starts past those thresholds.
+        if (length > 1) {
+            if (initialTime < 0.5f) {
+                setBgFade(initialTime * 2);
+            } else if (length - initialTime < 0.5f) {
+                setBgFade((length - initialTime) * 2);
+            } else {
+                setBgFade(1);
+            }
+        }
     }
 
     private void setBgFade(float percent) {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha((1 - Config.getBackgroundBrightness()) * (1 - percent));
+            dimRectangle.setAlpha((1 - dimBrightness) * (1 - percent));
         }
     }
 
     private void resumeBgFade() {
         if (dimRectangle != null && !Config.isNoChangeDimInBreaks()) {
-            dimRectangle.setAlpha(1 - Config.getBackgroundBrightness());
+            dimRectangle.setAlpha(1 - dimBrightness);
         }
     }
 

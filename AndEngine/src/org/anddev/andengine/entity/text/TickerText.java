@@ -1,9 +1,12 @@
 package org.anddev.andengine.entity.text;
 
+import java.util.List;
+
 import javax.microedition.khronos.opengles.GL10;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.opengl.font.Font;
+import org.anddev.andengine.opengl.texture.buffer.TextTextureBuffer;
 import org.anddev.andengine.opengl.vertex.TextVertexBuffer;
 import org.anddev.andengine.util.HorizontalAlign;
 
@@ -88,7 +91,25 @@ public class TickerText extends Text {
 
 	@Override
 	protected void drawVertices(final GL10 pGL, final Camera pCamera) {
-		pGL.glDrawArrays(GL10.GL_TRIANGLES, 0, this.mCharactersVisible * TextVertexBuffer.VERTICES_PER_CHARACTER);
+		// osu!droid modified: A Font may span multiple atlas pages, so the visible character range can
+		// straddle more than one texture. Draw each same-page run separately, clipped to the range of
+		// vertices currently revealed by the ticker, instead of assuming a single texture for everything.
+		final int visibleVertexCount = this.mCharactersVisible * TextVertexBuffer.VERTICES_PER_CHARACTER;
+
+		final List<TextTextureBuffer.PageRun> pageRuns = this.getPageRuns();
+		final int pageRunCount = pageRuns.size();
+
+		for (int i = 0; i < pageRunCount; i++) {
+			final TextTextureBuffer.PageRun pageRun = pageRuns.get(i);
+			if (pageRun.startVertex >= visibleVertexCount) {
+				break;
+			}
+
+			final int vertexCount = Math.min(pageRun.vertexCount, visibleVertexCount - pageRun.startVertex);
+
+			pageRun.texture.bind(pGL);
+			pGL.glDrawArrays(GL10.GL_TRIANGLES, pageRun.startVertex, vertexCount);
+		}
 	}
 
 	@Override

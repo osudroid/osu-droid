@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import androidx.annotation.Nullable;
+
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import java.io.Serial;
@@ -10,14 +12,13 @@ import com.osudroid.multiplayer.api.data.RoomTeam;
 import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.data.ScoreInfo;
 import com.osudroid.multiplayer.Multiplayer;
-import com.rian.osu.beatmap.Beatmap;
-import com.rian.osu.beatmap.sections.BeatmapDifficulty;
-import com.rian.osu.mods.IMigratableMod;
-import com.rian.osu.mods.IModRequiresOriginalBeatmap;
-import com.rian.osu.mods.ModFlashlight;
-import com.rian.osu.mods.ModHidden;
-import com.rian.osu.utils.ModHashMap;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.beatmaps.sections.BeatmapDifficulty;
+import com.osudroid.mods.IMigratableMod;
+import com.osudroid.mods.ModFlashlight;
+import com.osudroid.mods.ModHidden;
+import com.osudroid.scoring.ScoreMultiplierCalculator;
+import com.osudroid.utils.ModHashMap;
+import com.osudroid.utils.ModUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,13 +45,13 @@ public class StatisticV2 implements Serializable {
     private long time = 0;
     private int currentCombo = 0;
     private int scoreHash = 0;
-    private int totalScore;
+    private long totalScore;
     private float hp = 1;
     private float diffModifier = 1;
     private ModHashMap mod = new ModHashMap();
     private String playerName = Config.getOnlineUsername();
     private String replayFilename = "";
-    private int forcedScore = -1;
+    private long forcedScore = -1;
     private String mark = null;
     private int beatmapNoteCount = 0;
     private int beatmapMaxCombo = 0;
@@ -62,6 +63,11 @@ public class StatisticV2 implements Serializable {
     private double unstableRate;
 
     private int life = 1;
+
+    /**
+     * The player's UID, used in multiplayer to match the entry to the local player.
+     */
+    public long uid = -1;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -77,7 +83,7 @@ public class StatisticV2 implements Serializable {
     /**
      * The score multiplier from mods.
      */
-    private float modScoreMultiplier = 1;
+    private double modScoreMultiplier = 1;
 
     /**
      * The MD5 hash of the beatmap.
@@ -101,7 +107,7 @@ public class StatisticV2 implements Serializable {
         if (params.length < 6) return;
 
         mod = ModUtils.deserializeMods(params[0]);
-        setForcedScore(Integer.parseInt(params[1]));
+        setForcedScore(Long.parseLong(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
         hit300k = Integer.parseInt(params[4]);
@@ -111,14 +117,15 @@ public class StatisticV2 implements Serializable {
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
 
-        if (params.length >= 11) {
-            time = Long.parseLong(params[10]);
+        // params[10] is a flag that denotes whether a replay is available, which is not used here, so we skip it.
+        if (params.length >= 12) {
+            time = Long.parseLong(params[11]);
         }
 
-        sliderHeadHits = params.length >= 12 ? Integer.parseInt(params[11]) : -1;
-        sliderTickHits = params.length >= 13 ? Integer.parseInt(params[12]) : -1;
-        sliderRepeatHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
-        sliderEndHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+        sliderHeadHits = params.length >= 13 ? Integer.parseInt(params[12]) : -1;
+        sliderTickHits = params.length >= 14 ? Integer.parseInt(params[13]) : -1;
+        sliderRepeatHits = params.length >= 15 ? Integer.parseInt(params[14]) : -1;
+        sliderEndHits = params.length >= 16 ? Integer.parseInt(params[15]) : -1;
 
         if (originalDifficulty != null) {
             migrateLegacyMods(originalDifficulty);
@@ -145,15 +152,15 @@ public class StatisticV2 implements Serializable {
         }
     }
 
-    public int getTotalScore() {
+    public long getTotalScore() {
         return totalScore;
     }
 
-    public int getTotalScoreWithMultiplier() {
+    public long getTotalScoreWithMultiplier() {
         if (forcedScore > 0)
             return forcedScore;
 
-        return (int) (totalScore * modScoreMultiplier);
+        return Math.round(totalScore * modScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -259,7 +266,7 @@ public class StatisticV2 implements Serializable {
             double comboPortion = scoreV2ComboPortion * currentMaxCombo / beatmapMaxCombo;
             double accuracyPortion = scoreV2AccPortion * Math.pow(getAccuracy(), 10) * getNotesHit() / beatmapNoteCount;
 
-            totalScore = (int) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
+            totalScore = (long) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
             // difficulty modifier, hence the prior check.
@@ -267,13 +274,13 @@ public class StatisticV2 implements Serializable {
             // In that case, just skip score addition to ensure score is always positive.
 
             //如果分数溢出或分数满了
-            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
-                totalScore = Integer.MAX_VALUE;
+            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Long.MAX_VALUE){
+                totalScore = Long.MAX_VALUE;
             }
             else{
                 totalScore += amount;
                 if (combo) {
-                    totalScore += (int) ((amount * currentCombo * diffModifier) / 25);
+                    totalScore += (long) ((amount * currentCombo * diffModifier) / 25);
                 }
             }
         }
@@ -319,7 +326,7 @@ public class StatisticV2 implements Serializable {
         this.mark = mark;
     }
 
-    public void setTotalScore(int totalScore) {
+    public void setTotalScore(long totalScore) {
         this.totalScore = totalScore;
     }
 
@@ -487,7 +494,7 @@ public class StatisticV2 implements Serializable {
         this.replayFilename = replayName;
     }
 
-    public void setForcedScore(int forcedScore) {
+    public void setForcedScore(long forcedScore) {
         this.forcedScore = forcedScore;
         totalScore = forcedScore;
     }
@@ -504,7 +511,7 @@ public class StatisticV2 implements Serializable {
         StringBuilder builder = new StringBuilder();
         builder.append(mod.serializeMods(false));
         builder.append(' ');
-        builder.append(getTotalScoreWithMultiplier());
+        builder.append(getTotalScore());
         builder.append(' ');
         builder.append(getScoreMaxCombo());
         builder.append(' ');
@@ -576,6 +583,11 @@ public class StatisticV2 implements Serializable {
         }
     }
 
+    public double getAverageHitOffset() {
+        int count = positiveHitOffsetCount + negativeHitOffsetCount;
+        return count > 0 ? (positiveHitOffsetSum + negativeHitOffsetSum) / count : 0;
+    }
+
     public double getNegativeHitError() {
         return negativeHitOffsetCount == 0 ? 0 : negativeHitOffsetSum / negativeHitOffsetCount;
     }
@@ -614,7 +626,7 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MaximumCombo ? currentCombo : scoreMaxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MaxCombo ? currentCombo : scoreMaxCombo;
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracy(), isAlive);
     }
@@ -628,7 +640,7 @@ public class StatisticV2 implements Serializable {
             playerName,
             replayFilename,
             mod.serializeMods(false),
-            getTotalScoreWithMultiplier(),
+            getTotalScore(),
             scoreMaxCombo,
             getMark(),
             hit300k,
@@ -645,14 +657,8 @@ public class StatisticV2 implements Serializable {
         );
     }
 
-    public void calculateModScoreMultiplier(final Beatmap beatmap) {
-        for (var m : mod.values()) {
-            if (m instanceof IModRequiresOriginalBeatmap requiresOriginalBeatmap) {
-                requiresOriginalBeatmap.applyFromBeatmap(beatmap);
-            }
-        }
-
-        modScoreMultiplier = ModUtils.calculateScoreMultiplier(mod);
+    public void calculateModScoreMultiplier(@Nullable final BeatmapDifficulty difficulty) {
+        modScoreMultiplier = new ScoreMultiplierCalculator(difficulty).calculateFor(mod.values());
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
@@ -696,7 +702,10 @@ public class StatisticV2 implements Serializable {
         scoreMaxCombo = 0;
         currentCombo = 0;
         totalScore = 0;
+        scoreHash = SecurityUtils.getHigh16Bits(0);
         hp = 1;
+        life = 1;
+        isAlive = true;
         mark = null;
         bonusScore = 0;
         positiveHitOffsetCount = 0;

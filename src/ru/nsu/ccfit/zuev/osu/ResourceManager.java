@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import com.osudroid.ui.skinning.StringSkinData;
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
 import com.reco1l.andengine.UIEngine;
@@ -17,6 +18,7 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
 import org.anddev.andengine.opengl.font.StrokeFont;
+import org.anddev.andengine.opengl.texture.ITexture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,9 +50,11 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
-import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
+    private static final int FONT_TEXTURE_SIZE = 1024;
+    private static final int STROKE_FONT_TEXTURE_WIDTH = 1024;
+    private static final int STROKE_FONT_TEXTURE_HEIGHT = 512;
 
     /**
      * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
@@ -147,6 +152,7 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
+        loadTexture("defaultapproachcircle", "gfx/approachcircle.png", false);
         loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
         loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
@@ -300,13 +306,15 @@ public class ResourceManager {
 
             for (int i = 0; i < 10; i++) {
                 String textureName = "comboburst-" + i;
-                if (availableFiles.containsKey(textureName)) { // No idea if this is still needed
+                if (availableFiles.containsKey(textureName)) {
                     File file = availableFiles.get(textureName);
                     if (file != null) {
                         loadTexture(textureName, file.getPath(), true);
                     } else {
                         unloadTexture(textureName);
                     }
+                } else {
+                    unloadTexture(textureName);
                 }
             }
 
@@ -410,20 +418,31 @@ public class ResourceManager {
         return frameIndex;
     }
 
+    /**
+     * Creates a new atlas page for a {@link Font} and registers it to the engine's
+     * {@link org.anddev.andengine.opengl.texture.TextureManager} so it gets uploaded like any other texture.
+     * Invoked by the {@link Font} whenever its current page runs out of room for new glyphs.
+     */
+    private Supplier<ITexture> createFontPageFactory(final int width, final int height) {
+        return () -> {
+            var page = new BitmapTextureAtlas(width, height, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+            engine.getTextureManager().loadTexture(page);
+            return page;
+        };
+    }
+
     public Font loadFont(final String resname, final String file, int size,
                          final int color) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        final Supplier<ITexture> pageFactory = createFontPageFactory(FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE);
         Font font;
         if (file == null) {
-            font = new Font(texture, Typeface.create(Typeface.DEFAULT,
+            font = new Font(pageFactory, Typeface.create(Typeface.DEFAULT,
                     Typeface.NORMAL), size, true, color);
         } else {
-            font = FontFactory.createFromAsset(texture, context, "fonts/"
+            font = FontFactory.createFromAsset(pageFactory, context, "fonts/"
                     + file, size, true, color);
         }
-        engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
         fonts.put(resname, font);
         return font;
@@ -432,19 +451,17 @@ public class ResourceManager {
     public StrokeFont loadStrokeFont(final String resname, final String file,
                                      int size, final int color1, final int color2) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        final Supplier<ITexture> pageFactory = createFontPageFactory(STROKE_FONT_TEXTURE_WIDTH, STROKE_FONT_TEXTURE_HEIGHT);
         StrokeFont font;
         if (file == null) {
-            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT,
+            font = new StrokeFont(pageFactory, Typeface.create(Typeface.DEFAULT,
                     Typeface.NORMAL), size, true, color1,
                     Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
         } else {
-            font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"
+            font = FontFactory.createStrokeFromAsset(pageFactory, context, "fonts/"
                             + file, size, true, color1, (float) 2 / Config.getTextureQuality(),
                     color2);
         }
-        engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
         fonts.put(resname, font);
         return font;
@@ -626,6 +643,14 @@ public class ResourceManager {
         }
 
         return region;
+    }
+
+    public TextureRegion getProfileBannerTextureIfLoaded(final String bannerURL) {
+        if (bannerURL == null || bannerURL.length() == 0) {
+            return null;
+        }
+
+        return getTextureIfLoaded(MD5Calculator.getStringMD5(bannerURL));
     }
 
     public TextureRegion getTextureIfLoaded(final String resname) {

@@ -18,8 +18,9 @@ public class TouchOptions {
 
 	private boolean mRunOnUpdateThread;
 
-    // BEGIN osu!droid modified - Option to disable historical events processing.
+    // BEGIN osu!droid modified - Option for historical events processing and raw pointer
     private boolean mProcessHistoricalEvents;
+    private boolean mUseRawPointer;
     // END osu!droid modified
 
 	// ===========================================================
@@ -50,7 +51,7 @@ public class TouchOptions {
 		return this.mRunOnUpdateThread;
 	}
 
-    // BEGIN osu!droid modified - Option to disable historical events processing.
+    // BEGIN osu!droid modified - Option for historical events processing and raw pointer
     public TouchOptions enableProcessHistoricalEvents() {
         return this.setProcessHistoricalEvents(true);
     }
@@ -69,6 +70,26 @@ public class TouchOptions {
      */
     public boolean isProcessHistoricalEvents() {
         return this.mProcessHistoricalEvents;
+    }
+
+    public TouchOptions enableUseRawPointer() {
+        return this.setUseRawPointer(true);
+    }
+
+    public TouchOptions disableUseRawPointer() {
+        return this.setUseRawPointer(false);
+    }
+
+    public TouchOptions setUseRawPointer(final boolean pUseRawPointer) {
+        this.mUseRawPointer = pUseRawPointer;
+        return this;
+    }
+
+    /**
+     * <u><b>Default:</b></u> <code>false</code>
+     */
+    public boolean isUseRawPointer() {
+        return this.mUseRawPointer;
     }
     // END osu!droid modified
 

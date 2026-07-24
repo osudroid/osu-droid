@@ -1,12 +1,12 @@
 package com.reco1l.andengine.container
 
 import androidx.annotation.*
+import com.osudroid.math.Precision
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.rian.osu.math.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.input.touch.*
@@ -137,6 +137,16 @@ open class UIScrollableContainer : UIContainer() {
     //endregion
 
     //region Indicators
+
+    /**
+     * Whether to show the horizontal scroll indicator.
+     */
+    var showHorizontalIndicator = true
+
+    /**
+     * Whether to show the vertical scroll indicator.
+     */
+    var showVerticalIndicator = true
 
     /**
      * The scroll indicator for the x-axis that shows the current scroll position.
@@ -336,7 +346,7 @@ open class UIScrollableContainer : UIContainer() {
         val verticalIndicator = verticalIndicator
 
         if (verticalIndicator != null) {
-            verticalIndicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
+            verticalIndicator.isVisible = showVerticalIndicator && (scrollAxes == Axes.Both || scrollAxes == Axes.Y)
 
             if (verticalIndicator.alpha > 0f && velocityY == 0f) {
                 verticalIndicator.alpha = (verticalIndicator.alpha - deltaTimeSec * 0.75f).coerceAtLeast(0f)
@@ -353,7 +363,7 @@ open class UIScrollableContainer : UIContainer() {
         val horizontalIndicator = horizontalIndicator
 
         if (horizontalIndicator != null) {
-            horizontalIndicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.X
+            horizontalIndicator.isVisible = showHorizontalIndicator && (scrollAxes == Axes.Both || scrollAxes == Axes.X)
 
             if (horizontalIndicator.alpha > 0f && velocityX == 0f) {
                 horizontalIndicator.alpha = (horizontalIndicator.alpha - deltaTimeSec * 0.75f).coerceAtLeast(0f)

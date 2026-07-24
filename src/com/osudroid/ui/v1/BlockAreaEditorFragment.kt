@@ -13,7 +13,7 @@ import com.osudroid.data.BlockArea
 import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.framework.android.dp
-import com.rian.osu.math.Vector2
+import com.osudroid.math.Vector2
 import ru.nsu.ccfit.zuev.osuplus.R
 
 

@@ -12,7 +12,8 @@ import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
-import com.rian.osu.beatmap.hitobject.HitObject
+import com.osudroid.beatmaps.constants.HitObjectType
+import com.osudroid.beatmaps.hitobjects.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -152,8 +153,12 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
         elements.forEach { it.onHitObjectLifetimeStart(obj) }
     }
 
-    override fun onAccuracyRegister(accuracy: Float) {
-        elements.forEach { it.onAccuracyRegister(accuracy) }
+    override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
+        elements.forEach { it.onAccuracyRegister(type, accuracy) }
+    }
+
+    override fun onSeek() {
+        elements.fastForEach { it.onSeek() }
     }
 
     //endregion

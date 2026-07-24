@@ -1,7 +1,7 @@
 buildscript {
     ext {
         kotlin_version = '2.1.10'
-        room_version = '2.6.1'
+        room_version = '2.7.2'
     }
     repositories {
         google()
@@ -19,7 +19,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.google.devtools.ksp' version '2.0.10-1.0.24'
+    id 'com.google.devtools.ksp' version '2.1.10-1.0.31'
 }
 
 allprojects {
@@ -153,6 +153,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        kotlinOptions {
+            jvmTarget = '17'
+            freeCompilerArgs += ['-Xjvm-default=all']
+        }
     }
 
     useLibrary 'org.apache.http.legacy'
@@ -198,7 +202,7 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:2025.1007.0'
+    implementation 'com.github.osudroid:language-pack:2026.0606.2'
 
     // Tools
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
@@ -212,6 +216,10 @@ dependencies {
     implementation ('io.socket:socket.io-client:2.1.1') {
         exclude group: 'org.json', module: 'json'
     }
+
+    // Video playback
+    implementation "androidx.media3:media3-exoplayer:1.4.1"
+    implementation files('libs/media3-decoder-ffmpeg.aar')
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"

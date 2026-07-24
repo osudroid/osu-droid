@@ -6,7 +6,7 @@ import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.utils.Execution;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.utils.ModUtils;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -76,7 +76,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mScrollDetector = new SurfaceScrollDetector(this);
     }
 
-    private String formatScore(StringBuilder sb, int score) {
+    private String formatScore(StringBuilder sb, long score) {
         sb.setLength(0);
         sb.append(Math.abs(score));
         for (int i = sb.length() - 3; i > 0; i -= 3) {
@@ -233,7 +233,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     return;
                 }
 
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getMD5());
+                DatabaseManager.getScoreInfoTable().migrateScores(beatmap.getMD5(), beatmap.getBeatmapDifficulty());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapLeaderboard(beatmap.getMD5(), beatmap.getBeatmapDifficulty());
 
                 if (scores.isEmpty() || !isActive()) {
 
@@ -249,14 +250,16 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
 
-                int nextTotalScore;
+                long nextTotalScore;
 
                 for (int i = 0; i < scores.size() && isActive(); ++i) {
 
-                    var score = scores.get(i);
+                    var scored = scores.get(i);
+                    var score = scored.getScoreInfo();
+                    var effectiveScore = scored.getEffectiveScore();
 
                     sb.setLength(0);
-                    var totalScore = formatScore(sb, score.getScore());
+                    var totalScore = formatScore(sb, effectiveScore);
 
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
@@ -265,7 +268,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                             .toString();
 
                     if (i < scores.size() - 1) {
-                        nextTotalScore = scores.get(i + 1).getScore();
+                        nextTotalScore = scores.get(i + 1).getEffectiveScore();
                     } else {
                         nextTotalScore = 0;
                     }
@@ -280,7 +283,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
                     }
 
-                    var diffTotalScore = score.getScore() - nextTotalScore;
+                    var diffTotalScore = effectiveScore - nextTotalScore;
 
                     sb.setLength(0);
                     var accStr = sb.append(modString)
@@ -297,7 +300,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, score.getMark(), false, (int) score.getId(), null, null, false));
 
                     var item = new ScoreBoardItem();
-                    item.set(i + 1, score.getPlayerName(), score.getMaxCombo(), score.getScore(), (int) score.getId());
+                    item.set(i + 1, score.getPlayerName(), score.getMaxCombo(), effectiveScore, (int) score.getId());
                     items.add(item);
                 }
                 scoreItems = items;

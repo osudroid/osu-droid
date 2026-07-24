@@ -4,9 +4,11 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -25,8 +27,8 @@ import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -41,7 +43,10 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.beatmaps.BeatmapCache;
+import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
+import com.osudroid.resources.R;
+import com.osudroid.ui.FPSCounter;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
@@ -54,7 +59,7 @@ import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.reco1l.osu.ui.MessageDialog;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -84,6 +89,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import okio.Okio;
+import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -92,7 +99,6 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
@@ -100,7 +106,8 @@ public class MainActivity extends BaseGameActivity implements
     public static String versionName;
     public static SongService songService;
     public ServiceConnection connection;
-    private String beatmapToAdd = null;
+    private String fileToAdd = null;
+    private Uri contentUriToAdd = null;
     private SaveServiceObject saveServiceObject;
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
@@ -112,6 +119,7 @@ public class MainActivity extends BaseGameActivity implements
     private DisplayManager.DisplayListener displayListener;
     private float currentRefreshRate = 60;
     private float maxRefreshRate = 60;
+    private int maxRefreshRateModeId = 0;
     private MessageDialog multiWindowAlert;
 
     // Multiplayer
@@ -124,11 +132,17 @@ public class MainActivity extends BaseGameActivity implements
         }
         analytics = FirebaseAnalytics.getInstance(this);
         crashlytics = FirebaseCrashlytics.getInstance();
+
+        // Detect the device's maximum supported OpenGL ES version and report it to Firebase
+        // so we can see the GLES capability distribution across users.
+        reportGlesVersion();
+
         Config.loadConfig(this);
-        initialGameDirectory();
-        //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
+        initialGameDirectory();
+        Multiplayer.initLog();
+        //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         OnlineManager.getInstance().init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
@@ -154,11 +168,10 @@ public class MainActivity extends BaseGameActivity implements
 
         ((DisplayManager) getSystemService(DISPLAY_SERVICE)).registerDisplayListener(displayListener, null);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            for (var mode : display.getSupportedModes()) {
-                for (float rate : mode.getAlternativeRefreshRates()) {
-                    maxRefreshRate = Math.max(maxRefreshRate, rate);
-                }
+        for (var mode : display.getSupportedModes()) {
+            if (mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+                maxRefreshRateModeId = mode.getModeId();
             }
         }
 
@@ -177,7 +190,7 @@ public class MainActivity extends BaseGameActivity implements
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
-            ToastLogger.showText(StringTable.get(com.osudroid.resources.R.string.message_info_multitouch), false);
+            ToastLogger.showText(StringTable.get(R.string.message_info_multitouch), false);
         }
         engine.setTouchController(new MultiTouchController());
 
@@ -195,7 +208,7 @@ public class MainActivity extends BaseGameActivity implements
                 dir = new File(Config.getBeatmapPath());
                 if (!(dir.exists() || dir.mkdirs())) {
                     ToastLogger.showText(StringTable.format(
-                                    com.osudroid.resources.R.string.message_error_createdir, dir.getPath()),
+                                    R.string.message_error_createdir, dir.getPath()),
                             true);
                 } else {
                     final SharedPreferences prefs = PreferenceManager
@@ -308,6 +321,7 @@ public class MainActivity extends BaseGameActivity implements
         if (BuildSettings.DEBUG_PLAYGROUND) {
             return DebugPlaygroundScene.INSTANCE;
         }
+
         return SplashScene.INSTANCE.getScene();
     }
 
@@ -315,6 +329,7 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
+            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
@@ -327,6 +342,7 @@ public class MainActivity extends BaseGameActivity implements
             Execution.delayed(2500, () -> {
 
                 UpdateManager.onActivityStart();
+                DatabaseManager.notifyIfResetDueToDowngrade();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -338,25 +354,19 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
+                applyRefreshRateSetting(Config.isForceMaxRefreshRate());
 
-                scheduledExecutor.scheduleAtFixedRate(() -> {
-                    if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        float refreshRate = getRefreshRate();
-
-                        if (refreshRate != maxRefreshRate) {
-                            mRenderSurfaceView.getHolder().getSurface().setFrameRate(maxRefreshRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
-                        }
-                    }
-
-                    AccessibilityDetector.check(MainActivity.this);
-                }, 0, 100, TimeUnit.MILLISECONDS);
+                AccessibilityDetector.register(MainActivity.this);
 
                 logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
                 if (roomInviteLink != null) {
-                    Multiplayer.connectFromLink(roomInviteLink);
+                    final Uri inviteLink = roomInviteLink;
+                    roomInviteLink = null;
+                    Multiplayer.connectFromLink(inviteLink);
                 } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
+                    fileToAdd = null;
                     willReplay = false;
                 }
 
@@ -378,7 +388,7 @@ public class MainActivity extends BaseGameActivity implements
         File internal = Environment.getDataDirectory();
         StatFs stat = new StatFs(internal.getPath());
         availableMemory = (double) stat.getAvailableBytes();
-        String toastMessage = String.format(StringTable.get(com.osudroid.resources.R.string.message_low_storage_space), df.format(availableMemory / minMem));
+        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
             Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
         }
@@ -413,20 +423,32 @@ public class MainActivity extends BaseGameActivity implements
 
     public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
+        if (contentUriToAdd != null) {
+            fileToAdd = copyContentUriToCache(contentUriToAdd);
+            contentUriToAdd = null;
+        }
         final File mainDir = new File(Config.getCorePath());
         final HashSet<String> forceImportedBeatmaps = new HashSet<>();
-        if (beatmapToAdd != null) {
-            File file = new File(beatmapToAdd);
+        if (fileToAdd != null) {
+            File file = new File(fileToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
-                        StringTable.get(com.osudroid.resources.R.string.library_importing),
+                        StringTable.get(R.string.library_importing),
                         false);
 
-                FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
-                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                FileUtils.extractBeatmapset(fileToAdd, Config.getBeatmapPath());
+                forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                        .replaceAll("(?i) \\[no video]$", ""));
                 // LibraryManager.INSTANCE.sort();
-            } else if (file.getName().endsWith(".odr")) {
+                fileToAdd = null;
+            } else if (file.getName().toLowerCase().endsWith(".osk")) {
+                ToastLogger.showText(StringTable.get(R.string.library_skin_importing), false);
+                FileUtils.extractZip(fileToAdd, Config.getSkinTopPath());
+                fileToAdd = null;
+            } else if (file.getName().toLowerCase().endsWith(".odr")) {
                 willReplay = true;
+            } else {
+                fileToAdd = null;
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
@@ -448,7 +470,8 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", ""));
                         }
                     } catch (IOException ignored) {
                     }
@@ -464,7 +487,8 @@ public class MainActivity extends BaseGameActivity implements
                     try (var zip = new ZipFile(file)) {
                         if (zip.isValidZipFile()) {
                             beatmaps.add(file.getPath());
-                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4));
+                            forceImportedBeatmaps.add(file.getName().substring(0, file.getName().length() - 4)
+                                    .replaceAll("(?i) \\[no video]$", ""));
                         }
                     } catch (IOException ignored) {
                     }
@@ -475,10 +499,10 @@ public class MainActivity extends BaseGameActivity implements
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
-                        com.osudroid.resources.R.string.library_importing_several,
+                        R.string.library_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
-                    FileUtils.extractZip(beatmap, Config.getBeatmapPath());
+                    FileUtils.extractBeatmapset(beatmap, Config.getBeatmapPath());
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
@@ -531,7 +555,7 @@ public class MainActivity extends BaseGameActivity implements
 
         if (skins.size() > 0) {
             ToastLogger.showText(StringTable.format(
-                    com.osudroid.resources.R.string.library_skin_importing_several,
+                    R.string.library_skin_importing_several,
                     skins.size()), false);
 
             for (final String skin : skins) {
@@ -539,11 +563,48 @@ public class MainActivity extends BaseGameActivity implements
                     String folderName = skin.substring(0, skin.length() - 4);
                     // We have imported the skin!
                     ToastLogger.showText(
-                            StringTable.format(com.osudroid.resources.R.string.library_imported, folderName),
+                            StringTable.format(R.string.library_imported, folderName),
                             true);
                     Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
                 }
             }
+        }
+    }
+
+    /**
+     * Detects the device's maximum supported OpenGL ES version via
+     * {@link ActivityManager#getDeviceConfigurationInfo()} and reports it to Firebase Analytics
+     * both as a persistent user property (for audience segmentation) and inside the APP_OPEN
+     * event bundle (for per-session inspection).
+     *
+     * <p>The version string format is {@code "<major>.<minor>"}, e.g. {@code "3.2"} or
+     * {@code "3.0"}.  Firebase user-property values are capped at 36 characters, so the short
+     * string is well within limits.
+     */
+    private void reportGlesVersion() {
+        try {
+            ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            // Use var so we never need to name the inner class ActivityManager.DeviceConfigurationInfo.
+            var configInfo = am.getDeviceConfigurationInfo();
+
+            // reqGlEsVersion encodes the version as (major << 16 | minor).
+            // Example: 0x00030002 → OpenGL ES 3.2
+            int reqGlEsVersion = configInfo.reqGlEsVersion;
+            int glesMajor = reqGlEsVersion >> 16;
+            int glesMinor = reqGlEsVersion & 0xFFFF;
+            String glesVersionStr = glesMajor + "." + glesMinor;
+
+            // Persist as a user property so the Firebase console can segment audiences
+            // by GLES version (e.g. "gles_version = 3.2" vs "3.0").
+            analytics.setUserProperty("gles_version", glesVersionStr);
+
+            // Also attach to Crashlytics so crash reports include the GLES capability.
+            crashlytics.setCustomKey("gles_version", glesVersionStr);
+
+            Debug.i("Device max GLES version: " + glesVersionStr
+                    + " (raw=0x" + Integer.toHexString(reqGlEsVersion) + ")");
+        } catch (Exception e) {
+            Debug.e("Failed to detect GLES version: " + e.getMessage(), e);
         }
     }
 
@@ -612,20 +673,117 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-
-            var data = getIntent().getData();
-
-            if (data != null) {
-
-                if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
-                    roomInviteLink = data;
-
-                if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
-                    beatmapToAdd = getIntent().getData().getPath();
-            }
-        }
+        parseIntent(getIntent());
         super.onStart();
+    }
+
+    private String copyContentUriToCache(Uri uri) {
+        String displayName = null;
+        String fileName;
+
+        try (var cursor = getContentResolver().query(uri, new String[]{ OpenableColumns.DISPLAY_NAME }, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                displayName = cursor.getString(0);
+            }
+        } catch (IllegalArgumentException | SecurityException e) {
+            Debug.e("MainActivity.copyContentUriToCache: cannot query display name: " + e.getMessage(), e);
+        }
+
+        if (displayName != null && !displayName.isEmpty()) {
+            // Strip any directory components a malicious provider might include.
+            fileName = new File(displayName).getName();
+        } else {
+            String mimeType = null;
+
+            try {
+                mimeType = getContentResolver().getType(uri);
+            } catch (SecurityException e) {
+                Debug.e("MainActivity.copyContentUriToCache: cannot query MIME type: " + e.getMessage(), e);
+            }
+
+            String ext;
+
+            if ("application/x-osu-beatmap-archive".equals(mimeType)) {
+                ext = ".osz";
+            } else if ("application/x-osu-skin-archive".equals(mimeType)) {
+                ext = ".osk";
+            } else {
+                ext = ".zip";
+            }
+
+            fileName = "import_" + System.currentTimeMillis() + ext;
+        }
+
+        var tempFile = new File(getCacheDir(), fileName);
+
+        try {
+            if (!tempFile.getCanonicalPath().startsWith(getCacheDir().getCanonicalPath() + File.separator)) {
+                Debug.e("MainActivity.copyContentUriToCache: rejected unsafe display name: " + displayName);
+                return null;
+            }
+        } catch (IOException e) {
+            Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
+            return null;
+        }
+
+        try (var in = getContentResolver().openInputStream(uri);
+             var sink = Okio.buffer(Okio.sink(tempFile))) {
+            if (in == null) {
+                ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
+                return null;
+            }
+
+            sink.writeAll(Okio.source(in));
+            return tempFile.getAbsolutePath();
+        } catch (IOException | SecurityException e) {
+            Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
+            ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
+            return null;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        if (parseIntent(intent)) {
+            var globalManager = GlobalManager.getInstance();
+
+            if (roomInviteLink != null) {
+                Execution.updateThread(() -> {
+                    if (mEngine != null) {
+                        var scene = mEngine.getScene();
+                        var gameScene = globalManager.getGameScene();
+
+                        // Ensure gameplay is cleaned up before joining the lobby to prevent any potential issues with
+                        // lingering game state.
+                        if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                            gameScene.quit();
+                        }
+                    }
+
+                    Multiplayer.connectFromLink(roomInviteLink);
+                    roomInviteLink = null;
+                });
+
+                return;
+            }
+
+            Execution.async(() -> {
+                loadBeatmapLibrary();
+
+                if (willReplay && fileToAdd != null) {
+                    final String replayFile = fileToAdd;
+
+                    Execution.updateThread(() -> {
+                        globalManager.getMainScene().watchReplay(replayFile);
+                        fileToAdd = null;
+                        willReplay = false;
+                    });
+                }
+            });
+        }
     }
 
     @Override
@@ -648,6 +806,12 @@ public class MainActivity extends BaseGameActivity implements
 
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             mEngine.getTextureManager().reloadTextures();
+        } else {
+            var songService = GlobalManager.getInstance().getSongService();
+
+            if (songService != null && songService.getStatus() == Status.PAUSED) {
+                songService.play();
+            }
         }
     }
 
@@ -701,7 +865,13 @@ public class MainActivity extends BaseGameActivity implements
         super.onDestroy();
 
         Multiplayer.flushLog();
-        ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);
+        AccessibilityDetector.unregister(this);
+
+        var listener = displayListener;
+
+        if (listener != null) {
+            ((DisplayManager) getSystemService(DISPLAY_SERVICE)).unregisterDisplayListener(listener);
+        }
     }
 
     @Override
@@ -879,7 +1049,9 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(Multiplayer.roomScene.getLeaveDialog()::show);
                         return true;
                     }
-                } else if (currentScene instanceof GameLoaderScene loaderScene) {
+                }
+
+                if (currentScene instanceof GameLoaderScene loaderScene) {
                     loaderScene.cancel();
                     return true;
                 }
@@ -934,6 +1106,19 @@ public class MainActivity extends BaseGameActivity implements
         return currentRefreshRate;
     }
 
+    public void applyRefreshRateSetting(boolean enable) {
+        runOnUiThread(() -> {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.preferredDisplayModeId = enable ? maxRefreshRateModeId : 0;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                lp.preferMinimalPostProcessing = enable && display.isMinimalPostProcessingSupported();
+            }
+
+            getWindow().setAttributes(lp);
+        });
+    }
+
     private boolean checkPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 Environment.isExternalStorageManager()) {
@@ -945,7 +1130,7 @@ public class MainActivity extends BaseGameActivity implements
         } else {
             Intent grantPermission = new Intent(this, PermissionActivity.class);
             startActivity(grantPermission);
-            overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
+            overridePendingTransition(ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap, ru.nsu.ccfit.zuev.osuplus.R.anim.fast_activity_swap);
             finish();
             return false;
         }
@@ -957,7 +1142,7 @@ public class MainActivity extends BaseGameActivity implements
                 .setTitle(getString(R.string.multi_mode_window_alert_title))
                 .setMessage(getString(R.string.multi_mode_window_alert_message))
                 .setAllowDismiss(false)
-                .addButton(getString(com.osudroid.resources.R.string.accessibility_detector_exit), (d) -> {
+                .addButton(getString(R.string.accessibility_detector_exit), (d) -> {
                     finish();
                     return null;
                 });
@@ -970,5 +1155,31 @@ public class MainActivity extends BaseGameActivity implements
         if (multiWindowAlert != null) {
             multiWindowAlert.dismiss();
         }
+    }
+
+    private boolean parseIntent(Intent intent) {
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri data = intent.getData();
+
+            if (data != null) {
+                if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
+                    roomInviteLink = data;
+                } else {
+                    String scheme = data.getScheme();
+                    if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+                        fileToAdd = data.getPath();
+                    } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+                        contentUriToAdd = data;
+                    }
+                }
+
+                // Consume the action so it doesn't get repeatedly processed
+                // on subsequent onStart() or onResume() triggers.
+                intent.setAction(Intent.ACTION_MAIN);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

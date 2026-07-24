@@ -126,7 +126,7 @@ class CursorEvent : IPoolable {
     }
 
     companion object {
-        private val pool = SynchronizedPool<CursorEvent>(50)
+        private val pool = SynchronizedPool<CursorEvent>(100)
 
         /**
          * Obtains an instance of [CursorEvent] from the pool or creates a new one if the pool is empty.

@@ -75,7 +75,6 @@ public class Config {
         safeBeatmapBg,
         useNightcoreOnMultiplayer,
         videoEnabled,
-        deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
         preferModAcronymInMultiplayer,
         keepBackgroundAspectRatio,
@@ -88,7 +87,6 @@ public class Config {
         RES_HEIGHT,
         spinnerStyle,
         metronomeSwitch,
-        minimumGameplaySynchronizationTime,
         backButtonPressTime;
 
     private static float soundVolume,
@@ -109,8 +107,23 @@ public class Config {
         "installID",
         "onlineUsername",
         "onlinePassword",
-        "starRatingVersion",
+        "droidStarRatingVersion",
+        "standardStarRatingVersion",
         "version"
+    );
+
+    public static final Map<String, int[]> PREFERENCE_BOUNDS = Map.ofEntries(
+        Map.entry("bgmvolume", new int[] { 0, 100 }),
+        Map.entry("soundvolume", new int[] { 0, 100 }),
+        Map.entry("bgbrightness", new int[] { 0, 100 }),
+        Map.entry("offset", new int[] { -750, 750 }),
+        Map.entry("cursorSize", new int[] { 25, 300 }),
+        Map.entry("playfieldSize", new int[] { 50, 100 }),
+        Map.entry("playfieldHorizontalPosition", new int[] { 0, 100 }),
+        Map.entry("playfieldVerticalPosition", new int[] { 0, 100 }),
+        Map.entry("back_button_press_time", new int[] { 0, 300 }),
+        Map.entry("seekBarVibrateIntensity", new int[] { 1, 255 }),
+        Map.entry("room_max_players", new int[] { 2, 16 })
     );
 
     /**
@@ -218,7 +231,6 @@ public class Config {
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
-        deleteUnsupportedVideos = prefs.getBoolean("deleteUnsupportedVideos", true);
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
@@ -231,7 +243,6 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         shiftPitchInRateChange = prefs.getBoolean("shiftPitchInRateChange", false);
-        minimumGameplaySynchronizationTime = prefs.getInt("gameAudioSynchronizationThreshold", 20);
         backButtonPressTime = Config.getInt("back_button_press_time", 300);
 
         // Multiplayer
@@ -748,10 +759,6 @@ public class Config {
         videoEnabled = value;
     }
 
-    public static boolean isDeleteUnsupportedVideos() {
-        return deleteUnsupportedVideos;
-    }
-
     public static boolean isSubmitScoreOnMultiplayer() {
         return submitScoreOnMultiplayer;
     }
@@ -792,16 +799,16 @@ public class Config {
         return getBoolean("displayPlayfieldBorder", false);
     }
 
-    public static int getMinimumGameplaySynchronizationTime() {
-        return minimumGameplaySynchronizationTime;
-    }
-
     public static int getBackButtonPressTime() {
         return backButtonPressTime;
     }
 
     public static boolean isPreferNoVideoDownloads() {
         return getBoolean("preferNoVideoDownloads", false);
+    }
+
+    public static boolean isHighPrecisionInput() {
+        return getBoolean("highPrecisionInput", false);
     }
 
     // Shared Preferences

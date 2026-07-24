@@ -22,6 +22,9 @@ enum class RoomStatus {
 
 
     companion object {
-        operator fun get(ordinal: Int) = entries[ordinal]
+        /**
+         * Returns the [RoomStatus] for the given wire string, or `null` if not recognized.
+         */
+        fun fromWire(value: String): RoomStatus? = runCatching { enumValueOf<RoomStatus>(value) }.getOrNull()
     }
 }

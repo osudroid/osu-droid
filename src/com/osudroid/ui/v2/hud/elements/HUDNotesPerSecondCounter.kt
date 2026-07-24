@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
-import com.rian.osu.beatmap.hitobject.HitObject
+import com.osudroid.beatmaps.hitobjects.HitObject
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 
@@ -12,6 +12,10 @@ class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {
         objects.add(obj)
+    }
+
+    override fun onSeek() {
+        objects.clear()
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {

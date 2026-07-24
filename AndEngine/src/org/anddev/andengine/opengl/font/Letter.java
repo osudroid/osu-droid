@@ -3,6 +3,8 @@
  */
 package org.anddev.andengine.opengl.font;
 
+import org.anddev.andengine.opengl.texture.ITexture;
+
 /**
  * (c) 2010 Nicolas Gramlich 
  * (c) 2011 Zynga Inc.
@@ -10,7 +12,9 @@ package org.anddev.andengine.opengl.font;
  * @author Nicolas Gramlich
  * @since 10:30:22 - 03.04.2010
  */
-// osu!droid modified: Use String for characters to support UTF-16.
+// osu!droid modified:
+// * Use String for characters to support UTF-16.
+// * Track which Font atlas page this Letter was drawn to, since a Font may span multiple pages.
 public class Letter {
 	// ===========================================================
 	// Constants
@@ -19,6 +23,8 @@ public class Letter {
 	// ===========================================================
 	// Fields
 	// ===========================================================
+
+	private final ITexture mTexture;
 
 	public final int mAdvance;
 	public final int mWidth;
@@ -33,7 +39,8 @@ public class Letter {
 	// Constructors
 	// ===========================================================
 
-	Letter(final String pCharacter, final int pAdvance, final int pWidth, final int pHeight, final float pTextureX, final float pTextureY, final float pTextureWidth, final float pTextureHeight) {
+	Letter(final ITexture pTexture, final String pCharacter, final int pAdvance, final int pWidth, final int pHeight, final float pTextureX, final float pTextureY, final float pTextureWidth, final float pTextureHeight) {
+		this.mTexture = pTexture;
 		this.mCharacter = pCharacter;
 		this.mAdvance = pAdvance;
 		this.mWidth = pWidth;
@@ -47,6 +54,10 @@ public class Letter {
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
+
+	public ITexture getTexture() {
+		return this.mTexture;
+	}
 
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces

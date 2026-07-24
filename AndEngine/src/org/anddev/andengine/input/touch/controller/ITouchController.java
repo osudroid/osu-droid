@@ -28,6 +28,18 @@ public interface ITouchController extends IUpdateHandler {
 
 	public boolean onHandleMotionEvent(final MotionEvent pMotionEvent);
 
+	// BEGIN osu!droid modified - raw pointer operations
+	int getRawPointerVersion(int pointerId);
+	boolean isRawPointerDown(int pointerId);
+	float getRawPointerSurfaceX(int pointerId);
+	float getRawPointerSurfaceY(int pointerId);
+	long getRawPointerEventTime(int pointerId);
+	int getRawPointerCapacity();
+	void clearRawPointers();
+	void resetRawPointers();
+	boolean isUseRawPointers();
+	// END osu!droid modified
+
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================

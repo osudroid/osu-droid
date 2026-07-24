@@ -26,16 +26,16 @@ import com.reco1l.andengine.sprite.UISprite;
 import com.osudroid.multiplayer.Multiplayer;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
-import com.rian.osu.GameMode;
-import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.math.Precision;
-import com.rian.osu.mods.LegacyModConverter;
-import com.rian.osu.mods.ModDifficultyAdjust;
-import com.rian.osu.mods.ModNightCore;
-import com.rian.osu.mods.ModPrecise;
-import com.rian.osu.mods.ModReplayV6;
-import com.rian.osu.utils.LRUCache;
-import com.rian.osu.utils.ModUtils;
+import com.osudroid.GameMode;
+import com.osudroid.difficulty.BeatmapDifficultyCalculator;
+import com.osudroid.math.Precision;
+import com.osudroid.mods.LegacyModConverter;
+import com.osudroid.mods.ModDifficultyAdjust;
+import com.osudroid.mods.ModNightCore;
+import com.osudroid.mods.ModPrecise;
+import com.osudroid.mods.ModReplayV6;
+import com.osudroid.utils.LRUCache;
+import com.osudroid.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -54,6 +54,7 @@ import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.MathUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -187,7 +188,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer = new UIContainer();
         backLayer = new Entity();
         scene.unregisterUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(false);
         load();
         GlobalManager.getInstance().getGameScene().setOldScene(scene);
     }
@@ -686,7 +686,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
             panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110 - paddingBottom);
-            OnlineScoring.getInstance().loadAvatar(false);
+            OnlineScoring.getInstance().loadProfileAssets(false);
             frontLayer.attachChild(panel);
 
             scoringSwitcher = new UISprite() {
@@ -1204,12 +1204,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     String scorePack = OnlineManager.getInstance().getScorePack(id);
                     String[] params = scorePack.split("\\s+");
 
-                    if (params.length < 11) return;
+                    if (params.length < 11) {
+                        return;
+                    }
 
+                    boolean hasReplay = params[10].equals("1");
                     StatisticV2 stat = new StatisticV2(params, difficulty);
 
                     stat.setPlayerName(playerName);
-                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedBeatmap);
+                    scoreScene.load(stat, null, null, hasReplay ? OnlineManager.getReplayURL(id) : null, null, selectedBeatmap);
                     engine.setScene(scoreScene.getScene());
                 } catch (Exception e) {
                     Debug.e("Cannot load play info: " + e.getMessage(), e);
@@ -1258,7 +1261,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             stat.getSliderRepeatHits() == -1 ||
             stat.getSliderEndHits() == -1;
 
-        scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
+        var replayFile = new File(Config.getScorePath() + stat.getReplayFilename());
+
+        scoreScene.load(stat, null, null, replayFile.exists() ? replayFile.getAbsolutePath() : null, null, selectedBeatmap);
 
         if (scoreNeedsUpdate) {
             score.setSliderHeadHits(stat.getSliderHeadHits() == -1 ? null : stat.getSliderHeadHits());
@@ -1304,7 +1309,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange.set(true);
 
         if (!Multiplayer.isConnected()) {
             return;
@@ -1332,7 +1337,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         // Locking host from change beatmap before the server responses to beatmapChange
-        Multiplayer.roomScene.isWaitingForBeatmapChange = true;
+        Multiplayer.roomScene.isWaitingForBeatmapChange.set(true);
 
         if (!Multiplayer.isConnected()) {
             return;
@@ -1659,6 +1664,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(
                 "selection-" + switch (cachedStatus) {
                     case ranked, approved, loved -> cachedStatus.name().toLowerCase();
+                    case qualified -> "approved";
                     default -> "question";
                 }
             ));

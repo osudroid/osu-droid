@@ -1,0 +1,41 @@
+package com.osudroid.difficulty.attributes
+
+import com.osudroid.beatmaps.hitobjects.HitCircle
+import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.mods.IModApplicableToTrackRate
+import com.osudroid.mods.Mod
+
+/**
+ * Holds data that can be used to calculate osu!standard performance points.
+ */
+class StandardDifficultyAttributes : DifficultyAttributes() {
+    /**
+     * The difficulty corresponding to the speed skill.
+     */
+    @JvmField
+    var speedDifficulty = 0.0
+
+    /**
+     * The amount of strains that are considered difficult with respect to the speed skill.
+     */
+    @JvmField
+    var speedDifficultStrainCount = 0.0
+
+    /**
+     * Describes how much of [speedDifficultStrainCount] is contributed to by [HitCircle]s or [Slider]s.
+     *
+     * A value closer to 0 indicates most of [speedDifficultStrainCount] is contributed by [HitCircle]s.
+     *
+     * A value closer to [Double.POSITIVE_INFINITY] indicates most of [speedDifficultStrainCount] is contributed by [Slider]s.
+     */
+    @JvmField
+    var speedTopWeightedSliderFactor = 0.0
+
+    /**
+     * The perceived approach rate **exclusive** of [IModApplicableToTrackRate] [Mod]s (DT/HT/etc.).
+     *
+     * [IModApplicableToTrackRate] [Mod]s don't directly affect the approach rate difficulty value, but have a perceived effect as a result of adjusting audio timing.
+     */
+    @JvmField
+    var approachRate = 0.0
+}
