@@ -1,14 +1,14 @@
 @file:JvmName("Execution")
-@file:Suppress("OPT_IN_USAGE")
 
 package com.osudroid.utils
 
 import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
@@ -22,22 +22,27 @@ interface CoroutineRunnable {
     operator fun invoke(scope: CoroutineScope)
 }
 
+/**
+ * Scope used for fire-and-forget coroutines launched through [async] and [delayed].
+ */
+private val executionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
 // Lots of overloads here, but they are necessary for Java interoperability...
 
 /**
- * Run a task on asynchronous using global scope.
+ * Run a task on asynchronous using [executionScope].
  */
-fun async(block: Runnable) = GlobalScope.launch { block.run() }
+fun async(block: Runnable) = executionScope.launch { block.run() }
 
 /**
- * Run a task on asynchronous using global scope.
+ * Run a task on asynchronous using [executionScope].
  */
-fun async(block: CoroutineScope.() -> Unit) = GlobalScope.launch(block = block)
+fun async(block: CoroutineScope.() -> Unit) = executionScope.launch(block = block)
 
 /**
- * Run a task on asynchronous using global scope.
+ * Run a task on asynchronous using [executionScope].
  */
-fun async(block: CoroutineRunnable) = GlobalScope.launch { block(this) }
+fun async(block: CoroutineRunnable) = executionScope.launch { block(this) }
 
 
 /**
@@ -51,25 +56,25 @@ fun runSafe(block: Runnable) = try {
 
 
 /**
- * Run a delayed task on asynchronous using global scope.
+ * Run a delayed task on asynchronous using [executionScope].
  */
-fun delayed(time: Long, block: Runnable) = GlobalScope.launch {
+fun delayed(time: Long, block: Runnable) = executionScope.launch {
     delay(time)
     block.run()
 }
 
 /**
- * Run a delayed task on asynchronous using global scope.
+ * Run a delayed task on asynchronous using [executionScope].
  */
-fun delayed(time: Long, block: CoroutineScope.() -> Unit) = GlobalScope.launch {
+fun delayed(time: Long, block: CoroutineScope.() -> Unit) = executionScope.launch {
     delay(time)
     block()
 }
 
 /**
- * Run a delayed task on asynchronous using global scope.
+ * Run a delayed task on asynchronous using [executionScope].
  */
-fun delayed(time: Long, block: CoroutineRunnable) = GlobalScope.launch {
+fun delayed(time: Long, block: CoroutineRunnable) = executionScope.launch {
     delay(time)
     block(this)
 }
