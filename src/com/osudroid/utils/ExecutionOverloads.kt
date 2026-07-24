@@ -4,6 +4,7 @@ package com.osudroid.utils
 
 import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,7 +60,7 @@ fun runSafe(block: Runnable) = try {
  * Run a delayed task on asynchronous using [executionScope].
  */
 fun delayed(time: Long, block: Runnable) = executionScope.launch {
-    delay(time)
+    delay(time.milliseconds)
     block.run()
 }
 
@@ -67,7 +68,7 @@ fun delayed(time: Long, block: Runnable) = executionScope.launch {
  * Run a delayed task on asynchronous using [executionScope].
  */
 fun delayed(time: Long, block: CoroutineScope.() -> Unit) = executionScope.launch {
-    delay(time)
+    delay(time.milliseconds)
     block()
 }
 
@@ -75,7 +76,7 @@ fun delayed(time: Long, block: CoroutineScope.() -> Unit) = executionScope.launc
  * Run a delayed task on asynchronous using [executionScope].
  */
 fun delayed(time: Long, block: CoroutineRunnable) = executionScope.launch {
-    delay(time)
+    delay(time.milliseconds)
     block(this)
 }
 
