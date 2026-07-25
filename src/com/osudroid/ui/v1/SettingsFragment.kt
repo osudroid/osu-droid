@@ -381,7 +381,10 @@ class SettingsFragment : SettingsFragment() {
         findPreference<SelectPreference>("skinPath")!!.apply {
 
             val skinMain = File(Config.getSkinTopPath())
-            val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
+            val skinMap = Config.getSkins()
+            val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
+
+            skins.sortBy { it.text.toString() }
             skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
 
             options = skins
