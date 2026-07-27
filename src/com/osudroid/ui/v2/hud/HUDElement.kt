@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud
 
+import android.graphics.PointF
 import com.osudroid.ui.v2.hud.elements.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.UIContainer
@@ -193,6 +194,8 @@ abstract class HUDElement : UIContainer(), IGameplayEvents {
     override fun onBreakStateChange(isBreak: Boolean) {}
 
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {}
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {}
 
     override fun onSeek() {}
 
