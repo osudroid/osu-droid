@@ -94,6 +94,17 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
         activeIndicators.add(indicator)
     }
 
+    override fun onSeek() {
+        // Note that this only clears current active indicators. While reconstructing indicators that should still be
+        // active is possible, it is not worth the complexity.
+        activeIndicators.forEach {
+            if (!it.isRecycled) {
+                expiredIndicators.release(it)
+            }
+        }
+        activeIndicators.clear()
+    }
+
     //region Indicator update & draw
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {

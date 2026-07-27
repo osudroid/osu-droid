@@ -45,6 +45,12 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
         currentIndicatorIndex = (currentIndicatorIndex + 1) % indicators.size
     }
 
+    override fun onSeek() {
+        // Note that this only clears current active indicators. While reconstructing indicators that should still be
+        // active is possible, it is not worth the complexity.
+        indicators.forEach { it.alpha = 0f }
+    }
+
     override fun onDrawChildren(gl: GL10, camera: Camera) {
         super.onDrawChildren(gl, camera)
 
