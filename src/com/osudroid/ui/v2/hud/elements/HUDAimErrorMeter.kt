@@ -309,16 +309,16 @@ class HUDAimErrorMeter : HUDElement() {
     }
 
     companion object {
-        private const val SIZE = 100f
+        private const val SIZE = 125f
         private const val INNER_PORTION = 0.85f
-        private const val LINE_THICKNESS = 2f
+        private const val LINE_THICKNESS = 2.5f
         private const val ARROW_TIP_LENGTH = 12f
 
-        private const val HIT_MARKER_SIZE = 7f
-        private const val HIT_MARKER_THICKNESS = 1.5f
+        private const val HIT_MARKER_SIZE = 9f
+        private const val HIT_MARKER_THICKNESS = 2f
 
-        private const val AVERAGE_MARKER_SIZE = 12f
-        private const val AVERAGE_MARKER_THICKNESS = 2f
+        private const val AVERAGE_MARKER_SIZE = 15f
+        private const val AVERAGE_MARKER_THICKNESS = 3f
         private const val AVERAGE_MARKER_MOVE_DURATION = 0.8f
 
         // Fades a marker out over ~5 seconds, assuming a 60 FPS update rate.
