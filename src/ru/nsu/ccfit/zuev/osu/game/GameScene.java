@@ -2389,8 +2389,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             short sacc = (short) (acc * 1000);
             replay.addObjectResult(id, sacc, null);
         }
-        if(GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()){
-           int nearestCursorId = getNearestCursorId(pos.x, pos.y);
+
+        // Autoplay/Autopilot synthesize their own cursor movement rather than using real touch input, so
+        // real touch events (e.g. a resting finger) must not be picked up as the "cursor position" here.
+        boolean isCursorTrackingActive = !GameHelper.isAutoplay() && !GameHelper.isAutopilot();
+        int nearestCursorId = isCursorTrackingActive ? getNearestCursorId(pos.x, pos.y) : -1;
+
+        if (GameHelper.isFlashlight() && isCursorTrackingActive) {
            if (nearestCursorId >= 0) {
                mainCursorId = nearestCursorId;
                var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
@@ -2422,6 +2427,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
+        if (nearestCursorId >= 0) {
+            var aimErrorCursorEvent = cursors[nearestCursorId].getLatestNonUpEvent();
+
+            if (aimErrorCursorEvent != null) {
+                float objectRadius = (float) parsedBeatmap.getHitObjects().objects.get(id).getScreenSpaceGameplayRadius();
+                hud.onAimJudgement(pos, aimErrorCursorEvent.position, objectRadius);
+            }
+        }
+
         hud.onNoteHit(stat);
     }
 
@@ -2431,15 +2445,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
                             Color4 color, int type, boolean incrementCombo) {
-        if (GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
-            if (nearestCursorId >= 0) {
-                mainCursorId = nearestCursorId;
-                var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
+        // Autoplay/Autopilot synthesize their own cursor movement rather than using real touch input, so
+        // real touch events (e.g. a resting finger) must not be picked up as the "cursor position" here.
+        boolean isCursorTrackingActive = !GameHelper.isAutoplay() && !GameHelper.isAutopilot();
+        boolean isFlashlightActive = GameHelper.isFlashlight() && isCursorTrackingActive;
+        boolean isSliderHeadHit = type == GameObjectListener.SLIDER_START && score > 0 && isCursorTrackingActive;
 
-                if (latestNonUpEvent != null) {
-                    flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
-                }
+        int nearestCursorId = -1;
+
+        if (isFlashlightActive || isSliderHeadHit) {
+            nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
+        }
+
+        if (isFlashlightActive && nearestCursorId >= 0) {
+            mainCursorId = nearestCursorId;
+            var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
+
+            if (latestNonUpEvent != null) {
+                flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
             }
         }
 
@@ -2477,6 +2500,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     stat.registerHit(30, false, false);
                     stat.addSliderHeadHit();
                     createBurstEffectSliderStart(judgementPos, color);
+
+                    if (nearestCursorId >= 0) {
+                        var aimErrorCursorEvent = cursors[nearestCursorId].getLatestNonUpEvent();
+
+                        if (aimErrorCursorEvent != null) {
+                            float objectRadius = (float) parsedBeatmap.getHitObjects().objects.get(id).getScreenSpaceGameplayRadius();
+                            hud.onAimJudgement(judgementPos, aimErrorCursorEvent.position, objectRadius);
+                        }
+                    }
+
                     if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
                     }
