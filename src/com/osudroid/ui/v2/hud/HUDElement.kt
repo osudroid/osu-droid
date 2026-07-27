@@ -35,6 +35,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     avg_offset_counter(HUDAverageOffsetCounter::class),
     hit_error_meter(HUDBarHitErrorMeter::class),
     color_hit_error_meter(HUDColorHitErrorMeter::class),
+    aim_error_meter(HUDAimErrorMeter::class),
     linear_song_progress(HUDLinearSongProgress::class),
     great_counter(HUDGreatCounter::class),
     ok_counter(HUDOkCounter::class),
