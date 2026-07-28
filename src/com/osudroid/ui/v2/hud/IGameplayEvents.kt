@@ -27,7 +27,7 @@ interface IGameplayEvents {
     fun onAccuracyRegister(type: HitObjectType, accuracy: Float)
 
     /**
-     * Called for non-miss judgements on circles and sliders, with the object's and cursor's screen-space
+     * Called for non-miss judgements on circles and slider heads, with the object's and cursor's screen-space
      * positions at the time of the hit.
      *
      * @param objectPosition The screen-space position of the hit circle that was judged.

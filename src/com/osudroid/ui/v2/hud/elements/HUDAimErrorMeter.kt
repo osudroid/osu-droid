@@ -6,6 +6,7 @@ import com.osudroid.math.toRadians
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.*
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.box
 import com.reco1l.andengine.circle
 import com.reco1l.andengine.container
 import com.reco1l.andengine.container.UIContainer
@@ -20,7 +21,7 @@ import kotlin.math.hypot
 import kotlin.math.sin
 
 /**
- * Shows where hit-circle judgements land relative to the object's center.
+ * Shows where circle and slider head judgements land relative to the object's center.
  *
  * Positions are normalized against the direction from the previous object to the current one, so a consistent aim bias
  * shows up as a consistent offset regardless of approach angle.
@@ -52,20 +53,20 @@ class HUDAimErrorMeter : HUDElement() {
         origin = Anchor.Center
         setSize(AVERAGE_MARKER_SIZE, AVERAGE_MARKER_SIZE)
 
-        attachChild(UIBox().apply {
+        box {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(AVERAGE_MARKER_SIZE, AVERAGE_MARKER_THICKNESS)
             color = Color4.White
-        })
+        }
 
-        attachChild(UIBox().apply {
+        box {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(AVERAGE_MARKER_SIZE, AVERAGE_MARKER_THICKNESS)
             rotation = 90f
             color = Color4.White
-        })
+        }
     }
 
     // Scratch fields reused every judgement to avoid Vec2/PointF allocations in this hot path.
@@ -104,11 +105,11 @@ class HUDAimErrorMeter : HUDElement() {
 
         // Cross background
         // Cardinal guides at higher opacity
-        attachChild(createCrossGuide(0f, LINE_THICKNESS, 0.5f))
-        attachChild(createCrossGuide(90f, LINE_THICKNESS, 0.5f))
+        +createCrossGuide(0f, LINE_THICKNESS, 0.5f)
+        +createCrossGuide(90f, LINE_THICKNESS, 0.5f)
         // Diagonal guides at lower opacity
-        attachChild(createCrossGuide(45f, LINE_THICKNESS / 2f, 0.2f))
-        attachChild(createCrossGuide(135f, LINE_THICKNESS / 2f, 0.2f))
+        +createCrossGuide(45f, LINE_THICKNESS / 2f, 0.2f)
+        +createCrossGuide(135f, LINE_THICKNESS / 2f, 0.2f)
 
         // Arrow background
         // A fixed 45-degree reference axis for the normalized flow direction, with a chevron tip at one end.
@@ -120,7 +121,7 @@ class HUDAimErrorMeter : HUDElement() {
             setSize(SIZE, SIZE)
             rotation = 45f
 
-            +UIBox().apply {
+            box {
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 setSize(LINE_THICKNESS, shaftLength)
@@ -131,7 +132,7 @@ class HUDAimErrorMeter : HUDElement() {
             // Chevron tip
             // Each wing hangs down from the shaft's tip point (its own top-center, used as the rotation
             // pivot) and is splayed outwards by rotating around that point.
-            +UIBox().apply {
+            box {
                 anchor = Anchor.Center
                 origin = Anchor.TopCenter
                 setSize(LINE_THICKNESS, ARROW_TIP_LENGTH)
@@ -141,7 +142,7 @@ class HUDAimErrorMeter : HUDElement() {
                 alpha = 0.7f
             }
 
-            +UIBox().apply {
+            box {
                 anchor = Anchor.Center
                 origin = Anchor.TopCenter
                 setSize(LINE_THICKNESS, ARROW_TIP_LENGTH)
