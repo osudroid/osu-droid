@@ -21,7 +21,7 @@ public class ScoreBoardItem implements Cloneable {
 
 
     public String userName;
-    public int playScore;
+    public long playScore;
     public int scoreId;
 
     /**
@@ -48,7 +48,7 @@ public class ScoreBoardItem implements Cloneable {
 
     public ScoreBoardItem() {}
 
-    public ScoreBoardItem(String userName, int playScore, int maxCombo, float accuracy, boolean isAlive) {
+    public ScoreBoardItem(String userName, long playScore, int maxCombo, float accuracy, boolean isAlive) {
         this.userName = userName;
         this.playScore = playScore;
         this.maxCombo = maxCombo;
@@ -57,7 +57,7 @@ public class ScoreBoardItem implements Cloneable {
     }
 
 
-    public void set(int rankPos, String name, int combo, int score, int id) {
+    public void set(int rankPos, String name, int combo, long score, int id) {
         rank = rankPos;
         userName = name;
         maxCombo = combo;

@@ -42,7 +42,7 @@ class DroidPerformanceCalculator(
     private var effectiveMissCount = 0.0
     private var sliderCheesePenalty = SliderCheesePenalty()
     private var tapPenalty = 1.0
-    private var totalScore = 0
+    private var totalScore = 0L
 
     private var aimEstimatedSliderBreaks = 0.0
     private var deviation = 0.0
@@ -291,7 +291,7 @@ class DroidPerformanceCalculator(
 
     private fun calculateStrainBasedMissPenalty(missCount: Double, difficultStrainCount: Double) =
         if (missCount == 0.0) 1.0
-        else 0.93 / (missCount / (4 * ln(difficultStrainCount)) + 1)
+        else 0.93 / (missCount / (4 * ln(max(1.0, difficultStrainCount))) + 1)
 
     private val proportionalMissPenalty: Double
         get() {

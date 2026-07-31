@@ -13,7 +13,6 @@ import org.andengine.opengl.shader.ShaderProgram
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.IVertexBufferObject
 import org.andengine.opengl.vbo.VertexBufferObjectManager
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
@@ -159,7 +158,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
             loadState = LoadState.NotLoaded
         }
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             @Suppress("UNCHECKED_CAST")
             (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }

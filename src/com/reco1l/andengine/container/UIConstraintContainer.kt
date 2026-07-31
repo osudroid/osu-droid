@@ -1,7 +1,6 @@
 package com.reco1l.andengine.container
 
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import org.andengine.engine.camera.*
 import org.andengine.entity.*
 import org.andengine.opengl.util.GLState
@@ -18,16 +17,16 @@ open class UIConstraintContainer : UIContainer() {
 
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
 
-        mChildren?.fastForEach { child ->
+        mChildren?.forEach { child ->
 
             if (child !is UIComponent) {
-                return@fastForEach
+                return@forEach
             }
 
             val target = constraints[child]
 
             if (target == this || target == null) {
-                return@fastForEach
+                return@forEach
             }
 
             val targetX = target.absoluteX

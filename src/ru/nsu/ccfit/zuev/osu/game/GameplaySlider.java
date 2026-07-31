@@ -298,10 +298,9 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
-        float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
-
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
+        float headFadeIn = (float) beatmapSlider.getHead().timeFadeIn / 1000;
 
         // Repeat arrow at end
         if (spanCount > 1) {
@@ -322,30 +321,31 @@ public class GameplaySlider extends GameObject {
 
             scene.attachChild(endArrow, 0);
 
+            // We can use headFadeIn here since the tail's fade in time is the same as the head.
             endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
                     .delay(fadeInDelay)
-                    .fadeIn(fadeInDuration));
+                    .fadeIn(headFadeIn));
         }
 
         scene.attachChild(tailCirclePiece, 0);
 
         if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
-            float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
+            float finalTailAlpha = (headFadeIn - fadeInDelay) / headFadeIn;
 
             headCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
-                    .fadeIn(fadeInDuration)
+                    .fadeIn(headFadeIn)
                     .then()
                     .fadeOut(fadeOutDuration));
 
             tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
                     .delay(fadeInDelay)
-                    .fadeTo(finalTailAlpha, fadeInDuration - fadeInDelay)
+                    .fadeTo(finalTailAlpha, headFadeIn - fadeInDelay)
                     .then()
                     .fadeOut(fadeOutDuration));
         } else {
             headCirclePiece.beginAbsoluteSequence(initialModifierTime,
-                    sequence -> sequence.fadeIn(fadeInDuration));
+                    sequence -> sequence.fadeIn(headFadeIn));
 
             float mehWindow = (float) hitWindow.getMehWindow() / 1000;
             float okWindow = (float) hitWindow.getOkWindow() / 1000;
@@ -358,7 +358,7 @@ public class GameplaySlider extends GameObject {
 
             tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
                     .delay(fadeInDelay)
-                    .fadeIn(fadeInDuration));
+                    .fadeIn(headFadeIn));
         }
 
         if (approachCircle.isVisible()) {
@@ -373,7 +373,7 @@ public class GameplaySlider extends GameObject {
             }
 
             approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
-                    .fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                    .fadeTo(0.9f, Math.min(headFadeIn * 2, timePreempt))
                     .scaleTo(scale, timePreempt, easing)
                     .after(e -> e.setAlpha(0)));
         }
@@ -428,6 +428,7 @@ public class GameplaySlider extends GameObject {
         }
 
         sliderBody.beginAbsoluteSequence(initialModifierTime, sequence -> {
+            float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
             sequence.fadeInFromZero(fadeInDuration);
 
             if (GameHelper.isHidden() && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {

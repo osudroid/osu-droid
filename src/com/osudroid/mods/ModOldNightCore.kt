@@ -26,7 +26,4 @@ package com.osudroid.mods
  */
 class ModOldNightCore : ModNightCore() {
     init { trackRateMultiplier = 44.1f * 1.5f / 48 }
-
-    // Force the score multiplier to be 1.12x, as it was the value used in the old versions (due to 1.5x rate).
-    override val scoreMultiplier = 1.12f
 }

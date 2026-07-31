@@ -1,7 +1,7 @@
 package com.reco1l.andengine.buffered
 
 import android.opengl.GLES32
-import com.reco1l.toolkt.*
+import com.osudroid.math.toRadians
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
 

@@ -8,12 +8,13 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.core.content.getSystemService
 import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.R
-import com.reco1l.toolkt.android.hideKeyboard
 
 
 /// Select
@@ -140,7 +141,8 @@ class InputView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : and
 
     override fun onKeyPreIme(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
-            hideKeyboard()
+            clearFocus()
+            context?.getSystemService<InputMethodManager>()?.hideSoftInputFromWindow(windowToken, 0)
         }
         return super.onKeyPreIme(keyCode, event)
     }
@@ -248,7 +250,10 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             if (action == IME_ACTION_DONE) {
 
                 val value = input.text.toString()
-                input.hideKeyboard()
+                input.apply {
+                    clearFocus()
+                    context?.getSystemService<InputMethodManager>()?.hideSoftInputFromWindow(windowToken, 0)
+                }
                 view.post { onValueChange(value) }
 
                 return@setOnEditorActionListener true

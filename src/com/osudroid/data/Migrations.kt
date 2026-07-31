@@ -5,15 +5,16 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
-import com.osudroid.mods.IModRequiresBeatmapDifficulty
 import com.osudroid.mods.LegacyModConverter
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModFlashlight
 import com.osudroid.mods.ModRateAdjust
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
 import java.io.File
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -193,10 +194,14 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                     if (rateAdjustingMods.size >= 2) {
                         // Stacked ModRateAdjust mods - recalculate score.
                         val oldScoreMultiplier = rateAdjustingMods.fold(1f) { acc, mod ->
-                            acc * mod.scoreMultiplier
+                            val rate = mod.trackRateMultiplier
+                            acc * if (rate > 1f) 1f + (rate - 1f) * 0.24f else 0.3f.pow((1f - rate) * 4f)
                         }
 
-                        val newScoreMultiplier = ModUtils.calculateScoreMultiplier(rateAdjustingMods)
+                        val combinedRate = rateAdjustingMods.fold(1f) { acc, mod -> acc * mod.trackRateMultiplier }
+                        val newScoreMultiplier =
+                            if (combinedRate > 1f) 1f + (combinedRate - 1f) * 0.24f
+                            else 0.3f.pow((1f - combinedRate) * 4f)
 
                         score = (score * newScoreMultiplier / oldScoreMultiplier).toInt()
                     }
@@ -256,8 +261,6 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
  * - Converts the `score` column in `ScoreInfo` from storing [StatisticV2.totalScoreWithMultiplier] to storing the raw
  * [StatisticV2.totalScore], so that future mod multiplier changes can be applied without needing to reverse-engineer
  * the old multiplier.
- * - Migrates [ModDifficultyAdjust]'s serialization into the new format (that also stores the original difficulty value).
- * This allows for future score multiplier recalculations that are independent of their beatmaps.
  * - Scores whose mods require the beatmap's difficulty (e.g. [ModDifficultyAdjust]) and whose beatmap is not present in
  * the library are flagged with `needsScoreMigration = 1`. Their `score` value is kept as-is and will be converted
  * on-the-fly once the beatmap is detected.
@@ -294,33 +297,28 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                     modMap
                 }
 
-                val hasBeatmapDependentMod = mods.values.any { m -> m is IModRequiresBeatmapDifficulty }
+                val hasBeatmapDependentMod = mods.values.any { m -> m is ModDifficultyAdjust }
 
                 if (hasBeatmapDependentMod) {
                     if (difficulty != null) {
-                        mods.values.filterIsInstance<IModRequiresBeatmapDifficulty>().forEach { m ->
-                            m.applyFromBeatmapDifficulty(difficulty)
-                        }
-
                         db.execSQL(
-                            "UPDATE ScoreInfo SET score = ?, mods = ? WHERE id = ?",
+                            "UPDATE ScoreInfo SET score = ? WHERE id = ?",
                             arrayOf<Any>(
-                                (score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(),
-                                mods.serializeMods(),
+                                (score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToInt(),
                                 id
                             )
                         )
                     } else {
-                        // Beatmap not in library; upgrade mods to new format and flag for on-the-fly migration.
+                        // Beatmap not in library; flag for on-the-fly migration.
                         db.execSQL(
-                            "UPDATE ScoreInfo SET mods = ?, needsScoreMigration = 1 WHERE id = ?",
-                            arrayOf<Any>(mods.serializeMods(), id)
+                            "UPDATE ScoreInfo SET needsScoreMigration = 1 WHERE id = ?",
+                            arrayOf<Any>(id)
                         )
                     }
                 } else {
                     db.execSQL(
                         "UPDATE ScoreInfo SET score = ? WHERE id = ?",
-                        arrayOf<Any>((score / ModUtils.calculateMigrationScoreMultiplier(mods)).roundToInt(), id)
+                        arrayOf<Any>((score / LegacyScoreMultiplierCalculator().calculateFor(mods.values)).roundToInt(), id)
                     )
                 }
             }

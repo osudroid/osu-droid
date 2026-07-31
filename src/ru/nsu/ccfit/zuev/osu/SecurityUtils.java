@@ -57,6 +57,10 @@ public final class SecurityUtils {
         return (x >> 12) % 3389;
     }
 
+    public static int getHigh16Bits(long x) {
+        return (int) ((x >> 12) % 3389);
+    }
+
     /**
      * @return 7-bit解码
      */

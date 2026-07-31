@@ -14,7 +14,7 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
-import com.reco1l.toolkt.*
+import com.reco1l.framework.math.roundBy
 import com.osudroid.utils.ModUtils.applyModsToBeatmapDifficulty
 import com.osudroid.utils.ModUtils.calculateRateWithMods
 import kotlinx.coroutines.Job

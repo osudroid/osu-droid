@@ -1,6 +1,6 @@
 package com.osudroid.mods
 
-import com.reco1l.toolkt.*
+import com.reco1l.framework.math.roundBy
 import com.osudroid.mods.settings.*
 
 /**
@@ -30,9 +30,6 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
         get() = trackRateMultiplier != 1f
 
     final override val isValidForMultiplayerAsFreeMod = false
-
-    override val scoreMultiplier: Float
-        get() = ModRateAdjustHelper(trackRateMultiplier).scoreMultiplier
 
     final override fun applyToRate(time: Double, rate: Float) = rate * trackRateMultiplier
 }

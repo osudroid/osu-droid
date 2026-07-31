@@ -1,10 +1,10 @@
 package com.reco1l.andengine.shape
 
 import androidx.annotation.*
+import com.osudroid.math.toRadians
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.UICircle.*
-import com.reco1l.toolkt.*
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
 

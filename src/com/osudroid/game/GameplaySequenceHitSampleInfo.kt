@@ -1,6 +1,5 @@
 package com.osudroid.game
 
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.osudroid.beatmaps.hitobjects.HitSampleInfo
 import com.osudroid.beatmaps.hitobjects.SequenceHitSampleInfo
 
@@ -13,21 +12,21 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         set(value) {
             field = value
 
-            samples.fastForEach { it.frequency = value }
+            samples.forEach { it.frequency = value }
         }
 
     override var isLooping = false
         set(value) {
             field = value
 
-            samples.fastForEach { it.isLooping = value }
+            samples.forEach { it.isLooping = value }
         }
 
     override var volume = 1f
         set(value) {
             field = value
 
-            samples.fastForEach { it.volume = value }
+            samples.forEach { it.volume = value }
         }
 
     private var index = 0
@@ -57,7 +56,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
 
         samples.ensureCapacity(sampleInfo.samples.size)
 
-        sampleInfo.samples.fastForEach { (time, sample) ->
+        sampleInfo.samples.forEach { (time, sample) ->
             val gameplaySampleInfo = GameplayHitSampleInfo.obtain().also {
                 it.init(sample)
                 it.time = time
@@ -90,7 +89,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
     fun stopAll() {
         hasSamplePlaying = false
 
-        samples.fastForEach { it.stop() }
+        samples.forEach { it.stop() }
     }
 
     /**
@@ -128,7 +127,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
             stopAll()
         }
 
-        samples.fastForEach { it.release() }
+        samples.forEach { it.release() }
         samples.clear()
         index = 0
         elapsedTime = 0f

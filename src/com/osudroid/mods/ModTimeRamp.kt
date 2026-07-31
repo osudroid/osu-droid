@@ -25,15 +25,6 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
     private var initialRateTime = 0.0
     private var finalRateTime = 0.0
 
-    // Graph: https://www.desmos.com/calculator/1zp4vwl3o7
-    override val scoreMultiplier: Float
-        get() =
-            Interpolation.linear(
-                calculateScoreMultiplierAt(initialRate),
-                calculateScoreMultiplierAt(finalRate),
-                FINAL_RATE_PROGRESS.toFloat()
-            )
-
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         initialRateTime = beatmap.hitObjects.objects.firstOrNull()?.startTime ?: 0.0
 
@@ -52,8 +43,6 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
 
     override val extraInformation
         get() = "%.2fx - %.2fx".format(initialRate, finalRate)
-
-    private fun calculateScoreMultiplierAt(rate: Float) = ModRateAdjustHelper(rate).scoreMultiplier
 
     companion object {
         /**

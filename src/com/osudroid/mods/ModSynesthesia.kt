@@ -10,7 +10,6 @@ class ModSynesthesia : Mod() {
     override val acronym = "SY"
     override val description = "Colors hit objects based on the rhythm."
     override val type = ModType.Fun
-    override val scoreMultiplier = 0.8f
 
     companion object {
         /**

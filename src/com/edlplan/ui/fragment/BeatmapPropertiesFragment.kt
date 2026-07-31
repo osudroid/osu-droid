@@ -11,9 +11,9 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.osudroid.data.BeatmapOptions
 import com.osudroid.data.DatabaseManager
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem

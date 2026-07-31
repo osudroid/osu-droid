@@ -5,7 +5,6 @@ import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.util.GLState
 import com.osudroid.beatmaps.constants.HitObjectType
@@ -95,6 +94,17 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
         activeIndicators.add(indicator)
     }
 
+    override fun onSeek() {
+        // Note that this only clears current active indicators. While reconstructing indicators that should still be
+        // active is possible, it is not worth the complexity.
+        activeIndicators.forEach {
+            if (!it.isRecycled) {
+                expiredIndicators.release(it)
+            }
+        }
+        activeIndicators.clear()
+    }
+
     //region Indicator update & draw
 
     override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
@@ -107,7 +117,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
         pGLState.pushModelViewGLMatrix()
         pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
 
-        activeIndicators.fastForEach {
+        activeIndicators.forEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
@@ -118,7 +128,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        activeIndicators.fastForEach(Indicator::update)
+        activeIndicators.forEach(Indicator::update)
         super.onManagedUpdate(deltaTimeSec)
     }
 

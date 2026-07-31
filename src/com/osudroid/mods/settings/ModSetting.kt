@@ -57,7 +57,7 @@ abstract class ModSetting<T>(
     /**
      * Whether this [ModSetting] is set to its default value.
      */
-    val isDefault
+    open val isDefault
         get() = value == defaultValue
 
     /**

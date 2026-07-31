@@ -11,7 +11,7 @@ import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
-import com.reco1l.toolkt.data.putObject
+import org.json.JSONObject
 
 object LobbyAPI {
 
@@ -107,13 +107,13 @@ object LobbyAPI {
                 put("maxPlayers", maxPlayers)
 
                 if (beatmap != null) {
-                    putObject("beatmap") {
+                    put("beatmap", JSONObject().apply {
                         put("md5", beatmap.md5)
                         put("title", beatmap.title)
                         put("artist", beatmap.artist)
                         put("creator", beatmap.creator)
                         put("version", beatmap.version)
-                    }
+                    })
                 }
 
                 if (!password.isNullOrBlank()) {
