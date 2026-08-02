@@ -99,6 +99,17 @@
             android:exported="false"
             tools:ignore="LockedOrientationActivity"/>
 
+        <activity android:name="com.discord.socialsdk.AuthenticationActivity"
+                  android:exported="true"
+                  android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="discord-1517948535000137988" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="ru.nsu.ccfit.zuev.osu.MainActivity"
             android:theme="@style/AppTheme"
