@@ -147,30 +147,6 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-
-        updateDiscordConnectButton()
-        DiscordPresenceManager.setConnectionStateListener(::updateDiscordConnectButton)
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        DiscordPresenceManager.setConnectionStateListener(null)
-    }
-
-    private fun updateDiscordConnectButton() {
-        val connected = DiscordPresenceManager.isConnected
-
-        findPreference<Preference>("discordConnect")?.apply {
-            isEnabled = !connected
-
-            title = getString(if (connected) R.string.opt_discordConnect_title_connected else R.string.opt_discordConnect_title)
-            summary = getString(if (connected) R.string.opt_discordConnect_summary_connected else R.string.opt_discordConnect_summary)
-        }
-    }
-
     override fun onLoadView() {
 
         sectionSelector = findViewById(R.id.section_selector)!!
@@ -342,28 +318,10 @@ class SettingsFragment : SettingsFragment() {
             true
         }
 
-        findPreference<Preference>("discordConnect")!!.setOnPreferenceClickListener {
-            when {
-                DiscordPresenceManager.isPendingAuthorization ->
-                    ToastLogger.showText(R.string.discord_authorization_pending_toast, true)
-
-                DiscordPresenceManager.isConnecting ->
-                    ToastLogger.showText(R.string.discord_connecting_toast, true)
-
-                else -> DiscordPresenceManager.connect()
-            }
-
-            true
-        }
-
         findPreference<CheckBoxPreference>("discordRichPresence")!!.setOnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
-                if (DiscordPresenceManager.isConnected) {
-                    // Defer refreshing the activity to allow the preference to persist first.
-                    requireView().post { DiscordPresenceManager.refreshActivity() }
-                } else {
-                    ToastLogger.showText(R.string.connect_to_discord_toast, true)
-                }
+                // Defer refreshing the activity to allow the preference to persist first.
+                requireView().post { DiscordPresenceManager.refreshActivity() }
             } else {
                 DiscordPresenceManager.clearActivity()
             }
