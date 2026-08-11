@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud.editor
 
+import android.graphics.PointF
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.container.UILinearContainer
@@ -155,6 +156,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
 
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
         elements.forEach { it.onAccuracyRegister(type, accuracy) }
+    }
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {
+        elements.forEach { it.onAimJudgement(objectPosition, cursorPosition, objectRadius) }
     }
 
     override fun onSeek() {

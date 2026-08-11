@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud
 
+import android.graphics.PointF
 import com.osudroid.resources.R.string
 import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
 import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
@@ -300,6 +301,11 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
         forEachElement { it.onAccuracyRegister(type, accuracy) }
         elementSelector?.onAccuracyRegister(type, accuracy)
+    }
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {
+        forEachElement { it.onAimJudgement(objectPosition, cursorPosition, objectRadius) }
+        elementSelector?.onAimJudgement(objectPosition, cursorPosition, objectRadius)
     }
 
     override fun onSeek() {
