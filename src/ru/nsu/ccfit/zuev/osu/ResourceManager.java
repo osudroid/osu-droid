@@ -380,19 +380,6 @@ public class ResourceManager {
         return textureStore.loadHighQualityFile(resname, file);
     }
 
-    public void loadHighQualityFileUnderFolder(File folder) {
-        File[] files = FileUtils.listFiles(folder, new String[]{
-            ".png", ".jpg", ".bmp"});
-        for (File file : files) {
-            if (file.isDirectory()) {
-                loadHighQualityFileUnderFolder(file);
-            } else {
-                Log.i("texture", "load: " + file.getPath());
-                loadHighQualityFile(file.getPath(), file);
-            }
-        }
-    }
-
     public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
     {
         var defaultName = prefix.getDefaultValue() + "-" + name;
