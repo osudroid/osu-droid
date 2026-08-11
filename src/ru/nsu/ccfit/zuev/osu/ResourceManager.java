@@ -282,7 +282,7 @@ public class ResourceManager {
     }
 
     /**
-     * Parses the frame count from the filename and updates the customFrameCount map.
+     * Parses the frame count from the filename and updates the relevant TextureStore's frame count.
      *
      * @param filename The filename, this shouldn't contain the file extension.
      * @param checkFirstFrameExists Whether to check if the first frame is loaded or not,
