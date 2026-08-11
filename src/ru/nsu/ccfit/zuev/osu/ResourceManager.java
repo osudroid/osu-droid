@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import static kotlin.collections.ArraysKt.any;
-import static kotlin.collections.ArraysKt.filter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,7 +10,10 @@ import com.osudroid.resources.FontStore;
 import com.osudroid.resources.SoundStore;
 import com.osudroid.resources.TextureStore;
 import com.osudroid.resources.skin.AnimatableFrameMatch;
+import com.osudroid.resources.skin.SkinFileCatalog;
 import com.osudroid.resources.skin.SkinTextureRules;
+import com.osudroid.resources.skin.SoundResolution;
+import com.osudroid.resources.skin.TextureResolution;
 import com.osudroid.ui.skinning.StringSkinData;
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
@@ -28,7 +30,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -45,11 +49,6 @@ import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class ResourceManager {
-
-    /**
-     * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
-     */
-    private static final String[] OPTIONAL_TEXTURES = SkinTextureRules.OPTIONAL_TEXTURES;
 
     /**
      * The textures that can be animated.
@@ -171,45 +170,9 @@ public class ResourceManager {
             if (skinjson == null) skinjson = new JSONObject();
             SkinJsonReader.getReader().supplyJson(skinjson);
         }
-        final Map<String, File> availableFiles = new HashMap<>();
-        if (skinFiles != null) {
-            for (final File f : skinFiles) {
-                if (f.isFile()) {
-                    if (f.getName().startsWith("comboburst")
-                            && (f.getName().endsWith(".wav") || f.getName().endsWith(".mp3"))) {
-                        continue;
-                    }
-                    if (f.getName().length() < 5) {
-                        continue;
-                    }
-                    if (f.length() == 0) {
-                        continue;
-                    }
-                    final String filename = f.getName().substring(0, f.getName().length() - 4);
-                    availableFiles.put(filename, f);
-                    //if ((filename.startsWith("hit0") || filename.startsWith("hit50") || filename.startsWith("hit100") || filename.startsWith("hit300"))){
-                    //    availableFiles.put(filename + "-0", f);
-                    //}
-
-                    if (filename.equals("hitcircle")) {
-                        if (!availableFiles.containsKey("sliderstartcircle")) {
-                            availableFiles.put("sliderstartcircle", f);
-                        }
-                        if (!availableFiles.containsKey("sliderendcircle")) {
-                            availableFiles.put("sliderendcircle", f);
-                        }
-                    }
-                    if (filename.equals("hitcircleoverlay")) {
-                        if (!availableFiles.containsKey("sliderstartcircleoverlay")) {
-                            availableFiles.put("sliderstartcircleoverlay", f);
-                        }
-                        if (!availableFiles.containsKey("sliderendcircleoverlay")) {
-                            availableFiles.put("sliderendcircleoverlay", f);
-                        }
-                    }
-                }
-            }
-        }
+        final Map<String, File> availableFiles = skinFiles != null
+                ? SkinFileCatalog.buildAvailableFiles(Arrays.asList(skinFiles))
+                : Collections.emptyMap();
 
         // Removing loaded animatable textures from the previous skin.
         for (var key : textureStore.getKeys().toArray(new String[0])) {
@@ -223,72 +186,26 @@ public class ResourceManager {
 
         try {
 
-            String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(ANIMATABLE_TEXTURES, f::startsWith)).toArray(new String[0]);
+            List<String> availableAnimatableFilenames = SkinFileCatalog.animatableFilenames(availableFiles);
 
             boolean isDefaultSkin = Objects.equals(folder, Config.getSkinTopPath());
 
-            for (var assetName : Objects.requireNonNull(context.getAssets().list("gfx"))) {
+            List<String> gfxAssetFileNames = Arrays.asList(Objects.requireNonNull(context.getAssets().list("gfx")));
 
-                var textureName = assetName.substring(0, assetName.length() - 4);
-
-                // Animatable textures are managed separately unless they're not present in the skin folder.
-                var skip = false;
-                for (var animatableTexture : ANIMATABLE_TEXTURES) {
-                    if (textureName.startsWith(animatableTexture) && any(availableAnimatableFilenames, f -> f.startsWith(animatableTexture))) {
-                        skip = true;
-                        break;
-                    }
-                }
-                if (skip) {
-                    continue;
-                }
-
-                if (availableFiles.containsKey(textureName)) {
-                    loadTexture(textureName, Objects.requireNonNull(availableFiles.get(textureName)).getPath(), true);
-                } else {
-                    if (!isDefaultSkin && any(OPTIONAL_TEXTURES, textureName::startsWith)) {
-                        unloadTexture(textureName);
-                    } else {
-                        loadTexture(textureName, "gfx/" + assetName, false);
-                        parseFrameIndex(textureName, false, false);
-                    }
-                }
+            for (var entry : SkinFileCatalog.resolveDefaultTextures(gfxAssetFileNames, availableFiles, availableAnimatableFilenames, isDefaultSkin)) {
+                applyTextureResolution(entry.getFirst(), entry.getSecond());
             }
 
-            if (availableFiles.containsKey("scorebar-kidanger")) {
-                loadTexture("scorebar-kidanger", Objects.requireNonNull(availableFiles.get("scorebar-kidanger")).getPath(), true);
-                loadTexture("scorebar-kidanger2", Objects.requireNonNull(availableFiles.get(availableFiles.containsKey("scorebar-kidanger2") ? "scorebar-kidanger2" : "scorebar-kidanger")).getPath(), true);
+            for (var entry : SkinFileCatalog.resolveKidangerTextures(availableFiles)) {
+                applyTextureResolution(entry.getFirst(), entry.getSecond());
             }
 
-            if (availableFiles.containsKey("comboburst")) {
-                loadTexture("comboburst", Objects.requireNonNull(availableFiles.get("comboburst")).getPath(), true);
-            } else {
-                unloadTexture("comboburst");
+            for (var entry : SkinFileCatalog.resolveComboburstTextures(availableFiles)) {
+                applyTextureResolution(entry.getFirst(), entry.getSecond());
             }
 
-            for (int i = 0; i < 10; i++) {
-                String textureName = "comboburst-" + i;
-                if (availableFiles.containsKey(textureName)) {
-                    File file = availableFiles.get(textureName);
-                    if (file != null) {
-                        loadTexture(textureName, file.getPath(), true);
-                    } else {
-                        unloadTexture(textureName);
-                    }
-                } else {
-                    unloadTexture(textureName);
-                }
-            }
-
-            for (var filename : availableAnimatableFilenames) {
-
-                var file = availableFiles.get(filename);
-                if (file != null) {
-                    loadTexture(filename, file.getPath(), true);
-                    parseFrameIndex(filename, false, false);
-                } else {
-                    unloadTexture(filename);
-                }
+            for (var entry : SkinFileCatalog.resolveAnimatableTextures(availableFiles, availableAnimatableFilenames)) {
+                applyAnimatableTextureResolution(entry.getFirst(), entry.getSecond());
             }
 
         } catch (final IOException e) {
@@ -297,18 +214,15 @@ public class ResourceManager {
 
         try {
             // TODO: buggy?
-            for (final String s : Objects.requireNonNull(context.getAssets().list("sfx"))) {
-                final String name = s.substring(0, s.length() - 4);
-                if (availableFiles.containsKey(name)) {
-                    loadSound(name, Objects.requireNonNull(availableFiles.get(name)).getPath(), true);
-                } else {
-                    loadSound(name, "sfx/" + s, false);
-                }
+            List<String> sfxAssetFileNames = Arrays.asList(Objects.requireNonNull(context.getAssets().list("sfx")));
+
+            for (var entry : SkinFileCatalog.resolveDefaultSounds(sfxAssetFileNames, availableFiles)) {
+                applySoundResolution(entry.getFirst(), entry.getSecond());
             }
+
             if (skinFolder != null) {
-                loadSound("comboburst", folder + "comboburst.wav", true);
-                for (int i = 0; i < 10; i++) {
-                    loadSound("comboburst-" + i, folder + "comboburst-" + i + ".wav", true);
+                for (var entry : SkinFileCatalog.comboburstSoundPaths(folder)) {
+                    loadSound(entry.getFirst(), entry.getSecond(), true);
                 }
             }
         } catch (final IOException e) {
@@ -324,6 +238,47 @@ public class ResourceManager {
         loadTexture("selection-question", "selection-question.png", false);
         loadTexture("selection-ranked", "selection-ranked.png", false);
         textureStore.markAbsent("lighting");
+    }
+
+    /**
+     * Applies a {@link TextureResolution} produced by {@link SkinFileCatalog#resolveDefaultTextures},
+     * {@link SkinFileCatalog#resolveKidangerTextures}, or {@link SkinFileCatalog#resolveComboburstTextures}.
+     * Only the {@link TextureResolution.FromDefaultAsset} branch parses a frame index - matching
+     * {@code loadCustomSkin}'s original behavior, where a custom skin file never triggered
+     * {@code parseFrameIndex} in this part of the loading sequence (only the animatable pass did,
+     * see {@link #applyAnimatableTextureResolution}).
+     */
+    private void applyTextureResolution(String name, TextureResolution resolution) {
+        if (resolution instanceof TextureResolution.FromFile) {
+            loadTexture(name, ((TextureResolution.FromFile) resolution).getFile().getPath(), true);
+        } else if (resolution instanceof TextureResolution.FromDefaultAsset) {
+            loadTexture(name, "gfx/" + ((TextureResolution.FromDefaultAsset) resolution).getAssetFileName(), false);
+            parseFrameIndex(name, false, false);
+        } else {
+            unloadTexture(name);
+        }
+    }
+
+    /**
+     * Applies a {@link TextureResolution} produced by {@link SkinFileCatalog#resolveAnimatableTextures}.
+     * Unlike {@link #applyTextureResolution}, the {@link TextureResolution.FromFile} branch parses a
+     * frame index here - matching {@code loadCustomSkin}'s original animatable-texture pass.
+     */
+    private void applyAnimatableTextureResolution(String name, TextureResolution resolution) {
+        if (resolution instanceof TextureResolution.FromFile) {
+            loadTexture(name, ((TextureResolution.FromFile) resolution).getFile().getPath(), true);
+            parseFrameIndex(name, false, false);
+        } else {
+            unloadTexture(name);
+        }
+    }
+
+    private void applySoundResolution(String name, SoundResolution resolution) {
+        if (resolution instanceof SoundResolution.FromFile) {
+            loadSound(name, ((SoundResolution.FromFile) resolution).getFile().getPath(), true);
+        } else {
+            loadSound(name, "sfx/" + ((SoundResolution.FromDefaultAsset) resolution).getAssetFileName(), false);
+        }
     }
 
     /**
