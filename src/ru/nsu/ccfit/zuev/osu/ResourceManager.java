@@ -2,13 +2,14 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static kotlin.collections.ArraysKt.any;
 import static kotlin.collections.ArraysKt.filter;
-import static kotlin.collections.ArraysKt.joinToString;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import com.osudroid.resources.skin.AnimatableFrameMatch;
+import com.osudroid.resources.skin.SkinTextureRules;
 import com.osudroid.ui.skinning.StringSkinData;
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
@@ -36,8 +37,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import kotlin.text.MatchResult;
-import kotlin.text.Regex;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
@@ -57,44 +56,12 @@ public class ResourceManager {
     /**
      * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
      */
-    private static final String[] OPTIONAL_TEXTURES = {
-        "scorebar-marker",
-        "scorebar-ki",
-        "scorebar-kidanger",
-        "scorebar-kidanger2",
-    };
+    private static final String[] OPTIONAL_TEXTURES = SkinTextureRules.OPTIONAL_TEXTURES;
 
     /**
      * The textures that can be animated.
      */
-    private static final String[] ANIMATABLE_TEXTURES = {
-        "followpoint-",
-        "hit0-",
-        "hit100-",
-        "hit100k-",
-        "hit300-",
-        "hit300g-",
-        "hit300k-",
-        "hit50-",
-        "menu-back-",
-        "play-skip-",
-        "scorebar-colour-",
-        "sliderb",
-        "sliderfollowcircle-"
-    };
-
-    /**
-     * <h2>Explanation</h2>
-     * <p>
-     * The first capturing group will refer to the texture's base name. The name may contain one or more hyphens/dashes
-     * in the name (e.g <code>menu-back</code>), but it should never end with a hyphen/dash.
-     * </p>
-     * <p>
-     * The second capturing group will refer to the frame index. A hyphen/dash may be present before the frame index
-     * (e.g., <code>menu-back-0</code> (with hyphen) or <code>sliderb0</code> (without hyphen)).
-     * </p>
-     */
-    private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(" + joinToString(ANIMATABLE_TEXTURES, "|", "", "", -1, "", null) + ")(\\d+)$");
+    private static final String[] ANIMATABLE_TEXTURES = SkinTextureRules.ANIMATABLE_TEXTURES;
 
     private final static ResourceManager mgr = new ResourceManager();
 
@@ -381,27 +348,16 @@ public class ResourceManager {
      */
     private int parseFrameIndex(String filename, boolean checkFirstFrameExists, boolean isBeatmapSkin) {
 
-        String textureName = filename;
-        int frameIndex = 0;
+        // If match is null, the filename does not belong to any animatable texture.
+        AnimatableFrameMatch match = SkinTextureRules.matchAnimatableFrame(filename);
 
-        MatchResult result = ANIMATABLE_TEXTURE_REGEX.matchEntire(filename);
-
-        // If result is null, the filename does not match the regex pattern.
-        if (result != null) {
-            List<String> values = result.getGroupValues();
-
-            textureName = values.get(1);
-            if (textureName.endsWith("-")) {
-                textureName = textureName.substring(0, textureName.length() - 1);
-            }
-
-            frameIndex = Integer.parseInt(values.get(2));
-        }
+        String textureName = match != null ? match.getTextureName() : filename;
+        int frameIndex = match != null ? match.getFrameIndex() : 0;
 
         var skinTextures = isBeatmapSkin ? customTextures : textures;
         var skinFrameCount = isBeatmapSkin ? customFrameCount : frameCount;
 
-        if (result == null || checkFirstFrameExists
+        if (match == null || checkFirstFrameExists
                 && !skinTextures.containsKey(textureName)
                 && !skinTextures.containsKey(textureName + "-0")
                 && !skinTextures.containsKey(textureName + "0")) {
