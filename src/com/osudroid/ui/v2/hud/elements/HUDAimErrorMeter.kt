@@ -13,8 +13,8 @@ import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
-import org.anddev.andengine.engine.camera.Camera
-import javax.microedition.khronos.opengles.GL10
+import org.andengine.engine.camera.Camera
+import org.andengine.opengl.util.GLState
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -259,12 +259,15 @@ class HUDAimErrorMeter : HUDElement() {
 
     //region Indicator update & draw
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
+    override fun onManagedDraw(pGLState: GLState, camera: Camera) {
         // averageMarker is hidden for this pass and re-drawn manually below (after the hit indicators) so
         // it always renders on top of them.
         averageMarker.isVisible = false
-        super.onDrawChildren(gl, camera)
+        super.onManagedDraw(pGLState, camera)
         averageMarker.isVisible = true
+
+        pGLState.pushModelViewGLMatrix()
+        onApplyTransformations(pGLState)
 
         activeIndicators.forEach {
             markerBar.x = it.x
@@ -273,13 +276,15 @@ class HUDAimErrorMeter : HUDElement() {
             markerBar.alpha = it.alpha
 
             markerBar.rotation = -45f
-            markerBar.onDraw(gl, camera)
+            markerBar.onDraw(pGLState, camera)
 
             markerBar.rotation = 45f
-            markerBar.onDraw(gl, camera)
+            markerBar.onDraw(pGLState, camera)
         }
 
-        averageMarker.onDraw(gl, camera)
+        averageMarker.onDraw(pGLState, camera)
+
+        pGLState.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
