@@ -38,6 +38,8 @@ class SoundStore {
 
     val keys: Set<String> get() = sounds.keys
 
+    val values: Collection<BassSoundProvider> get() = sounds.values
+
     fun clear() = sounds.clear()
 
     //endregion

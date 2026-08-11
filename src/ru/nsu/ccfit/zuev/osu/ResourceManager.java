@@ -5,9 +5,10 @@ import static kotlin.collections.ArraysKt.filter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.util.Log;
 
+import com.osudroid.resources.FontStore;
+import com.osudroid.resources.SoundStore;
 import com.osudroid.resources.skin.AnimatableFrameMatch;
 import com.osudroid.resources.skin.SkinTextureRules;
 import com.osudroid.ui.skinning.StringSkinData;
@@ -17,7 +18,6 @@ import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import org.andengine.engine.Engine;
 import org.andengine.opengl.font.Font;
-import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.font.StrokeFont;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
@@ -49,9 +49,6 @@ import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class ResourceManager {
-    private static final int FONT_TEXTURE_SIZE = 1024;
-    private static final int STROKE_FONT_TEXTURE_WIDTH = 1024;
-    private static final int STROKE_FONT_TEXTURE_HEIGHT = 512;
 
     /**
      * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
@@ -70,14 +67,15 @@ public class ResourceManager {
     // during rendering. Plain HashMaps corrupt under that access pattern, so these must stay synchronized.
     // (Collections.synchronizedMap rather than ConcurrentHashMap because "textures" intentionally stores
     // null values as tombstones, e.g. the "lighting" entry below.)
-    private final Map<String, Font> fonts = Collections.synchronizedMap(new HashMap<>());
+    private final FontStore fontStore = new FontStore();
+    private final SoundStore soundStore = new SoundStore();
+    private final SoundStore customSoundStore = new SoundStore();
+
     private final Map<String, Integer> frameCount = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, TextureRegion> textures = Collections.synchronizedMap(new HashMap<>());
-    private final Map<String, BassSoundProvider> sounds = Collections.synchronizedMap(new HashMap<>());
 
     private final Map<String, Integer> customFrameCount = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, TextureRegion> customTextures = Collections.synchronizedMap(new HashMap<>());
-    private final Map<String, BassSoundProvider> customSounds = Collections.synchronizedMap(new HashMap<>());
 
     private Engine engine;
     private Context context;
@@ -97,12 +95,16 @@ public class ResourceManager {
         this.engine = engine;
         this.context = context;
 
-        fonts.clear();
+        fontStore.init(engine, context);
+        soundStore.init(context);
+        customSoundStore.init(context);
+
+        fontStore.clear();
         textures.clear();
-        sounds.clear();
+        soundStore.clear();
         frameCount.clear();
 
-        customSounds.clear();
+        customSoundStore.clear();
         customTextures.clear();
         customFrameCount.clear();
 
@@ -377,51 +379,18 @@ public class ResourceManager {
         return frameIndex;
     }
 
-    public Font loadFont(final String resname, final String file, int size,
+    public Font loadFont(final String resname, final String file, final int size,
                          final int color) {
-        size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(engine.getTextureManager(), FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        Font font;
-        if (file == null) {
-            font = new Font(engine.getFontManager(), texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color);
-        } else {
-            font = FontFactory.createFromAsset(engine.getFontManager(), texture, context.getAssets(), "fonts/"
-                    + file, size, true, color);
-        }
-        engine.getTextureManager().loadTexture(texture);
-        engine.getFontManager().loadFont(font);
-        fonts.put(resname, font);
-        return font;
+        return fontStore.loadFont(resname, file, size, color);
     }
 
     public StrokeFont loadStrokeFont(final String resname, final String file,
-                                     int size, final int color1, final int color2) {
-        size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(engine.getTextureManager(), STROKE_FONT_TEXTURE_WIDTH, STROKE_FONT_TEXTURE_HEIGHT,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        StrokeFont font;
-        if (file == null) {
-            font = new StrokeFont(engine.getFontManager(), texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color1,
-                    Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
-        } else {
-            font = FontFactory.createStrokeFromAsset(engine.getFontManager(), texture, context.getAssets(), "fonts/"
-                            + file, size, true, color1, (float) 2 / Config.getTextureQuality(),
-                    color2);
-        }
-        engine.getTextureManager().loadTexture(texture);
-        engine.getFontManager().loadFont(font);
-        fonts.put(resname, font);
-        return font;
+                                     final int size, final int color1, final int color2) {
+        return fontStore.loadStrokeFont(resname, file, size, color1, color2);
     }
 
     public Font getFont(final String resname) {
-        if (!fonts.containsKey(resname)) {
-            loadFont(resname, null, 35, Color.WHITE);
-        }
-        return fonts.get(resname);
+        return fontStore.getOrLoadDefault(resname);
     }
 
     public TextureRegion loadTexture(final String resname, final String file,
@@ -620,36 +589,7 @@ public class ResourceManager {
 
     public BassSoundProvider loadSound(final String resname, final String file,
                                        final boolean external) {
-        BassSoundProvider snd = new BassSoundProvider();
-        if (external) {
-            //若是来自储存文件
-            try {
-                if (!snd.prepare(file)) {
-                    // 外部文件加载失败尝试自带皮肤
-                    String shortName = file.substring(file.lastIndexOf("/") + 1);
-                    if (!snd.prepare(context.getAssets(), "sfx/" + shortName)) {
-                        return null;
-                    }
-                }
-            } catch (final Exception e) {
-                Debug.e("ResourceManager.loadSoundFromExternal: " + e.getMessage(), e);
-                return null;
-            }
-        } else {
-            //若是没有自定义音效，则使用自带音效
-            try {
-                if (!snd.prepare(context.getAssets(), file)) {
-                    return null;
-                }
-            } catch (final Exception e) {
-                Debug.e("ResourceManager.loadSound: " + e.getMessage(), e);
-                return null;
-            }
-        }
-
-        sounds.put(resname, snd);
-
-        return snd;
+        return soundStore.load(resname, file, external);
     }
 
     public BassSoundProvider getSound(final String name) {
@@ -657,7 +597,7 @@ public class ResourceManager {
     }
 
     public BassSoundProvider getSound(final String name, final boolean defaultToEmpty) {
-        var sound = sounds.get(name);
+        var sound = soundStore.get(name);
 
         if (sound == null && defaultToEmpty) {
             return BassSoundProvider.EMPTY;
@@ -677,7 +617,7 @@ public class ResourceManager {
         Matcher matcher = pattern.matcher(resName);
         if (matcher.find()) {
             String setName = matcher.group(1);
-            if (!sounds.containsKey(setName)) {
+            if (!soundStore.containsKey(setName)) {
                 // 剔除未知的音频文件
                 return;
             }
@@ -691,12 +631,12 @@ public class ResourceManager {
             return;
         }
 
-        customSounds.put(resName, snd);
+        customSoundStore.put(resName, snd);
     }
 
     public BassSoundProvider getCustomSound(final String name, final boolean defaultToEmpty) {
-        if (BeatmapSkinManager.isSkinEnabled() && customSounds.containsKey(name)) {
-            return customSounds.get(name);
+        if (BeatmapSkinManager.isSkinEnabled() && customSoundStore.containsKey(name)) {
+            return customSoundStore.get(name);
         }
 
         return getSound(name, defaultToEmpty);
@@ -708,17 +648,17 @@ public class ResourceManager {
         }
         if (set >= 2) {
             String fullName = resname + set;
-            if (customSounds.containsKey(fullName)) {
-                return customSounds.get(fullName);
+            if (customSoundStore.containsKey(fullName)) {
+                return customSoundStore.get(fullName);
             } else {
-                return sounds.get(resname);
+                return soundStore.get(resname);
             }
         }
-        if (customSounds.containsKey(resname)) {
-            return customSounds.get(resname);
+        if (customSoundStore.containsKey(resname)) {
+            return customSoundStore.get(resname);
         }
 
-        return sounds.get(resname);
+        return soundStore.get(resname);
     }
 
     public void loadCustomTexture(final File file) {
@@ -812,10 +752,8 @@ public class ResourceManager {
     }
 
     public void clearCustomResources() {
-        synchronized (customSounds) {
-            for (final BassSoundProvider s : customSounds.values()) {
-                s.free();
-            }
+        for (final BassSoundProvider s : customSoundStore.getValues()) {
+            s.free();
         }
         synchronized (customTextures) {
             for (final String s : customTextures.keySet()) {
@@ -826,7 +764,7 @@ public class ResourceManager {
             }
         }
         customTextures.clear();
-        customSounds.clear();
+        customSoundStore.clear();
         customFrameCount.clear();
     }
 
