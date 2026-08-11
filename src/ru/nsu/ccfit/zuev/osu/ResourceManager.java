@@ -9,13 +9,13 @@ import android.util.Log;
 
 import com.osudroid.resources.FontStore;
 import com.osudroid.resources.SoundStore;
+import com.osudroid.resources.TextureStore;
 import com.osudroid.resources.skin.AnimatableFrameMatch;
 import com.osudroid.resources.skin.SkinTextureRules;
 import com.osudroid.ui.skinning.StringSkinData;
 import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
 import com.reco1l.andengine.UIEngine;
-import com.reco1l.andengine.texture.BlankTextureRegion;
 import org.andengine.engine.Engine;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.StrokeFont;
@@ -28,10 +28,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -64,18 +61,13 @@ public class ResourceManager {
 
     // These caches are written from background loading threads (e.g. beatmap skin loading during
     // gameplay start, see BeatmapSkinManager) while being read concurrently from the update/GL thread
-    // during rendering. Plain HashMaps corrupt under that access pattern, so these must stay synchronized.
-    // (Collections.synchronizedMap rather than ConcurrentHashMap because "textures" intentionally stores
-    // null values as tombstones, e.g. the "lighting" entry below.)
+    // during rendering - the stores are ConcurrentHashMap-backed internally specifically to stay safe
+    // under that access pattern.
     private final FontStore fontStore = new FontStore();
     private final SoundStore soundStore = new SoundStore();
     private final SoundStore customSoundStore = new SoundStore();
-
-    private final Map<String, Integer> frameCount = Collections.synchronizedMap(new HashMap<>());
-    private final Map<String, TextureRegion> textures = Collections.synchronizedMap(new HashMap<>());
-
-    private final Map<String, Integer> customFrameCount = Collections.synchronizedMap(new HashMap<>());
-    private final Map<String, TextureRegion> customTextures = Collections.synchronizedMap(new HashMap<>());
+    private final TextureStore textureStore = new TextureStore();
+    private final TextureStore customTextureStore = new TextureStore();
 
     private Engine engine;
     private Context context;
@@ -98,15 +90,15 @@ public class ResourceManager {
         fontStore.init(engine, context);
         soundStore.init(context);
         customSoundStore.init(context);
+        textureStore.init(engine, context);
+        customTextureStore.init(engine, context);
 
         fontStore.clear();
-        textures.clear();
+        textureStore.clear();
         soundStore.clear();
-        frameCount.clear();
 
         customSoundStore.clear();
-        customTextures.clear();
-        customFrameCount.clear();
+        customTextureStore.clear();
 
         initSecurityUtils();
     }
@@ -130,8 +122,7 @@ public class ResourceManager {
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-        if (!textures.containsKey("lighting"))
-            textures.put("lighting", null);
+        textureStore.markAbsent("lighting");
 
         UIEngine.getCurrent().onSkinChange();
     }
@@ -221,15 +212,15 @@ public class ResourceManager {
             }
         }
 
-        // Removing loaded animatable textures from the previous skin. Usage of toArray() is necessary to avoid ConcurrentModificationException.
-        for (var key : textures.keySet().toArray(new String[0])) {
+        // Removing loaded animatable textures from the previous skin.
+        for (var key : textureStore.getKeys().toArray(new String[0])) {
             if (any(ANIMATABLE_TEXTURES, key::startsWith)) {
                 unloadTexture(key);
             }
         }
 
-        frameCount.clear();
-        customFrameCount.clear();
+        textureStore.clearFrameCounts();
+        customTextureStore.clearFrameCounts();
 
         try {
 
@@ -333,8 +324,7 @@ public class ResourceManager {
         loadTexture("selection-loved", "selection-loved.png", false);
         loadTexture("selection-question", "selection-question.png", false);
         loadTexture("selection-ranked", "selection-ranked.png", false);
-        if (!textures.containsKey("lighting"))
-            textures.put("lighting", null);
+        textureStore.markAbsent("lighting");
     }
 
     /**
@@ -356,21 +346,17 @@ public class ResourceManager {
         String textureName = match != null ? match.getTextureName() : filename;
         int frameIndex = match != null ? match.getFrameIndex() : 0;
 
-        var skinTextures = isBeatmapSkin ? customTextures : textures;
-        var skinFrameCount = isBeatmapSkin ? customFrameCount : frameCount;
+        var skinTextureStore = isBeatmapSkin ? customTextureStore : textureStore;
 
         if (match == null || checkFirstFrameExists
-                && !skinTextures.containsKey(textureName)
-                && !skinTextures.containsKey(textureName + "-0")
-                && !skinTextures.containsKey(textureName + "0")) {
-            skinFrameCount.remove(textureName);
+                && !skinTextureStore.containsKey(textureName)
+                && !skinTextureStore.containsKey(textureName + "-0")
+                && !skinTextureStore.containsKey(textureName + "0")) {
+            skinTextureStore.removeFrameCount(textureName);
             return -1;
         }
 
-        //noinspection DataFlowIssue
-        if (!skinFrameCount.containsKey(textureName) || skinFrameCount.get(textureName) < frameIndex + 1) {
-            skinFrameCount.put(textureName, frameIndex + 1);
-        }
+        skinTextureStore.growFrameCount(textureName, frameIndex + 1);
 
         if (BuildConfig.DEBUG) {
             Log.v("ResourceManager", "Parsed frame index: " + frameIndex + " from " + filename);
@@ -395,119 +381,49 @@ public class ResourceManager {
 
     public TextureRegion loadTexture(final String resname, final String file,
                                      final boolean external, final TextureOptions opt) {
-        return loadTexture(resname, file, external, opt, this.engine);
+        return textureStore.load(resname, file, external, opt);
     }
 
     public TextureRegion loadTexture(final String resname, final String file,
                                      final boolean external) {
-        return loadTexture(resname, file, external, TextureOptions.BILINEAR, this.engine);
-    }
-
-    public TextureRegion loadTexture(final String resname, final String file,
-                                     final boolean external, Engine engine) {
-        return loadTexture(resname, file, external, TextureOptions.BILINEAR, engine);
+        return textureStore.load(resname, file, external, TextureOptions.BILINEAR);
     }
 
     public TextureRegion loadBackground(final String file) {
-        return loadBackground(file, this.engine);
-    }
-
-    public TextureRegion loadBackground(final String file, Engine engine) {
-        if (textures.containsKey("::background")) {
-            engine.getTextureManager().unloadTexture(Objects.requireNonNull(textures.get("::background")).getTexture());
+        if (textureStore.containsKey("::background")) {
+            // Deliberately not textureStore.unload(name) here, which would also remove the map
+            // entry - the original code only unloads the GL texture at this point and leaves the
+            // (now stale, about to be overwritten below) region in the map, since getTexture/
+            // getTextureIfLoaded("::background") is read externally (GameScene, ScoringScene,
+            // GameLoaderScene, RoomScene, LobbyScene) and must keep seeing *something* until this
+            // method's own textureStore.put(...) calls below replace it.
+            engine.getTextureManager().unloadTexture(Objects.requireNonNull(textureStore.get("::background")).getTexture());
         }
         if (file == null) {
-            return textures.get("menu-background");
+            return textureStore.get("menu-background");
         }
-        TextureRegion region;
+
         final QualityFileBitmapSource source = new QualityFileBitmapSource(new File(file));
         if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
-            textures.put("::background", textures.get("menu-background"));
-            return textures.get("::background");
+            TextureRegion fallback = textureStore.get("menu-background");
+            textureStore.put("::background", fallback);
+            return fallback;
         }
+
         final BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
-        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
+        TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
-        textures.put("::background", region);
-        return region;
-    }
-
-    public TextureRegion loadTexture(final String resname, final String file,
-                                     final boolean external, final TextureOptions opt, Engine engine) {
-        TextureRegion region;
-        if (external) {
-            var texFile = new File(file);
-            var isHDTexture = false;
-
-            if (!texFile.exists()) {
-
-                var dotIndex = file.lastIndexOf('.');
-
-                texFile = new File(file.substring(0, dotIndex) + "@2x" + file.substring(dotIndex));
-                isHDTexture = texFile.exists();
-
-                if (!isHDTexture) {
-                    return new BlankTextureRegion();
-                }
-            }
-            final QualityFileBitmapSource source = new QualityFileBitmapSource(texFile, isHDTexture ? 2 : 1);
-
-            if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
-                return null;
-            }
-
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), opt);
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
-            engine.getTextureManager().loadTexture(tex);
-            textures.put(resname, region);
-        } else {
-            final QualityAssetBitmapSource source;
-
-            try {
-                source = new QualityAssetBitmapSource(context, file);
-            } catch (NullPointerException e) {
-                return new BlankTextureRegion();
-            }
-
-            if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
-                return null;
-            }
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), opt);
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
-            engine.getTextureManager().loadTexture(tex);
-            textures.put(resname, region);
-        }
-
+        textureStore.put("::background", region);
         return region;
     }
 
     public TextureRegion loadHighQualityAsset(final String resname,
                                               final String file) {
-        TextureRegion region;
-
-        final QualityAssetBitmapSource source = new QualityAssetBitmapSource(context, file);
-        if (source.getWidth() == 0 || source.getHeight() == 0) {
-            return null;
-        }
-
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
-        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
-        engine.getTextureManager().loadTexture(tex);
-        textures.put(resname, region);
-
-        return region;
+        return textureStore.loadHighQualityAsset(resname, file);
     }
 
     public TextureRegion loadHighQualityFile(final String resname, final File file) {
-        QualityFileBitmapSource source = new QualityFileBitmapSource(file);
-        if (source.getWidth() == 0 || source.getHeight() == 0) {
-            return null;
-        }
-        BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
-        TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
-        engine.getTextureManager().loadTexture(tex);
-        textures.put(resname, region);
-        return region;
+        return textureStore.loadHighQualityFile(resname, file);
     }
 
     public void loadHighQualityFileUnderFolder(File folder) {
@@ -526,32 +442,33 @@ public class ResourceManager {
     public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
     {
         var defaultName = prefix.getDefaultValue() + "-" + name;
-        if (BeatmapSkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
-            return customTextures.get(defaultName);
+        if (BeatmapSkinManager.isSkinEnabled() && customTextureStore.containsKey(defaultName)) {
+            return customTextureStore.get(defaultName);
         }
 
         var customName = prefix.getCurrentValue() + "-" + name;
 
-        if (!textures.containsKey(customName)) {
+        if (!textureStore.containsKey(customName)) {
             loadTexture(customName, Config.getSkinPath() + customName.replace("\\", "") + ".png", true);
         }
 
-        if (textures.get(customName) != null) {
-            return textures.get(customName);
+        TextureRegion custom = textureStore.get(customName);
+        if (custom != null) {
+            return custom;
         }
-        return textures.get(defaultName);
+        return textureStore.get(defaultName);
     }
 
     public TextureRegion getTexture(final String resname) {
-        if (BeatmapSkinManager.isSkinEnabled() && customTextures.containsKey(resname)) {
-            return customTextures.get(resname);
+        if (BeatmapSkinManager.isSkinEnabled() && customTextureStore.containsKey(resname)) {
+            return customTextureStore.get(resname);
         }
-        if (!textures.containsKey(resname)) {
+        if (!textureStore.containsKey(resname)) {
             Debug.i("Loading texture: " + resname);
 
             return loadTexture(resname, "gfx/" + resname + ".png", false);
         }
-        return textures.get(resname);
+        return textureStore.get(resname);
     }
 
     public TextureRegion getAvatarTextureIfLoaded(final String avatarURL) {
@@ -573,18 +490,14 @@ public class ResourceManager {
     }
 
     public TextureRegion getTextureIfLoaded(final String resname) {
-        if (textures.containsKey(resname)/*
-         * &&
-         * textures.get(resname).getTexture().
-         * isLoadedToHardware()
-         */) {
-            return textures.get(resname);
+        if (textureStore.containsKey(resname)) {
+            return textureStore.get(resname);
         }
         return null;
     }
 
     public boolean isTextureLoaded(final String resname) {
-        return textures.containsKey(resname);
+        return textureStore.containsKey(resname);
     }
 
     public BassSoundProvider loadSound(final String resname, final String file,
@@ -668,9 +581,9 @@ public class ResourceManager {
 
         String delimiter = "-";
 
-        if (parseFrameIndex(resname, true, true) < 0 && !textures.containsKey(resname)) {
-            if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
-                if (textures.containsKey(resname + "0")) {
+        if (parseFrameIndex(resname, true, true) < 0 && !textureStore.containsKey(resname)) {
+            if (textureStore.containsKey(resname + "-0") || textureStore.containsKey(resname + "0")) {
+                if (textureStore.containsKey(resname + "0")) {
                     delimiter = "";
                 }
                 multiframe = true;
@@ -688,63 +601,41 @@ public class ResourceManager {
         engine.getTextureManager().loadTexture(tex);
         if (multiframe) {
             int i = 0;
-            while (textures.containsKey(resname + delimiter + i)) {
-                customTextures.put(resname + delimiter + i, region);
+            while (textureStore.containsKey(resname + delimiter + i)) {
+                customTextureStore.put(resname + delimiter + i, region);
                 i++;
             }
         } else {
-            customTextures.put(resname, region);
+            customTextureStore.put(resname, region);
 
             if (resname.equals("hitcircle")) {
-                if (!customTextures.containsKey("sliderstartcircle")) {
-                    customTextures.put("sliderstartcircle", region);
+                if (!customTextureStore.containsKey("sliderstartcircle")) {
+                    customTextureStore.put("sliderstartcircle", region);
                 }
 
-                if (!customTextures.containsKey("sliderendcircle")) {
-                    customTextures.put("sliderendcircle", region);
+                if (!customTextureStore.containsKey("sliderendcircle")) {
+                    customTextureStore.put("sliderendcircle", region);
                 }
             }
 
             if (resname.equals("hitcircleoverlay")) {
-                if (!customTextures.containsKey("sliderstartcircleoverlay")) {
-                    customTextures.put("sliderstartcircleoverlay", region);
+                if (!customTextureStore.containsKey("sliderstartcircleoverlay")) {
+                    customTextureStore.put("sliderstartcircleoverlay", region);
                 }
 
-                if (!customTextures.containsKey("sliderendcircleoverlay")) {
-                    customTextures.put("sliderendcircleoverlay", region);
+                if (!customTextureStore.containsKey("sliderendcircleoverlay")) {
+                    customTextureStore.put("sliderendcircleoverlay", region);
                 }
             }
         }
     }
 
     public void unloadTexture(final String name) {
-        if (textures.get(name) != null) {
-            engine.getTextureManager().unloadTexture(
-                    Objects.requireNonNull(textures.get(name)).getTexture());
-            textures.remove(name);
-            Debug.i("Texture \"" + name + "\"unloaded");
-        }
+        textureStore.unload(name);
     }
 
     public void unloadTexture(TextureRegion texture) {
-        engine.getTextureManager().unloadTexture(texture.getTexture());
-
-        List<String> toRemove = new ArrayList<>();
-
-        // Manual iteration over a synchronizedMap's view isn't guarded by the map's own lock,
-        // so it must be wrapped explicitly to avoid a ConcurrentModificationException if a
-        // background thread mutates "textures" (e.g. skin loading) at the same time.
-        synchronized (textures) {
-            for (var entry : textures.entrySet()) {
-                if (entry.getValue() == texture) {
-                    toRemove.add(entry.getKey());
-                }
-            }
-        }
-
-        for (var key : toRemove) {
-            textures.remove(key);
-        }
+        textureStore.unload(texture);
     }
 
     public void initSecurityUtils() {
@@ -755,41 +646,32 @@ public class ResourceManager {
         for (final BassSoundProvider s : customSoundStore.getValues()) {
             s.free();
         }
-        synchronized (customTextures) {
-            for (final String s : customTextures.keySet()) {
-                TextureRegion tex = customTextures.get(s);
-                if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
-                    engine.getTextureManager().unloadTexture(tex.getTexture());
-                }
+        for (final String s : customTextureStore.getKeys()) {
+            TextureRegion tex = customTextureStore.get(s);
+            if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
+                engine.getTextureManager().unloadTexture(tex.getTexture());
             }
         }
-        customTextures.clear();
+        customTextureStore.clear();
         customSoundStore.clear();
-        customFrameCount.clear();
     }
 
     public int getFrameCount(final String texname) {
-
-        boolean isCustom = BeatmapSkinManager.isSkinEnabled() && customFrameCount.containsKey(texname);
-
-        if (isCustom) {
-            //noinspection DataFlowIssue
-            return customFrameCount.get(texname);
+        if (BeatmapSkinManager.isSkinEnabled()) {
+            int custom = customTextureStore.getFrameCount(texname);
+            if (custom != -1) {
+                return custom;
+            }
         }
 
-        if (!frameCount.containsKey(texname)) {
-            return -1;
-        }
-
-        //noinspection DataFlowIssue
-        return frameCount.get(texname);
+        return textureStore.getFrameCount(texname);
     }
 
     public void checkSpinnerTextures() {
         final String[] names = {"spinner-background", "spinner-circle",
                 "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
-            TextureRegion tex = textures.get(s);
+            TextureRegion tex = textureStore.get(s);
             if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().onReload();
                 break;
@@ -808,7 +690,7 @@ public class ResourceManager {
                 "spinner-clear"
         };
         for (final String s : names) {
-            TextureRegion tex = textures.get(s);
+            TextureRegion tex = textureStore.get(s);
             if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().onReload();
                 break;

@@ -55,11 +55,22 @@ class TextureStore {
 
     fun containsKey(name: String): Boolean = textures.containsKey(name)
 
-    fun put(name: String, region: TextureRegion) {
-        textures[name] = region
+    /**
+     * Unconditionally sets [name] to [region] - a `null` region is stored as [markAbsent] would,
+     * matching the original `Map<String, TextureRegion>.put(name, someNullableGet())` pass-through
+     * pattern `ResourceManager.loadBackground` relies on (its "::background" fallback stores
+     * whatever `get("menu-background")` returned, including `null` if that itself was never loaded).
+     */
+    fun put(name: String, region: TextureRegion?) {
+        textures[name] = region ?: absentTexture
     }
 
-    /** Marks [name] as checked-and-absent: [containsKey] becomes true, [get] keeps returning `null`. */
+    /**
+     * Marks [name] as checked-and-absent: [containsKey] becomes true, [get] keeps returning `null`.
+     * Unlike [put], does not override an already-present region (matching the `if
+     * (!textures.containsKey("lighting")) textures.put("lighting", null)` guard every original call
+     * site used this for).
+     */
     fun markAbsent(name: String) {
         textures.putIfAbsent(name, absentTexture)
     }
