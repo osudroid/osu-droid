@@ -1,23 +1,23 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import org.andengine.opengl.util.GLState
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
 // GLES20 draw topology constants (mirrored for convenience)
-const val GL_TRIANGLES = GLES20.GL_TRIANGLES
-const val GL_TRIANGLE_STRIP = GLES20.GL_TRIANGLE_STRIP
-const val GL_TRIANGLE_FAN = GLES20.GL_TRIANGLE_FAN
-const val GL_LINES = GLES20.GL_LINES
-const val GL_LINE_STRIP = GLES20.GL_LINE_STRIP
-const val GL_POINTS = GLES20.GL_POINTS
+const val GL_TRIANGLES = GLES32.GL_TRIANGLES
+const val GL_TRIANGLE_STRIP = GLES32.GL_TRIANGLE_STRIP
+const val GL_TRIANGLE_FAN = GLES32.GL_TRIANGLE_FAN
+const val GL_LINES = GLES32.GL_LINES
+const val GL_LINE_STRIP = GLES32.GL_LINE_STRIP
+const val GL_POINTS = GLES32.GL_POINTS
 
 // GLES20 buffer usage constants
-const val GL_STATIC_DRAW = GLES20.GL_STATIC_DRAW
-const val GL_DYNAMIC_DRAW = GLES20.GL_DYNAMIC_DRAW
-const val GL_STREAM_DRAW = GLES20.GL_STREAM_DRAW
+const val GL_STATIC_DRAW = GLES32.GL_STATIC_DRAW
+const val GL_DYNAMIC_DRAW = GLES32.GL_DYNAMIC_DRAW
+const val GL_STREAM_DRAW = GLES32.GL_STREAM_DRAW
 
 interface IBuffer {
 
@@ -86,14 +86,14 @@ abstract class Buffer(
     protected fun bindAndUpload() {
         if (mVboId == 0) {
             val ids = IntArray(1)
-            GLES20.glGenBuffers(1, ids, 0)
+            GLES32.glGenBuffers(1, ids, 0)
             mVboId = ids[0]
         }
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId)
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, mVboId)
         if (mDirty) {
             mFloatBuffer.position(0)
-            GLES20.glBufferData(
-                GLES20.GL_ARRAY_BUFFER,
+            GLES32.glBufferData(
+                GLES32.GL_ARRAY_BUFFER,
                 mFloatBuffer.capacity() * 4,
                 mFloatBuffer,
                 bufferUsage
@@ -104,7 +104,7 @@ abstract class Buffer(
 
     fun unloadFromActiveBufferObjectManager() {
         if (isManaged && mVboId != 0) {
-            GLES20.glDeleteBuffers(1, IntArray(1) { mVboId }, 0)
+            GLES32.glDeleteBuffers(1, IntArray(1) { mVboId }, 0)
             mVboId = 0
         }
     }

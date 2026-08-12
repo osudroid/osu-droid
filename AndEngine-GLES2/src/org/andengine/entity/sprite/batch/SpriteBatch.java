@@ -20,7 +20,7 @@ import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.color.ColorUtils;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * TODO TRY DEGENERATE TRIANGLES!
@@ -52,9 +52,9 @@ public class SpriteBatch extends Shape {
 	public static final int SPRITE_SIZE = SpriteBatch.VERTEX_SIZE * SpriteBatch.VERTICES_PER_SPRITE;
 
 	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(3)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES20.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES20.GL_UNSIGNED_BYTE, true)
-		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES20.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
+		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES32.GL_UNSIGNED_BYTE, true)
+		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES32.GL_FLOAT, false)
 		.build();
 
 	// ===========================================================
@@ -195,7 +195,7 @@ public class SpriteBatch extends Shape {
 	protected void draw(final GLState pGLState, final Camera pCamera) {
 		this.begin();
 
-		this.mSpriteBatchVertexBufferObject.draw(GLES20.GL_TRIANGLES, this.mVertices);
+		this.mSpriteBatchVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertices);
 
 		this.end();
 	}

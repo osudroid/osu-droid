@@ -16,11 +16,9 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.osudroid.data.DatabaseManager;
+import com.reco1l.framework.android.ViewsKt;
 import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.PromptDialog;
-import com.reco1l.toolkt.android.Dimensions;
-import com.reco1l.toolkt.android.Texts;
-import com.reco1l.toolkt.android.Views;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +82,7 @@ public class CollectionsManagerFragment extends BaseFragment {
         }
 
         playOnLoadAnim();
-        Views.setCornerRadius(findViewById(R.id.frg_body), Dimensions.getDp(14f));
+        ViewsKt.setCornerRadius(findViewById(R.id.frg_body), ViewsKt.getDp(14f));
     }
 
     private void playOnLoadAnim() {
@@ -215,8 +213,8 @@ public class CollectionsManagerFragment extends BaseFragment {
 
             updateFolderNameText(holder, folder);
 
-            Texts.setDrawableLeft(holder.button1, getContext().getDrawable(R.drawable.delete_24px));
-            Texts.getDrawableLeft(holder.button1).setTint(0xFFFFBFBF);
+            ViewsKt.setDrawableLeft(holder.button1, getContext().getDrawable(R.drawable.delete_24px));
+            ViewsKt.getDrawableLeft(holder.button1).setTint(0xFFFFBFBF);
             holder.button1.setVisibility(isDefaultFolder ? View.GONE : View.VISIBLE);
 
             holder.button1.setOnClickListener(v -> {
@@ -278,7 +276,7 @@ public class CollectionsManagerFragment extends BaseFragment {
 
             var folder = folders.get(position);
 
-            Texts.setDrawableLeft(holder.button2, getContext().getDrawable(
+            ViewsKt.setDrawableLeft(holder.button2, getContext().getDrawable(
                 DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)
                     ? R.drawable.remove_24px
                     : R.drawable.add_24px
@@ -288,10 +286,10 @@ public class CollectionsManagerFragment extends BaseFragment {
 
                 if (DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)) {
                     DatabaseManager.getBeatmapCollectionsTable().removeBeatmap(folder, track);
-                    Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.add_24px));
+                    ViewsKt.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.add_24px));
                 } else {
                     DatabaseManager.getBeatmapCollectionsTable().addBeatmap(folder, track);
-                    Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.remove_24px));
+                    ViewsKt.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.remove_24px));
                 }
 
                 updateFolderNameText(holder, folder);

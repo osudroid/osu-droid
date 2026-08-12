@@ -1,6 +1,6 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.text.UITextureText.*
 import org.andengine.engine.camera.*
@@ -59,8 +59,45 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
             }
         }
 
+    /**
+     * When set, each character is placed in a fixed-width cell (unscaled pixels) looked up by
+     * character. Characters absent from the map use their natural texture width. Useful for
+     * preventing layout shifts when glyphs in the same role have varying widths.
+     */
+    var fixedCharWidths: Map<Char, Float>? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
 
-    private val textureRegions = mutableListOf<TextureRegion>()
+    /**
+     * When set, content size (width/height) is measured from this string instead of [text].
+     * The rendered text is still [text]. Use this to give the component a stable bounding box
+     * sized for the widest value it can display, so surrounding elements don't shift.
+     */
+    var measureText: String? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
+
+    /**
+     * Horizontal alignment of the rendered text within the content bounds.
+     */
+    var textAlign = TextAlign.Left
+        set(value) {
+            if (field != value) {
+                field = value
+                onUpdateText()
+            }
+        }
+
+    private val textureRegions = mutableListOf<Pair<Char, TextureRegion>>()
+    private var textContentWidth = 0f
 
     /**
      * VBO holding full-range UV coordinates: (0,0), (0,1), (1,0), (1,1).
@@ -82,21 +119,29 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
 
     private fun onUpdateText() {
+        textureRegions.clear()
+        textContentWidth = 0f
+
+        for (char in text) {
+            val textureRegion = characters[char] ?: continue
+            val cellWidth = (fixedCharWidths?.get(char) ?: textureRegion.width.toFloat()) * textureScaleX
+            textureRegions.add(char to textureRegion)
+            textContentWidth += cellWidth + spacing
+        }
+
+        if (textureRegions.isNotEmpty()) {
+            textContentWidth -= spacing
+        }
 
         var contentWidth = 0f
         var contentHeight = 0f
 
-        textureRegions.clear()
-        for (i in text.indices) {
+        for (char in measureText ?: text) {
+            val textureRegion = characters[char] ?: continue
+            val cellWidth = (fixedCharWidths?.get(char) ?: textureRegion.width) * textureScaleX
 
-            val textureRegion = characters[text[i]] ?: continue
-            val textureWidth = textureRegion.width * textureScaleX
-            val textureHeight = textureRegion.height * textureScaleY
-
-            textureRegions.add(textureRegion)
-
-            contentWidth += textureWidth + spacing
-            contentHeight = max(contentHeight, textureHeight)
+            contentWidth += cellWidth + spacing
+            contentHeight = max(contentHeight, textureRegion.height * textureScaleY)
         }
 
         contentWidth -= spacing
@@ -112,16 +157,21 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
         beginDraw(pGLState)
 
-        var offsetX = 0f
+        var offsetX = when (textAlign) {
+            TextAlign.Left -> 0f
+            TextAlign.Center -> 0.5f
+            TextAlign.Right -> 1f
+        } * (contentWidth - textContentWidth)
 
         for (i in textureRegions.indices) {
 
-            val texture = textureRegions[i]
+            val (char, texture) = textureRegions[i]
             val textureWidth = texture.width * textureScaleX
             val textureHeight = texture.height * textureScaleY
+            val cellWidth = (fixedCharWidths?.get(char) ?: texture.width.toFloat()) * textureScaleX
 
             pGLState.pushModelViewGLMatrix()
-            pGLState.translateModelViewGLMatrixf(offsetX, 0f, 0f)
+            pGLState.translateModelViewGLMatrixf(offsetX + (cellWidth - textureWidth) / 2f, 0f, 0f)
 
             // Update position quad for this character and re-upload to GPU.
             buffer?.update(textureWidth, textureHeight)
@@ -135,12 +185,12 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
             pGLState.popModelViewGLMatrix()
 
-            offsetX += textureWidth + spacing
+            offsetX += cellWidth + spacing
         }
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Reset GL buffer binding so legacy VBO binding is not tricked by a stale
         // cache entry left over from Buffer.bindAndUpload(), which calls glBindBuffer
@@ -164,19 +214,19 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
         // Upload texture unit
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
         // Disable per-vertex color array
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Set up full-range UV VBO at attribute 3
         fullUVBuffer.beginDraw(pGLState)
@@ -187,7 +237,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         // Re-upload MVP matrix per character since each character is translated differently.
         val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, gl.modelViewProjectionGLMatrix, 0
             )
@@ -223,3 +273,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
     }
 }
+
+/**
+ * Determines the horizontal alignment of the rendered text within the content bounds.
+ */
+enum class TextAlign { Left, Center, Right }

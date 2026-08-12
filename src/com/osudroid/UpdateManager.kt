@@ -41,7 +41,7 @@ object UpdateManager: IFileRequestObserver
                 .addButton("Yes") {
                     it.dismiss()
 
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/gles/latest"))
                     GlobalManager.getInstance().mainActivity.startActivity(intent)
                 }
                 .addButton("No", clickListener = MessageDialog::dismiss)
@@ -70,6 +70,10 @@ object UpdateManager: IFileRequestObserver
 
             try {
                 JsonObjectRequest(OnlineManager.updateEndpoint).use { request ->
+                    request.buildUrl {
+                        addQueryParameter("applicationId", BuildConfig.APPLICATION_ID)
+                        addQueryParameter("buildType", BuildConfig.BUILD_TYPE)
+                    }
 
                     val response = request.execute().json
 

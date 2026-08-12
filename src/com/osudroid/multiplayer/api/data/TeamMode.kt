@@ -13,13 +13,13 @@ enum class TeamMode {
     /**
      * Players are playing in teams.
      */
-    TeamVersus;
+    TeamVS;
 
 
     companion object {
         /**
-         * Returns the [TeamMode] for [ordinal], or `null` if the ordinal is not recognized.
+         * Returns the [TeamMode] for the given wire string, or `null` if not recognized.
          */
-        operator fun get(ordinal: Int): TeamMode? = entries.getOrNull(ordinal)
+        fun fromWire(value: String): TeamMode? = runCatching { enumValueOf<TeamMode>(value) }.getOrNull()
     }
 }

@@ -1,7 +1,7 @@
 package com.osudroid.mods
 
 import com.edlplan.framework.easing.Easing
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.osudroid.mods.settings.*
 
 /**

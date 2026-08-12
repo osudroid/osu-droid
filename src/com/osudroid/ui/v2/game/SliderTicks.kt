@@ -75,6 +75,7 @@ class SliderTickContainer : UIContainer() {
 
 class SliderTickSprite : UISprite(), IPoolable {
     override var isRecycled = false
+    private var tick: SliderTick? = null
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
@@ -87,6 +88,8 @@ class SliderTickSprite : UISprite(), IPoolable {
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
      */
     fun init(tick: SliderTick) {
+        this.tick = tick
+
         val startTime = (tick.startTime / 1000).toFloat()
         val timePreempt = (tick.timePreempt / 1000).toFloat()
         val fadeInStartTime = startTime - timePreempt
@@ -117,13 +120,19 @@ class SliderTickSprite : UISprite(), IPoolable {
      * @param isSuccessful Whether the hit resulted in a successful hit.
      */
     fun onHit(isSuccessful: Boolean) {
+        val tick = tick ?: return
+
         clearEntityModifiers()
 
-        fadeOut(ANIM_DURATION, Easing.OutQuint)
+        beginAbsoluteSequence(tick.startTime.toFloat() / 1000) {
+            fadeOut(ANIM_DURATION, Easing.OutQuint)
 
-        if (isSuccessful) {
-            scaleTo(1.5f, ANIM_DURATION, Easing.Out)
+            if (isSuccessful) {
+                scaleTo(1.5f, ANIM_DURATION, Easing.Out)
+            }
         }
+
+        this.tick = null
     }
 
     override fun onDetached() {
@@ -137,10 +146,25 @@ class SliderTickSprite : UISprite(), IPoolable {
         private val pool = SynchronizedPool<SliderTickSprite>(20).apply { release(SliderTickSprite()) }
 
         /**
+         * Renews the [SliderTickSprite] pool with fresh instances.
+         *
+         * @param size The number of [SliderTickSprite] instances to pre-populate the pool with.
+         */
+        @JvmStatic
+        fun renew(size: Int) {
+            pool.clear()
+            repeat(size) { pool.release(SliderTickSprite()) }
+        }
+
+        /**
          * Obtains a [SliderTickSprite] from the pool, or creates a new one if the pool is empty.
          */
         @JvmStatic
-        fun obtain() = pool.acquire() ?: SliderTickSprite()
+        fun obtain(): SliderTickSprite {
+            val sprite = pool.acquire() ?: return SliderTickSprite()
+            sprite.textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
+            return sprite
+        }
     }
 
 }

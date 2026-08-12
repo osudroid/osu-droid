@@ -6,7 +6,7 @@ import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.vbo.IVertexBufferObject;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -20,11 +20,11 @@ public interface IShape extends IEntity, ITouchArea {
 	// Constants
 	// ===========================================================
 
-	public static final int BLENDFUNCTION_SOURCE_DEFAULT = GLES20.GL_SRC_ALPHA;
-	public static final int BLENDFUNCTION_DESTINATION_DEFAULT = GLES20.GL_ONE_MINUS_SRC_ALPHA;
+	public static final int BLENDFUNCTION_SOURCE_DEFAULT = GLES32.GL_SRC_ALPHA;
+	public static final int BLENDFUNCTION_DESTINATION_DEFAULT = GLES32.GL_ONE_MINUS_SRC_ALPHA;
 
-	public static final int BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT = GLES20.GL_ONE;
-	public static final int BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT = GLES20.GL_ONE_MINUS_SRC_ALPHA;
+	public static final int BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT = GLES32.GL_ONE;
+	public static final int BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT = GLES32.GL_ONE_MINUS_SRC_ALPHA;
 
 	// ===========================================================
 	// Methods

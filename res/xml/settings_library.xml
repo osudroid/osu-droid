@@ -26,13 +26,6 @@
             app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="deleteUnsupportedVideos"
-            android:summary="@string/opt_delete_unsupported_videos_summary"
-            android:title="@string/opt_delete_unsupported_videos_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
             android:defaultValue="false"
             android:key="preferNoVideoDownloads"
             android:summary="@string/opt_prefer_no_video_downloads_summary"

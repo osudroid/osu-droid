@@ -3,6 +3,7 @@ package com.osudroid.beatmaps
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
+import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.beatmaps.sections.BeatmapColor
 import com.osudroid.beatmaps.sections.BeatmapControlPoints
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
@@ -16,8 +17,12 @@ import com.osudroid.mods.IModApplicableToDifficultyWithMods
 import com.osudroid.mods.IModApplicableToHitObject
 import com.osudroid.mods.IModApplicableToHitObjectWithMods
 import com.osudroid.mods.IModFacilitatesAdjustment
-import com.osudroid.mods.IModRequiresOriginalBeatmap
 import com.osudroid.mods.Mod
+import com.osudroid.mods.ModScoreV2
+import com.osudroid.scoring.ScoreMultiplierCalculator
+import com.osudroid.utils.ModHashMap
+import com.osudroid.utils.ModUtils
+import kotlin.math.roundToLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -48,6 +53,77 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
+    }
+
+    /**
+     * Calculates the maximum score of this [Beatmap] with the given [ModHashMap].
+     *
+     * This does not take spinner bonus into account.
+     *
+     * @param mods The [ModHashMap] to calculate the maximum score with.
+     * @return The maximum score of this [Beatmap] with [mods] applied.
+     */
+    fun calculateMaximumScore(mods: ModHashMap?): Long {
+        val scoreMultiplier = if (mods != null) ScoreMultiplierCalculator(difficulty).calculateFor(mods.values) else 1.0
+
+        if (mods != null && ModScoreV2::class in mods) {
+            return (1e6 * scoreMultiplier).toLong()
+        }
+
+        val difficultyMultiplier = 1 + difficulty.od / 10 + difficulty.hp / 10 + (difficulty.difficultyCS - 3) / 4
+
+        var combo = 0
+        var score = 0L
+
+        // Spinners need non-rate adjusted to calculate required spins.
+        val nonRateAdjustedDifficulty = difficulty.clone()
+
+        if (mods != null) {
+            ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, mode, mods.values)
+        }
+
+        for (obj in hitObjects) {
+            when (obj) {
+                is Slider -> {
+                    // Slider head
+                    score += 30
+                    ++combo
+
+                    // Slider repeats
+                    score += 30 * obj.repeatCount
+                    combo += obj.repeatCount
+
+                    // Slider ticks
+                    score += 10 * obj.tickCount
+                    combo += obj.tickCount
+
+                    // In osu!standard, slider end awards a 30. osu!droid does not do this.
+                    if (mode == GameMode.Standard) {
+                        score += 30
+                    }
+                }
+
+                is Spinner -> {
+                    // For each required rotations, a spinner tick (100 score) is awarded, but does not contribute to
+                    // combo.
+                    val minRps = when (mode) {
+                        GameMode.Droid -> 2 + 2 * nonRateAdjustedDifficulty.od / 10.0
+                        GameMode.Standard -> BeatmapDifficulty.difficultyRange(
+                            nonRateAdjustedDifficulty.od.toDouble(), 90.0, 150.0, 225.0
+                        ) / 60.0
+                    }
+
+                    val requiredRotations = (minRps * obj.duration / 1000).toInt()
+
+                    repeat(requiredRotations) { score += 100 }
+                }
+            }
+
+            score += (300 + 300 * combo * difficultyMultiplier / 25).toLong()
+            ++combo
+        }
+
+        return (score * scoreMultiplier).roundToLong()
     }
 
     /**
@@ -95,11 +171,6 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         }
 
         val adjustmentMods = mods?.filterIsInstance<IModFacilitatesAdjustment>() ?: emptyList()
-
-        mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
-            scope?.ensureActive()
-            it.applyFromBeatmap(this)
-        }
 
         val converter = BeatmapConverter(this, scope)
 

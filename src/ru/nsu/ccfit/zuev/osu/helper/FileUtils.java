@@ -46,14 +46,33 @@ public class FileUtils {
 
     public static boolean extractZip(final String sourcePath, final String targetPath) {
         final File file = new File(sourcePath);
+        final String sourceFileName = file.getName();
+        final String folderName = sourceFileName.substring(0, sourceFileName.length() - 4);
 
+        return extractZip(file, sourceFileName, targetPath, folderName);
+    }
+
+    /**
+     * Extracts a beatmapset archive into {@code targetPath}, stripping a trailing {@code " [no video]"} suffix
+     * (case-insensitive) from the destination folder name so that a no-video download and its video counterpart
+     * land in the same folder.
+     */
+    public static boolean extractBeatmapset(final String sourcePath, final String targetPath) {
+        final File file = new File(sourcePath);
+        final String sourceFileName = file.getName();
+        final String folderName = sourceFileName
+                .substring(0, sourceFileName.length() - 4)
+                .replaceAll("(?i) \\[no video]$", "");
+
+        return extractZip(file, sourceFileName, targetPath, folderName);
+    }
+
+    private static boolean extractZip(final File file, final String sourceFileName,
+                                      final String targetPath, final String folderName) {
         // Check if we can use SD card for storage
         if (!canUseSD()) {
             return false;
         }
-
-        String sourceFileName = file.getName();
-        final String folderName = sourceFileName.substring(0, sourceFileName.length() - 4);
 
         final File folderFile = new File(targetPath + "/" + folderName);
         if(!folderFile.exists()) {

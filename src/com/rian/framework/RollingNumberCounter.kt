@@ -25,3 +25,11 @@ class RollingDoubleCounter(initialValue: Double) : RollingCounter<Double>(initia
     override fun interpolate(startValue: Double, endValue: Double, progress: Float) =
         Interpolation.linear(startValue, endValue, progress.toDouble())
 }
+
+/**
+ * A [RollingCounter] for [Long] values.
+ */
+class RollingLongCounter(initialValue: Long) : RollingCounter<Long>(initialValue) {
+    override fun interpolate(startValue: Long, endValue: Long, progress: Float) =
+        Interpolation.linear(startValue.toDouble(), endValue.toDouble(), progress.toDouble()).toLong()
+}

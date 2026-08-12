@@ -17,7 +17,7 @@ import org.andengine.util.color.Color;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * The general workflow with a {@link RenderTexture} is: {@link RenderTexture#init(GLState)} -> {@link RenderTexture#begin(GLState)} -> {@link RenderTexture#end(GLState)} -> {@link RenderTexture#destroy(GLState)}. 
@@ -115,7 +115,7 @@ public class RenderTexture extends Texture {
 
 	@Override
 	protected void writeTextureToHardware(final GLState pGLState) {
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, this.mPixelFormat.getGLInternalFormat(), this.mWidth, this.mHeight, 0, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), null);
+		GLES32.glTexImage2D(GLES32.GL_TEXTURE_2D, 0, this.mPixelFormat.getGLInternalFormat(), this.mWidth, this.mHeight, 0, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), null);
 	}
 
 	// ===========================================================
@@ -143,7 +143,7 @@ public class RenderTexture extends Texture {
 		pGLState.bindFramebuffer(this.mFramebufferObjectID);
 
 		/* Attach texture to FBO. */
-		GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, this.mHardwareTextureID, 0);
+		GLES32.glFramebufferTexture2D(GLES32.GL_FRAMEBUFFER, GLES32.GL_COLOR_ATTACHMENT0, GLES32.GL_TEXTURE_2D, this.mHardwareTextureID, 0);
 
 		try {
 			pGLState.checkFramebufferStatus();
@@ -212,13 +212,13 @@ public class RenderTexture extends Texture {
 		this.begin(pGLState, pFlipX, pFlipY);
 
 		/* Save clear color. */
-		GLES20.glGetFloatv(GLES20.GL_COLOR_CLEAR_VALUE, RenderTexture.CLEARCOLOR_CONTAINER, 0);
+		GLES32.glGetFloatv(GLES32.GL_COLOR_CLEAR_VALUE, RenderTexture.CLEARCOLOR_CONTAINER, 0);
 
-		GLES20.glClearColor(pRed, pGreen, pBlue, pAlpha);
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+		GLES32.glClearColor(pRed, pGreen, pBlue, pAlpha);
+		GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT);
 
 		/* Restore clear color. */
-		GLES20.glClearColor(RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_RED_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_GREEN_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_BLUE_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_ALPHA_INDEX]);
+		GLES32.glClearColor(RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_RED_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_GREEN_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_BLUE_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_ALPHA_INDEX]);
 	}
 
 	/**
@@ -227,7 +227,7 @@ public class RenderTexture extends Texture {
 	 */
 	public void begin(final GLState pGLState, final boolean pFlipX, final boolean pFlipY) {
 		this.savePreviousViewport();
-		GLES20.glViewport(0, 0, this.mWidth, this.mHeight);
+		GLES32.glViewport(0, 0, this.mWidth, this.mHeight);
 
 		pGLState.pushProjectionGLMatrix();
 
@@ -329,7 +329,7 @@ public class RenderTexture extends Texture {
 	}
 
 	protected void savePreviousViewport() {
-		GLES20.glGetIntegerv(GLES20.GL_VIEWPORT, RenderTexture.VIEWPORT_CONTAINER, 0);
+		GLES32.glGetIntegerv(GLES32.GL_VIEWPORT, RenderTexture.VIEWPORT_CONTAINER, 0);
 
 		this.mPreviousViewPortX = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_X_INDEX];
 		this.mPreviousViewPortY = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_Y_INDEX];
@@ -338,7 +338,7 @@ public class RenderTexture extends Texture {
 	}
 
 	protected void resotorePreviousViewport() {
-		GLES20.glViewport(this.mPreviousViewPortX, this.mPreviousViewPortY, this.mPreviousViewPortWidth, this.mPreviousViewPortHeight);
+		GLES32.glViewport(this.mPreviousViewPortX, this.mPreviousViewPortY, this.mPreviousViewPortWidth, this.mPreviousViewPortHeight);
 	}
 
 	public int[] getPixelsARGB_8888(final GLState pGLState) {
@@ -351,7 +351,7 @@ public class RenderTexture extends Texture {
 		glPixelBuffer.position(0);
 
 		this.begin(pGLState);
-		GLES20.glReadPixels(pX, pY, pWidth, pHeight, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), glPixelBuffer);
+		GLES32.glReadPixels(pX, pY, pWidth, pHeight, this.mPixelFormat.getGLFormat(), this.mPixelFormat.getGLType(), glPixelBuffer);
 		this.end(pGLState);
 
 		return GLHelper.convertRGBA_8888toARGB_8888(pixelsRGBA_8888);

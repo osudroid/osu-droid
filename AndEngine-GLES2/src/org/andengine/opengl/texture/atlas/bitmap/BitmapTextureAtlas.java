@@ -16,7 +16,7 @@ import org.andengine.util.math.MathUtils;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLUtils;
 
 /**
@@ -138,7 +138,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 		final int glFormat = pixelFormat.getGLFormat();
 		final int glType = pixelFormat.getGLType();
 
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, glInternalFormat, this.mWidth, this.mHeight, 0, glFormat, glType, null);
+		GLES32.glTexImage2D(GLES32.GL_TEXTURE_2D, 0, glInternalFormat, this.mWidth, this.mHeight, 0, glFormat, glType, null);
 
 		final boolean preMultipyAlpha = this.mTextureOptions.mPreMultiplyAlpha;
 		/* Non alpha premultiplied bitmaps are loaded with ARGB_8888 and converted down manually. */
@@ -159,18 +159,18 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 				final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && pixelFormat == PixelFormat.RGBA_8888;
 				if(!useDefaultAlignment) {
 					/* Adjust unpack alignment. */
-					GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+					GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
 				}
 
 				if(preMultipyAlpha) {
-					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, glFormat, glType);
+					GLUtils.texSubImage2D(GLES32.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, glFormat, glType);
 				} else {
-					pGLState.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, this.mPixelFormat);
+					pGLState.glTexSubImage2D(GLES32.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, this.mPixelFormat);
 				}
 
 				if(!useDefaultAlignment) {
 					/* Restore default unpack alignment. */
-					GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+					GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
 				}
 
 				bitmap.recycle();

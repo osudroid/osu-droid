@@ -1,6 +1,6 @@
 package com.reco1l.andengine.component
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 
 /**
  * Determines the blending function for the sprite.
@@ -22,23 +22,23 @@ data class BlendInfo(
     companion object {
 
         val None = BlendInfo(
-            GLES20.GL_ONE,
-            GLES20.GL_ZERO
+            GLES32.GL_ONE,
+            GLES32.GL_ZERO
         )
 
         val Mixture = BlendInfo(
-            GLES20.GL_SRC_ALPHA,
-            GLES20.GL_ONE_MINUS_SRC_ALPHA
+            GLES32.GL_SRC_ALPHA,
+            GLES32.GL_ONE_MINUS_SRC_ALPHA
         )
 
         val Additive = BlendInfo(
-            GLES20.GL_SRC_ALPHA,
-            GLES20.GL_ONE,
+            GLES32.GL_SRC_ALPHA,
+            GLES32.GL_ONE,
         )
 
         val PreMultiply = BlendInfo(
-            GLES20.GL_ONE,
-            GLES20.GL_ONE_MINUS_SRC_ALPHA
+            GLES32.GL_ONE,
+            GLES32.GL_ONE_MINUS_SRC_ALPHA
         )
 
         val Inherit = BlendInfo(-1, -1)

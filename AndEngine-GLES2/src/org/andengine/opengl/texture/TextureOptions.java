@@ -1,6 +1,6 @@
 package org.andengine.opengl.texture;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * The {@link TextureOptions} defines with what parameters a {@link ITexture} is treated with by the hardware.
@@ -20,15 +20,15 @@ public class TextureOptions {
 	// Constants
 	// ===========================================================
 
-	public static final TextureOptions NEAREST = new TextureOptions(GLES20.GL_NEAREST, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE, false);
-	public static final TextureOptions BILINEAR = new TextureOptions(GLES20.GL_LINEAR, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE, false);
-	public static final TextureOptions REPEATING_NEAREST = new TextureOptions(GLES20.GL_NEAREST, GLES20.GL_NEAREST, GLES20.GL_REPEAT, GLES20.GL_REPEAT, false);
-	public static final TextureOptions REPEATING_BILINEAR = new TextureOptions(GLES20.GL_LINEAR, GLES20.GL_LINEAR, GLES20.GL_REPEAT, GLES20.GL_REPEAT, false);
+	public static final TextureOptions NEAREST = new TextureOptions(GLES32.GL_NEAREST, GLES32.GL_NEAREST, GLES32.GL_CLAMP_TO_EDGE, GLES32.GL_CLAMP_TO_EDGE, false);
+	public static final TextureOptions BILINEAR = new TextureOptions(GLES32.GL_LINEAR, GLES32.GL_LINEAR, GLES32.GL_CLAMP_TO_EDGE, GLES32.GL_CLAMP_TO_EDGE, false);
+	public static final TextureOptions REPEATING_NEAREST = new TextureOptions(GLES32.GL_NEAREST, GLES32.GL_NEAREST, GLES32.GL_REPEAT, GLES32.GL_REPEAT, false);
+	public static final TextureOptions REPEATING_BILINEAR = new TextureOptions(GLES32.GL_LINEAR, GLES32.GL_LINEAR, GLES32.GL_REPEAT, GLES32.GL_REPEAT, false);
 
-	public static final TextureOptions NEAREST_PREMULTIPLYALPHA = new TextureOptions(GLES20.GL_NEAREST, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE, true);
-	public static final TextureOptions BILINEAR_PREMULTIPLYALPHA = new TextureOptions(GLES20.GL_LINEAR, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE, true);
-	public static final TextureOptions REPEATING_NEAREST_PREMULTIPLYALPHA = new TextureOptions(GLES20.GL_NEAREST, GLES20.GL_NEAREST, GLES20.GL_REPEAT, GLES20.GL_REPEAT, true);
-	public static final TextureOptions REPEATING_BILINEAR_PREMULTIPLYALPHA = new TextureOptions(GLES20.GL_LINEAR, GLES20.GL_LINEAR, GLES20.GL_REPEAT, GLES20.GL_REPEAT, true);
+	public static final TextureOptions NEAREST_PREMULTIPLYALPHA = new TextureOptions(GLES32.GL_NEAREST, GLES32.GL_NEAREST, GLES32.GL_CLAMP_TO_EDGE, GLES32.GL_CLAMP_TO_EDGE, true);
+	public static final TextureOptions BILINEAR_PREMULTIPLYALPHA = new TextureOptions(GLES32.GL_LINEAR, GLES32.GL_LINEAR, GLES32.GL_CLAMP_TO_EDGE, GLES32.GL_CLAMP_TO_EDGE, true);
+	public static final TextureOptions REPEATING_NEAREST_PREMULTIPLYALPHA = new TextureOptions(GLES32.GL_NEAREST, GLES32.GL_NEAREST, GLES32.GL_REPEAT, GLES32.GL_REPEAT, true);
+	public static final TextureOptions REPEATING_BILINEAR_PREMULTIPLYALPHA = new TextureOptions(GLES32.GL_LINEAR, GLES32.GL_LINEAR, GLES32.GL_REPEAT, GLES32.GL_REPEAT, true);
 
 	public static final TextureOptions DEFAULT = NEAREST; 
 
@@ -71,10 +71,10 @@ public class TextureOptions {
 	public void apply() {
 		// osu!droid fix: use glTexParameteri — all four parameters are integer-valued GL enums.
 		// The old code used glTexParameterf for wrap modes which is not spec-compliant in GLES2.
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, this.mMinFilter);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, this.mMagFilter);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, this.mWrapS);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, this.mWrapT);
+		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, this.mMinFilter);
+		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MAG_FILTER, this.mMagFilter);
+		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_S, this.mWrapS);
+		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_T, this.mWrapT);
 	}
 
 	// ===========================================================

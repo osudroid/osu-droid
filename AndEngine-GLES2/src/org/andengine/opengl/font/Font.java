@@ -18,7 +18,7 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLUtils;
 import android.util.SparseArray;
 
@@ -281,18 +281,18 @@ public class Font implements IFont {
 						final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && (pixelFormat == PixelFormat.RGBA_8888);
 						if(!useDefaultAlignment) {
 							/* Adjust unpack alignment. */
-							GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+							GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
 						}
 
 						if(preMultipyAlpha) {
-							GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, letter.mTextureX, letter.mTextureY, bitmap);
+							GLUtils.texSubImage2D(GLES32.GL_TEXTURE_2D, 0, letter.mTextureX, letter.mTextureY, bitmap);
 						} else {
-							pGLState.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, letter.mTextureX, letter.mTextureY, bitmap, pixelFormat);
+							pGLState.glTexSubImage2D(GLES32.GL_TEXTURE_2D, 0, letter.mTextureX, letter.mTextureY, bitmap, pixelFormat);
 						}
 
 						if(!useDefaultAlignment) {
 							/* Restore default unpack alignment. */
-							GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+							GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
 						}
 
 						bitmap.recycle();

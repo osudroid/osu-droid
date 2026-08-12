@@ -16,7 +16,6 @@ import org.andengine.util.math.MathUtils;
 
 import java.util.ArrayList;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -148,14 +147,11 @@ public class GameplaySpinner extends GameObject {
             scene.attachChild(approachCircle, 0);
             approachCircle.setAlpha(0);
 
-            approachCircle.beginAbsoluteSequence(hitTime, sequence -> {
-                sequence.fadeTo(0.75f)
-                        .fadeTo(1, duration)
-                        .scaleTo(2)
-                        .scaleTo(0, duration);
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(hitTime, sequence -> sequence
+                    .fadeTo(0.75f)
+                    .fadeTo(1, duration)
+                    .scaleTo(2)
+                    .scaleTo(0, duration));
         }
 
         scene.attachChild(circle, 0);
@@ -167,45 +163,30 @@ public class GameplaySpinner extends GameObject {
 
         if (background.isVisible()) {
             background.setAlpha(0);
-            background.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-                sequence.fadeIn(fadeDuration);
-
-                return Unit.INSTANCE;
-            });
+            background.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
         }
 
         circle.setAlpha(0);
-        circle.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        circle.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
 
         metreY = background.getY() - background.getHeightScaled() / 2f;
         metre.setY(background.getY() + background.getHeightScaled() / 2f);
 
         metre.setAlpha(0);
-        metre.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        metre.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence.fadeIn(fadeDuration));
 
         spinText.setAlpha(0);
-        spinText.beginAbsoluteSequence(fadeInStartTime, sequence -> {
-            sequence.fadeIn(fadeDuration)
-                    .then(timePreempt / 2)
-                    .fadeOut(fadeDuration);
-
-            return Unit.INSTANCE;
-        });
+        spinText.beginAbsoluteSequence(fadeInStartTime, sequence -> sequence
+                .fadeIn(fadeDuration)
+                .then(timePreempt / 2)
+                .fadeOut(fadeDuration));
 
         oldMouse = null;
 
         setLifetimeEnd(Float.MAX_VALUE);
     }
 
-    void removeFromScene() {
+    protected void detachFromScene() {
         if (scene == null) {
             return;
         }
@@ -231,6 +212,14 @@ public class GameplaySpinner extends GameObject {
         scene.detachChild(bonusScore);
         setLifetimeEnd(hitTime + duration);
         scene = null;
+    }
+
+    void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+
+        detachFromScene();
 
         int score = 0;
         if (replayObjectData != null) {
@@ -428,7 +417,14 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void onExpire() {
-        removeFromScene();
+        detachFromScene();
+        stopLoopingSamples();
+
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            hitSamples.get(i).release();
+        }
+
+        hitSamples.clear();
         GameObjectPool.getInstance().putSpinner(this);
     }
 
@@ -489,11 +485,9 @@ public class GameplaySpinner extends GameObject {
 
                     stat.changeHp(rate * 0.01f * duration / needRotations);
                 }
-
-                rotations = totalRotations - wholeRotations;
-            } else {
-                rotations = totalRotations - wholeRotations;
             }
+
+            rotations = totalRotations - wholeRotations;
         }
     }
 

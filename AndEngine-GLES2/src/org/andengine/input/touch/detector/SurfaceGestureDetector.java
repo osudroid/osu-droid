@@ -112,6 +112,10 @@ public abstract class SurfaceGestureDetector extends BaseDetector {
 
 		@Override
 		public boolean onFling(final MotionEvent pMotionEventStart, final MotionEvent pMotionEventEnd, final float pVelocityX, final float pVelocityY) {
+			if(pMotionEventStart == null || pMotionEventEnd == null) {
+				return false;
+			}
+
 			final float swipeMinDistance = this.mSwipeMinDistance;
 
 			final boolean isHorizontalFling = Math.abs(pVelocityX) > Math.abs(pVelocityY);

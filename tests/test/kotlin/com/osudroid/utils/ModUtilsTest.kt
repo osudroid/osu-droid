@@ -94,8 +94,8 @@ class ModUtilsTest {
 
         listOf(
             Case(
-                BeatmapDifficulty(cs = 5f),
-                BeatmapDifficulty(cs = 5f),
+                BeatmapDifficulty(),
+                BeatmapDifficulty(),
                 GameMode.Standard,
                 listOf(ModAutoplay())
             ),
@@ -132,17 +132,5 @@ class ModUtilsTest {
             Assert.assertEquals(expected.od, original.od, 1e-2f)
             Assert.assertEquals(expected.hp, original.hp, 1e-2f)
         }
-    }
-
-    @Test
-    fun `Test score multiplier calculation with multiple ModRateAdjust mods`() {
-        val mods = listOf(
-            ModHidden(),
-            ModDoubleTime(),
-            ModCustomSpeed(0.85f),
-            ModPrecise()
-        )
-
-        Assert.assertEquals(1.1977575f, ModUtils.calculateScoreMultiplier(mods), 1e-6f)
     }
 }

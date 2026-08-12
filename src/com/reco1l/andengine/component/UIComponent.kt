@@ -10,7 +10,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.andengine.modifier.*
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
@@ -23,6 +22,7 @@ import org.andengine.opengl.util.*
 import org.andengine.util.Constants.*
 import org.andengine.util.algorithm.collision.ShapeCollisionChecker
 import org.andengine.util.adt.transformation.Transformation
+import java.util.function.Consumer
 
 import kotlin.math.*
 
@@ -667,7 +667,7 @@ abstract class UIComponent : Entity(0f, 0f),
             // because some of them like size-related flags might change the parent's layout.
             onHandleInvalidations()
 
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 if (child is UIComponent) {
                     onHandleInvalidations()
                 }
@@ -906,7 +906,7 @@ abstract class UIComponent : Entity(0f, 0f),
         localToParentTransformation
         parentToLocalTransformation
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             if (it is UIComponent) {
                 it.onInvalidateTransformations()
             }
@@ -1107,13 +1107,13 @@ abstract class UIComponent : Entity(0f, 0f),
     }
 
     private fun updateModifiers(time: Float) {
-        universalModifierTrackers.fastForEach { it.update(time) }
+        universalModifierTrackers.forEach { it.update(time) }
     }
 
     override fun clearEntityModifiers() {
         super.clearEntityModifiers()
 
-        universalModifierTrackers.fastForEach { it.clear() }
+        universalModifierTrackers.forEach { it.clear() }
     }
 
     /**
@@ -1127,10 +1127,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clear(type) }
+        universalModifierTrackers.forEach { it.clear(type) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(type, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(type, true) }
         }
     }
 
@@ -1142,10 +1142,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.fastForEach { it.clear(*types) }
+        universalModifierTrackers.forEach { it.clear(*types) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(true, *types) }
         }
     }
 
@@ -1157,10 +1157,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time) }
+        universalModifierTrackers.forEach { it.clearAfter(time) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
         }
     }
 
@@ -1173,10 +1173,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time, type) }
+        universalModifierTrackers.forEach { it.clearAfter(time, type) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
         }
     }
 
@@ -1189,10 +1189,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.fastForEach { it.clearAfter(time, *types) }
+        universalModifierTrackers.forEach { it.clearAfter(time, *types) }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
         }
     }
 
@@ -1208,11 +1208,11 @@ abstract class UIComponent : Entity(0f, 0f),
         if (type != null) {
             getTrackerFor(type)?.finish()
         } else {
-            universalModifierTrackers.fastForEach { it.finish() }
+            universalModifierTrackers.forEach { it.finish() }
         }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.finishModifiers(true, type) }
+            mChildren?.forEach { (it as? UIComponent)?.finishModifiers(true, type) }
         }
     }
 
@@ -1244,24 +1244,39 @@ abstract class UIComponent : Entity(0f, 0f),
         modifierDelay += duration
 
         if (propagateChildren) {
-            mChildren?.fastForEach { (it as? UIComponent)?.addDelay(duration, true) }
+            mChildren?.forEach { (it as? UIComponent)?.addDelay(duration, true) }
         }
     }
 
     /**
      * Starts a sequence of [UniversalModifier]s. The block will be provided with a [UniversalModifierSequence] that can
      * be used to add [UniversalModifier]s.
+     *
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
      */
+    @JvmSynthetic
     inline fun beginModifierSequence(crossinline block: UniversalModifierSequence.() -> Unit) =
         UniversalModifierSequence.obtain(this).use { it.block() }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s. The block will be provided with a [UniversalModifierSequence] that can
+     * be used to add [UniversalModifier]s.
+     *
+     * This is a Java-friendly overload of [beginModifierSequence] that accepts a [Consumer].
+     *
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
+     */
+    fun beginModifierSequence(block: Consumer<UniversalModifierSequence>) =
+        beginModifierSequence { block.accept(this) }
 
     /**
      * Starts a sequence of [UniversalModifier]s from an absolute time value (adjusts [modifierStartTime]).
      *
      * @param newModifierStartTime The new value for [modifierStartTime].
      * @param propagateChildren Whether this should be applied to children. `true` by default.
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
      */
-    @JvmOverloads
+    @JvmSynthetic
     inline fun beginAbsoluteSequence(
         newModifierStartTime: Float,
         propagateChildren: Boolean = true,
@@ -1279,6 +1294,22 @@ abstract class UIComponent : Entity(0f, 0f),
     }
 
     /**
+     * Starts a sequence of [UniversalModifier]s from an absolute time value (adjusts [modifierStartTime]).
+     *
+     * This is a Java-friendly overload of [beginAbsoluteSequence] that accepts a [Consumer].
+     *
+     * @param newModifierStartTime The new value for [modifierStartTime].
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
+     */
+    @JvmOverloads
+    fun beginAbsoluteSequence(
+        newModifierStartTime: Float,
+        propagateChildren: Boolean = true,
+        block: Consumer<UniversalModifierSequence>
+    ) = beginAbsoluteSequence(newModifierStartTime, propagateChildren) { block.accept(this) }
+
+    /**
      * Adjusts [modifierStartTime] to a new absolute time value. **This is used internally for [beginAbsoluteSequence]
      * but is made public for inlining, and should not be used externally**.
      *
@@ -1289,7 +1320,7 @@ abstract class UIComponent : Entity(0f, 0f),
         modifierDelay += newModifierStartTime - modifierStartTime
 
         if (propagateChildren) {
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 (child as? UIComponent)?.adjustAbsoluteSequenceTime(newModifierStartTime)
             }
         }
@@ -1313,7 +1344,7 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         if (propagateChildren) {
-            mChildren?.fastForEach { child ->
+            mChildren?.forEach { child ->
                 (child as? UIComponent)?.restoreAbsoluteSequenceTime(prevModifierStartTime)
             }
         }
@@ -1326,28 +1357,44 @@ abstract class UIComponent : Entity(0f, 0f),
      * @param propagateChildren Whether this should be applied to children. `true` by default.
      * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
      */
-    @JvmOverloads
+    @JvmSynthetic
     inline fun beginDelayedSequence(
         delay: Float,
         propagateChildren: Boolean = true,
         crossinline block: UniversalModifierSequence.() -> Unit
     ) {
-        addDelay(delay, propagateChildren)
         val oldDelay = modifierDelay
+        addDelay(delay, propagateChildren)
 
         try {
             beginModifierSequence(block)
+        } finally {
+            addDelay(-delay, propagateChildren)
 
             val newDelay = modifierDelay
 
             if (!Precision.almostEquals(oldDelay, newDelay)) {
                 throw IllegalStateException("${this::class.simpleName}'s modifierDelay at the end of delayed sequence " +
-                        "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
+                    "is not the same as at the beginning (begin=$oldDelay end=$newDelay)")
             }
-        } finally {
-            addDelay(-delay, propagateChildren)
         }
     }
+
+    /**
+     * Starts a sequence of [UniversalModifier]s with a (cumulative) relative delay applied.
+     *
+     * This is a Java-friendly overload of [beginDelayedSequence] that accepts a [Consumer].
+     *
+     * @param delay The offset in seconds from current time. Note that this stacks with other nested sequences.
+     * @param propagateChildren Whether this should be applied to children. `true` by default.
+     * @param block The block to execute with the [UniversalModifierSequence] to add [UniversalModifier]s to.
+     */
+    @JvmOverloads
+    fun beginDelayedSequence(
+        delay: Float,
+        propagateChildren: Boolean = true,
+        block: Consumer<UniversalModifierSequence>
+    ) = beginDelayedSequence(delay, propagateChildren) { block.accept(this) }
 
     //endregion
 
@@ -1684,14 +1731,14 @@ abstract class UIComponent : Entity(0f, 0f),
      * Called when input bindings are invalidated and needs to be removed.
      */
     open fun onInvalidateInputBindings() {
-        inputBindings.fastForEachIndexed { index, binding ->
+        inputBindings.forEachIndexed { index, binding ->
             if (binding != null) {
                 propagateTouchEvent(MotionEvent.ACTION_CANCEL, index)
             }
         }
         inputBindings.fill(null)
 
-        mChildren?.fastForEach { child ->
+        mChildren?.forEach { child ->
             if (child is UIComponent) {
                 child.onInvalidateInputBindings()
             }
@@ -1756,6 +1803,7 @@ abstract class UIComponent : Entity(0f, 0f),
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [UIComponent]'s [customClock] in
      * [onUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null
@@ -1800,7 +1848,7 @@ abstract class UIComponent : Entity(0f, 0f),
         background?.updateClock(currentClock)
         foreground?.updateClock(currentClock)
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             @Suppress("UNCHECKED_CAST")
             (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }

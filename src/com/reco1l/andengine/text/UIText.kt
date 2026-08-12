@@ -1,13 +1,12 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import com.reco1l.toolkt.kotlin.*
 import org.andengine.opengl.font.*
 import org.andengine.opengl.font.exception.FontException
 import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
@@ -154,7 +153,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         // Upload MVP matrix
         if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES20.glUniformMatrix4fv(
+            GLES32.glUniformMatrix4fv(
                 shader.uniformMVPMatrixLocation,
                 1, false, pGLState.modelViewProjectionGLMatrix, 0
             )
@@ -162,19 +161,19 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         // Upload texture unit sampler
         if (shader.uniformTexture0Location >= 0) {
-            GLES20.glUniform1i(shader.uniformTexture0Location, 0)
+            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
         }
 
         // Upload color uniform
         if (shader.uniformColorLocation >= 0) {
-            GLES20.glUniform4f(
+            GLES32.glUniform4f(
                 shader.uniformColorLocation,
                 drawRed, drawGreen, drawBlue, drawAlpha
             )
         }
 
         // Disable color vertex attribute (this shader uses uniform color)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         // UV (attr 3) is already set up by TextTextureBuffer inside the CompoundBuffer.beginDraw()
     }
 
@@ -261,7 +260,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             val lineHeight = font.lineHeight
             var i = 0
 
-            lines.fastForEachIndexed { lineIndex, line ->
+            lines.forEachIndexed { lineIndex, line ->
 
                 var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
                 val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
@@ -294,7 +293,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UIText
-            GLES20.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
+            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
         }
     }
 
@@ -314,7 +313,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
             setPosition(0)
 
-            lines.fastForEach { line ->
+            lines.forEach { line ->
                 line.forEach { character ->
 
                     val letter = font.safeGetLetter(character)

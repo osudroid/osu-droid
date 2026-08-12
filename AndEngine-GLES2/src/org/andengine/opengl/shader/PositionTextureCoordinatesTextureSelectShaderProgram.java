@@ -5,7 +5,7 @@ import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -23,16 +23,18 @@ public class PositionTextureCoordinatesTextureSelectShaderProgram extends Shader
 	public static final String VERTEXSHADER = PositionTextureCoordinatesShaderProgram.VERTEXSHADER;
 
 	public static final String FRAGMENTSHADER =
+			"#version 320 es\n" +
 			"precision lowp float;\n" +
 			"uniform sampler2D " + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ";\n" +
 			"uniform sampler2D " + ShaderProgramConstants.UNIFORM_TEXTURE_1 + ";\n" +
 			"uniform bool " + ShaderProgramConstants.UNIFORM_TEXTURESELECT_TEXTURE_0 + ";\n" +
-			"varying mediump vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+			"in mediump vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+			"out vec4 fragColor;\n" +
 			"void main() {\n" +
 			"	if(" + ShaderProgramConstants.UNIFORM_TEXTURESELECT_TEXTURE_0 + ") {\n" +
-			"		gl_FragColor = texture2D(" + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ", " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ");\n" +
+			"		fragColor = texture(" + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ", " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ");\n" +
 			"	} else {\n" +
-			"		gl_FragColor = texture2D(" + ShaderProgramConstants.UNIFORM_TEXTURE_1 + ", " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ");\n" +
+			"		fragColor = texture(" + ShaderProgramConstants.UNIFORM_TEXTURE_1 + ", " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ");\n" +
 			"	}\n" +
 			"}";
 
@@ -75,8 +77,8 @@ public class PositionTextureCoordinatesTextureSelectShaderProgram extends Shader
 
 	@Override
 	protected void link(final GLState pGLState) throws ShaderProgramLinkException {
-		GLES20.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION);
-		GLES20.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES);
+		GLES32.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION);
+		GLES32.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES);
 
 		super.link(pGLState);
 
@@ -97,18 +99,18 @@ public class PositionTextureCoordinatesTextureSelectShaderProgram extends Shader
 
 	@Override
 	public void bind(final GLState pGLState, final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-		GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
-		GLES20.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
-		GLES20.glUniform1i(mUniformTexture0Location, 0);
-		GLES20.glUniform1i(mUniformTexture1Location, 1);
+		GLES32.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
+		GLES32.glUniform1i(mUniformTexture0Location, 0);
+		GLES32.glUniform1i(mUniformTexture1Location, 1);
 	}
 
 	@Override
 	public void unbind(final GLState pGLState) {
-		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
 		
 		super.unbind(pGLState);
 	}

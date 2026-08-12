@@ -1,6 +1,6 @@
 package org.andengine.entity.primitive;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2012
@@ -13,13 +13,13 @@ public enum DrawMode {
 	// Elements
 	// ===========================================================
 
-	POINTS(GLES20.GL_POINTS),
-	LINE_STRIP(GLES20.GL_LINE_STRIP),
-	LINE_LOOP(GLES20.GL_LINE_LOOP),
-	LINES(GLES20.GL_LINES),
-	TRIANGLE_STRIP(GLES20.GL_TRIANGLE_STRIP),
-	TRIANGLE_FAN(GLES20.GL_TRIANGLE_FAN),
-	TRIANGLES(GLES20.GL_TRIANGLES);
+	POINTS(GLES32.GL_POINTS),
+	LINE_STRIP(GLES32.GL_LINE_STRIP),
+	LINE_LOOP(GLES32.GL_LINE_LOOP),
+	LINES(GLES32.GL_LINES),
+	TRIANGLE_STRIP(GLES32.GL_TRIANGLE_STRIP),
+	TRIANGLE_FAN(GLES32.GL_TRIANGLE_FAN),
+	TRIANGLES(GLES32.GL_TRIANGLES);
 
 	// ===========================================================
 	// Constants

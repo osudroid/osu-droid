@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.multi
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.edlplan.ui.fragment.WebViewFragment
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
@@ -12,6 +12,7 @@ import com.osudroid.ui.OsuColors
 import com.osudroid.ui.v2.*
 import com.osudroid.utils.async
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -34,7 +35,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
-import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomPlayerCard : UILinearContainer() {
     private val teamColorBar: UIButton
@@ -171,7 +171,7 @@ class RoomPlayerCard : UILinearContainer() {
                     }
 
                     override fun beginDraw(pGLState: GLState) {
-                        GLES20.glDepthMask(true)
+                        GLES32.glDepthMask(true)
                         super.beginDraw(pGLState)
                     }
                 }
@@ -193,7 +193,7 @@ class RoomPlayerCard : UILinearContainer() {
                     }
 
                     override fun beginDraw(pGLState: GLState) {
-                        GLES20.glDepthMask(true)
+                        GLES32.glDepthMask(true)
                         super.beginDraw(pGLState)
                     }
                 }
@@ -379,7 +379,7 @@ class RoomPlayerCard : UILinearContainer() {
                     if (OnlineManager.getInstance().loadAvatarToTextureManager(avatarUrl)) {
                         ensureActive()
 
-                        val texture = resourceManager.getTextureIfLoaded(avatarKey)
+                        val texture = resourceManager.getAvatarTextureIfLoaded(avatarUrl)
 
                         updateThread {
                             if (lastPlayerId == userId) {

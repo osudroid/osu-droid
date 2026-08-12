@@ -190,7 +190,7 @@ public class MainScene implements IUpdateHandler {
         UIBox box = new UIBox() {
 
             {
-                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME, vbo);
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid-GLES-" + BuildConfig.VERSION_NAME, vbo);
                 attachChild(versionText, 0);
 
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
@@ -221,7 +221,7 @@ public class MainScene implements IUpdateHandler {
                             dialog.dismiss();
 
                             try {
-                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"));
+                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/gles/latest"));
                                 context.startActivity(intent);
                             } catch (Exception e) {
                                 android.util.Log.e("MainScene", "Failed to load changelog", e);
@@ -654,12 +654,9 @@ public class MainScene implements IUpdateHandler {
                 button.setX(menuBarX - 100);
                 button.setAlpha(0f);
 
-                button.beginModifierSequence(sequence -> {
-                    sequence.moveToX(menuBarX, 0.5f, Easing.OutElastic)
-                            .fadeTo(0.9f, 0.5f, Easing.OutCubic);
-
-                    return Unit.INSTANCE;
-                });
+                button.beginModifierSequence(sequence -> sequence
+                        .moveToX(menuBarX, 0.5f, Easing.OutElastic)
+                        .fadeTo(0.9f, 0.5f, Easing.OutCubic));
             }
 
             isMenuShowed = true;
@@ -678,13 +675,10 @@ public class MainScene implements IUpdateHandler {
                     button.setX(menuBarX);
                     button.setAlpha(0.9f);
 
-                    button.beginModifierSequence(sequence -> {
-                        sequence.moveToX(menuBarX - 50, 1f, Easing.OutExpo)
-                                .fadeOut(1f, Easing.OutExpo)
-                                .after(IEntity::detachSelf);
-
-                        return Unit.INSTANCE;
-                    });
+                    button.beginModifierSequence(sequence -> sequence
+                            .moveToX(menuBarX - 50, 1f, Easing.OutExpo)
+                            .fadeOut(1f, Easing.OutExpo)
+                            .after(IEntity::detachSelf));
                 }
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
@@ -1057,6 +1051,7 @@ public class MainScene implements IUpdateHandler {
         GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
         StatisticV2 stat = replay.getStat();
         stat.migrateLegacyMods(beatmap.getBeatmapDifficulty());
+        stat.calculateModScoreMultiplier(beatmap.getBeatmapDifficulty());
 
         GlobalManager.getInstance().getSongMenu().select();
         ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());

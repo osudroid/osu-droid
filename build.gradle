@@ -1,7 +1,7 @@
 buildscript {
     ext {
         kotlin_version = '2.1.10'
-        room_version = '2.6.1'
+        room_version = '2.7.2'
     }
     repositories {
         google()
@@ -106,7 +106,7 @@ android {
 
     buildTypes {
         debug {
-            resValue "string", "app_name", "osu!droid-debug"
+            resValue "string", "app_name", "osu!droid-GLES-debug"
             applicationIdSuffix '.debug'
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
@@ -114,9 +114,9 @@ android {
         }
 
         release {
-            resValue "string", "app_name", "osu!droid"
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+            resValue "string", "app_name", "osu!droid-GLES"
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig = signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
@@ -125,14 +125,22 @@ android {
 
         pre_release {
             matchingFallbacks = ['release']
-            resValue "string", "app_name", "osu!droid"
-            minifyEnabled true
+            resValue "string", "app_name", "osu!droid-GLES"
+//            minifyEnabled true
 //            debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig = signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
             }
+        }
+    }
+
+    flavorDimensions += ["renderer"]
+    productFlavors {
+        gles {
+            dimension "renderer"
+            applicationId "ru.nsu.ccfit.zuev.osuplus.gles"
         }
     }
 
@@ -158,6 +166,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
         kotlinOptions {
             jvmTarget = '17'
+            freeCompilerArgs += ['-Xjvm-default=all']
         }
     }
 
@@ -179,7 +188,7 @@ android {
 
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
-            def fileName = "osudroid-${defaultConfig.versionName}-${variant.buildType.name}.apk"
+            def fileName = "osudroid-gles-${defaultConfig.versionName}-${variant.buildType.name}.apk"
             outputFileName = fileName
         }
     }
@@ -204,11 +213,10 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:2025.1007.0'
+    implementation 'com.github.osudroid:language-pack:2026.0606.2'
 
     // Tools
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
-    implementation 'com.github.Reco1I:Toolkt:1.0.24'
     implementation 'commons-io:commons-io:2.18.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'
@@ -220,6 +228,10 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
 
+    // Video playback
+    implementation "androidx.media3:media3-exoplayer:1.4.1"
+    implementation files('libs/media3-decoder-ffmpeg.aar')
+
     // Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
@@ -227,3 +239,5 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
 }
+
+apply from: '16kb-alignment.gradle'

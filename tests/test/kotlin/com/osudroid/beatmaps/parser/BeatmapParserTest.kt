@@ -301,6 +301,17 @@ class BeatmapParserTest {
     }
 
     @Test
+    fun `Test difficulty properties are clamped to 0-10`() {
+        outOfRangeDifficultyBeatmap.difficulty.apply {
+            Assert.assertEquals(10f, difficultyCS, 0f)
+            Assert.assertEquals(10f, gameplayCS, 0f)
+            Assert.assertEquals(10f, ar, 0f)
+            Assert.assertEquals(10f, od, 0f)
+            Assert.assertEquals(10f, hp, 0f)
+        }
+    }
+
+    @Test
     fun `Test NaN control points`() {
         nanBeatmap.controlPoints.apply {
             Assert.assertEquals(1, timing.controlPoints.size)
@@ -324,6 +335,7 @@ class BeatmapParserTest {
         private lateinit var v3Beatmap: Beatmap
         private lateinit var v14Beatmap: Beatmap
         private lateinit var nanBeatmap: Beatmap
+        private lateinit var outOfRangeDifficultyBeatmap: Beatmap
 
         @BeforeClass
         @JvmStatic
@@ -341,6 +353,9 @@ class BeatmapParserTest {
 
             nanBeatmap =
                 BeatmapParser(TestResourceManager.getBeatmapFile("nan-control-points")!!).parse(true)
+
+            outOfRangeDifficultyBeatmap =
+                BeatmapParser(TestResourceManager.getBeatmapFile("out-of-range-difficulty")!!).parse(true)
         }
     }
 }

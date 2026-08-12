@@ -1,6 +1,6 @@
 package com.edlplan.framework.support.graphics;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.util.Log;
 
 import com.edlplan.framework.math.Color4;
@@ -16,15 +16,15 @@ public class GLWrapped {
     BooleanSetting depthTest = new BooleanSetting(t -> {
         BatchEngine.flush();
         if (t) {
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+            GLES32.glEnable(GLES32.GL_DEPTH_TEST);
         } else {
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+            GLES32.glDisable(GLES32.GL_DEPTH_TEST);
         }
     },
             false).initial();
-    public static int GL_SHORT = GLES20.GL_SHORT;
-    public static int GL_UNSIGNED_SHORT = GLES20.GL_UNSIGNED_SHORT;
-    public static int GL_TRIANGLES = GLES20.GL_TRIANGLES;
+    public static int GL_SHORT = GLES32.GL_SHORT;
+    public static int GL_UNSIGNED_SHORT = GLES32.GL_UNSIGNED_SHORT;
+    public static int GL_TRIANGLES = GLES32.GL_TRIANGLES;
     public static int GL_MAX_TEXTURE_SIZE;
     public static BlendSetting blend = new BlendSetting().setUp();
     private static boolean enable = true;
@@ -47,12 +47,12 @@ public class GLWrapped {
     }
 
     public static void drawArrays(int mode, int offset, int count) {
-        if (enable) GLES20.glDrawArrays(mode, offset, count);
+        if (enable) GLES32.glDrawArrays(mode, offset, count);
         drawCalls++;
     }
 
     public static void drawElements(int mode, int count, int type, Buffer b) {
-        if (enable) GLES20.glDrawElements(mode, count, type, b);
+        if (enable) GLES32.glDrawElements(mode, count, type, b);
         drawCalls++;
     }
 
@@ -61,7 +61,7 @@ public class GLWrapped {
     }
 
     public static void setViewport(int x1, int y1, int w, int h) {
-        GLES20.glViewport(x1, y1, w, h);
+        GLES32.glViewport(x1, y1, w, h);
         px1 = x1;
         pw = w;
         py1 = y1;
@@ -69,19 +69,19 @@ public class GLWrapped {
     }
 
     public static void setClearColor(float r, float g, float b, float a) {
-        GLES20.glClearColor(r, g, b, a);
+        GLES32.glClearColor(r, g, b, a);
     }
 
     public static void clearColorBuffer() {
-        if (enable) GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        if (enable) GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT);
     }
 
     public static void clearDepthBuffer() {
-        if (enable) GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES32.glClear(GLES32.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void clearDepthAndColorBuffer() {
-        if (enable) GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT | GLES32.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void setClearColor(Color4 c) {
@@ -94,13 +94,13 @@ public class GLWrapped {
 
     public static int getIntegerValue(int key) {
         int[] b = new int[1];
-        GLES20.glGetIntegerv(key, b, 0);
+        GLES32.glGetIntegerv(key, b, 0);
         return b[0];
     }
 
     public static void checkGlError(String op) {
         int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+        while ((error = GLES32.glGetError()) != GLES32.GL_NO_ERROR) {
             Log.e("ES20_ERROR", op + ": glError " + error);
             throw new GLException(op + ": glError " + error);
         }

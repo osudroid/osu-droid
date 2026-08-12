@@ -1,6 +1,6 @@
 package com.osudroid.mods
 
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.osudroid.mods.settings.*
 import kotlin.math.round
 
@@ -15,9 +15,6 @@ class ModFlashlight : Mod() {
 
     override val isRanked
         get() = usesDefaultSettings
-
-    override val scoreMultiplier
-        get() = if (usesDefaultSettings) 1.12f else 1f
 
     /**
      * The amount of seconds until the flashlight reaches the cursor.

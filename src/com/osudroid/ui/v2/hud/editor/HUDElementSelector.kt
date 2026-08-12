@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud.editor
 
+import android.graphics.PointF
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.container.UILinearContainer
@@ -12,7 +13,6 @@ import com.reco1l.framework.math.Vec4
 import com.osudroid.ui.v2.hud.GameplayHUD
 import com.osudroid.ui.v2.hud.HUDElements
 import com.osudroid.ui.v2.hud.IGameplayEvents
-import com.reco1l.toolkt.kotlin.fastForEach
 import org.andengine.input.touch.TouchEvent
 import com.osudroid.beatmaps.constants.HitObjectType
 import com.osudroid.beatmaps.hitobjects.HitObject
@@ -135,27 +135,35 @@ class HUDElementSelector(private val hud: GameplayHUD) : UIContainer(), IGamepla
     //region Gameplay Events
 
     override fun onNoteHit(statistics: StatisticV2) {
-        elements.fastForEach { it.onNoteHit(statistics) }
+        elements.forEach { it.onNoteHit(statistics) }
     }
 
     override fun onBreakStateChange(isBreak: Boolean) {
-        elements.fastForEach { it.onBreakStateChange(isBreak) }
+        elements.forEach { it.onBreakStateChange(isBreak) }
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
-        elements.fastForEach { it.onGameplayUpdate(gameScene, secondsElapsed) }
+        elements.forEach { it.onGameplayUpdate(gameScene, secondsElapsed) }
     }
 
     override fun onGameplayTouchDown(time: Float) {
-        elements.fastForEach { it.onGameplayTouchDown(time) }
+        elements.forEach { it.onGameplayTouchDown(time) }
     }
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {
-        elements.fastForEach { it.onHitObjectLifetimeStart(obj) }
+        elements.forEach { it.onHitObjectLifetimeStart(obj) }
     }
 
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
-        elements.fastForEach { it.onAccuracyRegister(type, accuracy) }
+        elements.forEach { it.onAccuracyRegister(type, accuracy) }
+    }
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {
+        elements.forEach { it.onAimJudgement(objectPosition, cursorPosition, objectRadius) }
+    }
+
+    override fun onSeek() {
+        elements.forEach { it.onSeek() }
     }
 
     //endregion

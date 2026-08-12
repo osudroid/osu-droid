@@ -3,12 +3,13 @@ package com.rian.andengine
 import com.reco1l.andengine.LoadState
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.UIComponent
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
 import org.andengine.engine.camera.hud.HUD as AndEngineHUD
 import org.andengine.entity.scene.Scene
+import org.andengine.engine.camera.Camera
+import org.andengine.opengl.util.GLState
 
 /**
  * An [AndEngineHUD] that provides an [IFrameBasedClock] to its [UIComponent] children.
@@ -18,6 +19,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
      * Whether [IFrameBasedClock.processFrame] should be automatically invoked on this [HUD]'s [clock] in
      * [onManagedUpdate]. This should only be set to false in scenarios where the clock is updated elsewhere.
      */
+    @get:JvmName("isProcessCustomClock")
     var processCustomClock = true
 
     private var customClock: IFrameBasedClock? = null
@@ -63,7 +65,7 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
             loadState = LoadState.NotLoaded
         }
 
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             @Suppress("UNCHECKED_CAST")
             (it as? IClockReceiver<IFrameBasedClock?>)?.updateClock(currentClock)
         }
@@ -124,6 +126,34 @@ open class HUD : AndEngineHUD(), IClockProvider<IFrameBasedClock?>, IClockReceiv
     protected open fun onUnload() {}
 
     //endregion
+
+    private var hudCamera: Camera? = null
+
+    override fun onDraw(pGL: GLState, pCamera: Camera) {
+        val mc = mCamera
+        var cam = pCamera
+
+        // HUD should not be affected by camera zoom since it is displayed across all scenes (meaning it should fill the
+        // entire screen). However, CameraScene (which is what AndEngine's HUD extends) passes the zoomed main camera
+        // to children.
+        // We need to give children an un-zoomed camera, not just due to that, but to also ensure that clipping computes
+        // correct scissor regions in this HUD's space.
+        if (mc != null) {
+            val rawWidth = mc.widthRaw
+            val rawHeight = mc.heightRaw
+            var hudCamera = hudCamera
+
+            if (hudCamera == null || hudCamera.widthRaw != rawWidth || hudCamera.heightRaw != rawHeight) {
+                hudCamera = Camera(0f, 0f, rawWidth, rawHeight)
+                this.hudCamera = hudCamera
+            }
+
+            hudCamera.setSurfaceSize(0, 0, pCamera.surfaceWidth, pCamera.surfaceHeight)
+            cam = hudCamera
+        }
+
+        super.onDraw(pGL, cam)
+    }
 
     override fun setChildScene(childScene: Scene?, modalDraw: Boolean, modalUpdate: Boolean, modalTouch: Boolean) {
         this.childScene?.onDetached()

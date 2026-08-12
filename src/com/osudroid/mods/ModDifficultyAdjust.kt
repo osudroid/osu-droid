@@ -1,16 +1,12 @@
 package com.osudroid.mods
 
-import com.reco1l.toolkt.*
+import com.reco1l.framework.math.roundBy
 import com.osudroid.GameMode
-import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.ModUtils
-import kotlin.math.exp
-import kotlin.math.pow
-import kotlin.reflect.KProperty0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -22,16 +18,15 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresOriginalBeatmap {
+) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods {
 
     /**
      * The circle size to enforce.
      */
-    var cs by NullableFloatModSetting(
+    var cs by DifficultyAdjustModSetting(
         name = "Circle size",
         key = "cs",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = null,
         minValue = 0f,
         maxValue = 15f,
         step = 0.1f,
@@ -42,11 +37,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     /**
      * The approach rate to enforce.
      */
-    var ar by NullableFloatModSetting(
+    var ar by DifficultyAdjustModSetting(
         name = "Approach rate",
         key = "ar",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = null,
         minValue = 0f,
         maxValue = 12.5f,
         step = 0.1f,
@@ -57,11 +51,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     /**
      * The overall difficulty to enforce.
      */
-    var od by NullableFloatModSetting(
+    var od by DifficultyAdjustModSetting(
         name = "Overall difficulty",
         key = "od",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = null,
         minValue = 0f,
         maxValue = 11f,
         step = 0.1f,
@@ -72,11 +65,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     /**
      * The health drain rate to enforce.
      */
-    var hp by NullableFloatModSetting(
+    var hp by DifficultyAdjustModSetting(
         name = "Health drain",
         key = "hp",
         valueFormatter = { (it ?: defaultValue)?.roundBy(1)?.toString() ?: "None" },
-        defaultValue = null,
         minValue = 0f,
         maxValue = 11f,
         step = 0.1f,
@@ -85,12 +77,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     )
 
     init {
-        // We set the default values here so that resetting the settings would reset them to null.
-        updateDefaultValue(::cs, cs)
-        updateDefaultValue(::ar, ar)
-        updateDefaultValue(::od, od)
-        updateDefaultValue(::hp, hp)
-
         this.cs = cs
         this.ar = ar
         this.od = od
@@ -107,31 +93,18 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val usesDefaultSettings
         get() = settings.all { it.value == it.initialValue }
 
-    override val scoreMultiplier: Float
-        get() {
-            // Graph: https://www.desmos.com/calculator/yrggkhrkzz
-            var multiplier = 1f
-            val cs = getModSettingDelegate<NullableFloatModSetting>(::cs)
-            val od = getModSettingDelegate<NullableFloatModSetting>(::od)
-
-            if (cs.value != null && cs.defaultValue != null) {
-                val diff = cs.value!! - cs.defaultValue!!
-
-                multiplier *=
-                    if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
-                    else 2 / (1 + exp(-0.5f * diff))
-            }
-
-            if (od.value != null && od.defaultValue != null) {
-                val diff = od.value!! - od.defaultValue!!
-
-                multiplier *=
-                    if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
-                    else 2 / (1 + exp(-0.25f * diff))
-            }
-
-            return multiplier
-        }
+    /**
+     * Sets this [ModDifficultyAdjust]'s default difficulty values. This does not change the current values of the
+     * settings, but rather the default values that are used when the settings are reset.
+     *
+     * @param difficulty The [BeatmapDifficulty] to use as the default values.
+     */
+    fun setDefaultDifficulty(difficulty: BeatmapDifficulty) {
+        getModSettingDelegate<DifficultyAdjustModSetting>(::cs).defaultValue = difficulty.gameplayCS
+        getModSettingDelegate<DifficultyAdjustModSetting>(::ar).defaultValue = difficulty.ar
+        getModSettingDelegate<DifficultyAdjustModSetting>(::od).defaultValue = difficulty.od
+        getModSettingDelegate<DifficultyAdjustModSetting>(::hp).defaultValue = difficulty.hp
+    }
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (!super.isCompatibleWith(other)) {
@@ -183,21 +156,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
                 applyOldFadeAdjustment(it, mods)
             }
         }
-    }
-
-    override fun applyFromBeatmap(beatmap: Beatmap) {
-        val difficulty = beatmap.difficulty
-
-        updateDefaultValue(::cs, difficulty.gameplayCS)
-        updateDefaultValue(::ar, difficulty.ar)
-        updateDefaultValue(::od, difficulty.od)
-        updateDefaultValue(::hp, difficulty.hp)
-    }
-
-    private fun updateDefaultValue(property: KProperty0<Float?>, value: Float?) {
-        val delegate = getModSettingDelegate<NullableFloatModSetting>(property)
-
-        delegate.defaultValue = value
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {

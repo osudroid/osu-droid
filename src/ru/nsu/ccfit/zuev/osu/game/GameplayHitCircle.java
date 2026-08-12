@@ -19,7 +19,6 @@ import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 
-import kotlin.Unit;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -117,18 +116,13 @@ public class GameplayHitCircle extends GameObject {
                 float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
                 sequence.then().fadeOut(fadeOutDuration);
             }
-
-            return Unit.INSTANCE;
         });
 
         if (!fadeOutCircle && circlePiece.isVisible()) {
             float okWindow = (float) beatmapCircle.hitWindow.getOkWindow() / 1000;
 
-            circlePiece.beginAbsoluteSequence(hitTime + okWindow, sequence -> {
-                sequence.fadeOut(mehWindow - okWindow);
-
-                return Unit.INSTANCE;
-            });
+            circlePiece.beginAbsoluteSequence(hitTime + okWindow,
+                    sequence -> sequence.fadeOut(mehWindow - okWindow));
         }
 
         if (approachCircle.isVisible()) {
@@ -142,13 +136,10 @@ public class GameplayHitCircle extends GameObject {
                 easing = Easing.None;
             }
 
-            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> {
-                sequence.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
-                        .scaleTo(scale, timePreempt, easing)
-                        .after(e -> e.setAlpha(0));
-
-                return Unit.INSTANCE;
-            });
+            approachCircle.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
+                    .fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt))
+                    .scaleTo(scale, timePreempt, easing)
+                    .after(e -> e.setAlpha(0)));
         }
 
         if (Config.isDimHitObjects() && circlePiece.isVisible()) {
@@ -156,11 +147,8 @@ public class GameplayHitCircle extends GameObject {
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);
-            circlePiece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000, sequence -> {
-                sequence.colorTo(1, 1, 1, 0.1f);
-
-                return Unit.INSTANCE;
-            });
+            circlePiece.beginAbsoluteSequence(hitTime - (float) HitWindow.MISS_WINDOW / 1000,
+                    sequence -> sequence.colorTo(1, 1, 1, 0.1f));
         }
 
         // Initialize samples
@@ -234,7 +222,7 @@ public class GameplayHitCircle extends GameObject {
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
                 // Remove circle and register hit in update thread
                 listener.onCircleHit(id, hitOffset, position, endsCombo, replayObjectData.result, comboColor);
-                if (successfulHit) {
+                if (successfulHit && !listener.isAfterSeek()) {
                     playHitSamples();
                 }
                 removeFromScene();
@@ -284,7 +272,9 @@ public class GameplayHitCircle extends GameObject {
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             startHit = true;
             successfulHit = true;
-            playHitSamples();
+            if (!listener.isAfterSeek()) {
+                playHitSamples();
+            }
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
@@ -309,6 +299,12 @@ public class GameplayHitCircle extends GameObject {
 
         circlePiece.detachSelf();
         approachCircle.detachSelf();
+
+        for (int i = hitSamples.size() - 1; i >= 0; --i) {
+            hitSamples.get(i).release();
+        }
+
+        hitSamples.clear();
 
         GameObjectPool.getInstance().putCircle(this);
     }

@@ -7,9 +7,9 @@ import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.osudroid.ui.v2.multi.*
+import com.osudroid.utils.async
 import com.reco1l.andengine.*
 import com.osudroid.utils.updateThread
-import com.reco1l.toolkt.kotlin.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +106,9 @@ object Multiplayer {
 
     @Volatile
     private var isWaitingAttemptResponse = false
+
+    @Volatile
+    private var attemptStartTimeMS = 0L
 
     private val abandonReconnectionLock = Any()
 
@@ -204,7 +207,7 @@ object Multiplayer {
         // Replace server statistics with local in Head-to-Head mode.
         if (room?.isTeamVersus == false) {
             val ownScore = GlobalManager.getInstance().gameScene.stat
-            val ownScoreIndex = list.indexOfFirst { it.playerName == OnlineManager.getInstance().username }.takeUnless { it == -1 }
+            val ownScoreIndex = list.indexOfFirst { it.uid == OnlineManager.getInstance().userId }.takeUnless { it == -1 }
 
             if (ownScore != null) {
                 if (ownScoreIndex == null) {
@@ -250,11 +253,22 @@ object Multiplayer {
      */
     private fun abandonReconnection() {
         synchronized(abandonReconnectionLock) {
-            if (!isReconnecting) return
+            if (!isReconnecting) {
+                return
+            }
+
             isReconnecting = false
 
             reconnectionJob?.cancel()
             reconnectionJob = null
+
+            // Release UI await-locks so the room scene is interactive after the error toast,
+            // even when navigation is deferred because a game session is still active.
+            roomScene?.apply {
+                isWaitingForBeatmapChange.set(false)
+                isWaitingForStatusChange.set(false)
+                isWaitingForModsChange.set(false)
+            }
 
             ToastLogger.showText(
                 "The connection to server has been lost, please check your internet connection.",
@@ -307,6 +321,7 @@ object Multiplayer {
 
         attemptCount = 0
         reconnectionStartTimeMS = System.currentTimeMillis()
+        lastAttemptResponseTimeMS = 0L
 
         reconnectionJob = scope.launch {
 
@@ -319,10 +334,16 @@ object Multiplayer {
                     return@launch
                 }
 
-                // Still waiting for the server to respond to the last attempt — poll cheaply
-                // instead of spinning at 100% CPU.
+                // Still waiting for the server to respond to the last attempt.
+                // If 8 seconds pass with no response (connect_error, disconnect, or initialConnection), treat it as a
+                // failure so the loop can retry rather than burning the entire 30s window on one unresponsive socket.
                 if (isWaitingAttemptResponse) {
-                    delay(250.milliseconds)
+                    if (currentTime - attemptStartTimeMS >= 8000) {
+                        onReconnectAttempt(false)
+                    } else {
+                        delay(250.milliseconds)
+                    }
+
                     continue
                 }
 
@@ -334,15 +355,24 @@ object Multiplayer {
                     continue
                 }
 
+                // Snapshot room once — it can be nulled on another thread by teardownSession()
+                // between the isReconnecting guard above and the connectToRoom call below.
+                val room = room ?: run {
+                    abandonReconnection()
+                    return@launch
+                }
+
                 try {
                     RoomAPI.connectToRoom(
-                        roomId = room!!.id,
+                        roomId = room.id,
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
-                        multiplayerSessionID = room!!.sessionID
+                        roomPassword = RoomAPI.lastRoomPassword,
+                        multiplayerSessionID = room.sessionID
                     )
 
                     isWaitingAttemptResponse = true
+                    attemptStartTimeMS = System.currentTimeMillis()
                 } catch (e: Exception) {
                     log(e)
 

@@ -5,7 +5,7 @@ package com.reco1l.andengine
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
-import android.opengl.GLES20
+import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.opengl.font.Font
@@ -30,7 +30,7 @@ class UIResourceManager(private val context: Context) {
 
         val engine = UIEngine.current
         val buf = IntArray(1)
-        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, buf, 0)
+        GLES32.glGetIntegerv(GLES32.GL_MAX_TEXTURE_SIZE, buf, 0)
         val maxTextureSize = buf[0].coerceAtLeast(256)
 
         Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${maxTextureSize}x${maxTextureSize}")

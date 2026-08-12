@@ -1,6 +1,6 @@
 package com.reco1l.andengine.component
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 
 /**
  * Information about how to behave with the depth buffer.
@@ -30,20 +30,20 @@ data class DepthInfo(
         val Less = DepthInfo(
             test = true,
             mask = true,
-            function = GLES20.GL_LESS,
+            function = GLES32.GL_LESS,
         )
 
         @JvmField
         val Default = DepthInfo(
             test = true,
             mask = true,
-            function = GLES20.GL_LESS
+            function = GLES32.GL_LESS
         )
 
         val None = DepthInfo(
             test = false,
             mask = false,
-            function = GLES20.GL_ALWAYS
+            function = GLES32.GL_ALWAYS
         )
 
     }

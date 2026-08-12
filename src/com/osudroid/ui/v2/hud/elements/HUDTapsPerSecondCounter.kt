@@ -1,6 +1,5 @@
 package com.osudroid.ui.v2.hud.elements
 
-import com.osudroid.utils.updateThread
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 
@@ -11,8 +10,11 @@ class HUDTapsPerSecondCounter : HUDStatisticCounter("Taps/sec") {
     private val timestamps = ArrayDeque<Float>(50)
 
     override fun onGameplayTouchDown(time: Float) {
-        // Queue to the update thread to avoid the timestamp queue potentially resizing itself in the main thread.
-        updateThread { timestamps.add(time) }
+        timestamps.add(time)
+    }
+
+    override fun onSeek() {
+        timestamps.clear()
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {

@@ -56,20 +56,14 @@ class SliderCheeseChecker(
     fun calculatePenalty(): SliderCheesePenalty {
         if (
             difficultyAttributes.difficultSliders.isEmpty() ||
-            doubleArrayOf(
-                difficultyAttributes.aimSliderFactor,
-                difficultyAttributes.flashlightSliderFactor
-            ).all { it == 1.0 }
+            difficultyAttributes.aimSliderFactor == 1.0
         ) {
             return SliderCheesePenalty()
         }
 
         val summedDifficultyRating = min(1.0, getCheesedDifficultyRatings().sum())
 
-        return SliderCheesePenalty(
-            computePenalty(difficultyAttributes.aimSliderFactor, summedDifficultyRating),
-            computePenalty(difficultyAttributes.flashlightSliderFactor, summedDifficultyRating)
-        )
+        return SliderCheesePenalty(computePenalty(difficultyAttributes.aimSliderFactor, summedDifficultyRating))
     }
 
     private fun getCheesedDifficultyRatings(): List<Double> {

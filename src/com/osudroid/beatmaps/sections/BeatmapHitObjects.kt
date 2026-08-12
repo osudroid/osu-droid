@@ -3,7 +3,6 @@ package com.osudroid.beatmaps.sections
 import com.osudroid.beatmaps.hitobjects.HitCircle
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
-import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
 
 /**
  * Contains information about hit objects of a beatmap.
@@ -68,7 +67,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
 
             is Slider -> {
                 ++sliderCount
-                sliderTickCount += obj.nestedHitObjects.count { it is SliderTick }
+                sliderTickCount += obj.tickCount
             }
 
             else -> ++spinnerCount
@@ -90,7 +89,7 @@ open class BeatmapHitObjects : Iterable<HitObject> {
 
                 is Slider -> {
                     --sliderCount
-                    sliderTickCount -= obj.nestedHitObjects.count { it is SliderTick }
+                    sliderTickCount -= obj.tickCount
                 }
 
                 else -> --spinnerCount

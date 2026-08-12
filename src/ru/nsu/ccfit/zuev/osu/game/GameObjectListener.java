@@ -49,8 +49,8 @@ public interface GameObjectListener {
     float getElapsedTime();
 
     /**
-     * Whether the game has just seeked and is in the first frame where active objects run their first update.
-     * Used to suppress hitsounds for nested slider objects that were already passed at the seek target.
+     * Whether the game has recently seeked and active objects are still in the catch-up frames.
+     * Used to suppress hitsounds for slider objects (head, ticks, repeats) that were already passed at the seek target.
      */
     boolean isAfterSeek();
 }

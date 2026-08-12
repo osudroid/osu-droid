@@ -1,6 +1,5 @@
 package com.osudroid.difficulty.calculator
 
-import com.osudroid.beatmaps.IBeatmap
 import com.osudroid.replay.SliderCheesePenalty
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
@@ -20,11 +19,19 @@ class DroidPerformanceCalculationParameters : PerformanceCalculationParameters()
     @JvmField
     var sliderCheesePenalty = SliderCheesePenalty()
 
-    override fun populate(beatmap: IBeatmap, stat: StatisticV2) {
-        super.populate(beatmap, stat)
+    /**
+     * The total score achieved.
+     */
+    @JvmField
+    var totalScore = 0L
+
+    override fun populate(stat: StatisticV2, sliderCount: Int, sliderTickCount: Int, sliderRepeatCount: Int) {
+        super.populate(stat, sliderCount, sliderTickCount, sliderRepeatCount)
+
+        totalScore = stat.totalScoreWithMultiplier
 
         comboBreakingSliderNestedMisses = if (stat.sliderHeadHits >= 0 && stat.sliderTickHits >= 0 && stat.sliderRepeatHits >= 0) {
-            beatmap.hitObjects.sliderCount + beatmap.hitObjects.sliderTickCount + beatmap.hitObjects.sliderRepeatCount -
+            sliderCount + sliderTickCount + sliderRepeatCount -
                     (stat.sliderHeadHits + stat.sliderTickHits + stat.sliderRepeatHits)
         } else null
     }

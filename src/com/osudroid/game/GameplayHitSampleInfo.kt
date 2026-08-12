@@ -60,7 +60,10 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
         this.sampleInfo = sampleInfo
 
         for (i in sampleInfo.lookupNames.indices) {
-            val soundProvider = getResources().getCustomSound(sampleInfo.lookupNames[i], false)
+            val name = sampleInfo.lookupNames[i]
+            val soundProvider =
+                if (sampleInfo.useBeatmapSample) getResources().getCustomSound(name, false)
+                else getResources().getSound(name, false)
 
             if (soundProvider != null) {
                 soundProvider.setFrequency(frequency)

@@ -122,18 +122,11 @@ public class Utils {
     }
 
     public static float direction(final float x, final float y) {
-        float len = (float) Math.sqrt(x * x + y * y);
-
-        if (len == 0) {
+        if (x == 0 && y == 0) {
             return 0;
         }
 
-        if (x > 0) {
-            len = (float) Math.asin(y / len);
-        } else {
-            len = (float) (Math.PI - Math.asin(y / len));
-        }
-        return len;
+        return (float) Math.atan2(y, x);
     }
 
     public static float direction(final PointF vector) {

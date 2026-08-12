@@ -5,7 +5,7 @@ import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -21,20 +21,23 @@ public class PositionColorShaderProgram extends ShaderProgram {
 	private static PositionColorShaderProgram INSTANCE;
 
 	public static final String VERTEXSHADER =
+			"#version 320 es\n" +
 			"uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
-			"attribute vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
-			"attribute vec4 " + ShaderProgramConstants.ATTRIBUTE_COLOR + ";\n" +
-			"varying vec4 " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
+			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
+			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_COLOR + ";\n" +
+			"out vec4 " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
 			"void main() {\n" +
 			"	gl_Position = " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + " * " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
 			"	" + ShaderProgramConstants.VARYING_COLOR + " = " + ShaderProgramConstants.ATTRIBUTE_COLOR + ";\n" +
 			"}";
 
 	public static final String FRAGMENTSHADER =
+			"#version 320 es\n" +
 			"precision lowp float;\n" +
-			"varying vec4 " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
+			"in vec4 " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
+			"out vec4 fragColor;\n" +
 			"void main() {\n" +
-			"	gl_FragColor = " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
+			"	fragColor = " + ShaderProgramConstants.VARYING_COLOR + ";\n" +
 			"}";
 
 	// ===========================================================
@@ -70,8 +73,8 @@ public class PositionColorShaderProgram extends ShaderProgram {
 
 	@Override
 	protected void link(final GLState pGLState) throws ShaderProgramLinkException {
-		GLES20.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION);
-		GLES20.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR);
+		GLES32.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION);
+		GLES32.glBindAttribLocation(this.mProgramID, ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR);
 
 		super.link(pGLState);
 
@@ -80,16 +83,16 @@ public class PositionColorShaderProgram extends ShaderProgram {
 
 	@Override
 	public void bind(final GLState pGLState, final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-		GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
+		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
-		GLES20.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
+		GLES32.glUniformMatrix4fv(mUniformMVPMatrixLocation, 1, false, pGLState.getModelViewProjectionGLMatrix(), 0);
 	}
 
 	@Override
 	public void unbind(final GLState pGLState) {
-		GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
+		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 		
 		super.unbind(pGLState);
 	}

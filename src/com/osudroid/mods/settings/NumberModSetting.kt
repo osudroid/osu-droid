@@ -164,7 +164,7 @@ open class NullableNumberModSetting<T>(
         super.copyFrom(other)
     }
 
-    final override fun load(json: JsonObject) {
+    override fun load(json: JsonObject) {
         if (key == null) {
             return
         }
@@ -189,7 +189,7 @@ open class NullableNumberModSetting<T>(
         } as? T ?: defaultValue
     }
 
-    final override fun save(builder: JsonObjectBuilder) = saveToJSON(builder)
+    override fun save(builder: JsonObjectBuilder) = saveToJSON(builder)
 }
 
 /**

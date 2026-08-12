@@ -4,7 +4,7 @@ import org.andengine.entity.particle.Particle;
 import org.andengine.entity.shape.IShape;
 import org.andengine.entity.shape.Shape;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * Sets the blend function used to draw the {@link Particle} during its lifespan. Only applicable to {@link Shape}s.

@@ -1,7 +1,7 @@
 package com.acivev.ui
 
 import android.content.Context
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.acivev.utils.DevicePerformanceUtil
 import org.andengine.engine.handler.timer.TimerHandler
 import org.andengine.entity.particle.SpriteParticleSystem
@@ -59,7 +59,7 @@ fun addSnowfall(scene: Scene, context: Context) {
 
         particleSystem.addParticleInitializer { particle ->
             particle.entity.setBlendingEnabled(true)
-            particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            particle.entity.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
         }
         particleSystem.isParticlesSpawnEnabled = true
     }
@@ -96,7 +96,7 @@ fun addFireworks(scene: Scene, context: Context) {
             addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.3f, 0.6f))
             addParticleInitializer { particle ->
                 particle.entity.setBlendingEnabled(true)
-                particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+                particle.entity.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE)
             }
             isParticlesSpawnEnabled = true
         }
@@ -134,7 +134,7 @@ fun addFireworks(scene: Scene, context: Context) {
                 addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.8f, 1.5f))
                 addParticleInitializer { particle ->
                     particle.entity.setBlendingEnabled(true)
-                    particle.entity.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+                    particle.entity.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE)
                 }
                 isParticlesSpawnEnabled = true
             }

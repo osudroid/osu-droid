@@ -11,7 +11,6 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.toolkt.kotlin.*
 import ru.nsu.ccfit.zuev.osu.*
 
 class ModMenuPresetsSection : ModMenuSection("Presets") {
@@ -98,7 +97,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                 if (isSelected) {
                     ModMenu.clear()
                 } else {
-                    ModMenu.modToggles.fastForEach { toggle ->
+                    ModMenu.modToggles.forEach { toggle ->
                         val presetMod = preset.mods[toggle.mod::class]
 
                         if (presetMod != null) {

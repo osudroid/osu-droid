@@ -8,7 +8,7 @@ import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.compressed.pvr.PVRTexture;
 import org.andengine.opengl.texture.compressed.pvr.PVRTexture.PVRTextureHeader;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -48,7 +48,7 @@ public class GreedyPVRTexturePixelBufferStrategy implements IPVRTexturePixelBuff
 		final Buffer pixelBuffer = pPVRTexturePixelBufferStrategyManager.getPixelBuffer(PVRTextureHeader.SIZE + pCurrentPixelDataOffset, pCurrentPixelDataSize);
 
 		/* Send to hardware. */
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, pLevel, pPixelFormat.getGLInternalFormat(), pWidth, pHeight, 0, pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
+		GLES32.glTexImage2D(GLES32.GL_TEXTURE_2D, pLevel, pPixelFormat.getGLInternalFormat(), pWidth, pHeight, 0, pPixelFormat.getGLFormat(), pPixelFormat.getGLType(), pixelBuffer);
 	}
 
 	// ===========================================================

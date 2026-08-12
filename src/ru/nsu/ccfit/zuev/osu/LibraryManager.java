@@ -8,7 +8,6 @@ import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapSetInfo;
 import com.osudroid.data.DatabaseManager;
-import com.reco1l.andengine.texture.VideoTexture;
 import com.osudroid.beatmaps.parser.BeatmapParser;
 import kotlin.io.FilesKt;
 import org.jetbrains.annotations.Nullable;
@@ -147,19 +146,6 @@ public class LibraryManager {
             try {
                 var data = new BeatmapParser(osuFile).parse(false);
                 var beatmapInfo = BeatmapInfo(data, directory.lastModified(), false);
-
-                if (data.getEvents().videoFilename != null && Config.isDeleteUnsupportedVideos()) {
-                    try {
-                        var videoFile = new File(beatmapInfo.getSetDirectory(), data.getEvents().videoFilename);
-
-                        if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
-                            //noinspection ResultOfMethodCallIgnored
-                            videoFile.delete();
-                        }
-                    } catch (Exception e) {
-                        Log.e("LibraryManager", "Failed to delete video file", e);
-                    }
-                }
 
                 pendingBeatmaps.add(beatmapInfo);
                 beatmapsFound++;

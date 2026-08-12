@@ -68,7 +68,10 @@ open class PerformanceCalculationParameters(
      * @param beatmap The [IBeatmap] to populate this [PerformanceCalculationParameters] with.
      * @param stat The [StatisticV2] to populate this [PerformanceCalculationParameters]
      */
-    open fun populate(beatmap: IBeatmap, stat: StatisticV2) {
+    open fun populate(beatmap: IBeatmap, stat: StatisticV2) =
+        populate(stat, beatmap.hitObjects.sliderCount, beatmap.hitObjects.sliderTickCount, beatmap.hitObjects.sliderRepeatCount)
+
+    open fun populate(stat: StatisticV2, sliderCount: Int, sliderTickCount: Int, sliderRepeatCount: Int) {
         maxCombo = stat.getScoreMaxCombo()
         countGreat = stat.hit300
         countOk = stat.hit100
@@ -76,7 +79,7 @@ open class PerformanceCalculationParameters(
         countMiss = stat.misses
 
         nonComboBreakingSliderNestedMisses =
-            if (stat.sliderEndHits >= 0) beatmap.hitObjects.sliderCount - stat.sliderEndHits else null
+            if (stat.sliderEndHits >= 0) sliderCount - stat.sliderEndHits else null
     }
 
     /**

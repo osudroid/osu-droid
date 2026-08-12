@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
+import com.rian.framework.RollingIntCounter
 import kotlin.math.roundToInt
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -16,16 +17,24 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
             }
         }
 
-    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
-        val beatmap = gameScene.playableBeatmap
+    private val counter = RollingIntCounter(0).apply { rollingDuration = 0.375f }
 
-        if (beatmap == null) {
-            return
-        }
+    init {
+        registerUpdateHandler(counter)
+    }
+
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
+        val beatmap = gameScene.playableBeatmap ?: return
 
         val timingPoint = beatmap.controlPoints.timing.controlPointAt(gameScene.elapsedTime * 1000.0)
         val bpm = timingPoint.bpm * GameHelper.getSpeedMultiplier()
 
-        value = bpm.roundToInt()
+        counter.targetValue = bpm.roundToInt()
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        value = counter.currentValue
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 }

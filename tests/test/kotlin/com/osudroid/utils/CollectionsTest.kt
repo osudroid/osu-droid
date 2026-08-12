@@ -4,10 +4,10 @@ import org.junit.Assert
 import org.junit.Test
 
 class CollectionsTest {
+    private data class TestCase(val data: Collection<Double>, val expected: Double)
+
     @Test
     fun `Test collections standard deviation`() {
-        data class TestCase(val data: Collection<Double>, val expected: Double)
-
         listOf(
             TestCase(listOf(), 0.0),
             TestCase(listOf(1.0), 0.0),
@@ -19,6 +19,24 @@ class CollectionsTest {
                 "Failed for data: $data",
                 expected,
                 data.standardDeviation(),
+                1e-2
+            )
+        }
+    }
+
+    @Test
+    fun `Test collections median`() {
+        listOf(
+            TestCase(listOf(), 0.0),
+            TestCase(listOf(1.0), 1.0),
+            TestCase(listOf(1.0, 5.0), 3.0),
+            TestCase(listOf(1.0, 5.0, 9.0), 5.0),
+            TestCase(listOf(1.0, 5.0, 9.0, 3.0, 12.0), 5.0)
+        ).forEach { (data, expected) ->
+            Assert.assertEquals(
+                "Failed for data: $data",
+                expected,
+                data.median(),
                 1e-2
             )
         }

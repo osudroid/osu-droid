@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew lint
 ```
 
-Requires **Java 17** and **Android NDK 30.0.14904198**. The project has three Gradle modules: the main app, `:AndEngine-GLES2` (modified GLES2 engine), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
+Requires **Java 17** and **Android NDK 30.0.14904198**. The project has three Gradle modules: the main app, `:AndEngine-GLES2` (modified AndEngine running on an OpenGL ES 3.2 context), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
 
 ## Architecture Overview
 
@@ -70,7 +70,7 @@ SplashScene → LoadingScreen → MainScene (menu hub) → LobbyScene
 
 ### Rendering
 
-AndEngine (GLES2) handles all rendering. The modern UI layer wraps it via `UIEngine`/`UIScene` and a custom entity hierarchy (`Entity` → `UIComponent` → `UIBufferedComponent`/`UIContainer`/etc.).
+The `:AndEngine-GLES2` module handles all rendering. At runtime it requests an **OpenGL ES 3.2** context (with automatic fallback to ES 3.0 on older devices) via a custom `EGLContextFactory` in `RenderSurfaceView`. All GL calls go through `android.opengl.GLES32`. All GLSL shaders use `#version 320 es`. The modern UI layer wraps AndEngine via `UIEngine`/`UIScene` and a custom entity hierarchy (`Entity` → `UIComponent` → `UIBufferedComponent`/`UIContainer`/etc.).
 
 ### Asset / Resource Loading
 
@@ -101,3 +101,5 @@ Socket.IO for real-time lobby/room events. REST calls use OkHttp3. Firebase Mess
 - New gameplay/beatmap/difficulty code goes in `com/osudroid/` (Kotlin).
 - UI components that extend AndEngine belong in `com/reco1l/andengine/` or `com/rian/andengine/` (Kotlin).
 - Legacy Java files in `ru/nsu/ccfit/zuev/osu/` are modified in-place; avoid moving them.
+
+@CLAUDE.local.md

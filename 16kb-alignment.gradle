@@ -1,0 +1,79 @@
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+/**
+ * Enforces 16 KB segment alignment on precompiled shared libraries (.so).
+ * This fixes compatibility with Android 15+ devices when third-party
+ * dependencies (like FFmpeg in AARs) are packaged with legacy 4 KB alignment.
+ */
+def enforce16KbElfAlignment(File libraryFile) {
+    if (!libraryFile.exists()) return
+
+    try {
+        def fileBytes = libraryFile.bytes
+        if (fileBytes.length < 64) return
+
+        // Validate ELF Magic Number (\x7F ELF)
+        if (fileBytes[0] == 0x7F && fileBytes[1] == (byte)'E' && fileBytes[2] == (byte)'L' && fileBytes[3] == (byte)'F') {
+            def byteBuffer = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN)
+            def is64Bit = fileBytes[4] == 2
+
+            long programHeaderOffset = is64Bit ? byteBuffer.getLong(32) : byteBuffer.getInt(28)
+            int programHeaderCount = is64Bit ? byteBuffer.getShort(56) : byteBuffer.getShort(44)
+            int programHeaderSize = is64Bit ? byteBuffer.getShort(54) : byteBuffer.getShort(42)
+
+            boolean isModified = false
+
+            // Iterate through ELF segments to update PT_LOAD alignment
+            for (int i = 0; i < programHeaderCount; i++) {
+                long currentEntryOffset = programHeaderOffset + (i * programHeaderSize)
+                int segmentType = byteBuffer.getInt((int) currentEntryOffset)
+
+                if (segmentType == 1) { // 1 = PT_LOAD segment
+                    int alignmentOffset = is64Bit ? 48 : 28
+                    long targetOffset = currentEntryOffset + alignmentOffset
+                    long currentAlignment = is64Bit ? byteBuffer.getLong((int) targetOffset) : byteBuffer.getInt((int) targetOffset)
+
+                    // Update to 16 KB (0x4000) if it uses legacy 4 KB alignment
+                    if (currentAlignment < 0x4000) {
+                        if (is64Bit) {
+                            byteBuffer.putLong((int) targetOffset, 0x4000L)
+                        } else {
+                            byteBuffer.putInt((int) targetOffset, 0x4000)
+                        }
+                        isModified = true
+                    }
+                }
+            }
+
+            if (isModified) {
+                libraryFile.bytes = byteBuffer.array()
+                logger.info("Successfully aligned to 16 KB: ${libraryFile.parentFile.name}/${libraryFile.name}")
+            }
+        }
+    } catch (Exception e) {
+        logger.error("Failed to apply 16 KB alignment patch to ${libraryFile.name}: ${e.message}")
+    }
+}
+
+// Hook into AGP artifact transformation tasks to patch extracted .aar libraries
+android.applicationVariants.configureEach { variant ->
+    def nativePackagingTasks = [
+            "merge${variant.name.capitalize()}JniLibFolders",
+            "merge${variant.name.capitalize()}NativeLibs",
+            "package${variant.name.capitalize()}NativeLibs"
+    ]
+
+    nativePackagingTasks.each { taskName ->
+        def targetTask = tasks.findByName(taskName)
+        if (targetTask != null) {
+            targetTask.doLast {
+                targetTask.getOutputs().getFiles().each { outputFiles ->
+                    fileTree(outputFiles).include("**/*.so").each { File nativeLib ->
+                        enforce16KbElfAlignment(nativeLib)
+                    }
+                }
+            }
+        }
+    }
+}

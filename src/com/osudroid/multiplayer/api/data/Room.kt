@@ -137,7 +137,7 @@ data class Room(
      * Whether this [Room] is in Team VS mode.
      */
     val isTeamVersus
-        get() = teamMode == TeamMode.TeamVersus
+        get() = teamMode == TeamMode.TeamVS
 
     /**
      * Special handling to add a player to this [Room].

@@ -9,7 +9,7 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.util.adt.DataConstants;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * TODO Extract a common base class from {@link VertexBufferObject} and {@link ZeroMemoryVertexBufferObject} (due to significant code duplication).
@@ -179,12 +179,12 @@ public abstract class VertexBufferObject implements IVertexBufferObject {
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pCount) {
-		GLES20.glDrawArrays(pPrimitiveType, 0, pCount);
+		GLES32.glDrawArrays(pPrimitiveType, 0, pCount);
 	}
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pOffset, final int pCount) {
-		GLES20.glDrawArrays(pPrimitiveType, pOffset, pCount);
+		GLES32.glDrawArrays(pPrimitiveType, pOffset, pCount);
 	}
 
 	@Override

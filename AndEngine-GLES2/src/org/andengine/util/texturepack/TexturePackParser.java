@@ -3,7 +3,7 @@ package org.andengine.util.texturepack;
 import java.io.IOException;
 import java.io.InputStream;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
@@ -236,17 +236,17 @@ public class TexturePackParser extends DefaultHandler {
 	private static int parseMinFilter(final Attributes pAttributes) {
 		final String minFilter = SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER);
 		if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_NEAREST)) {
-			return GLES20.GL_NEAREST;
+			return GLES32.GL_NEAREST;
 		} else if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_LINEAR)) {
-			return GLES20.GL_LINEAR;
+			return GLES32.GL_LINEAR;
 		} else if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_LINEAR_MIPMAP_LINEAR)) {
-			return GLES20.GL_LINEAR_MIPMAP_LINEAR;
+			return GLES32.GL_LINEAR_MIPMAP_LINEAR;
 		} else if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_LINEAR_MIPMAP_NEAREST)) {
-			return GLES20.GL_LINEAR_MIPMAP_NEAREST;
+			return GLES32.GL_LINEAR_MIPMAP_NEAREST;
 		} else if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_NEAREST_MIPMAP_LINEAR)) {
-			return GLES20.GL_NEAREST_MIPMAP_LINEAR;
+			return GLES32.GL_NEAREST_MIPMAP_LINEAR;
 		} else if(minFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_NEAREST_MIPMAP_NEAREST)) {
-			return GLES20.GL_NEAREST_MIPMAP_NEAREST;
+			return GLES32.GL_NEAREST_MIPMAP_NEAREST;
 		} else {
 			throw new IllegalArgumentException("Unexpected " + TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MINFILTER + " attribute: '" + minFilter + "'.");
 		}
@@ -255,9 +255,9 @@ public class TexturePackParser extends DefaultHandler {
 	private static int parseMagFilter(final Attributes pAttributes) {
 		final String magFilter = SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MAGFILTER);
 		if(magFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MAGFILTER_VALUE_NEAREST)) {
-			return GLES20.GL_NEAREST;
+			return GLES32.GL_NEAREST;
 		} else if(magFilter.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MAGFILTER_VALUE_LINEAR)) {
-			return GLES20.GL_LINEAR;
+			return GLES32.GL_LINEAR;
 		} else {
 			throw new IllegalArgumentException("Unexpected " + TexturePackParser.TAG_TEXTURE_ATTRIBUTE_MAGFILTER + " attribute: '" + magFilter + "'.");
 		}
@@ -274,11 +274,11 @@ public class TexturePackParser extends DefaultHandler {
 	private int parseWrap(final Attributes pAttributes, final String pWrapAttributeName) {
 		final String wrapAttribute = SAXUtils.getAttributeOrThrow(pAttributes, pWrapAttributeName);
 		if(this.mVersion == 1 && wrapAttribute.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_WRAP_VALUE_CLAMP)) {
-			return GLES20.GL_CLAMP_TO_EDGE;
+			return GLES32.GL_CLAMP_TO_EDGE;
 		} else if(wrapAttribute.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_WRAP_VALUE_CLAMP_TO_EDGE)) {
-			return GLES20.GL_CLAMP_TO_EDGE;
+			return GLES32.GL_CLAMP_TO_EDGE;
 		} else if(wrapAttribute.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_WRAP_VALUE_REPEAT)) {
-			return GLES20.GL_REPEAT;
+			return GLES32.GL_REPEAT;
 		} else {
 			throw new IllegalArgumentException("Unexpected " + pWrapAttributeName + " attribute: '" + wrapAttribute + "'.");
 		}

@@ -12,8 +12,8 @@ fun parsePlayer(o: JSONObject) = RoomPlayer(
     id = o.getString("id").toLong(),
     name = o.getString("username"),
     rank = o.getInt("rank"),
-    status = PlayerStatus[o.getInt("status")] ?: PlayerStatus.NotReady,
-    team = if (o.isNull("team")) null else RoomTeam[o.getInt("team")],
+    status = PlayerStatus.fromWire(o.getString("status")) ?: PlayerStatus.NotReady,
+    team = if (o.isNull("team")) null else RoomTeam.fromWire(o.getString("team")),
     mods = RoomMods(o.getJSONArray("mods"))
 )
 

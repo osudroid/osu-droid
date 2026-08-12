@@ -36,6 +36,10 @@ public class BeatmapSkinManager {
     }
 
     public void loadBeatmapSkin(final String beatmapFolder) {
+        if (!Config.isUseCustomSkins() && !Config.isUseCustomSounds()) {
+            clearSkin();
+            return;
+        }
         skinEnabled = true;
         if (skinname.equals(beatmapFolder)) {
             return;

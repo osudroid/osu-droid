@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud
 
+import android.graphics.PointF
 import com.osudroid.resources.R.string
 import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
 import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
@@ -10,7 +11,6 @@ import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import org.andengine.entity.IEntity
 import org.andengine.input.touch.TouchEvent
 import com.osudroid.beatmaps.constants.HitObjectType
@@ -247,7 +247,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
         // Cannot use forEachElement {} because we're modifying the list.
-        mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
+        mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
     }
 
     override fun onAttached() {
@@ -268,7 +268,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
      * using another method such as `filterIsInstance<HUDElement>()`.
      */
     fun forEachElement(action: (HUDElement) -> Unit) {
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             (it as? HUDElement)?.let(action)
         }
     }
@@ -301,6 +301,16 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
         forEachElement { it.onAccuracyRegister(type, accuracy) }
         elementSelector?.onAccuracyRegister(type, accuracy)
+    }
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {
+        forEachElement { it.onAimJudgement(objectPosition, cursorPosition, objectRadius) }
+        elementSelector?.onAimJudgement(objectPosition, cursorPosition, objectRadius)
+    }
+
+    override fun onSeek() {
+        forEachElement { it.onSeek() }
+        elementSelector?.onSeek()
     }
 
     //endregion

@@ -24,7 +24,9 @@ import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.async
 import com.osudroid.utils.mainThread
+import com.osudroid.utils.runSafe
 import com.osudroid.utils.updateThread
+import com.osudroid.resources.R
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.UIEngine
@@ -56,16 +58,15 @@ import com.reco1l.andengine.ui.UITextButton
 import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.toolkt.kotlin.runSafe
 import com.osudroid.mods.ModScoreV2
 import org.json.JSONArray
+import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 
 class RoomScene(
     /**
@@ -137,6 +138,7 @@ class RoomScene(
 
 
     private var currentPlayers = LongArray(0)
+    private var allowAutomaticPlaybackRestart = true
 
 
     init {
@@ -402,7 +404,7 @@ class RoomScene(
                         }
 
                         if (!BuildSettings.MOCK_MULTIPLAYER) {
-                            if (room.teamMode == TeamMode.TeamVersus) {
+                            if (room.teamMode == TeamMode.TeamVS) {
                                 val teams = room.teamMap
 
                                 if (teams.values.any { it.isEmpty() }) {
@@ -454,7 +456,7 @@ class RoomScene(
                                     return@callback
                                 }
 
-                                if (room.teamMode == TeamMode.TeamVersus && player.team == null) {
+                                if (room.teamMode == TeamMode.TeamVS && player.team == null) {
                                     ToastLogger.showText(R.string.multiplayer_room_cannot_ready_no_team, true)
                                     isWaitingForStatusChange.set(false)
                                     return@callback
@@ -502,15 +504,15 @@ class RoomScene(
             when (room.winCondition) {
                 WinCondition.ScoreV1 -> R.string.multiplayer_room_score_v1
                 WinCondition.ScoreV2 -> R.string.multiplayer_room_score_v2
-                WinCondition.HighestAccuracy -> R.string.multiplayer_room_highest_accuracy
-                WinCondition.MaximumCombo -> R.string.multiplayer_room_maximum_combo
+                WinCondition.Accuracy -> R.string.multiplayer_room_highest_accuracy
+                WinCondition.MaxCombo -> R.string.multiplayer_room_maximum_combo
             }
         )
 
         teamModeBadge.setText(
             when (room.teamMode) {
                 TeamMode.HeadToHead -> R.string.multiplayer_room_head_to_head
-                TeamMode.TeamVersus -> R.string.multiplayer_room_team_versus
+                TeamMode.TeamVS -> R.string.multiplayer_room_team_versus
             }
         )
 
@@ -748,13 +750,31 @@ class RoomScene(
         // will call invalidateStatus() with the correct beatmap context.
 
         chat.show()
+        allowAutomaticPlaybackRestart = true
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (Config.isPlayMusicPreview() && allowAutomaticPlaybackRestart) {
+            val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+
+            if (selectedBeatmap != null) {
+                val songService = GlobalManager.getInstance().songService
+
+                if (songService.status == Status.STOPPED) {
+                    songService.preLoad(selectedBeatmap.audioPath)
+                    songService.play()
+                }
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
     // Communication
 
     override fun onServerError(error: String) {
-        mainThread { ToastLogger.showText(error, true) }
+        ToastLogger.showText(error, true)
     }
 
     override fun onRoomChatMessage(uid: Long?, message: String) {
@@ -804,18 +824,17 @@ class RoomScene(
 
             Multiplayer.onReconnectAttempt(true)
 
-            // If the status returned by server is PLAYING then it means the match was forced to start while the player
-            // was disconnected.
             val player = Multiplayer.player ?: return
-            if (player.status == PlayerStatus.Playing) {
-                // Handling special case when the beatmap could have been changed and match was started while player was
-                // disconnected.
-                if (GlobalManager.getInstance().selectedBeatmap != null) {
-                    onRoomMatchPlay()
-                } else {
-                    invalidateStatus()
-                }
+
+            // If the server reports Playing, the match started while the player was disconnected.
+            if (player.status == PlayerStatus.Playing && GlobalManager.getInstance().selectedBeatmap != null) {
+                onRoomMatchPlay()
+            } else {
+                // Always re-sync status after reconnection so that the isWaitingForStatusChange lock
+                // (set in onRoomDisconnect) is cleared and the player can toggle ready again.
+                invalidateStatus()
             }
+
             return
         }
 
@@ -836,8 +855,16 @@ class RoomScene(
             isWaitingForStatusChange.set(true)
             isWaitingForModsChange.set(true)
 
-            chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
-            Multiplayer.onReconnect()
+            if (Multiplayer.isReconnecting) {
+                // A reconnection-attempt socket dropped before receiving initialConnection.
+                // Fail the current attempt so the loop retries immediately rather than staying
+                // stuck in the isWaitingAttemptResponse polling branch until the 30s timeout.
+                Multiplayer.onReconnectAttempt(false)
+            } else {
+                chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_reconnecting), "#FFBFBF")
+                Multiplayer.onReconnect()
+            }
+
             return
         }
 
@@ -1048,6 +1075,7 @@ class RoomScene(
 
         updateThread {
             val global = GlobalManager.getInstance()
+
             if (player.status != PlayerStatus.MissingBeatmap && global.engine.scene != global.gameScene.scene) {
 
                 if (global.selectedBeatmap == null) {
@@ -1055,6 +1083,7 @@ class RoomScene(
                     return@updateThread
                 }
 
+                allowAutomaticPlaybackRestart = false
                 global.songMenu.stopMusic()
                 global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
 

@@ -1,6 +1,6 @@
 package com.edlplan.framework.support.batch.object;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.Matrix;
 
 import com.edlplan.framework.support.batch.AbstractBatch;
@@ -141,31 +141,31 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
         if (glState != null) {
             glState.useProgram(shader.getProgramID());
         } else {
-            GLES20.glUseProgram(shader.getProgramID());
+            GLES32.glUseProgram(shader.getProgramID());
         }
 
         // --- Upload MVP uniform -------------------------------------------------
         if (shader.getUMVPLoc() >= 0) {
-            GLES20.glUniformMatrix4fv(shader.getUMVPLoc(), 1, false, mvp, 0);
+            GLES32.glUniformMatrix4fv(shader.getUMVPLoc(), 1, false, mvp, 0);
         }
 
         // --- Bind texture -------------------------------------------------------
         // osu!droid fix (Issue 28): route activeTexture + bindTexture through GLState
         // so its per-unit texture cache stays authoritative. The old code called
-        // GLES20.glActiveTexture / glBindTexture directly, leaving GLState's
+        // GLES32.glActiveTexture / glBindTexture directly, leaving GLState's
         // mCurrentBoundTextureIDs[0] stale. The next sprite that happened to carry
         // the same cached texture ID as was bound *before* the storyboard batch
         // would skip its glBindTexture call and render with the storyboard texture.
         GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
         if (glState != null) {
-            glState.activeTexture(GLES20.GL_TEXTURE0);
+            glState.activeTexture(GLES32.GL_TEXTURE0);
             glState.bindTexture(bindTexture.getHardwareTextureID());
         } else {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
+            GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
+            GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, bindTexture.getHardwareTextureID());
         }
         if (shader.getUTextureLoc() >= 0) {
-            GLES20.glUniform1i(shader.getUTextureLoc(), 0);
+            GLES32.glUniform1i(shader.getUTextureLoc(), 0);
         }
 
         // --- Upload vertex data (client-side array, no VBO) ---------------------
@@ -174,52 +174,52 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
         if (glState != null) {
             glState.bindArrayBuffer(0);
         } else {
-            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+            GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0);
         }
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         buffer.position(0);
         buffer.put(ary, 0, offset);
 
         // a_position  (2 floats at stride STEP, byte offset 0)
         buffer.position(0);
-        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_POSITION);
-        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_POSITION, 2,
-                GLES20.GL_FLOAT, false, STEP, buffer);
+        GLES32.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_POSITION);
+        GLES32.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_POSITION, 2,
+                GLES32.GL_FLOAT, false, STEP, buffer);
 
         // a_texCoord  (2 floats at stride STEP, byte offset 2*4 = 8)
         buffer.position(OFFSET_COORD);
-        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
-        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_TEXCOORD, 2,
-                GLES20.GL_FLOAT, false, STEP, buffer);
+        GLES32.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
+        GLES32.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_TEXCOORD, 2,
+                GLES32.GL_FLOAT, false, STEP, buffer);
 
         // a_color     (4 floats at stride STEP, byte offset 4*4 = 16)
         buffer.position(OFFSET_COLOR);
-        GLES20.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
-        GLES20.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_COLOR, 4,
-                GLES20.GL_FLOAT, false, STEP, buffer);
+        GLES32.glEnableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
+        GLES32.glVertexAttribPointer(StoryboardBatchShader.ATTRIB_COLOR, 4,
+                GLES32.GL_FLOAT, false, STEP, buffer);
 
         // --- Draw ---------------------------------------------------------------
         indicesBuffer.position(0);
-        GLWrapped.drawElements(GLES20.GL_TRIANGLES,
+        GLWrapped.drawElements(GLES32.GL_TRIANGLES,
                 offset / SIZE_PER_QUAD * 6,
-                GLES20.GL_UNSIGNED_SHORT,
+                GLES32.GL_UNSIGNED_SHORT,
                 indicesBuffer);
 
         // --- Restore GL state so AndEngine's GLState cache remains authoritative -
         // Disable the storyboard-specific attrib array (texCoord slot = 1, color slot = 2)
         // and re-enable the two that AndEngine always expects to be active:
         //   slot 0 = ATTRIBUTE_POSITION, slot 1 = ATTRIBUTE_COLOR
-        GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
-        GLES20.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+        GLES32.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_TEXCOORD);
+        GLES32.glDisableVertexAttribArray(StoryboardBatchShader.ATTRIB_COLOR);
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
 
         // Release the shader binding through GLState so the cache reflects program = 0.
         if (glState != null) {
             glState.useProgram(0);
         } else {
-            GLES20.glUseProgram(0);
+            GLES32.glUseProgram(0);
         }
 
         return true;

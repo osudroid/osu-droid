@@ -1,6 +1,6 @@
 package org.andengine.opengl;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 /**
  * (c) Zynga 2011
@@ -19,10 +19,10 @@ public class GLES20Fix {
 	private GLES20Fix() {}
 
 	public static void glVertexAttribPointerFix(final int pIndex, final int pSize, final int pType, final boolean pNormalized, final int pStride, final int pOffset) {
-		GLES20.glVertexAttribPointer(pIndex, pSize, pType, pNormalized, pStride, pOffset);
+		GLES32.glVertexAttribPointer(pIndex, pSize, pType, pNormalized, pStride, pOffset);
 	}
 
 	public static void glDrawElementsFix(final int pMode, final int pCount, final int pType, final int pOffset) {
-		GLES20.glDrawElements(pMode, pCount, pType, pOffset);
+		GLES32.glDrawElements(pMode, pCount, pType, pOffset);
 	}
 }

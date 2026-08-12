@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.hud.HUDElement
 import org.andengine.entity.sprite.Sprite
@@ -278,7 +278,7 @@ class HUDLeaderboard : HUDElement() {
             width = SPRITE_WIDTH
 
             info = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
-            info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            info.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
 
@@ -290,7 +290,7 @@ class HUDLeaderboard : HUDElement() {
                 5,
                 GlobalManager.getInstance().engine.vertexBufferObjectManager
             )
-            rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            rank.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)
             rank.setScaleCenter(0f, 0f)
             rank.setScale(1.7f)

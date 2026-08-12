@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui.entity
 
-import android.opengl.GLES20
-import com.osudroid.multiplayer.api.data.WinCondition.HighestAccuracy
+import android.opengl.GLES32
+import com.osudroid.multiplayer.api.data.WinCondition.Accuracy
 import com.osudroid.multiplayer.Multiplayer
 import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
@@ -86,7 +86,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
 
         init {
-            setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             width = 140f
             height = 100f
 
@@ -95,7 +95,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
                 ${getNumberInstance(US).format(stats.totalScoreWithMultiplier)}
                 ${
                 when (Multiplayer.room!!.winCondition) {
-                    HighestAccuracy -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
+                    Accuracy -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
                     else -> "${getNumberInstance(US).format(stats.scoreMaxCombo)}x"
                 }
             }
@@ -103,7 +103,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             text.setScaleCenter(0f, 0f)
             text.setScale(0.65f)
 
-            rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            rank.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             rank.text = "#${index + 1}"
             rank.setScaleCenter(0f, 0f)
             rank.setScale(1.7f)

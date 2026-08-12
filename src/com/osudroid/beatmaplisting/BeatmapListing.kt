@@ -42,9 +42,9 @@ import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
 import com.reco1l.osu.ui.SelectDropdown
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.drawableLeft
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
+import com.reco1l.framework.android.drawableLeft
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -162,7 +162,6 @@ class BeatmapListing : BaseFragment(),
                 .setOnSelectListener { value ->
                     value as Int
                     if (value != mirror.ordinal) {
-                        Config.setInt("beatmapMirror", value)
                         mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
 
                         logoView.text = mirror.description
@@ -338,7 +337,11 @@ class BeatmapListing : BaseFragment(),
         /**
          * The current selected beatmap mirror.
          */
-        var mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+        var mirror
+            get() = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+            set(value) {
+                Config.setInt("beatmapMirror", value.ordinal)
+            }
 
         /**
          * Whether is a beatmap preview music playing or not.

@@ -28,8 +28,8 @@ enum class PlayerStatus {
 
     companion object {
         /**
-         * Returns the [PlayerStatus] for [ordinal], or `null` if the ordinal is not recognized.
+         * Returns the [PlayerStatus] for the given wire string, or `null` if not recognized.
          */
-        operator fun get(ordinal: Int): PlayerStatus? = entries.getOrNull(ordinal)
+        fun fromWire(value: String): PlayerStatus? = runCatching { enumValueOf<PlayerStatus>(value) }.getOrNull()
     }
 }

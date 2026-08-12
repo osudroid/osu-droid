@@ -45,6 +45,20 @@ class SynchronizedPoolTest {
         // Pool is full, should return false
         Assert.assertFalse(pool.release(obj3))
     }
+
+    @Test
+    fun `Test pool clear`() {
+        val pool = SynchronizedPool<TestPoolable>(2)
+        val obj = TestPoolable()
+
+        pool.release(obj)
+        Assert.assertNotNull(pool.acquire()) // Should acquire the object
+
+        pool.release(obj)
+        pool.clear()
+
+        Assert.assertNull(pool.acquire())
+    }
 }
 
 private class TestPoolable : IPoolable {
