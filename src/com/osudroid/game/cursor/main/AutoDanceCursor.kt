@@ -1,8 +1,9 @@
-package ru.nsu.ccfit.zuev.osu.game.cursor.main
+package com.osudroid.game.cursor.main
 
 import ru.nsu.ccfit.zuev.osu.game.GameObject
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener
 import ru.nsu.ccfit.zuev.osu.game.GameplaySpinner
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor
 import kotlin.math.*
 
 /**

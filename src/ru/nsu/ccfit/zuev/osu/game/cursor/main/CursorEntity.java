@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
+import com.osudroid.game.cursor.trail.FancyCursorTrail;
 import com.reco1l.andengine.component.UIComponent;
 
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
@@ -10,7 +11,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
-import ru.nsu.ccfit.zuev.osu.game.cursor.trail.FancyCursorTrail;
 
 public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;

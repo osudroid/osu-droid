@@ -1,4 +1,4 @@
-package ru.nsu.ccfit.zuev.osu.game.cursor.trail
+package com.osudroid.game.cursor.trail
 
 import android.opengl.GLES20
 import org.andengine.engine.camera.Camera
