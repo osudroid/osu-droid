@@ -1,4 +1,4 @@
-package com.acivev.ui.menu.main
+package com.osudroid.ui.v2.menu.main
 
 import com.reco1l.andengine.UIScene
 import org.andengine.entity.particle.ParticleSystem

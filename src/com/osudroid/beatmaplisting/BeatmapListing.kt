@@ -29,7 +29,7 @@ import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
-import com.acivev.ui.menu.main.MusicOption
+import com.osudroid.ui.v2.menu.main.MusicOption
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.osudroid.BuildSettings

@@ -1,4 +1,4 @@
-package com.acivev.andengine.opengl
+package com.osudroid.ui.v2.menu.main.shader
 
 import android.opengl.GLES32
 import org.andengine.opengl.shader.ShaderProgram
@@ -6,7 +6,7 @@ import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
 
 /**
- * Single-texture GLSL shader for [com.acivev.ui.menu.main.KiaiCatJamSprite].
+ * Single-texture GLSL shader for [com.osudroid.ui.v2.menu.main.KiaiCatJamSprite].
  *
  * The vertex shader passes two sets of UVs:
  * - `a_textureCoordinates` → atlas sub-region UVs for sampling the catjam frame

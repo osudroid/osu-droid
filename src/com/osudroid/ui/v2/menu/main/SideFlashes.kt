@@ -1,4 +1,4 @@
-package com.acivev.ui.menu.main
+package com.osudroid.ui.v2.menu.main
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.component.BlendInfo

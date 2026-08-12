@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import com.acivev.ui.menu.main.MainMenuV2;
+import com.osudroid.ui.v2.menu.main.MainMenuV2;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.UIEngine;

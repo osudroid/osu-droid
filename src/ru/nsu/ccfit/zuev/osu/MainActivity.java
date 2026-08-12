@@ -801,7 +801,7 @@ public class MainActivity extends BaseGameActivity implements
         final String lower = new File(path).getName().toLowerCase();
 
         if (lower.endsWith(".odr")) {
-            final com.acivev.ui.menu.main.MainMenuV2 menu =
+            final com.osudroid.ui.v2.menu.main.MainMenuV2 menu =
                     GlobalManager.getInstance().getMainMenuV2();
             if (menu != null) {
                 Execution.updateThread(() -> menu.watchReplay(path));

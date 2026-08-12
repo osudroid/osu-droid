@@ -1,7 +1,7 @@
-package com.acivev.ui.menu.main
+package com.osudroid.ui.v2.menu.main
 
 import android.opengl.GLES32
-import com.acivev.andengine.opengl.CatJamCircleShader
+import com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.sprite.ScaleType
@@ -13,7 +13,7 @@ import org.andengine.opengl.util.GLState
 /**
  * A sprite that renders a catjam animation frame clipped to a circle.
  *
- * Uses [com.acivev.andengine.opengl.CatJamCircleShader] which discards fragments outside a circular radius in
+ * Uses [com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader] which discards fragments outside a circular radius in
  * normalized quad-UV space (0→1). No mask texture is needed — the circle is computed
  * mathematically in the fragment shader.
  *
@@ -29,7 +29,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
      */
     var clipRadius: Float = 0.5f
 
-    /** Static full-quad position buffer bound at [com.acivev.andengine.opengl.CatJamCircleShader.QUAD_POS_LOCATION]. */
+    /** Static full-quad position buffer bound at [com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader.QUAD_POS_LOCATION]. */
     private val quadPosBuffer = QuadPosBuffer()
 
     init {

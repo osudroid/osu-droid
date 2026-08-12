@@ -1,4 +1,4 @@
-package com.acivev.ui.menu.main
+package com.osudroid.ui.v2.menu.main
 
 import com.osudroid.utils.updateThread
 import com.rian.andengine.modifier.ModifierType
