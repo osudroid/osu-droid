@@ -323,6 +323,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset("star2", "gfx/star2.png");
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
         ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
         ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
