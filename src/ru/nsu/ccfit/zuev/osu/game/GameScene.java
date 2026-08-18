@@ -3355,6 +3355,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return playableBeatmap;
     }
 
+    public @Nullable ReplaySettingsPanel getReplaySettingsPanel() {
+        return replaySettingsPanel;
+    }
+
     /**
      * The time that gameplay started relative to the start of the {@link Beatmap}, in seconds.
      */
