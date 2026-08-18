@@ -72,7 +72,8 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         if (UIEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
-            detachSelf()
+            // Detach on the next tick to ensure that parent's entity list stays stable throughout this tick.
+            updateThread { detachSelf() }
             return
         }
 

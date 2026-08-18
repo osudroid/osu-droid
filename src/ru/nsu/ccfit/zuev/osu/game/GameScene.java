@@ -2181,36 +2181,33 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void onExit() {
-
-        Execution.updateThread(() -> {
-            BeatmapSkinManager.setSkinEnabled(false);
-            GameObjectPool.getInstance().purge();
-            stopLoopingSamples();
-            if (activeObjects != null) {
-                activeObjects.clear();
-            }
-            if (expiredObjects != null) {
-                expiredObjects.clear();
-            }
-            if (hud != null) {
-                hud.detachSelf();
-            }
-            breakPeriods = null;
-            replaySettingsPanel = null;
-            objects = null;
-            timingControlPoints = null;
-            effectControlPoints = null;
-            parsedBeatmap = null;
-            playableBeatmap = null;
-            cursorSprites = null;
-            lastMods = null;
-            performanceAttributes = null;
-            performanceCalculationParameters = null;
-            droidTimedDifficultyAttributes = null;
-            standardTimedDifficultyAttributes = null;
-            sliderPaths = null;
-            sliderRenderPaths = null;
-        });
+        BeatmapSkinManager.setSkinEnabled(false);
+        GameObjectPool.getInstance().purge();
+        stopLoopingSamples();
+        if (activeObjects != null) {
+            activeObjects.clear();
+        }
+        if (expiredObjects != null) {
+            expiredObjects.clear();
+        }
+        if (hud != null) {
+            hud.detachSelf();
+        }
+        breakPeriods = null;
+        replaySettingsPanel = null;
+        objects = null;
+        timingControlPoints = null;
+        effectControlPoints = null;
+        parsedBeatmap = null;
+        playableBeatmap = null;
+        cursorSprites = null;
+        lastMods = null;
+        performanceAttributes = null;
+        performanceCalculationParameters = null;
+        droidTimedDifficultyAttributes = null;
+        standardTimedDifficultyAttributes = null;
+        sliderPaths = null;
+        sliderRenderPaths = null;
 
         BeatmapSkinManager.getInstance().clearSkin();
 
@@ -3011,7 +3008,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
-        if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {
+        if (isGameOver) {
             quit();
             return;
         }
@@ -3358,6 +3355,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public @Nullable DroidPlayableBeatmap getPlayableBeatmap() {
         return playableBeatmap;
+    }
+
+    public @Nullable ReplaySettingsPanel getReplaySettingsPanel() {
+        return replaySettingsPanel;
     }
 
     /**
