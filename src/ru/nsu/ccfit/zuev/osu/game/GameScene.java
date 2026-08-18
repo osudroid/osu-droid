@@ -3009,7 +3009,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
-        if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {
+        if (isGameOver) {
             quit();
             return;
         }
