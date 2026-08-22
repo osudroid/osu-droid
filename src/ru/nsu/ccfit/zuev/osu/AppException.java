@@ -9,18 +9,17 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.TypefaceSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -321,26 +320,44 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             public void run() {
                 Looper.prepare();
 
-                SpannableStringBuilder message = new SpannableStringBuilder();
-                message.append("osu!droid requires OpenGL ES 3.0 or higher, which your device does not support. " +
-                        "The game cannot start on this device.");
-                message.append("\n\n");
+                int pad16 = dp(context, 16);
+                int pad20 = dp(context, 20);
 
-                int diagStart = message.length();
-                message.append(diagnostics);
-                message.setSpan(new TypefaceSpan("monospace"), diagStart, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                message.setSpan(new RelativeSizeSpan(0.85f), diagStart, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                LinearLayout root = new LinearLayout(context);
+                root.setOrientation(LinearLayout.VERTICAL);
+                root.setPadding(pad20, dp(context, 4), pad20, dp(context, 4));
+
+                TextView explanationView = new TextView(context);
+                explanationView.setText("osu!droid requires OpenGL ES 3.0 or higher, which your device does not " +
+                        "support. The game cannot start on this device.");
+                explanationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                root.addView(explanationView);
+
+                TextView diagnosticsView = new TextView(context);
+                diagnosticsView.setText(diagnostics);
+                diagnosticsView.setTypeface(Typeface.MONOSPACE);
+                diagnosticsView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                diagnosticsView.setTextIsSelectable(true);
+                diagnosticsView.setPadding(pad16, pad16, pad16, pad16);
+
+                GradientDrawable diagnosticsBackground = new GradientDrawable();
+                diagnosticsBackground.setColor(Color.argb(30, 128, 128, 128));
+                diagnosticsBackground.setStroke(dp(context, 1), Color.argb(60, 128, 128, 128));
+                diagnosticsBackground.setCornerRadius(dp(context, 8));
+                diagnosticsView.setBackground(diagnosticsBackground);
+
+                LinearLayout.LayoutParams diagnosticsLayoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                diagnosticsLayoutParams.topMargin = pad16;
+                root.addView(diagnosticsView, diagnosticsLayoutParams);
 
                 final AlertDialog alert = new AlertDialog.Builder(context)
                         .setTitle("Unsupported Device")
-                        .setMessage(message)
+                        .setView(root)
                         .setNegativeButton("Copy Info", null)
                         .setPositiveButton("Exit", (dialog, which) -> Runtime.getRuntime().exit(0))
                         .setCancelable(false)
                         .show();
-
-                TextView textView = alert.findViewById(android.R.id.message);
-                textView.setTextIsSelectable(true);
 
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
                     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -351,6 +368,10 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 Looper.loop();
             }
         }.start();
+    }
+
+    private static int dp(Context context, int value) {
+        return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
 
     /**
