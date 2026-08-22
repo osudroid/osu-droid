@@ -5,12 +5,15 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.RenderOptions;
+import org.andengine.opengl.exception.GLESVersionUnsupportedException;
 import org.andengine.opengl.shader.ShaderProgram;
+import org.andengine.opengl.shader.exception.ShaderProgramCompileException;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.debug.Debug;
 
 import android.opengl.GLES32;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -122,6 +125,9 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 				this.mEngine.onDrawFrame(this.mGLState);
 			} catch (final InterruptedException e) {
 				Debug.e("GLThread interrupted!", e);
+			} catch (final ShaderProgramCompileException e) {
+				// The EGL context reports a higher ES version than its GLSL compiler actually accepts
+				throw this.wrapShaderCompileException(e);
 			}
 		}
 	}
@@ -129,6 +135,21 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 	// ===========================================================
 	// Methods
 	// ===========================================================
+
+	private GLESVersionUnsupportedException wrapShaderCompileException(final ShaderProgramCompileException pException) {
+		final String glVersion = GLES32.glGetString(GLES32.GL_VERSION);
+		final String glslVersion = GLES32.glGetString(GLES32.GL_SHADING_LANGUAGE_VERSION);
+		final String detected = (glslVersion != null ? glslVersion : "unknown") + (glVersion != null ? " (" + glVersion + ")" : "");
+
+		return new GLESVersionUnsupportedException(
+				"GLSL ES 3.20",
+				detected,
+				Build.MANUFACTURER + " " + Build.MODEL,
+				Build.HARDWARE,
+				Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")",
+				pException
+		);
+	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes

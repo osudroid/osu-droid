@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -11,13 +13,19 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.TypefaceSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.osudroid.multiplayer.Multiplayer;
+import org.andengine.opengl.exception.GLESVersionUnsupportedException;
 import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -242,6 +250,13 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         if (Multiplayer.isMultiplayer)
             Multiplayer.log(ex);
 
+        final GLESVersionUnsupportedException glesException = findCause(ex, GLESVersionUnsupportedException.class);
+        if (glesException != null) {
+            showUnsupportedGLESDialog(context, glesException);
+            saveErrorLog(getCrashReport(context, ex));
+            return true;
+        }
+
         final String crashReport = getCrashReport(context, ex);
 
         new Thread() {
@@ -273,6 +288,69 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         saveErrorLog(crashReport);
 
         return true;
+    }
+
+    /**
+     * Walks the cause chain looking for an exception to the given type.
+     */
+    private static <T extends Throwable> T findCause(Throwable ex, Class<T> type) {
+        Throwable current = ex;
+        while (current != null) {
+            if (type.isInstance(current)) {
+                return type.cast(current);
+            }
+            current = current.getCause();
+        }
+        return null;
+    }
+
+    /**
+     * Shows devices whose GPU/driver cannot create the minimum
+     * required OpenGL ES context, instead of the generic raw stacktrace crash dialog: this is
+     * a hardware limitation.
+     */
+    private void showUnsupportedGLESDialog(final Context context, final GLESVersionUnsupportedException ex) {
+        final String diagnostics =
+                "Device: " + ex.getDevice() + "\n" +
+                "Chipset: " + ex.getChipset() + "\n" +
+                "Detected: " + ex.getDetectedVersion() + "\n" +
+                "Required: " + ex.getRequiredVersion() + "\n" +
+                "Android: " + ex.getAndroidVersion();
+
+        new Thread() {
+            public void run() {
+                Looper.prepare();
+
+                SpannableStringBuilder message = new SpannableStringBuilder();
+                message.append("osu!droid requires OpenGL ES 3.0 or higher, which your device does not support. " +
+                        "The game cannot start on this device.");
+                message.append("\n\n");
+
+                int diagStart = message.length();
+                message.append(diagnostics);
+                message.setSpan(new TypefaceSpan("monospace"), diagStart, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                message.setSpan(new RelativeSizeSpan(0.85f), diagStart, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                final AlertDialog alert = new AlertDialog.Builder(context)
+                        .setTitle("Unsupported Device")
+                        .setMessage(message)
+                        .setNegativeButton("Copy Info", null)
+                        .setPositiveButton("Exit", (dialog, which) -> Runtime.getRuntime().exit(0))
+                        .setCancelable(false)
+                        .show();
+
+                TextView textView = alert.findViewById(android.R.id.message);
+                textView.setTextIsSelectable(true);
+
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    clipboard.setPrimaryClip(ClipData.newPlainText("osu!droid Diagnostics", diagnostics));
+                    Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                });
+
+                Looper.loop();
+            }
+        }.start();
     }
 
     /**
