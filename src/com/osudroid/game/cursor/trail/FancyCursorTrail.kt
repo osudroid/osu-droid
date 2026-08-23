@@ -110,7 +110,9 @@ class FancyCursorTrail : UIComponent() {
 
     // Entity rendering
 
-    override fun draw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        super.doDraw(pGLState, pCamera)
+
         val n = pieces.size
         if (n < 2) return
 
