@@ -19,5 +19,7 @@
         <item>low</item>
         <item>off</item>
     </string-array>
+    <string name="opt_fancy_cursor_trail_title">Fancy cursor trail</string>
+    <string name="opt_fancy_cursor_trail_summary">Replace the particle cursor trail with a smooth rainbow ribbon trail</string>
 
 </resources>

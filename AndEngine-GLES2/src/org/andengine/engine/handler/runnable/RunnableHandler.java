@@ -20,7 +20,11 @@ public class RunnableHandler implements IUpdateHandler {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<Runnable> mRunnables = new ArrayList<Runnable>();
+	private ArrayList<Runnable> mRunnables = new ArrayList<Runnable>();
+	// BEGIN osu!droid modified: add a spare buffer to swap mRunnables with when onUpdate() is running.
+	// See the method for explanation.
+	private ArrayList<Runnable> mRunnablesSwapBuffer = new ArrayList<Runnable>();
+	// END osu!droid modified
 
 	// ===========================================================
 	// Constructors
@@ -37,6 +41,14 @@ public class RunnableHandler implements IUpdateHandler {
 	@Override
 	public synchronized void onUpdate(final float pSecondsElapsed) {
 		final ArrayList<Runnable> runnables = this.mRunnables;
+
+		// BEGIN osu!droid modified: swap in the empty buffer so Runnables posted by run() below (directly, or
+		// indirectly via postRunnable()) land in the new mRunnables instead of the list we're about to iterate
+		// and clear (which will cause the posted Runnables, which has not been run yet, to be cleared).
+		this.mRunnables = this.mRunnablesSwapBuffer;
+		this.mRunnablesSwapBuffer = runnables;
+		// END osu!droid modified
+
 		final int runnableCount = runnables.size();
 		for(int i = 0; i < runnableCount; i++) {
 			runnables.get(i).run();

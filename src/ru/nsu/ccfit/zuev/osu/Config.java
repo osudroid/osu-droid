@@ -64,6 +64,7 @@ public class Config {
         burstEffects,
         hitLighting,
         useParticles,
+        useFancyCursorTrail,
         useCustomComboColors,
         forceRomanized,
         fixFrameOffset,
@@ -217,6 +218,7 @@ public class Config {
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useParticles = prefs.getBoolean("particles", useParticles);
         spectrumQuality = normalizeSpectrumQuality(prefs.getString("spectrumQuality", spectrumQuality));
+        useFancyCursorTrail = prefs.getBoolean("fancyCursorTrail", useFancyCursorTrail);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new Color4[4];
         for (int i = 1; i <= 4; i++) {
@@ -580,6 +582,14 @@ public class Config {
 
     public static void setUseParticles(boolean useParticles) {
         Config.useParticles = useParticles;
+    }
+
+    public static boolean isUseFancyCursorTrail() {
+        return useFancyCursorTrail;
+    }
+
+    public static void setUseFancyCursorTrail(boolean useFancyCursorTrail) {
+        Config.useFancyCursorTrail = useFancyCursorTrail;
     }
 
     public static String getSkinPath() {

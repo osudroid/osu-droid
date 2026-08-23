@@ -1,9 +1,11 @@
 package org.andengine.opengl.view;
 
 import org.andengine.engine.Engine;
+import org.andengine.opengl.exception.GLESVersionUnsupportedException;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -115,6 +117,11 @@ public class RenderSurfaceView extends GLSurfaceView {
 		/** KHR extension attribute for minor version; equals EGL_CONTEXT_MINOR_VERSION_KHR = 0x30FB. */
 		private static final int EGL_CONTEXT_MINOR_VERSION_KHR = 0x30FB;
 
+		/** EGL_RENDERABLE_TYPE bits, used to report the ES version the config actually advertises. */
+		private static final int EGL_OPENGL_ES_BIT = 0x0001;
+		private static final int EGL_OPENGL_ES2_BIT = 0x0004;
+		private static final int EGL_OPENGL_ES3_BIT_KHR = 0x0040;
+
 		@Override
 		public EGLContext createContext(final EGL10 egl, final EGLDisplay display, final EGLConfig eglConfig) {
 			// Try OpenGL ES 3.2 first.
@@ -142,7 +149,35 @@ public class RenderSurfaceView extends GLSurfaceView {
 			}
 
 			Log.e(TAG, "Failed to create OpenGL ES 3.0 or 3.2 context.");
-			return null;
+			throw new GLESVersionUnsupportedException(
+					"OpenGL ES 3.0",
+					this.getDetectedRenderableType(egl, display, eglConfig),
+					Build.MANUFACTURER + " " + Build.MODEL,
+					Build.HARDWARE,
+					Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")"
+			);
+		}
+
+		/**
+		 * Reads the config's EGL_RENDERABLE_TYPE bitmask to report the highest ES version the
+		 * hardware actually advertises, since no context (and thus no GL_VERSION string) exists
+		 * at this point.
+		 */
+		private String getDetectedRenderableType(final EGL10 egl, final EGLDisplay display, final EGLConfig eglConfig) {
+			final int[] value = new int[1];
+			if (!egl.eglGetConfigAttrib(display, eglConfig, EGL10.EGL_RENDERABLE_TYPE, value)) {
+				return "Unknown";
+			}
+
+			final int renderableType = value[0];
+			if ((renderableType & EGL_OPENGL_ES3_BIT_KHR) != 0) {
+				return "OpenGL ES 3.x";
+			} else if ((renderableType & EGL_OPENGL_ES2_BIT) != 0) {
+				return "OpenGL ES 2.0";
+			} else if ((renderableType & EGL_OPENGL_ES_BIT) != 0) {
+				return "OpenGL ES 1.x";
+			}
+			return "unbekannt";
 		}
 
 		@Override
