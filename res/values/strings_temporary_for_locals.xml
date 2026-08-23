@@ -3,6 +3,22 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_spectrum_quality_title">Spectrum visualizer</string>
+    <string name="opt_spectrum_quality_summary">Quality of the audio spectrum ring around the logo.</string>
+    <string name="opt_spectrum_quality_full">Full</string>
+    <string name="opt_spectrum_quality_low">Low</string>
+    <string name="opt_spectrum_quality_off">Off</string>
+
+    <string-array name="spectrum_quality_entries">
+        <item>@string/opt_spectrum_quality_full</item>
+        <item>@string/opt_spectrum_quality_low</item>
+        <item>@string/opt_spectrum_quality_off</item>
+    </string-array>
+    <string-array name="spectrum_quality_values">
+        <item>full</item>
+        <item>low</item>
+        <item>off</item>
+    </string-array>
     <string name="opt_fancy_cursor_trail_title">Fancy cursor trail</string>
     <string name="opt_fancy_cursor_trail_summary">Replace the particle cursor trail with a smooth rainbow ribbon trail</string>
 

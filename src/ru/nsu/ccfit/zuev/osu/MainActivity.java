@@ -323,6 +323,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset("star2", "gfx/star2.png");
         ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
         ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
         ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
@@ -384,6 +385,7 @@ public class MainActivity extends BaseGameActivity implements
     private void onLoadComplete() {
         Execution.async(() -> {
             GlobalManager.getInstance().init();
+            com.acivev.VibratorManager.INSTANCE.init(this);
             Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
@@ -402,11 +404,28 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
+                // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
+                // Never enqueue a bare setScene() and a follow-up action as two separate
+                // Execution.updateThread() calls, the follow-up would run first (LIFO) and then
+                // setScene would overwrite whatever scene the follow-up set.
                 if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    if (willReplay) {
+                        final String replayFile = fileToAdd;
+                        fileToAdd = null;
+                        willReplay = false;
+                        Execution.updateThread(() -> {
+                            GlobalManager.getInstance().getEngine().setScene(
+                                    GlobalManager.getInstance().getMainMenuV2());
+                            GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile);
+                        });
+                    } else {
+                        Execution.updateThread(() -> {
+                            GlobalManager.getInstance().getEngine().setScene(
+                                    GlobalManager.getInstance().getMainMenuV2());
+                            GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
+                        });
+                    }
                 }
-
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
                 applyRefreshRateSetting(Config.isForceMaxRefreshRate());
@@ -419,13 +438,9 @@ public class MainActivity extends BaseGameActivity implements
                     final Uri inviteLink = roomInviteLink;
                     roomInviteLink = null;
                     Multiplayer.connectFromLink(inviteLink);
-                } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
-                    fileToAdd = null;
-                    willReplay = false;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
             });
         });
     }
@@ -727,6 +742,83 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+        // Activity.onNewIntent() does NOT update getIntent() on its own - must be done explicitly,
+        // otherwise onStart()'s parseIntent(getIntent()) below would keep seeing the stale intent.
+        setIntent(intent);
+
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction())) {
+            return;
+        }
+
+        final Uri data = intent.getData();
+        if (data == null) return;
+
+        if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
+            final var globalManager = GlobalManager.getInstance();
+
+            Execution.updateThread(() -> {
+                if (mEngine != null) {
+                    var scene = mEngine.getScene();
+                    var gameScene = globalManager.getGameScene();
+
+                    // Ensure gameplay is cleaned up before joining the lobby to prevent any potential issues with
+                    // lingering game state.
+                    if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                        gameScene.quit();
+                    }
+                }
+
+                Multiplayer.connectFromLink(data);
+            });
+            return;
+        }
+
+        // onNewIntent is only called on an ALREADY-RUNNING instance (warm start / foreground open).
+        // The game is fully initialized here, so we can dispatch watchReplay directly without
+        // going through the cold-start loadBeatmapLibrary → willReplay path.
+        final String scheme = data.getScheme();
+
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            final String path = data.getPath();
+            if (path != null) dispatchIncomingFile(path);
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            // Copy asynchronously, content resolver I/O must not block the main thread.
+            Execution.async(() -> {
+                final String path = copyContentUriToCache(data);
+                if (path != null) dispatchIncomingFile(path);
+            });
+        }
+    }
+
+    /**
+     * Dispatches an already-resolved local file path coming from an external intent (warm-start
+     * path, i.e. onNewIntent). A replay is watched immediately via MainMenuV2, bypassing the
+     * slower cold-start loadBeatmapLibrary → willReplay path. Beatmap/skin archives still need
+     * that general library-reload flow (extraction, library rescan), so they're routed there.
+     */
+    private void dispatchIncomingFile(final String path) {
+        final String lower = new File(path).getName().toLowerCase();
+
+        if (lower.endsWith(".odr")) {
+            final com.osudroid.ui.v2.menu.main.MainMenuV2 menu =
+                    GlobalManager.getInstance().getMainMenuV2();
+            if (menu != null) {
+                Execution.updateThread(() -> menu.watchReplay(path));
+            } else {
+                // Extremely rare: onNewIntent fired before init() completed.
+                // Store for the cold start path to pick up.
+                fileToAdd = path;
+                willReplay = true;
+            }
+        } else if (lower.endsWith(".osz") || lower.endsWith(".osk")) {
+            fileToAdd = path;
+            Execution.async(this::loadBeatmapLibrary);
+        }
+    }
+
+    @Override
     protected void onStart() {
         parseIntent(getIntent());
         super.onStart();
@@ -794,50 +886,6 @@ public class MainActivity extends BaseGameActivity implements
             Debug.e("MainActivity.copyContentUriToCache: " + e.getMessage(), e);
             ToastLogger.showText(StringTable.get(R.string.import_failed_open_file), false);
             return null;
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-
-        if (parseIntent(intent)) {
-            var globalManager = GlobalManager.getInstance();
-
-            if (roomInviteLink != null) {
-                Execution.updateThread(() -> {
-                    if (mEngine != null) {
-                        var scene = mEngine.getScene();
-                        var gameScene = globalManager.getGameScene();
-
-                        // Ensure gameplay is cleaned up before joining the lobby to prevent any potential issues with
-                        // lingering game state.
-                        if (scene != null && gameScene != null && scene == gameScene.getScene()) {
-                            gameScene.quit();
-                        }
-                    }
-
-                    Multiplayer.connectFromLink(roomInviteLink);
-                    roomInviteLink = null;
-                });
-
-                return;
-            }
-
-            Execution.async(() -> {
-                loadBeatmapLibrary();
-
-                if (willReplay && fileToAdd != null) {
-                    final String replayFile = fileToAdd;
-
-                    Execution.updateThread(() -> {
-                        globalManager.getMainScene().watchReplay(replayFile);
-                        fileToAdd = null;
-                        willReplay = false;
-                    });
-                }
-            });
         }
     }
 
@@ -1165,7 +1213,7 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
-                GlobalManager.getInstance().getMainScene().showExitDialog();
+                GlobalManager.getInstance().getMainMenuV2().showExitDialog();
             }
             return true;
         }
@@ -1191,8 +1239,12 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-        GlobalManager.getInstance().getMainScene().exit();
+        var mainMenuV2 = GlobalManager.getInstance().getMainMenuV2();
+        if (mainMenuV2 != null) {
+            mainMenuV2.exit();
+        } else {
+            finish();
+        }
     }
 
     public long getVersionCode() {
