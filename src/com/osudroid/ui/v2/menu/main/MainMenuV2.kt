@@ -252,7 +252,7 @@ class MainMenuV2 : UIScene() {
 
         val versionText = UIText().apply {
             font = ResourceManager.getInstance().getFont("smallFont")
-            text = "osu!droid ${BuildConfig.VERSION_NAME}"
+            text = "osu!droid-GLES-${BuildConfig.VERSION_NAME}"
             color = Color4.White
             inheritAncestorsColor = false
             x = 20f
@@ -286,7 +286,7 @@ class MainMenuV2 : UIScene() {
                         HorizontalMessageDialog()
                             .setTitle("About")
                             .setMessage(
-                                "<h1>osu!droid</h1>\n" +
+                                "<h1>osu!droid-GLES</h1>\n" +
                                 "<h5>Version ${BuildConfig.VERSION_NAME}</h5>\n" +
                                 "<p>Made by osu!droid team<br>osu! is © peppy 2007-2026</p>\n" +
                                 "<br>\n" +
@@ -300,7 +300,7 @@ class MainMenuV2 : UIScene() {
                             .addButton("Changelog") { dialog ->
                                 dialog.dismiss()
                                 try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/latest"))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://osudroid.moe/changelog/gles/latest"))
                                     GlobalManager.getInstance().mainActivity.startActivity(intent)
                                 } catch (e: Exception) {
                                     Log.e("MainMenuV2", "Failed to open changelog", e)
