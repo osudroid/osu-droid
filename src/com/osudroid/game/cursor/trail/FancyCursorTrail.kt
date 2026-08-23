@@ -1,8 +1,8 @@
 package com.osudroid.game.cursor.trail
 
 import android.opengl.GLES20
+import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
-import org.andengine.entity.Entity
 import org.andengine.opengl.shader.PositionColorShaderProgram
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
@@ -19,14 +19,14 @@ import kotlin.math.hypot
  * out over ~0.5 s. The ribbon is drawn with additive blending and per-vertex
  * rainbow colors using [PositionColorShaderProgram].
  */
-class FancyCursorTrail : Entity() {
+class FancyCursorTrail : UIComponent() {
 
     /** Half-width of the ribbon at its newest (widest) point, in screen pixels. */
-    var trailWidth: Float = 8f
+    var trailWidth = 8f
 
     /** Current cursor position; update this every frame before calling [update]. */
-    var cursorX: Float = 0f
-    var cursorY: Float = 0f
+    var cursorX = 0f
+    var cursorY = 0f
 
     // Trail state
 
@@ -35,11 +35,11 @@ class FancyCursorTrail : Entity() {
         val y: Float,
         val startWidth: Float
     ) {
-        var alpha: Float = 1f
-        var r: Float = 1f
-        var g: Float = 1f
-        var b: Float = 1f
-        var width: Float = startWidth
+        var alpha = 1f
+        var r = 1f
+        var g = 1f
+        var b = 1f
+        var width = startWidth
     }
 
     private val pieces = ArrayList<TrailPiece>(256)
@@ -140,17 +140,26 @@ class FancyCursorTrail : Entity() {
             var perpX = diffY
             var perpY = -diffX
             val len = hypot(perpX, perpY)
-            if (len > 0f) { perpX /= len; perpY /= len }
+            if (len > 0f) {
+                perpX /= len
+                perpY /= len
+            }
 
             // Vertex A – on the 'left' of prev
             buf.put(prev.x - perpX * prev.width)
             buf.put(prev.y - perpY * prev.width)
-            buf.put(prev.r); buf.put(prev.g); buf.put(prev.b); buf.put(prev.alpha)
+            buf.put(prev.r)
+            buf.put(prev.g)
+            buf.put(prev.b)
+            buf.put(prev.alpha)
 
             // Vertex B – on the 'right' of curr
             buf.put(curr.x + perpX * curr.width)
             buf.put(curr.y + perpY * curr.width)
-            buf.put(curr.r); buf.put(curr.g); buf.put(curr.b); buf.put(curr.alpha)
+            buf.put(curr.r)
+            buf.put(curr.g)
+            buf.put(curr.b)
+            buf.put(curr.alpha)
         }
 
         // Bind shader (compiles lazily on first call)
