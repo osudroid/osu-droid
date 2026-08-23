@@ -1,6 +1,6 @@
 package com.osudroid.game.cursor.trail
 
-import android.opengl.GLES20
+import android.opengl.GLES32
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.shader.PositionColorShaderProgram
@@ -167,47 +167,47 @@ class FancyCursorTrail : UIComponent() {
         shader.bindProgram(pGLState)
 
         // Disable the texture-coord attrib array (PositionColor shader doesn't use it)
-        GLES20.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Upload the MVP matrix so the ribbon maps to screen coordinates
-        GLES20.glUniformMatrix4fv(
+        GLES32.glUniformMatrix4fv(
             shader.uniformMVPMatrixLocation, 1, false,
             pGLState.modelViewProjectionGLMatrix, 0
         )
 
         // Additive blending gives a nice neon glow effect
-        GLES20.glEnable(GLES20.GL_BLEND)
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+        GLES32.glEnable(GLES32.GL_BLEND)
+        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE)
 
         // Ensure no VBO is bound so GL uses our client-side buffer
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0)
 
         val stride = floatsPerVert * 4   // 24 bytes between consecutive vertices
 
         // Position attribute – 2 floats starting at float-offset 0
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
         buf.position(0)
-        GLES20.glVertexAttribPointer(
+        GLES32.glVertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
-            2, GLES20.GL_FLOAT, false, stride, buf
+            2, GLES32.GL_FLOAT, false, stride, buf
         )
 
         // Color attribute – 4 floats starting at float-offset 2 (byte-offset 8)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         buf.position(2)
-        GLES20.glVertexAttribPointer(
+        GLES32.glVertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION,
-            4, GLES20.GL_FLOAT, false, stride, buf
+            4, GLES32.GL_FLOAT, false, stride, buf
         )
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertCount)
+        GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, vertCount)
 
         // Restore state expected by other renderers
 
         // Restore normal alpha blending
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
         // Re-enable the texture-coord attrib array (PositionColor shader disables it)
-        GLES20.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     // Helpers
