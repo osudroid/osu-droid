@@ -1,5 +1,6 @@
 package com.osudroid.game.cursor.main
 
+import com.osudroid.math.Interpolation
 import ru.nsu.ccfit.zuev.osu.game.GameObject
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener
 import ru.nsu.ccfit.zuev.osu.game.GameplaySpinner
@@ -91,8 +92,8 @@ class AutoDanceCursor : AutoCursor() {
 
             val blend = (moveElapsed / moveDuration).coerceAtMost(1.0f)
 
-            var x = lerp(fromX, toX, blend)
-            var y = lerp(fromY, toY, blend)
+            var x = Interpolation.linear(fromX, toX, blend)
+            var y = Interpolation.linear(fromY, toY, blend)
 
             val dx = toX - fromX
             val dy = toY - fromY
@@ -102,8 +103,8 @@ class AutoDanceCursor : AutoCursor() {
             // Only apply the arc when the distance is large enough to look deliberate.
             if (length >= MIN_DANCE_DISTANCE) {
                 // Map blend [0,1] to the sine/cosine phase angles.
-                val phaseX = lerp(Math.PI, 0.0, blend.toDouble())        // π → 0
-                val phaseY = lerp(Math.PI / 2.0, -Math.PI / 2.0, blend.toDouble()) // π/2 → -π/2
+                val phaseX = Interpolation.linear(Math.PI, 0.0, blend.toDouble())        // π → 0
+                val phaseY = Interpolation.linear(Math.PI / 2.0, -Math.PI / 2.0, blend.toDouble()) // π/2 → -π/2
 
                 val danceX = (sin(phaseX) * length).toFloat()
                 val danceY = (cos(phaseY) * length).toFloat()
@@ -129,10 +130,6 @@ class AutoDanceCursor : AutoCursor() {
     }
 
     companion object {
-        private fun lerp(a: Float, b: Float, t: Float): Float = a + (b - a) * t
-
-        private fun lerp(a: Double, b: Double, t: Double): Double = a + (b - a) * t
-
         /**
          * Minimum half-distance (screen pixels) between the current and target hit object
          * positions before the arc effect is applied. Below this threshold the cursor just
