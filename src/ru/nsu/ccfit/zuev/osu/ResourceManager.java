@@ -29,11 +29,11 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,14 +100,19 @@ public class ResourceManager {
 
     private final static ResourceManager mgr = new ResourceManager();
 
-    private final Map<String, Font> fonts = new HashMap<>();
-    private final Map<String, Integer> frameCount = new HashMap<>();
-    private final Map<String, TextureRegion> textures = new HashMap<>();
-    private final Map<String, BassSoundProvider> sounds = new HashMap<>();
+    // These caches are written from background loading threads (e.g. beatmap skin loading during
+    // gameplay start, see BeatmapSkinManager) while being read concurrently from the update/GL thread
+    // during rendering. Plain HashMaps corrupt under that access pattern, so these must stay synchronized.
+    // (Collections.synchronizedMap rather than ConcurrentHashMap because "textures" intentionally stores
+    // null values as tombstones, e.g. the "lighting" entry below.)
+    private final Map<String, Font> fonts = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, Integer> frameCount = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, TextureRegion> textures = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, BassSoundProvider> sounds = Collections.synchronizedMap(new HashMap<>());
 
-    private final Map<String, Integer> customFrameCount = new HashMap<>();
-    private final Map<String, TextureRegion> customTextures = new HashMap<>();
-    private final Map<String, BassSoundProvider> customSounds = new HashMap<>();
+    private final Map<String, Integer> customFrameCount = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, TextureRegion> customTextures = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, BassSoundProvider> customSounds = Collections.synchronizedMap(new HashMap<>());
 
     private Engine engine;
     private Context context;
@@ -841,9 +846,14 @@ public class ResourceManager {
 
         List<String> toRemove = new ArrayList<>();
 
-        for (var entry : textures.entrySet()) {
-            if (entry.getValue() == texture) {
-                toRemove.add(entry.getKey());
+        // Manual iteration over a synchronizedMap's view isn't guarded by the map's own lock,
+        // so it must be wrapped explicitly to avoid a ConcurrentModificationException if a
+        // background thread mutates "textures" (e.g. skin loading) at the same time.
+        synchronized (textures) {
+            for (var entry : textures.entrySet()) {
+                if (entry.getValue() == texture) {
+                    toRemove.add(entry.getKey());
+                }
             }
         }
 
@@ -857,17 +867,21 @@ public class ResourceManager {
     }
 
     public void clearCustomResources() {
-        for (final BassSoundProvider s : customSounds.values()) {
-            s.free();
-        }
-        final Set<String> texnames = customTextures.keySet();
-        for (final String s : texnames) {
-            TextureRegion tex = customTextures.get(s);
-            if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
-                engine.getTextureManager().unloadTexture(tex.getTexture());
-                // engine.getTextureManager().loadTexture(textures.get(s).getTexture());
+        synchronized (customSounds) {
+            for (final BassSoundProvider s : customSounds.values()) {
+                s.free();
             }
         }
+
+        synchronized (customTextures) {
+            for (final String s : customTextures.keySet()) {
+                TextureRegion tex = customTextures.get(s);
+                if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
+                    engine.getTextureManager().unloadTexture(tex.getTexture());
+                }
+            }
+        }
+
         customTextures.clear();
         customSounds.clear();
         customFrameCount.clear();
