@@ -149,7 +149,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     var scoreID = Integer.parseInt(data[0]);
                     var playerName = isPersonalBest ? username : data[1];
-                    var score = Integer.parseInt(data[2]);
+                    var score = Long.parseLong(data[2]);
                     var pp = Float.parseFloat(data[3]);
                     var combo = Integer.parseInt(data[4]);
                     var mark = data[5];
