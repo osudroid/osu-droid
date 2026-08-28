@@ -816,7 +816,12 @@ public class Config {
     // If the option is expected to be accessed frequently consider storing it locally as a field where it's needed.
 
     public static boolean getBoolean(String key, boolean defaultValue) {
-        return sharedPreferences.getBoolean(key, defaultValue);
+        try {
+            return sharedPreferences.getBoolean(key, defaultValue);
+        } catch (ClassCastException e) {
+            Debug.e("Config: preference \"" + key + "\" has an unexpected type, using default", e);
+            return defaultValue;
+        }
     }
 
     public static void setBoolean(String key, boolean value) {
@@ -824,7 +829,12 @@ public class Config {
     }
 
     public static int getInt(String key, int defaultValue) {
-        return sharedPreferences.getInt(key, defaultValue);
+        try {
+            return sharedPreferences.getInt(key, defaultValue);
+        } catch (ClassCastException e) {
+            Debug.e("Config: preference \"" + key + "\" has an unexpected type, using default", e);
+            return defaultValue;
+        }
     }
 
     public static void setInt(String key, int value) {
@@ -832,7 +842,12 @@ public class Config {
     }
 
     public static long getLong(String key, long defaultValue) {
-        return sharedPreferences.getLong(key, defaultValue);
+        try {
+            return sharedPreferences.getLong(key, defaultValue);
+        } catch (ClassCastException e) {
+            Debug.e("Config: preference \"" + key + "\" has an unexpected type, using default", e);
+            return defaultValue;
+        }
     }
 
     public static void setLong(String key, long value) {
@@ -840,7 +855,12 @@ public class Config {
     }
 
     public static String getString(String key, String defaultValue) {
-        return sharedPreferences.getString(key, defaultValue);
+        try {
+            return sharedPreferences.getString(key, defaultValue);
+        } catch (ClassCastException e) {
+            Debug.e("Config: preference \"" + key + "\" has an unexpected type, using default", e);
+            return defaultValue;
+        }
     }
 
     public static void setString(String key, String value) {
@@ -848,7 +868,12 @@ public class Config {
     }
 
     public static float getFloat(String key, float defaultValue) {
-        return sharedPreferences.getFloat(key, defaultValue);
+        try {
+            return sharedPreferences.getFloat(key, defaultValue);
+        } catch (ClassCastException e) {
+            Debug.e("Config: preference \"" + key + "\" has an unexpected type, using default", e);
+            return defaultValue;
+        }
     }
 
     public static void setFloat(String key, float value) {
