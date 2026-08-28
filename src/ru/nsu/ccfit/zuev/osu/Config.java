@@ -276,7 +276,7 @@ public class Config {
                 .getDefaultSharedPreferences(context);
 
         onlineUsername = prefs.getString("onlineUsername", "");
-        onlinePassword = prefs.getString("onlinePassword", null);
+        onlinePassword = prefs.getString("onlinePassword", "");
         stayOnline = prefs.getBoolean("stayOnline", false);
         loadAvatar = prefs.getBoolean("loadAvatar",false);
     }
