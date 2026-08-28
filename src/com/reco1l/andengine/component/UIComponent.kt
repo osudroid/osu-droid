@@ -1208,11 +1208,16 @@ abstract class UIComponent : Entity(0f, 0f),
         if (type != null) {
             getTrackerFor(type)?.finish()
         } else {
-            universalModifierTrackers.forEach { it.finish() }
+            // a modifier's `onFinished` callback may append a new modifier of another type (e.g. chaining),
+            // which would mutate this same list, preventing the use of the regular `forEach`.
+            universalModifierTrackers.forEachTolerant { it.finish() }
         }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.finishModifiers(true, type) }
+            // a modifier's `onFinished` callback may detach its own entity (e.g. `fadeOut().after { detachSelf() }`),
+            // which would mutate `mChildren` mid-iteration and cause a `ConcurrentModificationException` if we used a
+            // regular `forEach`.
+            mChildren?.forEachTolerant { (it as? UIComponent)?.finishModifiers(true, type) }
         }
     }
 
@@ -1738,7 +1743,9 @@ abstract class UIComponent : Entity(0f, 0f),
         }
         inputBindings.fill(null)
 
-        mChildren?.forEach { child ->
+        // forEachTolerant on purpose: propagateTouchEvent(ACTION_CANCEL) above can run arbitrary
+        // touch-cancel handlers, which may detach an entity and mutate `mChildren` mid-iteration.
+        mChildren?.forEachTolerant { child ->
             if (child is UIComponent) {
                 child.onInvalidateInputBindings()
             }

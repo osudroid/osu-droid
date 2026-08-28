@@ -136,6 +136,11 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            failMessage = "Username or password is empty";
+            return false;
+        }
+
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam("password", MD5Calculator.getStringMD5(password.trim() + "taikotaiko"));

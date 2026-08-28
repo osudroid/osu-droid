@@ -6,6 +6,7 @@ import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
 import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
 import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.reco1l.andengine.container.UIContainer
+import com.reco1l.framework.forEachTolerant
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
@@ -269,9 +270,9 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
      * using another method such as `filterIsInstance<HUDElement>()`.
      */
     fun forEachElement(action: (HUDElement) -> Unit) {
-        mChildren?.forEach {
-            (it as? HUDElement)?.let(action)
-        }
+        // `action` may reorder `mChildren` (e.g. selecting an  element moves it to front), which
+        // would cause a `ConcurrentModificationException` if we used a regular `forEach`.
+        mChildren?.forEachTolerant { (it as? HUDElement)?.let(action) }
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
