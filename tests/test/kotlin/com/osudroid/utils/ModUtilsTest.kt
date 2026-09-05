@@ -12,6 +12,8 @@ import com.osudroid.mods.ModNightCore
 import com.osudroid.mods.ModOldNightCore
 import com.osudroid.mods.ModPrecise
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.mods.ModWindDown
+import com.osudroid.mods.ModWindUp
 import org.junit.Assert
 import org.junit.Test
 
@@ -68,6 +70,36 @@ class ModUtilsTest {
             Assert.assertTrue(ModHidden::class in this)
 
             Assert.assertEquals(1.25f, ofType<ModCustomSpeed>()!!.trackRateMultiplier, 0f)
+        }
+    }
+
+    @Test
+    fun `Test Wind Up serialization preserves rate settings`() {
+        val windUp = ModWindUp().also {
+            it.initialRate = 1.2f
+            it.finalRate = 1.8f
+        }
+
+        val serializedMods = ModUtils.serializeMods(listOf(windUp))
+
+        ModUtils.deserializeMods(serializedMods).ofType<ModWindUp>()!!.apply {
+            Assert.assertEquals(1.2f, initialRate, 0f)
+            Assert.assertEquals(1.8f, finalRate, 0f)
+        }
+    }
+
+    @Test
+    fun `Test Wind Down serialization preserves rate settings`() {
+        val windDown = ModWindDown().also {
+            it.initialRate = 1.3f
+            it.finalRate = 0.6f
+        }
+
+        val serializedMods = ModUtils.serializeMods(listOf(windDown))
+
+        ModUtils.deserializeMods(serializedMods).ofType<ModWindDown>()!!.apply {
+            Assert.assertEquals(1.3f, initialRate, 0f)
+            Assert.assertEquals(0.6f, finalRate, 0f)
         }
     }
 
