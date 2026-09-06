@@ -127,7 +127,7 @@ fun List<Mod>.calculateRate(time: Double = 0.0): Float {
  */
 @JvmOverloads
 @JvmName("calculateRateWithTrackRateMods")
-fun List<IModApplicableToTrackRate>.calculateRateWithMods(time: Double = 0.0): Float {
+fun List<IModApplicableToTrackRate>.calculateRate(time: Double = 0.0): Float {
     var rate = 1f
 
     for (i in indices) {
