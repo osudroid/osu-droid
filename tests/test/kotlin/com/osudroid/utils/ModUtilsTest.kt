@@ -20,9 +20,7 @@ import org.junit.Test
 class ModUtilsTest {
     @Test
     fun `Test mod serialization with non-user playable mods`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())
-        )
+        val serializedMods = listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()).serialize()
 
         ModUtils.deserializeMods(serializedMods).apply {
             Assert.assertEquals(4, size)
@@ -37,10 +35,9 @@ class ModUtilsTest {
 
     @Test
     fun `Test mod serialization without non-user playable mods`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()),
-            false
-        )
+        val serializedMods = listOf(
+            ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()
+        ).serialize(false)
 
         ModUtils.deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
@@ -55,13 +52,11 @@ class ModUtilsTest {
 
     @Test
     fun `Test mod deserialization`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(
-                ModAutoplay(),
-                ModCustomSpeed(1.25f),
-                ModHidden()
-            )
-        )
+        val serializedMods = listOf(
+            ModAutoplay(),
+            ModCustomSpeed(1.25f),
+            ModHidden()
+        ).serialize()
 
         ModUtils.deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
@@ -80,7 +75,7 @@ class ModUtilsTest {
             it.finalRate = 1.8f
         }
 
-        val serializedMods = ModUtils.serializeMods(listOf(windUp))
+        val serializedMods = listOf(windUp).serialize()
 
         ModUtils.deserializeMods(serializedMods).ofType<ModWindUp>()!!.apply {
             Assert.assertEquals(1.2f, initialRate, 0f)
@@ -95,7 +90,7 @@ class ModUtilsTest {
             it.finalRate = 0.6f
         }
 
-        val serializedMods = ModUtils.serializeMods(listOf(windDown))
+        val serializedMods = listOf(windDown).serialize()
 
         ModUtils.deserializeMods(serializedMods).ofType<ModWindDown>()!!.apply {
             Assert.assertEquals(1.3f, initialRate, 0f)

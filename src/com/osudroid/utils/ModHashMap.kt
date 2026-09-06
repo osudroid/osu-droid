@@ -167,7 +167,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     @JvmOverloads
     @Throws(SerializationException::class)
     fun serializeMods(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
-        ModUtils.serializeMods(values, includeNonUserPlayable, includeIrrelevantMods)
+        values.serialize(includeNonUserPlayable, includeIrrelevantMods)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.

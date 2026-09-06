@@ -8,6 +8,7 @@ import com.osudroid.beatmaps.PreciseDroidHitWindow
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
+import com.osudroid.utils.ModUtils.deserializeMods
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.SerializationException
@@ -56,38 +57,31 @@ val allModsInstances by lazy {
 val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
 
 /**
+ * Serializes a list of [Mod]s into a list of [APIMod]s, contained within a JSON string.
+ *
+ * The result can be deserialized using [deserializeMods].
+ *
+ * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
+ * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
+ * @return The list of [APIMod]s as a JSON string.
+ * @throws SerializationException If there is an error during serialization.
+ */
+@JvmOverloads
+@Throws(SerializationException::class)
+fun Iterable<Mod>.serialize(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false): String {
+    val filteredMods = filter {
+        (includeNonUserPlayable || it.isUserPlayable) && (includeIrrelevantMods || it.isRelevant)
+    }
+
+    return Json.encodeToString(filteredMods.map { it.toAPIMod() })
+}
+
+/**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
     /**
-     * Serializes a list of [Mod]s into a list of [APIMod]s, contained within a JSON string.
-     *
-     * The result can be deserialized using [deserializeMods].
-     *
-     * @param mods The list of [Mod]s to serialize.
-     * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
-     * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
-     * @return The list of [APIMod]s as a JSON string.
-     * @throws SerializationException If there is an error during serialization of [mods].
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Throws(SerializationException::class)
-    fun serializeMods(
-        mods: Iterable<Mod>,
-        includeNonUserPlayable: Boolean = true,
-        includeIrrelevantMods: Boolean = false
-    ): String {
-        val filteredMods = mods.filter {
-            (includeNonUserPlayable || it.isUserPlayable) &&
-            (includeIrrelevantMods || it.isRelevant)
-        }
-
-        return Json.encodeToString(filteredMods.map { it.toAPIMod() })
-    }
-
-    /**
-     * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serializeMods].
+     * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serialize].
      *
      * @param str The JSON string containing the list of [APIMod]s.
      * @return The deserialized [Mod]s in a [ModHashMap].
