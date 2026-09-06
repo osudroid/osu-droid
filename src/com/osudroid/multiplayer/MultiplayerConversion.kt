@@ -3,6 +3,7 @@
 package com.osudroid.multiplayer
 
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -31,7 +32,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     playerName = json.getString("username")
     setForcedScore(json.getLong("score"))
     time = System.currentTimeMillis()
-    mod = ModUtils.deserializeMods(json.optJSONArray("mods")?.toString() ?: "")
+    mod = deserializeMods(json.optJSONArray("mods")?.toString() ?: "")
     scoreMaxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")

@@ -22,7 +22,7 @@ class ModUtilsTest {
     fun `Test mod serialization with non-user playable mods`() {
         val serializedMods = listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()).serialize()
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(4, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -39,7 +39,7 @@ class ModUtilsTest {
             ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()
         ).serialize(false)
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -58,7 +58,7 @@ class ModUtilsTest {
             ModHidden()
         ).serialize()
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -77,7 +77,7 @@ class ModUtilsTest {
 
         val serializedMods = listOf(windUp).serialize()
 
-        ModUtils.deserializeMods(serializedMods).ofType<ModWindUp>()!!.apply {
+        deserializeMods(serializedMods).ofType<ModWindUp>()!!.apply {
             Assert.assertEquals(1.2f, initialRate, 0f)
             Assert.assertEquals(1.8f, finalRate, 0f)
         }
@@ -92,7 +92,7 @@ class ModUtilsTest {
 
         val serializedMods = listOf(windDown).serialize()
 
-        ModUtils.deserializeMods(serializedMods).ofType<ModWindDown>()!!.apply {
+        deserializeMods(serializedMods).ofType<ModWindDown>()!!.apply {
             Assert.assertEquals(1.3f, initialRate, 0f)
             Assert.assertEquals(0.6f, finalRate, 0f)
         }

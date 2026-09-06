@@ -8,7 +8,6 @@ import com.osudroid.beatmaps.PreciseDroidHitWindow
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
-import com.osudroid.utils.ModUtils.deserializeMods
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.SerializationException
@@ -77,29 +76,28 @@ fun Iterable<Mod>.serialize(includeNonUserPlayable: Boolean = true, includeIrrel
 }
 
 /**
+ * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serialize].
+ *
+ * @param str The JSON string containing the list of [APIMod]s.
+ * @return The deserialized [Mod]s in a [ModHashMap].
+ * @throws SerializationException If there is an error during deserialization of [str].
+ * @throws IllegalArgumentException If [str] is not a valid representation of a list of [APIMod]s.
+ */
+@Throws(SerializationException::class, IllegalArgumentException::class)
+fun deserializeMods(str: String): ModHashMap {
+    if (str.isEmpty()) {
+        return ModHashMap()
+    }
+
+    val apiMods = Json.decodeFromString<List<APIMod>>(str)
+
+    return ModHashMap(apiMods.mapNotNull { it.toMod() })
+}
+
+/**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    /**
-     * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serialize].
-     *
-     * @param str The JSON string containing the list of [APIMod]s.
-     * @return The deserialized [Mod]s in a [ModHashMap].
-     * @throws SerializationException If there is an error during deserialization of [str].
-     * @throws IllegalArgumentException If [str] is not a valid representation of a list of [APIMod]s.
-     */
-    @JvmStatic
-    @Throws(SerializationException::class, IllegalArgumentException::class)
-    fun deserializeMods(str: String): ModHashMap {
-        if (str.isEmpty()) {
-            return ModHashMap()
-        }
-
-        val apiMods = Json.decodeFromString<List<APIMod>>(str)
-
-        return ModHashMap(apiMods.mapNotNull { it.toMod() })
-    }
-
     /**
      * Calculates the playback rate for the track with the selected [Mod]s at [time].
      *

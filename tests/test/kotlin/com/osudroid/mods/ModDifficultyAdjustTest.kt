@@ -9,6 +9,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.math.Vector2
 import com.osudroid.mods.settings.DifficultyAdjustModSetting
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
@@ -182,7 +183,7 @@ class ModDifficultyAdjustTest {
     @Test
     fun `Test deserialization of old object format`() {
         val json = """[{"acronym":"DA","settings":{"cs":{"adjusted":7.0,"original":4.0},"od":{"adjusted":9.0,"original":8.0}}}]"""
-        val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
+        val deserialized = deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
         Assert.assertEquals(4f, deserialized.csDelegate().defaultValue)
@@ -193,7 +194,7 @@ class ModDifficultyAdjustTest {
     @Test
     fun `Test deserialization of old scalar format`() {
         val json = """[{"acronym":"DA","settings":{"cs":7.0,"od":9.0}}]"""
-        val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
+        val deserialized = deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
         Assert.assertEquals(9f, deserialized.od)
@@ -202,7 +203,7 @@ class ModDifficultyAdjustTest {
     @Test
     fun `Test deserialization of old object format with null original`() {
         val json = """[{"acronym":"DA","settings":{"cs":{"adjusted":7.0,"original":null}}}]"""
-        val deserialized = ModUtils.deserializeMods(json).ofType<ModDifficultyAdjust>()!!
+        val deserialized = deserializeMods(json).ofType<ModDifficultyAdjust>()!!
 
         Assert.assertEquals(7f, deserialized.cs)
         Assert.assertNull(deserialized.csDelegate().defaultValue)

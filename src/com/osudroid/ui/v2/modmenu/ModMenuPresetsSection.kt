@@ -4,7 +4,7 @@ import com.osudroid.data.*
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu.addMod
 import com.osudroid.ui.v2.modmenu.ModMenu.removeMod
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import com.osudroid.utils.searchContiguously
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -59,7 +59,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
 
         for (preset in modPresets) {
 
-            preset.mods = ModUtils.deserializeMods(preset.serializedMods)
+            preset.mods = deserializeMods(preset.serializedMods)
             toggleContainer += ModPresetToggle(preset)
         }
     }

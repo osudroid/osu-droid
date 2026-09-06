@@ -13,6 +13,7 @@ import com.osudroid.mods.ModReplayV6
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -94,7 +95,7 @@ val MIGRATION_1_2 = object : BackedUpMigration(1, 2) {
                     // Realistically, this should never happen since migrations are done in a transaction, but there are
                     // crash reports where the CREATE TABLE statement below for ModPreset was executed more than once
                     // (hence the addition of the IF NOT EXISTS clause to that statement).
-                    ModUtils.deserializeMods(oldMods)
+                    deserializeMods(oldMods)
                 } catch (_: Exception) {
                     // If the mods are not deserializable, we assume they are legacy mods, so we migrate them.
                     val newMods = LegacyModConverter.convert(oldMods, difficulty)
@@ -154,7 +155,7 @@ val MIGRATION_2_3 = object : BackedUpMigration(2, 3) {
                     // Check if the mods are already in the new format. In that case, we don't need to migrate them.
                     // Realistically, this should never happen since migrations are done in a transaction, but there are
                     // crash reports where the mods were not migrated in the last migration.
-                    mods = ModUtils.deserializeMods(modString)
+                    mods = deserializeMods(modString)
                 } catch (_: Exception) {
                     // If the mods are not deserializable, we assume they are legacy mods, so we migrate them.
                     @Suppress("DuplicatedCode")
@@ -238,7 +239,7 @@ val MIGRATION_3_4 = object : BackedUpMigration(3, 4) {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 var score = it.getInt(1)
-                val mods = ModUtils.deserializeMods(it.getString(2))
+                val mods = deserializeMods(it.getString(2))
 
                 val flashlight = mods.ofType<ModFlashlight>()!!
 
@@ -277,7 +278,7 @@ val MIGRATION_4_5 = object : BackedUpMigration(4, 5) {
                 val difficulty = db.getBeatmapDifficulty(it.getString(3))
 
                 val mods = try {
-                    ModUtils.deserializeMods(serializedMods)
+                    deserializeMods(serializedMods)
                 } catch (_: Exception) {
                     // If the mods are not deserializable, assume they are legacy mods that need to be migrated.
                     // We have done this in previous migrations, but at one point they were bugged and some scores may
