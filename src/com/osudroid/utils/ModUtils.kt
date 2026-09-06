@@ -1,3 +1,5 @@
+@file:JvmName("ModUtils")
+
 package com.osudroid.utils
 
 import com.osudroid.GameMode
@@ -12,47 +14,46 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 /**
+ * All available [Mod]s.
+ */
+val allModsInstances by lazy {
+    arrayOf(
+        ModApproachDifferent(),
+        ModAutoplay(),
+        ModAutopilot(),
+        ModCustomSpeed(),
+        ModDifficultyAdjust(),
+        ModDoubleTime(),
+        ModEasy(),
+        ModFlashlight(),
+        ModFreezeFrame(),
+        ModHalfTime(),
+        ModHardRock(),
+        ModHidden(),
+        ModMirror(),
+        ModMuted(),
+        ModNightCore(),
+        ModNoFail(),
+        ModPerfect(),
+        ModPrecise(),
+        ModRandom(),
+        ModReallyEasy(),
+        ModRelax(),
+        ModReplayV6(),
+        ModScoreV2(),
+        ModSmallCircle(),
+        ModSuddenDeath(),
+        ModSynesthesia(),
+        ModTraceable(),
+        ModWindDown(),
+        ModWindUp()
+    )
+}
+
+/**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-
-    /**
-     * All available [Mod]s.
-     */
-    val allModsInstances by lazy {
-        arrayOf(
-            ModApproachDifferent(),
-            ModAutoplay(),
-            ModAutopilot(),
-            ModCustomSpeed(),
-            ModDifficultyAdjust(),
-            ModDoubleTime(),
-            ModEasy(),
-            ModFlashlight(),
-            ModFreezeFrame(),
-            ModHalfTime(),
-            ModHardRock(),
-            ModHidden(),
-            ModMirror(),
-            ModMuted(),
-            ModNightCore(),
-            ModNoFail(),
-            ModPerfect(),
-            ModPrecise(),
-            ModRandom(),
-            ModReallyEasy(),
-            ModRelax(),
-            ModReplayV6(),
-            ModScoreV2(),
-            ModSmallCircle(),
-            ModSuddenDeath(),
-            ModSynesthesia(),
-            ModTraceable(),
-            ModWindDown(),
-            ModWindUp()
-        )
-    }
-
     /**
      * All [Mod] classes by their acronym.
      */

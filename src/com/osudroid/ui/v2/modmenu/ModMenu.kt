@@ -31,6 +31,7 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDiff
 import com.osudroid.mods.*
 import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.allModsInstances
 import java.io.IOException
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -225,7 +226,7 @@ object ModMenu : UIScene() {
                     modPresetsSection = ModMenuPresetsSection()
                     +modPresetsSection
 
-                    val mods = ModUtils.allModsInstances
+                    val mods = allModsInstances
 
                     ModType.entries.forEach { type ->
                         val sectionName = StringTable.get(type.stringId)
