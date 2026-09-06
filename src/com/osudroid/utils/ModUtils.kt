@@ -51,14 +51,14 @@ val allModsInstances by lazy {
 }
 
 /**
+ * All [Mod] classes by their acronym.
+ */
+val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
+
+/**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    /**
-     * All [Mod] classes by their acronym.
-     */
-    val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
-
     /**
      * Serializes a list of [Mod]s into a list of [APIMod]s, contained within a JSON string.
      *
