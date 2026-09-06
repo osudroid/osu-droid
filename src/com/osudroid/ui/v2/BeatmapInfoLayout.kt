@@ -16,7 +16,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.Vec4
 import com.reco1l.framework.math.roundBy
 import com.osudroid.utils.ModUtils.applyModsToBeatmapDifficulty
-import com.osudroid.utils.ModUtils.calculateRateWithMods
+import com.osudroid.utils.calculateRate
 import kotlinx.coroutines.Job
 import ru.nsu.ccfit.zuev.osu.*
 import java.text.*
@@ -254,7 +254,7 @@ class BeatmapInfoLayout : UILinearContainer() {
         spinnersBadge.value = beatmapInfo.spinnerCount.toString()
 
         val mods = ModMenu.enabledMods
-        val totalSpeedMultiplier = calculateRateWithMods(mods.values, Double.POSITIVE_INFINITY)
+        val totalSpeedMultiplier = mods.values.calculateRate(Double.POSITIVE_INFINITY)
 
         val difficulty = beatmapInfo.getBeatmapDifficulty()
 

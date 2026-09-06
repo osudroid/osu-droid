@@ -4,6 +4,7 @@ import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.utils.CircleSizeCalculator
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.calculateRate
 
 /**
  * Represents the Really Easy mod.
@@ -32,7 +33,7 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
                     ar -= 0.5f
                 }
 
-                val speedMultiplier = ModUtils.calculateRateWithMods(mods)
+                val speedMultiplier = mods.calculateRate()
 
                 ar -= 0.5f
                 ar -= speedMultiplier - 1

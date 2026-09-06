@@ -101,7 +101,7 @@ class ModUtilsTest {
     @Test
     fun `Test rate calculation with mods`() {
         fun test(expectedRate: Float, vararg mods: Mod) =
-            Assert.assertEquals(expectedRate, ModUtils.calculateRateWithMods(mods.toList()), 0f)
+            Assert.assertEquals(expectedRate, mods.toList().calculateRate(), 0f)
 
         test(1f)
         test(1.25f, ModCustomSpeed(1.25f))

@@ -3,7 +3,7 @@ package com.osudroid.beatmaps
 import com.osudroid.GameMode
 import com.osudroid.mods.Mod
 import com.osudroid.utils.ModHashMap
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.calculateRate
 
 /**
  * Represents an [IBeatmap] that is in a playable state in a specific [GameMode].
@@ -34,7 +34,7 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      * The speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
-    val speedMultiplier = if (mods != null) ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY) else 1f
+    val speedMultiplier = mods?.calculateRate(Double.POSITIVE_INFINITY) ?: 1f
 
     /**
      * The [HitWindow] of this [PlayableBeatmap].

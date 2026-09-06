@@ -7,6 +7,7 @@ import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.ModUtils
+import com.osudroid.utils.calculateRate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -134,7 +135,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             // to game time. This makes the player perceive the AR as is under all speed multipliers.
             if (ar != null && mods.any { m -> m is ModReplayV6 }) {
                 val preempt = BeatmapDifficulty.difficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
-                val trackRate = ModUtils.calculateRateWithMods(mods)
+                val trackRate = mods.calculateRate()
 
                 it.ar = BeatmapDifficulty.inverseDifficultyRange(preempt * trackRate, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
             }
@@ -159,8 +160,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     }
 
     private fun applyOldFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
-        val initialTrackRate = ModUtils.calculateRateWithMods(mods)
-        val currentTrackRate = ModUtils.calculateRateWithMods(mods, hitObject.startTime)
+        val initialTrackRate = mods.calculateRate()
+        val currentTrackRate = mods.calculateRate(hitObject.startTime)
 
         // Cancel the rate that was initially applied to timePreempt (via applyToDifficulty above and
         // HitObject.applyDefaults) and apply the current one.
