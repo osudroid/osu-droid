@@ -151,7 +151,7 @@ class ModUtilsTest {
                 listOf(ModPrecise())
             )
         ).forEach { (original, expected, mode, mods) ->
-            ModUtils.applyModsToBeatmapDifficulty(original, mode, mods)
+            original.applyMods(mode, mods)
 
             Assert.assertEquals(expected.difficultyCS, original.difficultyCS, 1e-2f)
             Assert.assertEquals(expected.gameplayCS, original.gameplayCS, 1e-2f)

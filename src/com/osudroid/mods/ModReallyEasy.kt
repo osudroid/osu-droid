@@ -3,7 +3,6 @@ package com.osudroid.mods
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.utils.CircleSizeCalculator
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.calculateRate
 
 /**

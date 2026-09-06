@@ -3,7 +3,7 @@ package com.osudroid.scoring
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.applyMods
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -66,7 +66,7 @@ class ScoreMultiplierCalculator @JvmOverloads constructor(difficulty: BeatmapDif
         val appliedDifficulty = difficulty?.clone()
 
         if (appliedDifficulty != null) {
-            ModUtils.applyModsToBeatmapDifficulty(appliedDifficulty, GameMode.Droid, mods)
+            appliedDifficulty.applyMods(GameMode.Droid, mods)
             this.appliedDifficulty = appliedDifficulty
         }
 

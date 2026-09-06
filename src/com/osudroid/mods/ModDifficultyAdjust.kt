@@ -6,7 +6,6 @@ import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.settings.*
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.calculateRate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive

@@ -12,7 +12,6 @@ import com.osudroid.mods.ModRateAdjust
 import com.osudroid.mods.ModReplayV6
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.deserializeMods
 import java.io.File
 import kotlin.math.pow

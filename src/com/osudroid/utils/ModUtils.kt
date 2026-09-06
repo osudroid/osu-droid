@@ -158,70 +158,63 @@ fun Iterable<Mod>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
  */
 @JvmOverloads
 @JvmName("calculateRateWithTrackRateMods")
-fun Iterable<IModApplicableToTrackRate>.calculateRateWithMods(time: Double = 0.0) = fold(1f) { rate, mod ->
+fun Iterable<IModApplicableToTrackRate>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
     mod.applyToRate(time, rate)
 }
 
 /**
- * A set of utilities to handle [Mod] combinations.
+ * Applies the selected [Mod]s to this [BeatmapDifficulty].
+ *
+ * @param mode The [GameMode] to apply the [Mod]s for.
+ * @param mods The selected [Mod]s.
+ * @param withRateChange Whether to apply rate changes to the [BeatmapDifficulty].
  */
-object ModUtils {
-    /**
-     * Applies the selected [Mod]s to a [BeatmapDifficulty].
-     *
-     * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.
-     * @param mode The [GameMode] to apply the [Mod]s for.
-     * @param mods The selected [Mod]s.
-     * @param withRateChange Whether to apply rate changes to the [BeatmapDifficulty].
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun applyModsToBeatmapDifficulty(
-        difficulty: BeatmapDifficulty,
-        mode: GameMode,
-        mods: Iterable<Mod>,
-        withRateChange: Boolean = false,
-        scope: CoroutineScope? = null
-    ) {
-        val adjustmentMods = mods.filterIsInstance<IModFacilitatesAdjustment>()
+@JvmOverloads
+@JvmName("applyModsToBeatmapDifficulty")
+fun BeatmapDifficulty.applyMods(
+    mode: GameMode,
+    mods: Iterable<Mod>,
+    withRateChange: Boolean = false,
+    scope: CoroutineScope? = null
+) {
+    val adjustmentMods = mods.filterIsInstance<IModFacilitatesAdjustment>()
 
-        for (mod in mods) {
-            scope?.ensureActive()
+    for (mod in mods) {
+        scope?.ensureActive()
 
-            if (mod is IModApplicableToDifficulty) {
-                mod.applyToDifficulty(mode, difficulty, adjustmentMods)
-            }
+        if (mod is IModApplicableToDifficulty) {
+            mod.applyToDifficulty(mode, this, adjustmentMods)
         }
-
-        for (mod in mods) {
-            scope?.ensureActive()
-
-            if (mod is IModApplicableToDifficultyWithMods) {
-                mod.applyToDifficulty(mode, difficulty, mods)
-            }
-        }
-
-        if (!withRateChange) {
-            return
-        }
-
-        // Apply rate adjustments
-        val trackRate = mods.calculateRate(Double.POSITIVE_INFINITY)
-
-        val preempt = BeatmapDifficulty.difficultyRange(
-            difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
-        ) / trackRate
-
-        difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(
-            preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
-        ).toFloat()
-
-        val isPreciseMod = mods.any { it is ModPrecise }
-        val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(difficulty.od) else DroidHitWindow(difficulty.od)
-        val greatWindow = hitWindow.greatWindow / trackRate
-
-        difficulty.od =
-            if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
     }
+
+    for (mod in mods) {
+        scope?.ensureActive()
+
+        if (mod is IModApplicableToDifficultyWithMods) {
+            mod.applyToDifficulty(mode, this, mods)
+        }
+    }
+
+    if (!withRateChange) {
+        return
+    }
+
+    // Apply rate adjustments
+    val trackRate = mods.calculateRate(Double.POSITIVE_INFINITY)
+
+    val preempt = BeatmapDifficulty.difficultyRange(
+        ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+    ) / trackRate
+
+    ar = BeatmapDifficulty.inverseDifficultyRange(
+        preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+    ).toFloat()
+
+    val isPreciseMod = mods.any { it is ModPrecise }
+    val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+    val greatWindow = hitWindow.greatWindow / trackRate
+
+    od =
+        if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
+        else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
 }

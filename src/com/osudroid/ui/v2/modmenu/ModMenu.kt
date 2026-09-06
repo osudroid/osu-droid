@@ -30,8 +30,8 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficu
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.osudroid.mods.*
 import com.osudroid.scoring.ScoreMultiplierCalculator
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.allModsInstances
+import com.osudroid.utils.applyMods
 import com.osudroid.utils.calculateRate
 import java.io.IOException
 import kotlinx.coroutines.*
@@ -378,7 +378,7 @@ object ModMenu : UIScene() {
             val difficulty = beatmap.difficulty.clone()
             val rate = mods.calculateRate(Double.POSITIVE_INFINITY)
 
-            ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true, this@scope)
+            difficulty.applyMods(gameMode, mods, true, this@scope)
 
             ensureActive()
 

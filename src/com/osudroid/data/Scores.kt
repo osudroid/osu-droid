@@ -14,7 +14,6 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.scoring.ScoreMultiplierCalculator
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.deserializeMods
 import kotlin.math.roundToLong
 import org.apache.commons.io.FilenameUtils

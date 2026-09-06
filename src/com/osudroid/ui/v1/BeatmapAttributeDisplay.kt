@@ -21,7 +21,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModPrecise
 import com.osudroid.utils.CircleSizeCalculator
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.applyMods
 import com.osudroid.utils.calculateRate
 import kotlin.math.roundToInt
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -45,8 +45,8 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
         val nonRateAdjustedDifficulty = difficulty.clone()
         val rateAdjustedDifficulty = difficulty.clone()
 
-        ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, GameMode.Droid, mods, false)
-        ModUtils.applyModsToBeatmapDifficulty(rateAdjustedDifficulty, GameMode.Droid, mods, true)
+        nonRateAdjustedDifficulty.applyMods(GameMode.Droid, mods, false)
+        rateAdjustedDifficulty.applyMods(GameMode.Droid, mods, true)
 
         // CS
 

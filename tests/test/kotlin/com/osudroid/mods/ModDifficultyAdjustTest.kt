@@ -8,7 +8,6 @@ import com.osudroid.beatmaps.sections.BeatmapControlPoints
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.math.Vector2
 import com.osudroid.mods.settings.DifficultyAdjustModSetting
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.deserializeMods
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive

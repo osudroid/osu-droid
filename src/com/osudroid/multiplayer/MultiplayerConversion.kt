@@ -2,7 +2,6 @@
 
 package com.osudroid.multiplayer
 
-import com.osudroid.utils.ModUtils
 import com.osudroid.utils.deserializeMods
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
