@@ -47,6 +47,12 @@ sealed class SoundResolution {
  *   alias is only applied with `putIfAbsent` while the direct entry is always overwritten, this is
  *   safe regardless of file iteration order: a dedicated slider file always wins over the alias,
  *   whichever one is scanned first.
+ * - A `name@2x.ext` file with no `name.ext` counterpart (e.g. official osu! skin exports commonly
+ *   only ship "cursor@2x.png", no plain "cursor.png") is aliased onto the base name too, pointing
+ *   at the base path even though it doesn't exist on disk. `TextureStore.load`'s own "missing file
+ *   -> try the @2x variant" fallback then resolves that path back to the real `@2x` file and loads
+ *   it at half resolution, matching how a real base file would display. Only applied via
+ *   `putIfAbsent`, so an actual base file always wins regardless of iteration order.
  */
 fun buildAvailableFiles(skinFiles: List<File>): Map<String, File> {
     val availableFiles = LinkedHashMap<String, File>()
@@ -69,6 +75,11 @@ fun buildAvailableFiles(skinFiles: List<File>): Map<String, File> {
         if (filename == "hitcircleoverlay") {
             availableFiles.putIfAbsent("sliderstartcircleoverlay", f)
             availableFiles.putIfAbsent("sliderendcircleoverlay", f)
+        }
+        if (filename.endsWith("@2x")) {
+            val baseName = filename.removeSuffix("@2x")
+            val extension = name.substring(name.length - 4)
+            availableFiles.putIfAbsent(baseName, File(f.parentFile, baseName + extension))
         }
     }
 
