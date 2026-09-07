@@ -1,6 +1,5 @@
 package com.osudroid.game.cursor.trail
 
-import android.graphics.BitmapFactory
 import android.opengl.GLES32
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
@@ -8,85 +7,18 @@ import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderP
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import kotlin.math.cos
 import kotlin.math.hypot
-import kotlin.math.max
 import kotlin.math.sin
 
 private const val MAX_PARTS = 512
 private const val DISJOINT_SPAWN_INTERVAL_MS = 1000f / 60f
-
-/**
- * Some skins ship "cursortrail.png" with large fully transparent padding around the actual visible
- * blob (e.g. glow bleed exported without cropping). Spacing trail parts by the raw canvas width
- * then places them far apart relative to what's actually visible, looking gappy even though parts
- * are technically still being interpolated. This measures the alpha-opaque contents bounding box
- * so [CursorTrail] can space parts by what's actually visible instead.
- *
- * Decodes the same file the skin system resolved for "cursortrail" (custom skin override, or the
- * bundled default asset) independently of the GPU uploaded texture, since the source bitmap isn't
- * kept around after upload. This only runs once per [CursorTrail] instance.
- */
-private fun measureVisibleContentSize(fallbackSize: Float): Float {
-    val bitmap = try {
-        val file = File(Config.getSkinPath() + "cursortrail.png")
-        if (file.exists()) {
-            BitmapFactory.decodeFile(file.path)
-        } else {
-            GlobalManager.getInstance().mainActivity.assets.open("gfx/cursortrail.png").use {
-                BitmapFactory.decodeStream(it)
-            }
-        }
-    } catch (e: Exception) {
-        null
-    } ?: return fallbackSize
-
-    try {
-        val width = bitmap.width
-        val height = bitmap.height
-        if (width <= 0 || height <= 0) {
-            return fallbackSize
-        }
-
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-        var minX = width
-        var minY = height
-        var maxX = -1
-        var maxY = -1
-
-        for (y in 0 until height) {
-            val rowOffset = y * width
-            for (x in 0 until width) {
-                // Small threshold to ignore near invisible antialiasing/compression noise.
-                if (pixels[rowOffset + x] ushr 24 > 4) {
-                    if (x < minX) minX = x
-                    if (x > maxX) maxX = x
-                    if (y < minY) minY = y
-                    if (y > maxY) maxY = y
-                }
-            }
-        }
-
-        if (maxX < minX || maxY < minY) {
-            return fallbackSize
-        }
-
-        return max(maxX - minX + 1, maxY - minY + 1).toFloat()
-    } finally {
-        bitmap.recycle()
-    }
-}
 
 /**
  * Renders the skin's "cursortrail" texture behind the moving cursor, osu! legacy skin
@@ -101,10 +33,6 @@ class CursorTrail(
     private val disjointTrail = !ResourceManager.getInstance().isTextureLoaded("cursormiddle")
     private val allowPartRotation = OsuSkin.get().isRotateCursorTrail
     private val fadeDurationMs = if (disjointTrail) 150f else 500f
-
-    // Spacing is based on the texture's actual visible content, not its raw canvas size. See
-    // measureVisibleContentSize's doc for why.
-    private val trailContentSize = measureVisibleContentSize(textureRegion.width)
 
     private val partX = FloatArray(MAX_PARTS)
     private val partY = FloatArray(MAX_PARTS)
@@ -214,7 +142,7 @@ class CursorTrail(
         }
     }
 
-    private fun interval(): Float = trailContentSize * cursorSprite.baseSize / 2.5f
+    private fun interval(): Float = textureRegion.width * cursorSprite.baseSize / 2.5f
 
     private fun addPart(x: Float, y: Float) {
         partX[writeIndex] = x
