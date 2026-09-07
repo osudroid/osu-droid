@@ -67,13 +67,10 @@ val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it:
  */
 @JvmOverloads
 @Throws(SerializationException::class)
-fun Iterable<Mod>.serialize(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false): String {
-    val filteredMods = filter {
-        (includeNonUserPlayable || it.isUserPlayable) && (includeIrrelevantMods || it.isRelevant)
-    }
-
-    return Json.encodeToString(filteredMods.map { it.toAPIMod() })
-}
+fun Iterable<Mod>.serialize(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
+    Json.encodeToString(mapNotNull {
+        if ((includeNonUserPlayable || it.isUserPlayable) && (includeIrrelevantMods || it.isRelevant)) it.toAPIMod() else null
+    })
 
 /**
  * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serialize].
