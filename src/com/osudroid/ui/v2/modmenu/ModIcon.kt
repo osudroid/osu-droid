@@ -15,9 +15,6 @@ import org.andengine.opengl.texture.region.*
 import org.andengine.opengl.util.GLState
 import com.osudroid.mods.*
 import com.osudroid.utils.allModsInstances
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.texture.region.*
-import com.osudroid.utils.*
 import ru.nsu.ccfit.zuev.osu.*
 
 /**
