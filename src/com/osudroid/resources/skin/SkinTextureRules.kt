@@ -11,6 +11,7 @@ val OPTIONAL_TEXTURES = arrayOf(
     "scorebar-ki",
     "scorebar-kidanger",
     "scorebar-kidanger2",
+    "cursormiddle",
 )
 
 /**

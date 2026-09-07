@@ -1,7 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import com.osudroid.game.cursor.trail.FancyCursorTrail;
+import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.component.UIComponent;
+import com.reco1l.andengine.sprite.UISprite;
 
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.andengine.entity.scene.Scene;
@@ -14,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
+    private final UISprite cursorMiddleSprite;
     private CursorTrail trail = null;
     private FancyCursorTrail fancyTrail = null;
     private PointParticleEmitter emitter = null;
@@ -22,6 +25,19 @@ public class CursorEntity extends UIComponent {
 
     public CursorEntity() {
         cursorSprite = new CursorSprite();
+
+        // "cursormiddle" is drawn statically on top of the cursor, unlike the cursor itself it never
+        // rotates or scales on click. its entirely opt in per skin (see OPTIONAL_TEXTURES).
+        var middleTexture = ResourceManager.getInstance().getTextureIfLoaded("cursormiddle");
+        if (middleTexture != null) {
+            cursorMiddleSprite = new UISprite();
+            cursorMiddleSprite.setAnchor(Anchor.Center);
+            cursorMiddleSprite.setOrigin(Anchor.Center);
+            cursorMiddleSprite.setScale(cursorSprite.baseSize);
+            cursorMiddleSprite.setTextureRegion(middleTexture);
+        } else {
+            cursorMiddleSprite = null;
+        }
 
         if (Config.isUseFancyCursorTrail()) {
             fancyTrail = new FancyCursorTrail();
@@ -39,6 +55,9 @@ public class CursorEntity extends UIComponent {
         }
 
         attachChild(cursorSprite);
+        if (cursorMiddleSprite != null) {
+            attachChild(cursorMiddleSprite);
+        }
         setVisible(false);
 
         // Not necessary to update by itself since it's done by GameScene.
