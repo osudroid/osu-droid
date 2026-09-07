@@ -183,7 +183,7 @@ public class Text extends RectangularShape {
 	 * @throws OutOfCharactersException leaves this {@link Text} object in an undefined state, until {@link Text#setText(CharSequence)} is called again and no {@link OutOfCharactersException} is thrown.
 	 */
 	public void setText(final CharSequence pText) throws OutOfCharactersException {
-		this.mText = pText;
+		this.mText = Text.truncateToCapacity(pText, this.mCharactersMaximum);
 		final IFont font = this.mFont;
 
 		this.mLines.clear();
@@ -341,6 +341,20 @@ public class Text extends RectangularShape {
 
 	public void invalidateText() {
 		this.setText(this.mText);
+	}
+
+	/**
+	 * Cuts down pText so it can never exceed pCharactersMaximum drawable characters, appending an
+	 * ellipsis when truncated. Whitespace/newlines don't count towards the drawn character total, so
+	 * using the raw length here is a conservative (i.e. safe) upper bound on it.
+	 */
+	private static CharSequence truncateToCapacity(final CharSequence pText, final int pCharactersMaximum) {
+		if (pText.length() <= pCharactersMaximum) {
+			return pText;
+		}
+
+		final int cutIndex = Math.max(0, pCharactersMaximum - 1);
+		return pText.subSequence(0, cutIndex).toString() + "…";
 	}
 
 	// ===========================================================

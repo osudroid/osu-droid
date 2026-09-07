@@ -107,6 +107,13 @@ public class HighPerformanceTextVertexBufferObject extends HighPerformanceVertex
 				}
 
 				if(!letter.isWhitespace()) {
+					if(bufferDataOffset + Text.LETTER_SIZE > bufferData.length) {
+						charactersToDraw++;
+						xBase += letter.mAdvance;
+						previousLetter = letter;
+						continue;
+					}
+
 					final float x = xBase + letter.mOffsetX;
 					final float y = yBase + letter.mOffsetY;
 
