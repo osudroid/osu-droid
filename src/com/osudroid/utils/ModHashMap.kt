@@ -157,7 +157,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     /**
      * Serializes all [Mod]s in this [ModHashMap] into a list of [APIMod]s, contained within a JSON string.
      *
-     * The result can be deserialized using [ModUtils.deserializeMods].
+     * The result can be deserialized using [deserializeMods].
      *
      * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
      * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
