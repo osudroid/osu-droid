@@ -1,0 +1,217 @@
+@file:JvmName("ModUtils")
+
+package com.osudroid.utils
+
+import com.osudroid.GameMode
+import com.osudroid.beatmaps.DroidHitWindow
+import com.osudroid.beatmaps.PreciseDroidHitWindow
+import com.osudroid.beatmaps.hitobjects.HitObject
+import com.osudroid.beatmaps.sections.BeatmapDifficulty
+import com.osudroid.mods.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+
+/**
+ * All available [Mod]s.
+ */
+val allModsInstances by lazy {
+    arrayOf(
+        ModApproachDifferent(),
+        ModAutoplay(),
+        ModAutopilot(),
+        ModCustomSpeed(),
+        ModDifficultyAdjust(),
+        ModDoubleTime(),
+        ModEasy(),
+        ModFlashlight(),
+        ModFreezeFrame(),
+        ModHalfTime(),
+        ModHardRock(),
+        ModHidden(),
+        ModMirror(),
+        ModMuted(),
+        ModNightCore(),
+        ModNoFail(),
+        ModPerfect(),
+        ModPrecise(),
+        ModRandom(),
+        ModReallyEasy(),
+        ModRelax(),
+        ModReplayV6(),
+        ModScoreV2(),
+        ModSmallCircle(),
+        ModSuddenDeath(),
+        ModSynesthesia(),
+        ModTraceable(),
+        ModWindDown(),
+        ModWindUp()
+    )
+}
+
+/**
+ * All [Mod] classes by their acronym.
+ */
+val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
+
+/**
+ * Serializes a list of [Mod]s into a list of [APIMod]s, contained within a JSON string.
+ *
+ * The result can be deserialized using [deserializeMods].
+ *
+ * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
+ * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
+ * @return The list of [APIMod]s as a JSON string.
+ * @throws SerializationException If there is an error during serialization.
+ */
+@JvmOverloads
+@Throws(SerializationException::class)
+fun Iterable<Mod>.serialize(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
+    Json.encodeToString(mapNotNull {
+        if ((includeNonUserPlayable || it.isUserPlayable) && (includeIrrelevantMods || it.isRelevant)) it.toAPIMod() else null
+    })
+
+/**
+ * Deserializes a list of [APIMod]s into their [Mod] counterparts from a JSON string received from [serialize].
+ *
+ * @param str The JSON string containing the list of [APIMod]s.
+ * @return The deserialized [Mod]s in a [ModHashMap].
+ * @throws SerializationException If there is an error during deserialization of [str].
+ * @throws IllegalArgumentException If [str] is not a valid representation of a list of [APIMod]s.
+ */
+@Throws(SerializationException::class, IllegalArgumentException::class)
+fun deserializeMods(str: String): ModHashMap {
+    if (str.isEmpty()) {
+        return ModHashMap()
+    }
+
+    val apiMods = Json.decodeFromString<List<APIMod>>(str)
+
+    return ModHashMap(apiMods.mapNotNull { it.toMod() })
+}
+
+/**
+ * Calculates the playback rate for the track with the selected [Mod]s at [time].
+ *
+ * This is a faster version that uses [Collection.indices] rather than [Iterable.iterator].
+ *
+ * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+ * @return The rate with [Mod]s.
+ */
+@JvmOverloads
+fun List<Mod>.calculateRate(time: Double = 0.0): Float {
+    var rate = 1f
+
+    for (i in indices) {
+        val mod = this[i]
+
+        if (mod is IModApplicableToTrackRate) {
+            rate = mod.applyToRate(time, rate)
+        }
+    }
+
+    return rate
+}
+
+/**
+ * Calculates the playback rate for the track with the selected [IModApplicableToTrackRate]s at [time].
+ *
+ * This is a faster version that uses [Collection.indices] rather than [Iterable.iterator].
+ *
+ * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+ * @return The rate with [IModApplicableToTrackRate]s.
+ */
+@JvmOverloads
+@JvmName("calculateRateWithTrackRateMods")
+fun List<IModApplicableToTrackRate>.calculateRate(time: Double = 0.0): Float {
+    var rate = 1f
+
+    for (i in indices) {
+        val mod = this[i]
+
+        rate = mod.applyToRate(time, rate)
+    }
+
+    return rate
+}
+
+/**
+ * Calculates the playback rate for the track with the selected [Mod]s at [time].
+ *
+ * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+ * @return The rate with [Mod]s.
+ */
+@JvmOverloads
+fun Iterable<Mod>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
+    (mod as? IModApplicableToTrackRate)?.applyToRate(time, rate) ?: rate
+}
+
+/**
+ * Calculates the playback rate for the track with the selected [IModApplicableToTrackRate]s at [time].
+ *
+ * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+ * @return The rate with [IModApplicableToTrackRate]s.
+ */
+@JvmOverloads
+@JvmName("calculateRateWithTrackRateMods")
+fun Iterable<IModApplicableToTrackRate>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
+    mod.applyToRate(time, rate)
+}
+
+/**
+ * Applies the selected [Mod]s to this [BeatmapDifficulty].
+ *
+ * @param mode The [GameMode] to apply the [Mod]s for.
+ * @param mods The selected [Mod]s.
+ * @param withRateChange Whether to apply rate changes to the [BeatmapDifficulty].
+ */
+@JvmOverloads
+@JvmName("applyModsToBeatmapDifficulty")
+fun BeatmapDifficulty.applyMods(
+    mode: GameMode,
+    mods: Iterable<Mod>,
+    withRateChange: Boolean = false,
+    scope: CoroutineScope? = null
+) {
+    val adjustmentMods = mods.filterIsInstance<IModFacilitatesAdjustment>()
+
+    for (mod in mods) {
+        scope?.ensureActive()
+
+        if (mod is IModApplicableToDifficulty) {
+            mod.applyToDifficulty(mode, this, adjustmentMods)
+        }
+    }
+
+    for (mod in mods) {
+        scope?.ensureActive()
+
+        if (mod is IModApplicableToDifficultyWithMods) {
+            mod.applyToDifficulty(mode, this, mods)
+        }
+    }
+
+    if (!withRateChange) {
+        return
+    }
+
+    // Apply rate adjustments
+    val trackRate = mods.calculateRate(Double.POSITIVE_INFINITY)
+
+    val preempt = BeatmapDifficulty.difficultyRange(
+        ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+    ) / trackRate
+
+    ar = BeatmapDifficulty.inverseDifficultyRange(
+        preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+    ).toFloat()
+
+    val isPreciseMod = mods.any { it is ModPrecise }
+    val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+    val greatWindow = hitWindow.greatWindow / trackRate
+
+    od =
+        if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
+        else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow).toFloat()
+}

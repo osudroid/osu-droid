@@ -933,7 +933,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         var mods = ModMenu.INSTANCE.getEnabledMods();
         boolean isPreciseMod = mods.contains(ModPrecise.class);
-        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
+        float totalSpeedMultiplier = ModUtils.calculateRate(mods.values(), Double.POSITIVE_INFINITY);
 
         var difficulty = beatmapInfo.getBeatmapDifficulty().clone();
         ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values(), true);
@@ -1491,7 +1491,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         var enabledMods = ModMenu.INSTANCE.getEnabledMods();
-        float speed = ModUtils.calculateRateWithMods(enabledMods.values(), Double.POSITIVE_INFINITY);
+        float speed = ModUtils.calculateRate(enabledMods.values(), Double.POSITIVE_INFINITY);
         boolean adjustPitch = Config.isShiftPitchInRateChange() || enabledMods.contains(ModNightCore.class);
 
         songService.setSpeed(speed);

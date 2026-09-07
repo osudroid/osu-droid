@@ -11,7 +11,8 @@ import kotlinx.serialization.json.*
  * {"adjusted": 7.0, "original": 4.0}
  * ```
  *
- * Old scalar values (`"cs": 7.0`) are accepted on [load] for backward compatibility.
+ * Plain scalar values (`"cs": 7.0`) are the current serialized format written by [save], and are also what data
+ * predating the legacy object format looks like. Both are accepted on [load].
  */
 class DifficultyAdjustModSetting(
     name: String,
@@ -48,7 +49,9 @@ class DifficultyAdjustModSetting(
         val element = json[key]
 
         if (element is JsonObject) {
-            // TODO: Remove this branch in a future migration once all legacy {"adjusted","original"} scores are gone.
+            // Object format that was temporarily used as a solution towards difficulty-dependent score multiplier.
+            // Now that another solution has been implemented, this format was removed, but it was still saved in
+            // some replays. This means this branch must be kept.
             value = element["adjusted"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull
 
             val original = element["original"]?.takeUnless { it is JsonNull }?.jsonPrimitive?.floatOrNull
@@ -57,7 +60,8 @@ class DifficultyAdjustModSetting(
                 defaultValue = original
             }
         } else {
-            // This is in old scalar format (or null / JsonNull). Delegate to parent for backward compatibility.
+            // Plain scalar (or null / JsonNull), which the current format written by save() and matches data from
+            // before/after the object format existed. Delegate to parent.
             super.load(json)
         }
     }

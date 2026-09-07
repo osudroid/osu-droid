@@ -25,7 +25,7 @@ import com.osudroid.mods.ModRelax
 import com.osudroid.mods.ModReplayV6
 import com.osudroid.mods.ModScoreV2
 import com.osudroid.mods.ModTraceable
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.calculateRate
 import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
@@ -215,7 +215,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         var inSpeedSection = false
         var firstSpeedObjectIndex = 0
-        val clockRate = ModUtils.calculateRateWithMods(mods)
+        val clockRate = mods.calculateRate()
 
         for (i in 2 until objects.size) {
             val current = objects[i]

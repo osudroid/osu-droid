@@ -21,7 +21,7 @@ import com.osudroid.mods.Mod
 import com.osudroid.mods.ModScoreV2
 import com.osudroid.scoring.ScoreMultiplierCalculator
 import com.osudroid.utils.ModHashMap
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.applyMods
 import kotlin.math.roundToLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -79,7 +79,7 @@ open class Beatmap(mode: GameMode) : IBeatmap, Cloneable {
         val nonRateAdjustedDifficulty = difficulty.clone()
 
         if (mods != null) {
-            ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, mode, mods.values)
+            nonRateAdjustedDifficulty.applyMods(mode, mods.values)
         }
 
         for (obj in hitObjects) {

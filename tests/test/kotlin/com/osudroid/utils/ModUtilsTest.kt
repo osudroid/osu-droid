@@ -12,17 +12,17 @@ import com.osudroid.mods.ModNightCore
 import com.osudroid.mods.ModOldNightCore
 import com.osudroid.mods.ModPrecise
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.mods.ModWindDown
+import com.osudroid.mods.ModWindUp
 import org.junit.Assert
 import org.junit.Test
 
 class ModUtilsTest {
     @Test
     fun `Test mod serialization with non-user playable mods`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())
-        )
+        val serializedMods = listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()).serialize()
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(4, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -35,12 +35,11 @@ class ModUtilsTest {
 
     @Test
     fun `Test mod serialization without non-user playable mods`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()),
-            false
-        )
+        val serializedMods = listOf(
+            ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()
+        ).serialize(false)
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -53,15 +52,13 @@ class ModUtilsTest {
 
     @Test
     fun `Test mod deserialization`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(
-                ModAutoplay(),
-                ModCustomSpeed(1.25f),
-                ModHidden()
-            )
-        )
+        val serializedMods = listOf(
+            ModAutoplay(),
+            ModCustomSpeed(1.25f),
+            ModHidden()
+        ).serialize()
 
-        ModUtils.deserializeMods(serializedMods).apply {
+        deserializeMods(serializedMods).apply {
             Assert.assertEquals(3, size)
             Assert.assertTrue(ModAutoplay::class in this)
             Assert.assertTrue(ModCustomSpeed::class in this)
@@ -72,9 +69,39 @@ class ModUtilsTest {
     }
 
     @Test
+    fun `Test Wind Up serialization preserves rate settings`() {
+        val windUp = ModWindUp().also {
+            it.initialRate = 1.2f
+            it.finalRate = 1.8f
+        }
+
+        val serializedMods = listOf(windUp).serialize()
+
+        deserializeMods(serializedMods).ofType<ModWindUp>()!!.apply {
+            Assert.assertEquals(1.2f, initialRate, 0f)
+            Assert.assertEquals(1.8f, finalRate, 0f)
+        }
+    }
+
+    @Test
+    fun `Test Wind Down serialization preserves rate settings`() {
+        val windDown = ModWindDown().also {
+            it.initialRate = 1.3f
+            it.finalRate = 0.6f
+        }
+
+        val serializedMods = listOf(windDown).serialize()
+
+        deserializeMods(serializedMods).ofType<ModWindDown>()!!.apply {
+            Assert.assertEquals(1.3f, initialRate, 0f)
+            Assert.assertEquals(0.6f, finalRate, 0f)
+        }
+    }
+
+    @Test
     fun `Test rate calculation with mods`() {
         fun test(expectedRate: Float, vararg mods: Mod) =
-            Assert.assertEquals(expectedRate, ModUtils.calculateRateWithMods(mods.toList()), 0f)
+            Assert.assertEquals(expectedRate, mods.toList().calculateRate(), 0f)
 
         test(1f)
         test(1.25f, ModCustomSpeed(1.25f))
@@ -124,7 +151,7 @@ class ModUtilsTest {
                 listOf(ModPrecise())
             )
         ).forEach { (original, expected, mode, mods) ->
-            ModUtils.applyModsToBeatmapDifficulty(original, mode, mods)
+            original.applyMods(mode, mods)
 
             Assert.assertEquals(expected.difficultyCS, original.difficultyCS, 1e-2f)
             Assert.assertEquals(expected.gameplayCS, original.gameplayCS, 1e-2f)

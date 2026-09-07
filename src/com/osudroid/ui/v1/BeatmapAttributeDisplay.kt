@@ -21,7 +21,8 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.Mod
 import com.osudroid.mods.ModPrecise
 import com.osudroid.utils.CircleSizeCalculator
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.applyMods
+import com.osudroid.utils.calculateRate
 import kotlin.math.roundToInt
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -44,8 +45,8 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
         val nonRateAdjustedDifficulty = difficulty.clone()
         val rateAdjustedDifficulty = difficulty.clone()
 
-        ModUtils.applyModsToBeatmapDifficulty(nonRateAdjustedDifficulty, GameMode.Droid, mods, false)
-        ModUtils.applyModsToBeatmapDifficulty(rateAdjustedDifficulty, GameMode.Droid, mods, true)
+        nonRateAdjustedDifficulty.applyMods(GameMode.Droid, mods, false)
+        rateAdjustedDifficulty.applyMods(GameMode.Droid, mods, true)
 
         // CS
 
@@ -85,7 +86,7 @@ open class BeatmapAttributeDisplay(difficulty: BeatmapDifficulty, mods: Iterable
         // For OD, we want to display rate-affected hit window values in a different way, because they are not
         // accurately represented by the OD value itself.
         val isPrecise = mods.any { it is ModPrecise }
-        val rate = ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
+        val rate = mods.calculateRate(Double.POSITIVE_INFINITY)
 
         val hitWindow =
             if (isPrecise) PreciseDroidHitWindow(nonRateAdjustedDifficulty.od)

@@ -14,7 +14,7 @@ import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.scoring.LegacyScoreMultiplierCalculator
 import com.osudroid.scoring.ScoreMultiplierCalculator
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import kotlin.math.roundToLong
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
@@ -164,7 +164,7 @@ data class ScoreInfo @JvmOverloads constructor(
             return score
         }
 
-        val modMap = ModUtils.deserializeMods(mods)
+        val modMap = deserializeMods(mods)
 
         return (score * ScoreMultiplierCalculator(difficulty).calculateFor(modMap.values)).roundToLong()
     }
@@ -177,7 +177,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.playerName = playerName
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
-        it.mod = ModUtils.deserializeMods(mods)
+        it.mod = deserializeMods(mods)
 
         // Pending-migration rows store total score with multiplier, so we use forced score to prevent mod multipliers
         // from multiplying again.
@@ -294,7 +294,7 @@ interface IScoreInfoDAO {
         }
 
         for (scoreInfo in pending) {
-            val mods = ModUtils.deserializeMods(scoreInfo.mods)
+            val mods = deserializeMods(scoreInfo.mods)
 
             updateScore(scoreInfo.copy(
                 score = (scoreInfo.score / LegacyScoreMultiplierCalculator(difficulty).calculateFor(mods.values)).roundToLong(),

@@ -69,6 +69,17 @@ class ScoreMultiplierCalculatorTest {
         Assert.assertEquals(0.75, calculateGroupMultiplier(listOf(ModHalfTime())), 1e-6)
     }
 
+    @Test
+    fun `HalfTime and CustomSpeed combination is clamped to the lower bound`() {
+        // combined rate = 0.75 * 0.5 = 0.375
+        // rateMultiplier(0.375) = 0.375 * 1.5 - 0.5 = 0.0625, clamped to 0.1
+        Assert.assertEquals(
+            0.1,
+            ScoreMultiplierCalculator().calculateFor(listOf(ModHalfTime(), ModCustomSpeed(0.5f))),
+            1e-6
+        )
+    }
+
     private fun calculateMultiplier(mods: Iterable<Mod>, difficulty: BeatmapDifficulty? = null) =
         TestScoreMultiplierCalculator(difficulty).calculateFor(mods)
 

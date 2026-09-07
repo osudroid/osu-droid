@@ -12,6 +12,7 @@ class ModWindDown : ModTimeRamp() {
 
     override var initialRate by object : FloatModSetting(
         name = "Initial rate",
+        key = "initialRate",
         valueFormatter = { "${it.roundBy(2)}x" },
         defaultValue = 1f,
         minValue = 0.55f,
@@ -35,6 +36,7 @@ class ModWindDown : ModTimeRamp() {
 
     override var finalRate by object : FloatModSetting(
         name = "Final rate",
+        key = "finalRate",
         valueFormatter = { "${it.roundBy(2)}x" },
         defaultValue = 0.75f,
         minValue = 0.5f,
