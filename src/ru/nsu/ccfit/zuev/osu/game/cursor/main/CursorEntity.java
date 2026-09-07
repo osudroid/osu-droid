@@ -1,27 +1,23 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
+import com.osudroid.game.cursor.trail.CursorTrail;
 import com.osudroid.game.cursor.trail.FancyCursorTrail;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.component.UIComponent;
 import com.reco1l.andengine.sprite.UISprite;
 
-import org.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.andengine.entity.scene.Scene;
 import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
     private final UISprite cursorMiddleSprite;
     private CursorTrail trail = null;
     private FancyCursorTrail fancyTrail = null;
-    private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
-    private float particleOffsetX, particleOffsetY;
 
     public CursorEntity() {
         cursorSprite = new CursorSprite();
@@ -43,15 +39,7 @@ public class CursorEntity extends UIComponent {
             fancyTrail = new FancyCursorTrail();
         } else if (Config.isUseParticles()) {
             TextureRegion trailTex = ResourceManager.getInstance().getTexture("cursortrail");
-
-            particleOffsetX = -trailTex.getWidth() / 2f;
-            particleOffsetY = -trailTex.getHeight() / 2f;
-
-            var spawnRate = (int) (GlobalManager.getInstance().getMainActivity().getRefreshRate() * 2);
-
-            emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
-            trail = new CursorTrail(emitter, spawnRate, trailTex, cursorSprite);
-            trail.setParticlesSpawnEnabled(false);
+            trail = new CursorTrail(trailTex, cursorSprite);
         }
 
         attachChild(cursorSprite);
@@ -68,7 +56,7 @@ public class CursorEntity extends UIComponent {
         isShowing = showing;
         setVisible(showing);
         if (trail != null)
-            trail.setParticlesSpawnEnabled(showing);
+            trail.setSpawningEnabled(showing);
         if (fancyTrail != null) {
             fancyTrail.setVisible(showing);
             if (!showing) fancyTrail.resetTrail();
@@ -83,15 +71,17 @@ public class CursorEntity extends UIComponent {
         if (isShowing) {
             cursorSprite.update(pSecondsElapsed);
 
-            if (trail != null) {
-                trail.update();
-            }
-
             if (fancyTrail != null) {
                 fancyTrail.setCursorX(getX());
                 fancyTrail.setCursorY(getY());
                 fancyTrail.update(pSecondsElapsed);
             }
+        }
+
+        // Runs regardless of isShowing so already-spawned trail parts keep fading out in real
+        // time instead of freezing while the cursor is hidden.
+        if (trail != null) {
+            trail.update(pSecondsElapsed);
         }
 
         super.onManagedUpdate(pSecondsElapsed);
@@ -109,8 +99,9 @@ public class CursorEntity extends UIComponent {
 
     @Override
     public void setPosition(float pX, float pY) {
-        if (emitter != null)
-            emitter.setCenter(pX + particleOffsetX, pY + particleOffsetY);
+        if (trail != null) {
+            trail.addPosition(pX, pY);
+        }
 
         super.setPosition(pX, pY);
     }
