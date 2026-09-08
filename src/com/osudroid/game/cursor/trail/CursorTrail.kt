@@ -7,6 +7,7 @@ import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderP
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite
 import ru.nsu.ccfit.zuev.skins.OsuSkin
@@ -15,6 +16,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.max
 import kotlin.math.sin
 
 private const val MAX_PARTS = 512
@@ -33,6 +35,8 @@ class CursorTrail(
     private val disjointTrail = !ResourceManager.getInstance().isTextureLoaded("cursormiddle")
     private val allowPartRotation = OsuSkin.get().isRotateCursorTrail
     private val fadeDurationMs = if (disjointTrail) 150f else 500f
+
+    private val originAtTopLeft = disjointTrail && !OsuSkin.get().isCursorCentre
 
     private val partX = FloatArray(MAX_PARTS)
     private val partY = FloatArray(MAX_PARTS)
@@ -135,14 +139,17 @@ class CursorTrail(
         if (disjointTrail && spawningEnabled && hasPosition) {
             disjointSpawnAccumulatorMs += secondsElapsed * 1000f
 
-            while (disjointSpawnAccumulatorMs >= DISJOINT_SPAWN_INTERVAL_MS) {
-                disjointSpawnAccumulatorMs -= DISJOINT_SPAWN_INTERVAL_MS
+            if (disjointSpawnAccumulatorMs >= DISJOINT_SPAWN_INTERVAL_MS) {
+                disjointSpawnAccumulatorMs = 0f
                 addPart(currentX, currentY)
             }
         }
     }
 
-    private fun interval(): Float = textureRegion.width * cursorSprite.baseSize / 2.5f
+    private fun interval(): Float {
+        val intervalMultiplier = 1f / max(Config.getCursorSize(), 1f)
+        return textureRegion.width * cursorSprite.scaleX / 2.5f * intervalMultiplier
+    }
 
     private fun addPart(x: Float, y: Float) {
         partX[writeIndex] = x
@@ -156,6 +163,11 @@ class CursorTrail(
 
         val halfW = textureRegion.width * cursorSprite.scaleX / 2f
         val halfH = textureRegion.height * cursorSprite.scaleY / 2f
+
+        // Centred origin spans [-half, half], top-left origin shifts that to [0, 2*half] so the
+        // textures top-left corner sits at the parts position instead of its center.
+        val offsetX = if (originAtTopLeft) halfW else 0f
+        val offsetY = if (originAtTopLeft) halfH else 0f
 
         val angle = if (allowPartRotation) Math.toRadians(cursorSprite.rotation.toDouble()).toFloat() else 0f
         val sin = sin(angle)
@@ -205,10 +217,10 @@ class CursorTrail(
             val cx = partX[i]
             val cy = partY[i]
 
-            putVertex(0, -halfW, -halfH, cx, cy, sin, cos, u, v)
-            putVertex(1, -halfW, halfH, cx, cy, sin, cos, u, v2)
-            putVertex(2, halfW, -halfH, cx, cy, sin, cos, u2, v)
-            putVertex(3, halfW, halfH, cx, cy, sin, cos, u2, v2)
+            putVertex(0, -halfW + offsetX, -halfH + offsetY, cx, cy, sin, cos, u, v)
+            putVertex(1, -halfW + offsetX, halfH + offsetY, cx, cy, sin, cos, u, v2)
+            putVertex(2, halfW + offsetX, -halfH + offsetY, cx, cy, sin, cos, u2, v)
+            putVertex(3, halfW + offsetX, halfH + offsetY, cx, cy, sin, cos, u2, v2)
 
             vertexBuffer.position(0)
             GLES32.glVertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)

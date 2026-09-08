@@ -30,7 +30,7 @@ public class CursorSprite extends UISprite implements ISliderListener {
         super();
 
         setAnchor(Anchor.Center);
-        setOrigin(Anchor.Center);
+        setOrigin(OsuSkin.get().isCursorCentre() ? Anchor.Center : Anchor.TopLeft);
         setScale(baseSize);
         setTextureRegion(ResourceManager.getInstance().getTexture("cursor"));
     }
@@ -41,6 +41,9 @@ public class CursorSprite extends UISprite implements ISliderListener {
     }
 
     public void handleClick() {
+        if (!OsuSkin.get().isCursorExpand())
+            return;
+
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize);
         beginModifierSequence(clickSequence);
@@ -59,6 +62,9 @@ public class CursorSprite extends UISprite implements ISliderListener {
 
     @Override
     public void onSliderTracking() {
+        if (!OsuSkin.get().isCursorExpand())
+            return;
+
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize);
         scaleTo(baseSize * 1.25f, clickAnimationTime);
@@ -66,6 +72,9 @@ public class CursorSprite extends UISprite implements ISliderListener {
 
     @Override
     public void onSliderEnd() {
+        if (!OsuSkin.get().isCursorExpand())
+            return;
+
         clearModifiers(ModifierType.ScaleXY);
         setScale(baseSize * 1.25f);
         scaleTo(baseSize, clickAnimationTime);

@@ -11,6 +11,7 @@ import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class CursorEntity extends UIComponent {
     protected final CursorSprite cursorSprite;
@@ -28,7 +29,7 @@ public class CursorEntity extends UIComponent {
         if (middleTexture != null) {
             cursorMiddleSprite = new UISprite();
             cursorMiddleSprite.setAnchor(Anchor.Center);
-            cursorMiddleSprite.setOrigin(Anchor.Center);
+            cursorMiddleSprite.setOrigin(OsuSkin.get().isCursorCentre() ? Anchor.Center : Anchor.TopLeft);
             cursorMiddleSprite.setScale(cursorSprite.baseSize);
             cursorMiddleSprite.setTextureRegion(middleTexture);
         } else {
