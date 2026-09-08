@@ -142,6 +142,15 @@ public class ResourceManager {
             if (jsonFile.exists()) {
                 try {
                     skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
+
+                    // Backfill any skin.ini derived keys missing
+                    var iniFile = new File(folder, "skin.ini");
+
+                    if (iniFile.exists()) {
+                        try (var ini = new IniReader(iniFile)) {
+                            SkinConverter.mergeMissing(skinjson, SkinConverter.convertToJson(ini));
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
