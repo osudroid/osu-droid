@@ -15,6 +15,23 @@ import java.io.IOException
 import kotlin.math.min
 
 
+/** Recursively fills [target] with keys from [source] it's missing, without overwriting existing ones. */
+fun mergeMissing(target: JSONObject, source: JSONObject) {
+    for (key in source.keys()) {
+        val sourceValue = source.opt(key)
+
+        if (!target.has(key)) {
+            target.put(key, sourceValue)
+            continue
+        }
+
+        val targetValue = target.opt(key)
+        if (sourceValue is JSONObject && targetValue is JSONObject) {
+            mergeMissing(targetValue, sourceValue)
+        }
+    }
+}
+
 fun convertToJson(ini: IniReader) = JSONObject().apply {
 
     fun convertToHex(ints: IntArray?): String? {
