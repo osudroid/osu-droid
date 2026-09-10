@@ -5,6 +5,8 @@ import android.util.Log;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.discord.DiscordPresenceManager;
+import com.osudroid.discord.UserActivity;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
@@ -635,6 +637,7 @@ public class ScoringScene {
             return;
         }
         replayMusic();
+        DiscordPresenceManager.setActivity(UserActivity.ChoosingBeatmap.INSTANCE);
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
         GlobalManager.getInstance().getSongMenu().updateScore();
         setReplayID(-1);

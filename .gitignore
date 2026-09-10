@@ -1,3 +1,6 @@
+# clangd compilation database (machine-specific absolute paths)
+jni/compile_commands.json
+
 # built application files
 *.apk
 *.ap_
@@ -36,6 +39,7 @@ proguard_logs/
 .DS_Store
 .gradle/
 .externalNativeBuild/
+.cxx/
 .kotlin/
 
 release.jks

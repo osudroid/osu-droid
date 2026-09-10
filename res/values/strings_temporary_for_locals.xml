@@ -3,4 +3,7 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_discordRichPresence_title">Discord Rich Presence</string>
+    <string name="opt_discordRichPresence_summary">Show your current activity on your Discord profile</string>
+
 </resources>

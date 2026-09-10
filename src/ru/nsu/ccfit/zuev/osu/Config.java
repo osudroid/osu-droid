@@ -705,6 +705,10 @@ public class Config {
         return receiveAnnouncements;
     }
 
+    public static boolean isDiscordRichPresenceEnabled() {
+        return sharedPreferences.getBoolean("discordRichPresence", false);
+    }
+
     public static void setReceiveAnnouncements(boolean receiveAnnouncements) {
         Config.receiveAnnouncements = receiveAnnouncements;
     }
