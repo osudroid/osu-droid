@@ -361,7 +361,7 @@ public class ScoringScene {
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new Date(stat.getTime()));
-        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
+        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME + "-GLES ", BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
             (mods.contains(ModFlashlight.class) && !mods.ofType(ModFlashlight.class).getUsesDefaultSettings())) {
