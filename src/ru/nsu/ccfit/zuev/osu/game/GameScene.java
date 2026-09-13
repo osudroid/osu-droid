@@ -3764,15 +3764,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void reconstructStatAtTime(float targetMs) {
         var playableBeatmap = this.playableBeatmap;
 
-        if (playableBeatmap == null || objects == null) {
+        if (playableBeatmap == null || objects == null || objects.length == 0) {
             return;
         }
 
         var difficulty = playableBeatmap.getDifficulty();
         int localTimingIdx = 0;
         int localBreakIdx = 0;
-        double segStartMs = Double.MIN_VALUE;
         var objectData = replaying ? replay.objectData : null;
+
+        // How far continuous HP drain has been applied, and which object-to-object rate segment
+        // it's currently within ([objects[rateSegIdx].startTime - timePreempt,
+        // objects[rateSegIdx + 1].startTime - timePreempt)). Both advance with elapsed
+        // time and is independent of which object's own judgement has been applied yet.
+        double drainCursorMs = objects[0].startTime - objects[0].timePreempt;
+        int rateSegIdx = 0;
 
         for (int i = 0; i < objects.length; i++) {
             var obj = objects[i];
@@ -3783,63 +3789,77 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 break;
             }
 
-            // Advance local timing point index to this object's position.
-            while (localTimingIdx + 1 < timingControlPoints.length && timingControlPoints[localTimingIdx + 1].time <= obj.startTime) {
-                localTimingIdx++;
-            }
+            double drainTargetMs = Math.min(judgementTimeMs, targetMs);
 
-            // Simulate HP drain between the previous object's lifetime start and this one's.
-            if (i > 0 && gameStarted) {
-                var prevObj = objects[i - 1];
+            while (drainCursorMs < drainTargetMs && rateSegIdx < objects.length - 1) {
+                var segFromObj = objects[rateSegIdx];
+                var segToObj = objects[rateSegIdx + 1];
+
+                // Advance local timing point index to this segment's own "to" object.
+                while (localTimingIdx + 1 < timingControlPoints.length && timingControlPoints[localTimingIdx + 1].time <= segToObj.startTime) {
+                    localTimingIdx++;
+                }
 
                 double msPerBeat = timingControlPoints[localTimingIdx].msPerBeat;
-                double distToNextObject = Math.max(obj.startTime - prevObj.startTime, msPerBeat / 2) / 1000;
+                double distToNextObject = Math.max(segToObj.startTime - segFromObj.startTime, msPerBeat / 2) / 1000;
 
                 double drainRate = difficulty.hp > 0 && distToNextObject > 0
                         ? 1 + difficulty.hp / (2 * distToNextObject)
                         : 0.375;
 
-                double segEndMs = obj.startTime - obj.timePreempt;
+                double segEndMs = segToObj.startTime - segToObj.timePreempt;
+                double stopAtMs = Math.min(segEndMs, drainTargetMs);
 
-                // Advance past breaks that fully precede the current segment.
-                if (breakPeriods != null) {
-                    while (localBreakIdx < breakPeriods.length && breakPeriods[localBreakIdx].endTime <= segStartMs) {
-                        localBreakIdx++;
+                if (stopAtMs > drainCursorMs) {
+                    // Advance past breaks that fully precede the current segment.
+                    if (breakPeriods != null) {
+                        while (localBreakIdx < breakPeriods.length && breakPeriods[localBreakIdx].endTime <= drainCursorMs) {
+                            localBreakIdx++;
+                        }
                     }
+
+                    double effectiveSecs = calculateEffectiveDrainDuration(drainCursorMs, stopAtMs, localBreakIdx);
+
+                    // Apply drain incrementally so that a large drain section can consume multiple Easy lives.
+                    // A one-shot stat.changeHp clamps at 0 and loses the excess, causing at most one Easy revive per drain
+                    // section regardless of how deep HP would have gone.
+                    float remainingDrain = (float) (drainRate * 0.01 * effectiveSecs);
+
+                    while (remainingDrain > 0) {
+                        float currentHp = stat.getHp();
+
+                        if (remainingDrain < currentHp) {
+                            stat.changeHp(-remainingDrain);
+                            break;
+                        }
+
+                        remainingDrain -= currentHp;
+                        stat.changeHp(-currentHp);
+
+                        if (!stat.canFail) {
+                            break;
+                        }
+
+                        if (GameHelper.isEasy() && failcount < 3) {
+                            failcount++;
+                            stat.changeHp(1f);
+                        } else {
+                            return;
+                        }
+                    }
+
+                    drainCursorMs = stopAtMs;
                 }
 
-                double effectiveSecs = calculateEffectiveDrainDuration(segStartMs, segEndMs, localBreakIdx);
-
-                // Apply drain incrementally so that a large drain section can consume multiple Easy lives.
-                // A one-shot stat.changeHp clamps at 0 and loses the excess, causing at most one Easy revive per drain
-                // section regardless of how deep HP would have gone.
-                float remainingDrain = (float) (drainRate * 0.01 * effectiveSecs);
-
-                while (remainingDrain > 0) {
-                    float currentHp = stat.getHp();
-
-                    if (remainingDrain < currentHp) {
-                        stat.changeHp(-remainingDrain);
-                        break;
-                    }
-
-                    remainingDrain -= currentHp;
-                    stat.changeHp(-currentHp);
-
-                    if (!stat.canFail) {
-                        break;
-                    }
-
-                    if (GameHelper.isEasy() && failcount < 3) {
-                        failcount++;
-                        stat.changeHp(1f);
-                    } else {
-                        return;
-                    }
+                if (drainCursorMs >= segEndMs) {
+                    rateSegIdx++;
+                } else {
+                    // Capped short of this segment's own end by drainTargetMs - stop crossing
+                    // further for now. The remainder of this same segment continues once a
+                    // later object's own judgement time lets drain proceed past it.
+                    break;
                 }
             }
-
-            segStartMs = obj.startTime - obj.timePreempt;
 
             if (!gameStarted) {
                 gameStarted = true;
