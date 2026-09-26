@@ -119,7 +119,8 @@ object FollowPointConnection {
         val distanceY = endPosition.y - startPosition.y
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
-        val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
+        // HitObject.timeFadeIn may be modified by mods, but reference uses the unmodified version (which is 400ms).
+        val endFadeInTime = 0.4f
         val duration = (end.startTime - start.endTime).toFloat() / 1000f
 
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
