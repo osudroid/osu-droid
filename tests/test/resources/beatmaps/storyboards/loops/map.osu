@@ -1,0 +1,10 @@
+osu file format v14
+
+[Events]
+Sprite,Foreground,Centre,"sb/loop.png",320,240
+ L,1000,3
+  F,0,0,200,0,1
+  M,0,0,400,0,0,100,100
+Sprite,Foreground,Centre,"sb/loop2.png",320,240
+ L,0,2000000000
+  F,0,0,100,0,1

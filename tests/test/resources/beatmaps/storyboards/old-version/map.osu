@@ -1,0 +1,7 @@
+osu file format v4
+
+[Events]
+Sprite,Foreground,Centre,"sb/old.png",320,240
+ F,0,1000,2000,0,1
+ L,3000,2
+  F,0,0,100,1,0

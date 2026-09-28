@@ -1,0 +1,7 @@
+osu file format v14
+
+[General]
+AudioFilename: audio.mp3
+
+[Events]
+0,0,"bg.png",0,0

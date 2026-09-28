@@ -1,0 +1,7 @@
+[Variables]
+$spritePath="sb\flash.png"
+$fadeCommand=F,0,0,1000,0,1
+
+[Events]
+Sprite,Foreground,Centre,$spritePath,320,240
+ $fadeCommand

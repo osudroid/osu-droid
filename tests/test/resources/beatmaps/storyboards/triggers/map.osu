@@ -1,0 +1,18 @@
+osu file format v14
+
+[Events]
+Sprite,Foreground,Centre,"sb/trigger.png",320,240
+ F,0,0,10000,0.2
+ T,HitSoundClap,0,10000
+  F,0,0,500,1,0
+ T,HitSoundSoftWhistle,0,10000,1
+  S,0,0,500,2,1
+ T,Passing,0,10000
+  C,0,0,0,255,255,255
+ T,Failing,0,10000
+  C,0,0,0,255,0,0
+Sprite,Foreground,Centre,"sb/flash.png",320,240 // trailing comments are stripped
+ T,NotATrigger,0,10000
+  F,0,0,500,1,0
+ T,hitsoundclap
+  F,0,0,500,1,0 // also within commands

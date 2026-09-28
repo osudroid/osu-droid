@@ -43,7 +43,12 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo, IPoolable {
             soundProvider?.setVolume(getFinalVolume(value))
         }
 
-    private var sampleInfo: HitSampleInfo? = null
+    /**
+     * The [HitSampleInfo] this [GameplayHitSampleInfo] wraps.
+     */
+    var sampleInfo: HitSampleInfo? = null
+        private set
+
     private var soundProvider: BassSoundProvider? = null
 
     override val isInitialized

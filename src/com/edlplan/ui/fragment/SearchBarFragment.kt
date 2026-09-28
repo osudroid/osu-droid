@@ -14,7 +14,7 @@ import android.widget.EditText
 import androidx.core.content.*
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
-import com.edlplan.framework.support.util.Updater
+import com.osudroid.utils.Updater
 import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper

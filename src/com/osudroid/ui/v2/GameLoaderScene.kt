@@ -5,6 +5,8 @@ import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.PlayerStatus
+import com.osudroid.storyboard.parser.StoryboardParser
+import com.osudroid.utils.async
 import com.osudroid.utils.ModHashMap
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
@@ -17,6 +19,8 @@ import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.rian.andengine.modifier.ModifierType
+import java.io.File
+import java.io.IOException
 import kotlin.math.*
 import org.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -32,6 +36,17 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private val dimBox: UIBox
     private val mainContainer: UIContainer
 
+    /**
+     * Whether the beatmap has a storyboard. This is determined ahead of loading so that the storyboard
+     * step is not shown for beatmaps without one.
+     */
+    @Volatile
+    private var hasStoryboard = false
+
+    private val beatmapStep = LoadingStep("Beatmap")
+    private val storyboardStep = LoadingStep("Storyboard")
+    private val videoStep = LoadingStep("Video")
+
     private val beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(beatmapInfo.setDirectory)
         ?: BeatmapOptions(beatmapInfo.setDirectory)
 
@@ -39,6 +54,14 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private var minimumTimeout = if (isRestart) 500L else 2000L
 
     init {
+        async {
+            hasStoryboard = try {
+                StoryboardParser.hasStoryboard(File(beatmapInfo.path))
+            } catch (_: IOException) {
+                false
+            }
+        }
+
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
 
         // Background
@@ -136,9 +159,14 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 y = -30f
                 spacing = 30f
 
-                +CircularProgressBar().apply {
-                    width = 32f
-                    height = 32f
+                // One indicator per loading step. The storyboard and video steps are only shown if they
+                // apply to the beatmap.
+                linearContainer {
+                    spacing = 32f
+
+                    +beatmapStep
+                    +storyboardStep
+                    +videoStep
                 }
 
                 +UITextButton().apply {
@@ -201,6 +229,20 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
+        val isBeatmapLoaded = gameScene.isBeatmapLoaded
+        val isStoryboardLoading = gameScene.isStoryboardLoading
+        val isStoryboardLoaded = isBeatmapLoaded && !isStoryboardLoading
+
+        beatmapStep.isDone = isBeatmapLoaded
+
+        storyboardStep.isVisible = isStoryboardEnabled && hasStoryboard
+        storyboardStep.isDone = isStoryboardLoaded
+
+        // Whether the beatmap has a video is only known once it has been loaded.
+
+        videoStep.isVisible = gameScene.isVideoLoading || gameScene.hasVideo()
+        videoStep.isDone = !gameScene.isVideoLoading
+
         if (!isStarting) {
 
             if (Multiplayer.isMultiplayer && !gameScene.isReadyToStart) {
@@ -219,8 +261,11 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
             if (gameScene.isReadyToStart) {
 
-                // Multiplayer will skip the minimum timeout if it's ready to start.
-                if (System.currentTimeMillis() - lastTimeTouched > minimumTimeout || Multiplayer.isMultiplayer) {
+                // Multiplayer will skip the minimum timeout if it's ready to start. It also does not wait for the
+                // storyboard, as all players must start at the same time.
+                val isTimeoutElapsed = System.currentTimeMillis() - lastTimeTouched > minimumTimeout
+
+                if (Multiplayer.isMultiplayer || (isTimeoutElapsed && !isStoryboardLoading)) {
                     isStarting = true
 
                     // This is used instead of getBackgroundBrightness to directly obtain the
@@ -254,6 +299,75 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         super.onManagedUpdate(deltaTimeSec)
     }
 
+
+    // This is used instead of Config.isEnableStoryboard to directly obtain the updated values from
+    // the quick settings.
+    private val isStoryboardEnabled
+        get() = Config.getInt("bgbrightness", 25) > 2 && Config.getBoolean("enableStoryboard", false)
+
+
+    /**
+     * The indicator of a loading step, which spins while the step is loading and turns into a green
+     * circle once it is done.
+     */
+    private class LoadingStep(name: String) : UILinearContainer() {
+
+        private val spinner = CircularProgressBar().apply {
+            width = FillParent
+            height = FillParent
+        }
+
+        private val doneCircle = UICircle().apply {
+            width = FillParent
+            height = FillParent
+            paintStyle = PaintStyle.Outline
+            lineWidth = 4f
+            color = Color4(0xFF9CFF5A)
+            isVisible = false
+        }
+
+        var isDone = false
+            set(value) {
+                if (field != value) {
+                    field = value
+                    spinner.isVisible = !value
+                    doneCircle.isVisible = value
+                }
+            }
+
+        override fun setVisible(value: Boolean) {
+            if (isVisible != value) {
+                super.setVisible(value)
+
+                // A hidden component does not process its own invalidations, so the parent must be
+                // told to lay out its children again.
+                (parent as? UIComponent)?.invalidate(InvalidationFlag.Content)
+            }
+        }
+
+        init {
+            orientation = Orientation.Vertical
+            spacing = 8f
+
+            container {
+                width = 32f
+                height = 32f
+                anchor = Anchor.TopCenter
+                origin = Anchor.TopCenter
+
+                +spinner
+                +doneCircle
+            }
+
+            text {
+                font = ResourceManager.getInstance().getFont("smallFont")
+                text = name
+                anchor = Anchor.TopCenter
+                origin = Anchor.TopCenter
+                applyTheme = { color = it.accentColor * 0.9f }
+            }
+        }
+    }
 
     private inner class QuickSettingsLayout : UIScrollableContainer() {
 

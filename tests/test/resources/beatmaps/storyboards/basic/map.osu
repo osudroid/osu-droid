@@ -1,0 +1,20 @@
+osu file format v14
+
+[General]
+AudioFilename: audio.mp3
+WidescreenStoryboard: 1
+
+[Events]
+//Background and Video events
+0,0,"bg.jpg",0,0
+//Storyboard Layer 0 (Background)
+Sprite,Background,Centre,"bg.jpg",320,240
+ F,0,0,1000,1
+//Storyboard Layer 3 (Foreground)
+Sprite,Foreground,Centre,"sb\osu.png",320,240
+ M,0,0,1000,320,240,400,300
+ S,0,0,1000,1,2
+//Storyboard Layer 4 (Overlay)
+Animation,Overlay,TopLeft,"sb/anim.png",0,0,4,50,LoopOnce
+ F,0,0,2000,0,1
+Sample,5000,0,"sb/hit.wav",80

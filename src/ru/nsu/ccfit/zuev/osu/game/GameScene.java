@@ -22,8 +22,7 @@ import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.osu.support.slider.SliderBody;
-import com.edlplan.framework.support.ProxySprite;
-import com.edlplan.framework.support.osb.StoryboardSprite;
+import com.osudroid.storyboard.renderer.StoryboardComponent;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
@@ -212,8 +211,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     @Nullable
     private Job storyboardLoadingJob;
-    private StoryboardSprite storyboardSprite;
-    private ProxySprite storyboardOverlayProxy;
+    private StoryboardComponent storyboardComponent;
 
     public HitWindow hitWindow;
     private ModHashMap lastMods;
@@ -253,6 +251,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * Whether the game is ready to start.
      */
     public boolean isReadyToStart = false;
+
+    /**
+     * Whether the beatmap and everything that gameplay requires has been loaded. Unlike {@link #isReadyToStart},
+     * this does not depend on the other players of a multiplayer room.
+     */
+    public volatile boolean isBeatmapLoaded = false;
 
 
     // UI
@@ -367,7 +371,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             sceneBorder = null;
         }
 
-        releaseStoryboard();
         releaseVideo();
 
         var playableBeatmap = this.playableBeatmap;
@@ -407,47 +410,86 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
-        if (storyboardSprite != null) {
-            return;
-        }
-
         if (storyboardLoadingJob != null && !storyboardLoadingJob.isCompleted()) {
             return;
         }
 
+        var loadedComponent = storyboardComponent;
+
+        if (loadedComponent != null) {
+            if (loadedComponent.isLoadedFor(beatmapInfo.getPath())) {
+                // Parsing a storyboard and loading its textures is expensive, so the loaded storyboard is
+                // kept when the beatmap is restarted. It is attached to the new scene when the background
+                // is applied.
+                if (!isReadyToStart) {
+                    loadedComponent.detachSelf();
+                    loadedComponent.overlayComponent.detachSelf();
+                    loadedComponent.resetPlayback();
+                }
+
+                return;
+            }
+
+            releaseStoryboard();
+        }
+
         storyboardLoadingJob = Execution.async(scope -> {
-            StoryboardSprite storyboardSprite = this.storyboardSprite;
-            this.storyboardSprite = null;
-
-            if (storyboardSprite != null) {
-                storyboardSprite.detachSelf();
-            } else {
-                storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                ensureActive(scope.getCoroutineContext());
-            }
-
-            ProxySprite storyboardOverlayProxy = this.storyboardOverlayProxy;
-            this.storyboardOverlayProxy = null;
-
-            if (storyboardOverlayProxy != null) {
-                storyboardOverlayProxy.detachSelf();
-            } else {
-                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT()));
-                ensureActive(scope.getCoroutineContext());
-            }
-
-            storyboardSprite.setTransparentBackground(videoEnabled && video != null);
-            storyboardSprite.loadStoryboard(beatmapInfo.getPath());
+            var storyboardComponent = new StoryboardComponent();
             ensureActive(scope.getCoroutineContext());
 
-            this.storyboardSprite = storyboardSprite;
-            this.storyboardOverlayProxy = storyboardOverlayProxy;
+            storyboardComponent.transparentBackground = videoEnabled && video != null;
+
+            try {
+                storyboardComponent.load(beatmapInfo.getPath(), scope);
+                ensureActive(scope.getCoroutineContext());
+            } catch (Throwable e) {
+                // The component is never attached when loading is cancelled or fails, so the
+                // textures it has loaded so far must be unloaded here.
+                storyboardComponent.release();
+                throw e;
+            }
+
+            this.storyboardComponent = storyboardComponent;
 
             // The storyboard may only load after gameplay is started, in which case we must apply it immediately.
             Execution.updateThread(this::applyBackground);
 
             storyboardLoadingJob = null;
         });
+    }
+
+    /**
+     * Whether the storyboard is still being loaded.
+     */
+    public boolean isStoryboardLoading() {
+        var job = storyboardLoadingJob;
+
+        return job != null && !job.isCompleted();
+    }
+
+    /**
+     * Whether the beatmap has a storyboard that has been loaded.
+     */
+    public boolean hasStoryboard() {
+        var storyboardComponent = this.storyboardComponent;
+
+        return storyboardComponent != null && storyboardComponent.isStoryboardAvailable();
+    }
+
+    /**
+     * Whether the video of the beatmap is still being loaded.
+     */
+    public boolean isVideoLoading() {
+        var job = videoLoadingJob;
+
+        return job != null && !job.isCompleted();
+    }
+
+    /**
+     * Whether the beatmap has a video that has been loaded.
+     */
+    public boolean hasVideo() {
+        return videoEnabled && video != null;
     }
 
     private void cancelStoryboardLoading() {
@@ -458,13 +500,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void releaseStoryboard() {
-        if (storyboardSprite != null) {
-            storyboardSprite.detachSelf();
-            storyboardOverlayProxy.detachSelf();
-            storyboardSprite.releaseStoryboard();
-            storyboardOverlayProxy.setDrawProxy(null);
-            storyboardSprite = null;
-            storyboardOverlayProxy = null;
+        if (storyboardComponent != null) {
+            storyboardComponent.detachSelf();
+            storyboardComponent.overlayComponent.detachSelf();
+            storyboardComponent.release();
+            storyboardComponent = null;
         }
     }
 
@@ -553,8 +593,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         boolean isStoryboardEnabled = brightness > 0.02f && Config.getBoolean("enableStoryboard", false);
         float playfieldSize = Config.getPlayfieldSize();
 
-        var storyboardSprite = this.storyboardSprite;
-        var storyboardOverlayProxy = this.storyboardOverlayProxy;
+        var storyboardComponent = this.storyboardComponent;
         var video = this.video;
         var sceneBorder = this.sceneBorder;
 
@@ -602,26 +641,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         background.setPosition((Config.getRES_WIDTH() - backgroundW) / 2f, (Config.getRES_HEIGHT() - backgroundH) / 2f);
         scene.setBackground(new EntityBackground(background));
 
-        if (storyboardSprite != null) {
+        if (storyboardComponent != null) {
             if (isStoryboardEnabled) {
-                storyboardSprite.setTransparentBackground(videoEnabled && video != null);
-                storyboardSprite.setBrightness(brightness);
+                storyboardComponent.transparentBackground = videoEnabled && video != null;
+                storyboardComponent.brightness = brightness;
 
-                if (!storyboardSprite.hasParent()) {
-                    scene.attachChild(storyboardSprite, 0);
+                if (!storyboardComponent.hasParent()) {
+                    scene.attachChild(storyboardComponent, 0);
+                }
+
+                if (!storyboardComponent.overlayComponent.hasParent()) {
+                    scene.attachChild(storyboardComponent.overlayComponent, scene.getChildCount() - 1);
                 }
             } else {
-                storyboardSprite.detachSelf();
-            }
-        }
-
-        if (storyboardOverlayProxy != null) {
-            if (isStoryboardEnabled) {
-                if (!storyboardOverlayProxy.hasParent()) {
-                    scene.attachChild(storyboardOverlayProxy, scene.getChildCount() - 1);
-                }
-            } else {
-                storyboardOverlayProxy.detachSelf();
+                storyboardComponent.detachSelf();
+                storyboardComponent.overlayComponent.detachSelf();
             }
         }
     }
@@ -1012,6 +1046,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void startGame(BeatmapInfo beatmapInfo, String replayFile, ModHashMap mods, boolean isHUDEditor) {
         isReadyToStart = false;
+        isBeatmapLoaded = false;
         isHUDEditorMode = isHUDEditor;
         startedFromHUDEditor = isHUDEditor;
         resetPlayfieldSizeScale();
@@ -1322,13 +1357,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         skipBtn = null;
         if (skipTime > 1) {
-            float paddingBottom = Multiplayer.isConnected() ? Multiplayer.roomScene.getChat().getButtonHeight() : 0f;
-
-            skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
-            skipBtn.setOrigin(Anchor.BottomRight);
-            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT() - paddingBottom);
-            skipBtn.setAlpha(0.7f);
-            hud.attachChild(skipBtn);
+            createSkipButton();
         }
 
         String playname = Config.getOnlineUsername();
@@ -1404,10 +1433,54 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             });
         }
 
+        isBeatmapLoaded = true;
+
         if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
         } else {
             isReadyToStart = true;
+        }
+    }
+
+    private void createSkipButton() {
+        float paddingBottom = Multiplayer.isConnected() ? Multiplayer.roomScene.getChat().getButtonHeight() : 0f;
+
+        skipBtn = new UIAnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
+        skipBtn.setOrigin(Anchor.BottomRight);
+        skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT() - paddingBottom);
+        skipBtn.setAlpha(0.7f);
+        hud.attachChild(skipBtn);
+    }
+
+    /**
+     * Moves the start of gameplay back to the earliest event of the storyboard, if it is before the current start.
+     * Storyboards use events in negative time to display an intro before the audio starts.
+     */
+    private void applyStoryboardLeadIn() {
+        var storyboardComponent = this.storyboardComponent;
+
+        // All players of a multiplayer room must start at the same time regardless of their settings.
+        if (storyboardComponent == null || Multiplayer.isMultiplayer || isHUDEditorMode) {
+            return;
+        }
+
+        var earliestEventTime = storyboardComponent.getEarliestEventTime();
+
+        if (earliestEventTime == null) {
+            return;
+        }
+
+        float startTime = (float) (earliestEventTime / 1000);
+
+        if (startTime >= gameplayClock.getCurrentTime()) {
+            return;
+        }
+
+        gameplayClock.seek(startTime);
+
+        // Allow the intro to be skipped if it is long enough to be worth it.
+        if (skipBtn == null && skipTime - 1 - startTime > 1) {
+            createSkipButton();
         }
     }
 
@@ -1435,6 +1508,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var firstObjectTimePreempt = (float) playableBeatmap.getHitObjects().objects.get(0).timePreempt / 1000;
         gameplayClock.seek(Math.min(gameplayClock.getCurrentTime(), firstObjectStartTime - firstObjectTimePreempt));
+        applyStoryboardLeadIn();
         initialStartTime = gameplayClock.getCurrentTime();
 
         if (songService != null) {
@@ -1561,8 +1635,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             );
         }
 
-        if (storyboardSprite != null && storyboardSprite.hasParent()) {
-            storyboardSprite.updateTime(mSecPassed);
+        if (storyboardComponent != null && storyboardComponent.hasParent()) {
+            storyboardComponent.updateTime(mSecPassed);
+
+            // osu!stable considers the player passing while HP is at least half full.
+            storyboardComponent.setPassingState(stat == null || stat.getHp() >= 0.5f);
         }
 
         if (replaying) {
@@ -2292,6 +2369,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public void reset() {
     }
 
+    private void notifyStoryboardOfHit() {
+        if (storyboardComponent != null && storyboardComponent.hasParent()) {
+            storyboardComponent.onHitObjectHit();
+        }
+    }
+
     //CB打击处理
     private String registerHit(final int objectId, final int score, final boolean endCombo) {
         return registerHit(objectId, score, endCombo, true);
@@ -2323,6 +2406,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
             return "hit0";
         }
+
+        notifyStoryboardOfHit();
 
         String scoreName = "hit300";
         if (score == 50) {
@@ -2498,6 +2583,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     scoreName = "sliderpoint30";
                     stat.registerHit(30, false, false);
                     stat.addSliderHeadHit();
+                    notifyStoryboardOfHit();
                     createBurstEffectSliderStart(judgementPos, color);
 
                     if (nearestCursorId >= 0) {
@@ -2520,6 +2606,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     scoreName = "sliderpoint30";
                     stat.registerHit(30, false, false);
                     stat.addSliderRepeatHit();
+                    notifyStoryboardOfHit();
                 }
                 break;
 
@@ -2528,6 +2615,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     scoreName = "sliderpoint10";
                     stat.registerHit(10, false, false);
                     stat.addSliderTickHit();
+                    notifyStoryboardOfHit();
                 }
                 break;
 
@@ -2634,6 +2722,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     @Override
     public void playHitSamples(List<GameplayHitSampleInfo> samples) {
+        if (storyboardComponent != null && storyboardComponent.hasParent()) {
+            storyboardComponent.onHitSamplesPlayed(samples);
+        }
+
         float volume = 1;
         var muted = GameHelper.getMuted();
 
@@ -2659,6 +2751,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void stopLoopingSamples() {
+        if (storyboardComponent != null) {
+            storyboardComponent.stopSamples();
+        }
+
         if (activeObjects == null) {
             return;
         }
