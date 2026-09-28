@@ -6,7 +6,6 @@ import com.osudroid.storyboard.model.StoryboardAnimation
 import com.osudroid.storyboard.model.StoryboardColor
 import com.osudroid.storyboard.model.StoryboardElement
 import com.osudroid.storyboard.model.commands.CommandTimeline
-import com.osudroid.storyboard.model.commands.StoryboardCommand
 import com.osudroid.storyboard.model.commands.StoryboardCommandGroup
 import com.osudroid.storyboard.model.commands.StoryboardTrigger
 import com.osudroid.storyboard.model.commands.StoryboardTriggerType
@@ -154,7 +153,7 @@ class PlayableSprite(
 
     /**
      * Activates a trigger at the given time. A running activation of the same trigger or of the
-     * same non-zero group number is cancelled, matching osu!stable.
+     * same non-zero group number is canceled, matching osu!stable.
      *
      * @param trigger The trigger to activate.
      * @param time The activation time in milliseconds.
