@@ -105,11 +105,11 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
                 textureRegion?.setTextureHeight(h)
                 setSize(w, h)
 
-                // RectangularShape initializes mScaleCenterX/Y from constructor dimensions (0×0 here).
-                // setSize() updates mWidth/mHeight but not the scale center, so we must fix it manually.
-                // Without this, applyBackground's centering formula — which assumes scale is applied around
-                // the entity center — places the video at the wrong screen position.
-                setScaleCenter(w / 2f, h / 2f)
+                // applyBackground's centering formula assumes that the scale is applied around the
+                // center of the entity. The scale center of a UIComponent is relative to its size
+                // rather than in pixels, so passing half of the video size here would move the
+                // video far off the screen.
+                setScaleCenter(0.5f, 0.5f)
 
                 mainHandler.post(callback)
             }
