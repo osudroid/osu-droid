@@ -1,6 +1,7 @@
 package com.osudroid.storyboard.model.commands
 
-import com.osudroid.storyboard.model.StoryboardEasing
+import com.edlplan.framework.easing.Easing
+import com.reco1l.framework.interpolate
 
 /**
  * Represents a single storyboard command that changes one property of a storyboard element
@@ -11,7 +12,7 @@ class StoryboardCommand<T>(
      * The easing applied to the interpolation of this command.
      */
     @JvmField
-    val easing: StoryboardEasing,
+    val easing: Easing,
 
     /**
      * The start time of this command in milliseconds.
@@ -54,7 +55,7 @@ class StoryboardCommand<T>(
         }
 
         val progress = ((time - startTime) / duration).coerceIn(0.0, 1.0)
-        return easing.interpolate(progress)
+        return easing.interpolate(progress.toFloat()).toDouble()
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.osudroid.storyboard.model.commands
 
-import com.osudroid.storyboard.model.StoryboardEasing
+import com.edlplan.framework.easing.Easing
 
 /**
  * An ordered list of [StoryboardCommand]s that target the same property of a storyboard element.
@@ -54,7 +54,7 @@ class CommandTimeline<T> : Iterable<StoryboardCommand<T>> {
      * @param startValue The value at the start of the command.
      * @param endValue The value at the end of the command.
      */
-    fun add(easing: StoryboardEasing, startTime: Double, endTime: Double, startValue: T, endValue: T) =
+    fun add(easing: Easing, startTime: Double, endTime: Double, startValue: T, endValue: T) =
         add(StoryboardCommand(easing, startTime, endTime, startValue, endValue))
 
     /**

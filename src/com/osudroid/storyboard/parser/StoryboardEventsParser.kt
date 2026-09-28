@@ -1,10 +1,10 @@
 package com.osudroid.storyboard.parser
 
+import com.edlplan.framework.easing.Easing
 import com.osudroid.storyboard.model.AnimationLoopType
 import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardAnimation
 import com.osudroid.storyboard.model.StoryboardColor
-import com.osudroid.storyboard.model.StoryboardEasing
 import com.osudroid.storyboard.model.StoryboardElement
 import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
@@ -179,7 +179,8 @@ internal class StoryboardEventsParser(private val storyboard: Storyboard) {
         // the version offset only applies to top-level commands.
         val offset = if (group === element.commands) timeOffset else 0.0
 
-        val easing = StoryboardEasing.parse(parts[1].toIntOrNull() ?: 0)
+        // Out-of-range values fall back to no easing, matching osu!stable.
+        val easing = Easing.entries.getOrElse(parts[1].toIntOrNull() ?: 0) { Easing.None }
         val startTime = parts[2].toDouble() + offset
         val endTime = (parts.getOrNull(3)?.toDoubleOrNull() ?: (startTime - offset)) + offset
         val duration = endTime - startTime

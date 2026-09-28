@@ -8,6 +8,17 @@ import kotlin.math.*
 
 private const val floatPi = Math.PI.toFloat()
 
+private const val elasticConst = 2f * floatPi / 0.3f
+private const val elasticConst2 = 0.3f / 4f
+
+// Exponential and elastic curves never reach 0 on their own. These offsets are applied linearly
+// over the curve so that it starts and ends at exactly 0 and 1.
+private val expoOffset = 2f.pow(-10f)
+private val elasticOffsetFull = 2f.pow(-11f)
+private val elasticOffsetHalf = 2f.pow(-10f) * sin((0.5f - elasticConst2) * elasticConst)
+private val elasticOffsetQuarter = 2f.pow(-10f) * sin((0.25f - elasticConst2) * elasticConst)
+private val inOutElasticOffset = 2f.pow(-10f) * sin((1f - elasticConst2 * 1.5f) * elasticConst / 1.5f)
+
 // Extracted from com.edlplan.framework.easing.EasingManager
 
 // Instead of using EasingManager which creates instances of EasingInterpolator
@@ -80,15 +91,19 @@ fun Easing.interpolate(value: Float): Float {
         }
 
         InExpo -> {
-            2f.pow(10f * (n - 1f))
+            2f.pow(10f * (n - 1f)) + expoOffset * (n - 1f)
         }
 
         OutExpo -> {
-            -(2f.pow(-10f * n)) + 1f
+            -(2f.pow(-10f * n)) + 1f + expoOffset * n
         }
 
         InOutExpo -> {
-            if (n < 0.5f) 0.5f * 2f.pow(20f * n - 10f) else 1f - 0.5f * 2f.pow(-20f * n + 10f)
+            if (n < 0.5f) {
+                0.5f * (2f.pow(20f * n - 10f) + expoOffset * (2f * n - 1f))
+            } else {
+                1f - 0.5f * (2f.pow(-20f * n + 10f) + expoOffset * (-2f * n + 1f))
+            }
         }
 
         InCirc -> {
@@ -108,26 +123,28 @@ fun Easing.interpolate(value: Float): Float {
         }
 
         InElastic -> {
-            -(2f.pow(-10f + 10f * n)) * sin((1f - 0.3f / 4f - n) * (2f * floatPi / 0.3f))
+            -(2f.pow(-10f + 10f * n)) * sin((1f - elasticConst2 - n) * elasticConst) + elasticOffsetFull * (1f - n)
         }
 
         OutElastic -> {
-            2f.pow(-10f * n) * sin((n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
+            2f.pow(-10f * n) * sin((n - elasticConst2) * elasticConst) + 1f - elasticOffsetFull * n
         }
 
         OutElasticHalf -> {
-            2f.pow(-10 * n) * sin((0.5f * n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
+            2f.pow(-10f * n) * sin((0.5f * n - elasticConst2) * elasticConst) + 1f - elasticOffsetHalf * n
         }
 
         OutElasticQuarter -> {
-            2f.pow(-10f * n) * sin((0.25f * n - 0.3f / 4f) * (2f * floatPi / 0.3f)) + 1f
+            2f.pow(-10f * n) * sin((0.25f * n - elasticConst2) * elasticConst) + 1f - elasticOffsetQuarter * n
         }
 
         InOutElastic -> {
             if (let { n *= 2f; n } < 1f) {
-                -0.5f * 2f.pow(-10f + 10f * n) * sin((1f - 0.3f / 4f * 1.5f - n) * (2f * floatPi / 0.3f) / 1.5f)
+                -0.5f * (2f.pow(-10f + 10f * n) * sin((1f - elasticConst2 * 1.5f - n) * elasticConst / 1.5f)
+                    - inOutElasticOffset * (1f - n))
             } else {
-                0.5f * 2f.pow(-10f * --n) * sin((n - 0.3f / 4f * 1.5f) * (2f * floatPi / 0.3f) / 1.5f) + 1f
+                0.5f * (2f.pow(-10f * --n) * sin((n - elasticConst2 * 1.5f) * elasticConst / 1.5f)
+                    + 2f - inOutElasticOffset * n)
             }
         }
 

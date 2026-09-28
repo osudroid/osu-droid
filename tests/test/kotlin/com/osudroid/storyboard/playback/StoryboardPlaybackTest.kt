@@ -1,12 +1,12 @@
 package com.osudroid.storyboard.playback
 
+import com.edlplan.framework.easing.Easing
 import com.osudroid.beatmaps.constants.SampleBank
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.storyboard.model.AnimationLoopType
 import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardAnimation
 import com.osudroid.storyboard.model.StoryboardColor
-import com.osudroid.storyboard.model.StoryboardEasing
 import com.osudroid.storyboard.model.StoryboardElement
 import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
@@ -15,6 +15,7 @@ import com.osudroid.storyboard.model.StoryboardSprite
 import com.osudroid.storyboard.model.commands.StoryboardLoop
 import com.osudroid.storyboard.model.commands.StoryboardTrigger
 import com.osudroid.storyboard.model.commands.StoryboardTriggerType
+import com.reco1l.framework.interpolate
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,26 +34,26 @@ class StoryboardPlaybackTest {
 
     @Test
     fun `Test easing boundary values`() {
-        for (easing in StoryboardEasing.entries) {
-            Assert.assertEquals("$easing at 0", 0.0, easing.interpolate(0.0), 1e-6)
-            Assert.assertEquals("$easing at 1", 1.0, easing.interpolate(1.0), 1e-6)
+        for (easing in Easing.entries) {
+            Assert.assertEquals("$easing at 0", 0f, easing.interpolate(0f), 1e-6f)
+            Assert.assertEquals("$easing at 1", 1f, easing.interpolate(1f), 1e-6f)
         }
     }
 
     @Test
     fun `Test easing spot values`() {
-        Assert.assertEquals(0.5, StoryboardEasing.None.interpolate(0.5), 0.0)
-        Assert.assertEquals(0.25, StoryboardEasing.InQuad.interpolate(0.5), 1e-9)
-        Assert.assertEquals(0.75, StoryboardEasing.OutQuad.interpolate(0.5), 1e-9)
-        Assert.assertEquals(0.125, StoryboardEasing.InCubic.interpolate(0.5), 1e-9)
-        Assert.assertEquals(0.5, StoryboardEasing.InOutSine.interpolate(0.5), 1e-9)
+        Assert.assertEquals(0.5f, Easing.None.interpolate(0.5f), 0f)
+        Assert.assertEquals(0.25f, Easing.InQuad.interpolate(0.5f), 1e-6f)
+        Assert.assertEquals(0.75f, Easing.OutQuad.interpolate(0.5f), 1e-6f)
+        Assert.assertEquals(0.125f, Easing.InCubic.interpolate(0.5f), 1e-6f)
+        Assert.assertEquals(0.5f, Easing.InOutSine.interpolate(0.5f), 1e-6f)
     }
 
     @Test
     fun `Test value evaluation before between and after commands`() {
         val element = sprite()
-        element.commands.alpha.add(StoryboardEasing.None, 1000.0, 2000.0, 0.2f, 0.8f)
-        element.commands.alpha.add(StoryboardEasing.None, 3000.0, 4000.0, 0.4f, 1f)
+        element.commands.alpha.add(Easing.None, 1000.0, 2000.0, 0.2f, 0.8f)
+        element.commands.alpha.add(Easing.None, 3000.0, 4000.0, 0.4f, 1f)
 
         val playable = PlayableSprite(element)
 
@@ -82,9 +83,9 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test scale and vector scale combination`() {
         val element = sprite()
-        element.commands.scale.add(StoryboardEasing.None, 0.0, 1000.0, 2f, 2f)
-        element.commands.vectorScaleX.add(StoryboardEasing.None, 0.0, 1000.0, 3f, 3f)
-        element.commands.vectorScaleY.add(StoryboardEasing.None, 0.0, 1000.0, 0.5f, 0.5f)
+        element.commands.scale.add(Easing.None, 0.0, 1000.0, 2f, 2f)
+        element.commands.vectorScaleX.add(Easing.None, 0.0, 1000.0, 3f, 3f)
+        element.commands.vectorScaleY.add(Easing.None, 0.0, 1000.0, 0.5f, 0.5f)
 
         val playable = PlayableSprite(element)
         playable.update(500.0)
@@ -97,7 +98,7 @@ class StoryboardPlaybackTest {
     fun `Test color evaluation`() {
         val element = sprite()
         element.commands.color.add(
-            StoryboardEasing.None, 0.0, 1000.0,
+            Easing.None, 0.0, 1000.0,
             StoryboardColor(1f, 0f, 0f), StoryboardColor(0f, 1f, 0f)
         )
 
@@ -113,9 +114,9 @@ class StoryboardPlaybackTest {
     fun `Test parameter command evaluation`() {
         val element = sprite()
         // An interval P command is active during its interval only.
-        element.commands.flipHorizontal.add(StoryboardEasing.None, 1000.0, 2000.0, true, false)
+        element.commands.flipHorizontal.add(Easing.None, 1000.0, 2000.0, true, false)
         // A zero-duration P command applies permanently.
-        element.commands.additiveBlend.add(StoryboardEasing.None, 3000.0, 3000.0, true, true)
+        element.commands.additiveBlend.add(Easing.None, 3000.0, 3000.0, true, true)
 
         val playable = PlayableSprite(element)
 
@@ -136,10 +137,10 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test display start time optimization`() {
         val element = sprite()
-        element.commands.x.add(StoryboardEasing.None, 0.0, 5000.0, 0f, 100f)
+        element.commands.x.add(Easing.None, 0.0, 5000.0, 0f, 100f)
         // The earliest alpha command starts with zero alpha, so the sprite only becomes visible
         // at its start time.
-        element.commands.alpha.add(StoryboardEasing.None, 2000.0, 3000.0, 0f, 1f)
+        element.commands.alpha.add(Easing.None, 2000.0, 3000.0, 0f, 1f)
 
         val playable = PlayableSprite(element)
 
@@ -155,7 +156,7 @@ class StoryboardPlaybackTest {
         val element = sprite()
 
         val loop = StoryboardLoop(1000.0, 3)
-        loop.alpha.add(StoryboardEasing.None, 0.0, 200.0, 0f, 1f)
+        loop.alpha.add(Easing.None, 0.0, 200.0, 0f, 1f)
         element.commands.loops.add(loop)
 
         val playable = PlayableSprite(element)
@@ -185,7 +186,7 @@ class StoryboardPlaybackTest {
         val element = sprite()
 
         val loop = StoryboardLoop(1000.0, 2)
-        loop.alpha.add(StoryboardEasing.None, 500.0, 1000.0, 0f, 1f)
+        loop.alpha.add(Easing.None, 500.0, 1000.0, 0f, 1f)
         element.commands.loops.add(loop)
 
         val playable = PlayableSprite(element)
@@ -203,7 +204,7 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test sample playback`() {
         val storyboard = storyboardOf(sprite().also {
-            it.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 1f, 1f)
+            it.commands.alpha.add(Easing.None, 0.0, 10000.0, 1f, 1f)
         })
 
         storyboard.samples.add(StoryboardSample(StoryboardLayerType.Background, 1000.0, "a.wav", 100))
@@ -240,7 +241,7 @@ class StoryboardPlaybackTest {
         val element = sprite()
 
         val trigger = StoryboardTrigger(StoryboardTriggerType.parse("HitObjectHit")!!, 0.0, 10000.0, 0)
-        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0f)
+        trigger.alpha.add(Easing.None, 0.0, 500.0, 1f, 0f)
         element.commands.triggers.add(trigger)
 
         val playback = StoryboardPlayback(storyboardOf(element))
@@ -269,7 +270,7 @@ class StoryboardPlaybackTest {
                 StoryboardLayerType.Foreground, StoryboardOrigin.Centre, "anim.png",
                 0f, 0f, 4, 100.0, loopType
             )
-            element.commands.alpha.add(StoryboardEasing.None, 1000.0, 2000.0, 1f, 1f)
+            element.commands.alpha.add(Easing.None, 1000.0, 2000.0, 1f, 1f)
             return element
         }
 
@@ -289,12 +290,12 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test hit sound trigger activation`() {
         val element = sprite()
-        element.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 0.2f, 0.2f)
+        element.commands.alpha.add(Easing.None, 0.0, 10000.0, 0.2f, 0.2f)
 
         val trigger = StoryboardTrigger(
             StoryboardTriggerType.parse("HitSoundClap")!!, 0.0, 10000.0, 0
         )
-        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0.5f)
+        trigger.alpha.add(Easing.None, 0.0, 500.0, 1f, 0.5f)
         element.commands.triggers.add(trigger)
 
         val storyboard = storyboardOf(element)
@@ -327,12 +328,12 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test hit sound trigger with distinct normal and addition banks`() {
         val element = sprite()
-        element.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 0.2f, 0.2f)
+        element.commands.alpha.add(Easing.None, 0.0, 10000.0, 0.2f, 0.2f)
 
         val trigger = StoryboardTrigger(
             StoryboardTriggerType.parse("HitSoundNormalSoftClap")!!, 0.0, 10000.0, 0
         )
-        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0.5f)
+        trigger.alpha.add(Easing.None, 0.0, 500.0, 1f, 0.5f)
         element.commands.triggers.add(trigger)
 
         val storyboard = storyboardOf(element)
@@ -367,10 +368,10 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test passing and failing state`() {
         val passElement = sprite(StoryboardLayerType.Pass)
-        passElement.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 1f, 1f)
+        passElement.commands.alpha.add(Easing.None, 0.0, 10000.0, 1f, 1f)
 
         val failElement = sprite(StoryboardLayerType.Fail)
-        failElement.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 1f, 1f)
+        failElement.commands.alpha.add(Easing.None, 0.0, 10000.0, 1f, 1f)
 
         val playback = StoryboardPlayback(storyboardOf(passElement, failElement))
 
@@ -388,11 +389,11 @@ class StoryboardPlaybackTest {
     @Test
     fun `Test failing trigger activation`() {
         val element = sprite()
-        element.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 0.5f, 0.5f)
+        element.commands.alpha.add(Easing.None, 0.0, 10000.0, 0.5f, 0.5f)
 
         val trigger = StoryboardTrigger(StoryboardTriggerType.Failing, 0.0, 10000.0, 0)
         trigger.color.add(
-            StoryboardEasing.None, 0.0, 0.0,
+            Easing.None, 0.0, 0.0,
             StoryboardColor(1f, 0f, 0f), StoryboardColor(1f, 0f, 0f)
         )
         element.commands.triggers.add(trigger)
@@ -416,8 +417,8 @@ class StoryboardPlaybackTest {
             StoryboardLayerType.Foreground, StoryboardOrigin.Centre, "anim.png",
             0f, 0f, 4, 100.0, AnimationLoopType.LoopForever
         )
-        element.commands.scale.add(StoryboardEasing.None, 1000.0, 1500.0, 1f, 1f)
-        element.commands.alpha.add(StoryboardEasing.None, 2000.0, 3000.0, 0f, 1f)
+        element.commands.scale.add(Easing.None, 1000.0, 1500.0, 1f, 1f)
+        element.commands.alpha.add(Easing.None, 2000.0, 3000.0, 0f, 1f)
 
         val playable = PlayableSprite(element)
 
@@ -434,7 +435,7 @@ class StoryboardPlaybackTest {
         val element = sprite()
 
         val trigger = StoryboardTrigger(StoryboardTriggerType.Passing, 0.0, 10000.0, 0)
-        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0f)
+        trigger.alpha.add(Easing.None, 0.0, 500.0, 1f, 0f)
         element.commands.triggers.add(trigger)
 
         val playback = StoryboardPlayback(storyboardOf(element))

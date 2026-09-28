@@ -1,10 +1,10 @@
 package com.osudroid.storyboard.parser
 
+import com.edlplan.framework.easing.Easing
 import com.osudroid.beatmaps.constants.SampleBank
 import com.osudroid.storyboard.model.AnimationLoopType
 import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardAnimation
-import com.osudroid.storyboard.model.StoryboardEasing
 import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
 import com.osudroid.storyboard.model.commands.StoryboardTriggerType
@@ -162,8 +162,8 @@ class StoryboardParserTest {
 
         // Easing parsing, including out-of-range fallback.
         val second = sprites[1].commands
-        Assert.assertEquals(StoryboardEasing.OutElastic, second.alpha[0].easing)
-        Assert.assertEquals(StoryboardEasing.None, second.alpha[1].easing)
+        Assert.assertEquals(Easing.OutElastic, second.alpha[0].easing)
+        Assert.assertEquals(Easing.None, second.alpha[1].easing)
     }
 
     @Test
