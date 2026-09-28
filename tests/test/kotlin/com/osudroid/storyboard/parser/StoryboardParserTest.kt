@@ -93,9 +93,22 @@ class StoryboardParserTest {
 
         val sprites = storyboard.layers[StoryboardLayerType.Foreground]!!
 
-        // Unknown (custom) layer names fall back to the Foreground layer.
         Assert.assertEquals(3, sprites.size)
-        Assert.assertEquals("sb/c.png", sprites[2].filePath)
+
+        // Unknown layers are rendered above the Foreground layer, and the Video layer below the
+        // Background layer.
+        Assert.assertEquals("sb/c.png", storyboard.layers[StoryboardLayerType.Custom]!!.single().filePath)
+        Assert.assertEquals("sb/d.png", storyboard.layers[StoryboardLayerType.Video]!!.single().filePath)
+        Assert.assertTrue(StoryboardLayerType.Video < StoryboardLayerType.Background)
+        Assert.assertTrue(StoryboardLayerType.Custom > StoryboardLayerType.Foreground)
+        Assert.assertTrue(StoryboardLayerType.Custom < StoryboardLayerType.Overlay)
+
+        // The iteration duration of a loop spans from the start of its earliest command to the
+        // end of its latest command.
+        val delayedLoop = sprites[2].commands.loops[0]
+        Assert.assertEquals(500.0, delayedLoop.iterationDuration, 0.0)
+        Assert.assertEquals(1500.0, delayedLoop.startTime, 0.0)
+        Assert.assertEquals(1500.0 + 3 * 500.0, delayedLoop.endTime, 0.0)
 
         val commands = sprites[0].commands
 
@@ -167,7 +180,6 @@ class StoryboardParserTest {
         Assert.assertEquals(1, loop.alpha.size)
         Assert.assertEquals(0.0, loop.alpha[0].startTime, 0.0)
 
-        // The iteration duration is the relative end time of the last command (stable behavior).
         Assert.assertEquals(400.0, loop.iterationDuration, 0.0)
         Assert.assertEquals(1000.0, loop.startTime, 0.0)
         Assert.assertEquals(1000.0 + 3 * 400.0, loop.endTime, 0.0)
@@ -192,8 +204,11 @@ class StoryboardParserTest {
         Assert.assertEquals(0.0, triggers[0].triggerStartTime, 0.0)
         Assert.assertEquals(10000.0, triggers[0].triggerEndTime, 0.0)
 
+        // A single sample set immediately followed by an addition name describes that addition's
+        // bank, not the normal sample's bank (matching stable/lazer trigger name parsing).
         val softWhistle = triggers[1].type as StoryboardTriggerType.HitSound
-        Assert.assertEquals(SampleBank.Soft, softWhistle.sampleBank)
+        Assert.assertNull(softWhistle.sampleBank)
+        Assert.assertEquals(SampleBank.Soft, softWhistle.additionsSampleBank)
         Assert.assertEquals("hitwhistle", softWhistle.addition)
         Assert.assertEquals(1, triggers[1].groupNumber)
 
@@ -203,6 +218,30 @@ class StoryboardParserTest {
         // Trigger command times are relative to the activation.
         Assert.assertEquals(1, triggers[0].alpha.size)
         Assert.assertEquals(0.0, triggers[0].alpha[0].startTime, 0.0)
+    }
+
+    @Test
+    fun `Test unsupported trigger and trailing comments`() {
+        val storyboard = parse("triggers")
+
+        val sprite = storyboard.layers[StoryboardLayerType.Foreground]!![1]
+        val triggers = sprite.commands.triggers
+
+        // The trailing comment of the declaration does not break parsing.
+        Assert.assertEquals(240f, sprite.initialY, 0f)
+        Assert.assertEquals(2, triggers.size)
+
+        // The commands of a trigger with an unknown condition stay within the trigger rather than
+        // leaking into the sprite's own timelines.
+        Assert.assertTrue(triggers[0].type is StoryboardTriggerType.Unsupported)
+        Assert.assertEquals(1, triggers[0].alpha.size)
+        Assert.assertEquals(0, sprite.commands.alpha.size)
+
+        // Hit sound trigger names are case-insensitive, and the trigger window is optional.
+        val clap = triggers[1].type as StoryboardTriggerType.HitSound
+        Assert.assertEquals("hitclap", clap.addition)
+        Assert.assertEquals(1, triggers[1].alpha.size)
+        Assert.assertEquals(0f, triggers[1].alpha[0].endValue, 0f)
     }
 
     @Test
@@ -216,6 +255,12 @@ class StoryboardParserTest {
         val bare = StoryboardTriggerType.parse("HitSound") as StoryboardTriggerType.HitSound
         Assert.assertNull(bare.sampleBank)
         Assert.assertNull(bare.addition)
+
+        // Two explicit banks assign the first to the normal sample and the second to the addition.
+        val normalSoftClap = StoryboardTriggerType.parse("HitSoundNormalSoftClap") as StoryboardTriggerType.HitSound
+        Assert.assertEquals(SampleBank.Normal, normalSoftClap.sampleBank)
+        Assert.assertEquals(SampleBank.Soft, normalSoftClap.additionsSampleBank)
+        Assert.assertEquals("hitclap", normalSoftClap.addition)
 
         Assert.assertNull(StoryboardTriggerType.parse("NotATrigger"))
         Assert.assertNull(StoryboardTriggerType.parse("HitSoundBogus"))
@@ -235,6 +280,22 @@ class StoryboardParserTest {
         val loop = sprite.commands.loops[0]
         Assert.assertEquals(3024.0, loop.loopStartTime, 0.0)
         Assert.assertEquals(0.0, loop.alpha[0].startTime, 0.0)
+    }
+
+    @Test
+    fun `Test quick storyboard detection`() {
+        fun resource(name: String) = TestResourceManager.getTestResource("beatmaps/storyboards/$name/map.osu")!!
+
+        // Declared in the .osu file.
+        Assert.assertTrue(StoryboardParser.hasStoryboard(resource("commands")))
+
+        val withoutStoryboard = TestResourceManager.getBeatmapFile("Kenji Ninuma - DISCOPRINCE (peppy) [Normal]")!!
+        Assert.assertFalse(StoryboardParser.hasStoryboard(withoutStoryboard))
+
+        // Agrees with the parser for every test storyboard.
+        for (name in arrayOf("basic", "loops", "triggers", "variables", "old-version")) {
+            Assert.assertEquals(name, StoryboardParser(resource(name)).parse() != null, StoryboardParser.hasStoryboard(resource(name)))
+        }
     }
 
     @Test

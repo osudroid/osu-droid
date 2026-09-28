@@ -3,9 +3,14 @@ package com.osudroid.storyboard.model
 /**
  * Represents the layer a storyboard element is rendered on.
  *
- * The rendering order corresponds to the ordinal of this enum, with [Background] rendered first.
+ * The rendering order corresponds to the ordinal of this enum, with [Video] rendered first.
  */
 enum class StoryboardLayerType {
+    /**
+     * Rendered below the [Background] layer.
+     */
+    Video,
+
     Background,
 
     /**
@@ -19,6 +24,12 @@ enum class StoryboardLayerType {
     Pass,
 
     Foreground,
+
+    /**
+     * Holds the elements of layers that are not part of the storyboard specification. Rendered
+     * above the [Foreground] layer, as in osu!lazer.
+     */
+    Custom,
 
     /**
      * Rendered above gameplay elements.
@@ -39,6 +50,7 @@ enum class StoryboardLayerType {
             "2", "Pass" -> Pass
             "3", "Foreground" -> Foreground
             "4", "Overlay" -> Overlay
+            "5", "Video" -> Video
             else -> null
         }
     }

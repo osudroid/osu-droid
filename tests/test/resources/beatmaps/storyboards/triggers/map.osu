@@ -11,3 +11,8 @@ Sprite,Foreground,Centre,"sb/trigger.png",320,240
   C,0,0,0,255,255,255
  T,Failing,0,10000
   C,0,0,0,255,0,0
+Sprite,Foreground,Centre,"sb/flash.png",320,240 // trailing comments are stripped
+ T,NotATrigger,0,10000
+  F,0,0,500,1,0
+ T,hitsoundclap
+  F,0,0,500,1,0 // also within commands

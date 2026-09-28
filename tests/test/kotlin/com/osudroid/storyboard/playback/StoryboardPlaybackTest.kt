@@ -1,6 +1,7 @@
 package com.osudroid.storyboard.playback
 
 import com.osudroid.beatmaps.constants.SampleBank
+import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.storyboard.model.AnimationLoopType
 import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardAnimation
@@ -9,6 +10,7 @@ import com.osudroid.storyboard.model.StoryboardEasing
 import com.osudroid.storyboard.model.StoryboardElement
 import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
+import com.osudroid.storyboard.model.StoryboardSample
 import com.osudroid.storyboard.model.StoryboardSprite
 import com.osudroid.storyboard.model.commands.StoryboardLoop
 import com.osudroid.storyboard.model.commands.StoryboardTrigger
@@ -179,6 +181,88 @@ class StoryboardPlaybackTest {
     }
 
     @Test
+    fun `Test loop with delayed first command`() {
+        val element = sprite()
+
+        val loop = StoryboardLoop(1000.0, 2)
+        loop.alpha.add(StoryboardEasing.None, 500.0, 1000.0, 0f, 1f)
+        element.commands.loops.add(loop)
+
+        val playable = PlayableSprite(element)
+
+        // First iteration runs from 1500 to 2000, the second one follows immediately.
+        playable.update(1750.0)
+        Assert.assertEquals(0.5f, playable.alpha, 1e-6f)
+
+        playable.update(2250.0)
+        Assert.assertEquals(0.5f, playable.alpha, 1e-6f)
+
+        Assert.assertEquals(2500.0, playable.endTime, 0.0)
+    }
+
+    @Test
+    fun `Test sample playback`() {
+        val storyboard = storyboardOf(sprite().also {
+            it.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 1f, 1f)
+        })
+
+        storyboard.samples.add(StoryboardSample(StoryboardLayerType.Background, 1000.0, "a.wav", 100))
+        storyboard.samples.add(StoryboardSample(StoryboardLayerType.Fail, 2000.0, "b.wav", 100))
+        storyboard.samples.add(StoryboardSample(StoryboardLayerType.Background, 3000.0, "c.wav", 100))
+        storyboard.samples.add(StoryboardSample(StoryboardLayerType.Background, -500.0, "intro.wav", 100))
+
+        val playback = StoryboardPlayback(storyboard)
+        val played = mutableListOf<String>()
+        playback.onSamplePlayed = { played.add(it.filePath) }
+
+        Assert.assertEquals(-500.0, playback.earliestEventTime!!, 0.0)
+
+        playback.setTime(-1000.0)
+        Assert.assertTrue(played.isEmpty())
+
+        playback.setTime(-490.0)
+        playback.setTime(1010.0)
+        Assert.assertEquals(listOf("intro.wav", "a.wav"), played)
+
+        // Samples of the Fail layer are not played while passing, and samples that are passed by
+        // a large margin are skipped.
+        playback.setTime(5000.0)
+        Assert.assertEquals(listOf("intro.wav", "a.wav"), played)
+
+        // Samples are played again after seeking backwards.
+        playback.setTime(900.0)
+        playback.setTime(1000.0)
+        Assert.assertEquals(listOf("intro.wav", "a.wav", "a.wav"), played)
+    }
+
+    @Test
+    fun `Test hit object hit trigger and playback reset`() {
+        val element = sprite()
+
+        val trigger = StoryboardTrigger(StoryboardTriggerType.parse("HitObjectHit")!!, 0.0, 10000.0, 0)
+        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0f)
+        element.commands.triggers.add(trigger)
+
+        val playback = StoryboardPlayback(storyboardOf(element))
+        val playable = playback.layers[StoryboardLayerType.Foreground]!![0]
+
+        Assert.assertTrue(playback.hasHitObjectHitTriggers)
+
+        // A sprite that is only displayed by triggers does not define the start of the storyboard.
+        Assert.assertNull(playback.earliestEventTime)
+
+        playback.update(1000.0)
+        playback.onHitObjectHit(1000.0)
+        playback.update(1250.0)
+        Assert.assertTrue(playable.isVisible)
+        Assert.assertEquals(0.5f, playable.alpha, 1e-6f)
+
+        playback.reset()
+        playback.update(1250.0)
+        Assert.assertFalse(playable.isVisible)
+    }
+
+    @Test
     fun `Test animation frame evaluation`() {
         fun animation(loopType: AnimationLoopType): StoryboardAnimation {
             val element = StoryboardAnimation(
@@ -223,11 +307,11 @@ class StoryboardPlaybackTest {
         Assert.assertEquals(0.2f, playable.alpha, 1e-6f)
 
         // A matching hit sound activates the trigger; a non-matching one does not.
-        playback.onHitSound("hitwhistle", SampleBank.Soft, 0, 1000.0)
+        playback.onHitSound(listOf(BankHitSampleInfo("hitwhistle", SampleBank.Soft)), 1000.0)
         playback.update(1000.0)
         Assert.assertEquals(0.2f, playable.alpha, 1e-6f)
 
-        playback.onHitSound("hitclap", SampleBank.Soft, 0, 1000.0)
+        playback.onHitSound(listOf(BankHitSampleInfo("hitclap", SampleBank.Soft)), 1000.0)
         playback.update(1000.0)
         Assert.assertEquals(1f, playable.alpha, 1e-6f)
 
@@ -238,6 +322,46 @@ class StoryboardPlaybackTest {
         // A backward seek resets trigger activations.
         playback.update(500.0)
         Assert.assertEquals(0.2f, playable.alpha, 1e-6f)
+    }
+
+    @Test
+    fun `Test hit sound trigger with distinct normal and addition banks`() {
+        val element = sprite()
+        element.commands.alpha.add(StoryboardEasing.None, 0.0, 10000.0, 0.2f, 0.2f)
+
+        val trigger = StoryboardTrigger(
+            StoryboardTriggerType.parse("HitSoundNormalSoftClap")!!, 0.0, 10000.0, 0
+        )
+        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0.5f)
+        element.commands.triggers.add(trigger)
+
+        val storyboard = storyboardOf(element)
+        val playback = StoryboardPlayback(storyboard)
+        val playable = playback.layers[StoryboardLayerType.Foreground]!![0]
+
+        // The normal sample is on the wrong bank (Drum instead of Normal), so the trigger must not
+        // activate even though the clap addition is correctly on the Soft bank.
+        playback.onHitSound(
+            listOf(
+                BankHitSampleInfo("hitnormal", SampleBank.Drum),
+                BankHitSampleInfo("hitclap", SampleBank.Soft)
+            ),
+            1000.0
+        )
+        playback.update(1000.0)
+        Assert.assertEquals(0.2f, playable.alpha, 1e-6f)
+
+        // The full sample set of a single hit object satisfies both constraints together: the
+        // normal sample on the Normal bank AND the clap addition on the Soft bank.
+        playback.onHitSound(
+            listOf(
+                BankHitSampleInfo("hitnormal", SampleBank.Normal),
+                BankHitSampleInfo("hitclap", SampleBank.Soft)
+            ),
+            1000.0
+        )
+        playback.update(1000.0)
+        Assert.assertEquals(1f, playable.alpha, 1e-6f)
     }
 
     @Test
@@ -284,6 +408,50 @@ class StoryboardPlaybackTest {
         playback.update(1500.0)
         Assert.assertEquals(1f, playable.red, 0f)
         Assert.assertEquals(0f, playable.green, 0f)
+    }
+
+    @Test
+    fun `Test animation starts at earliest command`() {
+        val element = StoryboardAnimation(
+            StoryboardLayerType.Foreground, StoryboardOrigin.Centre, "anim.png",
+            0f, 0f, 4, 100.0, AnimationLoopType.LoopForever
+        )
+        element.commands.scale.add(StoryboardEasing.None, 1000.0, 1500.0, 1f, 1f)
+        element.commands.alpha.add(StoryboardEasing.None, 2000.0, 3000.0, 0f, 1f)
+
+        val playable = PlayableSprite(element)
+
+        // The sprite only becomes visible with the fade, but the animation has been running
+        // since the scale command.
+        Assert.assertEquals(2000.0, playable.displayStartTime, 0.0)
+
+        playable.update(2150.0)
+        Assert.assertEquals(3, playable.frameIndex)
+    }
+
+    @Test
+    fun `Test sprite with only trigger commands is hidden until triggered`() {
+        val element = sprite()
+
+        val trigger = StoryboardTrigger(StoryboardTriggerType.Passing, 0.0, 10000.0, 0)
+        trigger.alpha.add(StoryboardEasing.None, 0.0, 500.0, 1f, 0f)
+        element.commands.triggers.add(trigger)
+
+        val playback = StoryboardPlayback(storyboardOf(element))
+        val playable = playback.layers[StoryboardLayerType.Foreground]!![0]
+
+        playback.setPassing(false, 0.0)
+        playback.update(1000.0)
+        Assert.assertFalse(playable.isVisible)
+
+        playback.setPassing(true, 1000.0)
+        playback.update(1250.0)
+        Assert.assertTrue(playable.isVisible)
+        Assert.assertEquals(0.5f, playable.alpha, 1e-6f)
+
+        // The sprite is hidden again once the trigger's commands have finished.
+        playback.update(2000.0)
+        Assert.assertFalse(playable.isVisible)
     }
 
     @Test

@@ -61,6 +61,12 @@ class PlayableSprite(
     val hasHitSoundTriggers
         get() = element.commands.triggers.any { it.type is StoryboardTriggerType.HitSound }
 
+    /**
+     * Whether this sprite has hit object hit triggers.
+     */
+    val hasHitObjectHitTriggers
+        get() = element.commands.triggers.any { it.type === StoryboardTriggerType.HitObjectHit }
+
     // The evaluated state of this sprite at the time of the last update() call.
     @JvmField var x = element.initialX
     @JvmField var y = element.initialY
@@ -76,17 +82,66 @@ class PlayableSprite(
     @JvmField var additiveBlend = false
     @JvmField var frameIndex = 0
 
-    init {
-        var start = timelines.startTime
-        var end = timelines.endTime
+    /**
+     * Whether this sprite is displayed at the time of the last [update] call.
+     *
+     * A sprite is displayed during the lifetime of its own commands and while a trigger
+     * activation is running. Outside of that (e.g. a sprite that only has trigger commands and has
+     * not been triggered yet), it is hidden.
+     */
+    @JvmField var isVisible = true
 
+    /**
+     * Whether the element has commands of its own (including loops), not accounting for triggers.
+     */
+    @JvmField
+    val hasOwnCommands: Boolean
+
+    /**
+     * The time at which the element becomes visible by its own commands, in milliseconds. Only
+     * meaningful if [hasOwnCommands] is `true`.
+     */
+    @JvmField
+    val ownDisplayStartTime: Double
+
+    private val ownStartTime: Double
+    private val ownEndTime: Double
+
+    init {
+        ownStartTime = timelines.startTime
+        ownEndTime = timelines.endTime
+        hasOwnCommands = ownStartTime <= ownEndTime
+
+        // If the sprite starts out invisible, it is displayed from the first alpha command that
+        // makes it visible, as in osu!lazer.
+        var displayStart = ownStartTime
+
+        if (timelines.alpha.startValue == 0f) {
+            for (command in timelines.alpha) {
+                if (command.startValue > 0f || command.endValue > 0f) {
+                    displayStart = command.startTime
+                    break
+                }
+            }
+        }
+
+        ownDisplayStartTime = displayStart
+
+        var start = ownDisplayStartTime
+        var end = ownEndTime
+
+        // The active window must cover the trigger windows so that the sprite can be displayed
+        // once a trigger activates.
         for (trigger in element.commands.triggers) {
+            if (trigger.type === StoryboardTriggerType.Unsupported || !trigger.hasCommands) {
+                continue
+            }
+
             start = min(start, trigger.triggerStartTime)
             end = maxOf(end, trigger.triggerEndTime + maxOf(trigger.commandsEndTime, 0.0))
         }
 
-        val firstAlpha = timelines.alpha.startValue
-        displayStartTime = if (firstAlpha == 0f) timelines.alpha.startTime else start
+        displayStartTime = start
         endTime = end
     }
 
@@ -98,15 +153,20 @@ class PlayableSprite(
     fun isActive(time: Double) = time in displayStartTime..endTime
 
     /**
-     * Activates a trigger at the given time. An active activation with the same non-zero group
-     * number is cancelled, matching osu!stable.
+     * Activates a trigger at the given time. A running activation of the same trigger or of the
+     * same non-zero group number is cancelled, matching osu!stable.
      *
      * @param trigger The trigger to activate.
      * @param time The activation time in milliseconds.
      */
     fun activate(trigger: StoryboardTrigger, time: Double) {
-        if (trigger.groupNumber != 0) {
-            activations.removeAll { it.trigger.groupNumber == trigger.groupNumber }
+        if (!trigger.hasCommands) {
+            return
+        }
+
+        activations.removeAll {
+            it.trigger === trigger ||
+                (trigger.groupNumber != 0 && it.trigger.groupNumber == trigger.groupNumber)
         }
 
         activations.add(TriggerActivation(trigger, time))
@@ -139,6 +199,8 @@ class PlayableSprite(
         flipVertical = evaluateBoolean(timelines.flipVertical, time)
         additiveBlend = evaluateBoolean(timelines.additiveBlend, time)
 
+        isVisible = hasOwnCommands && time >= ownDisplayStartTime && time <= ownEndTime
+
         applyActivations(time)
 
         // In stable, alpha values exceeding 1 wrap around and make the sprite disappear.
@@ -165,6 +227,10 @@ class PlayableSprite(
         for (activation in activations) {
             val group = activation.trigger
             val relativeTime = time - activation.time
+
+            if (relativeTime >= activation.commandsStartTime && relativeTime <= activation.commandsEndTime) {
+                isVisible = true
+            }
 
             if (group.x.hasCommands) x = evaluate(group.x, relativeTime, x)
             if (group.y.hasCommands) y = evaluate(group.y, relativeTime, y)
@@ -193,7 +259,10 @@ class PlayableSprite(
             return 0
         }
 
-        val frame = ((time - displayStartTime) / animation.frameDelay).toInt()
+        // Playback starts at the earliest command of the animation rather than at the time it
+        // becomes visible, matching osu!lazer.
+        val startTime = if (hasOwnCommands) ownStartTime else displayStartTime
+        val frame = ((time - startTime) / animation.frameDelay).toInt()
 
         return when (animation.loopType) {
             AnimationLoopType.LoopOnce -> frame.coerceIn(0, animation.frameCount - 1)
@@ -273,7 +342,11 @@ class PlayableSprite(
     private class TriggerActivation(
         @JvmField val trigger: StoryboardTrigger,
         @JvmField val time: Double
-    )
+    ) {
+        // Relative to the activation time.
+        @JvmField val commandsStartTime = trigger.commandsStartTime
+        @JvmField val commandsEndTime = trigger.commandsEndTime
+    }
 
     /**
      * The flat command timelines of an element, with all loops unrolled into absolute time.
@@ -314,7 +387,9 @@ class PlayableSprite(
 
                 // Guard against pathological storyboards whose unrolled loops would exhaust
                 // memory. Excess iterations are dropped with a warning.
-                val iterations = min(loop.totalIterations, MAX_UNROLLED_COMMANDS / commandsPerIteration)
+                // A loop without a duration plays back once, as in osu!lazer.
+                val totalIterations = if (loop.iterationDuration > 0) loop.totalIterations else 1
+                val iterations = min(totalIterations, MAX_UNROLLED_COMMANDS / commandsPerIteration)
 
                 if (iterations < loop.totalIterations) {
                     Log.w(

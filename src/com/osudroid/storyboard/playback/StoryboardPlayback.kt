@@ -1,8 +1,9 @@
 package com.osudroid.storyboard.playback
 
-import com.osudroid.beatmaps.constants.SampleBank
+import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardLayerType
+import com.osudroid.storyboard.model.StoryboardSample
 import com.osudroid.storyboard.model.commands.StoryboardTriggerType
 
 /**
@@ -49,6 +50,49 @@ class StoryboardPlayback(
     val hasHitSoundTriggers = spritesWithTriggers.any { it.hasHitSoundTriggers }
 
     /**
+     * Whether any sprite of this storyboard has hit object hit triggers.
+     */
+    @JvmField
+    val hasHitObjectHitTriggers = spritesWithTriggers.any { it.hasHitObjectHitTriggers }
+
+    /**
+     * The samples of this storyboard, sorted by time.
+     */
+    private val samples = storyboard.samples.sortedBy { it.time }
+
+    private var nextSampleIndex = 0
+
+    /**
+     * Invoked when a sample of this storyboard should be played.
+     */
+    var onSamplePlayed: ((StoryboardSample) -> Unit)? = null
+
+    /**
+     * The earliest point in time at which a sprite becomes visible or a sample is played, in
+     * milliseconds, or `null` if this storyboard has neither.
+     *
+     * Storyboards use events in negative time to display an intro before the audio starts.
+     */
+    @JvmField
+    val earliestEventTime: Double? = run {
+        var earliest = Double.MAX_VALUE
+
+        for (sprites in layers.values) {
+            for (sprite in sprites) {
+                if (sprite.hasOwnCommands) {
+                    earliest = minOf(earliest, sprite.ownDisplayStartTime)
+                }
+            }
+        }
+
+        if (samples.isNotEmpty()) {
+            earliest = minOf(earliest, samples[0].time)
+        }
+
+        if (earliest == Double.MAX_VALUE) null else earliest
+    }
+
+    /**
      * Whether the player is currently in a passing state, controlling the visibility of the
      * [Pass][StoryboardLayerType.Pass] and [Fail][StoryboardLayerType.Fail] layers.
      */
@@ -89,6 +133,8 @@ class StoryboardPlayback(
             for (state in layerStates.values) {
                 state.reset()
             }
+
+            nextSampleIndex = samples.indexOfFirst { it.time >= time }.let { if (it < 0) samples.size else it }
         }
 
         currentTime = time
@@ -96,6 +142,33 @@ class StoryboardPlayback(
         for (state in layerStates.values) {
             state.sweep(time)
         }
+
+        while (nextSampleIndex < samples.size && samples[nextSampleIndex].time <= time) {
+            val sample = samples[nextSampleIndex++]
+
+            // Samples that are passed by a large margin (e.g. when skipping or seeking) are not
+            // played, to avoid layering all of them at once.
+            if (time - sample.time < SAMPLE_ALLOWABLE_LATE_START && isLayerVisible(sample.layer)) {
+                onSamplePlayed?.invoke(sample)
+            }
+        }
+    }
+
+    /**
+     * Resets this playback to its initial state, so that it can be played back from the start.
+     */
+    fun reset() {
+        for (sprite in spritesWithTriggers) {
+            sprite.resetActivations()
+        }
+
+        for (state in layerStates.values) {
+            state.reset()
+        }
+
+        nextSampleIndex = 0
+        isPassing = true
+        currentTime = -Double.MAX_VALUE
     }
 
     /**
@@ -133,15 +206,17 @@ class StoryboardPlayback(
     }
 
     /**
-     * Notifies this playback that a hit sample was played, activating matching hit sound triggers
-     * whose window contains the given time.
+     * Notifies this playback that the hit samples of a single hit object were played, activating
+     * matching hit sound triggers whose window contains the given time.
      *
-     * @param name The name of the sample (e.g. `hitclap`).
-     * @param bank The [SampleBank] the sample was loaded from.
-     * @param customSampleBank The custom sample bank index of the sample.
-     * @param time The time the sample was played at, in milliseconds.
+     * The full set of samples played for the hit object must be passed together, since a trigger
+     * (e.g. `HitSoundNormalSoftClap`) can require a bank on the normal sample and a different bank
+     * on an addition sample at the same time.
+     *
+     * @param samples The samples played for a single hit object.
+     * @param time The time the samples were played at, in milliseconds.
      */
-    fun onHitSound(name: String, bank: SampleBank, customSampleBank: Int, time: Double) {
+    fun onHitSound(samples: List<BankHitSampleInfo>, time: Double) {
         if (!hasHitSoundTriggers) {
             return
         }
@@ -150,8 +225,28 @@ class StoryboardPlayback(
             for (trigger in sprite.element.commands.triggers) {
                 val type = trigger.type as? StoryboardTriggerType.HitSound ?: continue
 
-                if (time in trigger.triggerStartTime..trigger.triggerEndTime &&
-                    type.matches(name, bank, customSampleBank)) {
+                if (time in trigger.triggerStartTime..trigger.triggerEndTime && type.matches(samples)) {
+                    sprite.activate(trigger, time)
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies this playback that a hit object was hit, activating hit object hit triggers whose
+     * window contains the given time.
+     *
+     * @param time The time the hit object was hit at, in milliseconds.
+     */
+    fun onHitObjectHit(time: Double) {
+        if (!hasHitObjectHitTriggers) {
+            return
+        }
+
+        for (sprite in spritesWithTriggers) {
+            for (trigger in sprite.element.commands.triggers) {
+                if (trigger.type === StoryboardTriggerType.HitObjectHit &&
+                    time in trigger.triggerStartTime..trigger.triggerEndTime) {
                     sprite.activate(trigger, time)
                 }
             }
@@ -257,5 +352,13 @@ class StoryboardPlayback(
 
             active.add(low, sprite)
         }
+    }
+
+    companion object {
+        /**
+         * The amount of time in milliseconds beyond the start time of a sample within which the
+         * sample is still played.
+         */
+        private const val SAMPLE_ALLOWABLE_LATE_START = 100.0
     }
 }

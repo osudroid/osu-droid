@@ -17,4 +17,9 @@ Sprite,Foreground,Centre,"sb/b.png",320,240
  F,99,1000,2000,1,0
 Sprite,CustomLayer,Centre,"sb/c.png",320,240
  F,0,0,1000,1
+Sprite,Video,Centre,"sb/d.png",320,240
+ F,0,0,1000,1
+Sprite,Foreground,Centre,"sb/e.png",320,240
+ L,1000,3
+  F,0,500,1000,0,1
 

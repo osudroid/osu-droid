@@ -109,7 +109,7 @@ internal class StoryboardEventsParser(private val storyboard: Storyboard) {
             "Sample", "5" -> {
                 storyboard.samples.add(
                     StoryboardSample(
-                        StoryboardLayerType.parse(parts[2]) ?: StoryboardLayerType.Background,
+                        parseLayer(parts[2]),
                         parts[1].toDouble() + timeOffset,
                         cleanPath(parts[3]),
                         parts.getOrNull(4)?.toIntOrNull() ?: 100
@@ -142,7 +142,9 @@ internal class StoryboardEventsParser(private val storyboard: Storyboard) {
             }
 
             "T" -> {
-                val type = StoryboardTriggerType.parse(parts[1]) ?: return
+                // Triggers with an unknown condition are kept (but never activate) so that their
+                // commands are not mistaken for commands of the element itself.
+                val type = StoryboardTriggerType.parse(parts[1]) ?: StoryboardTriggerType.Unsupported
 
                 // The trigger window times are optional; a trigger without them can activate at
                 // any point in time (matching osu!lazer).
@@ -294,14 +296,11 @@ internal class StoryboardEventsParser(private val storyboard: Storyboard) {
     }
 
     /**
-     * Parses a layer name. The `Video` layer maps to the Background layer (lazer renders it
-     * below Background), and unknown (custom) layer names fall back to the Foreground layer,
-     * approximating osu!lazer, which renders custom layers above the Foreground layer.
+     * Parses a layer name. Unknown layers are rendered above the Foreground layer, as in
+     * osu!lazer.
      */
-    private fun parseLayer(value: String) = when (value) {
-        "5", "Video" -> StoryboardLayerType.Background
-        else -> StoryboardLayerType.parse(value) ?: StoryboardLayerType.Foreground
-    }
+    private fun parseLayer(value: String) =
+        StoryboardLayerType.parse(value.trim()) ?: StoryboardLayerType.Custom
 
     private fun cleanPath(path: String) = path.trim().trim('"').replace('\\', '/')
 }

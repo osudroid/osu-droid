@@ -2,32 +2,38 @@ package com.osudroid.storyboard.renderer
 
 import android.graphics.Color
 import com.edlplan.andengine.TextureHelper
-import com.osudroid.storyboard.model.StoryboardAnimation
-import com.osudroid.storyboard.model.StoryboardLayerType
-import com.osudroid.storyboard.parser.StoryboardParser
-import com.osudroid.storyboard.playback.StoryboardPlayback
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.game.GameplayHitSampleInfo
+import com.osudroid.storyboard.model.Storyboard
+import com.osudroid.storyboard.model.StoryboardAnimation
+import com.osudroid.storyboard.model.StoryboardLayerType
+import com.osudroid.storyboard.model.StoryboardSample
+import com.osudroid.storyboard.parser.StoryboardParser
+import com.osudroid.storyboard.playback.StoryboardPlayback
 import com.reco1l.andengine.component.UIComponent
 import java.io.File
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.game.GameHelper
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 
 /**
  * Renders a beatmap's storyboard.
  *
- * This component renders the storyboard background and the `Background`, `Fail`/`Pass` and
- * `Foreground` layers, followed by the background dim, and is meant to be attached below all
- * gameplay elements. The `Overlay` layer is rendered by [overlayComponent], which is meant to be
+ * This component renders the storyboard background and all layers up to the `Foreground` layer
+ * (and custom layers above it), followed by the background dim, and is meant to be attached below
+ * all gameplay elements. The `Overlay` layer is rendered by [overlayComponent], which is meant to be
  * attached above gameplay elements.
  *
  * All sprites are streamed through a shared [StoryboardBatch], with the storyboard's 640x480
  * coordinate space mapped to a centered letterbox that fills the screen height (or width,
- * whichever is limiting). Non-widescreen storyboards are cropped to the 4:3 area.
+ * whichever is limiting). Sprites outside of that area are not cropped.
  */
 class StoryboardComponent : UIComponent() {
     /**
@@ -45,7 +51,8 @@ class StoryboardComponent : UIComponent() {
 
     /**
      * The background brightness in the range `[0, 1]`. A dim overlay with `1 - brightness` alpha
-     * is drawn above the storyboard layers (except the `Overlay` layer).
+     * is drawn above the storyboard layers. The sprites of the `Overlay` layer are darkened
+     * instead, as they are displayed in front of gameplay elements.
      */
     @JvmField
     var brightness = 1f
@@ -57,7 +64,9 @@ class StoryboardComponent : UIComponent() {
         private set
 
     private var texturePool: StoryboardTexturePool? = null
+    private var sounds: HashMap<String, BassSoundProvider>? = null
     private var loadedOsuPath: String? = null
+    private var loadedSignature = 0L
 
     internal val batch = StoryboardBatch()
 
@@ -66,6 +75,13 @@ class StoryboardComponent : UIComponent() {
      */
     val isStoryboardAvailable
         get() = playback != null
+
+    /**
+     * The earliest point in time at which the loaded storyboard displays a sprite or plays a
+     * sample, in milliseconds, or `null` if there is none.
+     */
+    val earliestEventTime
+        get() = playback?.earliestEventTime
 
     init {
         width = Config.getRES_WIDTH().toFloat()
@@ -81,20 +97,89 @@ class StoryboardComponent : UIComponent() {
      */
     @JvmOverloads
     fun load(osuPath: String, scope: CoroutineScope? = null) {
-        if (osuPath == loadedOsuPath && playback != null) {
+        if (isLoadedFor(osuPath)) {
             return
         }
 
         release()
 
-        val storyboard = StoryboardParser(osuPath, scope).parse() ?: return
-        val pool = StoryboardTexturePool(File(osuPath).parentFile!!)
+        val signature = computeSignature(osuPath)
+        val storyboard = StoryboardParser(osuPath, scope).parse()
 
-        pool.load(storyboard)
+        if (storyboard != null) {
+            val directory = File(osuPath).parentFile!!
 
-        texturePool = pool
-        playback = StoryboardPlayback(storyboard)
+            // The resources are assigned before they are loaded so that release() unloads them
+            // if loading is interrupted.
+            val pool = StoryboardTexturePool(directory, storyboard.useSkinSprites)
+            texturePool = pool
+            pool.load(storyboard)
+
+            scope?.ensureActive()
+            loadSounds(storyboard, directory, scope)
+
+            playback = StoryboardPlayback(storyboard).also { it.onSamplePlayed = ::playSample }
+        }
+
         loadedOsuPath = osuPath
+        loadedSignature = signature
+    }
+
+    /**
+     * Whether the storyboard of the given beatmap is loaded and its files have not changed since.
+     * This is also the case if the beatmap was found to have no storyboard.
+     *
+     * @param osuPath The path of the `.osu` file of the beatmap.
+     */
+    fun isLoadedFor(osuPath: String) = osuPath == loadedOsuPath && computeSignature(osuPath) == loadedSignature
+
+    /**
+     * Resets the playback of the loaded storyboard so that it can be played back from the start.
+     */
+    fun resetPlayback() {
+        stopSamples()
+        playback?.reset()
+    }
+
+    /**
+     * Stops all playing storyboard samples.
+     */
+    fun stopSamples() {
+        sounds?.values?.forEach { it.stop() }
+    }
+
+    private fun computeSignature(osuPath: String): Long {
+        val osuFile = File(osuPath)
+        val osbFile = FileUtils.listFiles(osuFile.parentFile, ".osb")?.firstOrNull()
+
+        return osuFile.lastModified() * 31 + (osbFile?.lastModified() ?: 0L)
+    }
+
+    private fun loadSounds(storyboard: Storyboard, directory: File, scope: CoroutineScope?) {
+        val sounds = HashMap<String, BassSoundProvider>()
+        this.sounds = sounds
+
+        for (sample in storyboard.samples) {
+            if (sample.filePath in sounds) {
+                continue
+            }
+
+            scope?.ensureActive()
+
+            val file = File(directory, sample.filePath)
+            val sound = BassSoundProvider()
+
+            if (file.isFile && sound.prepare(file.absolutePath)) {
+                sounds[sample.filePath] = sound
+            }
+        }
+    }
+
+    private fun playSample(sample: StoryboardSample) {
+        val sound = sounds?.get(sample.filePath) ?: return
+
+        sound.setFrequency(GameHelper.getSpeedMultiplier())
+        sound.play(sample.volume / 100f)
     }
 
     /**
@@ -136,21 +221,33 @@ class StoryboardComponent : UIComponent() {
             return
         }
 
-        for (i in samples.indices) {
-            val sample = samples[i].sampleInfo as? BankHitSampleInfo ?: continue
+        val bankSamples = samples.mapNotNull { it.sampleInfo as? BankHitSampleInfo }
 
-            playback.onHitSound(sample.name, sample.bank, sample.customSampleBank, playback.currentTime)
+        if (bankSamples.isNotEmpty()) {
+            playback.onHitSound(bankSamples, playback.currentTime)
         }
     }
 
     /**
-     * Releases the loaded storyboard and unloads its textures.
+     * Notifies the storyboard that a hit object was hit, activating hit object hit triggers.
+     */
+    fun onHitObjectHit() {
+        val playback = playback ?: return
+
+        playback.onHitObjectHit(playback.currentTime)
+    }
+
+    /**
+     * Releases the loaded storyboard and unloads its textures and samples.
      */
     fun release() {
         playback = null
         loadedOsuPath = null
+        loadedSignature = 0L
         texturePool?.clear()
         texturePool = null
+        sounds?.values?.forEach { it.free() }
+        sounds = null
     }
 
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
@@ -173,7 +270,8 @@ class StoryboardComponent : UIComponent() {
     internal fun drawLayers(
         playback: StoryboardPlayback,
         layers: Array<StoryboardLayerType>,
-        alpha: Float
+        alpha: Float,
+        colorMultiplier: Float = 1f
     ) {
         val pool = texturePool ?: return
 
@@ -200,14 +298,14 @@ class StoryboardComponent : UIComponent() {
 
                 sprite.update(playback.currentTime)
 
-                if (sprite.alpha * alpha < ALPHA_EPSILON) {
+                if (!sprite.isVisible || sprite.alpha * alpha < ALPHA_EPSILON) {
                     continue
                 }
 
                 val element = sprite.element
                 val path = (element as? StoryboardAnimation)?.framePath(sprite.frameIndex) ?: element.filePath
 
-                batch.draw(sprite, pool.get(path), alpha)
+                batch.draw(sprite, pool.get(path), alpha, colorMultiplier)
             }
         }
 
@@ -264,10 +362,12 @@ class StoryboardComponent : UIComponent() {
         private const val ALPHA_EPSILON = 1f / 255f
 
         private val MAIN_LAYERS = arrayOf(
+            StoryboardLayerType.Video,
             StoryboardLayerType.Background,
             StoryboardLayerType.Fail,
             StoryboardLayerType.Pass,
-            StoryboardLayerType.Foreground
+            StoryboardLayerType.Foreground,
+            StoryboardLayerType.Custom
         )
 
         private val blackRegion: TextureRegion by lazy {

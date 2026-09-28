@@ -2,9 +2,6 @@ package com.osudroid.storyboard.model
 
 /**
  * Represents a storyboard `Sample` (audio) event.
- *
- * These are currently parsed for completeness but not played back, matching the behavior of the
- * previous storyboard implementation.
  */
 class StoryboardSample(
     /**

@@ -10,7 +10,8 @@ import ru.nsu.ccfit.zuev.osu.Config
  * Renders the `Overlay` layer of a storyboard, meant to be attached above gameplay elements.
  *
  * The playback state, texture pool and batch are shared with the owning [StoryboardComponent].
- * The background dim does not apply to this layer, matching the previous implementation.
+ * The background dim is applied by darkening the sprites rather than by covering them, as this
+ * layer is displayed in front of gameplay elements.
  */
 class StoryboardOverlayComponent internal constructor(
     private val storyboardComponent: StoryboardComponent
@@ -28,7 +29,7 @@ class StoryboardOverlayComponent internal constructor(
         val batch = storyboardComponent.batch
 
         batch.begin(pGLState)
-        storyboardComponent.drawLayers(playback, OVERLAY_LAYERS, drawAlpha)
+        storyboardComponent.drawLayers(playback, OVERLAY_LAYERS, drawAlpha, storyboardComponent.brightness)
         batch.end()
     }
 

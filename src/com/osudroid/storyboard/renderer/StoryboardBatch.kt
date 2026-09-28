@@ -110,8 +110,10 @@ class StoryboardBatch {
      * @param sprite The sprite to draw.
      * @param region The texture region of the sprite's current frame.
      * @param alphaMultiplier An additional alpha multiplier (the component's draw alpha).
+     * @param colorMultiplier An additional color multiplier, used to dim the sprite.
      */
-    fun draw(sprite: PlayableSprite, region: TextureRegion, alphaMultiplier: Float) {
+    @JvmOverloads
+    fun draw(sprite: PlayableSprite, region: TextureRegion, alphaMultiplier: Float, colorMultiplier: Float = 1f) {
         val alpha = sprite.alpha * alphaMultiplier
 
         prepare(region.texture, sprite.additiveBlend)
@@ -147,9 +149,9 @@ class StoryboardBatch {
         }
 
         // Straight (non-premultiplied) vertex color; the alpha is applied by the blend function.
-        val cr = sprite.red
-        val cg = sprite.green
-        val cb = sprite.blue
+        val cr = sprite.red * colorMultiplier
+        val cg = sprite.green * colorMultiplier
+        val cb = sprite.blue * colorMultiplier
 
         val x = spaceOffsetX + sprite.x * spaceScale
         val y = spaceOffsetY + sprite.y * spaceScale

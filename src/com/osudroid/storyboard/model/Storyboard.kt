@@ -29,6 +29,13 @@ class Storyboard {
     var widescreen = false
 
     /**
+     * Whether textures of the current skin are preferred over the textures in the beatmap folder,
+     * per the `UseSkinSprites` setting of the beatmap.
+     */
+    @JvmField
+    var useSkinSprites = false
+
+    /**
      * The file name of the beatmap's background image, as declared in the `[Events]` section.
      */
     @JvmField
@@ -41,10 +48,10 @@ class Storyboard {
         get() = layers.values.asSequence().flatten()
 
     /**
-     * Whether this storyboard has no elements.
+     * Whether this storyboard has neither elements nor samples.
      */
     val isEmpty
-        get() = layers.values.all { it.isEmpty() }
+        get() = samples.isEmpty() && layers.values.all { it.isEmpty() }
 
     /**
      * Adds an element to its layer.
@@ -78,7 +85,7 @@ class Storyboard {
     fun usesBackgroundImage(): Boolean {
         val background = backgroundFilename?.let { normalizePath(it) } ?: return false
 
-        return elements.any { normalizePath(it.filePath) == background }
+        return layers[StoryboardLayerType.Background]!!.any { normalizePath(it.filePath) == background }
     }
 
     private fun normalizePath(path: String) = path.replace('\\', '/').trim('"').lowercase()
