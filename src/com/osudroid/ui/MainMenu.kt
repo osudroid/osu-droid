@@ -8,6 +8,7 @@ import com.osudroid.utils.async
 import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.utils.mainThread
 import com.osudroid.ui.v2.multi.LobbyScene
+import com.osudroid.ui.v2.songselect.SongSelect
 import com.osudroid.multiplayer.Multiplayer
 import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -82,9 +83,8 @@ class MainMenu(val main: MainScene) {
                     } else {
                         main.musicControl(MainScene.MusicOption.PLAY)
 
-                        GlobalManager.getInstance().songMenu.reload()
-                        GlobalManager.getInstance().songMenu.show()
-                        GlobalManager.getInstance().songMenu.select()
+                        SongSelect.invalidateLibrary()
+                        SongSelect.show()
                     }
                 }
 

@@ -3,6 +3,7 @@ package com.osudroid.ui.v2
 import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
+import com.osudroid.ui.v2.songselect.SongSelect
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.storyboard.parser.StoryboardParser
@@ -204,15 +205,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
             return
         }
 
-        val global = GlobalManager.getInstance()
-        val songMenu = global.songMenu
-        val selectedBeatmap = songMenu.selectedBeatmap
-
-        global.engine.scene = songMenu.scene
-
-        if (selectedBeatmap != null) {
-            songMenu.playMusic(selectedBeatmap.audioPath, selectedBeatmap.previewTime)
-        }
+        SongSelect.show()
+        SongSelect.playCurrentMusic()
     }
 
 

@@ -12,6 +12,7 @@ import com.osudroid.resources.R
 import com.osudroid.ui.BannerManager
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.multi.LobbyScene
+import com.osudroid.ui.v2.songselect.SongSelect
 import com.reco1l.andengine.ui.UIConfirmDialog
 import com.reco1l.osu.ui.HorizontalMessageDialog
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
@@ -700,9 +701,8 @@ class MainMenuV2 : UIScene() {
                 } else {
                     updateThread {
                         musicControl(MusicOption.PLAY)
-                        GlobalManager.getInstance().songMenu.reload()
-                        GlobalManager.getInstance().songMenu.show()
-                        GlobalManager.getInstance().songMenu.select()
+                        SongSelect.invalidateLibrary()
+                        SongSelect.show()
                     }
                 }
             }

@@ -20,6 +20,7 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.StarRatingBadge
+import com.osudroid.ui.v2.songselect.SongSelect
 import com.osudroid.utils.ModHashMap
 import com.osudroid.utils.async
 import com.osudroid.utils.updateThread
@@ -358,7 +359,11 @@ object ModMenu : UIScene() {
             val songMenu = GlobalManager.getInstance().songMenu
 
             if (beatmap == null) {
-                songMenu.setStarsDisplay(0f)
+                if (isSongSelectActive) {
+                    SongSelect.setStarRatingDisplay(0.0)
+                } else {
+                    songMenu.setStarsDisplay(0f)
+                }
                 return@scope
             }
 
@@ -402,14 +407,26 @@ object ModMenu : UIScene() {
             ensureActive()
 
             starRatingBadge.rating = attributes.starRating
-            songMenu.changeDimensionInfo(selectedBeatmap)
-            songMenu.setStarsDisplay(attributes.starRating.toFloat())
+
+            if (isSongSelectActive) {
+                SongSelect.setDifficultyStatistics(selectedBeatmap)
+                SongSelect.setStarRatingDisplay(attributes.starRating)
+            } else {
+                songMenu.changeDimensionInfo(selectedBeatmap)
+                songMenu.setStarsDisplay(attributes.starRating.toFloat())
+            }
         }
     }
 
     //endregion
 
     //region Visibility
+
+    /**
+     * Whether the new [SongSelect] scene is the scene this menu is shown on top of.
+     */
+    private val isSongSelectActive
+        get() = GlobalManager.getInstance().engine.scene === SongSelect
 
     override fun show() {
         GlobalManager.getInstance().engine.scene.setChildScene(
@@ -598,7 +615,11 @@ object ModMenu : UIScene() {
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 
         if (modChangeQueue.any { it is IModApplicableToTrackRate }) {
-            GlobalManager.getInstance().songMenu.updateMusicEffects()
+            if (isSongSelectActive) {
+                SongSelect.updateMusicEffects()
+            } else {
+                GlobalManager.getInstance().songMenu.updateMusicEffects()
+            }
         }
         modChangeQueue.clear()
 
@@ -606,6 +627,10 @@ object ModMenu : UIScene() {
 
         selectedModsIndicator.mods = enabledMods
         modPresetsSection.onModsChanged()
+
+        if (isSongSelectActive) {
+            SongSelect.onModsChanged()
+        }
     }
 
     fun addMod(mod: Mod) {

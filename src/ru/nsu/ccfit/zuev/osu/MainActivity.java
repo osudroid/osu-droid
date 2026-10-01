@@ -61,6 +61,7 @@ import com.osudroid.UpdateManager;
 import com.osudroid.ui.v2.multi.LobbyScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
+import com.osudroid.ui.v2.songselect.SongSelect;
 import com.reco1l.osu.ui.MessageDialog;
 import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
@@ -301,6 +302,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
+        ResourceManager.getInstance().loadFont("torusBold", "torus-bold.otf", 21, Color.WHITE);
+        ResourceManager.getInstance().loadFont("torusBoldLarge", "torus-bold.otf", 28, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
         // Re-initialize SplashScene so its Sprite/Text children are bound to the current
@@ -440,6 +443,7 @@ public class MainActivity extends BaseGameActivity implements
                     Multiplayer.connectFromLink(inviteLink);
                 }
 
+                SongSelect.INSTANCE.loadBeatmaps();
                 Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
             });
         });
