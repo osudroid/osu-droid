@@ -1,6 +1,7 @@
 package com.reco1l.framework
 
 import com.edlplan.framework.easing.*
+import com.osudroid.math.Precision
 
 object Interpolation {
 
@@ -42,5 +43,37 @@ object Interpolation {
         return start + t * (end - start)
     }
 
+    /**
+     * Interpolates towards [end] starting from [start] using [deltaTime] as the elapsed time of a [duration] long transition.
+     */
+    @JvmStatic
+    fun floatLerp(deltaTime: Float, duration: Float, start: Float, end: Float, easing: Easing = Easing.None): Float {
+        return floatAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
+    }
+
+    /**
+     * Same as [floatLerp] but snaps to [end] once the difference between [start] and [end] is within [snapBy].
+     */
+    @JvmStatic
+    fun floatLerpWithSnap(deltaTime: Float, duration: Float, start: Float, end: Float, snapBy: Float = 0f, easing: Easing = Easing.None): Float {
+        if (Precision.almostEquals(start, end, snapBy)) {
+            return end
+        }
+        return floatAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
+    }
+
+    @JvmStatic
+    fun colorAt(time: Float, start: Color4, end: Color4, startTime: Float, endTime: Float, easing: Easing = Easing.None): Color4 {
+        val r = floatAt(time, start.red, end.red, startTime, endTime, easing)
+        val g = floatAt(time, start.green, end.green, startTime, endTime, easing)
+        val b = floatAt(time, start.blue, end.blue, startTime, endTime, easing)
+        val a = floatAt(time, start.alpha, end.alpha, startTime, endTime, easing)
+        return Color4(r, g, b, a)
+    }
+
+    @JvmStatic
+    fun colorLerp(deltaTime: Float, duration: Float, start: Color4, end: Color4, easing: Easing = Easing.None): Color4 {
+        return colorAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
+    }
 
 }

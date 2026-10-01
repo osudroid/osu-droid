@@ -768,14 +768,7 @@ abstract class UIComponent : Entity(0f, 0f),
 
         doDraw(pGLState, camera)
 
-        // Draw children
-        val children = mChildren
-        if (children != null) {
-            val childCount = children.size
-            for (i in 0 until childCount) {
-                children.get(i)?.onDraw(pGLState, camera)
-            }
-        }
+        onDrawChildren(pGLState, camera)
 
         foreground?.setSize(width, height)
         foreground?.onDraw(pGLState, camera)
@@ -786,6 +779,19 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         pGLState.popModelViewGLMatrix()
+    }
+
+    /**
+     * Draws the children of this component. Override to customize which children are drawn and how.
+     */
+    protected open fun onDrawChildren(pGLState: GLState, camera: Camera) {
+        val children = mChildren
+        if (children != null) {
+            val childCount = children.size
+            for (i in 0 until childCount) {
+                children.get(i)?.onDraw(pGLState, camera)
+            }
+        }
     }
 
     open fun beginDraw(pGLState: GLState) {

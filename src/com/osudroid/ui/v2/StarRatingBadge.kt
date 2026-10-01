@@ -61,6 +61,25 @@ class StarRatingBadge : UIBadge() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
+    /**
+     * Applies the text and colors for the current [rating] immediately, skipping the rolling animation.
+     */
+    fun applyColorsInstantly() {
+        val value = rating
+        counter.setValueWithoutRolling(value)
+
+        text = "%.2f".format(value)
+        background?.color = OsuColors.getStarRatingColor(value)
+
+        if (value >= 6.5) {
+            color = OsuColors.getStarRatingTextColor(value)
+            alpha = 1f
+        } else {
+            color = Color4.Black
+            alpha = 0.75f
+        }
+    }
+
     companion object {
         init {
             ResourceManager.getInstance().loadHighQualityAsset("star-xs", "star.png")

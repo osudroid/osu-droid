@@ -71,3 +71,11 @@ inline fun IEntity.labeledBadge(builder: UILabeledBadge.() -> Unit): UILabeledBa
 inline fun IEntity.compoundText(builder: CompoundText.() -> Unit): CompoundText {
     return CompoundText().apply(builder).also(::attachChild)
 }
+
+inline fun IEntity.clickableContainer(builder: UIClickableContainer.() -> Unit): UIClickableContainer {
+    return UIClickableContainer().apply(builder).also(::attachChild)
+}
+
+inline fun IEntity.wedge(builder: UIWedge.() -> Unit): UIWedge {
+    return UIWedge().apply(builder).also(::attachChild)
+}
