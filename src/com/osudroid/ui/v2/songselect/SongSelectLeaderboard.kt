@@ -60,8 +60,9 @@ class SongSelectLeaderboard : UILinearContainer() {
      */
     private val scoringModeText = UIText().apply {
         font = ResourceManager.getInstance().getFont("xs")
-        applyTheme = { color = it.accentColor * 0.8f }
     }
+
+    private lateinit var globalButton: UITextButton
 
 
     private var currentLoadingJob: Job? = null
@@ -82,10 +83,13 @@ class SongSelectLeaderboard : UILinearContainer() {
 
         +UITabSelector().apply {
             width = FillParent
-            addButton("Local") { leaderboardType = Local }
+            addButton("Local") {
+                leaderboardType = Local
+                updateScoringModeLabel()
+            }
 
             // Tapping the global tab while it is already active toggles between PP and score ranking.
-            addButton("Global") {
+            globalButton = addButton("Global") {
                 if (leaderboardType == Global) {
                     val newMode = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP)
                         BeatmapLeaderboardScoringMode.SCORE
@@ -97,15 +101,18 @@ class SongSelectLeaderboard : UILinearContainer() {
                     onBeatmapSelected(SongSelect.selectedBeatmap)
                 } else {
                     leaderboardType = Global
+                    updateScoringModeLabel()
                 }
             }
 
-            // Static label at the right edge of the global tab, outside of the button so it does not
-            // move with the button's content or press feedback.
-            +scoringModeText.apply {
-                anchor = Anchor.CenterRight
-                origin = Anchor.CenterRight
-                x = -2f.srem
+            // The mode label lives in the button's foreground: it is not part of the centered button
+            // content, but it scales with the press feedback and sits at a fixed spot on the right.
+            globalButton.foreground = UIContainer().apply {
+                +scoringModeText.apply {
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    x = -3f.srem
+                }
             }
             updateScoringModeLabel()
 
@@ -151,6 +158,12 @@ class SongSelectLeaderboard : UILinearContainer() {
 
     private fun updateScoringModeLabel() {
         scoringModeText.text = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) "PP" else "Score"
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        // Follow the (animated) text color of the tab so the label always matches its selection state.
+        scoringModeText.color = globalButton.color
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
