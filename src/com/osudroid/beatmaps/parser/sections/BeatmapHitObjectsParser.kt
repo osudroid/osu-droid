@@ -301,9 +301,13 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
     }
 
-    private fun parseCoordinates(formatVersion: Int, x: String, y: String) =
-        if (formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(x), parseFloat(y))
-        else Vector2(parseFloat(x).toInt(), parseFloat(y).toInt())
+    private fun parseCoordinates(formatVersion: Int, x: String, y: String): Vector2 {
+        val x = parseFloat(x).coerceIn(0f, 512f)
+        // For some reason the Y position caps at 512 and not 384, what the heck stable?
+        val y = parseFloat(y).coerceIn(0f, 512f)
+
+        return if (formatVersion >= FIRST_LAZER_VERSION) Vector2(x, y) else Vector2(x.toInt(), y.toInt())
+    }
 }
 
 /**
