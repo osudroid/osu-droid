@@ -5,6 +5,7 @@ import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.mods.settings.*
 import com.osudroid.utils.HitObjectGenerationUtils
 import kotlinx.coroutines.CoroutineScope
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Mirror mod.
@@ -14,7 +15,9 @@ class ModMirror : Mod(), IModApplicableToHitObject {
     override val acronym = "MR"
     override val description = "Flip objects on the chosen axes."
     override val type = ModType.Conversion
-    override val incompatibleMods = super.incompatibleMods + ModHardRock::class
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModHardRock::class) && super.isCompatibleWith(other)
 
     /**
      * The axes along which to flip the [HitObject]s.

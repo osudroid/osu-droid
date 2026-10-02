@@ -3,6 +3,7 @@ package com.osudroid.mods
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.utils.CircleSizeCalculator
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Easy mod.
@@ -13,14 +14,13 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
     override val description = "Larger circles, more forgiving HP drain, less accuracy required, and three lives!"
     override val type = ModType.DifficultyReduction
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (other is ModDifficultyAdjust) {
             return other.cs == null || other.ar == null || other.od == null || other.hp == null
         }
 
-        return super.isCompatibleWith(other)
+        return !other.isInstanceOfAny(ModHardRock::class) && super.isCompatibleWith(other)
     }
 
     override fun applyToDifficulty(

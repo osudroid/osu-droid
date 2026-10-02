@@ -1,5 +1,7 @@
 package com.osudroid.mods
 
+import com.osudroid.utils.isInstanceOfAny
+
 /**
  * Represents the No Fail mod.
  */
@@ -10,7 +12,11 @@ class ModNoFail : Mod() {
     override val type = ModType.DifficultyReduction
     override val isRanked = true
 
-    override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModPerfect::class, ModSuddenDeath::class, ModAutopilot::class, ModRelax::class
-    )
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(
+            ModPerfect::class,
+            ModSuddenDeath::class,
+            ModAutopilot::class,
+            ModRelax::class
+        ) && super.isCompatibleWith(other)
 }

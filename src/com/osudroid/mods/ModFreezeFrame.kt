@@ -8,6 +8,7 @@ import com.osudroid.beatmaps.hitobjects.sliderobject.SliderRepeat
 import com.osudroid.beatmaps.hitobjects.sliderobject.SliderTick
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Freeze Frame mod.
@@ -17,7 +18,9 @@ class ModFreezeFrame : Mod(), IModApplicableToBeatmap {
     override val acronym = "FR"
     override val description = "Burn the notes into your memory."
     override val type = ModType.Fun
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModApproachDifferent::class, ModHidden::class)
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModApproachDifferent::class, ModHidden::class) && super.isCompatibleWith(other)
 
     private var lastNewComboTime = 0.0
 

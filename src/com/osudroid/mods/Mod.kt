@@ -86,15 +86,6 @@ abstract class Mod {
      */
     open val isValidForMultiplayerAsFreeMod = true
 
-    /**
-     * The [Mod]s this [Mod] cannot be enabled with. This is merely a static list of [KClass]es that this [Mod] is
-     * incompatible with, regardless of the actual instance of the [Mod].
-     *
-     * Some [Mod]s may have additional compatibility requirements that are captured in [isCompatibleWith].
-     * When checking for [Mod] compatibility, always use [isCompatibleWith].
-     */
-    open val incompatibleMods = emptyArray<KClass<out Mod>>()
-
     private var settingsBacking: List<ModSetting<Any?>>? = null
 
     /**
@@ -117,15 +108,13 @@ abstract class Mod {
     /**
      * Determines whether this [Mod] is compatible with another [Mod].
      *
-     * This extends [incompatibleMods] by allowing for dynamic checks against the actual instance of the [Mod] (i.e.,
-     * its specific settings).
+     * Do note that compatibility is not guaranteed to be symmetric between two [Mod]s. Callers that need to know
+     * whether two [Mod]s can coexist must check both directions.
      *
      * @param other The [Mod] to check compatibility with.
      * @return `true` if this [Mod] is compatible with [other], `false` otherwise.
      */
-    open fun isCompatibleWith(other: Mod) =
-        incompatibleMods.none { it.isInstance(other) } &&
-        other.incompatibleMods.none { it.isInstance(this) }
+    open fun isCompatibleWith(other: Mod) = true
 
     /**
      * Copies [ModSetting]s from another [Mod] into this [Mod], overwriting all existing [ModSetting]s.
@@ -214,7 +203,6 @@ abstract class Mod {
         result = 31 * result + isRelevant.hashCode()
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
-        result = 31 * result + incompatibleMods.contentHashCode()
 
         for (setting in settings) {
             result = 31 * result + setting.defaultValue.hashCode()

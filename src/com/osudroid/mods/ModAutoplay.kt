@@ -1,5 +1,7 @@
 package com.osudroid.mods
 
+import com.osudroid.utils.isInstanceOfAny
+
 /**
  * Represents the Autoplay mod.
  */
@@ -10,7 +12,12 @@ class ModAutoplay : Mod() {
     override val type = ModType.Automation
     override val isValidForMultiplayer = false
     override val isValidForMultiplayerAsFreeMod = false
-    override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModRelax::class, ModAutopilot::class, ModPerfect::class, ModSuddenDeath::class
-    )
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(
+            ModRelax::class,
+            ModAutopilot::class,
+            ModPerfect::class,
+            ModSuddenDeath::class
+        ) && super.isCompatibleWith(other)
 }

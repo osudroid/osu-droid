@@ -589,7 +589,7 @@ object ModMenu : UIScene() {
 
         modToggles.forEach {
             it.hasIncompatibility =
-                if (!it.isSelected) enabledMods.any { m -> !it.mod.isCompatibleWith(m) } else false
+                !it.isSelected && enabledMods.any { m -> !it.mod.isCompatibleWith(m) || !m.isCompatibleWith(it.mod) }
         }
 
         val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap

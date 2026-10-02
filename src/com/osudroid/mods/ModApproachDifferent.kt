@@ -3,6 +3,7 @@ package com.osudroid.mods
 import com.edlplan.framework.easing.Easing
 import com.reco1l.framework.math.roundBy
 import com.osudroid.mods.settings.*
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Approach Different mod.
@@ -12,7 +13,9 @@ class ModApproachDifferent : Mod() {
     override val acronym = "AD"
     override val description = "Never trust the approach circles..."
     override val type = ModType.Fun
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModHidden::class, ModFreezeFrame::class)
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModHidden::class, ModFreezeFrame::class) && super.isCompatibleWith(other)
 
     override val isRelevant
         get() = scale != 3f || style != AnimationStyle.Linear
