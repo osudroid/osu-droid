@@ -1,6 +1,8 @@
 package com.osudroid.ui.v2.multi
 
 import android.util.Log
+import com.osudroid.discord.DiscordPresenceManager
+import com.osudroid.discord.UserActivity
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
@@ -286,6 +288,10 @@ class LobbyScene : UIScene() {
         GlobalManager.getInstance().mainScene.show()
     }
 
+    override fun onAttached() {
+        DiscordPresenceManager.setActivity(UserActivity.SearchingForMultiplayerLobby)
+        super.onAttached()
+    }
 
     companion object {
         private const val FETCH_TIMEOUT = 1000L

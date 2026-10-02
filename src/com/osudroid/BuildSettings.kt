@@ -20,6 +20,11 @@ object BuildSettings {
     val MOCK_MULTIPLAYER = BuildConfig.DEBUG
 
     /**
+     * Discord application client ID. Set to 0 to disable Discord integration.
+     */
+    const val DISCORD_CLIENT_ID = "1517948535000137988"
+
+    /**
      * Whether to use the debug playground scene or not.
      */
     const val DEBUG_PLAYGROUND = false
