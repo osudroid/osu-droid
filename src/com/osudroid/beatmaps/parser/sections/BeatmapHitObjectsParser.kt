@@ -45,7 +45,11 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
 
-            val position = parseCoordinates(beatmap.formatVersion, it[0], it[1])
+            val position = parseCoordinates(beatmap.formatVersion, it[0], it[1]).also { pos ->
+                pos.x = pos.x.coerceIn(0f, 512f)
+                // For some reason the Y position caps at 512 and not 384, what the heck stable?
+                pos.y = pos.y.coerceIn(0f, 512f)
+            }
 
             val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()
@@ -302,9 +306,8 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
     }
 
     private fun parseCoordinates(formatVersion: Int, x: String, y: String): Vector2 {
-        val x = parseFloat(x).coerceIn(0f, 512f)
-        // For some reason the Y position caps at 512 and not 384, what the heck stable?
-        val y = parseFloat(y).coerceIn(0f, 512f)
+        val x = parseFloat(x)
+        val y = parseFloat(y)
 
         return if (formatVersion >= FIRST_LAZER_VERSION) Vector2(x, y) else Vector2(x.toInt(), y.toInt())
     }
