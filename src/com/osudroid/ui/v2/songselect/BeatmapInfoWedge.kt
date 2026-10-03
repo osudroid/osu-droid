@@ -103,9 +103,10 @@ class BeatmapInfoWedge : UIContainer() {
                 +starsText
             }
 
+            // Length, BPM and the object counts in one row, the difficulty values below.
             linearContainer {
                 orientation = Orientation.Horizontal
-                spacing = 2f.srem
+                spacing = 1f.srem
 
                 lengthText = badge {
                     leadingIcon = FontAwesomeIcon(Icon.Clock)
@@ -118,57 +119,47 @@ class BeatmapInfoWedge : UIContainer() {
                     text = "0"
                     sizeVariant = SizeVariant.Small
                 }
+
+                circlesBadge = labeledBadge {
+                    label = "Circles"
+                    value = "0"
+                    sizeVariant = SizeVariant.Small
+                }
+                slidersBadge = labeledBadge {
+                    label = "Sliders"
+                    value = "0"
+                    sizeVariant = SizeVariant.Small
+                }
+                spinnersBadge = labeledBadge {
+                    label = "Spinners"
+                    value = "0"
+                    sizeVariant = SizeVariant.Small
+                }
             }
 
             linearContainer {
-                orientation = Orientation.Vertical
+                orientation = Orientation.Horizontal
                 spacing = 1f.srem
 
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    spacing = 1f.srem
-
-                    circlesBadge = labeledBadge {
-                        label = "Circles"
-                        value = "0"
-                        sizeVariant = SizeVariant.Small
-                    }
-                    slidersBadge = labeledBadge {
-                        label = "Sliders"
-                        value = "0"
-                        sizeVariant = SizeVariant.Small
-                    }
-                    spinnersBadge = labeledBadge {
-                        label = "Spinners"
-                        value = "0"
-                        sizeVariant = SizeVariant.Small
-                    }
+                arText = labeledBadge {
+                    label = "AR"
+                    value = "00.0"
+                    sizeVariant = SizeVariant.Small
                 }
-
-                linearContainer {
-                    orientation = Orientation.Horizontal
-                    spacing = 1f.srem
-
-                    arText = labeledBadge {
-                        label = "AR"
-                        value = "00.0"
-                        sizeVariant = SizeVariant.Small
-                    }
-                    odText = labeledBadge {
-                        label = "OD"
-                        value = "00.0"
-                        sizeVariant = SizeVariant.Small
-                    }
-                    csText = labeledBadge {
-                        label = "CS"
-                        value = "00.0"
-                        sizeVariant = SizeVariant.Small
-                    }
-                    hpText = labeledBadge {
-                        label = "HP"
-                        value = "00.0"
-                        sizeVariant = SizeVariant.Small
-                    }
+                odText = labeledBadge {
+                    label = "OD"
+                    value = "00.0"
+                    sizeVariant = SizeVariant.Small
+                }
+                csText = labeledBadge {
+                    label = "CS"
+                    value = "00.0"
+                    sizeVariant = SizeVariant.Small
+                }
+                hpText = labeledBadge {
+                    label = "HP"
+                    value = "00.0"
+                    sizeVariant = SizeVariant.Small
                 }
             }
         }
