@@ -97,6 +97,10 @@ class BeatmapInfoWedge : UIContainer() {
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
                 }
+
+                // Star rating at the top right, next to the title block.
+                starsText = StarRatingBadge()
+                +starsText
             }
 
             linearContainer {
@@ -114,11 +118,6 @@ class BeatmapInfoWedge : UIContainer() {
                     text = "0"
                     sizeVariant = SizeVariant.Small
                 }
-
-                starsText = StarRatingBadge().apply {
-                    sizeVariant = SizeVariant.Small
-                }
-                +starsText
             }
 
             linearContainer {
