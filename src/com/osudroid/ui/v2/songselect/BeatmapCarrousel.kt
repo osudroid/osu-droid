@@ -43,6 +43,12 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         }
 
     /**
+     * Whether the carousel moves too fast for panels to be worth loading covers for.
+     */
+    val isFastScrolling: Boolean
+        get() = isDraggingIndicator || abs(velocityY) > FAST_SCROLL_VELOCITY
+
+    /**
      * Whether to automatically scroll to the selected panel.
      */
     var autoScrollToSelectedPanel = false
@@ -152,5 +158,10 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
          * How much narrower panels at the top and bottom edge are compared to the center.
          */
         private const val ARC_DEPTH = 220f
+
+        /**
+         * Fling speed in units per second above which covers are not loaded.
+         */
+        private const val FAST_SCROLL_VELOCITY = 3000f
     }
 }

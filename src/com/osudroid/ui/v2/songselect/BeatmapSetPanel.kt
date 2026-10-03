@@ -209,15 +209,29 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         titleText.text = firstBeatmap?.titleText ?: "Unknown"
         artistText.text = firstBeatmap?.artistText ?: "Unknown"
 
-        val coverTexture = data.coverTexture
-        if (coverTexture != null) {
-            cover.textureRegion = coverTexture
-        } else {
-            cover.textureRegion = null
+        // Already loaded covers are shown right away. Missing ones are loaded from onManagedUpdate once the
+        // panel stayed bound for a moment, so fast scrolling does not start a decode and texture upload for
+        // every panel that only flies by.
+        cover.textureRegion = data.coverTexture
+        boundTime = 0f
+    }
 
-            if (!data.isLoadingCover && firstBeatmap != null) {
-                loadCover(data)
-            }
+    /**
+     * Seconds since this panel was bound, used to delay cover loading.
+     */
+    private var boundTime = 0f
+
+    private fun updateCoverLoading(deltaTimeSec: Float) {
+        val data = boundData ?: return
+
+        if (data.coverTexture != null || data.isLoadingCover || data.beatmapSetInfo.beatmaps.isEmpty()) {
+            return
+        }
+
+        boundTime += deltaTimeSec
+
+        if (boundTime >= COVER_LOAD_DELAY && !beatmapCarrousel.isFastScrolling) {
+            loadCover(data)
         }
     }
 
@@ -331,6 +345,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        updateCoverLoading(deltaTimeSec)
+
 
         val accentColor = Theme.current.accentColor
         val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width
@@ -409,6 +425,11 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     companion object {
 
         private const val COVER_HEIGHT = 100
+
+        /**
+         * How long a panel has to stay bound before its cover is loaded.
+         */
+        private const val COVER_LOAD_DELAY = 0.15f
 
         private val SELECTION_INDICATOR_WIDTH
             get() = 1.25f.rem
