@@ -434,7 +434,8 @@ open class UIScrollableContainer : UIContainer() {
 
             if (verticalIndicator.isVisible) {
                 verticalIndicator.x = width - verticalIndicator.width
-                verticalIndicator.y = scrollY * (height / scrollableContentHeight)
+                // Map the scroll range onto the free track so the indicator also works with its minimum size.
+                verticalIndicator.y = if (maxScrollY > 0f) (scrollY / maxScrollY).coerceIn(0f, 1f) * (height - verticalIndicator.height) else 0f
 
                 verticalIndicator.onUpdate(deltaTimeSec)
             }
@@ -450,7 +451,7 @@ open class UIScrollableContainer : UIContainer() {
             }
 
             if (horizontalIndicator.isVisible) {
-                horizontalIndicator.x = scrollX * (width / scrollableContentWidth)
+                horizontalIndicator.x = if (maxScrollX > 0f) (scrollX / maxScrollX).coerceIn(0f, 1f) * (width - horizontalIndicator.width) else 0f
                 horizontalIndicator.y = height - horizontalIndicator.height
 
                 horizontalIndicator.onUpdate(deltaTimeSec)
@@ -463,8 +464,9 @@ open class UIScrollableContainer : UIContainer() {
     override fun onContentChanged() {
         super.onContentChanged()
 
-        verticalIndicator?.height = height * (height / scrollableContentHeight).coerceAtMost(1f)
-        horizontalIndicator?.width = width * (width / scrollableContentWidth).coerceAtMost(1f)
+        // Proportional size, but never smaller than MIN_INDICATOR_SIZE so long lists keep a usable indicator.
+        verticalIndicator?.height = (height * (height / scrollableContentHeight).coerceAtMost(1f)).coerceIn(min(MIN_INDICATOR_SIZE, height), height)
+        horizontalIndicator?.width = (width * (width / scrollableContentWidth).coerceAtMost(1f)).coerceIn(min(MIN_INDICATOR_SIZE, width), width)
     }
 
     //region Input
@@ -597,6 +599,7 @@ open class UIScrollableContainer : UIContainer() {
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
+        const val MIN_INDICATOR_SIZE = 48f
         const val DEFAULT_MINIMUM_TRAVEL = 20f
         const val DEFAULT_MAX_VELOCITY = 3000f
 
