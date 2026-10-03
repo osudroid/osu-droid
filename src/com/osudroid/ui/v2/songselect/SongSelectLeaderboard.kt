@@ -43,7 +43,7 @@ class SongSelectLeaderboard : UILinearContainer() {
         set(value) {
             if (field != value) {
                 field = value
-                scoresContainer.onCreateComponent = { LeaderboardItem(value == Global) }
+                // The item pool is shared between both types, switching only reloads the data.
                 onBeatmapSelected(SongSelect.selectedBeatmap)
             }
         }
@@ -148,8 +148,9 @@ class SongSelectLeaderboard : UILinearContainer() {
                     padding = Vec4(0f, 0f, 0f, 90f)
                 }
 
-                // Without avatars because local is chosen by default
-                onCreateComponent = { LeaderboardItem(false) }
+                // One pool for both leaderboard types: recreating it on every tab switch caused a visible hitch.
+                // Local scores have no avatar URL and show the offline avatar.
+                onCreateComponent = { LeaderboardItem(true) }
             }
         }
 
