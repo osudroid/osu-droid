@@ -84,6 +84,13 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     private var isTransitioning = false
 
+    /**
+     * The width of the button before the carousel arc inset is applied, animated between collapsed and expanded.
+     */
+    private var buttonBaseWidth = -1f
+
+    private var arcInset = 0f
+
     private lateinit var cover: UIShapedSprite
     private lateinit var selectionIndicator: UIContainer
     private lateinit var titleText: UIText
@@ -330,7 +337,11 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         val buttonContainerTargetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
         val buttonContainerTargetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
 
-        button.width = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, button.width, buttonContainerTargetWidth, 0.5f)
+        if (buttonBaseWidth < 0f) {
+            buttonBaseWidth = buttonContainerTargetWidth
+        }
+        buttonBaseWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBaseWidth, buttonContainerTargetWidth, 0.5f)
+        button.width = buttonBaseWidth - arcInset
         buttonBorder.color = Interpolation.colorLerp(deltaTimeSec, 0.1f, buttonBorder.color, buttonContainerTargetBorderColor)
         buttonBorder.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.lineWidth, buttonContainerTargetBorderWidth, 0.5f)
 
@@ -344,7 +355,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, alpha, panelContainerTargetAlpha, 0.1f)
         }
 
-        isTransitioning = button.width != buttonContainerTargetWidth
+        isTransitioning = buttonBaseWidth != buttonContainerTargetWidth
             || buttonBorder.color != buttonContainerTargetBorderColor
             || buttonBorder.lineWidth != buttonContainerTargetBorderWidth
             || panelsContainer.height != panelContainerTargetHeight
@@ -355,6 +366,19 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         }
 
         super.onManagedUpdate(deltaTimeSec)
+    }
+
+    /**
+     * Sets the inset of the carousel arc, see [BeatmapCarrousel]. Applied to the button's right-anchored width.
+     */
+    fun setArcInset(inset: Float) {
+        if (arcInset != inset) {
+            arcInset = inset
+
+            if (buttonBaseWidth >= 0f) {
+                button.width = buttonBaseWidth - inset
+            }
+        }
     }
 
     fun expand() {

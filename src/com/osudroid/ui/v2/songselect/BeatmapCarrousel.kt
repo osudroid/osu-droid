@@ -4,6 +4,7 @@ import com.osudroid.data.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.theme.rem
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.Camera
 import org.andengine.input.touch.TouchEvent
@@ -58,8 +59,9 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
             orientation = Orientation.Vertical
             width = FillParent
             spacing = -2f
-            padding = Vec4(0f, 200f)
-            translationX = 14f
+            // Left padding leaves room for the expanded set button, which grows 3rem past the panel width,
+            // without it the button would be clipped at the carousel's left edge.
+            padding = Vec4(3f.rem, 200f, 0f, 200f)
         }
 
         onCreateComponent = { BeatmapSetPanel(this) }
@@ -71,18 +73,31 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         return positionInScreen / parentHeight
     }
 
+    /**
+     * Horizontal inset of a panel on the arc, panels at the vertical center of the carousel reach furthest
+     * to the left, panels get narrower the further they are from the center (like the legacy song menu).
+     * The right edge of every panel stays flush with the carousel's right edge.
+     */
+    private fun getArcInset(positionPercentage: Float): Float {
+        // -1 at the top edge, 0 at the center, 1 at the bottom edge.
+        val distanceFromCenter = ((positionPercentage - 0.5f) * 2f).coerceIn(-1f, 1f)
+        return ARC_DEPTH * (1f - cos(distanceFromCenter * PI.toFloat() / 2f))
+    }
+
     override fun onDrawComponent(pGLState: GLState, camera: Camera, component: BeatmapSetPanel) {
 
         val buttonAbsoluteY = component.absoluteY + component.button.absoluteY
         val mainPanelYPercentage = getPositionPercentage(buttonAbsoluteY, component.button.height, scrollY, height)
 
-        component.button.translationX = SHEAR * (1f - mainPanelYPercentage)
+        component.setArcInset(getArcInset(mainPanelYPercentage))
 
         if (selectedPanel == component) {
-            component.panelsContainer.forEach { panel -> panel as BeatmapPanel
-                val panelYPercentage = getPositionPercentage(buttonAbsoluteY + panel.absoluteY, panel.height, scrollY, height)
+            val panelsAbsoluteY = component.absoluteY + component.panelsContainer.absoluteY
 
-                panel.translationX = -component.translationX + SHEAR * (1f - panelYPercentage)
+            component.panelsContainer.forEach { panel -> panel as BeatmapPanel
+                val panelYPercentage = getPositionPercentage(panelsAbsoluteY + panel.absoluteY, panel.height, scrollY, height)
+
+                panel.setArcInset(getArcInset(panelYPercentage))
             }
         }
 
@@ -121,6 +136,9 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
 
 
     companion object {
-        private const val SHEAR = 180f
+        /**
+         * How much narrower panels at the top and bottom edge are compared to the center.
+         */
+        private const val ARC_DEPTH = 220f
     }
 }

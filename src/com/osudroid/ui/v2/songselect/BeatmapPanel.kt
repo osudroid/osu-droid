@@ -24,6 +24,13 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
 
     private var isExpanded = false
 
+    /**
+     * The width before the carousel arc inset is applied, animated between collapsed and expanded.
+     */
+    private var baseWidth = -1f
+
+    private var arcInset = 0f
+
     private val selectionIndicator: UIContainer
 
     private val backgroundBox = UIBox().apply {
@@ -111,9 +118,26 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
 
         borderBox.color = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderBox.color, targetBorderColor)
         borderBox.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderBox.lineWidth, targetBorderWidth, 0.5f)
-        width = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, width, targetWidth, 0.5f)
+        if (baseWidth < 0f) {
+            baseWidth = targetWidth
+        }
+        baseWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, baseWidth, targetWidth, 0.5f)
+        width = baseWidth - arcInset
 
         super.onManagedUpdate(deltaTimeSec)
+    }
+
+    /**
+     * Sets the inset of the carousel arc, see [BeatmapCarrousel]. Applied to the right-anchored width.
+     */
+    fun setArcInset(inset: Float) {
+        if (arcInset != inset) {
+            arcInset = inset
+
+            if (baseWidth >= 0f) {
+                width = baseWidth - inset
+            }
+        }
     }
 
 
