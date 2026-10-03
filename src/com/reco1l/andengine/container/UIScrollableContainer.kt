@@ -137,6 +137,25 @@ open class UIScrollableContainer : UIContainer() {
     var velocityFromGesture = false
 
     /**
+     * When `true`, a touch that starts on the right edge of the container grabs the vertical indicator:
+     * dragging then maps the finger position directly onto the whole scroll range.
+     */
+    var isVerticalIndicatorDraggable = false
+
+    /**
+     * The width of the touch area along the right edge that grabs the vertical indicator.
+     */
+    var indicatorTouchWidth = 48f
+
+    /**
+     * Whether the vertical indicator is currently being dragged.
+     */
+    var isDraggingIndicator = false
+        private set
+
+    private var indicatorGrabOffset = 0f
+
+    /**
      * The maximum velocity in px/s for both axes.
      */
     var maxVelocity = Vec2(DEFAULT_MAX_VELOCITY)
@@ -428,7 +447,7 @@ open class UIScrollableContainer : UIContainer() {
         if (verticalIndicator != null) {
             verticalIndicator.isVisible = showVerticalIndicator && (scrollAxes == Axes.Both || scrollAxes == Axes.Y)
 
-            if (verticalIndicator.alpha > 0f && velocityY == 0f) {
+            if (verticalIndicator.alpha > 0f && velocityY == 0f && !isDraggingIndicator) {
                 verticalIndicator.alpha = (verticalIndicator.alpha - deltaTimeSec * 0.75f).coerceAtLeast(0f)
             }
 
@@ -505,10 +524,76 @@ open class UIScrollableContainer : UIContainer() {
         deltaY = 0f
     }
     
+    /**
+     * Handles dragging of the vertical indicator, see [isVerticalIndicatorDraggable].
+     *
+     * @return `true` if the event was consumed by the indicator drag.
+     */
+    private fun handleIndicatorDrag(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        val indicator = verticalIndicator
+
+        if (!isVerticalIndicatorDraggable || indicator == null || !scrollAxes.isVertical || maxScrollY <= 0f) {
+            isDraggingIndicator = false
+            return false
+        }
+
+        val trackLength = height - indicator.height
+
+        fun scrollToFinger() {
+            if (trackLength > 0f) {
+                scrollY = ((localY - indicatorGrabOffset) / trackLength).coerceIn(0f, 1f) * maxScrollY
+            }
+            indicator.alpha = 1f
+        }
+
+        when (event.action) {
+            ACTION_DOWN -> {
+                if (localX < width - indicatorTouchWidth) {
+                    isDraggingIndicator = false
+                    return false
+                }
+
+                isDraggingIndicator = true
+                velocityX = 0f
+                velocityY = 0f
+
+                // Grabbing the indicator keeps the finger's offset on it, touching elsewhere on the track centers it.
+                val indicatorTop = indicator.y
+                indicatorGrabOffset = if (localY in indicatorTop..(indicatorTop + indicator.height))
+                    localY - indicatorTop
+                else
+                    indicator.height / 2f
+
+                scrollToFinger()
+                return true
+            }
+
+            ACTION_MOVE -> {
+                if (!isDraggingIndicator) {
+                    return false
+                }
+                scrollToFinger()
+                return true
+            }
+
+            else -> {
+                if (!isDraggingIndicator) {
+                    return false
+                }
+                isDraggingIndicator = false
+                return true
+            }
+        }
+    }
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         if (preventScrolling) {
             return super.onAreaTouched(event, localX, localY)
+        }
+
+        if (handleIndicatorDrag(event, localX, localY)) {
+            return true
         }
 
         when (event.action) {

@@ -60,6 +60,10 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         velocityFromGesture = true
         flingDeceleration = Vec2(1200f)
         overflowAxes = Axes.None
+
+        // Grab the scroll indicator at the right edge to jump through the whole list.
+        isVerticalIndicatorDraggable = true
+        verticalIndicator?.width = 10f
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
 
