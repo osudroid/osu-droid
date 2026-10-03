@@ -487,9 +487,18 @@ abstract class UIComponent : Entity(0f, 0f),
 
     /**
      * Called when the size of this entity changes.
+     *
+     * Children are invalidated as well: sizes like [FillParent] or relative axes are computed from this
+     * entity's size, so buffers built from them (boxes, sprites, text) have to be refreshed.
      */
     open fun onSizeChanged() {
         (parent as? UIComponent)?.onChildSizeChanged(this)
+
+        mChildren?.forEach { child ->
+            if (child is UIComponent) {
+                child.invalidate(InvalidationFlag.Size)
+            }
+        }
     }
 
     /**
