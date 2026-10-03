@@ -123,6 +123,20 @@ open class UIScrollableContainer : UIContainer() {
     var deceleration = Vec2(DEFAULT_DECELERATION)
 
     /**
+     * When set, flings decelerate linearly by this many units per second squared (time based, frame rate
+     * independent) instead of the per-frame multiplicative [deceleration]. This is the behavior of the
+     * legacy song menu, a long, even glide that ends predictably.
+     */
+    var flingDeceleration: Vec2? = null
+
+    /**
+     * When `true`, the fling velocity on release is the average velocity of the whole drag gesture
+     * (distance since touch down divided by its duration) instead of the velocity of the last move event.
+     * Averaging ignores the jitter of the final touch samples and gives consistent flings.
+     */
+    var velocityFromGesture = false
+
+    /**
      * The maximum velocity in px/s for both axes.
      */
     var maxVelocity = Vec2(DEFAULT_MAX_VELOCITY)
@@ -232,6 +246,10 @@ open class UIScrollableContainer : UIContainer() {
 
     private var dragStartTimeMillis = 0L
 
+    private var gestureStartX = 0f
+    private var gestureStartY = 0f
+    private var gestureStartTimeMillis = 0L
+
 
     /**
      * Stops the scrolling of the container by setting the velocity to 0.
@@ -266,8 +284,19 @@ open class UIScrollableContainer : UIContainer() {
         scrollX -= velocityX * deltaTimeSec
         scrollY -= velocityY * deltaTimeSec
 
-        velocityX *= deceleration.x
-        velocityY *= deceleration.y
+        val flingDeceleration = flingDeceleration
+
+        if (flingDeceleration != null) {
+            velocityX = decelerateLinearly(velocityX, flingDeceleration.x * deltaTimeSec)
+            velocityY = decelerateLinearly(velocityY, flingDeceleration.y * deltaTimeSec)
+        } else {
+            velocityX *= deceleration.x
+            velocityY *= deceleration.y
+        }
+    }
+
+    private fun decelerateLinearly(velocity: Float, amount: Float): Float {
+        return if (abs(velocity) > amount) velocity - amount * sign(velocity) else 0f
     }
 
     private fun handleOverflow() {
@@ -489,6 +518,10 @@ open class UIScrollableContainer : UIContainer() {
                 velocityX = 0f
                 velocityY = 0f
                 dragStartTimeMillis = System.currentTimeMillis()
+
+                gestureStartX = localX
+                gestureStartY = localY
+                gestureStartTimeMillis = dragStartTimeMillis
             }
 
             ACTION_MOVE -> {
@@ -520,6 +553,19 @@ open class UIScrollableContainer : UIContainer() {
             }
 
             else -> {
+                if (velocityFromGesture && isUserScrolling) {
+                    val gestureTimeSeconds = (System.currentTimeMillis() - gestureStartTimeMillis) / 1000f
+
+                    if (gestureTimeSeconds > 0.01f) {
+                        if (scrollAxes.isHorizontal) {
+                            velocityX = (localX - gestureStartX) / gestureTimeSeconds
+                        }
+                        if (scrollAxes.isVertical) {
+                            velocityY = (localY - gestureStartY) / gestureTimeSeconds
+                        }
+                    }
+                }
+
                 isUserScrolling = false
             }
         }

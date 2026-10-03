@@ -52,6 +52,14 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         scrollAxes = Axes.Y
         width = FillParent
         height = FillParent
+
+        // Scrolling like the legacy song menu, immediate drag, fling from the whole gesture,
+        // long linear deceleration, no overscroll bounce.
+        minimumTravel = Vec2(6f)
+        maxVelocity = Vec2(12000f)
+        velocityFromGesture = true
+        flingDeceleration = Vec2(1200f)
+        overflowAxes = Axes.None
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
 
