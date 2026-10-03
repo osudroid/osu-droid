@@ -71,8 +71,8 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
 
         linearContainer {
             orientation = Orientation.Vertical
-            padding = Vec4(SELECTION_INDICATOR_WIDTH + 4f.srem, 3f.srem, 4f.srem, 3f.srem)
-            spacing = 1f.srem
+            padding = Vec4(SELECTION_INDICATOR_WIDTH + 4f.srem, 2f.srem, 4f.srem, 2f.srem)
+            spacing = 0.5f.srem
 
             text {
                 text = beatmapInfo.version
@@ -105,7 +105,7 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
         val accentColor = Theme.current.accentColor
         val targetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
         val targetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
-        val targetWidth = if (isExpanded) parent.innerWidth + 3f.rem else parent.innerWidth
+        val targetWidth = if (isExpanded) parent.innerWidth else parent.innerWidth - 2f.rem
 
         selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
 

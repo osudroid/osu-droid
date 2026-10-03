@@ -118,7 +118,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
             button = clickableContainer {
                 width = FillParent
-                minHeight = 4.5f.rem
+                minHeight = 5.5f.rem
                 anchor = Anchor.TopRight
                 origin = Anchor.TopRight
                 foreground = buttonBorder
@@ -170,11 +170,11 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                 linearContainer {
                     orientation = Orientation.Vertical
                     width = FillParent
-                    padding = Vec4(SELECTION_INDICATOR_WIDTH + 2.5f.srem, 2.5f.srem, 2.5f.srem, 2.5f.srem)
+                    padding = Vec4(SELECTION_INDICATOR_WIDTH + 3f.srem, 3f.srem, 3f.srem, 3f.srem)
 
                     titleText = text {
                         text = "Unknown"
-                        font = ResourceManager.getInstance().getFont("torusBold")
+                        font = ResourceManager.getInstance().getFont("torusBoldLarge")
                         applyTheme = { color = it.accentColor }
                     }
 
@@ -326,7 +326,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         val accentColor = Theme.current.accentColor
-        val buttonContainerTargetWidth = if (isExpanded) width + 2f.rem else width
+        val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width
         val buttonContainerTargetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
         val buttonContainerTargetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
 
