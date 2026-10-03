@@ -52,27 +52,19 @@ class BeatmapInfoWedge : UIContainer() {
         translationX = -2f
         translationY = -2f
 
-        // The wedge shapes are background/foreground so they take the container's size without
-        // being part of the content measurement (a FillParent child would keep the container from shrinking).
-        background = UIWedge().apply {
+        wedge {
+            width = FillParent
+            height = FillParent
             alpha = 0.75f
             cornerRadius = 0.75f.rem
             applyTheme = { color = it.accentColor * 0.1f }
         }
 
-        foreground = UIWedge().apply {
-            paintStyle = PaintStyle.Outline
-            lineWidth = 2f
-            cornerRadius = 0.75f.rem
-            applyTheme = { color = it.accentColor * 0.2f }
-        }
-
         linearContainer {
             width = FillParent
             orientation = Orientation.Vertical
-            // Extra right padding keeps the badges clear of the wedge's sheared edge.
-            padding = Vec4(4f.srem, 3f.srem, 6f.srem, 3f.srem)
-            spacing = 1f.srem
+            padding = Vec4(4f.srem, 4f.srem, 4f.srem, 4f.srem)
+            spacing = 1.5f.srem
 
             flexContainer {
                 direction = FlexDirection.Row
@@ -111,11 +103,6 @@ class BeatmapInfoWedge : UIContainer() {
                 orientation = Orientation.Horizontal
                 spacing = 2f.srem
 
-                starsText = StarRatingBadge().apply {
-                    sizeVariant = SizeVariant.Small
-                }
-                +starsText
-
                 lengthText = badge {
                     leadingIcon = FontAwesomeIcon(Icon.Clock)
                     text = "00:00"
@@ -127,6 +114,11 @@ class BeatmapInfoWedge : UIContainer() {
                     text = "0"
                     sizeVariant = SizeVariant.Small
                 }
+
+                starsText = StarRatingBadge().apply {
+                    sizeVariant = SizeVariant.Small
+                }
+                +starsText
             }
 
             linearContainer {
@@ -182,6 +174,14 @@ class BeatmapInfoWedge : UIContainer() {
             }
         }
 
+        wedge {
+            width = FillParent
+            height = FillParent
+            paintStyle = PaintStyle.Outline
+            lineWidth = 2f
+            cornerRadius = 0.75f.rem
+            applyTheme = { color = it.accentColor * 0.2f }
+        }
     }
 
 
