@@ -365,6 +365,7 @@ public class Font implements IFont {
 	private void addPage() {
 		final ITexture page = this.mPageFactory.createPage();
 		this.mPages.add(page);
+		android.util.Log.i("Font", "New atlas page #" + this.mPages.size() + " (" + page.getWidth() + "x" + page.getHeight() + ") for font size " + this.mPaint.getTextSize() + ", " + (this.mPages.size() - 1) + " page(s) before");
 		// Queued for upload, the letters placed on it stay pending in update() until it is on the GPU.
 		page.load();
 		this.mCurrentTextureX = Font.LETTER_TEXTURE_PADDING;
