@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.opengl.texture.ITexture
 import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.*
@@ -137,8 +138,14 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         return buffer!!
     }
 
+    /**
+     * Consecutive characters sharing the same font atlas page, drawn with one call each.
+     * Built together with the texture coordinates, see [TextTextureBuffer.update].
+     */
+    internal var pageRuns: List<PageRun> = emptyList()
+
     override fun onUpdateBuffer() {
-        buffer?.getFirstOf<TextTextureBuffer>()?.update(font, lines)
+        pageRuns = buffer?.getFirstOf<TextTextureBuffer>()?.update(font, lines) ?: emptyList()
         buffer?.getFirstOf<TextVertexBuffer>()?.update(this, font, lines, linesWidth)
     }
 
@@ -293,7 +300,17 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UIText
-            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(entity.currentLength, length))
+            val vertexLimit = VERTICES_PER_CHARACTER * min(entity.currentLength, length)
+
+            // One draw call per run of characters on the same atlas page.
+            for (run in entity.pageRuns) {
+                if (run.startVertex >= vertexLimit) {
+                    break
+                }
+                val texture = run.texture ?: continue
+                texture.bind(gl)
+                GLES32.glDrawArrays(drawTopology, run.startVertex, min(run.vertexCount, vertexLimit - run.startVertex))
+            }
         }
     }
 
@@ -304,19 +321,25 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         bufferUsage = GL_STATIC_DRAW
     ) {
 
-        fun update(font: Font?, lines: List<String>?) {
+        fun update(font: Font?, lines: List<String>?): List<PageRun> {
 
             if (font == null || lines == null) {
                 mFloatBuffer.clear()
-                return
+                return emptyList()
             }
 
             setPosition(0)
+
+            val runs = ArrayList<PageRun>()
+            var vertex = 0
 
             lines.forEach { line ->
                 line.forEach { character ->
 
                     val letter = font.safeGetLetter(character)
+
+                    appendToPageRuns(runs, letter.mTexture, vertex)
+                    vertex += VERTICES_PER_CHARACTER
 
                     val u = letter.mU
                     val v = letter.mV
@@ -333,12 +356,35 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
             }
 
             setPosition(0)
+            return runs
+        }
+
+        /**
+         * Extends the last run or starts a new one. Whitespace has no page and joins any run, as its quad is empty.
+         */
+        private fun appendToPageRuns(runs: MutableList<PageRun>, texture: ITexture?, startVertex: Int) {
+            val last = runs.lastOrNull()
+
+            when {
+                last == null -> runs.add(PageRun(texture, startVertex, VERTICES_PER_CHARACTER))
+                texture == null || last.texture == texture -> last.vertexCount += VERTICES_PER_CHARACTER
+                last.texture == null -> {
+                    last.texture = texture
+                    last.vertexCount += VERTICES_PER_CHARACTER
+                }
+                else -> runs.add(PageRun(texture, startVertex, VERTICES_PER_CHARACTER))
+            }
         }
 
     }
 
     //endregion
 
+
+    /**
+     * A contiguous range of vertices whose characters all live on the same font atlas page.
+     */
+    class PageRun(var texture: ITexture?, val startVertex: Int, var vertexCount: Int)
 
     companion object {
         private const val VERTICES_PER_CHARACTER = 6

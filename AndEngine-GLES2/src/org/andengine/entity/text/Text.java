@@ -304,6 +304,56 @@ public class Text extends RectangularShape {
 		return this.mTextVertexBufferObject;
 	}
 
+	// osu!droid modified: fonts can span several atlas pages, so letters are drawn in runs per page.
+	private int mPageRunCount;
+	private int[] mPageRunVertexCounts;
+	private org.andengine.opengl.texture.ITexture[] mPageRunTextures;
+
+	/**
+	 * Mirrors the letter order of the vertex buffer (non-whitespace letters only, up to the character maximum)
+	 * and groups consecutive letters on the same atlas page.
+	 */
+	private void updatePageRuns() {
+		this.mPageRunCount = 0;
+
+		// Allocated lazily, vertices may be updated before the field initializers of this class ran.
+		if(this.mPageRunTextures == null) {
+			this.mPageRunTextures = new org.andengine.opengl.texture.ITexture[4];
+			this.mPageRunVertexCounts = new int[4];
+		}
+		if(this.mFont == null || this.mLines == null) {
+			return;
+		}
+
+		final IFont font = this.mFont;
+		final java.util.ArrayList<CharSequence> lines = this.mLines;
+		int letters = 0;
+
+		for(int row = 0; row < lines.size() && letters < this.mCharactersMaximum; row++) {
+			final CharSequence line = lines.get(row);
+			for(int i = 0; i < line.length() && letters < this.mCharactersMaximum; i++) {
+				final org.andengine.opengl.font.Letter letter = font.getLetter(line.charAt(i));
+				if(letter.isWhitespace()) {
+					continue;
+				}
+				final org.andengine.opengl.texture.ITexture texture = letter.mTexture != null ? letter.mTexture : font.getTexture();
+
+				if(this.mPageRunCount > 0 && this.mPageRunTextures[this.mPageRunCount - 1] == texture) {
+					this.mPageRunVertexCounts[this.mPageRunCount - 1] += Text.VERTICES_PER_LETTER;
+				} else {
+					if(this.mPageRunCount == this.mPageRunTextures.length) {
+						this.mPageRunTextures = java.util.Arrays.copyOf(this.mPageRunTextures, this.mPageRunCount * 2);
+						this.mPageRunVertexCounts = java.util.Arrays.copyOf(this.mPageRunVertexCounts, this.mPageRunCount * 2);
+					}
+					this.mPageRunTextures[this.mPageRunCount] = texture;
+					this.mPageRunVertexCounts[this.mPageRunCount] = Text.VERTICES_PER_LETTER;
+					this.mPageRunCount++;
+				}
+				letters++;
+			}
+		}
+	}
+
 	@Override
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
 		super.preDraw(pGLState, pCamera);
@@ -315,7 +365,22 @@ public class Text extends RectangularShape {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertexCountToDraw);
+		final int[] runs = this.mPageRunVertexCounts;
+		final org.andengine.opengl.texture.ITexture[] runTextures = this.mPageRunTextures;
+
+		if(this.mPageRunCount <= 1) {
+			this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertexCountToDraw);
+			return;
+		}
+
+		// One draw call per run of letters on the same font atlas page.
+		int offset = 0;
+		for(int i = 0; i < this.mPageRunCount && offset < this.mVertexCountToDraw; i++) {
+			final int count = Math.min(runs[i], this.mVertexCountToDraw - offset);
+			runTextures[i].bind(pGLState);
+			this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, offset, count);
+			offset += runs[i];
+		}
 	}
 
 	@Override
@@ -333,6 +398,7 @@ public class Text extends RectangularShape {
 	@Override
 	protected void onUpdateVertices() {
 		this.mTextVertexBufferObject.onUpdateVertices(this);
+		this.updatePageRuns();
 	}
 
 	// ===========================================================

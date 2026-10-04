@@ -52,6 +52,10 @@ public abstract class Texture implements ITexture {
 	// Getter & Setter
 	// ===========================================================
 
+	public TextureManager getTextureManager() {
+		return this.mTextureManager;
+	}
+
 	@Override
 	public int getHardwareTextureID() {
 		return this.mHardwareTextureID;
