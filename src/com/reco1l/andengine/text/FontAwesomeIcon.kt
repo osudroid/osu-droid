@@ -121,7 +121,9 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
 
     override fun onDeclarePointers(gl: GLState) {
         super.onDeclarePointers(gl)
-        font?.texture?.bind(gl)
+        // The glyph may live on any atlas page of the font, bind the one it was placed on.
+        val font = font
+        (font?.getLetter(icon.toChar())?.mTexture ?: font?.texture)?.bind(gl)
     }
 
     override fun onBindShader(pGLState: GLState) {

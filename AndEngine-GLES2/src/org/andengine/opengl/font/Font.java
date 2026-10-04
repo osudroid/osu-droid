@@ -1,10 +1,14 @@
 package org.andengine.opengl.font;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.andengine.opengl.font.exception.FontException;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
+import org.andengine.opengl.texture.Texture;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.adt.map.SparseArrayUtils;
 import org.andengine.util.color.Color;
@@ -29,6 +33,9 @@ import android.util.SparseArray;
  * @author Nicolas Gramlich
  * @since 10:39:33 - 03.04.2010
  */
+// osu!droid modified:
+// * Use multiple atlas pages instead of overflowing a single fixed-size texture, so already placed
+//   glyphs remain valid and pages can stay small (ported from master, commits 2d2abeb1c and c391990df).
 public class Font implements IFont {
 	// ===========================================================
 	// Constants
@@ -42,7 +49,8 @@ public class Font implements IFont {
 
 	private final FontManager mFontManager;
 
-	private final ITexture mTexture;
+	private final List<ITexture> mPages = new ArrayList<ITexture>();
+	private final IPageFactory mPageFactory;
 	private final int mTextureWidth;
 	private final int mTextureHeight;
 	private int mCurrentTextureX = Font.LETTER_TEXTURE_PADDING;
@@ -69,11 +77,24 @@ public class Font implements IFont {
 		this(pFontManager, pTexture, pTypeface, pSize, pAntiAlias, pColor.getARGBPackedInt());
 	}
 
+	/**
+	 * Creates a font whose further atlas pages are copies of <code>pTexture</code> (same size, format and options).
+	 */
 	public Font(final FontManager pFontManager, final ITexture pTexture, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColorARGBPackedInt) {
+		this(pFontManager, pTexture, Font.createCopyingPageFactory(pTexture), pTypeface, pSize, pAntiAlias, pColorARGBPackedInt);
+	}
+
+	/**
+	 * @param pPageFactory creates an additional atlas page whenever the current one runs out of room. Every page it
+	 *                     produces <b>must</b> have the same dimensions as <code>pFirstPage</code>. The font loads the
+	 *                     pages itself, the factory must not do so.
+	 */
+	public Font(final FontManager pFontManager, final ITexture pFirstPage, final IPageFactory pPageFactory, final Typeface pTypeface, final float pSize, final boolean pAntiAlias, final int pColorARGBPackedInt) {
 		this.mFontManager = pFontManager;
-		this.mTexture = pTexture;
-		this.mTextureWidth = pTexture.getWidth();
-		this.mTextureHeight = pTexture.getHeight();
+		this.mPages.add(pFirstPage);
+		this.mPageFactory = pPageFactory;
+		this.mTextureWidth = pFirstPage.getWidth();
+		this.mTextureHeight = pFirstPage.getHeight();
 
 		this.mBackgroundPaint = new Paint();
 		this.mBackgroundPaint.setColor(Color.TRANSPARENT_ARGB_PACKED_INT);
@@ -117,20 +138,34 @@ public class Font implements IFont {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+	/**
+	 * @return the first atlas page. Glyphs may live on further pages, see {@link Letter#mTexture} and {@link #getPages()}.
+	 */
 	@Override
 	public ITexture getTexture() {
-		return this.mTexture;
+		return this.mPages.get(0);
+	}
+
+	/**
+	 * @return a snapshot of all atlas pages of this font.
+	 */
+	public synchronized List<ITexture> getPages() {
+		return Collections.unmodifiableList(new ArrayList<ITexture>(this.mPages));
 	}
 
 	@Override
-	public void load() {
-		this.mTexture.load();
+	public synchronized void load() {
+		for(final ITexture page : this.mPages) {
+			page.load();
+		}
 		this.mFontManager.loadFont(this);
 	}
 
 	@Override
-	public void unload() {
-		this.mTexture.unload();
+	public synchronized void unload() {
+		for(final ITexture page : this.mPages) {
+			page.unload();
+		}
 		this.mFontManager.unloadFont(this);
 	}
 
@@ -236,7 +271,11 @@ public class Font implements IFont {
 			}
 
 			if((this.mCurrentTextureY + letterHeight) >= textureHeight) {
-				throw new FontException("Not enough space for " + Letter.class.getSimpleName() + ": '" + pCharacter + "' on the " + this.mTexture.getClass().getSimpleName() + ". Existing Letters: " + SparseArrayUtils.toString(this.mManagedCharacterToLetterMap));
+				final boolean fitsOnEmptyPage = (2 * Font.LETTER_TEXTURE_PADDING + letterHeight) < textureHeight && (2 * Font.LETTER_TEXTURE_PADDING + letterWidth) < textureWidth;
+				if(!fitsOnEmptyPage || this.mPageFactory == null) {
+					throw new FontException("Not enough space for " + Letter.class.getSimpleName() + ": '" + pCharacter + "' on a " + (int) textureWidth + "x" + (int) textureHeight + " page. Existing Letters: " + SparseArrayUtils.toString(this.mManagedCharacterToLetterMap));
+				}
+				this.addPage();
 			}
 
 			this.mCurrentTextureYHeightMax = Math.max(letterHeight, this.mCurrentTextureYHeightMax);
@@ -254,7 +293,7 @@ public class Font implements IFont {
 			final float u2 = ((this.mCurrentTextureX + letterWidth) / textureWidth) - halfTexelU;
 			final float v2 = ((this.mCurrentTextureY + letterHeight) / textureHeight) - halfTexelV;
 
-			letter = new Letter(pCharacter, this.mCurrentTextureX - Font.LETTER_TEXTURE_PADDING, this.mCurrentTextureY - Font.LETTER_TEXTURE_PADDING, letterWidth, letterHeight, letterLeft, letterTop - this.getAscent(), advance, u, v, u2, v2);
+			letter = new Letter(this.getCurrentPage(), pCharacter, this.mCurrentTextureX - Font.LETTER_TEXTURE_PADDING, this.mCurrentTextureY - Font.LETTER_TEXTURE_PADDING, letterWidth, letterHeight, letterLeft, letterTop - this.getAscent(), advance, u, v, u2, v2);
 			this.mCurrentTextureX += letterWidth + Font.LETTER_TEXTURE_PADDING;
 		}
 
@@ -266,16 +305,28 @@ public class Font implements IFont {
 	}
 
 	public synchronized void update(final GLState pGLState) {
-		if(this.mTexture.isLoadedToHardware()) {
-			final ArrayList<Letter> lettersPendingToBeDrawnToTexture = this.mLettersPendingToBeDrawnToTexture;
-			if(lettersPendingToBeDrawnToTexture.size() > 0) {
-				this.mTexture.bind(pGLState);
-				final PixelFormat pixelFormat = this.mTexture.getPixelFormat();
+		final ArrayList<Letter> lettersPendingToBeDrawnToTexture = this.mLettersPendingToBeDrawnToTexture;
+		if(lettersPendingToBeDrawnToTexture.size() > 0) {
+			final ITexture firstPage = this.mPages.get(0);
+			final PixelFormat pixelFormat = firstPage.getPixelFormat();
+			final boolean preMultipyAlpha = firstPage.getTextureOptions().mPreMultiplyAlpha;
 
-				final boolean preMultipyAlpha = this.mTexture.getTextureOptions().mPreMultiplyAlpha;
+			ITexture boundPage = null;
+
+			{
 				for(int i = lettersPendingToBeDrawnToTexture.size() - 1; i >= 0; i--) {
 					final Letter letter = lettersPendingToBeDrawnToTexture.get(i);
 					if(!letter.isWhitespace()) {
+						final ITexture page = letter.mTexture;
+						// A page is uploaded by the TextureManager first, keep its letters pending until then.
+						if(!page.isLoadedToHardware()) {
+							continue;
+						}
+						if(page != boundPage) {
+							page.bind(pGLState);
+							boundPage = page;
+						}
+
 						final Bitmap bitmap = this.getLetterBitmap(letter);
 
 						final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && (pixelFormat == PixelFormat.RGBA_8888);
@@ -297,12 +348,48 @@ public class Font implements IFont {
 
 						bitmap.recycle();
 					}
+					lettersPendingToBeDrawnToTexture.remove(i);
 				}
-				lettersPendingToBeDrawnToTexture.clear();
-
-				System.gc();
 			}
 		}
+	}
+
+	private ITexture getCurrentPage() {
+		return this.mPages.get(this.mPages.size() - 1);
+	}
+
+	/**
+	 * Allocates a new, empty atlas page rather than reusing the current one, so that {@link Letter}s already handed
+	 * out keep pointing at valid, unmodified texture data.
+	 */
+	private void addPage() {
+		final ITexture page = this.mPageFactory.createPage();
+		this.mPages.add(page);
+		// Queued for upload, the letters placed on it stay pending in update() until it is on the GPU.
+		page.load();
+		this.mCurrentTextureX = Font.LETTER_TEXTURE_PADDING;
+		this.mCurrentTextureY = Font.LETTER_TEXTURE_PADDING;
+		this.mCurrentTextureYHeightMax = 0;
+	}
+
+	private static IPageFactory createCopyingPageFactory(final ITexture pTemplate) {
+		if(!(pTemplate instanceof BitmapTextureAtlas)) {
+			return null;
+		}
+		final BitmapTextureAtlas template = (BitmapTextureAtlas) pTemplate;
+		return new IPageFactory() {
+			@Override
+			public ITexture createPage() {
+				return new BitmapTextureAtlas(((Texture) template).getTextureManager(), template.getWidth(), template.getHeight(), template.getBitmapTextureFormat(), template.getTextureOptions());
+			}
+		};
+	}
+
+	/**
+	 * Creates additional atlas pages for a {@link Font}.
+	 */
+	public interface IPageFactory {
+		ITexture createPage();
 	}
 
 	// ===========================================================

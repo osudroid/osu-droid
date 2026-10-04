@@ -31,18 +31,19 @@ class UIResourceManager(private val context: Context) {
         val engine = UIEngine.current
         val buf = IntArray(1)
         GLES32.glGetIntegerv(GLES32.GL_MAX_TEXTURE_SIZE, buf, 0)
-        val maxTextureSize = buf[0].coerceAtLeast(256)
 
-        Log.i("UIResourceManager", "Loading font: $fontIdentifier with texture size ${maxTextureSize}x${maxTextureSize}")
+        // Fonts grow by adding pages when one is full, so a page can stay small. Allocating the GPU maximum
+        // (16384x16384, 1 GiB, on current devices) per font froze the song select for seconds on open.
+        val pageSize = buf[0].coerceIn(256, FONT_PAGE_SIZE)
 
-        val texture = BitmapTextureAtlas(
-            engine.textureManager,
-            maxTextureSize,
-            maxTextureSize,
-            TextureOptions.BILINEAR_PREMULTIPLYALPHA
-        )
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier with page size ${pageSize}x${pageSize}")
+
+        val pageFactory = Font.IPageFactory {
+            BitmapTextureAtlas(engine.textureManager, pageSize, pageSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
+        }
+        val texture = pageFactory.createPage()
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
-        val font = Font(engine.fontManager, texture, typeface, size, true, Color.WHITE)
+        val font = Font(engine.fontManager, texture, pageFactory, typeface, size, true, Color.WHITE)
 
         engine.apply {
             textureManager.loadTexture(texture)
@@ -75,9 +76,16 @@ class UIResourceManager(private val context: Context) {
 
             UIEngine.current.apply {
                 fontManager.unloadFont(font)
-                textureManager.unloadTexture(font.texture)
+                font.pages.forEach { textureManager.unloadTexture(it) }
             }
         }
     }
 
+
+    companion object {
+        /**
+         * The maximum side length of a font atlas page.
+         */
+        private const val FONT_PAGE_SIZE = 1024
+    }
 }
