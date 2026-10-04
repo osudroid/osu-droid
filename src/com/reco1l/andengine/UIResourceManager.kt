@@ -86,6 +86,6 @@ class UIResourceManager(private val context: Context) {
         /**
          * The maximum side length of a font atlas page.
          */
-        private const val FONT_PAGE_SIZE = 1024
+        private const val FONT_PAGE_SIZE = 2048
     }
 }
