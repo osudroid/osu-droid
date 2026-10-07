@@ -15,6 +15,8 @@ import com.edlplan.framework.easing.Easing
 import com.osudroid.utils.mainThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent
+import com.reco1l.andengine.component.innerWidth
+import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
@@ -96,6 +98,22 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
 
     private var cursorPositions = intArrayOf(0)
 
+    /**
+     * Horizontal text scroll, see [updateTextScroll].
+     */
+    private var textScrollOffset = 0f
+
+    /**
+     * The width of the entered text, without padding.
+     */
+    val textWidth: Float
+        get() = cursorPositions.lastOrNull()?.toFloat() ?: 0f
+
+    /**
+     * Hides the outline while the input is neither focused nor holds text.
+     */
+    var hideOutlineWhenIdle = false
+
     // Use a hidden EditText to properly handle soft keyboard input (e.g., UTF-16 characters, selection and clipboard operations).
     private val internalEditText = AppCompatEditText(UIEngine.current.context).apply {
         layoutParams = ViewGroup.LayoutParams(1, 1)
@@ -174,10 +192,16 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     init {
         height = 48f
         padding = Vec4(12f, 0f)
+        // Clipped viewport for scrolling text, see updateTextScroll().
+        +UIContainer().apply {
+            width = FillParent
+            height = FillParent
+            clipToBounds = true
 
-        +placeholderEntity
-        +textEntity
-        +caret
+            +placeholderEntity
+            +textEntity
+            +caret
+        }
 
         background = UIBox().apply { cornerRadius = 12f }
         foreground = UIBox().apply {
@@ -241,13 +265,44 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     }
 
 
+    /**
+     * Scrolls the text so the caret stays visible.
+     */
+    private fun updateTextScroll() {
+        val visibleWidth = (innerWidth - caret.width).coerceAtLeast(0f)
+        val caretPosition = if (caret.isVisible) targetCursorPosition else textWidth
+
+        var offset = textScrollOffset
+        if (caretPosition - offset > visibleWidth) {
+            offset = caretPosition - visibleWidth
+        }
+        if (caretPosition - offset < 0f) {
+            offset = caretPosition
+        }
+        // Scroll back when the text got shorter.
+        offset = offset.coerceAtMost((textWidth - visibleWidth).coerceAtLeast(0f)).coerceAtLeast(0f)
+
+        textScrollOffset = offset
+        textEntity.x = -offset
+    }
+
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        // The cursor position first, the scroll depends on it and the caret on the scroll.
+        if (caret.isVisible) {
+            targetCursorPosition = cursorPositions.getOrNull(internalEditText.selectionEnd)?.toFloat() ?: textWidth
+        }
+        updateTextScroll()
+
+        if (hideOutlineWhenIdle) {
+            val isIdle = !isFocused && value.isEmpty()
+            foreground?.let { it.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.15f, it.alpha, if (isIdle) 0f else 1f, 0.02f) }
+        }
+
         selectionBox.width = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.3f), selectionBox.width, targetSelectionBoxWidth, 0f, 0.3f, Easing.OutExpo)
         caret.x = Interpolation.floatAt(deltaTimeSec.coerceIn(0f, 0.3f), caret.x, textEntity.x + targetCursorPosition, 0f, 0.3f, Easing.OutExpo)
         selectionBox.x = caret.x
 
         if (caret.isVisible) {
-            targetCursorPosition = cursorPositions.getOrNull(internalEditText.selectionEnd)?.toFloat() ?: (textEntity.x + textEntity.width)
             caret.y = textEntity.y
             caret.height = textEntity.height
 
@@ -281,7 +336,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
             if (!isFocused) {
                 focus()
             } else {
-                val x = localX - padding.left
+                val x = localX - padding.left + textScrollOffset
 
                 // Find the closest letter position to the touch
                 var distance = 0f
