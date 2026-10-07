@@ -4,12 +4,16 @@ import com.osudroid.GameMode
 import com.osudroid.beatmaps.DroidHitWindow.Companion.hitWindow300ToOverallDifficulty
 import com.osudroid.beatmaps.PreciseDroidHitWindow
 import com.osudroid.data.BeatmapInfo
+import com.osudroid.math.Precision
+import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModPrecise
 import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.applyMods
 import com.osudroid.utils.calculateRate
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.UIComponent
+import com.reco1l.framework.Color4
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
@@ -44,6 +48,12 @@ class BeatmapInfoWedge : UIContainer() {
     private lateinit var spinnersBadge: UILabeledBadge
 
     private lateinit var starsText: StarRatingBadge
+
+    /**
+     * Colors of statistics changed by mods, like the legacy song menu, red when harder, green when easier,
+     * orange when set by Difficulty Adjust. Components without an entry use the theme's accent color.
+     */
+    private val statisticColors = mutableMapOf<UIComponent, Color4>()
     private lateinit var versionText: UIText
 
 
@@ -168,6 +178,12 @@ class BeatmapInfoWedge : UIContainer() {
                     value = "00.0"
                     sizeVariant = SizeVariant.Small
                 }
+
+                lengthText.useStatisticColor(background = true)
+                bpmText.useStatisticColor(background = true)
+                for (badge in listOf(arText, odText, csText, hpText)) {
+                    badge.valueEntity.useStatisticColor(background = false)
+                }
             }
         }
 
@@ -243,7 +259,52 @@ class BeatmapInfoWedge : UIContainer() {
         csText.value = difficulty.difficultyCS.toString()
         hpText.value = difficulty.hp.toString()
 
+        val isDifficultyAdjusted = ModDifficultyAdjust::class in mods
+
+        setStatisticColor(arText.valueEntity, compareColor(beatmapInfo.approachRate, difficulty.ar, isDifficultyAdjusted, isPreciseMod))
+        setStatisticColor(odText.valueEntity, compareColor(beatmapInfo.overallDifficulty, difficulty.od, isDifficultyAdjusted, isPreciseMod))
+        setStatisticColor(csText.valueEntity, compareColor(beatmapInfo.circleSize, difficulty.difficultyCS, isDifficultyAdjusted, isPreciseMod))
+        setStatisticColor(hpText.valueEntity, compareColor(beatmapInfo.hpDrainRate, difficulty.hp, isDifficultyAdjusted, isPreciseMod))
+
+        // A faster rate makes the map harder: shorter length, higher BPM.
+        val rateColor = compareColor(1f, totalSpeedMultiplier, false, false)
+        setStatisticColor(lengthText, rateColor)
+        setStatisticColor(bpmText, rateColor)
+
         setStarRatingDisplay(beatmapInfo.getStarRating().toDouble())
+    }
+
+    /**
+     * Precise uses its own, stronger color variants, like the legacy song menu.
+     */
+    private fun compareColor(original: Float, modified: Float, isDifficultyAdjusted: Boolean, isPrecise: Boolean): Color4? = when {
+        Precision.almostEquals(original, modified) -> null
+        isDifficultyAdjusted -> if (isPrecise) PRECISE_DIFFICULTY_ADJUSTED_COLOR else DIFFICULTY_ADJUSTED_COLOR
+        modified > original -> if (isPrecise) PRECISE_HARDER_COLOR else HARDER_COLOR
+        else -> if (isPrecise) PRECISE_EASIER_COLOR else EASIER_COLOR
+    }
+
+    private fun setStatisticColor(component: UIComponent, color: Color4?) {
+        if (color == null) {
+            statisticColors.remove(component)
+        } else {
+            statisticColors[component] = color
+        }
+        component.onThemeChanged(Theme.current)
+    }
+
+    /**
+     * Makes the component take its color from [statisticColors], falling back to the theme's accent color.
+     * Used for the values of labeled badges and for the length/BPM badges.
+     */
+    private fun UIComponent.useStatisticColor(background: Boolean) {
+        inheritAncestorsColor = false
+        applyTheme = { theme ->
+            color = statisticColors[this] ?: theme.accentColor
+            if (background) {
+                this.background?.color = theme.accentColor * 0.15f
+            }
+        }
     }
 
     /**
@@ -253,4 +314,13 @@ class BeatmapInfoWedge : UIContainer() {
         starsText.rating = value
     }
 
+
+    companion object {
+        private val HARDER_COLOR = Color4(205, 85, 85)
+        private val EASIER_COLOR = Color4(46, 139, 87)
+        private val DIFFICULTY_ADJUSTED_COLOR = Color4(255, 180, 0)
+        private val PRECISE_HARDER_COLOR = Color4(214, 45, 45)
+        private val PRECISE_EASIER_COLOR = Color4(158, 108, 65)
+        private val PRECISE_DIFFICULTY_ADJUSTED_COLOR = Color4(255, 120, 0)
+    }
 }
