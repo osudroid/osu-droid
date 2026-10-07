@@ -1,15 +1,29 @@
 package com.osudroid.ui.v2.songselect
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
  * The bar above the [BeatmapCarrousel] holding the filter button and the search input.
+ *
+ * The search box is collapsed to the filter button's size when unused, and grows with its text when in use.
  */
-class SongSelectFilterBar : UIFlexContainer() {
+class SongSelectFilterBar : UILinearContainer() {
+
+    private val filterButton: UIIconButton
+    private val searchBox: UIContainer
+    private val searchInput: UITextInput
+
+    /**
+     * The animated search box width, negative until the first layout.
+     */
+    private var searchBoxWidth = -1f
+
 
     init {
         ResourceManager.getInstance().loadHighQualityAsset("filters", "filters.png")
@@ -19,44 +33,47 @@ class SongSelectFilterBar : UIFlexContainer() {
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
         padding = Vec4(32f, 16f)
-        direction = FlexDirection.Row
-        gap = 14f
+        // A linear container, the flex container would lock the search box to its content width.
+        orientation = Orientation.Horizontal
+        spacing = 14f
 
-        iconButton {
+        filterButton = iconButton {
             icon = ResourceManager.getInstance().getTexture("filters")
         }
 
-        container {
+        searchInput = object : UITextInput("") {
+
+            private var lastValueChangeMillis = -1L
+
+            init {
+                key = "query"
+                width = FillParent
+                height = FillParent
+                // Room for the search icon below.
+                padding = Vec4(12f, 0f, 64f, 0f)
+                hideOutlineWhenIdle = true
+            }
+
+            override fun onValueChanged() {
+                super.onValueChanged()
+                lastValueChangeMillis = System.currentTimeMillis()
+            }
+
+            override fun onManagedUpdate(deltaTimeSec: Float) {
+                super.onManagedUpdate(deltaTimeSec)
+
+                if (lastValueChangeMillis > 0L && System.currentTimeMillis() - lastValueChangeMillis > 300) {
+                    lastValueChangeMillis = -1L
+                    SongSelect.loadBeatmaps(query = value)
+                }
+            }
+        }
+
+        searchBox = container {
             height = FillParent
-            flexRules {
-                grow = 1f
-                basis = 0f
-            }
+            // No clipping, it would cut off the input's outline.
 
-            +object : UITextInput("") {
-
-                private var lastValueChangeMillis = -1L
-
-                init {
-                    key = "query"
-                    width = FillParent
-                    height = FillParent
-                }
-
-                override fun onValueChanged() {
-                    super.onValueChanged()
-                    lastValueChangeMillis = System.currentTimeMillis()
-                }
-
-                override fun onManagedUpdate(deltaTimeSec: Float) {
-                    super.onManagedUpdate(deltaTimeSec)
-
-                    if (lastValueChangeMillis > 0L && System.currentTimeMillis() - lastValueChangeMillis > 300) {
-                        lastValueChangeMillis = -1L
-                        SongSelect.loadBeatmaps(query = value)
-                    }
-                }
-            }
+            +searchInput
 
             sprite {
                 width = 52f
@@ -67,6 +84,31 @@ class SongSelectFilterBar : UIFlexContainer() {
                 applyTheme = { color = it.accentColor }
             }
         }
+    }
+
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        // In use: between half and full free width, depending on the text.
+        val collapsedWidth = filterButton.width
+        val fullWidth = innerWidth - filterButton.width - spacing
+        val isInUse = searchInput.isFocused || searchInput.value.isNotEmpty()
+        val textWidth = searchInput.textWidth + searchInput.padding.horizontal + TEXT_END_SPACE
+        val targetWidth = if (isInUse) textWidth.coerceIn(maxOf(collapsedWidth, fullWidth / 2f), maxOf(collapsedWidth, fullWidth)) else collapsedWidth
+
+        if (collapsedWidth > 0f) {
+            searchBoxWidth = if (searchBoxWidth < 0f) targetWidth else Interpolation.floatLerpWithSnap(deltaTimeSec, 0.15f, searchBoxWidth, targetWidth, 0.5f)
+            searchBox.width = searchBoxWidth
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
+
+    companion object {
+        /**
+         * Room after the text for the caret.
+         */
+        private const val TEXT_END_SPACE = 8f
     }
 
 }
