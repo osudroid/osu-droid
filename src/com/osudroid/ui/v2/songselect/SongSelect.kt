@@ -51,6 +51,26 @@ object SongSelect : UIScene() {
     private val backgroundSprite: UISprite
 
     private lateinit var modsButton: UITextButton
+    private lateinit var randomButton: UITextButton
+
+    /**
+     * The previously selected beatmaps, one per beatmap set change, newest last. Holding the random button
+     * walks back through them like the legacy song menu did.
+     */
+    private val previousSelections = ArrayDeque<BeatmapInfo>()
+
+    /**
+     * Whether the current selection change comes from walking back through [previousSelections].
+     */
+    private var isRestoringPreviousSelection = false
+
+    /**
+     * Whether a previous selection was restored during the current random button press, which then
+     * must not also select a random beatmap on release.
+     */
+    private var previousSelectionPerformed = false
+
+    private var randomHoldTime = 0f
 
     /**
      * All beatmap sets from the database, independent of the current filter.
@@ -132,14 +152,22 @@ object SongSelect : UIScene() {
                 onActionUp = { ModMenu.show() }
             }
 
-            textButton {
+            // Tap: random beatmap. Hold: go back to the previous selection, one step per second.
+            randomButton = textButton {
                 text = "Random"
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("random"))
+                onActionDown = {
+                    randomHoldTime = 0f
+                    previousSelectionPerformed = false
+                }
                 onActionUp = {
-                    val data = beatmapCarrousel.data
-                    if (data.isNotEmpty()) {
-                        beatmapCarrousel.applyComponent(data.random()) { selectRandom() }
+                    if (!previousSelectionPerformed) {
+                        selectRandomBeatmap()
                     }
+                    previousSelectionPerformed = false
+                }
+                onActionCancel = {
+                    previousSelectionPerformed = false
                 }
             }
         }
@@ -204,6 +232,16 @@ object SongSelect : UIScene() {
 
 
     fun onBeatmapSelected(beatmapInfo: BeatmapInfo?) {
+        val previous = selectedBeatmap
+
+        // Remember the previous beatmap whenever the set changes, unless we are walking back through the history.
+        if (!isRestoringPreviousSelection && previous != null && beatmapInfo != null && previous.setDirectory != beatmapInfo.setDirectory) {
+            while (previousSelections.size >= PREVIOUS_SELECTION_LIMIT) {
+                previousSelections.removeFirst()
+            }
+            previousSelections.addLast(previous)
+        }
+
         selectedBeatmap = beatmapInfo
 
         currentCalculationJob?.cancel(CancellationException("Calculation cancelled due to new selection."))
@@ -360,6 +398,59 @@ object SongSelect : UIScene() {
     }
 
 
+    private fun selectRandomBeatmap() {
+        val data = beatmapCarrousel.data
+        if (data.size <= 1) {
+            return
+        }
+
+        val currentDirectory = selectedBeatmap?.setDirectory
+        val candidates = data.filter { it.beatmapSetInfo.directory != currentDirectory }
+
+        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+        beatmapCarrousel.applyComponent(candidates.random()) { selectRandom() }
+    }
+
+    /**
+     * Selects the most recent entry of [previousSelections] that is still part of the carrousel data.
+     *
+     * @return `false` if there was nothing to go back to.
+     */
+    private fun selectPreviousBeatmap(): Boolean {
+        while (previousSelections.isNotEmpty()) {
+            val beatmapInfo = previousSelections.removeLast()
+            val model = beatmapCarrousel.data.find { it.beatmapSetInfo.directory == beatmapInfo.setDirectory } ?: continue
+
+            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+
+            isRestoringPreviousSelection = true
+            try {
+                beatmapCarrousel.applyComponent(model) { select(beatmapInfo) }
+            } finally {
+                isRestoringPreviousSelection = false
+            }
+            return true
+        }
+        return false
+    }
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+        // Holding the random button walks back through the previous selections, once per second.
+        if (::randomButton.isInitialized && randomButton.isPressed) {
+            randomHoldTime += pSecondsElapsed
+
+            if (randomHoldTime >= PREVIOUS_SELECTION_INTERVAL) {
+                randomHoldTime -= PREVIOUS_SELECTION_INTERVAL
+
+                if (selectPreviousBeatmap()) {
+                    previousSelectionPerformed = true
+                }
+            }
+        }
+
+        super.onManagedUpdate(pSecondsElapsed)
+    }
+
     /**
      * Selects the panel of the globally selected beatmap, if it is part of the carrousel data.
      */
@@ -382,5 +473,8 @@ object SongSelect : UIScene() {
         }
     }
 
+
+    private const val PREVIOUS_SELECTION_LIMIT = 10
+    private const val PREVIOUS_SELECTION_INTERVAL = 1f
 
 }
