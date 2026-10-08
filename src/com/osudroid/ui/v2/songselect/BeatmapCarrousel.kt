@@ -86,6 +86,28 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
     }
 
 
+    /**
+     * Difficulty panels not listed under any set, shared by all set panels so expanding a set
+     * does not create new panels every time.
+     */
+    private val beatmapPanelPool = ArrayDeque<BeatmapPanel>()
+
+    fun obtainBeatmapPanel(setPanel: BeatmapSetPanel, beatmapInfo: BeatmapInfo): BeatmapPanel {
+        val panel = beatmapPanelPool.removeLastOrNull() ?: BeatmapPanel()
+        panel.bind(setPanel, beatmapInfo)
+        return panel
+    }
+
+    /**
+     * Returns a panel to the pool, the caller detaches it from its set panel.
+     */
+    fun releaseBeatmapPanel(panel: BeatmapPanel) {
+        if (beatmapPanelPool.size < BEATMAP_PANEL_POOL_LIMIT) {
+            beatmapPanelPool.addLast(panel)
+        }
+    }
+
+
     private fun getPositionPercentage(componentY: Float, componentHeight: Float, parentScroll: Float, parentHeight: Float): Float {
         val positionInScreen = componentY + componentHeight / 2f - parentScroll
         return positionInScreen / parentHeight
@@ -113,9 +135,16 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
             val panelsAbsoluteY = component.absoluteY + component.panelsContainer.absoluteY
 
             component.panelsContainer.forEach { panel -> panel as BeatmapPanel
-                val panelYPercentage = getPositionPercentage(panelsAbsoluteY + panel.absoluteY, panel.height, scrollY, height)
+                // Panels are stacked from the top, their y equals their absolute y.
+                val panelY = panelsAbsoluteY + panel.y
+                val panelHeight = panel.height
+                val panelTop = panelY - scrollY
 
-                panel.setArcInset(getArcInset(panelYPercentage))
+                panel.isOnScreen = panelTop + panelHeight > -OFF_SCREEN_MARGIN && panelTop < height + OFF_SCREEN_MARGIN
+
+                if (panel.isOnScreen) {
+                    panel.setArcInset(getArcInset(getPositionPercentage(panelY, panelHeight, scrollY, height)))
+                }
             }
         }
 
@@ -163,5 +192,15 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
          * Fling speed in units per second above which covers are not loaded.
          */
         private const val FAST_SCROLL_VELOCITY = 3000f
+
+        /**
+         * Distance beyond the carousel's edges within which difficulty panels still count as on screen.
+         */
+        private const val OFF_SCREEN_MARGIN = 100f
+
+        /**
+         * Upper bound of pooled difficulty panels, sets with more difficulties create the rest on demand.
+         */
+        private const val BEATMAP_PANEL_POOL_LIMIT = 32
     }
 }

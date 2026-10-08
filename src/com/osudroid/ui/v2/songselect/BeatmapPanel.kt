@@ -7,7 +7,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.text.FontAwesomeIcon
+import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Interpolation
@@ -18,11 +18,30 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
  * A single difficulty entry shown below an expanded [BeatmapSetPanel].
+ *
+ * Panels are pooled by the [BeatmapCarrousel] and rebound with [bind] whenever a set expands.
  */
 @Suppress("LeakingThis")
-open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatmapInfo: BeatmapInfo) : UIContainer() {
+open class BeatmapPanel : UIContainer() {
+
+    /**
+     * The set panel this panel is currently listed under.
+     */
+    lateinit var beatmapSetPanel: BeatmapSetPanel
+        private set
+
+    /**
+     * The beatmap this panel currently shows.
+     */
+    lateinit var beatmapInfo: BeatmapInfo
+        private set
 
     private var isExpanded = false
+
+    /**
+     * Whether the panel is inside the carousel's visible area, off-screen panels are not updated.
+     */
+    var isOnScreen = true
 
     /**
      * The width before the carousel arc inset is applied, animated between collapsed and expanded.
@@ -32,6 +51,9 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
     private var arcInset = 0f
 
     private val selectionIndicator: UIContainer
+    private lateinit var versionText: UIText
+    private lateinit var starRatingBadge: StarRatingBadge
+    private lateinit var difficultyStars: DifficultyStars
 
     private val backgroundBox = UIBox().apply {
         cornerRadius = Radius.XL
@@ -81,8 +103,7 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
             padding = Vec4(SELECTION_INDICATOR_WIDTH + 4f.srem, 2f.srem, 4f.srem, 2f.srem)
             spacing = 0.5f.srem
 
-            text {
-                text = beatmapInfo.version
+            versionText = text {
                 font = ResourceManager.getInstance().getFont("torusBold")
                 applyTheme = { color = it.accentColor }
             }
@@ -91,23 +112,47 @@ open class BeatmapPanel(private val beatmapSetPanel: BeatmapSetPanel, val beatma
                 orientation = Orientation.Horizontal
                 spacing = 2f.srem
 
-                +StarRatingBadge().apply {
-                    rating = beatmapInfo.getStarRating().toDouble()
+                starRatingBadge = StarRatingBadge().apply {
                     sizeVariant = SizeVariant.Small
-                    applyColorsInstantly()
                 }
+                +starRatingBadge
 
                 // Skinnable star row like the legacy song menu.
-                +DifficultyStars().apply {
+                difficultyStars = DifficultyStars().apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    rating = beatmapInfo.getStarRating()
                 }
+                +difficultyStars
             }
         }
     }
 
+    /**
+     * Shows [beatmapInfo] under [beatmapSetPanel] and resets the state left over from the previous use.
+     */
+    fun bind(beatmapSetPanel: BeatmapSetPanel, beatmapInfo: BeatmapInfo) {
+        this.beatmapSetPanel = beatmapSetPanel
+        this.beatmapInfo = beatmapInfo
+
+        versionText.text = beatmapInfo.version
+        starRatingBadge.rating = beatmapInfo.getStarRating().toDouble()
+        starRatingBadge.applyColorsInstantly()
+        difficultyStars.rating = beatmapInfo.getStarRating()
+
+        isExpanded = false
+        isOnScreen = true
+        baseWidth = -1f
+        arcInset = 0f
+        selectionIndicator.alpha = 0f
+        borderBox.color = Theme.current.accentColor.copy(alpha = 0.3f)
+        borderBox.lineWidth = 0.25f.srem
+    }
+
     override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (!isOnScreen) {
+            return
+        }
 
         val accentColor = Theme.current.accentColor
         val targetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)

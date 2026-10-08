@@ -246,7 +246,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         selectedPanel = null
         isTransitioning = false
 
-        panelsContainer.detachChildren()
+        releasePanels()
         panelsContainer.height = 0f
         panelsContainer.alpha = 0f
 
@@ -378,7 +378,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             || panelsContainer.alpha != panelContainerTargetAlpha
 
         if (!isExpanded && !isTransitioning && panelsContainer.childCount > 0) {
-            panelsContainer.detachChildren()
+            releasePanels()
         }
 
         super.onManagedUpdate(deltaTimeSec)
@@ -408,16 +408,30 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         if (!isExpanded) {
             isExpanded = true
 
+            // Releases panels left over from a collapse that is still animating.
+            releasePanels()
+
             data.beatmapSetInfo.beatmaps.sortedBy { it.getStarRating() }.forEach {
-                panelsContainer.attachChild(BeatmapPanel(this@BeatmapSetPanel, it))
+                panelsContainer.attachChild(beatmapCarrousel.obtainBeatmapPanel(this, it))
             }
         }
+    }
+
+    /**
+     * Detaches all difficulty panels and returns them to the carousel's pool.
+     */
+    private fun releasePanels() {
+        panelsContainer.forEach { beatmapCarrousel.releaseBeatmapPanel(it as BeatmapPanel) }
+        panelsContainer.detachChildren()
     }
 
     fun collapse() {
         if (isExpanded) {
             isExpanded = false
             selectedPanel = null
+
+            // Only the selected set's panels are tracked by the carousel.
+            panelsContainer.forEach { (it as BeatmapPanel).isOnScreen = true }
         }
     }
 
