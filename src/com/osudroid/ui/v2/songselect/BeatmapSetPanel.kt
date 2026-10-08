@@ -274,10 +274,16 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     val bitmap = BitmapFactory.decodeFile(beatmap.backgroundPath)?.cropInCenter(COVER_HEIGHT)
 
                     if (bitmap != null) {
-                        cacheFile.outputStream().use { out ->
-                            if (!bitmap.compress(Bitmap.CompressFormat.WEBP, 10, out)) {
-                                cacheFile.delete()
-                            }
+                        // Written to a temporary file first, so a cover is never visible half written. Its name is
+                        // unique because duplicate imports of a set share the same cover and load it at the same time.
+                        val tempFile = File.createTempFile(beatmap.md5, ".tmp", coverCacheDirectory)
+
+                        val compressed = tempFile.outputStream().use { out ->
+                            bitmap.compress(Bitmap.CompressFormat.WEBP, 10, out)
+                        }
+
+                        if (!compressed || !tempFile.renameTo(cacheFile)) {
+                            tempFile.delete()
                         }
                     }
                 }

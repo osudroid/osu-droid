@@ -169,7 +169,7 @@ class TextureStore {
 
     fun loadHighQualityFile(resname: String, file: File): TextureRegion? {
         val source = QualityFileBitmapSource(file)
-        if (source.width == 0 || source.height == 0) {
+        if (source.width == 0 || source.height == 0 || !source.preload()) {
             return null
         }
 
