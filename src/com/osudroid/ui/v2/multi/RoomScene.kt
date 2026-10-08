@@ -1,6 +1,8 @@
 package com.osudroid.ui.v2.multi
 
 import com.osudroid.BuildSettings
+import com.osudroid.discord.DiscordPresenceManager
+import com.osudroid.discord.UserActivity
 import java.util.concurrent.atomic.AtomicBoolean
 import com.osudroid.beatmaplisting.BeatmapDownloader
 import com.osudroid.beatmaplisting.BeatmapListing
@@ -750,6 +752,7 @@ class RoomScene(
         // will call invalidateStatus() with the correct beatmap context.
 
         chat.show()
+        updateDiscordActivity()
         allowAutomaticPlaybackRestart = true
     }
 
@@ -772,6 +775,12 @@ class RoomScene(
 
 
     // Communication
+
+    fun updateDiscordActivity() {
+        DiscordPresenceManager.setActivity(
+            UserActivity.InMultiplayerLobby(room.name, room.playerCount, room.maxPlayers)
+        )
+    }
 
     override fun onServerError(error: String) {
         ToastLogger.showText(error, true)
@@ -845,6 +854,7 @@ class RoomScene(
         updateBeatmap(newRoom.beatmap)
 
         show()
+        updateDiscordActivity()
     }
 
     override fun onRoomDisconnect(reason: String?, byUser: Boolean) {
@@ -888,6 +898,7 @@ class RoomScene(
     override fun onRoomNameChange(name: String) {
         room.name = name
         updateThread { updateInformation() }
+        updateDiscordActivity()
     }
 
     override fun onRoomMaxPlayersChange(maxPlayers: Int) {
@@ -902,6 +913,7 @@ class RoomScene(
 
         updateThread { updateInformation() }
         updatePlayerList()
+        updateDiscordActivity()
     }
 
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) {
@@ -1136,6 +1148,7 @@ class RoomScene(
 
         updateThread { updateInformation() }
         updatePlayerList()
+        updateDiscordActivity()
     }
 
     override fun onPlayerLeft(uid: Long) {
@@ -1148,6 +1161,7 @@ class RoomScene(
 
         updateThread { updateInformation() }
         updatePlayerList()
+        updateDiscordActivity()
     }
 
     override fun onPlayerKick(uid: Long) {
@@ -1200,6 +1214,7 @@ class RoomScene(
 
         updateThread { updateInformation() }
         updatePlayerList()
+        updateDiscordActivity()
     }
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus) {
