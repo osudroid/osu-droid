@@ -67,6 +67,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
 
 
     override fun onDrawScene(pGLState: GLState, pCamera: Camera) {
+        UIComponent.invalidateSizeCache()
         val focusedEntity = focusedEntity
 
         if (focusedEntity != null) {
@@ -193,6 +194,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     }
 
     override fun onUpdate(pNanosecondsElapsed: Long) {
+        UIComponent.invalidateSizeCache()
         clock.processFrame()
 
         super.onUpdate((clock.elapsedFrameTime * 1e9).toLong())

@@ -85,15 +85,22 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     //region Draw pipeline
 
-    override fun onHandleInvalidations(restoreFlags: Boolean) {
-
+    private fun createBufferIfNeeded() {
         if (needsNewBuffer) {
             needsNewBuffer = false
             buffer = onCreateBuffer()
             requestBufferUpdate()
         }
+    }
+
+    override fun onHandleInvalidations(restoreFlags: Boolean) {
+
+        createBufferIfNeeded()
 
         super.onHandleInvalidations(restoreFlags)
+
+        // Size changes can request a new buffer while the invalidations are handled.
+        createBufferIfNeeded()
 
         // Buffer update is done after invalidations are handled so we can
         // refer the buffer in those invalidations.

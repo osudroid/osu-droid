@@ -57,6 +57,11 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
     private val componentPool = LinkedList<C>()
 
+    /**
+     * The data list orphan components were last checked against.
+     */
+    private var lastCheckedData: List<T>? = null
+
 
     init {
         super.attachChild(componentWrapper)
@@ -112,6 +117,12 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
      * keep being drawn at their stale position after the data set changed.
      */
     private fun unbindOrphanComponents(dataList: List<T>) {
+        // Only a new data list can orphan components, scrolling alone does not.
+        if (dataList === lastCheckedData) {
+            return
+        }
+        lastCheckedData = dataList
+
         if (boundComponents.isEmpty()) {
             return
         }
@@ -138,35 +149,6 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
             boundComponents[data] = component
             Log.v("UIRecyclerContainer", "Binding component, pool size: ${componentPool.size}, bound components: ${boundComponents.size}")
         }
-    }
-
-    private fun isInContainerBounds(component: C): Boolean {
-        // Override the culling check to be straightforward
-        // with the carrousel and panels making it fast.
-
-        val containerSize: Float
-        val currentScroll: Float
-        val positionOnContainer: Float
-        val componentSize: Float
-
-        when (orientation) {
-
-            Vertical -> {
-                containerSize = height
-                currentScroll = scrollY
-                positionOnContainer = component.absoluteY - currentScroll
-                componentSize = component.height
-            }
-
-            Horizontal -> {
-                containerSize = width
-                currentScroll = scrollX
-                positionOnContainer = component.absoluteX - currentScroll
-                componentSize = component.width
-            }
-        }
-
-        return positionOnContainer + componentSize > 0f && positionOnContainer < containerSize
     }
 
 
@@ -214,20 +196,38 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
 
             unbindOrphanComponents(dataList)
 
+            val isVertical = orientation == Vertical
+            val visibleStart = if (isVertical) scrollY - contentY else scrollX - contentX
+            val visibleEnd = visibleStart + (if (isVertical) this@UIRecyclerContainer.height else this@UIRecyclerContainer.width)
+
             var contentWidth = 0f
             var contentHeight = 0f
+
+            // Unbound data shares the same fallback component, so it only has to be measured once.
+            var measuredComponent: C? = null
+            var componentWidth = 0f
+            var componentHeight = 0f
 
             for (i in dataList.indices) {
 
                 val data = dataList[i]
                 val component = fetchComponentOrFallback(data)
 
+                if (component !== measuredComponent || component.boundData != null) {
+                    measuredComponent = component
+                    componentWidth = component.width
+                    componentHeight = component.height
+                }
+
+                val position: Float
+
                 when (orientation) {
                     Horizontal -> {
-                        component.x = contentWidth
+                        position = contentWidth
+                        component.x = position
 
-                        contentWidth += component.width
-                        contentHeight = max(contentHeight, component.height)
+                        contentWidth += componentWidth
+                        contentHeight = max(contentHeight, componentHeight)
 
                         if (dataList.size > 1 && i < dataList.size - 1) {
                             contentWidth += spacing
@@ -235,10 +235,11 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
                     }
 
                     Vertical -> {
-                        component.y = contentHeight
+                        position = contentHeight
+                        component.y = position
 
-                        contentHeight += component.height
-                        contentWidth = max(contentWidth, component.width)
+                        contentHeight += componentHeight
+                        contentWidth = max(contentWidth, componentWidth)
 
                         if (dataList.size > 1 && i < dataList.size - 1) {
                             contentHeight += spacing
@@ -246,7 +247,10 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
                     }
                 }
 
-                if (isInContainerBounds(component)) {
+                val start = position + if (isVertical) component.translationY else component.translationX
+                val end = start + if (isVertical) componentHeight else componentWidth
+
+                if (end > visibleStart && start < visibleEnd) {
                     if (component.isRecyclable && component.boundData != data) {
                         bindComponent(data, component)
                     }

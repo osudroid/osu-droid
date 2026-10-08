@@ -91,6 +91,27 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
             Outline -> GL_LINE_STRIP
         }
     ) {
+
+        /**
+         * Vertex offsets of the four corner arcs relative to their centers, they only depend on the radius
+         * so a size change only has to move them.
+         */
+        private val arcOffsets = FloatArray(max(1, segments) * 4 * 2).also { offsets ->
+            val segments = max(1, segments)
+            var i = 0
+
+            for (arc in 0 until 4) {
+                val startAngle = Math.toRadians(arc * 90.0 - 180.0)
+                val deltaAngle = Math.toRadians(90.0) / max(1, segments - 1)
+
+                for (j in 0 until segments) {
+                    val angle = startAngle + j * deltaAngle
+                    offsets[i++] = radius * cos(angle).toFloat()
+                    offsets[i++] = radius * sin(angle).toFloat()
+                }
+            }
+        }
+
         fun update(entity: UIBox) {
 
             val width = entity.width
@@ -108,14 +129,17 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
                 putVertex(position++, width / 2f, height / 2f)
             }
 
-            // [1]
-            position = addArc(position, radius, radius, -90f, 0f, radius, radius, segments)
-            // [2]
-            position = addArc(position, width - radius, radius, 0f, 90f, radius, radius, segments)
-            // [3]
-            position = addArc(position, width - radius, height - radius, 90f, 180f, radius, radius, segments)
-            // [4]
-            position = addArc(position, radius, height - radius, 180f, 270f, radius, radius, segments)
+            var offset = 0
+
+            for (arc in 0 until 4) {
+                val centerX = if (arc == 0 || arc == 3) radius else width - radius
+                val centerY = if (arc < 2) radius else height - radius
+
+                repeat(segments) {
+                    putVertex(position++, centerX + arcOffsets[offset], centerY + arcOffsets[offset + 1])
+                    offset += 2
+                }
+            }
 
             // Closing point
             putVertex(position, 0f, radius)

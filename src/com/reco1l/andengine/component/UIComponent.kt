@@ -48,6 +48,12 @@ abstract class UIComponent : Entity(0f, 0f),
      * to [width] or [height] will be treated as a percentage (values from 0 to 1).
      */
     open var relativeSizeAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Size)
+            }
+        }
 
     /**
      * Determines which axes for the position of the entity are relative w.r.t the parent.
@@ -98,18 +104,29 @@ abstract class UIComponent : Entity(0f, 0f),
                 invalidate(InvalidationFlag.Size)
             }
         }
+    private var cachedWidth = 0f
+    private var cachedWidthEpoch = -1
+
     /**
      * The width of the entity.
      */
     var width: Float = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.horizontal,
-            position = x,
-            isRelative = relativeSizeAxes.isHorizontal,
-            contentSize = contentWidth,
-            containerSize = parent.innerWidth,
-        ).coerceAtMost(maxWidth).coerceAtLeast(minWidth)
+        get() {
+            if (cachedWidthEpoch == layoutEpoch) {
+                return cachedWidth
+            }
+
+            cachedWidth = computeSizeValue(
+                value = field,
+                padding = padding.horizontal,
+                position = x,
+                isRelative = relativeSizeAxes.isHorizontal,
+                contentSize = contentWidth,
+                containerSize = parent.innerWidth,
+            ).coerceAtMost(maxWidth).coerceAtLeast(minWidth)
+            cachedWidthEpoch = layoutEpoch
+            return cachedWidth
+        }
         set(value) {
             if (field != value) {
                 field = value
@@ -137,18 +154,29 @@ abstract class UIComponent : Entity(0f, 0f),
                 invalidate(InvalidationFlag.Size)
             }
         }
+    private var cachedHeight = 0f
+    private var cachedHeightEpoch = -1
+
     /**
      * The height of the entity.
      */
     var height = 0f
-        get() = computeSizeValue(
-            value = field,
-            padding = padding.vertical,
-            position = y,
-            isRelative = relativeSizeAxes.isVertical,
-            contentSize = contentHeight,
-            containerSize = parent.innerHeight,
-        ).coerceAtMost(maxHeight).coerceAtLeast(minHeight)
+        get() {
+            if (cachedHeightEpoch == layoutEpoch) {
+                return cachedHeight
+            }
+
+            cachedHeight = computeSizeValue(
+                value = field,
+                padding = padding.vertical,
+                position = y,
+                isRelative = relativeSizeAxes.isVertical,
+                contentSize = contentHeight,
+                containerSize = parent.innerHeight,
+            ).coerceAtMost(maxHeight).coerceAtLeast(minHeight)
+            cachedHeightEpoch = layoutEpoch
+            return cachedHeight
+        }
         set(value) {
             if (field != value) {
                 field = value
@@ -376,6 +404,7 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     fun invalidate(flag: Int) {
         invalidationFlags = invalidationFlags or flag
+        layoutEpoch++
     }
 
     //endregion
@@ -420,6 +449,7 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         super.setParent(entity)
+        layoutEpoch++
 
         attachmentMode = if (entity == null) AttachmentMode.None else mode ?: AttachmentMode.Child
 
@@ -499,6 +529,40 @@ abstract class UIComponent : Entity(0f, 0f),
                 child.invalidate(InvalidationFlag.Size)
             }
         }
+    }
+
+    private var lastCheckedWidth = Float.NaN
+    private var lastCheckedHeight = Float.NaN
+    private var lastCheckedContentWidth = Float.NaN
+    private var lastCheckedContentHeight = Float.NaN
+    private var lastCheckedPadding: Vec4? = null
+    private var lastCheckedVisible = false
+
+    /**
+     * Whether the size, content size, padding or visibility changed since the last call. Children are invalidated
+     * whenever their parent's size changes, even if their own size stays the same.
+     */
+    private fun hasSizeChangedSinceLastCheck(): Boolean {
+        val width = width
+        val height = height
+        val contentWidth = contentWidth
+        val contentHeight = contentHeight
+        val padding = padding
+        val visible = isVisible
+
+        if (width == lastCheckedWidth && height == lastCheckedHeight
+            && contentWidth == lastCheckedContentWidth && contentHeight == lastCheckedContentHeight
+            && padding == lastCheckedPadding && visible == lastCheckedVisible) {
+            return false
+        }
+
+        lastCheckedWidth = width
+        lastCheckedHeight = height
+        lastCheckedContentWidth = contentWidth
+        lastCheckedContentHeight = contentHeight
+        lastCheckedPadding = padding
+        lastCheckedVisible = visible
+        return true
     }
 
     /**
@@ -718,7 +782,7 @@ abstract class UIComponent : Entity(0f, 0f),
         when (flag) {
             InvalidationFlag.Position -> onPositionChanged()
             InvalidationFlag.Content -> onContentChanged()
-            InvalidationFlag.Size -> onSizeChanged()
+            InvalidationFlag.Size -> if (hasSizeChangedSinceLastCheck()) onSizeChanged()
             InvalidationFlag.Transformations -> onInvalidateTransformations()
             InvalidationFlag.InputBindings -> onInvalidateInputBindings()
         }
@@ -914,12 +978,9 @@ abstract class UIComponent : Entity(0f, 0f),
     //region Transformations
 
     open fun onInvalidateTransformations() {
+        // The matrices are recalculated lazily by their getters.
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
-
-        // This recreates and calculates the transformation matrices.
-        localToParentTransformation
-        parentToLocalTransformation
 
         mChildren?.forEach {
             if (it is UIComponent) {
@@ -1880,6 +1941,20 @@ abstract class UIComponent : Entity(0f, 0f),
 
     @Suppress("ConstPropertyName")
     companion object {
+
+        /**
+         * Incremented whenever anything that computed sizes depend on may have changed. Computed sizes are
+         * cached per epoch.
+         */
+        private var layoutEpoch = 0
+
+        /**
+         * Invalidates the cached sizes of all components, called at the start of every update and draw pass.
+         */
+        @JvmStatic
+        fun invalidateSizeCache() {
+            layoutEpoch++
+        }
 
         /**
          * The width and height of the entity will match the content size without any constraints.
