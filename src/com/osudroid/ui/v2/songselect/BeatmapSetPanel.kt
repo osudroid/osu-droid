@@ -259,7 +259,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
         try {
             val beatmap = model.beatmapSetInfo.beatmaps[0]
-            val textureName = "cover@${beatmap.md5}"
+            val textureName = model.coverTextureName!!
 
             if (ResourceManager.getInstance().isTextureLoaded(textureName)) {
                 model.coverTexture = ResourceManager.getInstance().getTexture(textureName)

@@ -10,6 +10,7 @@ import org.andengine.engine.camera.Camera
 import org.andengine.input.touch.TouchEvent
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.*
 
 class BeatmapSetModel(
@@ -17,6 +18,12 @@ class BeatmapSetModel(
     var coverTexture: TextureRegion? = null,
     var isLoadingCover: Boolean = false,
 ) {
+    /**
+     * The name of the cover texture, duplicate imports of a set share the same cover.
+     */
+    val coverTextureName: String?
+        get() = beatmapSetInfo.beatmaps.getOrNull(0)?.let { "cover@${it.md5}" }
+
     override fun toString(): String {
         return beatmapSetInfo.directory
     }
@@ -87,6 +94,64 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
 
 
     /**
+     * Loaded covers by texture name and the models showing them.
+     */
+    private val loadedCovers = HashMap<String, MutableSet<BeatmapSetModel>>()
+
+    private var dataIndices = emptyMap<BeatmapSetModel, Int>()
+    private var dataIndicesSource: List<BeatmapSetModel>? = null
+
+    /**
+     * Keeps only the covers of the panels on screen and [COVER_KEEP_MARGIN] panels above and below loaded,
+     * otherwise scrolling through a large library keeps every cover in memory.
+     */
+    private fun updateCoverCache() {
+        val data = data
+
+        if (dataIndicesSource !== data) {
+            dataIndicesSource = data
+            dataIndices = data.withIndex().associate { (index, model) -> model to index }
+        }
+
+        var firstVisible = Int.MAX_VALUE
+        var lastVisible = Int.MIN_VALUE
+
+        for ((model, panel) in boundComponents) {
+            val index = dataIndices[model] ?: continue
+
+            // The expanded set stays bound while scrolled away, only the others tell which part is on screen.
+            if (panel.isRecyclable) {
+                firstVisible = min(firstVisible, index)
+                lastVisible = max(lastVisible, index)
+            }
+
+            if (model.coverTexture != null) {
+                val name = model.coverTextureName ?: continue
+                loadedCovers.getOrPut(name) { mutableSetOf() }.add(model)
+            }
+        }
+
+        val iterator = loadedCovers.entries.iterator()
+
+        while (iterator.hasNext()) {
+            val (name, models) = iterator.next()
+
+            val isKept = models.any { model ->
+                val index = dataIndices[model]
+                model.isLoadingCover || model in boundComponents
+                    || index != null && index >= firstVisible - COVER_KEEP_MARGIN && index <= lastVisible + COVER_KEEP_MARGIN
+            }
+
+            if (!isKept) {
+                models.forEach { it.coverTexture = null }
+                ResourceManager.getInstance().unloadTexture(name)
+                iterator.remove()
+            }
+        }
+    }
+
+
+    /**
      * Difficulty panels not listed under any set, shared by all set panels so expanding a set
      * does not create new panels every time.
      */
@@ -152,6 +217,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        updateCoverCache()
 
         val panel = selectedPanel
         if (panel != null && autoScrollToSelectedPanel) {
@@ -197,6 +263,11 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
          * Distance beyond the carousel's edges within which difficulty panels still count as on screen.
          */
         private const val OFF_SCREEN_MARGIN = 100f
+
+        /**
+         * Number of panels above and below the screen whose covers stay loaded.
+         */
+        private const val COVER_KEEP_MARGIN = 3
 
         /**
          * Upper bound of pooled difficulty panels, sets with more difficulties create the rest on demand.
