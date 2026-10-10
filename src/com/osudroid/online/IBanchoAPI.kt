@@ -21,7 +21,8 @@ object IBanchoAPI {
      * leaderboard scoring mode setting.
      *
      * Lines with 9 fields are leaderboard entries, a line with 10 fields is the personal best of the
-     * current user that did not make it into the leaderboard (the 10th field is its rank).
+     * current user that did not make it into the leaderboard (the 10th field is its rank). Such an
+     * entry is returned with [BeatmapScoreModel.isInLeaderboard] set to `false`.
      */
     @Throws(OnlineManager.OnlineManagerException::class)
     fun getBeatmapLeaderboard(hash: String): List<BeatmapScoreModel> {
@@ -43,7 +44,7 @@ object IBanchoAPI {
                 list.add(
                     BeatmapScoreModel(
                         scoreId = data[0].toLong(),
-                        rank = if (isPersonalBest && !isInLeaderboard) data[9].toInt() else index + 1,
+                        rank = if (isInLeaderboard) index + 1 else data[9].toInt(),
                         mark = data[5],
                         playerName = if (isPersonalBest) username else data[1],
                         mods = data[6],
@@ -53,6 +54,7 @@ object IBanchoAPI {
                         accuracy = data[7].toFloat(),
                         avatarUrl = data[8].takeIf { it.isNotEmpty() },
                         isPersonalBest = isPersonalBest,
+                        isInLeaderboard = isInLeaderboard,
                     )
                 )
             } catch (e: NumberFormatException) {

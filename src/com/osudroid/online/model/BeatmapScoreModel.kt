@@ -20,6 +20,11 @@ data class BeatmapScoreModel(
      * Whether this score is the personal best of the current user.
      */
     val isPersonalBest: Boolean = false,
+    /**
+     * Whether this score is part of the leaderboard list. The personal best of the current user
+     * is delivered separately when it did not make it into the leaderboard.
+     */
+    val isInLeaderboard: Boolean = true,
 )
 
 fun BeatmapScore(rank: Int, info: ScoreInfo): BeatmapScoreModel {
