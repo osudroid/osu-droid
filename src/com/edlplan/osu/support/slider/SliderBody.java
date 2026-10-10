@@ -48,6 +48,10 @@ public class SliderBody extends UIContainer {
     private final Vec2 tmpStartR = new Vec2();
     private final Vec2 tmpEndL = new Vec2();
     private final Vec2 tmpEndR = new Vec2();
+    private final Vec2 tmpPreviousEndL = new Vec2();
+    private final Vec2 tmpPreviousEndR = new Vec2();
+    private Vec2 tmpQuadStart;
+    private Vec2 tmpQuadEnd;
     private final Vec2 tmpCapCurrent = new Vec2();
     private final Vec2 tmpCapCurrent2 = new Vec2();
     private final Vec2 tmpCutPoint = new Vec2();
@@ -488,8 +492,10 @@ public class SliderBody extends UIContainer {
         builder.maxY = cache.maxY;
 
         if (Vec2.length(segmentStart, cutPoint) > lengthUpdateEpsilon) {
-            addLineQuad(builder, segmentStart, cutPoint, width);
-            addEndCap(builder, cutPoint, segmentTheta - FMath.PiHalf, width);
+            // The quad starts at the corners of the cached join, so its normal is taken from the whole segment.
+            computeQuadCorners(segmentStart, cutPoint, segmentStart, this.cache.sourcePath.get(segmentIndex + 1), width);
+            addLineQuad(builder);
+            addLineCap(builder, cutPoint, segmentTheta - FMath.PiHalf, FMath.Pi, width, tmpEndR, tmpEndL);
         }
 
         builder.applyVertices(target.getVertices());
@@ -519,15 +525,30 @@ public class SliderBody extends UIContainer {
         builder.maxX = cache.maxX;
         builder.maxY = cache.maxY;
 
-        addStartCap(builder, cutPoint, segmentTheta + FMath.PiHalf, width);
+        computeQuadCorners(cutPoint, segmentEnd, this.cache.sourcePath.get(segmentIndex), segmentEnd, width);
+        addLineCap(builder, cutPoint, segmentTheta + FMath.PiHalf, FMath.Pi, width, tmpStartL, tmpStartR);
 
         if (Vec2.length(cutPoint, segmentEnd) > lengthUpdateEpsilon) {
-            addLineQuad(builder, cutPoint, segmentEnd, width);
+            addLineQuad(builder);
         }
 
         if (segmentIndex < this.cache.segmentCount - 1) {
             float nextTheta = this.cache.segmentThetas[segmentIndex + 1];
-            addLineCap(builder, segmentEnd, segmentTheta - FMath.PiHalf, nextTheta - segmentTheta, width);
+            Vec2 nextPoint = this.cache.sourcePath.get(segmentIndex + 2);
+
+            // Same join as built by DrawLinePath, so it meets the cached quads of the next segment exactly.
+            tmpPreviousEndL.set(tmpEndL);
+            tmpPreviousEndR.set(tmpEndR);
+            computeQuadCorners(segmentEnd, nextPoint, segmentEnd, nextPoint, width);
+
+            float thetaDiff = nextTheta - segmentTheta;
+            if (thetaDiff < 0) {
+                addLineCap(builder, segmentEnd, segmentTheta - FMath.PiHalf, thetaDiff, width, tmpPreviousEndL, tmpStartL);
+                builder.add(segmentEnd, tmpPreviousEndR, tmpStartR);
+            } else {
+                addLineCap(builder, segmentEnd, segmentTheta - FMath.PiHalf, thetaDiff, width, tmpPreviousEndR, tmpStartR);
+                builder.add(segmentEnd, tmpPreviousEndL, tmpStartL);
+            }
 
             int suffixOffset = this.cache.segmentQuadStartOffsets[segmentIndex + 1];
             int suffixLength = cache.vertexLength - suffixOffset;
@@ -537,7 +558,7 @@ public class SliderBody extends UIContainer {
                 builder.length += suffixLength;
             }
         } else {
-            addEndCap(builder, segmentEnd, segmentTheta - FMath.PiHalf, width);
+            addLineCap(builder, segmentEnd, segmentTheta - FMath.PiHalf, FMath.Pi, width, tmpEndR, tmpEndL);
         }
 
         builder.applyVertices(target.getVertices());
@@ -653,9 +674,16 @@ public class SliderBody extends UIContainer {
         return out;
     }
 
-    private void addLineQuad(TriangleBuilder builder, Vec2 pointStart, Vec2 pointEnd, float width) {
-        tmpOthExpand.set(Vec2.lineOthNormal(pointStart, pointEnd, tmpOthExpand));
+    /**
+     * Computes the quad corners like {@link DrawLinePath}, with the normal of {@code segmentStart} to {@code segmentEnd}.
+     * The corners must match the cached ones bit for bit, otherwise hairline gaps appear between them.
+     */
+    private void computeQuadCorners(Vec2 pointStart, Vec2 pointEnd, Vec2 segmentStart, Vec2 segmentEnd, float width) {
+        tmpOthExpand.set(Vec2.lineOthNormal(segmentStart, segmentEnd, tmpOthExpand));
         tmpOthExpand.zoom(width);
+
+        tmpQuadStart = pointStart;
+        tmpQuadEnd = pointEnd;
 
         tmpStartL.set(pointStart);
         tmpStartL.add(tmpOthExpand);
@@ -668,40 +696,42 @@ public class SliderBody extends UIContainer {
 
         tmpEndR.set(pointEnd);
         tmpEndR.minus(tmpOthExpand);
-
-        builder.add(pointStart, pointEnd, tmpEndL);
-        builder.add(pointStart, tmpEndL, tmpStartL);
-        builder.add(pointStart, tmpEndR, pointEnd);
-        builder.add(pointStart, tmpStartR, tmpEndR);
     }
 
-    private void addEndCap(TriangleBuilder builder, Vec2 origin, float theta, float width) {
-        addLineCap(builder, origin, theta, FMath.Pi, width);
+    /**
+     * Adds the quad whose corners were last computed by {@link #computeQuadCorners}.
+     */
+    private void addLineQuad(TriangleBuilder builder) {
+        builder.add(tmpQuadStart, tmpQuadEnd, tmpEndL);
+        builder.add(tmpQuadStart, tmpEndL, tmpStartL);
+        builder.add(tmpQuadStart, tmpEndR, tmpQuadEnd);
+        builder.add(tmpQuadStart, tmpStartR, tmpEndR);
     }
 
-    private void addStartCap(TriangleBuilder builder, Vec2 origin, float theta, float width) {
-        addLineCap(builder, origin, theta, FMath.Pi, width);
-    }
-
-    private void addLineCap(TriangleBuilder builder, Vec2 origin, float theta, float thetaDiff, float width) {
+    /**
+     * Adds a cap from {@code first} to {@code last}, see {@link DrawLinePath} for why they are passed in.
+     */
+    private void addLineCap(TriangleBuilder builder, Vec2 origin, float theta, float thetaDiff, float width, Vec2 first, Vec2 last) {
         final float step = FMath.Pi / 24;
 
         float dir = Math.signum(thetaDiff);
         thetaDiff *= dir;
-        int amountPoints = (int) Math.ceil(thetaDiff / step);
+        int amountPoints = Math.max(1, (int) Math.ceil(thetaDiff / step));
 
         if (dir < 0) {
             theta += FMath.Pi;
         }
 
-        tmpCapCurrent.set(Vec2.atCircle(theta, tmpCapCurrent));
-        tmpCapCurrent.zoom(width);
-        tmpCapCurrent.add(origin);
+        tmpCapCurrent.set(first);
 
         for (int i = 1; i <= amountPoints; i++) {
-            tmpCapCurrent2.set(Vec2.atCircle(theta + dir * Math.min(i * step, thetaDiff), tmpCapCurrent2));
-            tmpCapCurrent2.zoom(width);
-            tmpCapCurrent2.add(origin);
+            if (i == amountPoints) {
+                tmpCapCurrent2.set(last);
+            } else {
+                tmpCapCurrent2.set(Vec2.atCircle(theta + dir * i * step, tmpCapCurrent2));
+                tmpCapCurrent2.zoom(width);
+                tmpCapCurrent2.add(origin);
+            }
 
             builder.add(origin, tmpCapCurrent, tmpCapCurrent2);
             tmpCapCurrent.set(tmpCapCurrent2);
