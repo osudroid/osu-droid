@@ -59,6 +59,11 @@
             android:title="@string/opt_clear_title" />
 
         <Preference
+            android:key="clear_cover_cache"
+            android:summary="@string/opt_clear_cover_cache_summary"
+            android:title="@string/opt_clear_cover_cache_title" />
+
+        <Preference
             android:key="clear_properties"
             android:summary="@string/opt_clearprops_summary"
             android:title="@string/opt_clearprops_title"

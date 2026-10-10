@@ -47,6 +47,7 @@ import com.osudroid.utils.mainThread
 import com.reco1l.framework.asTimeInterpolator
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.CalibrationScene
+import com.osudroid.ui.v2.songselect.BeatmapCoverCache
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference
@@ -502,6 +503,12 @@ class SettingsFragment : SettingsFragment() {
         findPreference<Preference>("clear_beatmap_cache")!!.setOnPreferenceClickListener {
             LibraryManager.clearDatabase()
             ToastLogger.showText(StringTable.get(string.library_cleared), true)
+            true
+        }
+
+        findPreference<Preference>("clear_cover_cache")!!.setOnPreferenceClickListener {
+            BeatmapCoverCache.clear()
+            ToastLogger.showText(R.string.opt_clear_cover_cache_done, true)
             true
         }
 

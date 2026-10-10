@@ -22,4 +22,8 @@
     <string name="opt_fancy_cursor_trail_title">Fancy cursor trail</string>
     <string name="opt_fancy_cursor_trail_summary">Replace the particle cursor trail with a smooth rainbow ribbon trail</string>
 
+    <string name="opt_clear_cover_cache_title">Clear cover cache</string>
+    <string name="opt_clear_cover_cache_summary">Delete cached song select covers. They are recreated when shown</string>
+    <string name="opt_clear_cover_cache_done">Cover cache cleared</string>
+
 </resources>

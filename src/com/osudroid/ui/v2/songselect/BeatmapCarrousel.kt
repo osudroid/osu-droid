@@ -125,11 +125,17 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
                 lastVisible = max(lastVisible, index)
             }
 
-            if (model.coverTexture != null) {
-                val name = model.coverTextureName ?: continue
-                loadedCovers.getOrPut(name) { mutableSetOf() }.add(model)
-            }
+            registerCover(model)
         }
+
+        val keepFrom = max(0, firstVisible - COVER_KEEP_MARGIN)
+        val keepTo = min(data.size - 1, lastVisible + COVER_KEEP_MARGIN)
+
+        for (index in keepFrom..keepTo) {
+            registerCover(data[index])
+        }
+
+        loadCoversAround(firstVisible, lastVisible, keepFrom, keepTo)
 
         val iterator = loadedCovers.entries.iterator()
 
@@ -146,6 +152,44 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
                 models.forEach { it.coverTexture = null }
                 ResourceManager.getInstance().unloadTexture(name)
                 iterator.remove()
+            }
+        }
+    }
+
+
+    private fun registerCover(model: BeatmapSetModel) {
+        if (model.coverTexture != null) {
+            val name = model.coverTextureName ?: return
+            loadedCovers.getOrPut(name) { mutableSetOf() }.add(model)
+        }
+    }
+
+    /**
+     * Starts loading the missing covers between [from] and [to], the ones closest to the middle of the screen first.
+     * Covers just outside the screen are loaded before they become visible.
+     */
+    private fun loadCoversAround(firstVisible: Int, lastVisible: Int, from: Int, to: Int) {
+        if (from > to || isFastScrolling) {
+            return
+        }
+
+        var loading = (from..to).count { data[it].isLoadingCover }
+        val center = (firstVisible + lastVisible) / 2
+
+        for (distance in 0..max(center - from, to - center)) {
+            for (index in intArrayOf(center - distance, center + distance)) {
+                if (loading >= MAX_CONCURRENT_COVER_LOADS) {
+                    return
+                }
+
+                val model = data.getOrNull(index) ?: continue
+
+                if (index < from || index > to || model.coverTexture != null || model.isLoadingCover || model.beatmapSetInfo.beatmaps.isEmpty()) {
+                    continue
+                }
+
+                BeatmapCoverCache.load(model)
+                loading++
             }
         }
     }
@@ -268,6 +312,11 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
          * Number of panels above and below the screen whose covers stay loaded.
          */
         private const val COVER_KEEP_MARGIN = 3
+
+        /**
+         * Covers decoded at the same time, more would compete with the game for the CPU on slow devices.
+         */
+        private const val MAX_CONCURRENT_COVER_LOADS = 2
 
         /**
          * Upper bound of pooled difficulty panels, sets with more difficulties create the rest on demand.

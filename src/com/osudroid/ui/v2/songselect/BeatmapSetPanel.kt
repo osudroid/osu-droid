@@ -1,7 +1,5 @@
 package com.osudroid.ui.v2.songselect
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import com.osudroid.data.BeatmapInfo
 import com.reco1l.andengine.*
@@ -15,11 +13,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
-import kotlinx.coroutines.*
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import java.io.File
-import kotlin.math.min
 import kotlin.random.Random
 
 /**
@@ -206,30 +200,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         titleText.text = firstBeatmap?.titleText ?: "Unknown"
         artistText.text = firstBeatmap?.artistText ?: "Unknown"
 
-        // Already loaded covers are shown right away. Missing ones are loaded from onManagedUpdate once the
-        // panel stayed bound for a moment, so fast scrolling does not start a decode and texture upload for
-        // every panel that only flies by.
         cover.textureRegion = data.coverTexture
-        boundTime = 0f
-    }
-
-    /**
-     * Seconds since this panel was bound, used to delay cover loading.
-     */
-    private var boundTime = 0f
-
-    private fun updateCoverLoading(deltaTimeSec: Float) {
-        val data = boundData ?: return
-
-        if (data.coverTexture != null || data.isLoadingCover || data.beatmapSetInfo.beatmaps.isEmpty()) {
-            return
-        }
-
-        boundTime += deltaTimeSec
-
-        if (boundTime >= COVER_LOAD_DELAY && !beatmapCarrousel.isFastScrolling) {
-            loadCover(data)
-        }
     }
 
     override fun onRecycle() {
@@ -248,62 +219,6 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         panelsContainer.alpha = 0f
 
         cover.textureRegion = null
-    }
-
-
-    private fun loadCover(model: BeatmapSetModel) = coverLoadScope.launch {
-        model.isLoadingCover = true
-
-        try {
-            val beatmap = model.beatmapSetInfo.beatmaps[0]
-            val textureName = model.coverTextureName!!
-
-            if (ResourceManager.getInstance().isTextureLoaded(textureName)) {
-                model.coverTexture = ResourceManager.getInstance().getTexture(textureName)
-            } else {
-                if (!coverCacheDirectory.exists()) {
-                    coverCacheDirectory.mkdirs()
-                }
-
-                val cacheFile = File(coverCacheDirectory, "${beatmap.md5}.webp")
-
-                if (!cacheFile.exists()) {
-                    val bitmap = decodeCover(beatmap.backgroundPath)
-
-                    if (bitmap != null) {
-                        // Written to a temporary file first, so a cover is never visible half written. Its name is
-                        // unique because duplicate imports of a set share the same cover and load it at the same time.
-                        val tempFile = File.createTempFile(beatmap.md5, ".tmp", coverCacheDirectory)
-
-                        val compressed = tempFile.outputStream().use { out ->
-                            bitmap.compress(Bitmap.CompressFormat.WEBP, COVER_QUALITY, out)
-                        }
-
-                        if (!compressed || !tempFile.renameTo(cacheFile)) {
-                            tempFile.delete()
-                        }
-                    }
-                }
-
-                if (cacheFile.exists()) {
-                    val texture = ResourceManager.getInstance().loadHighQualityFile(textureName, cacheFile)
-
-                    if (texture != null) {
-                        model.coverTexture = texture
-                    } else {
-                        cacheFile.delete()
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("BeatmapSetPanel", "Failed to load cover for ${model.beatmapSetInfo.directory}", e)
-        }
-
-        model.isLoadingCover = false
-
-        if (boundData == model) {
-            cover.textureRegion = model.coverTexture
-        }
     }
 
 
@@ -348,8 +263,11 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        updateCoverLoading(deltaTimeSec)
-
+        // Covers are loaded and unloaded asynchronously by the carousel.
+        val coverTexture = boundData?.coverTexture
+        if (cover.textureRegion !== coverTexture) {
+            cover.textureRegion = coverTexture
+        }
 
         val accentColor = Theme.current.accentColor
         val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width
@@ -443,54 +361,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     companion object {
 
-        /**
-         * Size of the cached covers, the aspect ratio of a panel at its largest.
-         */
-        private const val COVER_WIDTH = 512
-        private const val COVER_HEIGHT = 80
-        private const val COVER_QUALITY = 80
         private const val COVER_BRIGHTNESS = 0.4f
-
-        /**
-         * How long a panel has to stay bound before its cover is loaded.
-         */
-        private const val COVER_LOAD_DELAY = 0.15f
 
         private val SELECTION_INDICATOR_WIDTH
             get() = 1.25f.rem
-
-        private val coverLoadScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-        private val coverCacheDirectory: File
-            get() = File(GlobalManager.getInstance().mainActivity.cacheDir, "covers")
-
-
-        /**
-         * Decodes the background as a [COVER_WIDTH] x [COVER_HEIGHT] cover. The band in the vertical center
-         * with the cover's aspect ratio, scaled down. Large backgrounds are subsampled while decoding.
-         */
-        private fun decodeCover(path: String): Bitmap? {
-            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeFile(path, bounds)
-
-            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
-                return null
-            }
-
-            var sampleSize = 1
-            while (bounds.outWidth / (sampleSize * 2) >= COVER_WIDTH && bounds.outHeight / (sampleSize * 2) >= COVER_HEIGHT) {
-                sampleSize *= 2
-            }
-
-            val decoded = BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sampleSize }) ?: return null
-
-            // Backgrounds flatter than the cover are cropped at the sides instead, to keep the aspect ratio.
-            val bandWidth = min(decoded.width, decoded.height * COVER_WIDTH / COVER_HEIGHT).coerceAtLeast(1)
-            val bandHeight = min(decoded.height, decoded.width * COVER_HEIGHT / COVER_WIDTH).coerceAtLeast(1)
-            val band = Bitmap.createBitmap(decoded, (decoded.width - bandWidth) / 2, (decoded.height - bandHeight) / 2, bandWidth, bandHeight)
-
-            return Bitmap.createScaledBitmap(band, COVER_WIDTH, COVER_HEIGHT, true)
-        }
     }
 
 }
