@@ -10,11 +10,14 @@ public class DrawLinePath {
 
     public float alpha;
     public float width;
-    Vec2 current, current2;
+    Vec2 current = new Vec2();
+    Vec2 current2 = new Vec2();
     Vec2 startL = new Vec2();
     Vec2 startR = new Vec2();
     Vec2 endL = new Vec2();
     Vec2 endR = new Vec2();
+    Vec2 previousEndL = new Vec2();
+    Vec2 previousEndR = new Vec2();
     Vec2 start = new Vec2();
     Vec2 end = new Vec2();
     Vec2 oth_expand = new Vec2();
@@ -73,22 +76,38 @@ public class DrawLinePath {
 
 
     private void addLineCap(Vec2 org, float theta, float thetaDiff) {
+        Vec2 first = Vec2.atCircle(theta, new Vec2()).zoom(width).add(org);
+        Vec2 last = Vec2.atCircle(theta + thetaDiff, new Vec2()).zoom(width).add(org);
+
+        addLineCap(org, theta, thetaDiff, first, last);
+    }
+
+    /**
+     * Adds a cap from {@code first} to {@code last}, the corners of the adjacent quads. They are passed in instead of
+     * computed again from the angles, since recomputed corners differ in the last float bits. That leaves hairline
+     * gaps between the cap and the quads, which the slider border shows through as single pixels.
+     */
+    private void addLineCap(Vec2 org, float theta, float thetaDiff, Vec2 first, Vec2 last) {
         final float step = FMath.Pi / MAXRES;
 
         float dir = Math.signum(thetaDiff);
         thetaDiff *= dir;
-        int amountPoints = (int) Math.ceil(thetaDiff / step);
+        int amountPoints = Math.max(1, (int) Math.ceil(thetaDiff / step));
 
         if (dir < 0)
             theta += FMath.Pi;
 
-        /* current = org + atCircle(...)*width */
-        current = Vec2.atCircle(theta, current).zoom(width).add(org);
+        current.set(first);
 
         for (int i = 1; i <= amountPoints; i++) {
-            current2 = Vec2.atCircle(theta + dir * Math.min(i * step, thetaDiff), current2)
-                    .zoom(width)
-                    .add(org);
+            if (i == amountPoints) {
+                current2.set(last);
+            } else {
+                current2 = Vec2.atCircle(theta + dir * i * step, current2)
+                        .zoom(width)
+                        .add(org);
+            }
+
             triangles.add(
                     org,
                     current,
@@ -98,7 +117,7 @@ public class DrawLinePath {
         }
     }
 
-    private void addLineQuads(Vec2 ps, Vec2 pe) {
+    private void computeQuadCorners(Vec2 ps, Vec2 pe) {
         oth_expand = Vec2.lineOthNormal(ps, pe, oth_expand).zoom(width);
 
         startL.set(ps);
@@ -111,7 +130,12 @@ public class DrawLinePath {
         endR.minus(oth_expand);
         start = ps;
         end = pe;
+    }
 
+    /**
+     * Adds the quads of the segment whose corners were last computed by {@link #computeQuadCorners}.
+     */
+    private void addLineQuads() {
         triangles.add(
                 start,
                 end,
@@ -193,11 +217,12 @@ public class DrawLinePath {
         segmentQuadStartCount = segmentCount;
 
         float theta = segmentThetas[0];
-        addLineCap(path.get(0), theta + FMath.PiHalf, FMath.Pi);
+        computeQuadCorners(path.get(0), path.get(1));
+        addLineCap(path.get(0), theta + FMath.PiHalf, FMath.Pi, startL, startR);
         segmentQuadStartOffsets[0] = triangles.length;
-        addLineQuads(path.get(0), path.get(1));
+        addLineQuads();
         if (path.size() == 2) {
-            addLineCap(path.get(1), theta - FMath.PiHalf, FMath.Pi);
+            addLineCap(path.get(1), theta - FMath.PiHalf, FMath.Pi, endR, endL);
             return;
         }
         Vec2 nowPoint = path.get(1);
@@ -208,13 +233,28 @@ public class DrawLinePath {
         for (int i = 2; i < max_i; i++) {
             nextPoint = path.get(i);
             nextTheta = segmentThetas[i - 1];
-            addLineCap(nowPoint, preTheta - FMath.PiHalf, nextTheta - preTheta);
+
+            previousEndL.set(endL);
+            previousEndR.set(endR);
+            computeQuadCorners(nowPoint, nextPoint);
+
+            // The cap closes the outer side of the turn. The inner side is closed as well, since the quads only
+            // overlap there as long as the float corners happen to round that way.
+            float thetaDiff = nextTheta - preTheta;
+            if (thetaDiff < 0) {
+                addLineCap(nowPoint, preTheta - FMath.PiHalf, thetaDiff, previousEndL, startL);
+                triangles.add(nowPoint, previousEndR, startR);
+            } else {
+                addLineCap(nowPoint, preTheta - FMath.PiHalf, thetaDiff, previousEndR, startR);
+                triangles.add(nowPoint, previousEndL, startL);
+            }
+
             segmentQuadStartOffsets[i - 1] = triangles.length;
-            addLineQuads(nowPoint, nextPoint);
+            addLineQuads();
             nowPoint = nextPoint;
             preTheta = nextTheta;
         }
-        addLineCap(path.get(max_i - 1), preTheta - FMath.PiHalf, FMath.Pi);
+        addLineCap(path.get(max_i - 1), preTheta - FMath.PiHalf, FMath.Pi, endR, endL);
     }
 
 
