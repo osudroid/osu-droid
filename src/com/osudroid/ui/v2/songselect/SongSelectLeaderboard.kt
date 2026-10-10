@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.songselect
 
 import android.opengl.GLES32
+import com.osudroid.BuildSettings
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
 import com.osudroid.online.IBanchoAPI
@@ -296,7 +297,7 @@ class SongSelectLeaderboard : UILinearContainer() {
                     }
 
                     Global -> {
-                        if (!OnlineManager.getInstance().isStayOnline) {
+                        if (!OnlineManager.getInstance().isStayOnline && !BuildSettings.MOCK_LEADERBOARD) {
                             ensureActive()
                             showMessage("You must be online to view global leaderboard.")
                             return@launch

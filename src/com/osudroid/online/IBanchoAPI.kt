@@ -1,6 +1,10 @@
 package com.osudroid.online
 
 import android.util.Log
+import com.osudroid.BuildSettings
+import com.osudroid.debug.MockLeaderboard
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode
 import com.osudroid.online.model.BeatmapScoreModel
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
@@ -26,6 +30,11 @@ object IBanchoAPI {
      */
     @Throws(OnlineManager.OnlineManagerException::class)
     fun getBeatmapLeaderboard(hash: String): List<BeatmapScoreModel> {
+        if (BuildSettings.MOCK_LEADERBOARD && !OnlineManager.getInstance().isStayOnline) {
+            val rankByPP = Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP
+            return MockLeaderboard.generate(hash, rankByPP)
+        }
+
         val lines = OnlineManager.getInstance().getTop(hash)
         val username = OnlineManager.getInstance().username
         val list = ArrayList<BeatmapScoreModel>(lines.size)
