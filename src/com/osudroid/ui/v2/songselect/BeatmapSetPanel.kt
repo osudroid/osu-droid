@@ -12,6 +12,7 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
 import kotlinx.coroutines.*
@@ -109,7 +110,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     override var applyTheme: ThemeApplier = { theme ->
         buttonBorder.color = theme.accentColor.copy(alpha = 0.3f)
-        coverBackground.color = (theme.accentColor * 0.1f).copy(alpha = 0.5f)
+        // Matches the former 60 % black overlay drawn over a 50 % background box.
+        coverBackground.color = (theme.accentColor * 0.1f * 0.25f).copy(alpha = 0.8f)
     }
 
 
@@ -146,15 +148,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     // Crop draws the texture quad larger than the bounds, so clip the overflow.
                     clipToBounds = true
                     shape = coverBackground
+                    // Darkened by tinting instead of a black overlay box, which would cost an extra draw call.
+                    color = Color4(COVER_BRIGHTNESS, COVER_BRIGHTNESS, COVER_BRIGHTNESS)
                 }
                 +cover
-
-                box {
-                    width = FillParent
-                    height = FillParent
-                    color = Colors.Black.copy(alpha = 0.6f)
-                    cornerRadius = Radius.XL
-                }
 
                 // Strip on the left edge marking the currently selected set.
                 selectionIndicator = container {
@@ -368,6 +365,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         buttonBorder.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.lineWidth, buttonContainerTargetBorderWidth, 0.5f)
 
         selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
+        // Transparent entities are still drawn.
+        selectionIndicator.isVisible = selectionIndicator.alpha > 0f
 
         val panelContainerTargetHeight = if (isExpanded) panelsContainer.contentHeight + panelsContainer.padding.vertical else 0f
         val panelContainerTargetAlpha = if (isExpanded) 1f else 0f
@@ -445,6 +444,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     companion object {
 
         private const val COVER_HEIGHT = 100
+
+        private const val COVER_BRIGHTNESS = 0.4f
 
         /**
          * How long a panel has to stay bound before its cover is loaded.

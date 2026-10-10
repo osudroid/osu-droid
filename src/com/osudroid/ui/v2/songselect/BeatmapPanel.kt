@@ -144,6 +144,7 @@ open class BeatmapPanel : UIContainer() {
         baseWidth = -1f
         arcInset = 0f
         selectionIndicator.alpha = 0f
+        selectionIndicator.isVisible = false
         borderBox.color = Theme.current.accentColor.copy(alpha = 0.3f)
         borderBox.lineWidth = 0.25f.srem
     }
@@ -160,6 +161,8 @@ open class BeatmapPanel : UIContainer() {
         val targetWidth = if (isExpanded) parent.innerWidth else parent.innerWidth - 2f.rem
 
         selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
+        // Transparent entities are still drawn.
+        selectionIndicator.isVisible = selectionIndicator.alpha > 0f
 
         borderBox.color = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderBox.color, targetBorderColor)
         borderBox.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderBox.lineWidth, targetBorderWidth, 0.5f)
