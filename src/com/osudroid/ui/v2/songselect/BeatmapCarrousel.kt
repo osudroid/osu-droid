@@ -19,6 +19,11 @@ class BeatmapSetModel(
     var isLoadingCover: Boolean = false,
 ) {
     /**
+     * Whether the set has no cover to show, e.g. because it has no background. It is not loaded again then.
+     */
+    var isCoverUnavailable = false
+
+    /**
      * The name of the cover texture, duplicate imports of a set share the same cover.
      */
     val coverTextureName: String?
@@ -184,7 +189,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
 
                 val model = data.getOrNull(index) ?: continue
 
-                if (index < from || index > to || model.coverTexture != null || model.isLoadingCover || model.beatmapSetInfo.beatmaps.isEmpty()) {
+                if (index < from || index > to || model.coverTexture != null || model.isLoadingCover || model.isCoverUnavailable || model.beatmapSetInfo.beatmaps.isEmpty()) {
                     continue
                 }
 

@@ -55,7 +55,7 @@ object BeatmapCoverCache {
 
                     val cacheFile = File(directory, "${beatmap.md5}.webp")
 
-                    if (!cacheFile.exists()) {
+                    if (!cacheFile.exists() && beatmap.backgroundFilename != null) {
                         val bitmap = decodeCover(beatmap.backgroundPath)
 
                         if (bitmap != null) {
@@ -87,6 +87,8 @@ object BeatmapCoverCache {
                 Log.e("BeatmapCoverCache", "Failed to load cover for ${model.beatmapSetInfo.directory}", e)
             }
 
+            // Otherwise the carousel would try again every frame.
+            model.isCoverUnavailable = model.coverTexture == null
             model.isLoadingCover = false
         }
     }
