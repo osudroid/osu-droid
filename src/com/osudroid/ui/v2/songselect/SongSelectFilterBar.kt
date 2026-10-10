@@ -9,13 +9,14 @@ import com.reco1l.framework.math.Vec4
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
- * The bar above the [BeatmapCarrousel] holding the filter button and the search input.
+ * The bar above the [BeatmapCarrousel] holding the leaderboard switch button, the filter button and the search input.
  *
- * The search box is collapsed to the filter button's size when unused, and grows with its text when in use.
+ * The search box is collapsed to the filter button's size when unused, and spans the rest of the bar when in use.
  */
-class SongSelectFilterBar : UILinearContainer() {
+class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContainer() {
 
     private val filterButton: UIIconButton
+    private val switchButton = LeaderboardSwitchButton(leaderboard)
     private val searchBox: UIContainer
     private val searchInput: UITextInput
 
@@ -36,6 +37,8 @@ class SongSelectFilterBar : UILinearContainer() {
         // A linear container, the flex container would lock the search box to its content width.
         orientation = Orientation.Horizontal
         spacing = 14f
+
+        +switchButton
 
         filterButton = iconButton {
             icon = ResourceManager.getInstance().getTexture("filters")
@@ -70,7 +73,6 @@ class SongSelectFilterBar : UILinearContainer() {
         }
 
         searchBox = container {
-            height = FillParent
             // No clipping, it would cut off the input's outline.
 
             +searchInput
@@ -88,12 +90,14 @@ class SongSelectFilterBar : UILinearContainer() {
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        // In use: between half and full free width, depending on the text.
+        switchButton.setButtonSize(filterButton.width, filterButton.height)
+        // The switch button grows below the bar when its mode tab is shown, the search box keeps the button height.
+        searchBox.height = filterButton.height
+
         val collapsedWidth = filterButton.width
-        val fullWidth = innerWidth - filterButton.width - spacing
+        val fullWidth = innerWidth - filterButton.width - switchButton.width - spacing * 2f
         val isInUse = searchInput.isFocused || searchInput.value.isNotEmpty()
-        val textWidth = searchInput.textWidth + searchInput.padding.horizontal + TEXT_END_SPACE
-        val targetWidth = if (isInUse) textWidth.coerceIn(maxOf(collapsedWidth, fullWidth / 2f), maxOf(collapsedWidth, fullWidth)) else collapsedWidth
+        val targetWidth = if (isInUse) maxOf(collapsedWidth, fullWidth) else collapsedWidth
 
         if (collapsedWidth > 0f) {
             searchBoxWidth = if (searchBoxWidth < 0f) targetWidth else Interpolation.floatLerpWithSnap(deltaTimeSec, 0.15f, searchBoxWidth, targetWidth, 0.5f)
@@ -103,12 +107,5 @@ class SongSelectFilterBar : UILinearContainer() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
-
-    companion object {
-        /**
-         * Room after the text for the caret.
-         */
-        private const val TEXT_END_SPACE = 8f
-    }
 
 }

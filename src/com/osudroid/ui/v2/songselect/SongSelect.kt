@@ -47,8 +47,8 @@ object SongSelect : UIScene() {
 
     private val beatmapLoadingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val filterBar = SongSelectFilterBar()
     private val leaderboard = SongSelectLeaderboard()
+    private val filterBar = SongSelectFilterBar(leaderboard)
     private val beatmapCarrousel = BeatmapCarrousel()
     private val beatmapInfoWedge = BeatmapInfoWedge()
     private val backgroundSprite: UISprite

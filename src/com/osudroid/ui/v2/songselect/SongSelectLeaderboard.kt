@@ -57,15 +57,6 @@ class SongSelectLeaderboard : UILinearContainer() {
 
     private val overlayContainer = UILinearContainer()
 
-    /**
-     * Shows the active global ranking type (PP or score) inside the global tab.
-     */
-    private val scoringModeText = UIText().apply {
-        font = ResourceManager.getInstance().getFont("xs")
-    }
-
-    private lateinit var globalButton: UITextButton
-
     private lateinit var personalBestContainer: UILinearContainer
     private val personalBestHeader = UIText()
     private val personalBestItem = LeaderboardItem(true)
@@ -87,44 +78,6 @@ class SongSelectLeaderboard : UILinearContainer() {
             8f.srem + 2f.srem, // The shear size
             BOTTOM_BUTTONS_CLEARANCE,
         )
-
-        +UITabSelector().apply {
-            width = FillParent
-            addButton("Local") {
-                leaderboardType = Local
-                updateScoringModeLabel()
-            }
-
-            // Tapping the global tab while it is already active toggles between PP and score ranking.
-            globalButton = addButton("Global") {
-                if (leaderboardType == Global) {
-                    val newMode = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP)
-                        BeatmapLeaderboardScoringMode.SCORE
-                    else
-                        BeatmapLeaderboardScoringMode.PP
-
-                    Config.setBeatmapLeaderboardScoringMode(newMode)
-                    updateScoringModeLabel()
-                    onBeatmapSelected(SongSelect.selectedBeatmap)
-                } else {
-                    leaderboardType = Global
-                    updateScoringModeLabel()
-                }
-            }
-
-            // The mode label lives in the button's foreground: it is not part of the centered button
-            // content, but it scales with the press feedback and sits at a fixed spot on the right.
-            globalButton.foreground = UIContainer().apply {
-                +scoringModeText.apply {
-                    anchor = Anchor.CenterRight
-                    origin = Anchor.CenterRight
-                    x = -3f.srem
-                }
-            }
-            updateScoringModeLabel()
-
-            selectedTab = 0
-        }
 
         container {
             width = FillParent
@@ -182,14 +135,7 @@ class SongSelectLeaderboard : UILinearContainer() {
     }
 
 
-    private fun updateScoringModeLabel() {
-        scoringModeText.text = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) "PP" else "Score"
-    }
-
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        // Follow the (animated) text color of the tab so the label always matches its selection state.
-        scoringModeText.color = globalButton.color
-
         // The score list ends above the docked personal best instead of scrolling underneath it.
         val listArea = scoresContainer.parent as? UIComponent
         if (listArea != null) {
