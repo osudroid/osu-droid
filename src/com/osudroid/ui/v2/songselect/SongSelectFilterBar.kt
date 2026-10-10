@@ -3,6 +3,9 @@ package com.osudroid.ui.v2.songselect
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.*
+import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
@@ -19,6 +22,8 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
     private val switchButton = LeaderboardSwitchButton(leaderboard)
     private val searchBox: UIContainer
     private val searchInput: UITextInput
+    private lateinit var searchIcon: UISprite
+    private lateinit var clearIcon: FontAwesomeIcon
 
     /**
      * The animated search box width, negative until the first layout.
@@ -77,19 +82,46 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
 
             +searchInput
 
-            sprite {
+            // The search icon opens the search, and turns into a clear button while there is text.
+            clickableContainer {
                 width = 52f
-                height = 28f
+                height = FillParent
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
-                textureRegion = ResourceManager.getInstance().getTexture("search-small")
-                applyTheme = { color = it.accentColor }
+                onActionUp = {
+                    if (searchInput.value.isEmpty()) {
+                        searchInput.focus()
+                    } else {
+                        searchInput.value = ""
+                    }
+                }
+
+                searchIcon = sprite {
+                    width = 52f
+                    height = 28f
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    textureRegion = ResourceManager.getInstance().getTexture("search-small")
+                    applyTheme = { color = it.accentColor }
+                }
+
+                clearIcon = FontAwesomeIcon(Icon.Xmark).apply {
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    iconSize = 20f
+                    applyTheme = { color = it.accentColor }
+                }
+                +clearIcon
             }
         }
     }
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        val hasText = searchInput.value.isNotEmpty()
+        searchIcon.isVisible = !hasText
+        clearIcon.isVisible = hasText
+
         switchButton.setButtonSize(filterButton.width, filterButton.height)
         // The switch button grows below the bar when its mode tab is shown, the search box keeps the button height.
         searchBox.height = filterButton.height
