@@ -60,7 +60,7 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
         origin = Anchor.CenterLeft
 
         applyTheme = {
-            color = it.accentColor.copy(alpha = 0.1f)
+            color = it.accentColor.copy(alpha = 0.35f)
         }
     }
 
@@ -102,6 +102,28 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
      * Horizontal text scroll, see [updateTextScroll].
      */
     private var textScrollOffset = 0f
+
+    /**
+     * Start of the current press in milliseconds, or -1 when not pressed.
+     */
+    private var pressStartTime = -1L
+
+    /**
+     * Whether the current press turned into a selection, dragging then extends it and the release must not
+     * move the cursor.
+     */
+    private var isSelecting = false
+
+    /**
+     * The x position of the current press, relative to the start of the text.
+     */
+    private var pressTextX = 0f
+
+    /**
+     * Bounds of the word selected by the long press, the selection always contains it while dragging.
+     */
+    private var selectionWordStart = 0
+    private var selectionWordEnd = 0
 
     /**
      * The width of the entered text, without padding.
@@ -199,6 +221,8 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
             clipToBounds = true
 
             +placeholderEntity
+            // Behind the text, so the selected characters stay readable.
+            +selectionBox
             +textEntity
             +caret
         }
@@ -287,6 +311,17 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        // A long press selects the word under the finger, dragging afterward extends the selection.
+        if (pressStartTime > 0L && System.currentTimeMillis() - pressStartTime >= LONG_PRESS_DURATION) {
+            pressStartTime = -1L
+            isSelecting = true
+
+            if (!isFocused) {
+                focus()
+            }
+            selectWordAt(getPositionAt(pressTextX))
+        }
+
         // The cursor position first, the scroll depends on it and the caret on the scroll.
         if (caret.isVisible) {
             targetCursorPosition = cursorPositions.getOrNull(internalEditText.selectionEnd)?.toFloat() ?: textWidth
@@ -332,32 +367,84 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (event.isActionUp) {
-            if (!isFocused) {
-                focus()
-            } else {
-                val x = localX - padding.left + textScrollOffset
+        pressTextX = localX - padding.left + textScrollOffset
 
-                // Find the closest letter position to the touch
-                var distance = 0f
-                var position = 0
+        when {
+            event.isActionDown -> {
+                pressStartTime = System.currentTimeMillis()
+                isSelecting = false
+            }
 
-                for (i in cursorPositions.indices) {
-                    val letterX = cursorPositions[i].toFloat()
-                    val newDistance = abs(letterX - x)
-
-                    if (newDistance < distance || i == 0) {
-                        distance = newDistance
-                        position = i
-                    }
+            event.isActionMove -> {
+                if (isSelecting) {
+                    updateSelection(getPositionAt(pressTextX))
                 }
+            }
 
-                mainThread {
-                    internalEditText.setSelection(position)
+            event.isActionUp -> {
+                pressStartTime = -1L
+
+                if (isSelecting) {
+                    isSelecting = false
+                } else if (!isFocused) {
+                    focus()
+                } else {
+                    val position = getPositionAt(pressTextX)
+                    mainThread { internalEditText.setSelection(position) }
                 }
             }
         }
         return true
+    }
+
+    /**
+     * Returns the cursor position closest to [x], relative to the start of the text.
+     */
+    private fun getPositionAt(x: Float): Int {
+        var distance = 0f
+        var position = 0
+
+        for (i in cursorPositions.indices) {
+            val newDistance = abs(cursorPositions[i].toFloat() - x)
+
+            if (newDistance < distance || i == 0) {
+                distance = newDistance
+                position = i
+            }
+        }
+
+        return position
+    }
+
+    /**
+     * Selects the word around [position], words are separated by whitespace.
+     */
+    private fun selectWordAt(position: Int) {
+        selectionWordStart = position
+        selectionWordEnd = position
+
+        while (selectionWordStart > 0 && !value[selectionWordStart - 1].isWhitespace()) {
+            selectionWordStart--
+        }
+
+        while (selectionWordEnd < value.length && !value[selectionWordEnd].isWhitespace()) {
+            selectionWordEnd++
+        }
+
+        updateSelection(position)
+    }
+
+    /**
+     * Selects from the long pressed word to [position], in either direction.
+     */
+    private fun updateSelection(position: Int) {
+        val start = minOf(selectionWordStart, position)
+        val end = maxOf(selectionWordEnd, position)
+
+        mainThread {
+            val length = internalEditText.text?.length ?: 0
+            internalEditText.setSelection(start.coerceIn(0, length), end.coerceIn(0, length))
+        }
     }
 
 
@@ -432,6 +519,24 @@ open class UITextInput(initialValue: String) : UIControl<String>(initialValue), 
     override fun onValueChanged() {
         super.onValueChanged()
         updateVisuals()
+
+        // A value set from outside while focused, the hidden EditText would otherwise restore its old text.
+        if (isFocused) {
+            mainThread {
+                if (internalEditText.text?.toString() != value) {
+                    internalEditText.setText(value, TextView.BufferType.EDITABLE)
+                    internalEditText.setSelection(value.length)
+                }
+            }
+        }
+    }
+
+
+    companion object {
+        /**
+         * How long a press has to last to select the word under it, the same as the long press of buttons.
+         */
+        private const val LONG_PRESS_DURATION = 500L
     }
 
 }
