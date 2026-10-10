@@ -19,7 +19,6 @@ import org.andengine.util.debug.Debug;
 import android.graphics.Bitmap;
 import android.opengl.GLES32;
 import android.opengl.GLUtils;
-import android.opengl.Matrix;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -629,8 +628,30 @@ public class GLState {
 	}
 
 	public float[] getModelViewProjectionGLMatrix() {
-		Matrix.multiplyMM(this.mModelViewProjectionGLMatrix, 0, this.mProjectionGLMatrixStack.mMatrixStack, this.mProjectionGLMatrixStack.mMatrixStackOffset, this.mModelViewGLMatrixStack.mMatrixStack, this.mModelViewGLMatrixStack.mMatrixStackOffset);
-		return this.mModelViewProjectionGLMatrix;
+		// Multiplied in Java instead of android.opengl.Matrix.multiplyMM, this runs for every draw call and the JNI
+		// overhead of multiplyMM is far larger than the multiplication itself.
+		final float[] result = this.mModelViewProjectionGLMatrix;
+		final float[] lhs = this.mProjectionGLMatrixStack.mMatrixStack;
+		final int lhsOffset = this.mProjectionGLMatrixStack.mMatrixStackOffset;
+		final float[] rhs = this.mModelViewGLMatrixStack.mMatrixStack;
+		final int rhsOffset = this.mModelViewGLMatrixStack.mMatrixStackOffset;
+
+		// Column-major, same as android.opengl.Matrix.multiplyMM: result = lhs * rhs.
+		for (int column = 0; column < 4; column++) {
+			final float r0 = rhs[rhsOffset + column * 4];
+			final float r1 = rhs[rhsOffset + column * 4 + 1];
+			final float r2 = rhs[rhsOffset + column * 4 + 2];
+			final float r3 = rhs[rhsOffset + column * 4 + 3];
+
+			for (int row = 0; row < 4; row++) {
+				result[column * 4 + row] = lhs[lhsOffset + row] * r0
+					+ lhs[lhsOffset + 4 + row] * r1
+					+ lhs[lhsOffset + 8 + row] * r2
+					+ lhs[lhsOffset + 12 + row] * r3;
+			}
+		}
+
+		return result;
 	}
 
 	public void resetModelViewGLMatrixStack() {
