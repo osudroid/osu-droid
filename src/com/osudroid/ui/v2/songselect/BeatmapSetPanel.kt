@@ -286,12 +286,18 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         // Transparent entities are still drawn.
         selectionIndicator.isVisible = selectionIndicator.alpha > 0f
 
-        val panelContainerTargetHeight = if (isExpanded) panelsContainer.contentHeight + panelsContainer.padding.vertical else 0f
+        val panelContainerTargetHeight = if (isExpanded) panelsContainer.contentHeight else 0f
         val panelContainerTargetAlpha = if (isExpanded) 1f else 0f
 
         panelsContainer.apply {
             height = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, height, panelContainerTargetHeight, 0.5f)
             alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, alpha, panelContainerTargetAlpha, 0.1f)
+
+            // The panels slide out from under the set button as the height animates, instead of being uncovered in place.
+            val slideOffset = height - contentHeight
+            if (padding.top != slideOffset) {
+                padding = Vec4(0f, slideOffset, 0f, 0f)
+            }
         }
 
         isTransitioning = buttonBaseWidth != buttonContainerTargetWidth
@@ -299,6 +305,9 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             || buttonBorder.lineWidth != buttonContainerTargetBorderWidth
             || panelsContainer.height != panelContainerTargetHeight
             || panelsContainer.alpha != panelContainerTargetAlpha
+
+        // While the height animates, the panels would otherwise overflow onto the button and the neighbouring sets.
+        panelsContainer.clipToBounds = isTransitioning
 
         if (!isExpanded && !isTransitioning && panelsContainer.childCount > 0) {
             releasePanels()

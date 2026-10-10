@@ -249,8 +249,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
             val panelsAbsoluteY = component.absoluteY + component.panelsContainer.absoluteY
 
             component.panelsContainer.forEach { panel -> panel as BeatmapPanel
-                // Panels are stacked from the top, their y equals their absolute y.
-                val panelY = panelsAbsoluteY + panel.y
+                val panelY = panelsAbsoluteY + panel.absoluteY
                 val panelHeight = panel.height
                 val panelTop = panelY - scrollY
 
