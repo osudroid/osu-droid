@@ -474,6 +474,10 @@ object SongSelect : UIScene() {
         beatmapCarrousel.applyComponent(model) {
             select(currentBeatmapInfo)
         }
+
+        // The beatmap may already be selected (e.g. when coming back from gameplay), which does not trigger the
+        // scroll to it, while the carousel may have been scrolled away in the meantime.
+        beatmapCarrousel.autoScrollToSelectedPanel = true
     }
 
     override fun onAttached() {
