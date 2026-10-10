@@ -12,6 +12,9 @@ import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.osudroid.utils.calculateRate
 import com.osudroid.utils.updateThread
+import com.edlplan.framework.easing.Easing
+import com.rian.andengine.modifier.ModifierType
+import org.andengine.opengl.texture.region.TextureRegion
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
@@ -93,7 +96,7 @@ object SongSelect : UIScene() {
             height = FillParent
             textureRegion = ResourceManager.getInstance().getTexture("menu-background")
             scaleType = ScaleType.Crop
-            color = color * 0.4f
+            setColor(BACKGROUND_BRIGHTNESS, BACKGROUND_BRIGHTNESS, BACKGROUND_BRIGHTNESS)
         }
 
         flexContainer {
@@ -278,7 +281,7 @@ object SongSelect : UIScene() {
                 val textureRegion = if (Config.isSafeBeatmapBg()) null else ResourceManager.getInstance().loadBackground(beatmapInfo.backgroundPath)
 
                 ensureActive()
-                backgroundSprite.textureRegion = textureRegion ?: ResourceManager.getInstance().getTexture("menu-background")
+                showBackground(textureRegion ?: ResourceManager.getInstance().getTexture("menu-background"))
             }
 
             if (currentSongPath != beatmapInfo.audioPath) {
@@ -434,6 +437,16 @@ object SongSelect : UIScene() {
         return false
     }
 
+    /**
+     * Shows a new background, fading it in from black like the legacy song menu, but faster and eased.
+     */
+    private fun showBackground(textureRegion: TextureRegion?) = updateThread {
+        backgroundSprite.textureRegion = textureRegion
+        backgroundSprite.clearModifiers(ModifierType.Color)
+        backgroundSprite.setColor(0f, 0f, 0f)
+        backgroundSprite.colorTo(BACKGROUND_BRIGHTNESS, BACKGROUND_BRIGHTNESS, BACKGROUND_BRIGHTNESS, BACKGROUND_FADE_DURATION, Easing.OutQuint)
+    }
+
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         // Holding the random button walks back through the previous selections, once per second.
         if (::randomButton.isInitialized && randomButton.isPressed) {
@@ -476,5 +489,12 @@ object SongSelect : UIScene() {
 
     private const val PREVIOUS_SELECTION_LIMIT = 10
     private const val PREVIOUS_SELECTION_INTERVAL = 1f
+
+    private const val BACKGROUND_BRIGHTNESS = 0.4f
+
+    /**
+     * Duration of the background fade-in in seconds.
+     */
+    private const val BACKGROUND_FADE_DURATION = 0.4f
 
 }
