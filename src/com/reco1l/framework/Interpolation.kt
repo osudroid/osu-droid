@@ -76,4 +76,14 @@ object Interpolation {
         return colorAt(deltaTime.coerceIn(0f, duration), start, end, 0f, duration, easing)
     }
 
+    /**
+     * Same as [colorLerp] but snaps to [end] once a step makes no progress anymore. [Color4] stores 8 bits per
+     * channel, so small steps (e.g. at high frame rates) round back to [start] and would never reach [end].
+     */
+    @JvmStatic
+    fun colorLerpWithSnap(deltaTime: Float, duration: Float, start: Color4, end: Color4, easing: Easing = Easing.None): Color4 {
+        val color = colorLerp(deltaTime, duration, start, end, easing)
+        return if (color == start) end else color
+    }
+
 }

@@ -164,7 +164,7 @@ open class BeatmapPanel : UIContainer() {
         // Transparent entities are still drawn.
         selectionIndicator.isVisible = selectionIndicator.alpha > 0f
 
-        borderBox.color = Interpolation.colorLerp(deltaTimeSec, 0.1f, borderBox.color, targetBorderColor)
+        borderBox.color = Interpolation.colorLerpWithSnap(deltaTimeSec, 0.1f, borderBox.color, targetBorderColor)
         borderBox.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderBox.lineWidth, targetBorderWidth, 0.5f)
         if (baseWidth < 0f) {
             baseWidth = targetWidth

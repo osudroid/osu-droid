@@ -279,7 +279,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         }
         buttonBaseWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBaseWidth, buttonContainerTargetWidth, 0.5f)
         button.width = buttonBaseWidth - arcInset
-        buttonBorder.color = Interpolation.colorLerp(deltaTimeSec, 0.1f, buttonBorder.color, buttonContainerTargetBorderColor)
+        buttonBorder.color = Interpolation.colorLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.color, buttonContainerTargetBorderColor)
         buttonBorder.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.lineWidth, buttonContainerTargetBorderWidth, 0.5f)
 
         selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
