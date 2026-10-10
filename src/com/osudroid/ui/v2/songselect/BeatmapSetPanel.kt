@@ -268,7 +268,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                 val cacheFile = File(coverCacheDirectory, "${beatmap.md5}.webp")
 
                 if (!cacheFile.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(beatmap.backgroundPath)?.cropInCenter(COVER_HEIGHT)
+                    val bitmap = decodeCover(beatmap.backgroundPath)
 
                     if (bitmap != null) {
                         // Written to a temporary file first, so a cover is never visible half written. Its name is
@@ -276,7 +276,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                         val tempFile = File.createTempFile(beatmap.md5, ".tmp", coverCacheDirectory)
 
                         val compressed = tempFile.outputStream().use { out ->
-                            bitmap.compress(Bitmap.CompressFormat.WEBP, 10, out)
+                            bitmap.compress(Bitmap.CompressFormat.WEBP, COVER_QUALITY, out)
                         }
 
                         if (!compressed || !tempFile.renameTo(cacheFile)) {
@@ -443,8 +443,12 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     companion object {
 
-        private const val COVER_HEIGHT = 100
-
+        /**
+         * Size of the cached covers, the aspect ratio of a panel at its largest.
+         */
+        private const val COVER_WIDTH = 512
+        private const val COVER_HEIGHT = 80
+        private const val COVER_QUALITY = 80
         private const val COVER_BRIGHTNESS = 0.4f
 
         /**
@@ -462,11 +466,30 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
         /**
-         * Crops a horizontal band of [bandHeight] pixels from the vertical center of the bitmap, keeping the full width.
+         * Decodes the background as a [COVER_WIDTH] x [COVER_HEIGHT] cover. The band in the vertical center
+         * with the cover's aspect ratio, scaled down. Large backgrounds are subsampled while decoding.
          */
-        private fun Bitmap.cropInCenter(bandHeight: Int): Bitmap {
-            val croppedHeight = min(bandHeight, height)
-            return Bitmap.createBitmap(this, 0, (height - croppedHeight) / 2, width, croppedHeight)
+        private fun decodeCover(path: String): Bitmap? {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(path, bounds)
+
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+                return null
+            }
+
+            var sampleSize = 1
+            while (bounds.outWidth / (sampleSize * 2) >= COVER_WIDTH && bounds.outHeight / (sampleSize * 2) >= COVER_HEIGHT) {
+                sampleSize *= 2
+            }
+
+            val decoded = BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sampleSize }) ?: return null
+
+            // Backgrounds flatter than the cover are cropped at the sides instead, to keep the aspect ratio.
+            val bandWidth = min(decoded.width, decoded.height * COVER_WIDTH / COVER_HEIGHT).coerceAtLeast(1)
+            val bandHeight = min(decoded.height, decoded.width * COVER_HEIGHT / COVER_WIDTH).coerceAtLeast(1)
+            val band = Bitmap.createBitmap(decoded, (decoded.width - bandWidth) / 2, (decoded.height - bandHeight) / 2, bandWidth, bandHeight)
+
+            return Bitmap.createScaledBitmap(band, COVER_WIDTH, COVER_HEIGHT, true)
         }
     }
 
