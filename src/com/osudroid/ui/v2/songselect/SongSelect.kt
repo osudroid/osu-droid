@@ -109,6 +109,7 @@ object SongSelect : UIScene() {
                 height = FillParent
                 orientation = Orientation.Vertical
                 spacing = 2f.srem
+                padding = Vec4(4f.srem, 4f.srem, 4f.srem, 0f)
                 flexRules {
                     grow = 1f
                     basis = 0f

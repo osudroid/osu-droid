@@ -73,12 +73,7 @@ class SongSelectLeaderboard : UILinearContainer() {
         width = FillParent
         orientation = Orientation.Vertical
         spacing = 2f.srem
-        padding = Vec4(
-            4f.srem,
-            0f,
-            8f.srem + 2f.srem, // The shear size
-            BOTTOM_BUTTONS_CLEARANCE,
-        )
+        padding = Vec4(0f, 0f, 0f, BOTTOM_BUTTONS_CLEARANCE)
 
         container {
             width = FillParent

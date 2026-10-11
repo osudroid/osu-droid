@@ -59,18 +59,16 @@ class BeatmapInfoWedge : UIContainer() {
 
     init {
         width = FillParent
-        translationX = -2f
-        translationY = -2f
 
-        // The wedge shapes are background/foreground so they take the container's size without
+        // The shapes are background/foreground so they take the container's size without
         // being part of the content measurement (a FillParent child would keep the container from shrinking).
-        background = UIWedge().apply {
+        background = UIBox().apply {
             alpha = 0.75f
             cornerRadius = 0.75f.rem
             applyTheme = { color = it.accentColor * 0.1f }
         }
 
-        foreground = UIWedge().apply {
+        foreground = UIBox().apply {
             paintStyle = PaintStyle.Outline
             lineWidth = 2f
             cornerRadius = 0.75f.rem
@@ -80,7 +78,7 @@ class BeatmapInfoWedge : UIContainer() {
         linearContainer {
             width = FillParent
             orientation = Orientation.Vertical
-            padding = Vec4(4f.srem, 3f.srem, 6f.srem, 3f.srem)
+            padding = Vec4(3f.srem)
             spacing = 1f.srem
 
             flexContainer {
