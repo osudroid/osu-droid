@@ -125,7 +125,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                 +personalBestHeader.apply {
                     text = "Personal Best"
-                    font = ResourceManager.getInstance().getFont("xs")
+                    font = ResourceManager.getInstance().getFont("torusBoldSmall")
                     applyTheme = { color = it.accentColor * 0.8f }
                 }
 
@@ -383,7 +383,7 @@ class SongSelectLeaderboard : UILinearContainer() {
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
                         alignment = Anchor.Center
-                        font = ResourceManager.getInstance().getFont("xs")
+                        font = ResourceManager.getInstance().getFont("torusBold")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
                     cursorX += RANK_WIDTH + GAP
@@ -433,7 +433,7 @@ class SongSelectLeaderboard : UILinearContainer() {
                         +modsText.apply {
                             width = FillParent
                             clipToBounds = true
-                            font = ResourceManager.getInstance().getFont("xs")
+                            font = ResourceManager.getInstance().getFont("torusBoldSmall")
                             applyTheme = { color = it.accentColor * 0.8f }
                         }
                     }
@@ -491,12 +491,12 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                 text {
                     text = label
-                    font = ResourceManager.getInstance().getFont("xs")
-                    applyTheme = { color = it.accentColor * 0.7f }
+                    font = ResourceManager.getInstance().getFont("torusBoldSmall")
+                    applyTheme = { color = it.accentColor * 0.8f }
                 }
 
                 +valueText.apply {
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    font = ResourceManager.getInstance().getFont("torusBold")
                     applyTheme = { color = it.accentColor }
                 }
             }
@@ -573,7 +573,7 @@ class SongSelectLeaderboard : UILinearContainer() {
         /**
          * Keeps the list and the docked personal best clear of the Back/Mods/Random buttons.
          */
-        private val BOTTOM_BUTTONS_CLEARANCE get() = 4.5f.rem
+        private val BOTTOM_BUTTONS_CLEARANCE get() = 5.25f.rem
     }
 
 }
