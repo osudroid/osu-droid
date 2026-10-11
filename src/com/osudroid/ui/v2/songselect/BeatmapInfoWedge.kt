@@ -43,9 +43,9 @@ class BeatmapInfoWedge : UIContainer() {
     private lateinit var odText: UILabeledBadge
     private lateinit var hpText: UILabeledBadge
 
-    private lateinit var circlesBadge: UILabeledBadge
-    private lateinit var slidersBadge: UILabeledBadge
-    private lateinit var spinnersBadge: UILabeledBadge
+    private lateinit var circlesText: UIText
+    private lateinit var slidersText: UIText
+    private lateinit var spinnersText: UIText
 
     private lateinit var starsText: StarRatingBadge
 
@@ -118,37 +118,44 @@ class BeatmapInfoWedge : UIContainer() {
                 +starsText
             }
 
-            // Length, BPM and the object counts in one row, the difficulty values below.
+            // Length and BPM right below the title, the object counts set apart from them by a wider gap.
+            // The difficulty values have a row of their own.
             linearContainer {
                 orientation = Orientation.Horizontal
-                spacing = 1f.srem
+                spacing = 8f.srem
 
-                lengthText = badge {
-                    leadingIcon = FontAwesomeIcon(Icon.Clock)
-                    text = "00:00"
-                    sizeVariant = SizeVariant.Small
+                linearContainer {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    spacing = 4f.srem
+
+                    lengthText = compoundText {
+                        leadingIcon = FontAwesomeIcon(Icon.Clock).apply { iconSize = STAT_ICON_SIZE }
+                        autoSizeLeadingIcon = Axes.None
+                        text = "00:00"
+                        font = ResourceManager.getInstance().getFont("torusBoldSm")
+                        spacing = 1f.srem
+                    }
+
+                    bpmText = compoundText {
+                        leadingIcon = FontAwesomeIcon(Icon.HeartPulse).apply { iconSize = STAT_ICON_SIZE }
+                        autoSizeLeadingIcon = Axes.None
+                        text = "0"
+                        font = ResourceManager.getInstance().getFont("torusBoldSm")
+                        spacing = 1f.srem
+                    }
                 }
 
-                bpmText = badge {
-                    leadingIcon = FontAwesomeIcon(Icon.HeartPulse)
-                    text = "0"
-                    sizeVariant = SizeVariant.Small
-                }
+                linearContainer {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    spacing = 3f.srem
 
-                circlesBadge = labeledBadge {
-                    label = "Circles"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
-                }
-                slidersBadge = labeledBadge {
-                    label = "Sliders"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
-                }
-                spinnersBadge = labeledBadge {
-                    label = "Spinners"
-                    value = "0"
-                    sizeVariant = SizeVariant.Small
+                    circlesText = objectCount("Circles")
+                    slidersText = objectCount("Sliders")
+                    spinnersText = objectCount("Spinners")
                 }
             }
 
@@ -156,35 +163,55 @@ class BeatmapInfoWedge : UIContainer() {
                 orientation = Orientation.Horizontal
                 spacing = 1f.srem
 
-                arText = labeledBadge {
-                    label = "AR"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                odText = labeledBadge {
-                    label = "OD"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                csText = labeledBadge {
-                    label = "CS"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-                hpText = labeledBadge {
-                    label = "HP"
-                    value = "00.0"
-                    sizeVariant = SizeVariant.Small
-                }
-
-                lengthText.useStatisticColor(background = true)
-                bpmText.useStatisticColor(background = true)
-                for (badge in listOf(arText, odText, csText, hpText)) {
-                    badge.valueEntity.useStatisticColor(background = false)
-                }
+                arText = difficultyBadge("AR")
+                odText = difficultyBadge("OD")
+                csText = difficultyBadge("CS")
+                hpText = difficultyBadge("HP")
             }
         }
 
+        lengthText.useStatisticColor()
+        bpmText.useStatisticColor()
+        for (badge in listOf(arText, odText, csText, hpText)) {
+            badge.valueEntity.useStatisticColor()
+        }
+    }
+
+
+    private fun UILinearContainer.difficultyBadge(label: String) = labeledBadge {
+        this.label = label
+        value = "00.0"
+        sizeVariant = SizeVariant.Small
+    }
+
+    /**
+     * Adds an object count as a plain label and value, without the badge background of the difficulty values.
+     */
+    private fun UILinearContainer.objectCount(label: String): UIText {
+        lateinit var valueText: UIText
+
+        linearContainer {
+            orientation = Orientation.Horizontal
+            spacing = 2f.srem
+
+            text {
+                text = label
+                font = ResourceManager.getInstance().getFont("torusBoldSm")
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                applyTheme = { color = it.accentColor * 0.7f }
+            }
+
+            valueText = text {
+                text = "0"
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                font = ResourceManager.getInstance().getFont("torusBoldSm")
+                applyTheme = { color = it.accentColor }
+            }
+        }
+
+        return valueText
     }
 
 
@@ -192,9 +219,9 @@ class BeatmapInfoWedge : UIContainer() {
         titleText.text = beatmapInfo?.titleText ?: "No selected beatmap"
         artistText.text = beatmapInfo?.artistText ?: "Unknown"
         versionText.text = beatmapInfo?.version ?: "Unknown"
-        circlesBadge.value = beatmapInfo?.hitCircleCount?.toString() ?: "0"
-        slidersBadge.value = beatmapInfo?.sliderCount?.toString() ?: "0"
-        spinnersBadge.value = beatmapInfo?.spinnerCount?.toString() ?: "0"
+        circlesText.text = beatmapInfo?.hitCircleCount?.toString() ?: "0"
+        slidersText.text = beatmapInfo?.sliderCount?.toString() ?: "0"
+        spinnersText.text = beatmapInfo?.spinnerCount?.toString() ?: "0"
 
         setDifficultyStatistics(beatmapInfo)
     }
@@ -293,16 +320,11 @@ class BeatmapInfoWedge : UIContainer() {
 
     /**
      * Makes the component take its color from [statisticColors], falling back to the theme's accent color.
-     * Used for the values of labeled badges and for the length/BPM badges.
+     * Used for the values of the difficulty badges and for the length and BPM.
      */
-    private fun UIComponent.useStatisticColor(background: Boolean) {
+    private fun UIComponent.useStatisticColor() {
         inheritAncestorsColor = false
-        applyTheme = { theme ->
-            color = statisticColors[this] ?: theme.accentColor
-            if (background) {
-                this.background?.color = theme.accentColor * 0.15f
-            }
-        }
+        applyTheme = { theme -> color = statisticColors[this] ?: theme.accentColor }
     }
 
     /**
@@ -314,6 +336,11 @@ class BeatmapInfoWedge : UIContainer() {
 
 
     companion object {
+        /**
+         * Smaller than the text, so the filled icons do not outweigh the values next to them.
+         */
+        private const val STAT_ICON_SIZE = 15f
+
         private val HARDER_COLOR = Color4(205, 85, 85)
         private val EASIER_COLOR = Color4(46, 139, 87)
         private val DIFFICULTY_ADJUSTED_COLOR = Color4(255, 180, 0)
