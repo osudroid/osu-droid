@@ -555,7 +555,10 @@ class SongSelectLeaderboard : UILinearContainer() {
              * Width to height ratio of the `ranking-*-small` textures.
              */
             private const val MARK_ASPECT_RATIO = 31f / 38f
-            private val RANK_WIDTH get() = 1.75f.rem
+            /**
+             * Fits a four digit rank, the personal best can be ranked far below the listed scores.
+             */
+            private val RANK_WIDTH get() = 3f.rem
             private val NAME_WIDTH get() = 8f.rem
             private val SCORE_WIDTH get() = 8f.rem
             private val GAP get() = 2f.srem
