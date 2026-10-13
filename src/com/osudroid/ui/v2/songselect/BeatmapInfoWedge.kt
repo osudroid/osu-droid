@@ -55,6 +55,7 @@ class BeatmapInfoWedge : UIContainer() {
      */
     private val statisticColors = mutableMapOf<UIComponent, Color4>()
     private lateinit var versionText: UIText
+    private lateinit var creatorText: UIText
 
 
     init {
@@ -107,9 +108,30 @@ class BeatmapInfoWedge : UIContainer() {
                         clipToBounds = true
                     }
 
-                    versionText = text {
-                        text = "Unknown"
-                        applyTheme = { color = it.accentColor * 0.8f }
+                    // The mapper next to the difficulty name, so the name reads as a difficulty.
+                    linearContainer {
+                        orientation = Orientation.Horizontal
+                        width = FillParent
+                        spacing = 1.25f.srem
+                        clipToBounds = true
+
+                        versionText = text {
+                            text = "Unknown"
+                            font = ResourceManager.getInstance().getFont("torusBold")
+                            applyTheme = { color = it.accentColor }
+                        }
+
+                        text {
+                            text = "mapped by"
+                            font = ResourceManager.getInstance().getFont("torusBold")
+                            applyTheme = { color = it.accentColor * 0.6f }
+                        }
+
+                        creatorText = text {
+                            text = "Unknown"
+                            font = ResourceManager.getInstance().getFont("torusBold")
+                            applyTheme = { color = it.accentColor * 0.8f }
+                        }
                     }
                 }
 
@@ -219,6 +241,7 @@ class BeatmapInfoWedge : UIContainer() {
         titleText.text = beatmapInfo?.titleText ?: "No selected beatmap"
         artistText.text = beatmapInfo?.artistText ?: "Unknown"
         versionText.text = beatmapInfo?.version ?: "Unknown"
+        creatorText.text = beatmapInfo?.creator?.takeUnless { it.isEmpty() } ?: "Unknown"
         circlesText.text = beatmapInfo?.hitCircleCount?.toString() ?: "0"
         slidersText.text = beatmapInfo?.sliderCount?.toString() ?: "0"
         spinnersText.text = beatmapInfo?.spinnerCount?.toString() ?: "0"
