@@ -21,10 +21,10 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.andengine.text.FontAwesomeIcon
-import com.reco1l.andengine.theme.Icon
+import com.reco1l.andengine.theme.Colors
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
+import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.Config
@@ -47,6 +47,11 @@ object SongSelect : UIScene() {
     var selectedBeatmap: BeatmapInfo? = null
         private set
 
+
+    /**
+     * The app's accent red, `colorAccent` in colors.xml. Declared before the views, which use it while being created.
+     */
+    private val BACK_BUTTON_COLOR = Color4(243, 115, 115)
 
     private val beatmapLoadingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -91,6 +96,7 @@ object SongSelect : UIScene() {
 
 
     init {
+        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
         ResourceManager.getInstance().loadHighQualityAsset("mods", "mods.png")
         ResourceManager.getInstance().loadHighQualityAsset("random", "random.png")
 
@@ -143,11 +149,21 @@ object SongSelect : UIScene() {
             padding = Vec4(2f.srem, 4f.srem)
             spacing = 2f.srem
 
+            // Unlike Mods and Random it leaves the song select, so it stands out in the app's accent red.
             textButton {
                 text = "Back"
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                leadingIcon = FontAwesomeIcon(Icon.ArrowLeft)
+                // Same arrow as in the mod menu.
+                leadingIcon = UISprite().apply {
+                    textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                    width = 28f
+                    height = 28f
+                }
+                applyTheme = {
+                    background?.color = BACK_BUTTON_COLOR
+                    color = Colors.White
+                }
 
                 onActionUp = {
                     GlobalManager.getInstance().mainMenuV2.show()

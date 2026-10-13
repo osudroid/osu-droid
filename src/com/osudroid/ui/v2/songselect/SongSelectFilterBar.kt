@@ -45,8 +45,10 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
 
         +switchButton
 
+        // Square, the other buttons of the bar take its size.
         filterButton = iconButton {
             icon = ResourceManager.getInstance().getTexture("filters")
+            padding = Vec4(16f)
         }
 
         searchInput = object : UITextInput("") {
