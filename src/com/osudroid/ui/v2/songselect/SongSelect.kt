@@ -1,6 +1,7 @@
 package com.osudroid.ui.v2.songselect
 
 import android.util.Log
+import android.view.RoundedCorner
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.BeatmapInfo
@@ -10,6 +11,7 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDiff
 import com.osudroid.mods.ModNightCore
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
+import com.osudroid.utils.DisplayCorners
 import com.osudroid.utils.calculateRate
 import com.osudroid.utils.updateThread
 import com.edlplan.framework.easing.Easing
@@ -31,6 +33,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.sqrt
 
 
 /**
@@ -109,7 +112,8 @@ object SongSelect : UIScene() {
                 height = FillParent
                 orientation = Orientation.Vertical
                 spacing = 2f.srem
-                padding = Vec4(4f.srem, 4f.srem, 4f.srem, 0f)
+                val cornerMargin = topLeftCornerMargin()
+                padding = Vec4(cornerMargin, cornerMargin, 4f.srem, 0f)
                 flexRules {
                     grow = 1f
                     basis = 0f
@@ -489,6 +493,20 @@ object SongSelect : UIScene() {
             currentBackgroundPath = null
             selectCurrentBeatmap()
         }
+    }
+
+
+    /**
+     * The margin of the info card from the top left screen edges. Larger on displays with a large rounded
+     * corner, so the card and its text are not cut off by it.
+     */
+    private fun topLeftCornerMargin(): Float {
+        val radius = DisplayCorners.getRadius(RoundedCorner.POSITION_TOP_LEFT)
+
+        // The card's rounded corner stays inside the display's rounded corner when the distance between
+        // both corner centers plus the card's radius does not exceed the display's radius.
+        val cardRadius = BeatmapInfoWedge.CORNER_RADIUS
+        return maxOf(4f.srem, (radius - cardRadius) * (1f - 1f / sqrt(2f)))
     }
 
 

@@ -65,14 +65,14 @@ class BeatmapInfoWedge : UIContainer() {
         // being part of the content measurement (a FillParent child would keep the container from shrinking).
         background = UIBox().apply {
             alpha = 0.75f
-            cornerRadius = 0.75f.rem
+            cornerRadius = CORNER_RADIUS
             applyTheme = { color = it.accentColor * 0.1f }
         }
 
         foreground = UIBox().apply {
             paintStyle = PaintStyle.Outline
             lineWidth = 2f
-            cornerRadius = 0.75f.rem
+            cornerRadius = CORNER_RADIUS
             applyTheme = { color = it.accentColor * 0.2f }
         }
 
@@ -359,6 +359,9 @@ class BeatmapInfoWedge : UIContainer() {
 
 
     companion object {
+        val CORNER_RADIUS
+            get() = 0.75f.rem
+
         /**
          * Smaller than the text, so the filled icons do not outweigh the values next to them.
          */
