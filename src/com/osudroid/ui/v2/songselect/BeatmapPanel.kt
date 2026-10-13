@@ -52,22 +52,37 @@ open class BeatmapPanel : UIContainer() {
 
     private val selectionIndicator: UIContainer
     private lateinit var versionText: UIText
+    private lateinit var creatorText: UIText
     private lateinit var starRatingBadge: StarRatingBadge
     private lateinit var difficultyStars: DifficultyStars
 
+    /**
+     * Moved aside by the selection strip, like the cover of a [BeatmapSetPanel].
+     */
     private val backgroundBox = UIBox().apply {
         cornerRadius = Radius.XL
+        height = FillParent
     }
 
     private val borderBox = UIBox().apply {
         cornerRadius = Radius.XL
         paintStyle = PaintStyle.Outline
-        lineWidth = 0.25f.srem
+        lineWidth = BeatmapSetPanel.BORDER_WIDTH
     }
+
+    /**
+     * Animated from 0 to 1 while the difficulty gets selected, drives the selection strip and the background.
+     */
+    private var selectionProgress = 0f
+
+    /**
+     * Selection progress of the current background color, negative to force an update.
+     */
+    private var backgroundSelection = -1f
 
 
     override var applyTheme: ThemeApplier = { theme ->
-        backgroundBox.color = (theme.accentColor * 0.1f).copy(alpha = 0.6f)
+        backgroundSelection = -1f
         borderBox.color = theme.accentColor.copy(alpha = 0.3f)
     }
 
@@ -77,12 +92,11 @@ open class BeatmapPanel : UIContainer() {
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
         cullingMode = CullingMode.CameraBounds
-        background = backgroundBox
         foreground = borderBox
 
-        // Strip on the left edge marking the currently selected difficulty.
+        // Accent fill, uncovered as a strip on the left edge when selected.
         selectionIndicator = container {
-            width = SELECTION_INDICATOR_WIDTH
+            width = FillParent
             height = FillParent
             alpha = 0f
             background = UIBox().apply {
@@ -90,22 +104,45 @@ open class BeatmapPanel : UIContainer() {
                 applyTheme = { color = it.accentColor }
             }
 
-            +FontAwesomeIcon(Icon.CaretRight).apply {
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                iconSize = 10f
-                color = Colors.Black
+            container {
+                width = SELECTION_INDICATOR_WIDTH
+                height = FillParent
+
+                +FontAwesomeIcon(Icon.CaretRight).apply {
+                    anchor = Anchor.Center
+                    origin = Anchor.Center
+                    iconSize = 10f
+                    color = Colors.Black
+                }
             }
         }
+
+        +backgroundBox
 
         linearContainer {
             orientation = Orientation.Vertical
             padding = Vec4(SELECTION_INDICATOR_WIDTH + 4f.srem, 2f.srem, 4f.srem, 2f.srem)
             spacing = 0.5f.srem
 
-            versionText = text {
-                font = ResourceManager.getInstance().getFont("torusBold")
-                applyTheme = { color = it.accentColor }
+            linearContainer {
+                orientation = Orientation.Horizontal
+                spacing = 1.25f.srem
+
+                versionText = text {
+                    font = ResourceManager.getInstance().getFont("torusBold")
+                    applyTheme = { color = it.accentColor }
+                }
+
+                text {
+                    text = "mapped by"
+                    font = ResourceManager.getInstance().getFont("torusBold")
+                    applyTheme = { color = it.accentColor * 0.6f }
+                }
+
+                creatorText = text {
+                    font = ResourceManager.getInstance().getFont("torusBold")
+                    applyTheme = { color = it.accentColor * 0.8f }
+                }
             }
 
             linearContainer {
@@ -135,6 +172,7 @@ open class BeatmapPanel : UIContainer() {
         this.beatmapInfo = beatmapInfo
 
         versionText.text = beatmapInfo.version
+        creatorText.text = beatmapInfo.creator.takeUnless { it.isEmpty() } ?: "Unknown"
         starRatingBadge.rating = beatmapInfo.getStarRating().toDouble()
         starRatingBadge.applyColorsInstantly()
         difficultyStars.rating = beatmapInfo.getStarRating()
@@ -143,10 +181,11 @@ open class BeatmapPanel : UIContainer() {
         isOnScreen = true
         baseWidth = -1f
         arcInset = 0f
+        selectionProgress = 0f
         selectionIndicator.alpha = 0f
         selectionIndicator.isVisible = false
         borderBox.color = Theme.current.accentColor.copy(alpha = 0.3f)
-        borderBox.lineWidth = 0.25f.srem
+        borderBox.lineWidth = BeatmapSetPanel.BORDER_WIDTH
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -157,12 +196,21 @@ open class BeatmapPanel : UIContainer() {
 
         val accentColor = Theme.current.accentColor
         val targetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
-        val targetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
+        val targetBorderWidth = if (isExpanded) BeatmapSetPanel.SELECTED_BORDER_WIDTH else BeatmapSetPanel.BORDER_WIDTH
         val targetWidth = if (isExpanded) parent.innerWidth else parent.innerWidth - 2f.rem
 
-        selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
+        selectionProgress = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionProgress, if (isExpanded) 1f else 0f, 0.05f)
+        selectionIndicator.alpha = selectionProgress
         // Transparent entities are still drawn.
-        selectionIndicator.isVisible = selectionIndicator.alpha > 0f
+        selectionIndicator.isVisible = selectionProgress > 0f
+
+        // Brighter when selected, and opaque so the accent fill doesn't shine through.
+        if (backgroundSelection != selectionProgress) {
+            backgroundSelection = selectionProgress
+            val brightness = BACKGROUND_BRIGHTNESS + (SELECTED_BACKGROUND_BRIGHTNESS - BACKGROUND_BRIGHTNESS) * selectionProgress
+            val alpha = BACKGROUND_ALPHA + (1f - BACKGROUND_ALPHA) * selectionProgress
+            backgroundBox.color = (accentColor * brightness).copy(alpha = alpha)
+        }
 
         borderBox.color = Interpolation.colorLerpWithSnap(deltaTimeSec, 0.1f, borderBox.color, targetBorderColor)
         borderBox.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, borderBox.lineWidth, targetBorderWidth, 0.5f)
@@ -171,8 +219,19 @@ open class BeatmapPanel : UIContainer() {
         }
         baseWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, baseWidth, targetWidth, 0.5f)
         width = baseWidth - arcInset
+        updateBackgroundBounds()
 
         super.onManagedUpdate(deltaTimeSec)
+    }
+
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        updateBackgroundBounds()
+    }
+
+    private fun updateBackgroundBounds() {
+        backgroundBox.x = SELECTION_INDICATOR_WIDTH * selectionProgress
+        backgroundBox.width = width - backgroundBox.x
     }
 
     /**
@@ -219,6 +278,10 @@ open class BeatmapPanel : UIContainer() {
 
 
     companion object {
+        private const val BACKGROUND_BRIGHTNESS = 0.1f
+        private const val SELECTED_BACKGROUND_BRIGHTNESS = 0.2f
+        private const val BACKGROUND_ALPHA = 0.6f
+
         private val SELECTION_INDICATOR_WIDTH
             get() = .75f.rem
     }

@@ -86,6 +86,13 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     private var arcInset = 0f
 
+    /**
+     * Animated from 0 to 1 while the set gets selected, drives the selection strip, cover inset and brightness.
+     */
+    private var selectionProgress = 0f
+
+    private var coverBrightness = COVER_BRIGHTNESS
+
     private lateinit var cover: UIShapedSprite
     private lateinit var selectionIndicator: UIContainer
     private lateinit var titleText: UIText
@@ -94,7 +101,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     private val buttonBorder = UIBox().apply {
         cornerRadius = Radius.XL
         paintStyle = PaintStyle.Outline
-        lineWidth = 0.25f.srem
+        lineWidth = BORDER_WIDTH
     }
 
     private val coverBackground = UIBox().apply {
@@ -135,9 +142,31 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     }
                 }
 
+                // Accent fill, uncovered as a strip on the left edge when selected.
+                selectionIndicator = container {
+                    width = FillParent
+                    height = FillParent
+                    alpha = 0f
+                    background = UIBox().apply {
+                        cornerRadius = Radius.XL
+                        applyTheme = { color = it.accentColor }
+                    }
+
+                    container {
+                        width = SELECTION_INDICATOR_WIDTH
+                        height = FillParent
+
+                        +FontAwesomeIcon(Icon.ChevronRight).apply {
+                            anchor = Anchor.Center
+                            origin = Anchor.Center
+                            iconSize = 12f
+                            color = Colors.Black
+                        }
+                    }
+                }
+
                 // Shaped sprite so the cover is masked by the rounded background box.
                 cover = UIShapedSprite().apply {
-                    width = FillParent
                     height = FillParent
                     // Crop draws the texture quad larger than the bounds, so clip the overflow.
                     clipToBounds = true
@@ -146,24 +175,6 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     color = Color4(COVER_BRIGHTNESS, COVER_BRIGHTNESS, COVER_BRIGHTNESS)
                 }
                 +cover
-
-                // Strip on the left edge marking the currently selected set.
-                selectionIndicator = container {
-                    width = SELECTION_INDICATOR_WIDTH
-                    height = FillParent
-                    alpha = 0f
-                    background = UIBox().apply {
-                        cornerRadius = Radius.XL
-                        applyTheme = { color = it.accentColor }
-                    }
-
-                    +FontAwesomeIcon(Icon.ChevronRight).apply {
-                        anchor = Anchor.Center
-                        origin = Anchor.Center
-                        iconSize = 12f
-                        color = Colors.Black
-                    }
-                }
 
                 linearContainer {
                     orientation = Orientation.Vertical
@@ -178,6 +189,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
                     artistText = text {
                         text = "Unknown"
+                        font = ResourceManager.getInstance().getFont("torusBold")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
                 }
@@ -272,7 +284,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         val accentColor = Theme.current.accentColor
         val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width
         val buttonContainerTargetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
-        val buttonContainerTargetBorderWidth = if (isExpanded) 0.5f.srem else 0.25f.srem
+        val buttonContainerTargetBorderWidth = if (isExpanded) SELECTED_BORDER_WIDTH else BORDER_WIDTH
 
         if (buttonBaseWidth < 0f) {
             buttonBaseWidth = buttonContainerTargetWidth
@@ -282,9 +294,21 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         buttonBorder.color = Interpolation.colorLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.color, buttonContainerTargetBorderColor)
         buttonBorder.lineWidth = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, buttonBorder.lineWidth, buttonContainerTargetBorderWidth, 0.5f)
 
-        selectionIndicator.alpha = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionIndicator.alpha, if (isExpanded) 1f else 0f, 0.05f)
+        selectionProgress = Interpolation.floatLerpWithSnap(deltaTimeSec, 0.1f, selectionProgress, if (isExpanded) 1f else 0f, 0.05f)
+        selectionIndicator.alpha = selectionProgress
         // Transparent entities are still drawn.
-        selectionIndicator.isVisible = selectionIndicator.alpha > 0f
+        selectionIndicator.isVisible = selectionProgress > 0f
+
+        val coverInset = SELECTION_INDICATOR_WIDTH * selectionProgress
+        cover.x = coverInset
+        cover.width = button.width - coverInset
+
+        // Brighter when selected.
+        val brightness = COVER_BRIGHTNESS + (SELECTED_COVER_BRIGHTNESS - COVER_BRIGHTNESS) * selectionProgress
+        if (coverBrightness != brightness) {
+            coverBrightness = brightness
+            cover.color = Color4(brightness, brightness, brightness)
+        }
 
         val panelContainerTargetHeight = if (isExpanded) panelsContainer.contentHeight else 0f
         val panelContainerTargetAlpha = if (isExpanded) 1f else 0f
@@ -371,6 +395,13 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     companion object {
 
         private const val COVER_BRIGHTNESS = 0.4f
+        private const val SELECTED_COVER_BRIGHTNESS = 0.5f
+
+        val BORDER_WIDTH
+            get() = 0.5f.srem
+
+        val SELECTED_BORDER_WIDTH
+            get() = 0.75f.srem
 
         private val SELECTION_INDICATOR_WIDTH
             get() = 1.25f.rem
