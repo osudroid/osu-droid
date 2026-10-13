@@ -22,6 +22,7 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
     private val switchButton = LeaderboardSwitchButton(leaderboard)
     private val searchBox: UIContainer
     private val searchInput: UITextInput
+    private lateinit var searchIconButton: UIClickableContainer
     private lateinit var searchIcon: UISprite
     private lateinit var clearIcon: FontAwesomeIcon
 
@@ -38,7 +39,7 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         width = FillParent
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
-        padding = Vec4(32f, 16f)
+        padding = Vec4(16f, 16f, 32f, 16f)
         // A linear container, the flex container would lock the search box to its content width.
         orientation = Orientation.Horizontal
         spacing = 14f
@@ -85,8 +86,8 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
             +searchInput
 
             // The search icon opens the search, and turns into a clear button while there is text.
-            clickableContainer {
-                width = 52f
+            // As wide as the collapsed box, so the icon is centered in it.
+            searchIconButton = clickableContainer {
                 height = FillParent
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
@@ -127,6 +128,7 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         switchButton.setButtonSize(filterButton.width, filterButton.height)
         // The switch button grows below the bar when its mode tab is shown, the search box keeps the button height.
         searchBox.height = filterButton.height
+        searchIconButton.width = filterButton.width
 
         val collapsedWidth = filterButton.width
         val fullWidth = innerWidth - filterButton.width - switchButton.width - spacing * 2f
