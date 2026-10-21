@@ -299,9 +299,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         // Transparent entities are still drawn.
         selectionIndicator.isVisible = selectionProgress > 0f
 
-        val coverInset = SELECTION_INDICATOR_WIDTH * selectionProgress
-        cover.x = coverInset
-        cover.width = button.width - coverInset
+        updateCoverBounds()
 
         // Brighter when selected.
         val brightness = COVER_BRIGHTNESS + (SELECTED_COVER_BRIGHTNESS - COVER_BRIGHTNESS) * selectionProgress
@@ -349,8 +347,15 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
             if (buttonBaseWidth >= 0f) {
                 button.width = buttonBaseWidth - inset
+                // Set while drawing, the cover would otherwise lag a frame behind the button's border.
+                updateCoverBounds()
             }
         }
+    }
+
+    private fun updateCoverBounds() {
+        cover.x = SELECTION_INDICATOR_WIDTH * selectionProgress
+        cover.width = button.width - cover.x
     }
 
     fun expand() {
