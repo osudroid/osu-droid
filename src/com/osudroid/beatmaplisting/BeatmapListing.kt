@@ -162,7 +162,7 @@ class BeatmapListing : BaseFragment(),
                 .setOnSelectListener { value ->
                     value as Int
                     if (value != mirror.ordinal) {
-                        mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+                        mirror = BeatmapMirror.entries[value]
 
                         logoView.text = mirror.description
                         logoView.drawableLeft = requireContext().getDrawable(mirror.logoResource)
