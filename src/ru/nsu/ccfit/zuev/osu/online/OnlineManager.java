@@ -244,28 +244,41 @@ public class OnlineManager {
             return false;
         }
 
+        var filename = beatmap.getFullBeatmapName().trim();
+        var cs = String.valueOf(beatmap.getCircleSize());
+        var ar = String.valueOf(beatmap.getApproachRate());
+        var od = String.valueOf(beatmap.getOverallDifficulty());
+        var hp = String.valueOf(beatmap.getHpDrainRate());
+        var replayFileChecksum = FileUtils.getSHA256Checksum(replayFile);
+
         var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
-        post.addParam("filename", beatmap.getFullBeatmapName().trim());
+        post.addParam("filename", filename);
         post.addParam("hash", beatmap.getMD5());
         post.addParam("data", scoreData);
         post.addParam("version", onlineVersion);
 
-        post.addParam("cs", String.valueOf(beatmap.getCircleSize()));
-        post.addParam("ar", String.valueOf(beatmap.getApproachRate()));
-        post.addParam("od", String.valueOf(beatmap.getOverallDifficulty()));
-        post.addParam("hp", String.valueOf(beatmap.getHpDrainRate()));
-
-        if (!attachAttestationSignature(post, userId + "|" + ssid + "|" + beatmap.getMD5() + "|" + scoreData)) {
-            return false;
-        }
+        post.addParam("cs", cs);
+        post.addParam("ar", ar);
+        post.addParam("od", od);
+        post.addParam("hp", hp);
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
 
         post.addParam("replayFile", replayFile.getName(), replayFileBody);
-        post.addParam("replayFileChecksum", FileUtils.getSHA256Checksum(replayFile));
+        post.addParam("replayFileChecksum", replayFileChecksum);
+
+        // Must match the field order verified by the server in submit.php.
+        var signPayload = String.join("|",
+            String.valueOf(userId), ssid, filename, beatmap.getMD5(), scoreData, onlineVersion,
+            cs, ar, od, hp, replayFileChecksum
+        );
+
+        if (!attachAttestationSignature(post, signPayload)) {
+            return false;
+        }
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -452,6 +465,8 @@ public class OnlineManager {
 
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
+        post.addParam("uid", String.valueOf(userId));
+        post.addParam("ssid", ssid);
 
         if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) {
             post.addParam("type", "pp");
