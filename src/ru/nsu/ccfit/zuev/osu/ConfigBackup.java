@@ -79,7 +79,7 @@ public class ConfigBackup {
                 }
 
                 Object value = json.get(key);
-            
+
                 switch (value.getClass().getSimpleName()) {
                     case "Boolean":
                         editor.putBoolean(key, (Boolean) value);
@@ -101,6 +101,12 @@ public class ConfigBackup {
                         editor.putLong(key, (Long) value);
                         break;
                     default:
+                        // Keys inside PREFERENCE_BOUNDS are expected to be numeric. Writing a String would make every
+                        // later Config.getInt() read on it crash, so skip it instead.
+                        if (Config.PREFERENCE_BOUNDS.containsKey(key)) {
+                            Debug.e("ConfigBackup: skipping \"" + key + "\", expected a number but got " + value.getClass().getSimpleName());
+                            break;
+                        }
                         editor.putString(key, value.toString());
                         break;
                 }

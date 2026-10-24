@@ -10,12 +10,12 @@ import android.widget.TextView
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.drawableLeft
-import com.reco1l.toolkt.android.drawableRight
-import com.reco1l.toolkt.android.layoutHeight
-import com.reco1l.toolkt.android.layoutWidth
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
+import com.reco1l.framework.android.drawableLeft
+import com.reco1l.framework.android.drawableRight
+import com.reco1l.framework.android.layoutHeight
+import com.reco1l.framework.android.layoutWidth
 import ru.nsu.ccfit.zuev.osuplus.R
 
 

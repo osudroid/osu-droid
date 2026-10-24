@@ -50,15 +50,15 @@ import com.osudroid.ui.v2.CalibrationScene
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference
-import com.reco1l.toolkt.android.bottomMargin
-import com.reco1l.toolkt.android.cornerRadius
-import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.drawableLeft
-import com.reco1l.toolkt.android.layoutWidth
-import com.reco1l.toolkt.android.topMargin
+import com.reco1l.framework.android.cornerRadius
+import com.reco1l.framework.android.dp
+import com.reco1l.framework.android.drawableLeft
+import com.reco1l.framework.android.layoutWidth
+import com.reco1l.framework.android.topMargin
 import com.osudroid.mods.ModAutoplay
 import com.osudroid.replay.ReplayImporter
 import com.osudroid.utils.ModHashMap
+import com.reco1l.framework.android.bottomMargin
 import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -381,7 +381,10 @@ class SettingsFragment : SettingsFragment() {
         findPreference<SelectPreference>("skinPath")!!.apply {
 
             val skinMain = File(Config.getSkinTopPath())
-            val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
+            val skinMap = Config.getSkins()
+            val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
+
+            skins.sortBy { it.text.toString() }
             skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
 
             options = skins

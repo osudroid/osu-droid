@@ -4,6 +4,7 @@ import com.osudroid.beatmaps.Beatmap
 import com.osudroid.math.Interpolation
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents a [Mod] that gradually adjusts the track's playback rate over time.
@@ -20,7 +21,9 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
     abstract var finalRate: Float
 
     final override val isValidForMultiplayerAsFreeMod = false
-    override val incompatibleMods = super.incompatibleMods + ModTimeRamp::class
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModTimeRamp::class) && super.isCompatibleWith(other)
 
     private var initialRateTime = 0.0
     private var finalRateTime = 0.0

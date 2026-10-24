@@ -5,6 +5,7 @@ import com.osudroid.multiplayer.*
 import com.osudroid.multiplayer.api.*
 import com.osudroid.multiplayer.api.data.*
 import com.osudroid.ui.v2.*
+import com.osudroid.utils.async
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -12,7 +13,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.osu.menu.*

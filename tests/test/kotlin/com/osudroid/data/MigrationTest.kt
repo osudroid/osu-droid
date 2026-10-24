@@ -6,7 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
 import com.osudroid.utils.ModHashMap
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.deserializeMods
 import java.io.IOException
 import org.junit.Assert
 import org.junit.Rule
@@ -157,7 +157,7 @@ class MigrationTest {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
                 val score = it.getInt(1)
-                val mods = ModUtils.deserializeMods(it.getString(2))
+                val mods = deserializeMods(it.getString(2))
 
                 // Check if the scores are migrated correctly.
                 when (id) {

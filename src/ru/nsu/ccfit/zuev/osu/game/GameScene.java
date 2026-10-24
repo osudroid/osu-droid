@@ -772,7 +772,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
-        GameHelper.setSpeedMultiplier(ModUtils.calculateRateWithMods(mods.values(), Double.NEGATIVE_INFINITY));
+        GameHelper.setSpeedMultiplier(ModUtils.calculateRate(mods.values(), Double.NEGATIVE_INFINITY));
 
         GameHelper.setOriginalTimePreempt((float) BeatmapDifficulty.difficultyRange(
             playableBeatmap.getDifficulty().getAR(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
@@ -2172,36 +2172,33 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void onExit() {
-
-        Execution.updateThread(() -> {
-            BeatmapSkinManager.setSkinEnabled(false);
-            GameObjectPool.getInstance().purge();
-            stopLoopingSamples();
-            if (activeObjects != null) {
-                activeObjects.clear();
-            }
-            if (expiredObjects != null) {
-                expiredObjects.clear();
-            }
-            if (hud != null) {
-                hud.detachSelf();
-            }
-            breakPeriods = null;
-            replaySettingsPanel = null;
-            objects = null;
-            timingControlPoints = null;
-            effectControlPoints = null;
-            parsedBeatmap = null;
-            playableBeatmap = null;
-            cursorSprites = null;
-            lastMods = null;
-            performanceAttributes = null;
-            performanceCalculationParameters = null;
-            droidTimedDifficultyAttributes = null;
-            standardTimedDifficultyAttributes = null;
-            sliderPaths = null;
-            sliderRenderPaths = null;
-        });
+        BeatmapSkinManager.setSkinEnabled(false);
+        GameObjectPool.getInstance().purge();
+        stopLoopingSamples();
+        if (activeObjects != null) {
+            activeObjects.clear();
+        }
+        if (expiredObjects != null) {
+            expiredObjects.clear();
+        }
+        if (hud != null) {
+            hud.detachSelf();
+        }
+        breakPeriods = null;
+        replaySettingsPanel = null;
+        objects = null;
+        timingControlPoints = null;
+        effectControlPoints = null;
+        parsedBeatmap = null;
+        playableBeatmap = null;
+        cursorSprites = null;
+        lastMods = null;
+        performanceAttributes = null;
+        performanceCalculationParameters = null;
+        droidTimedDifficultyAttributes = null;
+        standardTimedDifficultyAttributes = null;
+        sliderPaths = null;
+        sliderRenderPaths = null;
 
         BeatmapSkinManager.getInstance().clearSkin();
 
@@ -2383,8 +2380,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             short sacc = (short) (acc * 1000);
             replay.addObjectResult(id, sacc, null);
         }
-        if(GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()){
-           int nearestCursorId = getNearestCursorId(pos.x, pos.y);
+
+        // Autoplay/Autopilot synthesize their own cursor movement rather than using real touch input, so
+        // real touch events (e.g. a resting finger) must not be picked up as the "cursor position" here.
+        boolean isCursorTrackingActive = !GameHelper.isAutoplay() && !GameHelper.isAutopilot();
+        int nearestCursorId = isCursorTrackingActive ? getNearestCursorId(pos.x, pos.y) : -1;
+
+        if (GameHelper.isFlashlight() && isCursorTrackingActive) {
            if (nearestCursorId >= 0) {
                mainCursorId = nearestCursorId;
                var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
@@ -2416,6 +2418,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
+        if (nearestCursorId >= 0) {
+            var aimErrorCursorEvent = cursors[nearestCursorId].getLatestNonUpEvent();
+
+            if (aimErrorCursorEvent != null) {
+                float objectRadius = (float) parsedBeatmap.getHitObjects().objects.get(id).getScreenSpaceGameplayRadius();
+                hud.onAimJudgement(pos, aimErrorCursorEvent.position, objectRadius);
+            }
+        }
+
         hud.onNoteHit(stat);
     }
 
@@ -2425,15 +2436,24 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
                             Color4 color, int type, boolean incrementCombo) {
-        if (GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
-            int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
-            if (nearestCursorId >= 0) {
-                mainCursorId = nearestCursorId;
-                var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
+        // Autoplay/Autopilot synthesize their own cursor movement rather than using real touch input, so
+        // real touch events (e.g. a resting finger) must not be picked up as the "cursor position" here.
+        boolean isCursorTrackingActive = !GameHelper.isAutoplay() && !GameHelper.isAutopilot();
+        boolean isFlashlightActive = GameHelper.isFlashlight() && isCursorTrackingActive;
+        boolean isSliderHeadHit = type == GameObjectListener.SLIDER_START && score > 0 && isCursorTrackingActive;
 
-                if (latestNonUpEvent != null) {
-                    flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
-                }
+        int nearestCursorId = -1;
+
+        if (isFlashlightActive || isSliderHeadHit) {
+            nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
+        }
+
+        if (isFlashlightActive && nearestCursorId >= 0) {
+            mainCursorId = nearestCursorId;
+            var latestNonUpEvent = cursors[mainCursorId].getLatestNonUpEvent();
+
+            if (latestNonUpEvent != null) {
+                flashlightSprite.onMouseMove(latestNonUpEvent.position.x, latestNonUpEvent.position.y);
             }
         }
 
@@ -2471,6 +2491,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     stat.registerHit(30, false, false);
                     stat.addSliderHeadHit();
                     createBurstEffectSliderStart(judgementPos, color);
+
+                    if (nearestCursorId >= 0) {
+                        var aimErrorCursorEvent = cursors[nearestCursorId].getLatestNonUpEvent();
+
+                        if (aimErrorCursorEvent != null) {
+                            float objectRadius = (float) parsedBeatmap.getHitObjects().objects.get(id).getScreenSpaceGameplayRadius();
+                            hud.onAimJudgement(judgementPos, aimErrorCursorEvent.position, objectRadius);
+                        }
+                    }
+
                     if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
                     }
@@ -2970,7 +3000,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         UIEngine.getCurrent().getOverlay().getChildScene().back();
         paused = false;
 
-        if (stat.getHp() <= 0 && !stat.getMod().contains(ModNoFail.class)) {
+        if (isGameOver) {
             quit();
             return;
         }
@@ -3317,6 +3347,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public @Nullable DroidPlayableBeatmap getPlayableBeatmap() {
         return playableBeatmap;
+    }
+
+    public @Nullable ReplaySettingsPanel getReplaySettingsPanel() {
+        return replaySettingsPanel;
     }
 
     /**
@@ -3722,15 +3756,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private void reconstructStatAtTime(float targetMs) {
         var playableBeatmap = this.playableBeatmap;
 
-        if (playableBeatmap == null || objects == null) {
+        if (playableBeatmap == null || objects == null || objects.length == 0) {
             return;
         }
 
         var difficulty = playableBeatmap.getDifficulty();
         int localTimingIdx = 0;
         int localBreakIdx = 0;
-        double segStartMs = Double.MIN_VALUE;
         var objectData = replaying ? replay.objectData : null;
+
+        // How far continuous HP drain has been applied, and which object-to-object rate segment
+        // it's currently within ([objects[rateSegIdx].startTime - timePreempt,
+        // objects[rateSegIdx + 1].startTime - timePreempt)). Both advance with elapsed
+        // time and is independent of which object's own judgement has been applied yet.
+        double drainCursorMs = objects[0].startTime - objects[0].timePreempt;
+        int rateSegIdx = 0;
 
         for (int i = 0; i < objects.length; i++) {
             var obj = objects[i];
@@ -3741,63 +3781,77 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 break;
             }
 
-            // Advance local timing point index to this object's position.
-            while (localTimingIdx + 1 < timingControlPoints.length && timingControlPoints[localTimingIdx + 1].time <= obj.startTime) {
-                localTimingIdx++;
-            }
+            double drainTargetMs = Math.min(judgementTimeMs, targetMs);
 
-            // Simulate HP drain between the previous object's lifetime start and this one's.
-            if (i > 0 && gameStarted) {
-                var prevObj = objects[i - 1];
+            while (drainCursorMs < drainTargetMs && rateSegIdx < objects.length - 1) {
+                var segFromObj = objects[rateSegIdx];
+                var segToObj = objects[rateSegIdx + 1];
+
+                // Advance local timing point index to this segment's own "to" object.
+                while (localTimingIdx + 1 < timingControlPoints.length && timingControlPoints[localTimingIdx + 1].time <= segToObj.startTime) {
+                    localTimingIdx++;
+                }
 
                 double msPerBeat = timingControlPoints[localTimingIdx].msPerBeat;
-                double distToNextObject = Math.max(obj.startTime - prevObj.startTime, msPerBeat / 2) / 1000;
+                double distToNextObject = Math.max(segToObj.startTime - segFromObj.startTime, msPerBeat / 2) / 1000;
 
                 double drainRate = difficulty.hp > 0 && distToNextObject > 0
                         ? 1 + difficulty.hp / (2 * distToNextObject)
                         : 0.375;
 
-                double segEndMs = obj.startTime - obj.timePreempt;
+                double segEndMs = segToObj.startTime - segToObj.timePreempt;
+                double stopAtMs = Math.min(segEndMs, drainTargetMs);
 
-                // Advance past breaks that fully precede the current segment.
-                if (breakPeriods != null) {
-                    while (localBreakIdx < breakPeriods.length && breakPeriods[localBreakIdx].endTime <= segStartMs) {
-                        localBreakIdx++;
+                if (stopAtMs > drainCursorMs) {
+                    // Advance past breaks that fully precede the current segment.
+                    if (breakPeriods != null) {
+                        while (localBreakIdx < breakPeriods.length && breakPeriods[localBreakIdx].endTime <= drainCursorMs) {
+                            localBreakIdx++;
+                        }
                     }
+
+                    double effectiveSecs = calculateEffectiveDrainDuration(drainCursorMs, stopAtMs, localBreakIdx);
+
+                    // Apply drain incrementally so that a large drain section can consume multiple Easy lives.
+                    // A one-shot stat.changeHp clamps at 0 and loses the excess, causing at most one Easy revive per drain
+                    // section regardless of how deep HP would have gone.
+                    float remainingDrain = (float) (drainRate * 0.01 * effectiveSecs);
+
+                    while (remainingDrain > 0) {
+                        float currentHp = stat.getHp();
+
+                        if (remainingDrain < currentHp) {
+                            stat.changeHp(-remainingDrain);
+                            break;
+                        }
+
+                        remainingDrain -= currentHp;
+                        stat.changeHp(-currentHp);
+
+                        if (!stat.canFail) {
+                            break;
+                        }
+
+                        if (GameHelper.isEasy() && failcount < 3) {
+                            failcount++;
+                            stat.changeHp(1f);
+                        } else {
+                            return;
+                        }
+                    }
+
+                    drainCursorMs = stopAtMs;
                 }
 
-                double effectiveSecs = calculateEffectiveDrainDuration(segStartMs, segEndMs, localBreakIdx);
-
-                // Apply drain incrementally so that a large drain section can consume multiple Easy lives.
-                // A one-shot stat.changeHp clamps at 0 and loses the excess, causing at most one Easy revive per drain
-                // section regardless of how deep HP would have gone.
-                float remainingDrain = (float) (drainRate * 0.01 * effectiveSecs);
-
-                while (remainingDrain > 0) {
-                    float currentHp = stat.getHp();
-
-                    if (remainingDrain < currentHp) {
-                        stat.changeHp(-remainingDrain);
-                        break;
-                    }
-
-                    remainingDrain -= currentHp;
-                    stat.changeHp(-currentHp);
-
-                    if (!stat.canFail) {
-                        break;
-                    }
-
-                    if (GameHelper.isEasy() && failcount < 3) {
-                        failcount++;
-                        stat.changeHp(1f);
-                    } else {
-                        return;
-                    }
+                if (drainCursorMs >= segEndMs) {
+                    rateSegIdx++;
+                } else {
+                    // Capped short of this segment's own end by drainTargetMs - stop crossing
+                    // further for now. The remainder of this same segment continues once a
+                    // later object's own judgement time lets drain proceed past it.
+                    break;
                 }
             }
-
-            segStartMs = obj.startTime - obj.timePreempt;
 
             if (!gameStarted) {
                 gameStarted = true;

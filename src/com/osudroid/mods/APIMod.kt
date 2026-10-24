@@ -1,6 +1,6 @@
 package com.osudroid.mods
 
-import com.osudroid.utils.ModUtils
+import com.osudroid.utils.allModsClassesByAcronym
 import kotlin.reflect.full.createInstance
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -26,7 +26,7 @@ data class APIMod @JvmOverloads constructor(
      * Returns `null` if [acronym] is not recognized.
      */
     fun toMod(): Mod? {
-        val mod = ModUtils.allModsClassesByAcronym[acronym]?.createInstance() ?: return null
+        val mod = allModsClassesByAcronym[acronym]?.createInstance() ?: return null
 
         if (settings != null) {
             mod.copySettings(settings)

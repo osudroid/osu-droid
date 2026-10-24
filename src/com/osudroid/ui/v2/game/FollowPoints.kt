@@ -8,7 +8,6 @@ import com.osudroid.utils.updateThread
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.toolkt.kotlin.*
 import com.rian.andengine.modifier.OnModifierFinished
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -33,7 +32,7 @@ object FollowPointConnection {
 
         return if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
             PoolableAnimatedFollowPoint("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
-                sprite.frames.fastForEach { it?.applyFollowPointMaxSize() }
+                sprite.frames.forEach { it?.applyFollowPointMaxSize() }
 
                 sprite.invalidate(InvalidationFlag.Content)
                 sprite.isLoop = false
@@ -120,7 +119,8 @@ object FollowPointConnection {
         val distanceY = endPosition.y - startPosition.y
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
-        val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
+        // HitObject.timeFadeIn may be modified by mods, but reference uses the unmodified version (which is 400ms).
+        val endFadeInTime = 0.4f
         val duration = (end.startTime - start.endTime).toFloat() / 1000f
 
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.

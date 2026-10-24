@@ -1,6 +1,6 @@
 package com.osudroid.mods
 
-import com.reco1l.toolkt.roundBy
+import com.reco1l.framework.math.roundBy
 import com.osudroid.beatmaps.Beatmap
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.hitobjects.Slider

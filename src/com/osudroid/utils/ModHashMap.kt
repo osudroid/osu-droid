@@ -1,6 +1,5 @@
 package com.osudroid.utils
 
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.osudroid.mods.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.iterator
@@ -61,12 +60,13 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
             throw IllegalArgumentException("The key class must correspond to the value class.")
         }
 
-        // Check if there are any mods that are incompatible with the new mod.
+        // Check if there are any mods that are incompatible with the new mod. Both directions are checked since
+        // isCompatibleWith is not guaranteed to be symmetric between two mods.
         val iterator = iterator()
         while (iterator.hasNext()) {
             val (_, mod) = iterator.next()
 
-            if (!value.isCompatibleWith(mod)) {
+            if (!value.isCompatibleWith(mod) || !mod.isCompatibleWith(value)) {
                 iterator.remove()
             }
         }
@@ -158,7 +158,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     /**
      * Serializes all [Mod]s in this [ModHashMap] into a list of [APIMod]s, contained within a JSON string.
      *
-     * The result can be deserialized using [ModUtils.deserializeMods].
+     * The result can be deserialized using [deserializeMods].
      *
      * @param includeNonUserPlayable Whether to include [Mod]s whose [Mod.isUserPlayable] is `false`. Defaults to `true`.
      * @param includeIrrelevantMods Whether to include [Mod]s whose [Mod.isRelevant] is `false`. Defaults to `false`.
@@ -168,7 +168,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
     @JvmOverloads
     @Throws(SerializationException::class)
     fun serializeMods(includeNonUserPlayable: Boolean = true, includeIrrelevantMods: Boolean = false) =
-        ModUtils.serializeMods(values, includeNonUserPlayable, includeIrrelevantMods)
+        values.serialize(includeNonUserPlayable, includeIrrelevantMods)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
@@ -245,7 +245,7 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
      * Converts this [ModHashMap] to its legacy mod string representation.
      */
     fun toLegacyModString() = buildString {
-        modStringOrder.fastForEach {
+        modStringOrder.forEach {
             if (it::class in this@ModHashMap) {
                 for ((k, v) in LegacyModConverter.legacyStorableMods) {
                     if (v.isInstance(this@ModHashMap[it::class])) {
@@ -268,9 +268,9 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
      */
     @JvmOverloads
     fun toDisplayModString(includeNonUserPlayable: Boolean = true) = buildString {
-        modStringOrder.fastForEach {
+        modStringOrder.forEach {
             if (!includeNonUserPlayable && !it.isUserPlayable) {
-                return@fastForEach
+                return@forEach
             }
 
             if (it::class in this@ModHashMap) {

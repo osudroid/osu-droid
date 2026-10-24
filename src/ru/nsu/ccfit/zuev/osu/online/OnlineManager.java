@@ -42,7 +42,7 @@ public class OnlineManager {
     public static final String attestationChallengeEndpoint = endpoint + "attestation_challenge.php";
     public static final String defaultAvatarURL = getAvatarURL(0);
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
-    private static final String onlineVersion = "61";
+    private static final String onlineVersion = "65";
 
     public static final OkHttpClient client = new OkHttpClient();
 
@@ -143,6 +143,11 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            failMessage = "Username or password is empty";
+            return false;
+        }
+
         boolean canRetry = true;
 
         while (true) {
@@ -159,11 +164,7 @@ public class OnlineManager {
 
             PostBuilder post = new URLEncodedPostBuilder();
             post.addParam("username", username);
-            post.addParam(
-                    "password",
-                    MD5Calculator.getStringMD5(
-                            escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                    ));
+            post.addParam("password", MD5Calculator.getStringMD5(password.trim() + "taikotaiko"));
             post.addParam("version", onlineVersion);
             post.addParam("attestationChain", chain);
 
@@ -653,19 +654,4 @@ public class OnlineManager {
         }
     }
 
-    private String escapeHTMLSpecialCharacters(String str) {
-        return str
-                .replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
-
-    private String addSlashes(String str) {
-        return str
-                .replace("'", "\\'")
-                .replace("\"", "\\\"")
-                .replace("\\", "\\\\");
-    }
 }

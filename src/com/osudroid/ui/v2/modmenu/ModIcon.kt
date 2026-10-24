@@ -1,7 +1,6 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.osudroid.ui.v2.*
-import com.osudroid.utils.ModUtils
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -12,6 +11,7 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
 import com.osudroid.mods.*
+import com.osudroid.utils.allModsInstances
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -24,7 +24,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
     private var shouldUpdateTexture = true
 
-    constructor(acronym: String): this(ModUtils.allModsInstances.find { it.acronym.equals(acronym, ignoreCase = true) }!!)
+    constructor(acronym: String): this(allModsInstances.find { it.acronym.equals(acronym, ignoreCase = true) }!!)
 
 
     init {

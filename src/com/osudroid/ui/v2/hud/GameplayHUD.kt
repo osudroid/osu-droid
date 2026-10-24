@@ -1,16 +1,17 @@
 package com.osudroid.ui.v2.hud
 
+import android.graphics.PointF
 import com.osudroid.resources.R.string
 import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
 import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
 import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.reco1l.andengine.container.UIContainer
+import com.reco1l.framework.forEachTolerant
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import com.osudroid.beatmaps.constants.HitObjectType
 import com.osudroid.beatmaps.hitobjects.HitObject
 import org.anddev.andengine.entity.IEntity
@@ -72,7 +73,8 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
         if (UIEngine.current.scene != GlobalManager.getInstance().gameScene?.scene) {
-            detachSelf()
+            // Detach on the next tick to ensure that parent's entity list stays stable throughout this tick.
+            updateThread { detachSelf() }
             return
         }
 
@@ -247,7 +249,7 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
 
 
         // Cannot use forEachElement {} because we're modifying the list.
-        mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
+        mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
     }
 
     override fun onAttached() {
@@ -268,9 +270,9 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
      * using another method such as `filterIsInstance<HUDElement>()`.
      */
     fun forEachElement(action: (HUDElement) -> Unit) {
-        mChildren?.fastForEach {
-            (it as? HUDElement)?.let(action)
-        }
+        // `action` may reorder `mChildren` (e.g. selecting an  element moves it to front), which
+        // would cause a `ConcurrentModificationException` if we used a regular `forEach`.
+        mChildren?.forEachTolerant { (it as? HUDElement)?.let(action) }
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
@@ -301,6 +303,11 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
     override fun onAccuracyRegister(type: HitObjectType, accuracy: Float) {
         forEachElement { it.onAccuracyRegister(type, accuracy) }
         elementSelector?.onAccuracyRegister(type, accuracy)
+    }
+
+    override fun onAimJudgement(objectPosition: PointF, cursorPosition: PointF, objectRadius: Float) {
+        forEachElement { it.onAimJudgement(objectPosition, cursorPosition, objectRadius) }
+        elementSelector?.onAimJudgement(objectPosition, cursorPosition, objectRadius)
     }
 
     override fun onSeek() {

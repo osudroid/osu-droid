@@ -12,7 +12,6 @@ import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.component.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
@@ -123,7 +122,7 @@ class HUDElementOverlay(private val element: HUDElement) : UIConstraintContainer
         }
 
         // Show only the tips that are not at the origin.
-        mChildren?.fastForEach {
+        mChildren?.forEach {
             if (it is Tip) {
                 it.isVisible = it.anchor.x != element.origin.x && it.anchor.y != element.origin.y
             }

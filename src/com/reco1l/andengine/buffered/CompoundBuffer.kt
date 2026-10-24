@@ -1,6 +1,5 @@
 package com.reco1l.andengine.buffered
 
-import com.reco1l.toolkt.kotlin.*
 import javax.microedition.khronos.opengles.GL10
 
 /**
@@ -19,25 +18,25 @@ class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
     //region Draw pipeline
 
     override fun beginDraw(gl: GL10) {
-        buffers.fastForEach { it.beginDraw(gl) }
+        buffers.forEach { it.beginDraw(gl) }
     }
 
     override fun declarePointers(gl: GL10, entity: UIBufferedComponent<*>) {
-        buffers.fastForEach { it.declarePointers(gl, entity) }
+        buffers.forEach { it.declarePointers(gl, entity) }
     }
 
     override fun draw(gl: GL10, entity: UIBufferedComponent<*>) {
-        buffers.fastForEach { it.draw(gl, entity) }
+        buffers.forEach { it.draw(gl, entity) }
     }
 
     override fun invalidateOnHardware() {
-        buffers.fastForEach { it.invalidateOnHardware() }
+        buffers.forEach { it.invalidateOnHardware() }
     }
 
     //endregion
 
     override fun finalize() {
         super.finalize()
-        buffers.fastForEach { it.finalize() }
+        buffers.forEach { it.finalize() }
     }
 }

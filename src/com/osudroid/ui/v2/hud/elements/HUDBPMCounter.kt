@@ -25,9 +25,14 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         val beatmap = gameScene.playableBeatmap ?: return
+        val replaySettingsPanel = gameScene.replaySettingsPanel
 
         val timingPoint = beatmap.controlPoints.timing.controlPointAt(gameScene.elapsedTime * 1000.0)
-        val bpm = timingPoint.bpm * GameHelper.getSpeedMultiplier()
+
+        // GameHelper.getSpeedMultiplier accounts for rate set by ReplaySettingsPanel, so it is not a representative of
+        // the actual playback rate. We need to divide by the replay playback rate to get the correct BPM.
+        val replayPlaybackRate = (replaySettingsPanel?.playbackControl?.rateControl?.rate ?: 1f)
+        val bpm = timingPoint.bpm * GameHelper.getSpeedMultiplier() / replayPlaybackRate
 
         counter.targetValue = bpm.roundToInt()
     }
