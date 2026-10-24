@@ -458,6 +458,9 @@ object RoomAPI {
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
 
+        // Blank passwords are not sent, so they must not be signed either.
+        val roomPassword = roomPassword?.takeUnless { it.isBlank() }
+
         val sign = MultiplayerAttestation.signPayload(
             arrayOf<Any>(
                 roomId,
@@ -479,7 +482,7 @@ object RoomAPI {
             auth["multiplayerSessionID"] = multiplayerSessionID
         }
 
-        if (!roomPassword.isNullOrBlank()) {
+        if (roomPassword != null) {
             auth["password"] = roomPassword
         }
 
