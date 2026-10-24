@@ -4,13 +4,27 @@ import com.osudroid.mods.ModCustomSpeed
 import com.osudroid.mods.ModDifficultyAdjust
 import com.osudroid.mods.ModDoubleTime
 import com.osudroid.mods.ModHardRock
+import com.osudroid.mods.Mod
 import com.osudroid.mods.ModHidden
 import com.osudroid.mods.ModReallyEasy
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.mods.ModType
 import org.junit.Assert
 import org.junit.Test
 
 class ModHashMapTest {
+    /**
+     * A [Mod] that is incompatible with [ModHidden], while [ModHidden] is compatible with it.
+     */
+    private class OneWayIncompatibleMod : Mod() {
+        override val name = "One Way Incompatible"
+        override val acronym = "OW"
+        override val description = "Test mod"
+        override val type = ModType.Fun
+
+        override fun isCompatibleWith(other: Mod) = other !is ModHidden && super.isCompatibleWith(other)
+    }
+
     @Test
     fun `Test insert mod by type`() {
         val map = ModHashMap()
@@ -38,6 +52,29 @@ class ModHashMapTest {
         map.put(ModDifficultyAdjust(1f, 1f, 1f, 1f))
 
         Assert.assertEquals(1, map.size)
+    }
+
+    @Test
+    fun `Test incompatible mod removal when only the existing mod declares incompatibility`() {
+        val map = ModHashMap()
+        map.put(OneWayIncompatibleMod())
+
+        Assert.assertTrue(ModHidden().isCompatibleWith(OneWayIncompatibleMod()))
+
+        map.put(ModHidden())
+
+        Assert.assertEquals(1, map.size)
+        Assert.assertTrue(ModHidden::class in map)
+    }
+
+    @Test
+    fun `Test incompatible mod removal when only the inserted mod declares incompatibility`() {
+        val map = ModHashMap()
+        map.put(ModHidden())
+        map.put(OneWayIncompatibleMod())
+
+        Assert.assertEquals(1, map.size)
+        Assert.assertTrue(OneWayIncompatibleMod::class in map)
     }
 
     @Test

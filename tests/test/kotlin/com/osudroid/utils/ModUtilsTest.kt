@@ -12,6 +12,7 @@ import com.osudroid.mods.ModNightCore
 import com.osudroid.mods.ModOldNightCore
 import com.osudroid.mods.ModPrecise
 import com.osudroid.mods.ModReplayV6
+import com.osudroid.mods.ModTimeRamp
 import com.osudroid.mods.ModWindDown
 import com.osudroid.mods.ModWindUp
 import org.junit.Assert
@@ -159,5 +160,34 @@ class ModUtilsTest {
             Assert.assertEquals(expected.od, original.od, 1e-2f)
             Assert.assertEquals(expected.hp, original.hp, 1e-2f)
         }
+    }
+
+    @Test
+    fun `Test isInstanceOfAny with no types`() {
+        Assert.assertFalse(ModHidden().isInstanceOfAny())
+    }
+
+    @Test
+    fun `Test isInstanceOfAny with matching type`() {
+        Assert.assertTrue(ModHidden().isInstanceOfAny(ModHidden::class))
+        Assert.assertTrue(ModHidden().isInstanceOfAny(ModHardRock::class, ModHidden::class))
+    }
+
+    @Test
+    fun `Test isInstanceOfAny with non-matching types`() {
+        Assert.assertFalse(ModHidden().isInstanceOfAny(ModHardRock::class))
+        Assert.assertFalse(ModHidden().isInstanceOfAny(ModHardRock::class, ModDoubleTime::class))
+    }
+
+    @Test
+    fun `Test isInstanceOfAny with supertype`() {
+        Assert.assertTrue(ModWindUp().isInstanceOfAny(ModTimeRamp::class))
+        Assert.assertTrue(ModWindDown().isInstanceOfAny(ModTimeRamp::class))
+        Assert.assertFalse(ModHidden().isInstanceOfAny(ModTimeRamp::class))
+    }
+
+    @Test
+    fun `Test isInstanceOfAny does not match sibling types`() {
+        Assert.assertFalse(ModWindUp().isInstanceOfAny(ModWindDown::class))
     }
 }

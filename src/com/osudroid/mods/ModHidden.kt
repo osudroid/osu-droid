@@ -7,6 +7,7 @@ import com.osudroid.beatmaps.hitobjects.Spinner
 import com.osudroid.mods.settings.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Hidden mod.
@@ -20,9 +21,12 @@ class ModHidden : ModWithVisibilityAdjustment() {
     override val isRanked
         get() = usesDefaultSettings
 
-    override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModApproachDifferent::class, ModTraceable::class, ModFreezeFrame::class
-    )
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(
+            ModApproachDifferent::class,
+            ModTraceable::class,
+            ModFreezeFrame::class
+        ) && super.isCompatibleWith(other)
 
     /**
      * Whether to only fade approach circles.

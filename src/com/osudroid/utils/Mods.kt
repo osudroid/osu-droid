@@ -8,6 +8,7 @@ import com.osudroid.beatmaps.PreciseDroidHitWindow
 import com.osudroid.beatmaps.hitobjects.HitObject
 import com.osudroid.beatmaps.sections.BeatmapDifficulty
 import com.osudroid.mods.*
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.SerializationException
@@ -158,6 +159,14 @@ fun Iterable<Mod>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
 fun Iterable<IModApplicableToTrackRate>.calculateRate(time: Double = 0.0) = fold(1f) { rate, mod ->
     mod.applyToRate(time, rate)
 }
+
+/**
+ * Determines whether this [Mod] is an instance of the given [Mod] types.
+ *
+ * @param types The [Mod] types to check this [Mod] against.
+ * @return `true` if this [Mod] is an instance of any of [types], `false` otherwise.
+ */
+fun Mod.isInstanceOfAny(vararg types: KClass<out Mod>) = types.any { it.isInstance(this) }
 
 /**
  * Applies the selected [Mod]s to this [BeatmapDifficulty].
