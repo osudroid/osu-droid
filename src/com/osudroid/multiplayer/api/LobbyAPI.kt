@@ -62,6 +62,7 @@ object LobbyAPI {
 
                 addQueryParameter("uid", uid.toString())
                 addQueryParameter("sessionId", sessionId)
+                addQueryParameter("version", RoomAPI.API_VERSION.toString())
                 addQueryParameter("sign", sign)
             }
 
@@ -102,6 +103,9 @@ object LobbyAPI {
             return 1
         }
 
+        // Blank passwords are not sent, so they must not be signed either.
+        val password = password?.takeUnless { it.isBlank() }
+
         JsonObjectRequest("$HOST$CREATE_ROOM").use { request ->
             val sign = MultiplayerAttestation.signPayload(
                 arrayOf<Any>(
@@ -132,7 +136,7 @@ object LobbyAPI {
                     })
                 }
 
-                if (!password.isNullOrBlank()) {
+                if (password != null) {
                     put("password", password)
                 }
 
