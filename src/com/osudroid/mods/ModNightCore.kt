@@ -1,5 +1,7 @@
 package com.osudroid.mods
 
+import com.osudroid.utils.isInstanceOfAny
+
 /**
  * Represents the Night Core mod.
  */
@@ -12,5 +14,7 @@ open class ModNightCore : ModRateAdjust() {
     override val description = "Uguuuuuuuu..."
     override val type = ModType.DifficultyIncrease
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModDoubleTime::class, ModHalfTime::class) && super.isCompatibleWith(other)
 }

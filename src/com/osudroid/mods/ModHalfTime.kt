@@ -1,5 +1,7 @@
 package com.osudroid.mods
 
+import com.osudroid.utils.isInstanceOfAny
+
 /**
  * Represents the Half Time mod.
  */
@@ -12,5 +14,7 @@ class ModHalfTime : ModRateAdjust() {
     override val description = "Less zoom..."
     override val type = ModType.DifficultyReduction
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModNightCore::class)
+
+    override fun isCompatibleWith(other: Mod) =
+        !other.isInstanceOfAny(ModDoubleTime::class, ModNightCore::class) && super.isCompatibleWith(other)
 }

@@ -7,6 +7,7 @@ import com.osudroid.utils.CircleSizeCalculator
 import com.osudroid.utils.HitObjectGenerationUtils
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
+import com.osudroid.utils.isInstanceOfAny
 
 /**
  * Represents the Hard Rock mod.
@@ -17,14 +18,13 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     override val description = "Everything just got a bit harder..."
     override val type = ModType.DifficultyIncrease
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + arrayOf(ModEasy::class, ModMirror::class)
 
     override fun isCompatibleWith(other: Mod): Boolean {
         if (other is ModDifficultyAdjust) {
             return other.cs == null || other.ar == null || other.od == null || other.hp == null
         }
 
-        return super.isCompatibleWith(other)
+        return !other.isInstanceOfAny(ModEasy::class, ModMirror::class) && super.isCompatibleWith(other)
     }
 
     override fun applyToDifficulty(

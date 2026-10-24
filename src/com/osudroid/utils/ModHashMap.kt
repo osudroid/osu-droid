@@ -60,12 +60,13 @@ open class ModHashMap : ConcurrentHashMap<Class<out Mod>, Mod> {
             throw IllegalArgumentException("The key class must correspond to the value class.")
         }
 
-        // Check if there are any mods that are incompatible with the new mod.
+        // Check if there are any mods that are incompatible with the new mod. Both directions are checked since
+        // isCompatibleWith is not guaranteed to be symmetric between two mods.
         val iterator = iterator()
         while (iterator.hasNext()) {
             val (_, mod) = iterator.next()
 
-            if (!value.isCompatibleWith(mod)) {
+            if (!value.isCompatibleWith(mod) || !mod.isCompatibleWith(value)) {
                 iterator.remove()
             }
         }
