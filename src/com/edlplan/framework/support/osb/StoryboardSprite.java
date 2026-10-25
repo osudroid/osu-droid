@@ -10,7 +10,6 @@ import com.edlplan.edlosbsupport.elements.StoryboardAnimationSprite;
 import com.edlplan.edlosbsupport.parser.OsbFileParser;
 import com.edlplan.edlosbsupport.player.OsbPlayer;
 import com.edlplan.framework.math.Anchor;
-import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.SupportSprite;
 import com.edlplan.framework.support.batch.BatchEngine;
@@ -127,10 +126,11 @@ public class StoryboardSprite extends SupportSprite {
         canvas.getBlendSetting().save();
         canvas.save();
         float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
-        Vec2 startOffset = new Vec2(canvas.getWidth() / 2, canvas.getHeight() / 2)
-                .minus(640 * 0.5f / scale, 480 * 0.5f / scale);
+        // Computed as floats rather than through Vec2 to avoid allocating every frame.
+        float startOffsetX = canvas.getWidth() / 2 - 640 * 0.5f / scale;
+        float startOffsetY = canvas.getHeight() / 2 - 480 * 0.5f / scale;
 
-        canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
+        canvas.translate(startOffsetX, startOffsetY).expendAxis(scale);
 
         if (context.engines != null) {
             for (LayerRenderEngine engine : context.engines) {
@@ -157,10 +157,11 @@ public class StoryboardSprite extends SupportSprite {
         canvas.getBlendSetting().save();
         canvas.save();
         float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
-        Vec2 startOffset = new Vec2(canvas.getWidth() / 2, canvas.getHeight() / 2)
-                .minus(640 * 0.5f / scale, 480 * 0.5f / scale);
+        // Computed as floats rather than through Vec2 to avoid allocating every frame.
+        float startOffsetX = canvas.getWidth() / 2 - 640 * 0.5f / scale;
+        float startOffsetY = canvas.getHeight() / 2 - 480 * 0.5f / scale;
 
-        canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
+        canvas.translate(startOffsetX, startOffsetY).expendAxis(scale);
 
         if (context.engines != null) {
             for (LayerRenderEngine engine : context.engines) {
