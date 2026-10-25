@@ -2,6 +2,7 @@ package com.reco1l.framework
 
 import org.junit.Assert
 import org.junit.Test
+import java.util.LinkedList
 import java.util.concurrent.atomic.AtomicReference
 
 class CollectionsTest {
@@ -28,6 +29,25 @@ class CollectionsTest {
         }
 
         Assert.assertEquals(listOf(0 to "a", 1 to "b", 2 to "c"), collected)
+    }
+
+    @Test
+    fun `Test forEachTolerant tolerates element removal in a non-random-access list`() {
+        // LinkedList is not RandomAccess, so the snapshot is taken through the addAll fallback
+        // rather than the index-based copy used by the other tests.
+        val list = LinkedList(listOf(1, 2, 3, 4))
+        val visited = mutableListOf<Int>()
+
+        list.forEachTolerant { item ->
+            visited.add(item)
+
+            if (item == 2) {
+                list.remove(2)
+            }
+        }
+
+        Assert.assertEquals(listOf(1, 2, 3, 4), visited)
+        Assert.assertEquals(listOf(1, 3, 4), list)
     }
 
     @Test
