@@ -14,6 +14,7 @@ import java.util.concurrent.CancellationException;
 
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
+import com.osudroid.discord.DiscordPresenceManager;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -115,6 +116,8 @@ public class OnlineScoring {
                     Execution.updateThread(this::updatePanels);
                     OnlineManager.getInstance().setStayOnline(true);
                     loadProfileAssets(true);
+                    // Refresh Discord activity to show online rank.
+                    DiscordPresenceManager.refreshActivity();
                 } else {
                     setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
                     OnlineManager.getInstance().setStayOnline(false);
@@ -170,6 +173,7 @@ public class OnlineScoring {
                         Execution.updateThread(this::updatePanels);
                         OnlineManager mgr = OnlineManager.getInstance();
                         panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
+                        DiscordPresenceManager.refreshActivity();
                         break;
                     }
 
