@@ -126,7 +126,6 @@ public abstract class GameObject {
                     }
                 } else {
                     // If there are no new events, check the latest event.
-                    // Not passing ACTION_DOWN or ACTION_MOVE here to avoid array allocation.
                     var event = cursor.getLatestEvent();
 
                     // Only consider case 2 in this scenario, as the event should logically be marked as a move event
