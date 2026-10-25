@@ -652,7 +652,7 @@ abstract class UIComponent : Entity(0f, 0f),
 
             mChildren?.forEach { child ->
                 if (child is UIComponent) {
-                    onHandleInvalidations()
+                    child.onHandleInvalidations()
                 }
             }
             return
