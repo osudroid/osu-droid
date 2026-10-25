@@ -40,7 +40,7 @@ object LobbyAPI {
     /**
      * Get room list.
      */
-    fun getRooms(query: String?, uid: Long, sessionId: String, sign: String?): List<Room> {
+    fun getRooms(query: String?, uid: Long, sessionId: String): List<Room> {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return listOf(
@@ -51,14 +51,19 @@ object LobbyAPI {
         }
 
         JsonArrayRequest("$HOST$GET_ROOMS").use {
+            val sign = MultiplayerAttestation.signPayload(
+                arrayOf<Any>(query ?: "", uid, sessionId, RoomAPI.API_VERSION, "getrooms").joinToString("|")
+            )
 
-            if (sign != null || query != null) {
-                it.buildUrl {
-                    addQueryParameter("sign", sign)
+            it.buildUrl {
+                if (query != null) {
                     addQueryParameter("query", query)
-                    addQueryParameter("uid", uid.toString())
-                    addQueryParameter("sessionId", sessionId)
                 }
+
+                addQueryParameter("uid", uid.toString())
+                addQueryParameter("sessionId", sessionId)
+                addQueryParameter("version", RoomAPI.API_VERSION.toString())
+                addQueryParameter("sign", sign)
             }
 
             return List(it.execute().json.length()) { i ->
@@ -92,13 +97,28 @@ object LobbyAPI {
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, sessionId: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, sessionId: String, password: String? = null, maxPlayers: Int = 8): Long {
 
         if (BuildSettings.MOCK_MULTIPLAYER) {
             return 1
         }
 
+        // Blank passwords are not sent, so they must not be signed either.
+        val password = password?.takeUnless { it.isBlank() }
+
         JsonObjectRequest("$HOST$CREATE_ROOM").use { request ->
+            val sign = MultiplayerAttestation.signPayload(
+                arrayOf<Any>(
+                    hostUID,
+                    name,
+                    maxPlayers,
+                    beatmap?.md5 ?: "",
+                    password ?: "",
+                    sessionId,
+                    RoomAPI.API_VERSION,
+                    "createroom"
+                ).joinToString("|")
+            )
 
             request.buildRequestBody {
 
@@ -116,7 +136,7 @@ object LobbyAPI {
                     })
                 }
 
-                if (!password.isNullOrBlank()) {
+                if (password != null) {
                     put("password", password)
                 }
 
