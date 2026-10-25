@@ -15,6 +15,11 @@ public class BassAudioFunc {
     private int channel = 0;
     private float speed = 1f;
     private float pitchRate = 1f;
+    /**
+     * The last volume applied to {@link #channel} via {@link #setVolume(float)}, or NaN if none has been applied
+     * to the current channel yet.
+     */
+    private float volume = Float.NaN;
     private boolean adjustPitch;
     private final BASS.BASS_CHANNELINFO channelInfo = new BASS.BASS_CHANNELINFO();
 
@@ -55,6 +60,7 @@ public class BassAudioFunc {
 
         channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playFlag | BASS.BASS_STREAM_DECODE);
         channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
+        volume = Float.NaN;
 
         if (channel == 0) {
             this.speed = 1;
@@ -210,7 +216,9 @@ public class BassAudioFunc {
     }
 
     public synchronized void setVolume(float volume) {
-        if (channel != 0) {
+        // Some callers set the volume every frame, so skip the native call when it is unchanged.
+        if (channel != 0 && volume != this.volume) {
+            this.volume = volume;
             BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
         }
     }
