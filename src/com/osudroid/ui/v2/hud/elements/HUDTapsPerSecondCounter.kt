@@ -24,6 +24,6 @@ class HUDTapsPerSecondCounter : HUDStatisticCounter("Taps/sec") {
             timestamps.removeFirst()
         }
 
-        valueText.text = timestamps.size.toString()
+        displayedValue = timestamps.size
     }
 }
