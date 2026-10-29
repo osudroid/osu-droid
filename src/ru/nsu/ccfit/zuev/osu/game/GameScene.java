@@ -1349,7 +1349,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
 
         if (!startedFromHUDEditor && (GameHelper.isAutoplay() || replaying)) {
-            hud.attachChild(replaySettingsPanel = new ReplaySettingsPanel());
+            hud.attachChild(replaySettingsPanel = new ReplaySettingsPanel(replaying));
 
             var seekControl = replaySettingsPanel.getPlaybackControl().getSeekControl();
 
