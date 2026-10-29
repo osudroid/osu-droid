@@ -29,6 +29,8 @@ import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.game.replay.ReplaySettingsPanel;
+import com.osudroid.game.replay.analysis.ReplayAnalysisData;
+import com.osudroid.game.replay.analysis.ReplayAnalysisOverlay;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
@@ -122,6 +124,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -228,6 +231,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Job ppCalculationJob;
 
     private ReplaySettingsPanel replaySettingsPanel;
+    private ReplayAnalysisOverlay replayAnalysisOverlay;
+    private boolean hideReplayCursor;
 
     // Game
 
@@ -1197,6 +1202,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         distToNextObject = 0;
 
+        hideReplayCursor = false;
+
+        if (replaying && replay != null) {
+            replayAnalysisOverlay = new ReplayAnalysisOverlay(
+                ReplayAnalysisData.fromMoveArrays(replay.cursorMoves),
+                Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH
+            );
+
+            fgScene.attachChild(replayAnalysisOverlay);
+        } else {
+            replayAnalysisOverlay = null;
+        }
+
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             cursorSprites = new CursorEntity[cursorCount];
@@ -1386,6 +1404,36 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 return Unit.INSTANCE;
             });
+
+            var analysisControl = replaySettingsPanel.getAnalysisSettingsControl();
+            final var overlay = replayAnalysisOverlay;
+
+            if (analysisControl != null && overlay != null) {
+                analysisControl.setOnShowTapMarkersChanged(show -> {
+                    overlay.setShowTapMarkers(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnShowFrameMarkersChanged(show -> {
+                    overlay.setShowFrameMarkers(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnShowCursorPathChanged(show -> {
+                    overlay.setShowCursorPath(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnDisplayLengthChanged(lengthMs -> {
+                    overlay.setDisplayLengthMs(lengthMs);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnHideGameplayCursorChanged(hide -> {
+                    hideReplayCursor = hide;
+                    return Unit.INSTANCE;
+                });
+            }
 
             seekControl.updateSeekPosition(
                 gameplayClock.getCurrentTime(),
@@ -1632,6 +1680,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     cursors[i].addEvent(event);
                 }
             }
+
+            if (replayAnalysisOverlay != null) {
+                replayAnalysisOverlay.setTime(replayTimeMs);
+            }
         }
 
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
@@ -1646,7 +1698,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 if (replaying && latestEvent != null) {
                     sprite.setPosition(latestEvent.position.x, latestEvent.position.y);
-                    sprite.setShowing(!latestEvent.isActionUp());
+                    sprite.setShowing(!hideReplayCursor && !latestEvent.isActionUp());
                 }
 
                 if (cursor.getLatestDownEvent() != null) {
@@ -1988,6 +2040,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             activeObjects.clear();
             expiredObjects.clear();
             replaySettingsPanel = null;
+            replayAnalysisOverlay = null;
             breakPeriods = null;
             cursorSprites = null;
             this.playableBeatmap = null;
@@ -2192,6 +2245,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         breakPeriods = null;
         replaySettingsPanel = null;
+        replayAnalysisOverlay = null;
         objects = null;
         timingControlPoints = null;
         effectControlPoints = null;
