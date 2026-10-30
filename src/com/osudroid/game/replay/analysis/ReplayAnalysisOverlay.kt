@@ -28,7 +28,7 @@ class ReplayAnalysisOverlay(data: ReplayAnalysisData, scale: Float) : UIContaine
 
     private val inducedTapMesh = UITriangleMesh().apply {
         color = Color4(0xFFFFCC22)
-        alpha = 0.4f
+        alpha = 0.5f
     }
 
     private val directTapMesh = UITriangleMesh().apply { color = Color4(0xFFFFCC22) }
