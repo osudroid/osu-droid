@@ -151,8 +151,8 @@ class ReplayAnalysisGeometryTest {
         val vertices = (0 until g.path.length step 2).map { g.path.ary[it] to g.path.ary[it + 1] }
 
         for ((x, y) in vertices) {
-            Assert.assertTrue("x=$x", abs(x - 0f) < 1e-4f || abs(x - 10f) < 1e-4f)
-            Assert.assertTrue("y=$y", abs(y - -2f) < 1e-4f || abs(y - 2f) < 1e-4f)
+            Assert.assertTrue("x=$x", abs(x) < 1e-4f || abs(x - 10f) < 1e-4f)
+            Assert.assertTrue("y=$y", abs(y + 2f) < 1e-4f || abs(y - 2f) < 1e-4f)
         }
 
         for ((cx, cy) in listOf(0f to -2f, 0f to 2f, 10f to -2f, 10f to 2f)) {
