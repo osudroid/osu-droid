@@ -18,12 +18,22 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
  * A panel that contains settings for replay playback. Can be expanded and collapsed by tapping the button on the left.
+ *
+ * @param showAnalysisControls Whether to include the analysis settings card.
  */
-class ReplaySettingsPanel : UIContainer() {
+class ReplaySettingsPanel(private val showAnalysisControls: Boolean) : UIContainer() {
     lateinit var playbackControl: ReplayPlaybackControl
         private set
 
     lateinit var visualSettingsControl: ReplayVisualSettingsControl
+        private set
+
+    /**
+     * The analysis settings card. Only created when [showAnalysisControls] is `true`, otherwise `null`.
+     */
+    // Must be declared above elementContainer. Its initializer calls addControls(), and an `= null` initializer
+    // declared after it would run later and overwrite the assigned card.
+    var analysisSettingsControl: ReplayAnalysisSettingsControl? = null
         private set
 
     private val isExpanded
@@ -94,6 +104,13 @@ class ReplaySettingsPanel : UIContainer() {
 
         visualSettingsControl = ReplayVisualSettingsControl()
         +visualSettingsControl
+
+        if (showAnalysisControls) {
+            val card = ReplayAnalysisSettingsControl()
+
+            analysisSettingsControl = card
+            +card
+        }
     }
 
     private inner class ReplaySettingsPanelButton : UIContainer() {
