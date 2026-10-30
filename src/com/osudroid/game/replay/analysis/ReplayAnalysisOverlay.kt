@@ -7,6 +7,7 @@ import com.reco1l.framework.Color4
 import javax.microedition.khronos.opengles.GL10
 import kotlin.properties.Delegates
 import org.anddev.andengine.engine.camera.Camera
+import org.anddev.andengine.opengl.util.GLHelper
 
 /**
  * Draws the replay analysis overlay during replay playback, using the layers built by [ReplayAnalysisGeometry].
@@ -86,6 +87,11 @@ class ReplayAnalysisOverlay(data: ReplayAnalysisData, scale: Float) : UIContaine
             inducedTapMesh.vertices.shareFrom(geometry.inducedTaps)
             directTapMesh.vertices.shareFrom(geometry.directTaps)
         }
+
+        // UITriangleMesh does not set a blend function, so the state left by the previous draw (e.g. premultiplied
+        // alpha from storyboard sprites) would otherwise apply and ignore the induced taps' alpha.
+        GLHelper.enableBlend(gl)
+        GLHelper.blendFunction(gl, GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA)
 
         super.onManagedDraw(gl, camera)
     }

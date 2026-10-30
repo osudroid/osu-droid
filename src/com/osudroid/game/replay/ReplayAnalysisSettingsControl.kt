@@ -33,8 +33,8 @@ class ReplayAnalysisSettingsControl : UICard() {
 
     private val displayLengthSlider = FormSlider(800f).apply {
         label = StringTable.get(R.string.replay_analysis_display_length)
-        control.min = 200f
         control.max = 2000f
+        control.min = 200f
         control.step = 200f
         valueFormatter = { "${it.roundToInt()} ms" }
         onValueChanged = { onDisplayLengthChanged?.invoke(it.roundToInt()) }
