@@ -55,7 +55,7 @@ private inline fun partitionPoint(size: Int, isBefore: (index: Int) -> Boolean):
     var high = size
 
     while (low < high) {
-        val mid = (low + high) ushr 1
+        val mid = low + high ushr 1
 
         if (isBefore(mid)) {
             low = mid + 1
