@@ -128,13 +128,13 @@ class ReplayAnalysisGeometryTest {
         val g = ReplayAnalysisGeometry(ReplayAnalysisData(listOf(track(down(0, x, y), up(10)))), scale = 2f)
         g.build(0f, 800, showCursorPath = false, showFrameMarkers = true, showTapMarkers = false)
 
-        // Radius = 2.5 / 2 * 2 = 2.5 screen px.
+        // Radius = 5 / 2 * 2 = 5 screen px.
         val distances = (0 until g.frameDots.length step 2).map {
             hypot(g.frameDots.ary[it] - x, g.frameDots.ary[it + 1] - y)
         }
 
-        Assert.assertTrue(distances.all { it <= 2.5f + 1e-4f })
-        Assert.assertEquals(2.5f, distances.max(), 1e-4f)
+        Assert.assertTrue(distances.all { it <= 5f + 1e-4f })
+        Assert.assertEquals(5f, distances.max(), 1e-4f)
     }
 
     @Test
@@ -145,17 +145,17 @@ class ReplayAnalysisGeometryTest {
         )
         g.build(100f, 1000, showCursorPath = true, showFrameMarkers = false, showTapMarkers = false)
 
-        // Half-width = PATH_WIDTH / 2 * scale = 2.
+        // Half-width = PATH_WIDTH / 2 * scale = 4 / 2 * 2 = 4.
         Assert.assertEquals(12, g.path.length)
 
         val vertices = (0 until g.path.length step 2).map { g.path.ary[it] to g.path.ary[it + 1] }
 
         for ((x, y) in vertices) {
             Assert.assertTrue("x=$x", abs(x) < 1e-4f || abs(x - 10f) < 1e-4f)
-            Assert.assertTrue("y=$y", abs(y + 2f) < 1e-4f || abs(y - 2f) < 1e-4f)
+            Assert.assertTrue("y=$y", abs(y - -4f) < 1e-4f || abs(y - 4f) < 1e-4f)
         }
 
-        for ((cx, cy) in listOf(0f to -2f, 0f to 2f, 10f to -2f, 10f to 2f)) {
+        for ((cx, cy) in listOf(0f to -4f, 0f to 4f, 10f to -4f, 10f to 4f)) {
             Assert.assertTrue(
                 "Missing corner ($cx, $cy)",
                 vertices.any { abs(it.first - cx) < 1e-4f && abs(it.second - cy) < 1e-4f }
@@ -173,14 +173,14 @@ class ReplayAnalysisGeometryTest {
         val inducedTaps = g.inducedTaps
         Assert.assertEquals(240, inducedTaps.length)
 
-        // Outer radius = TAP_RING_DIAMETER / 2 * scale = 16; inner radius = outer - TAP_RING_THICKNESS * scale = 12.8.
+        // Outer radius = TAP_RING_DIAMETER / 2 * scale = 32 / 2 * 2 = 32; inner radius = outer - TAP_RING_THICKNESS * scale = 32 - 3.2 * 2 = 25.6.
         val distances = (0 until inducedTaps.length step 2).map {
             hypot(inducedTaps.ary[it], inducedTaps.ary[it + 1])
         }
 
-        Assert.assertTrue(distances.all { abs(it - 16f) < 1e-3f || abs(it - 12.8f) < 1e-3f })
-        Assert.assertEquals(12.8f, distances.min(), 1e-3f)
-        Assert.assertEquals(16f, distances.max(), 1e-3f)
+        Assert.assertTrue(distances.all { abs(it - 32f) < 1e-3f || abs(it - 25.6f) < 1e-3f })
+        Assert.assertEquals(25.6f, distances.min(), 1e-3f)
+        Assert.assertEquals(32f, distances.max(), 1e-3f)
     }
 
     @Test

@@ -213,13 +213,13 @@ class ReplayAnalysisGeometry(private val data: ReplayAnalysisData, private val s
 
     private companion object {
         // Sizes, in osu! pixels.
-        const val PATH_WIDTH = 2f
-        const val FRAME_DOT_DIAMETER = 2.5f
+        const val PATH_WIDTH = 4f
+        const val FRAME_DOT_DIAMETER = 5f
         const val FRAME_DOT_SEGMENTS = 8
-        const val TAP_RING_DIAMETER = 16f
-        const val TAP_RING_THICKNESS = 1.6f
+        const val TAP_RING_DIAMETER = 32f
+        const val TAP_RING_THICKNESS = 3.2f
         const val TAP_RING_SEGMENTS = 20
-        const val TAP_DOT_DIAMETER = 2f
+        const val TAP_DOT_DIAMETER = 4f
         const val TAP_DOT_SEGMENTS = 8
 
         // Floats per primitive: 2 per vertex, 3 vertices per triangle.
