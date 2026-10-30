@@ -1,9 +1,9 @@
 package com.osudroid.game.replay.analysis
 
 import com.edlplan.framework.utils.FloatArraySlice
+import com.osudroid.ui.OsuColors
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.UITriangleMesh
-import com.reco1l.framework.Color4
 import javax.microedition.khronos.opengles.GL10
 import kotlin.properties.Delegates
 import org.anddev.andengine.engine.camera.Camera
@@ -22,16 +22,16 @@ import org.anddev.andengine.opengl.util.GLHelper
 class ReplayAnalysisOverlay(data: ReplayAnalysisData, scale: Float) : UIContainer() {
     private val geometry = ReplayAnalysisGeometry(data, scale)
 
-    private val pathMesh = UITriangleMesh().apply { color = Color4(0xFFEB4791) }
+    private val pathMesh = UITriangleMesh().apply { color = OsuColors.pink2 }
 
-    private val frameDotMesh = UITriangleMesh().apply { color = Color4(0xFFEB4791) }
+    private val frameDotMesh = UITriangleMesh().apply { color = OsuColors.pink2 }
 
     private val inducedTapMesh = UITriangleMesh().apply {
-        color = Color4(0xFFFFCC22)
+        color = OsuColors.yellow
         alpha = 0.5f
     }
 
-    private val directTapMesh = UITriangleMesh().apply { color = Color4(0xFFFFCC22) }
+    private val directTapMesh = UITriangleMesh().apply { color = OsuColors.yellow }
 
     private var isDirty = true
 
