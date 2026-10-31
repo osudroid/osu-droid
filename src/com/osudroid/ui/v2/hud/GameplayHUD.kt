@@ -269,11 +269,19 @@ class GameplayHUD : UIContainer(), IGameplayEvents {
      * Note: If you need to remove elements you have to copy the list temporarily
      * using another method such as `filterIsInstance<HUDElement>()`.
      */
-    fun forEachElement(action: (HUDElement) -> Unit) {
+    inline fun forEachElement(action: (HUDElement) -> Unit) {
         // `action` may reorder `mChildren` (e.g. selecting an  element moves it to front), which
         // would cause a `ConcurrentModificationException` if we used a regular `forEach`.
-        mChildren?.forEachTolerant { (it as? HUDElement)?.let(action) }
+        // Inlined so that the per-frame callers below don't allocate a capturing lambda.
+        elementChildren?.forEachTolerant { if (it is HUDElement) action(it) }
     }
+
+    /**
+     * Exposes [mChildren] to [forEachElement], since a public inline function cannot access protected members.
+     */
+    @PublishedApi
+    internal val elementChildren: List<IEntity>?
+        get() = mChildren
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         forEachElement { it.onGameplayUpdate(gameScene, secondsElapsed) }

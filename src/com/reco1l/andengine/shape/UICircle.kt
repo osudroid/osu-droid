@@ -61,7 +61,6 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
      */
     fun setPortion(value: Float) {
         endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
-        requestBufferUpdate()
     }
 
 

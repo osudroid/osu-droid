@@ -31,6 +31,6 @@ class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
             objects.removeFirst()
         }
 
-        valueText.text = objects.size.toString()
+        displayedValue = objects.size
     }
 }

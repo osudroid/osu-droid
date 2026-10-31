@@ -523,22 +523,29 @@ class RoomScene(
     }
 
     fun updatePlayerList() = updateThread {
-        val shouldReload = currentPlayers.size != room.playersMap.size
-                || !currentPlayers.all { room.playersMap.containsKey(it) }
+        // Room state is mutated on the socket EventThread (and room itself is replaced on reconnection), so take a
+        // single snapshot and derive everything from it. Reading room state multiple times here can observe different
+        // player lists, desynchronizing the card count from the player count.
+        val room = room
+        val players = room.activePlayers
+
+        val shouldReload = playersContainer.childCount != players.size
+                || currentPlayers.size != players.size
+                || players.indices.any { currentPlayers[it] != players[it].id }
 
         playersContainer.apply {
 
             if (shouldReload) {
                 detachChildren()
 
-                room.activePlayers.forEach {
+                players.forEach {
                     +RoomPlayerCard().apply {
                         updateState(room, it)
                     }
                 }
-                currentPlayers = room.playersMap.keys.toLongArray()
+                currentPlayers = LongArray(players.size) { players[it].id }
             } else {
-                room.activePlayers.forEachIndexed { index, player ->
+                players.forEachIndexed { index, player ->
                     val card = getChildByIndex(index) as RoomPlayerCard
                     card.updateState(room, player)
                 }

@@ -9,14 +9,6 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
 
     override val name = "BPM counter"
 
-    private var value = 0
-        set(value) {
-            if (field != value) {
-                field = value
-                valueText.text = value.toString()
-            }
-        }
-
     private val counter = RollingIntCounter(0).apply { rollingDuration = 0.375f }
 
     init {
@@ -38,7 +30,7 @@ class HUDBPMCounter : HUDStatisticCounter("BPM") {
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        value = counter.currentValue
+        displayedValue = counter.currentValue
 
         super.onManagedUpdate(deltaTimeSec)
     }

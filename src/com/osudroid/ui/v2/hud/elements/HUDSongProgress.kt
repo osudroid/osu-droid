@@ -8,6 +8,7 @@ import com.reco1l.framework.Color4
 import com.osudroid.ui.v2.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
+import kotlin.math.roundToInt
 
 sealed class HUDSongProgress : HUDElement() {
     abstract fun setProgress(progress: Float, isIntro: Boolean)
@@ -121,15 +122,24 @@ class HUDPieSongProgress : HUDSongProgress() {
 
 
     override fun setProgress(progress: Float, isIntro: Boolean) {
+        // Snapping the progress to fixed steps lets UICircle skip rebuilding its vertex buffer on frames where the
+        // visible arc would not change.
+        val snappedProgress = (progress * PROGRESS_STEPS).roundToInt() / PROGRESS_STEPS
 
         if (isIntro) {
             circularProgress.setColor(199f / 255f, 1f, 47f / 255f)
-            circularProgress.setPortion(-1f + progress)
+            circularProgress.setPortion(-1f + snappedProgress)
         } else {
             circularProgress.setColor(1f, 1f, 1f)
-            circularProgress.setPortion(progress)
+            circularProgress.setPortion(snappedProgress)
         }
+    }
 
+    companion object {
+        /**
+         * The number of steps a full circle is divided into (0.5 degrees per step).
+         */
+        private const val PROGRESS_STEPS = 720f
     }
 
 }

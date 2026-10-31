@@ -112,10 +112,7 @@ class HUDHealthBar : HUDElement() {
 
         if (isNewStyle) {
 
-            val color = getFillColor(hp)
-
-            fill.color = color
-            marker.color = color
+            applyFillColor(hp)
             marker.blendInfo = if (hp < EPIC_CUTOFF) BlendInfo.Inherit else BlendInfo.Additive
 
         } else {
@@ -159,12 +156,33 @@ class HUDHealthBar : HUDElement() {
         marker.scaleTo(1f, 0.2f, Easing.Out)
     }
 
-    private fun getFillColor(hp: Float) = when {
+    private fun applyFillColor(hp: Float) {
+        // Interpolated per channel instead of through Colors.interpolateNonLinear,
+        // which allocates a Color4 every frame.
+        val red: Float
+        val greenBlue: Float
 
-        hp < 0.2f -> Colors.interpolateNonLinear(0.2f - hp, Color4.Black, Color4.Red, 0f, 0.2f)
-        hp < EPIC_CUTOFF -> Colors.interpolateNonLinear(0.5f - hp, Color4.White, Color4.Black, 0f, 0.5f)
+        when {
+            // Black to red.
+            hp < 0.2f -> {
+                red = Interpolation.floatAt(0.2f - hp, 0f, 1f, 0f, 0.2f)
+                greenBlue = 0f
+            }
 
-        else -> Color4.White
+            // White to black.
+            hp < EPIC_CUTOFF -> {
+                red = Interpolation.floatAt(0.5f - hp, 1f, 0f, 0f, 0.5f)
+                greenBlue = red
+            }
+
+            else -> {
+                red = 1f
+                greenBlue = 1f
+            }
+        }
+
+        fill.setColor(red, greenBlue, greenBlue, 1f)
+        marker.setColor(red, greenBlue, greenBlue, 1f)
     }
 
     companion object {
