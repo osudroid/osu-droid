@@ -54,6 +54,27 @@ internal fun releaseTolerantBuffer() {
 }
 
 /**
+ * Copies [source] into this buffer element by element.
+ *
+ * Unlike [ArrayList.addAll], this does not allocate the intermediate array
+ * that [Collection.toArray] produces.
+ */
+@PublishedApi
+internal fun <T> ArrayList<T>.copyFrom(source: List<T>) {
+    if (source !is RandomAccess) {
+        // Indexed access would be O(n) per element here.
+        addAll(source)
+        return
+    }
+
+    ensureCapacity(source.size)
+
+    for (i in source.indices) {
+        add(source[i])
+    }
+}
+
+/**
  * Iterates over a snapshot of the receiver taken at call time, so that a structural mutation
  * caused by [action] (e.g. removing or reordering elements) can neither skip nor duplicate
  * elements, unlike a live index-based loop or [Iterable.forEach] (the latter also fails fast on
@@ -69,7 +90,7 @@ inline fun <T> List<T>.forEachTolerant(action: (T) -> Unit) {
     val buffer = acquireTolerantBuffer<T>()
 
     try {
-        buffer.addAll(this)
+        buffer.copyFrom(this)
 
         for (i in buffer.indices) {
             action(buffer[i])
@@ -88,7 +109,7 @@ inline fun <T> List<T>.forEachIndexedTolerant(action: (Int, T) -> Unit) {
     val buffer = acquireTolerantBuffer<T>()
 
     try {
-        buffer.addAll(this)
+        buffer.copyFrom(this)
 
         for (i in buffer.indices) {
             action(i, buffer[i])

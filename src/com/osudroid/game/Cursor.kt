@@ -46,9 +46,10 @@ class Cursor {
     var latestProcessedEventIndex = 0
 
     /**
-     * The latest [CursorEvent] of this [Cursor].
+     * The latest [CursorEvent] of this [Cursor], or `null` if there are no [CursorEvent]s.
      */
-    private var latestEvent: CursorEvent? = null
+    var latestEvent: CursorEvent? = null
+        private set
 
     /**
      * Adds a [CursorEvent] to this [Cursor].
@@ -69,42 +70,6 @@ class Cursor {
         }
 
         latestEvent = event
-    }
-
-    /**
-     * Obtains the latest [CursorEvent] of this [Cursor].
-     *
-     * @param actions The actions to filter by. If none are provided, no filtering is done.
-     * @return The latest [CursorEvent], or [latestEvent] or `null` if there are no [CursorEvent]s.
-     */
-    fun getLatestEvent(vararg actions: Int): CursorEvent? {
-        if (actions.isEmpty()) {
-            return latestEvent
-        }
-
-        if (!events.isEmpty()) {
-            val size = events.size
-
-            for (i in size - 1 downTo 0) {
-                val event = events[i]
-
-                for (j in actions.indices) {
-                    if (event.action == actions[j]) {
-                        return event
-                    }
-                }
-            }
-        }
-
-        if (latestEvent != null) {
-            for (i in actions.indices) {
-                if (latestEvent!!.action == actions[i]) {
-                    return latestEvent
-                }
-            }
-        }
-
-        return null
     }
 
     /**

@@ -669,7 +669,7 @@ abstract class UIComponent : Entity(0f, 0f),
 
             mChildren?.forEach { child ->
                 if (child is UIComponent) {
-                    onHandleInvalidations()
+                    child.onHandleInvalidations()
                 }
             }
             return
@@ -1107,13 +1107,17 @@ abstract class UIComponent : Entity(0f, 0f),
     }
 
     private fun updateModifiers(time: Float) {
-        universalModifierTrackers.forEach { it.update(time) }
+        for (i in universalModifierTrackers.indices) {
+            universalModifierTrackers[i].update(time)
+        }
     }
 
     override fun clearEntityModifiers() {
         super.clearEntityModifiers()
 
-        universalModifierTrackers.forEach { it.clear() }
+        for (i in universalModifierTrackers.indices) {
+            universalModifierTrackers[i].clear()
+        }
     }
 
     /**
