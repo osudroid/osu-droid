@@ -23,7 +23,11 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.util.Debug;
+
 import android.content.Context;
+import android.opengl.EGL14;
+import android.opengl.EGLExt;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -198,6 +202,28 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 	private int mSurfaceWidth;
 	private int mSurfaceHeight;
 	private boolean mHasSurface;
+
+	// BEGIN osu!droid modified: frame pacing controls
+	/**
+	 * Whether buffer swaps should wait for the display's vertical sync.
+	 */
+	private volatile boolean mVSyncEnabled = true;
+
+	/**
+	 * Whether the GL thread has to (re-)apply the swap interval before its next buffer swap.
+	 */
+	private volatile boolean mSwapIntervalDirty = true;
+
+	/**
+	 * Whether each frame is stamped with a desired presentation time of "now" before it is swapped.
+	 */
+	private volatile boolean mPresentationTimeEnabled = false;
+
+	/**
+	 * Whether the GL thread waits for a {@link android.view.Choreographer} vertical sync callback after each swap.
+	 */
+	private volatile boolean mChoreographerPacingEnabled = false;
+	// END osu!droid modified
 
 	// ===========================================================
 	// Constructors
@@ -403,6 +429,58 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		return this.mRenderMode;
 	}
 
+	// BEGIN osu!droid modified: frame pacing controls.
+	/**
+	 * Sets whether buffer swaps should wait for the display's vertical sync.
+	 * <p>
+	 * This method is thread-safe. The change is applied by the GL thread before its next buffer swap.
+	 * <p>
+	 * When disabled, the GL thread is no longer paced by the display, so the update/draw loop runs as fast as whatever
+	 * throttles the update thread allows. The display still presents at most one frame per refresh (the rest of the
+	 * frames are discarded by the compositor).
+	 *
+	 * @param enabled <code>true</code> to wait for vertical sync (<code>eglSwapInterval</code> set to 1),
+	 *                <code>false</code> to not wait (<code>eglSwapInterval</code> set to 0).
+	 */
+	public void setVSyncEnabled(final boolean enabled) {
+		if (this.mVSyncEnabled != enabled) {
+			this.mVSyncEnabled = enabled;
+			this.mSwapIntervalDirty = true;
+		}
+	}
+
+	/**
+	 * @return Whether buffer swaps wait for the display's vertical sync.
+	 */
+	public boolean isVSyncEnabled() {
+		return this.mVSyncEnabled;
+	}
+
+	/**
+	 * Sets whether each frame is stamped with a desired presentation time of "now" (<code>eglPresentationTimeANDROID</code>)
+	 * before it is swapped.
+	 * <p>
+	 * This lets the compositor present the newest frame at the next refresh and drop older queued ones, instead of
+	 * presenting every queued frame in order. Note that it also stops an <code>eglSwapInterval</code> of 1 from reliably
+	 * pacing the GL thread (use {@link #setChoreographerPacingEnabled(boolean)} for that).
+	 * <p>
+	 * This method is thread-safe.
+	 */
+	public void setPresentationTimeEnabled(final boolean enabled) {
+		this.mPresentationTimeEnabled = enabled;
+	}
+
+	/**
+	 * Sets whether the GL thread waits for a {@link android.view.Choreographer} vertical sync callback after each swap,
+	 * pacing it to the display.
+	 * <p>
+	 * This method is thread-safe.
+	 */
+	public void setChoreographerPacingEnabled(final boolean enabled) {
+		this.mChoreographerPacingEnabled = enabled;
+	}
+	// END osu!droid modified
+
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
@@ -550,6 +628,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			} catch (final InterruptedException e) {
 				// fall thru and exit normally
 			} finally {
+				// BEGIN osu!droid modified: stop the Choreographer thread together with the GL thread
+				if (this.mVSyncWaiter != null) {
+					this.mVSyncWaiter.quit();
+				}
+				// END osu!droid modified
+
 				sEglSemaphore.release();
 			}
 		}
@@ -603,6 +687,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 				if(changed) {
 					gl = (GL10) this.mEglHelper.createSurface(GLSurfaceView.this.getHolder());
 					tellRendererSurfaceChanged = true;
+
+					// BEGIN osu!droid modified: frame pacing controls
+					// The swap interval belongs to the surface, so a new surface needs it applied again.
+					GLSurfaceView.this.mSwapIntervalDirty = true;
+					// END osu!droid modified
 				}
 				if(tellRendererSurfaceCreated) {
 					this.mRenderer.onSurfaceCreated(gl, this.mEglHelper.mEglConfig);
@@ -616,11 +705,40 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 					/* draw a frame here */
 					this.mRenderer.onDrawFrame(gl);
 
+					// BEGIN osu!droid modified: frame pacing controls
+					// Clear the flag before reading the setting, so that a change made in-between is not lost.
+					// It marks the flag dirty again and gets applied on the next frame.
+					if (GLSurfaceView.this.mSwapIntervalDirty) {
+						GLSurfaceView.this.mSwapIntervalDirty = false;
+						this.mEglHelper.applySwapInterval(GLSurfaceView.this.mVSyncEnabled ? 1 : 0);
+					}
+					// END osu!droid modified
+
 					/*
 					 * Once we're done with GL, we need to call swapBuffers() to
 					 * instruct the system to display the rendered frame
 					 */
+					// BEGIN osu!droid modified: frame pacing controls
+					if (GLSurfaceView.this.mPresentationTimeEnabled) {
+						this.mEglHelper.setPresentationTime(System.nanoTime());
+					} else {
+						this.mEglHelper.clearPresentationTime();
+					}
+					// END osu!droid modified
+
 					this.mEglHelper.swap();
+
+					// BEGIN osu!droid modified: frame pacing controls
+					if (GLSurfaceView.this.mChoreographerPacingEnabled) {
+						if (this.mVSyncWaiter == null) {
+							this.mVSyncWaiter = new ChoreographerVSyncWaiter();
+						}
+
+						this.mVSyncWaiter.waitForVSync();
+					}
+
+					this.mRenderer.onFrameSwapped(gl);
+					// END osu!droid modified
 				}
 			}
 
@@ -754,6 +872,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		private final ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
 		private EglHelper mEglHelper;
 		private boolean mSizeChanged;
+
+		// BEGIN osu!droid modified: frame pacing controls
+		/**
+		 * Created on first use so that its thread only exists while Choreographer pacing is (or was) in use.
+		 */
+		private ChoreographerVSyncWaiter mVSyncWaiter;
+		// END osu!droid modified
 	}
 
 	/**
@@ -858,6 +983,62 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			return this.mEgl.eglGetError() != EGL11.EGL_CONTEXT_LOST;
 		}
 
+		// BEGIN osu!droid modified: frame pacing controls
+		/**
+		 * Sets the desired presentation time of the next frame swapped on the surface that is current on the calling
+		 * (GL) thread.
+		 * <p>
+		 * If the device does not support <code>EGL_ANDROID_presentation_time</code>, this logs a warning once and does
+		 * nothing from then on.
+		 *
+		 * @param nanoseconds The desired presentation time, in the {@link System#nanoTime()} time base.
+		 */
+		public void setPresentationTime(final long nanoseconds) {
+			if (this.mPresentationTimeUnsupported) {
+				return;
+			}
+
+			if (!EGLExt.eglPresentationTimeANDROID(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), nanoseconds)) {
+				this.mPresentationTimeUnsupported = true;
+				Debug.w("eglPresentationTimeANDROID failed with EGL error 0x" + Integer.toHexString(EGL14.eglGetError()) + ", not using presentation times");
+				return;
+			}
+
+			this.mHasPresentationTime = true;
+		}
+
+		/**
+		 * Makes frames swapped on the surface that is current on the calling (GL) thread stop carrying a presentation
+		 * time, if {@link #setPresentationTime(long)} gave them one.
+		 * <p>
+		 * The native window keeps the last presentation time it was given and stamps every later frame with it, so
+		 * without this, those frames would keep a stale explicit timestamp (which, unlike an automatic one, lets the
+		 * compositor drop queued frames) instead of going back to stock behavior.
+		 */
+		public void clearPresentationTime() {
+			if (!this.mHasPresentationTime) {
+				return;
+			}
+
+			this.mHasPresentationTime = false;
+			EGLExt.eglPresentationTimeANDROID(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), NATIVE_WINDOW_TIMESTAMP_AUTO);
+		}
+
+		/**
+		 * Sets the swap interval of the surface that is current on the calling (GL) thread.
+		 * <p>
+		 * {@link EGL10} has no swap interval API, so this goes through {@link EGL14}. Both wrap the same native EGL
+		 * display, so {@link EGL14#eglGetCurrentDisplay()} returns the display this helper made current.
+		 *
+		 * @param interval The minimum number of display refreshes per buffer swap. 0 disables vertical sync.
+		 */
+		public void applySwapInterval(final int interval) {
+			if (!EGL14.eglSwapInterval(EGL14.eglGetCurrentDisplay(), interval)) {
+				Debug.w("eglSwapInterval(" + interval + ") failed with EGL error 0x" + Integer.toHexString(EGL14.eglGetError()));
+			}
+		}
+		// END osu!droid modified
+
 		public void finish() {
 			if(this.mEglSurface != null) {
 				this.mEgl.eglMakeCurrent(this.mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
@@ -879,6 +1060,21 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		EGLSurface mEglSurface;
 		EGLConfig mEglConfig;
 		EGLContext mEglContext;
+
+		// BEGIN osu!droid modified: frame pacing controls
+		private boolean mPresentationTimeUnsupported;
+
+		/**
+		 * Whether frames are currently stamped with an explicit presentation time.
+		 */
+		private boolean mHasPresentationTime;
+
+		/**
+		 * <code>NATIVE_WINDOW_TIMESTAMP_AUTO</code> from <code>system/window.h</code>: makes the native window stamp
+		 * frames with the time they are queued, which is the default.
+		 */
+		private static final long NATIVE_WINDOW_TIMESTAMP_AUTO = Long.MIN_VALUE;
+		// END osu!droid modified
 	}
 
 	/**
@@ -987,5 +1183,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		 *            the interface supports GL11 or higher interfaces.
 		 */
 		void onDrawFrame(GL10 gl);
+
+		// BEGIN osu!droid modified: notify the renderer of buffer swaps
+		/**
+		 * Called on the GL thread right after the frame drawn by {@link #onDrawFrame(GL10)} has been handed to the
+		 * display with a buffer swap.
+		 *
+		 * @param gl the GL interface.
+		 */
+		void onFrameSwapped(GL10 gl);
+		// END osu!droid modified
 	}
 }
