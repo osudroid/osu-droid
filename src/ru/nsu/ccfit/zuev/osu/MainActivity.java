@@ -117,6 +117,11 @@ public class MainActivity extends BaseGameActivity implements
     private ScheduledFuture<?> logFlushFuture;
     private Display display;
     private DisplayManager.DisplayListener displayListener;
+    /**
+     * The maximum limit of the update rate, regardless of the frame limiter setting.
+     */
+    private static final float MAXIMUM_UPDATE_HZ = 1000;
+
     private float currentRefreshRate = 60;
     private float maxRefreshRate = 60;
     private int maxRefreshRateModeId = 0;
@@ -162,6 +167,9 @@ public class MainActivity extends BaseGameActivity implements
             public void onDisplayChanged(int displayId) {
                 if (displayId == display.getDisplayId()) {
                     currentRefreshRate = display.getRefreshRate();
+
+                    // Refresh-rate multiples of the frame limiter depend on the current refresh rate.
+                    applyFrameLimiterSetting(Config.getFrameLimiter());
                 }
             }
         };
@@ -402,6 +410,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
+        applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
@@ -1117,6 +1126,40 @@ public class MainActivity extends BaseGameActivity implements
 
             getWindow().setAttributes(lp);
         });
+    }
+
+    /**
+     * Applies a frame limiter setting to the render surface and the update clock.
+     *
+     * @param frameLimiter A value returned by {@link Config#getFrameLimiter()}.
+     */
+    public void applyFrameLimiterSetting(int frameLimiter) {
+        boolean lowLatency = frameLimiter == Config.FRAME_LIMITER_VSYNC_LOW_LATENCY;
+        boolean vsync = lowLatency || frameLimiter == Config.FRAME_LIMITER_VSYNC;
+
+        // Every frame gets a presentation time, and with vertical sync on, a Choreographer callback paces the loop
+        // instead of the swap interval. The next update only starts after that wait, so it samples input as late as
+        // possible.
+        if (mRenderSurfaceView != null) {
+            mRenderSurfaceView.setVSyncEnabled(vsync);
+            mRenderSurfaceView.setPresentationTimeEnabled(frameLimiter != Config.FRAME_LIMITER_VSYNC);
+            mRenderSurfaceView.setChoreographerPacingEnabled(lowLatency);
+        }
+
+        if (mEngine != null) {
+            mEngine.setReleaseUpdateAfterSwap(lowLatency);
+        }
+
+        // With vertical sync on, the display paces the loop and the hard limit is never reached, which keeps the
+        // previous behavior intact. Without it, the clock is the only thing pacing the loop.
+        float maximumUpdateHz = vsync || frameLimiter == Config.FRAME_LIMITER_UNLIMITED
+            ? MAXIMUM_UPDATE_HZ
+            : Math.min(currentRefreshRate * frameLimiter, MAXIMUM_UPDATE_HZ);
+
+        if (mEngine instanceof UIEngine uiEngine) {
+            // The clock is read on the update thread, so change it there.
+            uiEngine.runOnUpdateThread(() -> uiEngine.getClock().setMaximumUpdateHz(maximumUpdateHz));
+        }
     }
 
     private boolean checkPermissions() {
