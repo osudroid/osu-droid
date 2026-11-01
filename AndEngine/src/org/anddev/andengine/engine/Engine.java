@@ -82,6 +82,20 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private final State mThreadLocker = new State();
 
+	// BEGIN osu!droid modified: optionally release the update thread after the buffer swap
+	/**
+	 * Whether the update thread is released after the buffer swap rather than right after drawing. Written from any
+	 * thread, read by the GL thread.
+	 */
+	private volatile boolean mReleaseUpdateAfterSwap = false;
+
+	/**
+	 * Whether the frame that was last drawn deferred releasing the update thread to {@link #onFrameSwapped(GL10)}.
+	 * Only accessed by the GL thread.
+	 */
+	private boolean mUpdateReleasePending = false;
+	// END osu!droid modified
+
 	private final UpdateThread mUpdateThread = new UpdateThread();
 
 	private final RunnableHandler mUpdateThreadRunnableHandler = new RunnableHandler();
@@ -519,8 +533,38 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 		this.onDrawScene(pGL);
 
-		threadLocker.notifyCanUpdate();
+		// BEGIN osu!droid modified: optionally release the update thread after the buffer swap
+		// Latch the setting for this frame, so that toggling it between here and onFrameSwapped() cannot leave the
+		// update thread waiting forever.
+		this.mUpdateReleasePending = this.mReleaseUpdateAfterSwap;
+
+		if (!this.mUpdateReleasePending) {
+			threadLocker.notifyCanUpdate();
+		}
+		// END osu!droid modified
 	}
+
+	// BEGIN osu!droid modified: optionally release the update thread after the buffer swap
+	public void onFrameSwapped(final GL10 pGL) {
+		if (!this.mUpdateReleasePending) {
+			return;
+		}
+
+		this.mUpdateReleasePending = false;
+		this.mThreadLocker.notifyCanUpdate();
+	}
+
+	/**
+	 * Sets whether the update thread is held back until the drawn frame has been swapped (including any vertical sync
+	 * wait the surface does after swapping), instead of being released as soon as drawing is done.
+	 * <p>
+	 * When the surface waits for vertical sync after swapping, this makes the next update sample input right after
+	 * vertical sync instead of a frame earlier, at the cost of no longer overlapping the next update with the swap.
+	 */
+	public void setReleaseUpdateAfterSwap(final boolean enabled) {
+		this.mReleaseUpdateAfterSwap = enabled;
+	}
+	// END osu!droid modified
 
 	protected void onDrawScene(final GL10 pGL) {
 		final Camera camera = this.getCamera();
