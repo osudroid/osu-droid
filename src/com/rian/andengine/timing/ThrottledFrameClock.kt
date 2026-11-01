@@ -59,7 +59,11 @@ class ThrottledFrameClock : FramedClock() {
         val before = currentTime
 
         try {
-            Thread.sleep((seconds * 1e3).toLong())
+            // Pass the sub-millisecond remainder as well. Truncating to whole milliseconds is a large relative
+            // error once the frame budget itself is only a few milliseconds.
+            val nanoseconds = (seconds * 1e9).toLong()
+
+            Thread.sleep(nanoseconds / 1_000_000, (nanoseconds % 1_000_000).toInt())
         } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
         }
