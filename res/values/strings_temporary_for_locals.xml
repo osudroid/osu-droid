@@ -3,4 +3,26 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_category_rendering">Rendering</string>
+    <string name="opt_frame_limiter_title">Frame limiter</string>
+    <string name="opt_frame_limiter_summary">Disabling VSync lowers visual latency but greatly increases battery usage and heat</string>
+
+    <string-array name="frame_limiter_names">
+        <item>VSync</item>
+        <item>VSync (low latency)</item>
+        <item>2x refresh rate</item>
+        <item>4x refresh rate</item>
+        <item>8x refresh rate</item>
+        <item>Unlimited</item>
+    </string-array>
+
+    <string-array name="frame_limiter_values" translatable="false">
+        <item>1</item>
+        <item>-1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+        <item>0</item>
+    </string-array>
+
 </resources>

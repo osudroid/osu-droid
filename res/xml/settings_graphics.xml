@@ -34,14 +34,22 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/opt_category_hud">
+    <PreferenceCategory android:title="@string/opt_category_rendering">
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="fps"
             android:summary="@string/opt_fps_summary"
             android:title="@string/opt_fps_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="1"
+            android:entries="@array/frame_limiter_names"
+            android:entryValues="@array/frame_limiter_values"
+            android:key="frameLimiter"
+            android:summary="@string/opt_frame_limiter_summary"
+            android:title="@string/opt_frame_limiter_title" />
 
     </PreferenceCategory>
 
