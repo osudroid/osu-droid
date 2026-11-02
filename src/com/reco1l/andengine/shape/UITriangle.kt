@@ -4,8 +4,6 @@ import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.opengl.font.FontManager
-import org.andengine.graphics.debug.RenderStats
-import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
@@ -97,11 +95,8 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
             )
         }
 
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            entity as UITriangle
-            QuadBatcher.flush()
-            GLES32.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GLES32.GL_TRIANGLES else GLES32.GL_LINE_LOOP, 0, vertexCount)
-            RenderStats.draw(vertexCount)
+        override fun topology(entity: UIBufferedComponent<*>): Int {
+            return if ((entity as UITriangle).paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP
         }
 
     }

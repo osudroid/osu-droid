@@ -252,6 +252,46 @@ class ShapeBatchingTest {
     }
 
     @Test
+    fun sector_triangleFanOverArcPoints() {
+        ShapeBatching.sector(identity, 10f, 10f, 4f, 4f, 0f, 90f, 4, white, blend)
+        val q = quads()
+        assertEquals(3, q.size)
+        for (quad in q) {
+            assertEquals(10f, quad[0].x, 0f); assertEquals(10f, quad[0].y, 0f)
+            assertEquals(quad[2].x, quad[3].x, 0f); assertEquals(quad[2].y, quad[3].y, 0f)
+            assertEquals(ShapeMasks.centerU(masks.solid()), quad[1].u, 0f)
+        }
+        // 0 degrees points up, 90 degrees to the right.
+        assertEquals(10f, q[0][1].x, 1e-4f); assertEquals(6f, q[0][1].y, 1e-4f)
+        assertEquals(14f, q[2][2].x, 1e-4f); assertEquals(10f, q[2][2].y, 1e-4f)
+        assertEquals(q[0][2].x, q[1][1].x, 0f)
+    }
+
+    @Test
+    fun arc_stripBetweenInnerAndOuterRadius() {
+        ShapeBatching.arc(identity, 10f, 10f, 4f, 3f, 0f, 90f, 3, 2f, white, blend)
+        val q = quads()
+        assertEquals(2, q.size)
+        // First point straight up: inner radius 2 (ry 3 - 1), outer 4 (ry 3 + 1).
+        assertEquals(10f, q[0][0].x, 1e-4f); assertEquals(8f, q[0][0].y, 1e-4f)
+        assertEquals(10f, q[0][1].x, 1e-4f); assertEquals(6f, q[0][1].y, 1e-4f)
+        // Last point to the right: inner x radius 3, outer 5.
+        assertEquals(13f, q[1][3].x, 1e-4f); assertEquals(10f, q[1][3].y, 1e-4f)
+        assertEquals(15f, q[1][2].x, 1e-4f)
+        assertEquals(q[0][2].x, q[1][1].x, 0f)
+    }
+
+    @Test
+    fun sectorAndArc_invisibleOrDegenerateAddNothing() {
+        val clear = QuadBatcher.packColor(1f, 1f, 1f, 0f)
+        ShapeBatching.sector(identity, 0f, 0f, 3f, 3f, 0f, 90f, 4, clear, blend)
+        ShapeBatching.arc(identity, 0f, 0f, 3f, 3f, 0f, 90f, 4, 1f, clear, blend)
+        ShapeBatching.sector(identity, 0f, 0f, 3f, 3f, 0f, 90f, 1, white, blend)
+        ShapeBatching.arc(identity, 0f, 0f, 3f, 3f, 0f, 90f, 4, 0f, white, blend)
+        assertTrue(!QuadBatcher.hasPending)
+    }
+
+    @Test
     fun circle_fourQuarterMasks() {
         ShapeBatching.circle(identity, 10f, 10f, 4f, white, blend)
         val q = quads()

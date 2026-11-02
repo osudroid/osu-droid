@@ -1,27 +1,21 @@
 package com.reco1l.andengine.ui
 
+import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
-import org.andengine.graphics.debug.RenderStats
-import android.opengl.GLES32
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.GL_DYNAMIC_DRAW
-import com.reco1l.andengine.buffered.GL_TRIANGLE_STRIP
 import com.reco1l.andengine.buffered.UIBufferedComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.shader.PositionColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
 
 /**
  * A rectangle that renders a smooth horizontal alpha gradient using per-vertex colors.
  *
- * The [org.andengine.opengl.shader.PositionColorShaderProgram] already supports per-vertex RGBA,  normally
- * [com.reco1l.andengine.buffered.UIBufferedComponent] disables the color attribute array and uses a constant *color.
- * This class overrides [onBindShader] to keep the array enabled so GLES can read the
- * gradient alpha values out of the interleaved VBO.
+ * Batched as a quad with a color per corner; with depth testing or clearing, the per-vertex colors
+ * of [GradientVBO] are drawn through the [MeshRenderer].
  *
  * @param fromAlpha  Alpha weight at the LEFT  edge (0–1).
  * @param toAlpha    Alpha weight at the RIGHT edge (0–1).
@@ -76,23 +70,6 @@ class UIGradientBox(
         requestBufferUpdate()
     }
 
-    // Shader binding
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
-        }
-
-        // Texture coordinates are unused, keep them disabled.
-        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-    }
-
     /**
      * Stores 4 vertices in GL_TRIANGLE_STRIP order.
      * Each vertex is 6 floats: (x, y, r, g, b, a).
@@ -128,46 +105,26 @@ class UIGradientBox(
             putVert(3, w,  h,  r, g, b, ta)
         }
 
+        override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
+            MeshRenderer.drawColored(
+                PrimitiveType.TriangleStrip, data, 0, 4,
+                gl.modelViewGLMatrix, gl.projectionGLMatrix,
+                meshBlendMode(), meshDepthTest(), depthInfo.mask
+            )
+        }
+
         private fun putVert(idx: Int, x: Float, y: Float, r: Float, g: Float, b: Float, a: Float) {
             val base = idx * VERTEX_FLOATS
-            mFloatBuffer.put(base, x)
-            mFloatBuffer.put(base + 1, y)
-            mFloatBuffer.put(base + 2, r)
-            mFloatBuffer.put(base + 3, g)
-            mFloatBuffer.put(base + 4, b)
-            mFloatBuffer.put(base + 5, a)
-        }
-
-        // Called once per frame before drawing (Dynamic sharing mode).
-        override fun beginDraw(gl: GLState) {
-            bindAndUpload()
-
-            // Position attribute: 2 floats, stride=24, byte-offset 0
-            GlesBackend.state.vertexAttribPointer(
-                ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
-                2, GLES32.GL_FLOAT, false, STRIDE_BYTES, 0
-            )
-            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-
-            // Color attribute: 4 floats, stride=24, byte-offset 8 (skip x,y)
-            GlesBackend.state.vertexAttribPointer(
-                ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION,
-                4, GLES32.GL_FLOAT, false, STRIDE_BYTES, 8
-            )
-            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        }
-
-        override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) { /* using beginDraw */ }
-
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            QuadBatcher.flush()
-            GLES32.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
-            RenderStats.draw(4)
+            data[base] = x
+            data[base + 1] = y
+            data[base + 2] = r
+            data[base + 3] = g
+            data[base + 4] = b
+            data[base + 5] = a
         }
     }
 
     companion object {
         private const val VERTEX_FLOATS = 6 // x, y, r, g, b, a
-        private const val STRIDE_BYTES = VERTEX_FLOATS * 4 // 24
     }
 }

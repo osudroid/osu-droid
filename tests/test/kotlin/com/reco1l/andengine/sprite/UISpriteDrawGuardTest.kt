@@ -82,7 +82,7 @@ class UISpriteDrawGuardTest {
     }
 
     @Test
-    fun noRegion_drawsAsBefore() {
+    fun noRegion_runsBufferHooksInOrder() {
         val sprite = RecordingSprite(null)
         sprite.doDraw(glState, camera)
 

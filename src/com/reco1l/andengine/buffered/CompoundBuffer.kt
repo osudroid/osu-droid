@@ -29,6 +29,10 @@ class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
         buffers.forEach { it.draw(gl, entity) }
     }
 
+    override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
+        for (buffer in buffers) buffer.drawMesh(gl, entity)
+    }
+
     override fun invalidateOnHardware() {
         buffers.forEach { it.invalidateOnHardware() }
     }

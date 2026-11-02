@@ -2,6 +2,7 @@ package com.reco1l.andengine.buffered
 
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
+import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.osudroid.math.toRadians
@@ -14,6 +15,17 @@ abstract class VertexBuffer(
     val vertexSize: Int,
     bufferUsage: Int
 ) : Buffer(vertexCount * vertexSize, bufferUsage) {
+
+
+    // Write position of the sequential [putVertex], in floats.
+    private var cursor = 0
+
+
+    /**
+     * The GL draw mode the vertices are drawn with for [entity]; [drawTopology] unless a buffer
+     * depends on the entity's state.
+     */
+    open fun topology(entity: UIBufferedComponent<*>): Int = drawTopology
 
 
     //region Draw pipeline
@@ -31,8 +43,14 @@ abstract class VertexBuffer(
 
     override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
         QuadBatcher.flush()
-        GLES32.glDrawArrays(drawTopology, 0, vertexCount)
+        GLES32.glDrawArrays(topology(entity), 0, vertexCount)
         RenderStats.draw(vertexCount)
+    }
+
+    override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
+        check(vertexSize == VERTEX_2D) { "The mesh renderer draws 2D vertices, got $vertexSize components" }
+        val primitive = GlesPipeline.primitiveTypeOf(topology(entity)) ?: return
+        entity.drawPositions(gl, primitive, data, 0, vertexCount)
     }
 
     //endregion
@@ -95,17 +113,17 @@ abstract class VertexBuffer(
     //region Utility functions
 
     fun setPosition(value: Int) {
-        mFloatBuffer.position(value)
+        cursor = value
     }
 
     fun putVertex(x: Float, y: Float) {
-        mFloatBuffer.put(x)
-        mFloatBuffer.put(y)
+        data[cursor++] = x
+        data[cursor++] = y
     }
 
     fun putVertex(index: Int, x: Float, y: Float) {
-        mFloatBuffer.put(index * vertexSize, x)
-        mFloatBuffer.put(index * vertexSize + 1, y)
+        data[index * vertexSize] = x
+        data[index * vertexSize + 1] = y
     }
 
     //endregion

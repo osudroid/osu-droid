@@ -78,14 +78,14 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         requestNewBuffer()
     }
 
-    // Only a full circle with equal sides goes through the batch; arcs and ellipses use the buffer.
-    private fun canBatchCircle(): Boolean {
-        return abs(endAngle - startAngle) >= 360f && abs(width - height) <= 1e-3f && canBatchShape()
+    // Only a full circle with equal sides uses the smoothed circle and ring masks.
+    private fun isFullCircle(): Boolean {
+        return abs(endAngle - startAngle) >= 360f && abs(width - height) <= 1e-3f
     }
 
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
         // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchCircle()) batchBlendMode() else null
+        val blend = if (canBatchShape()) batchBlendMode() else null
         if (blend != null) {
             onApplyColor(pGLState)
 
@@ -93,17 +93,31 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
                 return
             }
 
-            val radius = width / 2f
             val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+            // The line width is given in pixels, the batch takes virtual units.
+            val batchLineWidth = lineWidth / FontManager.getRasterScale()
 
             QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            if (paintStyle == PaintStyle.Fill) {
-                ShapeBatching.circle(pGLState.modelViewGLMatrix, radius, radius, radius, color, blend)
+            // Full circles use the ring band, which lies inside the radius; partial outlines follow the
+            // legacy centered line strip. An outline whose portion reaches exactly a full circle therefore
+            // switches between the two looks (no caller does this today).
+            if (isFullCircle()) {
+                val radius = width / 2f
+                if (paintStyle == PaintStyle.Fill) {
+                    ShapeBatching.circle(pGLState.modelViewGLMatrix, radius, radius, radius, color, blend)
+                } else {
+                    ShapeBatching.ring(pGLState.modelViewGLMatrix, radius, radius, radius, batchLineWidth, color, blend)
+                }
             } else {
-                ShapeBatching.ring(
-                    pGLState.modelViewGLMatrix, radius, radius, radius,
-                    lineWidth / FontManager.getRasterScale(), color, blend
-                )
+                // Same points as the buffer: radii of half the size, around the center.
+                val rx = width / 2f
+                val ry = height / 2f
+                val segments = approximateSegments(width, height)
+                if (paintStyle == PaintStyle.Fill) {
+                    ShapeBatching.sector(pGLState.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, color, blend)
+                } else {
+                    ShapeBatching.arc(pGLState.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, batchLineWidth, color, blend)
+                }
             }
             return
         }
@@ -115,7 +129,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
     // The batch needs no buffer; it is only built when the circle is drawn the legacy way.
     override fun onCreateBuffer(): CircleVertexBuffer? {
 
-        if (canBatchCircle()) {
+        if (canBatchShape()) {
             return null
         }
 

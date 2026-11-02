@@ -351,7 +351,7 @@ class UIShapeBatchingTest {
     }
 
     @Test
-    fun uiCircle_arc_usesLegacyPath() {
+    fun uiCircle_depthMask_usesLegacyPath() {
         val circle = object : UICircle() {
             val legacyCalls = ArrayList<String>()
             override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
@@ -360,6 +360,7 @@ class UIShapeBatchingTest {
         }
         circle.setSize(20f, 20f)
         circle.setPortion(0.5f)
+        circle.depthInfo = DepthInfo.Default
         circle.onHandleInvalidations()
 
         circle.doDraw(glState, camera)
@@ -367,6 +368,110 @@ class UIShapeBatchingTest {
         assertFalse(QuadBatcher.hasPending)
         assertEquals(listOf("begin", "pointers", "draw"), circle.legacyCalls)
         assertNotNull(circle.buffer)
+    }
+
+    @Test
+    fun portionCircle_batchedWithoutBuffer() {
+        val circle = circle { setPortion(0.25f) }
+        drawAndFlush { circle.doDraw(glState, camera) }
+
+        assertEquals(1, draws())
+        assertEquals(UICircle.approximateSegments(20f, 20f) - 1, allQuadCorners().size)
+        assertNull(circle.buffer)
+    }
+
+    @Test
+    fun ellipse_batched() {
+        val ellipse = UICircle().apply { setSize(30f, 10f) }
+        ellipse.onHandleInvalidations()
+        drawAndFlush { ellipse.doDraw(glState, camera) }
+
+        assertEquals(1, draws())
+        assertNull(ellipse.buffer)
+        val quads = allQuadCorners()
+        assertEquals(UICircle.approximateSegments(30f, 10f) - 1, quads.size)
+        for (q in quads) {
+            // Every triangle starts at the center and stays inside the bounding box.
+            assertEquals(15f, q[0][0], 1e-4f); assertEquals(5f, q[0][1], 1e-4f)
+            for (c in q) {
+                assertTrue(c[0] in -1e-3f..30.001f && c[1] in -1e-3f..10.001f)
+            }
+        }
+    }
+
+    /** The four corners (x, y) of every quad of the last vertex upload. */
+    private fun allQuadCorners(): List<List<FloatArray>> {
+        val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
+        val stride = QuadBatcher.VERTEX_SIZE_BYTES
+        val quads = ArrayList<List<FloatArray>>()
+        while (buffer.remaining() >= stride * 4) {
+            quads += List(4) {
+                val x = buffer.float
+                val y = buffer.float
+                buffer.position(buffer.position() + stride - 8)
+                floatArrayOf(x, y)
+            }
+        }
+        return quads
+    }
+
+    @Test
+    fun sector_matchesBufferGeometry() {
+        val cases = listOf(
+            floatArrayOf(20f, 20f, 0f, 90f),
+            floatArrayOf(40f, 24f, 30f, 250f),
+            floatArrayOf(30f, 30f, 90f, -45f)
+        )
+        for (case in cases) {
+            val circle = UICircle().apply {
+                setSize(case[0], case[1])
+                startAngle = case[2]
+                endAngle = case[3]
+            }
+            circle.onHandleInvalidations()
+            val segments = UICircle.approximateSegments(case[0], case[1])
+            val buffer = UICircle.CircleVertexBuffer(segments, PaintStyle.Fill)
+            buffer.update(circle)
+
+            drawAndFlush { circle.doDraw(glState, camera) }
+            val quads = allQuadCorners()
+
+            assertEquals(segments - 1, quads.size)
+            // Buffer layout: center, then the arc points; fan triangle i is (center, point i, point i + 1).
+            for ((i, q) in quads.withIndex()) {
+                assertEquals(buffer.valueAt(0), q[0][0], 1e-3f); assertEquals(buffer.valueAt(1), q[0][1], 1e-3f)
+                assertEquals(buffer.valueAt(2 * (i + 1)), q[1][0], 1e-3f); assertEquals(buffer.valueAt(2 * (i + 1) + 1), q[1][1], 1e-3f)
+                assertEquals(buffer.valueAt(2 * (i + 2)), q[2][0], 1e-3f); assertEquals(buffer.valueAt(2 * (i + 2) + 1), q[2][1], 1e-3f)
+            }
+            vertexUploads.clear()
+        }
+    }
+
+    @Test
+    fun arc_matchesBufferGeometry() {
+        val circle = UICircle().apply {
+            setSize(40f, 24f)
+            paintStyle = PaintStyle.Outline
+            lineWidth = 2f
+            startAngle = 30f
+            endAngle = 250f
+        }
+        circle.onHandleInvalidations()
+        val segments = UICircle.approximateSegments(40f, 24f)
+        val buffer = UICircle.CircleVertexBuffer(segments, PaintStyle.Outline)
+        buffer.update(circle)
+
+        drawAndFlush { circle.doDraw(glState, camera) }
+        val quads = allQuadCorners()
+
+        assertEquals(segments - 1, quads.size)
+        // The strip is centered on the buffer's line strip: the midpoint of inner and outer corner is the point.
+        for ((i, q) in quads.withIndex()) {
+            assertEquals(buffer.valueAt(2 * i), (q[0][0] + q[1][0]) / 2f, 1e-3f)
+            assertEquals(buffer.valueAt(2 * i + 1), (q[0][1] + q[1][1]) / 2f, 1e-3f)
+            assertEquals(buffer.valueAt(2 * (i + 1)), (q[3][0] + q[2][0]) / 2f, 1e-3f)
+            assertEquals(buffer.valueAt(2 * (i + 1) + 1), (q[3][1] + q[2][1]) / 2f, 1e-3f)
+        }
     }
 
     @Test

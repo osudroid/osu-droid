@@ -1,20 +1,18 @@
 package com.reco1l.andengine.sprite
 
+import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.sprite.UISprite.*
 import com.reco1l.andengine.sprite.ScaleType.*
 import com.reco1l.framework.math.*
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.*
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.util.*
-import android.opengl.GLES32
 import kotlin.math.*
 
 /**
@@ -128,6 +126,13 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
      * express is drawn through the buffer path.
      */
     open val isBatchable: Boolean get() = true
+
+    /**
+     * Sprites that are not [isBatchable] keep the legacy buffer path; a subclass that takes it must
+     * override [onBindShader] and bind its own shader. All others draw their buffers through the
+     * [MeshRenderer] when they cannot be batched.
+     */
+    override val drawsWithOwnShader: Boolean get() = !isBatchable
 
     // Scratch for [computeQuad], shared by both draw paths and the buffers.
     private val quad = SpriteQuad()
@@ -263,51 +268,40 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         out.v1 = if (flippedVertical) v else v2
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
-    }
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        // Upload MVP matrix
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
-        }
-
-        // Upload texture unit sampler
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
-
-        // Upload color uniform
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(
-                shader.uniformColorLocation,
-                drawRed, drawGreen, drawBlue, drawAlpha
-            )
-        }
-
-        // Disable color vertex attribute (this shader uses uniform color)
-        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-
-        // Set up UV coordinates at attribute 3
-        uvBuffer.beginDraw(pGLState)
-    }
-
     override fun onDrawBuffer(pGLState: GLState) {
-        textureRegion?.texture?.bind(pGLState)
-        super.onDrawBuffer(pGLState)
+        if (drawsWithOwnShader) {
+            textureRegion?.texture?.bind(pGLState)
+            super.onDrawBuffer(pGLState)
+            return
+        }
+
+        // Without a texture there is nothing to sample (the legacy path sampled whatever was bound).
+        val texture = textureRegion?.texture ?: return
+        val positions = buffer?.data ?: return
+        val uvs = uvBuffer.data
+
+        // Interleave the buffers' positions and texture coordinates (same strip order) as x, y, u, v.
+        val vertices = texturedScratch
+        for (i in 0 until SPRITE_VERTICES) {
+            vertices[i * 4] = positions[i * 2]
+            vertices[i * 4 + 1] = positions[i * 2 + 1]
+            vertices[i * 4 + 2] = uvs[i * 2]
+            vertices[i * 4 + 3] = uvs[i * 2 + 1]
+        }
+
+        MeshRenderer.drawTextured(
+            PrimitiveType.TriangleStrip, vertices, 0, SPRITE_VERTICES,
+            pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
+            BatchTexture.of(texture),
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            meshBlendMode(), meshDepthTest(), depthInfo.mask
+        )
     }
 
 
     class SpriteVBO : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
-        vertexCount = 4,
+        vertexCount = SPRITE_VERTICES,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
@@ -323,7 +317,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
      * Vertex order matches [SpriteVBO]: top-left, bottom-left, top-right, bottom-right (GL_TRIANGLE_STRIP).
      */
     class SpriteUVBuffer : TextureCoordinatesBuffer(
-        vertexCount = 4,
+        vertexCount = SPRITE_VERTICES,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
@@ -353,6 +347,13 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         @JvmField var v0 = 0f
         @JvmField var u1 = 0f
         @JvmField var v1 = 0f
+    }
+
+    private companion object {
+        const val SPRITE_VERTICES = 4
+
+        // x, y, u, v per vertex for the mesh renderer; GL thread only, shared by all sprites.
+        val texturedScratch = FloatArray(SPRITE_VERTICES * 4)
     }
 
 }

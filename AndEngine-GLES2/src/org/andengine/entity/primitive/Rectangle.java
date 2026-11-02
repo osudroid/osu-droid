@@ -4,6 +4,7 @@ import org.andengine.engine.camera.Camera;
 import org.andengine.entity.primitive.vbo.HighPerformanceRectangleVertexBufferObject;
 import org.andengine.entity.primitive.vbo.IRectangleVertexBufferObject;
 import org.andengine.entity.shape.RectangularShape;
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.opengl.shader.PositionColorShaderProgram;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.util.GLState;
@@ -45,6 +46,9 @@ public class Rectangle extends RectangularShape {
 	// ===========================================================
 
 	protected final IRectangleVertexBufferObject mRectangleVertexBufferObject;
+
+	/** Set by preDraw: this draw goes through the quad batch instead of the rectangle's own buffer. */
+	boolean mDrawBatched;
 
 	// ===========================================================
 	// Constructors
@@ -90,6 +94,13 @@ public class Rectangle extends RectangularShape {
 
 	@Override
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
+		this.mDrawBatched = this.isBatchable();
+		if(this.mDrawBatched) {
+			return;
+		}
+		// Pending batched quads are drawn before this rectangle, so the order stays the draw order.
+		QuadBatcher.flush();
+
 		super.preDraw(pGLState, pCamera);
 
 		this.mRectangleVertexBufferObject.bind(pGLState, this.mShaderProgram);
@@ -97,11 +108,18 @@ public class Rectangle extends RectangularShape {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			RectangleBatching.add(this, pGLState);
+			return;
+		}
 		this.mRectangleVertexBufferObject.draw(GLES32.GL_TRIANGLE_STRIP, Rectangle.VERTICES_PER_RECTANGLE);
 	}
 
 	@Override
 	protected void postDraw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			return;
+		}
 		this.mRectangleVertexBufferObject.unbind(pGLState, this.mShaderProgram);
 
 		super.postDraw(pGLState, pCamera);
@@ -120,6 +138,14 @@ public class Rectangle extends RectangularShape {
 	// ===========================================================
 	// Methods
 	// ===========================================================
+
+	/**
+	 * @return true if this rectangle is drawn through the quad batch: the default shader, the engine's own
+	 * vertex buffer, and no subclass that draws itself.
+	 */
+	protected boolean isBatchable() {
+		return RectangleBatching.canBatch(this);
+	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes

@@ -32,7 +32,19 @@ class PlayableSprite(
     @JvmField
     val declarationIndex: Int = 0
 ) {
-    private val timelines = EffectiveTimelines(element)
+    // The own timelines as tracks for the per-frame evaluation, null where there are no commands.
+    // The unrolled timelines themselves are only needed while building them (see init).
+    private val xTrack: FloatTrack?
+    private val yTrack: FloatTrack?
+    private val scaleTrack: FloatTrack?
+    private val vectorScaleXTrack: FloatTrack?
+    private val vectorScaleYTrack: FloatTrack?
+    private val rotationTrack: FloatTrack?
+    private val alphaTrack: FloatTrack?
+    private val colorTrack: ColorTrack?
+    private val flipHorizontalTrack: BooleanTrack?
+    private val flipVerticalTrack: BooleanTrack?
+    private val additiveBlendTrack: BooleanTrack?
 
     /**
      * The active trigger activations of this sprite.
@@ -107,6 +119,19 @@ class PlayableSprite(
     private val ownEndTime: Double
 
     init {
+        val timelines = EffectiveTimelines(element)
+        xTrack = PropertyTrack.floatOf(timelines.x)
+        yTrack = PropertyTrack.floatOf(timelines.y)
+        scaleTrack = PropertyTrack.floatOf(timelines.scale)
+        vectorScaleXTrack = PropertyTrack.floatOf(timelines.vectorScaleX)
+        vectorScaleYTrack = PropertyTrack.floatOf(timelines.vectorScaleY)
+        rotationTrack = PropertyTrack.floatOf(timelines.rotation)
+        alphaTrack = PropertyTrack.floatOf(timelines.alpha)
+        colorTrack = PropertyTrack.colorOf(timelines.color)
+        flipHorizontalTrack = PropertyTrack.booleanOf(timelines.flipHorizontal)
+        flipVerticalTrack = PropertyTrack.booleanOf(timelines.flipVertical)
+        additiveBlendTrack = PropertyTrack.booleanOf(timelines.additiveBlend)
+
         ownStartTime = timelines.startTime
         ownEndTime = timelines.endTime
         hasOwnCommands = ownStartTime <= ownEndTime
@@ -182,21 +207,31 @@ class PlayableSprite(
      * @param time The time in milliseconds.
      */
     fun update(time: Double) {
-        x = evaluate(timelines.x, time, element.initialX)
-        y = evaluate(timelines.y, time, element.initialY)
+        x = valueOf(xTrack, time, element.initialX)
+        y = valueOf(yTrack, time, element.initialY)
 
-        val scale = evaluate(timelines.scale, time, 1f)
-        scaleX = scale * evaluate(timelines.vectorScaleX, time, 1f)
-        scaleY = scale * evaluate(timelines.vectorScaleY, time, 1f)
+        val scale = valueOf(scaleTrack, time, 1f)
+        scaleX = scale * valueOf(vectorScaleXTrack, time, 1f)
+        scaleY = scale * valueOf(vectorScaleYTrack, time, 1f)
 
-        rotation = evaluate(timelines.rotation, time, 0f)
-        alpha = evaluate(timelines.alpha, time, 1f)
+        rotation = valueOf(rotationTrack, time, 0f)
+        alpha = valueOf(alphaTrack, time, 1f)
 
-        evaluateColorInto(timelines.color, time)
+        val color = colorTrack
+        if (color != null) {
+            color.update(time)
+            red = color.red
+            green = color.green
+            blue = color.blue
+        } else {
+            red = 1f
+            green = 1f
+            blue = 1f
+        }
 
-        flipHorizontal = evaluateBoolean(timelines.flipHorizontal, time)
-        flipVertical = evaluateBoolean(timelines.flipVertical, time)
-        additiveBlend = evaluateBoolean(timelines.additiveBlend, time)
+        flipHorizontal = valueOf(flipHorizontalTrack, time)
+        flipVertical = valueOf(flipVerticalTrack, time)
+        additiveBlend = valueOf(additiveBlendTrack, time)
 
         isVisible = hasOwnCommands && time >= ownDisplayStartTime && time <= ownEndTime
 
@@ -213,6 +248,15 @@ class PlayableSprite(
             frameIndex = animationFrameAt(animation, time)
         }
     }
+
+    private fun valueOf(
+        track: FloatTrack?,
+        time: Double,
+        initialValue: Float
+    ): Float = if (track != null) track.valueAt(time) else initialValue
+
+    private fun valueOf(track: BooleanTrack?, time: Double): Boolean =
+        track != null && track.valueAt(time)
 
     private fun applyActivations(time: Double) {
         // Fast path for the vast majority of sprites, which have no trigger activations. This

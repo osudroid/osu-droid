@@ -3,6 +3,7 @@ package com.osudroid.ui.v2.menu.main
 import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader
+import com.reco1l.andengine.buffered.UIBufferedComponent
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.sprite.ScaleType
@@ -101,6 +102,9 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
             putVertex(3, 1f, 1f) // bottom-right
             invalidateOnHardware()
         }
+
+        // Only used by the circle shader on the legacy path, never drawn through the mesh renderer.
+        override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) = Unit
 
         fun bindAsQuadPosAttribute() {
             bindAndUpload()

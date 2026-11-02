@@ -55,7 +55,7 @@ enum class CompareFunction { Never, Less, LessOrEqual, Equal, Greater, GreaterOr
 
 enum class CullMode { None, Front, Back }
 
-enum class PrimitiveType { Triangles, TriangleStrip, Lines, LineStrip, Points }
+enum class PrimitiveType { Triangles, TriangleStrip, Lines, LineStrip, Points, TriangleFan, LineLoop }
 
 /**
  * Everything fixed about a draw besides its resources: the [program], how vertices are read

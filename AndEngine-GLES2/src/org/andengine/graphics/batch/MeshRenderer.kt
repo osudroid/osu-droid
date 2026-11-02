@@ -11,6 +11,7 @@ import org.andengine.graphics.GpuBuffer
 import org.andengine.graphics.GpuProgram
 import org.andengine.graphics.Pipeline
 import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.Texture
 import org.andengine.graphics.VertexAttribute
 import org.andengine.graphics.VertexFormat
 import org.andengine.graphics.VertexLayout
@@ -21,7 +22,7 @@ import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesStateCache
 
 /**
- * Draws untextured, colored triangle/line meshes (slider bodies, trails, storyboard shapes) in one
+ * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails, storyboard shapes), in one
  * draw call each. A mesh is given as 2D positions (or positions with a color per vertex), is
  * transformed on the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn with its own
  * program; the vertex shader only applies the projection passed to [draw].
@@ -77,6 +78,48 @@ void main() {
 }
 """
 
+    /** float2 position + float2 uv + 4 normalized bytes color. */
+    const val TEXTURED_VERTEX_SIZE_BYTES = 20
+
+    private const val TEXTURED_FLOATS = 4
+
+    @JvmField
+    val texturedLayout = VertexLayout(
+        TEXTURED_VERTEX_SIZE_BYTES,
+        listOf(
+            VertexAttribute(0, VertexFormat.Float2, 0),
+            VertexAttribute(1, VertexFormat.Float2, 8),
+            VertexAttribute(2, VertexFormat.UByte4Normalized, 16)
+        )
+    )
+
+    private const val TEXTURED_VERTEX_SHADER = """#version 300 es
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aUv;
+layout(location = 2) in vec4 aColor;
+uniform mat4 uProjection;
+out vec2 vUv;
+out vec4 vColor;
+void main() {
+    vUv = aUv;
+    vColor = aColor;
+    gl_Position = uProjection * vec4(aPosition, 0.0, 1.0);
+}
+"""
+
+    private const val TEXTURED_FRAGMENT_SHADER = """#version 300 es
+precision mediump float;
+uniform sampler2D uTexture;
+in vec2 vUv;
+in vec4 vColor;
+out vec4 fragColor;
+void main() {
+    fragColor = texture(uTexture, vUv) * vColor;
+}
+"""
+
+    private const val TEXTURE_UNIT = 0
+
     private const val COUNTER_UNREGISTERED = -2
     private const val COUNTER_UNAVAILABLE = -1
     private var vertexCounter = COUNTER_UNREGISTERED
@@ -88,24 +131,48 @@ void main() {
 
     private val littleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
 
-    private var program: GpuProgram? = null
-    private var vertexBuffer: GpuBuffer? = null
+    /** Program, vertex buffer, staging and pipelines of one vertex format. */
+    private class Kit(
+        val vertexSize: Int,
+        val layout: VertexLayout,
+        val vertexShader: String,
+        val fragmentShader: String,
+        val name: String,
+        val samplerUnits: Map<String, Int>
+    ) {
+        var program: GpuProgram? = null
+        var vertexBuffer: GpuBuffer? = null
 
-    /** Per blend mode, the pipelines by depth state, depth write and primitive. */
-    private val pipelines = HashMap<BlendMode, Array<Pipeline?>>()
-    private var pipelineTotal = 0
+        /** Per blend mode, the pipelines by depth state, depth write and primitive. */
+        val pipelines = HashMap<BlendMode, Array<Pipeline?>>()
+        var pipelineTotal = 0
 
-    /** Staging for the vertex upload; CPU memory, kept across [releaseResources]. */
-    private var staging: ByteBuffer? = null
+        /** Staging for the vertex upload; CPU memory, kept across [releaseResources]. */
+        var staging: ByteBuffer? = null
+
+        val capacityVertices: Int get() = (staging?.capacity() ?: 0) / vertexSize
+    }
+
+    private val plain = Kit(VERTEX_SIZE_BYTES, layout, VERTEX_SHADER, FRAGMENT_SHADER, "mesh", emptyMap())
+    private val textured = Kit(
+        TEXTURED_VERTEX_SIZE_BYTES, texturedLayout, TEXTURED_VERTEX_SHADER, TEXTURED_FRAGMENT_SHADER, "mesh-textured",
+        mapOf("uTexture" to TEXTURE_UNIT)
+    )
 
     private val savedState = IntArray(GlesStateCache.DRAW_STATE_SIZE)
 
     /** Vertices the staging memory holds; 0 before the first draw. */
     @JvmStatic
-    val capacityVertices: Int get() = (staging?.capacity() ?: 0) / VERTEX_SIZE_BYTES
+    val capacityVertices: Int get() = plain.capacityVertices
 
-    /** Number of cached pipelines. */
-    val pipelineCount: Int get() = pipelineTotal
+    private val kits = arrayOf(plain, textured)
+
+    /** Number of cached pipelines, textured meshes included. */
+    val pipelineCount: Int get() = kits.sumOf { it.pipelineTotal }
+
+    /** Vertices the staging memory of the textured meshes holds; 0 before the first one. */
+    @JvmStatic
+    val texturedCapacityVertices: Int get() = textured.capacityVertices
 
     /**
      * Index of the [RenderStats] counter "mesh.vertices"; -1 if registering it failed, -2 before the
@@ -137,7 +204,7 @@ void main() {
         require(offset >= 0 && offset + vertexCount * 2 <= positions.size) {
             "Positions of $vertexCount vertices from $offset exceed ${positions.size} values"
         }
-        val bytes = reserve(vertexCount)
+        val bytes = reserve(plain, vertexCount)
         val color = if (littleEndian) rgba else Integer.reverseBytes(rgba)
         val a = matrix[0]
         val b = matrix[1]
@@ -156,7 +223,7 @@ void main() {
             src += 2
             dst += VERTEX_SIZE_BYTES
         }
-        submit(primitive, vertexCount, projection, blend, depthTest, depthWrite)
+        submit(plain, primitive, vertexCount, projection, null, blend, depthTest, depthWrite)
     }
 
     /**
@@ -179,7 +246,7 @@ void main() {
         require(offset >= 0 && offset + vertexCount * COLORED_FLOATS <= vertices.size) {
             "Vertices of $vertexCount vertices from $offset exceed ${vertices.size} values"
         }
-        val bytes = reserve(vertexCount)
+        val bytes = reserve(plain, vertexCount)
         val a = matrix[0]
         val b = matrix[1]
         val c = matrix[4]
@@ -198,23 +265,73 @@ void main() {
             src += COLORED_FLOATS
             dst += VERTEX_SIZE_BYTES
         }
-        submit(primitive, vertexCount, projection, blend, depthTest, depthWrite)
+        submit(plain, primitive, vertexCount, projection, null, blend, depthTest, depthWrite)
     }
 
     /**
-     * Draws the pending quads first, then makes sure the buffers hold [vertexCount] vertices
-     * (growing them if needed) and returns the staging memory to fill from byte 0.
+     * Like [draw], but [vertices] holds (x, y, u, v) floats per vertex from [offset] on, and the
+     * mesh is drawn with [texture] on unit 0, multiplied by the one color [rgba]. A legacy texture
+     * that is not on the GPU draws nothing.
      */
-    private fun reserve(vertexCount: Int): ByteBuffer {
+    @JvmStatic
+    fun drawTextured(
+        primitive: PrimitiveType,
+        vertices: FloatArray,
+        offset: Int,
+        vertexCount: Int,
+        matrix: FloatArray,
+        projection: FloatArray,
+        texture: Texture,
+        rgba: Int,
+        blend: BlendMode,
+        depthTest: CompareFunction?,
+        depthWrite: Boolean
+    ) {
+        if (vertexCount <= 0) return
+        require(offset >= 0 && offset + vertexCount * TEXTURED_FLOATS <= vertices.size) {
+            "Vertices of $vertexCount vertices from $offset exceed ${vertices.size} values"
+        }
+        if (!BatchTexture.isLoaded(texture)) return
+        val bytes = reserve(textured, vertexCount)
+        val color = if (littleEndian) rgba else Integer.reverseBytes(rgba)
+        val a = matrix[0]
+        val b = matrix[1]
+        val c = matrix[4]
+        val d = matrix[5]
+        val tx = matrix[12]
+        val ty = matrix[13]
+        var src = offset
+        var dst = 0
+        for (i in 0 until vertexCount) {
+            val x = vertices[src]
+            val y = vertices[src + 1]
+            bytes.putFloat(dst, a * x + c * y + tx)
+            bytes.putFloat(dst + 4, b * x + d * y + ty)
+            bytes.putFloat(dst + 8, vertices[src + 2])
+            bytes.putFloat(dst + 12, vertices[src + 3])
+            bytes.putInt(dst + 16, color)
+            src += TEXTURED_FLOATS
+            dst += TEXTURED_VERTEX_SIZE_BYTES
+        }
+        submit(textured, primitive, vertexCount, projection, texture, blend, depthTest, depthWrite)
+    }
+
+    /**
+     * Draws the pending quads first, then makes sure the buffers of [kit] hold [vertexCount]
+     * vertices (growing them if needed) and returns the staging memory to fill from byte 0.
+     */
+    private fun reserve(kit: Kit, vertexCount: Int): ByteBuffer {
         QuadBatcher.flush()
-        ensureResources(vertexCount)
-        return staging!!
+        ensureResources(kit, vertexCount)
+        return kit.staging!!
     }
 
     private fun submit(
+        kit: Kit,
         primitive: PrimitiveType,
         vertexCount: Int,
         projection: FloatArray,
+        texture: Texture?,
         blend: BlendMode,
         depthTest: CompareFunction?,
         depthWrite: Boolean
@@ -223,18 +340,19 @@ void main() {
         val state = GlesBackend.state
         // Before the upload binds the mesh buffer, so the binding found before the draw comes back.
         state.saveDrawState(savedState)
-        val bytes = staging!!
-        val vb = vertexBuffer!!
+        val bytes = kit.staging!!
+        val vb = kit.vertexBuffer!!
         bytes.clear()
         // New storage per draw: rewriting storage that earlier draws still read makes the driver wait.
-        vb.replace(bytes, vertexCount * VERTEX_SIZE_BYTES)
-        val pipeline = pipelineFor(blend, depthTest, depthWrite, primitive)
+        vb.replace(bytes, vertexCount * kit.vertexSize)
+        val pipeline = pipelineFor(kit, blend, depthTest, depthWrite, primitive)
         val context = GlesRenderContext.instance
         val ownPass = !context.isInPass
         if (ownPass) context.beginInlinePass()
         try {
             context.setPipeline(pipeline)
             context.setUniformMatrix4(pipeline.program.uniformLocation("uProjection"), projection)
+            if (texture != null) context.setTexture(TEXTURE_UNIT, texture, null)
             context.setVertexBuffer(vb)
             context.draw(0, vertexCount)
         } finally {
@@ -259,35 +377,35 @@ void main() {
         return index
     }
 
-    private fun pipelineFor(blend: BlendMode, depthTest: CompareFunction?, depthWrite: Boolean, primitive: PrimitiveType): Pipeline {
-        var slots = pipelines[blend]
+    private fun pipelineFor(kit: Kit, blend: BlendMode, depthTest: CompareFunction?, depthWrite: Boolean, primitive: PrimitiveType): Pipeline {
+        var slots = kit.pipelines[blend]
         if (slots == null) {
             slots = arrayOfNulls(depthStates * 2 * primitives.size)
-            pipelines[blend] = slots
+            kit.pipelines[blend] = slots
         }
         val depthIndex = if (depthTest == null) 0 else depthTest.ordinal + 1
         val index = (depthIndex * 2 + (if (depthWrite) 1 else 0)) * primitives.size + primitive.ordinal
         var pipeline = slots[index]
         if (pipeline == null) {
-            pipeline = Pipeline(program!!, layout, blend, depthTest, depthWrite, CullMode.None, primitive)
+            pipeline = Pipeline(kit.program!!, kit.layout, blend, depthTest, depthWrite, CullMode.None, primitive)
             slots[index] = pipeline
-            pipelineTotal++
+            kit.pipelineTotal++
         }
         return pipeline
     }
 
     /**
-     * Creates the program and the vertex buffer, or grows the staging memory and the buffer to the
-     * next power of two when [vertexCount] vertices do not fit.
+     * Creates the program and the vertex buffer of [kit], or grows its staging memory and buffer to
+     * the next power of two when [vertexCount] vertices do not fit.
      */
-    private fun ensureResources(vertexCount: Int) {
-        val oldCapacity = capacityVertices
+    private fun ensureResources(kit: Kit, vertexCount: Int) {
+        val oldCapacity = kit.capacityVertices
         var capacity = if (oldCapacity == 0) INITIAL_CAPACITY_VERTICES else oldCapacity
         if (vertexCount > capacity) capacity = Integer.highestOneBit(vertexCount - 1) shl 1
-        val bufferBytes = capacity * VERTEX_SIZE_BYTES
+        val bufferBytes = capacity * kit.vertexSize
 
-        val oldBuffer = vertexBuffer
-        val needProgram = program == null
+        val oldBuffer = kit.vertexBuffer
+        val needProgram = kit.program == null
         val needBuffer = oldBuffer == null || oldBuffer.sizeBytes < bufferBytes
         if (!needProgram && !needBuffer && capacity == oldCapacity) return
 
@@ -295,9 +413,11 @@ void main() {
         var newProgram: GpuProgram? = null
         var newBuffer: GpuBuffer? = null
         try {
-            if (needProgram) newProgram = GlesGraphicsDevice.instance.createProgram(VERTEX_SHADER, FRAGMENT_SHADER, "mesh", emptyMap())
+            if (needProgram) {
+                newProgram = GlesGraphicsDevice.instance.createProgram(kit.vertexShader, kit.fragmentShader, kit.name, kit.samplerUnits)
+            }
             if (needBuffer) {
-                newBuffer = GlesGraphicsDevice.instance.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, bufferBytes, "mesh-vertices")
+                newBuffer = GlesGraphicsDevice.instance.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, bufferBytes, "${kit.name}-vertices")
             }
         } catch (e: RuntimeException) {
             newBuffer?.dispose()
@@ -305,29 +425,31 @@ void main() {
             throw e
         }
         if (capacity != oldCapacity) {
-            staging = ByteBuffer.allocateDirect(bufferBytes).order(ByteOrder.nativeOrder())
+            kit.staging = ByteBuffer.allocateDirect(bufferBytes).order(ByteOrder.nativeOrder())
         }
         if (newProgram != null) {
-            program = newProgram
+            kit.program = newProgram
             // Pipelines hold the old program.
-            pipelines.clear()
-            pipelineTotal = 0
+            kit.pipelines.clear()
+            kit.pipelineTotal = 0
         }
         if (newBuffer != null) {
             oldBuffer?.dispose()
-            vertexBuffer = newBuffer
+            kit.vertexBuffer = newBuffer
         }
     }
 
     /** Disposes the GPU resources; the next draw creates them again. For shutdown and tests. */
     @JvmStatic
     fun releaseResources() {
-        pipelines.clear()
-        pipelineTotal = 0
-        program?.dispose()
-        vertexBuffer?.dispose()
-        program = null
-        vertexBuffer = null
+        for (kit in kits) {
+            kit.pipelines.clear()
+            kit.pipelineTotal = 0
+            kit.program?.dispose()
+            kit.vertexBuffer?.dispose()
+            kit.program = null
+            kit.vertexBuffer = null
+        }
         vertexCounter = COUNTER_UNREGISTERED
     }
 }

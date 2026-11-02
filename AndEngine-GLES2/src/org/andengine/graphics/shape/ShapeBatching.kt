@@ -1,7 +1,9 @@
 package org.andengine.graphics.shape
 
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 import kotlin.math.sqrt
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.QuadBatcher
@@ -238,6 +240,80 @@ object ShapeBatching {
         if (!visible(rgba) || !(radius > 0f) || !(lineWidth > 0f)) return
         quarters(masks().ring(px(radius), px(min(lineWidth, radius))), matrix, cx, cy, radius, rgba, blend)
     }
+
+    /**
+     * A filled fan over an elliptical arc with radii [rx], [ry] around ([cx], [cy]): one triangle
+     * per segment between the center and two neighbouring arc points. The [segments] points run
+     * evenly from [startAngle] to [endAngle] (degrees, 0 pointing up, clockwise on screen).
+     */
+    @JvmStatic
+    fun sector(
+        matrix: FloatArray, cx: Float, cy: Float, rx: Float, ry: Float,
+        startAngle: Float, endAngle: Float, segments: Int, rgba: Int, blend: BlendMode
+    ) {
+        if (!visible(rgba) || segments < 2) return
+        val start = toRadians(startAngle - 90f)
+        val delta = (toRadians(endAngle - 90f) - start) / max(1, segments - 1)
+        val slot = masks().solid()
+        qu.fill(ShapeMasks.centerU(slot))
+        qv.fill(ShapeMasks.centerV(slot))
+        qc.fill(rgba)
+        qx[0] = cx; qy[0] = cy
+        var pcos = cos(start)
+        var psin = sin(start)
+        for (j in 1 until segments) {
+            val angle = start + j * delta
+            val c = cos(angle)
+            val s = sin(angle)
+            qx[1] = cx + rx * pcos; qy[1] = cy + ry * psin
+            qx[2] = cx + rx * c; qy[2] = cy + ry * s
+            qx[3] = qx[2]; qy[3] = qy[2]
+            QuadBatcher.addGlyphQuad(slot, blend, matrix, qx, qy, qu, qv, qc)
+            pcos = c
+            psin = s
+        }
+    }
+
+    /**
+     * The outline of an elliptical arc as a strip of quads, [lineWidth] wide and centered on the arc
+     * (radius +- half the width). On ellipses (rx != ry) the band is offset radially per axis, not along the
+     * curve normal. Points as in [sector]. [lineWidth] is in the units of the
+     * geometry, the caller converts from pixels.
+     */
+    @JvmStatic
+    fun arc(
+        matrix: FloatArray, cx: Float, cy: Float, rx: Float, ry: Float,
+        startAngle: Float, endAngle: Float, segments: Int, lineWidth: Float, rgba: Int, blend: BlendMode
+    ) {
+        if (!visible(rgba) || segments < 2 || !(lineWidth > 0f)) return
+        val half = lineWidth * 0.5f
+        val inX = max(0f, rx - half)
+        val inY = max(0f, ry - half)
+        val outX = rx + half
+        val outY = ry + half
+        val slot = masks().solid()
+        qu.fill(ShapeMasks.centerU(slot))
+        qv.fill(ShapeMasks.centerV(slot))
+        qc.fill(rgba)
+        val start = toRadians(startAngle - 90f)
+        val delta = (toRadians(endAngle - 90f) - start) / max(1, segments - 1)
+        var pc = cos(start)
+        var ps = sin(start)
+        for (j in 1 until segments) {
+            val angle = start + j * delta
+            val c = cos(angle)
+            val s = sin(angle)
+            qx[0] = cx + inX * pc; qy[0] = cy + inY * ps
+            qx[1] = cx + outX * pc; qy[1] = cy + outY * ps
+            qx[2] = cx + outX * c; qy[2] = cy + outY * s
+            qx[3] = cx + inX * c; qy[3] = cy + inY * s
+            QuadBatcher.addGlyphQuad(slot, blend, matrix, qx, qy, qu, qv, qc)
+            pc = c
+            ps = s
+        }
+    }
+
+    private fun toRadians(degrees: Float): Float = degrees * Math.PI.toFloat() / 180
 
     private fun quarters(mask: GlyphSlot, m: FloatArray, cx: Float, cy: Float, r: Float, rgba: Int, blend: BlendMode) {
         maskBox(mask, blend, m, cx - r, cy - r, cx, cy, false, false, rgba)

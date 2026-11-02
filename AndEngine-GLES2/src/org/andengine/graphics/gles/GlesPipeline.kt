@@ -62,6 +62,20 @@ object GlesPipeline {
         PrimitiveType.Lines -> GLES20.GL_LINES
         PrimitiveType.LineStrip -> GLES20.GL_LINE_STRIP
         PrimitiveType.Points -> GLES20.GL_POINTS
+        PrimitiveType.TriangleFan -> GLES20.GL_TRIANGLE_FAN
+        PrimitiveType.LineLoop -> GLES20.GL_LINE_LOOP
+    }
+
+    /** The [PrimitiveType] of a `glDrawArrays` mode, or null if [mode] is not one. Allocation free. */
+    fun primitiveTypeOf(mode: Int): PrimitiveType? = when (mode) {
+        GLES20.GL_TRIANGLES -> PrimitiveType.Triangles
+        GLES20.GL_TRIANGLE_STRIP -> PrimitiveType.TriangleStrip
+        GLES20.GL_LINES -> PrimitiveType.Lines
+        GLES20.GL_LINE_STRIP -> PrimitiveType.LineStrip
+        GLES20.GL_POINTS -> PrimitiveType.Points
+        GLES20.GL_TRIANGLE_FAN -> PrimitiveType.TriangleFan
+        GLES20.GL_LINE_LOOP -> PrimitiveType.LineLoop
+        else -> null
     }
 
     fun blendFactor(factor: BlendFactor): Int = when (factor) {

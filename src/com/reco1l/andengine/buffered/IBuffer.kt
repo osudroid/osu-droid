@@ -14,6 +14,7 @@ const val GL_TRIANGLE_STRIP = GLES32.GL_TRIANGLE_STRIP
 const val GL_TRIANGLE_FAN = GLES32.GL_TRIANGLE_FAN
 const val GL_LINES = GLES32.GL_LINES
 const val GL_LINE_STRIP = GLES32.GL_LINE_STRIP
+const val GL_LINE_LOOP = GLES32.GL_LINE_LOOP
 const val GL_POINTS = GLES32.GL_POINTS
 
 // GLES20 buffer usage constants
@@ -30,19 +31,27 @@ interface IBuffer {
 
 
     /**
-     * Called before drawing the buffer.
+     * Called before drawing the buffer the legacy way, for entities with a shader of their own
+     * ([UIBufferedComponent.drawsWithOwnShader]).
      */
-    fun beginDraw(gl: GLState)
+    fun beginDraw(gl: GLState) = Unit
 
     /**
-     * Called when the buffer should declare its pointers and submit its data.
+     * Called when the buffer should declare its pointers and submit its data (legacy way).
      */
-    fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>)
+    fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) = Unit
 
     /**
-     * Called when the buffer should draw itself.
+     * Called when the buffer should draw itself the legacy way, with the shader the entity bound.
      */
-    fun draw(gl: GLState, entity: UIBufferedComponent<*>)
+    fun draw(gl: GLState, entity: UIBufferedComponent<*>) = Unit
+
+    /**
+     * Called when the buffer should draw itself through the mesh renderer, with the color, blend
+     * and depth settings of [entity] (see [UIBufferedComponent.drawPositions]). Buffers that only
+     * hold attributes for another buffer, or are only used the legacy way, draw nothing.
+     */
+    fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>)
 
     /**
      * Called during disposal.
@@ -68,10 +77,15 @@ abstract class Buffer(
 
     override var sharingMode = BufferSharingMode.Off
 
-    protected val mFloatBuffer: FloatBuffer = ByteBuffer
-        .allocateDirect(capacity * 4)
-        .order(ByteOrder.nativeOrder())
-        .asFloatBuffer()
+    /**
+     * The client-side data: what the mesh renderer reads and what a legacy upload sends to the GL
+     * buffer.
+     */
+    @JvmField
+    val data = FloatArray(capacity)
+
+    // Direct copy of [data] for the legacy upload; only made once the buffer is drawn the legacy way.
+    private var uploadBuffer: FloatBuffer? = null
 
     private var mVboId = 0
     private var mDirty = true
@@ -82,7 +96,7 @@ abstract class Buffer(
     }
 
     /** The float at [index] of the client-side data. */
-    fun valueAt(index: Int): Float = mFloatBuffer.get(index)
+    fun valueAt(index: Int): Float = data[index]
 
     fun setHardwareBufferNeedsUpdate() {
         mDirty = true
@@ -96,15 +110,22 @@ abstract class Buffer(
         }
         GlesBackend.state.bindArrayBuffer(mVboId)
         if (mDirty) {
-            mFloatBuffer.position(0)
+            val upload = uploadBuffer ?: ByteBuffer
+                .allocateDirect(data.size * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .also { uploadBuffer = it }
+            upload.position(0)
+            upload.put(data, 0, data.size)
+            upload.position(0)
             GLES32.glBufferData(
                 GLES32.GL_ARRAY_BUFFER,
-                mFloatBuffer.capacity() * 4,
-                mFloatBuffer,
+                data.size * 4,
+                upload,
                 bufferUsage
             )
             mDirty = false
-            RenderStats.upload(mFloatBuffer.capacity() * 4)
+            RenderStats.upload(data.size * 4)
         }
     }
 

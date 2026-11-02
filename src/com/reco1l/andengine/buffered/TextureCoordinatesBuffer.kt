@@ -23,4 +23,7 @@ abstract class TextureCoordinatesBuffer(
 
     override fun draw(gl: GLState, entity: UIBufferedComponent<*>) = Unit
 
+    // Texture coordinates of another buffer's vertices: nothing to draw on their own.
+    override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) = Unit
+
 }
