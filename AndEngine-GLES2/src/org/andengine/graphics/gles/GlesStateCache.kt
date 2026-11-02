@@ -11,19 +11,27 @@ import org.andengine.graphics.debug.RenderStats
  * after [invalidate] the next call always reaches GL. GL thread only.
  *
  * Drawing that is queued instead of issued at once (the quad batch) hooks into
- * [beforeExternalChange], so it is drawn before anything changes the state it depends on.
+ * [beforeExternalChange], so it is drawn before anything changes the state it depends on; the
+ * scissor has its own hook, [beforeScissorChange], since not all queued work depends on it.
  */
 class GlesStateCache(private val gl: GL30) {
 
     /**
      * Runs once right before a state change that really reaches GL (a skipped duplicate does not
-     * count), before a clear, and before an object is forgotten as deleted; it is cleared before
+     * count; the scissor has [beforeScissorChange] instead), before a clear, and before an object is forgotten as deleted; it is cleared before
      * it runs, so it is never re-entered. Used to draw queued work first: the callee must leave
      * every value this cache tracks as it found it (see [saveDrawState]), because the change that
      * triggered it goes on with values read before. Null while nothing waits.
      */
     @JvmField
     var beforeExternalChange: Runnable? = null
+
+    /**
+     * Like [beforeExternalChange], but runs only before a change of the scissor test or box (and
+     * [beforeExternalChange] does not): set only while queued work depends on the scissor.
+     */
+    @JvmField
+    var beforeScissorChange: Runnable? = null
 
     private val scratch = IntArray(1)
     private val unitCount: Int
@@ -120,6 +128,12 @@ class GlesStateCache(private val gl: GL30) {
     fun runBeforeExternalChange() {
         val hook = beforeExternalChange ?: return
         beforeExternalChange = null
+        hook.run()
+    }
+
+    private fun runBeforeScissorChange() {
+        val hook = beforeScissorChange ?: return
+        beforeScissorChange = null
         hook.run()
     }
 
@@ -480,14 +494,14 @@ class GlesStateCache(private val gl: GL30) {
     fun setScissorEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (scissor == value) return
-        runBeforeExternalChange()
+        runBeforeScissorChange()
         scissor = value
         setCap(GLES20.GL_SCISSOR_TEST, enabled)
     }
 
     fun scissor(x: Int, y: Int, width: Int, height: Int) {
         if (scissorX == x && scissorY == y && scissorW == width && scissorH == height) return
-        runBeforeExternalChange()
+        runBeforeScissorChange()
         scissorX = x
         scissorY = y
         scissorW = width
@@ -567,8 +581,9 @@ class GlesStateCache(private val gl: GL30) {
 
     /**
      * Copies the state a draw of the render context may change (program, VAO with its element
-     * buffer, array buffer, active unit, the 2D texture and the sampler of unit 0, blend, depth
-     * and cull) into [out], which needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
+     * buffer, array buffer, active unit, the 2D texture and the sampler of unit 0, the array
+     * texture and the sampler of unit 1, blend, depth, cull and the scissor) into [out], which
+     * needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
      */
     fun saveDrawState(out: IntArray) {
         out[S_PROGRAM] = program
@@ -578,6 +593,8 @@ class GlesStateCache(private val gl: GL30) {
         out[S_ACTIVE_UNIT] = activeUnit
         out[S_TEXTURE_0] = textures[0]
         out[S_SAMPLER_0] = samplers[0]
+        out[S_TEXTURE_ARRAY_1] = textures[TEXTURE_ARRAY_1]
+        out[S_SAMPLER_1] = samplers[1]
         out[S_BLEND] = blendEnabled
         out[S_BLEND_SRC_RGB] = blendSrcRgb
         out[S_BLEND_DST_RGB] = blendDstRgb
@@ -588,6 +605,27 @@ class GlesStateCache(private val gl: GL30) {
         out[S_DEPTH_MASK] = depthMask
         out[S_CULL] = cullFace
         out[S_CULL_MODE] = cullMode
+        saveScissorState(out, S_SCISSOR)
+    }
+
+    /**
+     * Copies the scissor test and box into [out] from [offset] on ([SCISSOR_STATE_SIZE] values).
+     * See [restoreScissorState].
+     */
+    fun saveScissorState(out: IntArray, offset: Int) {
+        out[offset] = scissor
+        out[offset + 1] = scissorX
+        out[offset + 2] = scissorY
+        out[offset + 3] = scissorW
+        out[offset + 4] = scissorH
+    }
+
+    /** Sets the known values [saveScissorState] wrote into [saved] from [offset] on again. */
+    fun restoreScissorState(saved: IntArray, offset: Int) {
+        // The box is set as a whole, so either all four are known or none; a width is never -1.
+        if (saved[offset + 3] != UNKNOWN) scissor(saved[offset + 1], saved[offset + 2], saved[offset + 3], saved[offset + 4])
+        val enabled = saved[offset]
+        if (enabled != UNKNOWN) setScissorEnabled(enabled == 1)
     }
 
     /**
@@ -623,6 +661,16 @@ class GlesStateCache(private val gl: GL30) {
         if (cull != UNKNOWN) setCullFaceEnabled(cull == 1)
         val mode = saved[S_CULL_MODE]
         if (mode != UNKNOWN) cullFace(mode)
+        restoreScissorState(saved, S_SCISSOR)
+
+        // Unit 1 first, so unit 0 is active afterwards unless another unit was.
+        val array1 = saved[S_TEXTURE_ARRAY_1]
+        if (array1 != UNKNOWN && textures[TEXTURE_ARRAY_1] != array1) {
+            activeTexture(1)
+            bindTexture(GLES30.GL_TEXTURE_2D_ARRAY, array1)
+        }
+        val sampler1 = saved[S_SAMPLER_1]
+        if (sampler1 != UNKNOWN) bindSampler(1, sampler1)
 
         val texture = saved[S_TEXTURE_0]
         val sampler = saved[S_SAMPLER_0]
@@ -664,8 +712,17 @@ class GlesStateCache(private val gl: GL30) {
         private const val S_DEPTH_MASK = 14
         private const val S_CULL = 15
         private const val S_CULL_MODE = 16
+        private const val S_TEXTURE_ARRAY_1 = 17
+        private const val S_SAMPLER_1 = 18
+        private const val S_SCISSOR = 19
+
+        /** Index of unit 1's 2D array binding in the texture bindings. */
+        private const val TEXTURE_ARRAY_1 = TEXTURE_TARGETS + 1
+
+        /** Number of values [saveScissorState] writes. */
+        const val SCISSOR_STATE_SIZE = 5
 
         /** Number of values [saveDrawState] writes. */
-        const val DRAW_STATE_SIZE = 17
+        const val DRAW_STATE_SIZE = S_SCISSOR + SCISSOR_STATE_SIZE
     }
 }

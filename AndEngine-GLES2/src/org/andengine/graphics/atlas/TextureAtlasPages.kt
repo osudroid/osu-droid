@@ -28,8 +28,19 @@ class TextureAtlasPages @JvmOverloads constructor(
     private val textureManager: TextureManager,
     val maxPageSize: Int = 2048,
     val maxRegionSize: Int = 512,
-    val padding: Int = 2
+    val padding: Int = 2,
+    val maxRegionLength: Int = maxRegionSize * 2
 ) {
+
+    /**
+     * Largest accepted image area: [maxRegionSize] squared. Long, thin images (list item backgrounds,
+     * bars) may be up to [maxRegionLength] on one side as long as they stay within this area.
+     */
+    val maxRegionArea: Int = maxRegionSize * maxRegionSize
+
+    init {
+        require(maxRegionLength >= maxRegionSize) { "maxRegionLength $maxRegionLength is below maxRegionSize $maxRegionSize" }
+    }
 
     private class Page(
         @JvmField val atlas: BitmapTextureAtlas,
@@ -90,8 +101,9 @@ class TextureAtlasPages @JvmOverloads constructor(
 
     /**
      * Places [source] on a page and returns a region covering exactly its content. Returns `null` when
-     * no session is open, the image exceeds [maxRegionSize] in either dimension, it does not fit on an
-     * empty page, or [options] repeat (wrapping cannot be expressed inside a shared page).
+     * no session is open, the image is larger than [maxRegionArea] or longer than [maxRegionLength] on a
+     * side, it does not fit on an empty page, or [options] repeat (wrapping cannot be expressed inside a
+     * shared page).
      */
     // Pages are shared by options with the same filtering and alpha handling; wrapping is always clamped.
     private fun sameOptions(a: TextureOptions, b: TextureOptions): Boolean =
@@ -100,7 +112,8 @@ class TextureAtlasPages @JvmOverloads constructor(
     fun add(source: IBitmapTextureAtlasSource, options: TextureOptions): TextureRegion? {
         val width = source.textureWidth
         val height = source.textureHeight
-        if (width <= 0 || height <= 0 || width > maxRegionSize || height > maxRegionSize) return null
+        if (width <= 0 || height <= 0 || width > maxRegionLength || height > maxRegionLength) return null
+        if (width.toLong() * height > maxRegionArea) return null
         if (options.mWrapS != CLAMPED.mWrapS || options.mWrapT != CLAMPED.mWrapT) return null
 
         synchronized(lock) {

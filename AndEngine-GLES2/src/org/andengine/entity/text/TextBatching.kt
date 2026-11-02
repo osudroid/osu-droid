@@ -33,7 +33,7 @@ object TextBatching {
     /**
      * Adds the first [count] of [letters] (in the order of the text's vertex data) to the batch,
      * transformed by the current model-view matrix of [glState]. A [StrokeFont] letter adds its
-     * outline first and its fill on top of it. The color is the font color times the text color.
+     * fill first and its outline on top of it. The color is the font color times the text color.
      */
     @JvmStatic
     fun add(text: Text, glState: GLState, letters: Array<Letter?>, count: Int) {
@@ -72,8 +72,9 @@ object TextBatching {
 
     /**
      * Adds one glyph of [letter] covering the local rectangle (x0, y0)-(x1, y1) to the batch,
-     * transformed by [matrix]. A [StrokeFont] letter adds its outline first and its fill on top of
-     * it. [QuadBatcher.setProjection] is up to the caller.
+     * transformed by [matrix]. A [StrokeFont] letter adds its fill first and its outline on top of
+     * it, so the outline stays fully visible over the fill. [QuadBatcher.setProjection] is up to
+     * the caller.
      */
     @JvmStatic
     fun addLetter(
@@ -82,13 +83,13 @@ object TextBatching {
         fillColor: Int, strokeColor: Int
     ) {
         val stroke = font as? StrokeFont
-        if (stroke != null) {
-            val outline = letter.mStrokeGlyph
-            if (outline != null) QuadBatcher.addGlyph(outline, blend, matrix, x0, y0, x1, y1, strokeColor)
-        }
         val glyph = letter.mGlyph
         if (glyph != null && (stroke == null || !stroke.isStrokeOnly)) {
             QuadBatcher.addGlyph(glyph, blend, matrix, x0, y0, x1, y1, fillColor)
+        }
+        if (stroke != null) {
+            val outline = letter.mStrokeGlyph
+            if (outline != null) QuadBatcher.addGlyph(outline, blend, matrix, x0, y0, x1, y1, strokeColor)
         }
     }
 

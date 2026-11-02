@@ -154,13 +154,13 @@ class UITextBatchingTest {
     private fun lastQuads(): List<FloatArray> {
         val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
         val quads = ArrayList<FloatArray>()
-        while (buffer.remaining() >= QuadBatcher.GLYPH_VERTEX_SIZE_BYTES * 4) {
+        while (buffer.remaining() >= QuadBatcher.VERTEX_SIZE_BYTES * 4) {
             val xs = FloatArray(4)
             val ys = FloatArray(4)
             for (corner in 0 until 4) {
                 xs[corner] = buffer.float
                 ys[corner] = buffer.float
-                buffer.position(buffer.position() + QuadBatcher.GLYPH_VERTEX_SIZE_BYTES - 8)
+                buffer.position(buffer.position() + QuadBatcher.VERTEX_SIZE_BYTES - 8)
             }
             quads += floatArrayOf(xs[0], ys[0], xs[2], ys[2])
         }

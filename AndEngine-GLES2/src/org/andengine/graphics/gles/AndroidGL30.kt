@@ -72,6 +72,7 @@ open class AndroidGL30 : GL30 {
     override fun glGetUniformBlockIndex(program: Int, uniformBlockName: String): Int = android.opengl.GLES30.glGetUniformBlockIndex(program, uniformBlockName)
     override fun glUniformBlockBinding(program: Int, uniformBlockIndex: Int, uniformBlockBinding: Int) = android.opengl.GLES30.glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding)
     override fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, value: FloatArray, offset: Int) = android.opengl.GLES30.glUniformMatrix4fv(location, count, transpose, value, offset)
+    override fun glUniform1i(location: Int, x: Int) = android.opengl.GLES30.glUniform1i(location, x)
     override fun glFramebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int) = android.opengl.GLES30.glFramebufferTexture2D(target, attachment, textarget, texture, level)
     override fun glFramebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: Int) = android.opengl.GLES30.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer)
     override fun glRenderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) = android.opengl.GLES30.glRenderbufferStorage(target, internalformat, width, height)

@@ -58,10 +58,6 @@ class RoomChat : UILinearContainer() {
     private val button = ChatButton()
     private val body = UILinearContainer()
 
-    //region Buffers
-    private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
-    //endregion
-
     private lateinit var input: UITextInput
     private lateinit var messageContainer: UILinearContainer
 
@@ -389,7 +385,6 @@ class RoomChat : UILinearContainer() {
             orientation = Orientation.Horizontal
             cullingMode = CullingMode.ParentBounds
             background = UIBox().apply {
-                buffer = messageBackgroundBuffer
                 applyTheme = {
                     color = it.accentColor * 0.09f
                     alpha = 0f

@@ -23,7 +23,8 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     open var buffer: T? = null
         set(value) {
             if (field != value) {
-                field?.finalize()
+                // Shared buffers are owned elsewhere.
+                field?.let { if (it.sharingMode == BufferSharingMode.Off) it.finalize() }
                 field = value
             }
         }
@@ -100,6 +101,21 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         return batchBlend
     }
 
+    /**
+     * Whether this entity's current depth, clear and blend state can be drawn through the batch: no
+     * depth test, no clearing and a blend function the batch can express. Shapes that fail this are
+     * drawn through their buffer.
+     *
+     * A batched shape does not run `beginDraw` or `onBindShader` and owns no buffer of its own, so
+     * do not assign shared VBOs to shapes that can be batched.
+     */
+    protected fun canBatchShape(): Boolean {
+        if (depthInfo.test) return false
+        val clear = clearInfo
+        if (clear.depthBuffer || clear.colorBuffer || clear.stencilBuffer) return false
+        return batchBlendMode() != null
+    }
+
 
     //region Buffer lifecycle
 
@@ -113,6 +129,21 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      */
     abstract fun onUpdateBuffer()
 
+
+    /**
+     * Builds the buffer now if there is none, for entities that skip it while they are drawn through
+     * the batch ([onCreateBuffer] returning null) and meet a draw that needs it.
+     */
+    protected fun ensureBuffer() {
+        if (buffer != null) return
+        needsNewBuffer = false
+        buffer = onCreateBuffer()
+        needsBufferUpdate = false
+        val created = buffer
+        if (created != null && created.sharingMode != BufferSharingMode.Dynamic) {
+            updateBuffer()
+        }
+    }
 
     fun requestNewBuffer() {
         needsNewBuffer = true

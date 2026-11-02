@@ -1,6 +1,9 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
+import org.andengine.opengl.font.FontManager
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
@@ -29,12 +32,51 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         requestBufferUpdate()
     }
 
-    override fun onCreateBuffer(): TriangleVBO {
-        return TriangleVBO()
+    // The batch needs no buffer; it is only built when the triangle is drawn the legacy way.
+    override fun onCreateBuffer(): TriangleVBO? {
+        return if (canBatchShape()) null else TriangleVBO()
     }
 
     override fun onUpdateBuffer() {
         buffer?.update(this)
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        // Invisible shapes still reach the buffer path: they serve as depth masks there.
+        val blend = if (canBatchShape()) batchBlendMode() else null
+        if (blend != null) {
+            onApplyColor(pGLState)
+
+            if (drawAlpha == 0f) {
+                return
+            }
+
+            val cx = width / 2f
+            val cy = height / 2f
+            val halfWidth = innerWidth / 2f
+            val halfHeight = innerHeight / 2f
+            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+            val matrix = pGLState.modelViewGLMatrix
+
+            // Same corners as the buffer: apex on top, base at the bottom.
+            val ax = cx
+            val ay = cy - halfHeight
+            val bx = cx - halfWidth
+            val by = cy + halfHeight
+            val ex = cx + halfWidth
+
+            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+            if (paintStyle == PaintStyle.Fill) {
+                ShapeBatching.triangle(matrix, ax, ay, bx, by, ex, by, color, blend)
+            } else {
+                val w = lineWidth / FontManager.getRasterScale()
+                ShapeBatching.triangleOutline(matrix, ax, ay, bx, by, ex, by, w, color, blend)
+            }
+            return
+        }
+
+        ensureBuffer()
+        super.doDraw(pGLState, pCamera)
     }
 
     override fun beginDraw(pGLState: GLState) {

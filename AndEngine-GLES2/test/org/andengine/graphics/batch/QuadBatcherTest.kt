@@ -358,7 +358,12 @@ class QuadBatcherTest {
 
         assertEquals(1, draws())
         assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindFramebuffer") || it.startsWith("glViewport") })
-        assertEquals(gl.calls.toString(), 0, gl.calls.count { it == "glDisable(${GLES20.GL_SCISSOR_TEST})" })
+        // Unclipped quads are drawn without the scissor test, which is switched on again after.
+        val draw = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
+        val scissorCalls = setOf("glEnable(${GLES20.GL_SCISSOR_TEST})", "glDisable(${GLES20.GL_SCISSOR_TEST})")
+        assertEquals(gl.calls.toString(), "glDisable(${GLES20.GL_SCISSOR_TEST})", gl.calls.subList(0, draw).lastOrNull { it in scissorCalls })
+        assertEquals(gl.calls.toString(), "glEnable(${GLES20.GL_SCISSOR_TEST})", gl.calls.lastOrNull { it in scissorCalls })
+        assertTrue(GlesBackend.state.isScissorEnabled)
         assertFalse(GlesRenderContext.instance.isInPass)
         assertEquals(0, GlesBackend.state.currentActiveTextureUnit)
     }

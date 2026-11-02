@@ -356,6 +356,10 @@ class RecordingGL : GL32 {
         uniformMatrices += value.copyOfRange(offset, offset + 16 * count)
     }
 
+    override fun glUniform1i(location: Int, x: Int) {
+        calls += "glUniform1i($location,$x)"
+    }
+
     override fun glFramebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int) {
         calls += "glFramebufferTexture2D($target,$attachment,$textarget,$texture,$level)"
     }

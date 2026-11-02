@@ -87,7 +87,7 @@ class QuadBatcherGlyphTest {
         val id = slots[0].array.texture.let { (it as GlesTexture).textureId }
         assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES30.GL_TEXTURE_2D_ARRAY},$id)"))
         assertTrue(gl.calls.toString(), gl.calls.contains("glVertexAttribPointer(3,1,${GLES20.GL_UNSIGNED_SHORT},false,24,20)"))
-        assertEquals(4 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
+        assertEquals(4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
     }
 
     @Test
@@ -99,7 +99,7 @@ class QuadBatcherGlyphTest {
         val b = lastVertices()
         for (quad in 0 until 2) {
             for (vertex in 0 until 4) {
-                val base = (quad * 4 + vertex) * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES
+                val base = (quad * 4 + vertex) * QuadBatcher.VERTEX_SIZE_BYTES
                 assertEquals(slots[quad].layer, b.getShort(base + 20).toInt())
             }
         }
@@ -107,19 +107,25 @@ class QuadBatcherGlyphTest {
     }
 
     @Test
-    fun glyphAfterSprite_flushesInOrder() {
+    fun glyphAfterSprite_sharesTheDrawInOrder() {
         sprite()
         glyph(slots[0])
-        assertEquals(1, draws())
+        assertEquals(0, draws())
         sprite()
-        assertEquals(2, draws())
+        assertEquals(0, draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 3, draws())
+        assertEquals(gl.calls.toString(), 1, draws())
+        assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},18,${GLES20.GL_UNSIGNED_SHORT},0)"))
+
+        // The quads keep the order of the calls: sprite, glyph, sprite.
+        val b = lastVertices()
+        val layers = (0 until 3).map { b.getShort(it * 4 * QuadBatcher.VERTEX_SIZE_BYTES + 20).toInt() and 0xFFFF }
+        assertEquals(listOf(QuadBatcher.SPRITE_LAYER, slots[0].layer, QuadBatcher.SPRITE_LAYER), layers)
 
         val arrayId = (slots[0].array.texture as GlesTexture).textureId
-        val drawIndices = gl.calls.indices.filter { gl.calls[it].startsWith("glDrawElements") }
+        val draw = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
         val arrayBind = gl.calls.indexOf("glBindTexture(${GLES30.GL_TEXTURE_2D_ARRAY},$arrayId)")
-        assertTrue(gl.calls.toString(), drawIndices[0] < arrayBind && arrayBind < drawIndices[1])
+        assertTrue(gl.calls.toString(), arrayBind in 0 until draw)
     }
 
     @Test
@@ -158,8 +164,8 @@ class QuadBatcherGlyphTest {
         val b = lastVertices()
         val x0 = b.getFloat(0)
         val y0 = b.getFloat(4)
-        val x2 = b.getFloat(2 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES)
-        val y2 = b.getFloat(2 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES + 4)
+        val x2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES)
+        val y2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES + 4)
         assertWholePixel(x0 * 2400f / 1280f, 0.001f)
         assertWholePixel(y0 * 1080f / 720f, 0.001f)
         assertEquals(10f, x2 - x0, 0.001f)
@@ -179,8 +185,8 @@ class QuadBatcherGlyphTest {
         val b = lastVertices()
         val x0 = b.getFloat(0)
         val y0 = b.getFloat(4)
-        val x2 = b.getFloat(2 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES)
-        val y2 = b.getFloat(2 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES + 4)
+        val x2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES)
+        val y2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES + 4)
         assertWholePixel(x0 * 2400f / 1280f, 0.002f)
         assertWholePixel(y0 * 1080f / 720f, 0.002f)
         assertEquals(15f, x2 - x0, 0.001f)

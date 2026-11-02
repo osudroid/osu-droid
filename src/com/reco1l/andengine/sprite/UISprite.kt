@@ -191,11 +191,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
      * function is the one the buffer path would set, for color and alpha alike.
      */
     private fun drawBatched(gl: GLState, region: TextureRegion): Boolean {
-        if (!isBatchable || depthInfo.test) {
-            return false
-        }
-        val clear = clearInfo
-        if (clear.depthBuffer || clear.colorBuffer || clear.stencilBuffer) {
+        if (!isBatchable || !canBatchShape()) {
             return false
         }
         val blend = batchBlendMode() ?: return false

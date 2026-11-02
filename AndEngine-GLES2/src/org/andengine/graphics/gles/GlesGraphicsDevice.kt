@@ -65,8 +65,8 @@ class GlesGraphicsDevice private constructor() : GraphicsDevice {
     override fun createBuffer(target: BufferTarget, usage: BufferUsage, sizeBytes: Int, label: String): GpuBuffer =
         GlesBuffer(target, usage, sizeBytes, label)
 
-    override fun createProgram(vertexSource: String, fragmentSource: String, label: String): GpuProgram =
-        GlesProgram(vertexSource, fragmentSource, label)
+    override fun createProgram(vertexSource: String, fragmentSource: String, label: String, samplerUnits: Map<String, Int>): GpuProgram =
+        GlesProgram(vertexSource, fragmentSource, label, samplerUnits)
 
     override fun createSampler(filter: TextureFilter, wrap: TextureWrap, label: String): Sampler =
         GlesSampler(filter, wrap, label)

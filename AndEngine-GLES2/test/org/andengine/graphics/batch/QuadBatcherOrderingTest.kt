@@ -163,18 +163,56 @@ class QuadBatcherOrderingTest {
     }
 
     @Test
-    fun scissorChange_flushes() {
+    fun scissorChange_doesNotFlushUnclippedBatch() {
         add()
 
         GlesBackend.state.setScissorEnabled(true)
-
-        assertBatchDrawnBefore("glEnable(${GLES20.GL_SCISSOR_TEST})")
-
-        add()
         GlesBackend.state.scissor(1, 2, 3, 4)
 
-        assertEquals(2, gl.calls.count { it.startsWith("glDrawElements") })
-        assertTrue(gl.calls.lastIndexOf(gl.calls.last { it.startsWith("glDrawElements") }) < indexOf("glScissor(1,2,3,4)"))
+        // The batch draws with the scissor test off, so the GL scissor does not matter to it.
+        assertTrue(QuadBatcher.hasPending)
+        assertEquals(-1, indexOfBatchDraw())
+    }
+
+    @Test
+    fun scissorChange_doesNotFlushCpuClippedBatch() {
+        QuadBatcher.setClip(0, 0, 1, 1)
+        // Mostly outside the clip: cut on the CPU.
+        QuadBatcher.add(texture, BlendMode.Alpha, identity, -1f, -1f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        try {
+            GlesBackend.state.setScissorEnabled(true)
+            GlesBackend.state.scissor(1, 2, 3, 4)
+
+            assertTrue(QuadBatcher.hasPending)
+            assertEquals(-1, indexOfBatchDraw())
+        } finally {
+            QuadBatcher.clearClip()
+        }
+    }
+
+    @Test
+    fun scissorChange_flushesScissorKeyedBatch() {
+        // Turned by 45 degrees: cannot be cut on the CPU, so it is drawn with the GL scissor.
+        val s = Math.sqrt(0.5).toFloat()
+        val turned = floatArrayOf(s, s, 0f, 0f, -s, s, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+        QuadBatcher.setClip(0, 0, 400, 240)
+        QuadBatcher.add(texture, BlendMode.Alpha, turned, -1f, -1f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        try {
+            GlesBackend.state.setScissorEnabled(true)
+
+            // The batch enables the scissor for its own draw as well; the change asked for is the last.
+            val draw = indexOfBatchDraw()
+            assertTrue(gl.calls.toString(), draw in 0 until gl.calls.lastIndexOf("glEnable(${GLES20.GL_SCISSOR_TEST})"))
+            assertFalse(QuadBatcher.hasPending)
+
+            QuadBatcher.add(texture, BlendMode.Alpha, turned, -1f, -1f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+            GlesBackend.state.scissor(1, 2, 3, 4)
+
+            assertEquals(2, gl.calls.count { it.startsWith("glDrawElements") })
+            assertTrue(gl.calls.indexOfLast { it.startsWith("glDrawElements") } < indexOf("glScissor(1,2,3,4)"))
+        } finally {
+            QuadBatcher.clearClip()
+        }
     }
 
     @Test

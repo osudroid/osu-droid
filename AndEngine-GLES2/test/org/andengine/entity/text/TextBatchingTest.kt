@@ -107,10 +107,10 @@ class TextBatchingTest {
     private fun vertices(): ByteBuffer =
         ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
 
-    private fun quads() = gl.vertexUploads.last().size / (4 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES)
+    private fun quads() = gl.vertexUploads.last().size / (4 * QuadBatcher.VERTEX_SIZE_BYTES)
 
     /** Byte offset of vertex 0 of quad [quad]. */
-    private fun at(quad: Int) = quad * 4 * QuadBatcher.GLYPH_VERTEX_SIZE_BYTES
+    private fun at(quad: Int) = quad * 4 * QuadBatcher.VERTEX_SIZE_BYTES
 
     private fun color(v: ByteBuffer, quad: Int) = listOf(
         v.get(at(quad) + 16).toInt() and 0xFF,
@@ -157,7 +157,7 @@ class TextBatchingTest {
     }
 
     @Test
-    fun strokeText_drawsStrokeThenFill() {
+    fun strokeText_drawsFillThenStroke() {
         val font = StrokeFont(fontManager, FakeRasterizer(), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), false).also { fonts += it }
         text(font, "a").onDraw(glState, camera)
         QuadBatcher.flush()
@@ -165,13 +165,13 @@ class TextBatchingTest {
         val v = vertices()
         assertEquals(2, quads())
         val letter = font.getLetter('a')
-        // The outline comes first, with its own atlas position and the stroke color.
-        assertEquals(letter.mStrokeGlyph!!.u, v.getFloat(at(0) + 8), 0f)
-        assertEquals(letter.mStrokeGlyph!!.v, v.getFloat(at(0) + 12), 0f)
-        assertEquals(listOf(0, 0, 255, 255), color(v, 0))
-        assertEquals(letter.mGlyph!!.u, v.getFloat(at(1) + 8), 0f)
-        assertEquals(letter.mGlyph!!.v, v.getFloat(at(1) + 12), 0f)
-        assertEquals(listOf(255, 0, 0, 255), color(v, 1))
+        // The fill comes first; the outline goes on top, with its own atlas position and the stroke color.
+        assertEquals(letter.mGlyph!!.u, v.getFloat(at(0) + 8), 0f)
+        assertEquals(letter.mGlyph!!.v, v.getFloat(at(0) + 12), 0f)
+        assertEquals(listOf(255, 0, 0, 255), color(v, 0))
+        assertEquals(letter.mStrokeGlyph!!.u, v.getFloat(at(1) + 8), 0f)
+        assertEquals(letter.mStrokeGlyph!!.v, v.getFloat(at(1) + 12), 0f)
+        assertEquals(listOf(0, 0, 255, 255), color(v, 1))
         assertTrue(letter.mGlyph!!.u != letter.mStrokeGlyph!!.u || letter.mGlyph!!.v != letter.mStrokeGlyph!!.v)
     }
 

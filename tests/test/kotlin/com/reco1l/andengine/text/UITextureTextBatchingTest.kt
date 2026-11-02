@@ -117,6 +117,7 @@ class UITextureTextBatchingTest {
             for (corner in 0 until 4) {
                 for (k in 0 until 4) quad[corner * 4 + k] = buffer.float
                 buffer.int // color
+                assertEquals(QuadBatcher.SPRITE_LAYER, buffer.int and 0xFFFF) // layer marker + padding
             }
             quads += quad
         }
@@ -182,7 +183,8 @@ class UITextureTextBatchingTest {
             val quad = FloatArray(16)
             for (corner in 0 until 4) {
                 for (k in 0 until 4) quad[corner * 4 + k] = buffer.float
-                buffer.int
+                buffer.int // color
+                assertEquals(QuadBatcher.SPRITE_LAYER, buffer.int and 0xFFFF) // layer marker + padding
             }
             actual += quad
         }

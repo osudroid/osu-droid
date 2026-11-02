@@ -150,6 +150,9 @@ public class SplashScene implements IUpdateHandler {
         if (mStarting)
         {
             mLoading.setAlpha(Math.min(1f, mLoading.getAlpha() + 0.1f));
+            // The texts start invisible and fade in together with the loading circle.
+            progressText.setAlpha(mLoading.getAlpha());
+            infoText.setAlpha(mLoading.getAlpha());
         }
 
         progressText.setText(String.format("%.0f %%", progress));

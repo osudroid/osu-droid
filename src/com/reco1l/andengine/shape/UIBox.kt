@@ -4,6 +4,10 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
+import org.andengine.engine.camera.Camera
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
+import org.andengine.opengl.font.FontManager
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
@@ -49,7 +53,12 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         requestNewBuffer()
     }
 
-    override fun onCreateBuffer(): BoxVBO {
+    // The batch needs no buffer; it is only built when the box is drawn the legacy way.
+    override fun onCreateBuffer(): BoxVBO? {
+
+        if (canBatchShape()) {
+            return null
+        }
 
         val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
@@ -64,6 +73,35 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
 
     override fun onUpdateBuffer() {
         buffer?.update(this)
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        // Invisible shapes still reach the buffer path: they serve as depth masks there.
+        val blend = if (canBatchShape()) batchBlendMode() else null
+        if (blend != null) {
+            onApplyColor(pGLState)
+
+            if (drawAlpha == 0f) {
+                return
+            }
+
+            val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+
+            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+            if (paintStyle == Fill) {
+                ShapeBatching.roundedRect(pGLState.modelViewGLMatrix, 0f, 0f, width, height, radius, color, blend)
+            } else {
+                ShapeBatching.roundedOutline(
+                    pGLState.modelViewGLMatrix, 0f, 0f, width, height, radius,
+                    lineWidth / FontManager.getRasterScale(), color, blend
+                )
+            }
+            return
+        }
+
+        ensureBuffer()
+        super.doDraw(pGLState, pCamera)
     }
 
     override fun beginDraw(pGLState: GLState) {

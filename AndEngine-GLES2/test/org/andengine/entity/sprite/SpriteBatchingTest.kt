@@ -81,25 +81,28 @@ class SpriteBatchingTest {
         assertEquals(1, draws())
 
         val v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
-        // Corners in order around the quad: (x,y), (x,y2), (x2,y2), (x2,y); 20 bytes per vertex,
-        // position at +0, UV at +8, color at +16.
+        // Corners in order around the quad: (x,y), (x,y2), (x2,y2), (x2,y); 24 bytes per vertex,
+        // position at +0, UV at +8, color at +16, the sprite layer marker at +20.
         assertEquals(10f, v.getFloat(0), 0f)
         assertEquals(0f, v.getFloat(4), 0f)
-        assertEquals(10f, v.getFloat(20), 0f)
-        assertEquals(8f, v.getFloat(24), 0f)
-        assertEquals(18f, v.getFloat(40), 0f)
-        assertEquals(8f, v.getFloat(44), 0f)
-        assertEquals(18f, v.getFloat(60), 0f)
-        assertEquals(0f, v.getFloat(64), 0f)
+        assertEquals(10f, v.getFloat(24), 0f)
+        assertEquals(8f, v.getFloat(28), 0f)
+        assertEquals(18f, v.getFloat(48), 0f)
+        assertEquals(8f, v.getFloat(52), 0f)
+        assertEquals(18f, v.getFloat(72), 0f)
+        assertEquals(0f, v.getFloat(76), 0f)
         // UVs of the region (2..10 of 16): top-left and bottom-right.
         assertEquals(2f / 16f, v.getFloat(8), 1e-6f)
         assertEquals(2f / 16f, v.getFloat(12), 1e-6f)
-        assertEquals(10f / 16f, v.getFloat(48), 1e-6f)
-        assertEquals(10f / 16f, v.getFloat(52), 1e-6f)
+        assertEquals(10f / 16f, v.getFloat(56), 1e-6f)
+        assertEquals(10f / 16f, v.getFloat(60), 1e-6f)
         // Color bytes R, G, B, A.
         assertEquals(255, v.get(16).toInt() and 0xFF)
         assertEquals(0, v.get(17).toInt() and 0xFF)
         assertEquals(127, v.get(19).toInt() and 0xFF)
+        for (corner in 0 until 4) {
+            assertEquals(QuadBatcher.SPRITE_LAYER, v.getShort(corner * 24 + 20).toInt() and 0xFFFF)
+        }
     }
 
     @Test

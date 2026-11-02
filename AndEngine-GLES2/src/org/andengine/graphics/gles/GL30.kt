@@ -75,6 +75,7 @@ interface GL30 {
     fun glGetUniformBlockIndex(program: Int, uniformBlockName: String): Int
     fun glUniformBlockBinding(program: Int, uniformBlockIndex: Int, uniformBlockBinding: Int)
     fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, value: FloatArray, offset: Int)
+    fun glUniform1i(location: Int, x: Int)
     fun glFramebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int)
     fun glFramebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: Int)
     fun glRenderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)

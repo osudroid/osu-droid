@@ -2,6 +2,10 @@ package com.osudroid.ui.v2.menu.main
 
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.buffered.*
+import org.andengine.engine.camera.Camera
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
+import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import kotlin.math.*
@@ -79,8 +83,45 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     }
 
     override fun onCreateBuffer(): SpectrumVBO? {
-        if (totalBars <= 0) return null
+        // The batch needs no buffer; it is only built when the spectrum is drawn the legacy way.
+        if (totalBars <= 0 || canBatchShape()) return null
         return SpectrumVBO(totalBars).also { it.sharingMode = BufferSharingMode.Dynamic }
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        val blend = if (canBatchShape()) batchBlendMode() else null
+        if (blend == null) {
+            ensureBuffer()
+            super.doDraw(pGLState, pCamera)
+            return
+        }
+
+        onApplyColor(pGLState)
+
+        if (drawAlpha == 0f || totalBars <= 0) {
+            return
+        }
+
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+        val matrix = pGLState.modelViewGLMatrix
+        val barWidth = halfBarH * 2f
+
+        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+
+        // Each bar is a rotated rectangle from its start point along its angle: a flat-ended line.
+        for (total in 0 until min(BAR_COUNT * activeRounds, totalBars)) {
+            val amp = frequencyAmplitudes[total % BAR_COUNT]
+            if (amp < AMPLITUDE_DEAD_ZONE) continue
+
+            val len = amp * maxBarLen
+            val sx = barStartX[total]
+            val sy = barStartY[total]
+
+            ShapeBatching.line(
+                matrix, sx, sy, sx + barCosA[total] * len, sy + barSinA[total] * len,
+                barWidth, color, blend
+            )
+        }
     }
 
     override fun onUpdateBuffer() {

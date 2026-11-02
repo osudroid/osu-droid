@@ -53,7 +53,8 @@ class GlyphSlot(
 ) {
     /**
      * True once the image of this slot was written to the current GPU texture by [GlyphAtlas.upload].
-     * Cleared by [Font.invalidateLetters][org.andengine.opengl.font.Font.invalidateLetters] when
+     * Cleared by [Font.invalidateLetters][org.andengine.opengl.font.Font.invalidateLetters] and by
+     * [ShapeMasks.onContextLost][org.andengine.graphics.shape.ShapeMasks.onContextLost] when
      * the atlas textures were lost; drawing skips slots that are not uploaded, because the texels
      * of a fresh texture are undefined.
      */
@@ -81,12 +82,15 @@ class GlyphAtlas(
     private var packer: AtlasPacker? = null
     private var currentLayer = 0
 
+    /** Largest width or height [allocate] accepts. */
+    val maxImageSize: Int get() = layerSize - 2 * padding
+
     val arrayCount: Int
         @Synchronized get() = arrays.size
 
     @Synchronized
     fun allocate(width: Int, height: Int): GlyphSlot? {
-        val limit = layerSize - 2 * padding
+        val limit = maxImageSize
         if (width <= 0 || height <= 0 || width > limit || height > limit) return null
 
         if (arrays.isEmpty()) {

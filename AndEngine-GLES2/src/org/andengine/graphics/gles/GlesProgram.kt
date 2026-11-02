@@ -6,12 +6,14 @@ import org.andengine.graphics.GpuProgram
 
 /**
  * Shader program compiled and linked from GLSL ES source, recompiled after a context loss. Sources
- * declaring `#version 310 es` need ES 3.1 and `#version 320 es` ES 3.2. GL thread only.
+ * declaring `#version 310 es` need ES 3.1 and `#version 320 es` ES 3.2. Each sampler uniform named
+ * in [samplerUnits] is set to its texture unit after every link. GL thread only.
  */
 class GlesProgram(
     val vertexSource: String,
     val fragmentSource: String,
-    override val label: String
+    override val label: String,
+    val samplerUnits: Map<String, Int> = emptyMap()
 ) : GpuProgram, GlesRestorable {
 
     /** The GL program; 0 while there is none. */
@@ -74,6 +76,14 @@ class GlesProgram(
         programId = program
         uniformLocations.clear()
         GlesResources.label(GLES32.GL_PROGRAM, program, label)
+        if (samplerUnits.isNotEmpty()) {
+            // Uniform values belong to the program in use.
+            GlesBackend.state.useProgram(program)
+            for ((name, unit) in samplerUnits) {
+                val location = uniformLocation(name)
+                if (location >= 0) gl.glUniform1i(location, unit)
+            }
+        }
     }
 
     private fun compile(type: Int, source: String, stage: String): Int {

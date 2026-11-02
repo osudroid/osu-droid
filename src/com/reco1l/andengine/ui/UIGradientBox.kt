@@ -9,6 +9,8 @@ import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.GL_DYNAMIC_DRAW
 import com.reco1l.andengine.buffered.GL_TRIANGLE_STRIP
 import com.reco1l.andengine.buffered.UIBufferedComponent
+import org.andengine.engine.camera.Camera
+import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.opengl.shader.PositionColorShaderProgram
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.GLState
@@ -31,8 +33,38 @@ class UIGradientBox(
 
     // Buffer lifecycle
 
-    override fun onCreateBuffer() = GradientVBO().also {
-        it.sharingMode = BufferSharingMode.Dynamic // update() called every frame
+    // The batch needs no buffer; it is only built when the box is drawn the legacy way.
+    override fun onCreateBuffer(): GradientVBO? {
+        if (canBatchShape()) {
+            return null
+        }
+
+        return GradientVBO().also {
+            it.sharingMode = BufferSharingMode.Dynamic // update() called every frame
+        }
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        // Invisible shapes still reach the buffer path: they serve as depth masks there.
+        val blend = if (canBatchShape()) batchBlendMode() else null
+        if (blend != null) {
+            onApplyColor(pGLState)
+
+            if (drawAlpha == 0f) {
+                return
+            }
+
+            // Same corner colors as GradientVBO: the left edge fades with fromAlpha, the right with toAlpha.
+            val left = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, fromAlpha * drawAlpha)
+            val right = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, toAlpha * drawAlpha)
+
+            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+            ShapeBatching.gradientRect(pGLState.modelViewGLMatrix, 0f, 0f, width, height, left, right, left, right, blend)
+            return
+        }
+
+        ensureBuffer()
+        super.doDraw(pGLState, pCamera)
     }
 
     override fun onUpdateBuffer() {

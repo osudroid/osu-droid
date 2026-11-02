@@ -5,6 +5,10 @@ import com.osudroid.math.toRadians
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.UICircle.*
+import org.andengine.engine.camera.Camera
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
+import org.andengine.opengl.font.FontManager
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
@@ -74,7 +78,46 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         requestNewBuffer()
     }
 
-    override fun onCreateBuffer(): CircleVertexBuffer {
+    // Only a full circle with equal sides goes through the batch; arcs and ellipses use the buffer.
+    private fun canBatchCircle(): Boolean {
+        return abs(endAngle - startAngle) >= 360f && abs(width - height) <= 1e-3f && canBatchShape()
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        // Invisible shapes still reach the buffer path: they serve as depth masks there.
+        val blend = if (canBatchCircle()) batchBlendMode() else null
+        if (blend != null) {
+            onApplyColor(pGLState)
+
+            if (drawAlpha == 0f) {
+                return
+            }
+
+            val radius = width / 2f
+            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+
+            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+            if (paintStyle == PaintStyle.Fill) {
+                ShapeBatching.circle(pGLState.modelViewGLMatrix, radius, radius, radius, color, blend)
+            } else {
+                ShapeBatching.ring(
+                    pGLState.modelViewGLMatrix, radius, radius, radius,
+                    lineWidth / FontManager.getRasterScale(), color, blend
+                )
+            }
+            return
+        }
+
+        ensureBuffer()
+        super.doDraw(pGLState, pCamera)
+    }
+
+    // The batch needs no buffer; it is only built when the circle is drawn the legacy way.
+    override fun onCreateBuffer(): CircleVertexBuffer? {
+
+        if (canBatchCircle()) {
+            return null
+        }
 
         val buffer = buffer
         val segments = approximateSegments(width, height)

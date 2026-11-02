@@ -44,14 +44,7 @@ object ScissorStack : Stack<Vec4>() {
             ?.takeUnless { vec -> vec.x != intersectedX || vec.y != intersectedY || vec.z != intersectedWidth || vec.w != intersectedHeight }
             ?: Vec4(intersectedX, intersectedY, intersectedWidth, intersectedHeight)
 
-        // Queued quads were meant for the previous clip.
-        QuadBatcher.flush()
-        GlesBackend.state.scissor(
-            intersectedX.toInt(),
-            intersectedY.toInt(),
-            intersectedWidth.toInt(),
-            intersectedHeight.toInt()
-        )
+        applyClip(intersectedX.toInt(), intersectedY.toInt(), intersectedWidth.toInt(), intersectedHeight.toInt())
         super.push(vec4)
     }
 
@@ -61,7 +54,6 @@ object ScissorStack : Stack<Vec4>() {
             return null
         }
 
-        QuadBatcher.flush()
         val vec4 = super.pop()
         if (vec4 != null) {
             vec4Pool.release(vec4)
@@ -70,15 +62,19 @@ object ScissorStack : Stack<Vec4>() {
         if (!empty()) {
             val current = peek()
 
-            GlesBackend.state.scissor(
-                current.x.toInt(),
-                current.y.toInt(),
-                current.z.toInt(),
-                current.w.toInt()
-            )
+            applyClip(current.x.toInt(), current.y.toInt(), current.z.toInt(), current.w.toInt())
+        } else {
+            QuadBatcher.clearClip()
         }
 
         return vec4
+    }
+
+
+    /** Sets the GL scissor for direct draws and reports the same rectangle to the quad batch. */
+    private fun applyClip(x: Int, y: Int, width: Int, height: Int) {
+        GlesBackend.state.scissor(x, y, width, height)
+        QuadBatcher.setClip(x, y, width, height)
     }
 
 

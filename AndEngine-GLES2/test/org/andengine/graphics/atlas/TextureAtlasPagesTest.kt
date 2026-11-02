@@ -11,6 +11,7 @@ import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.region.TextureRegion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -52,13 +53,28 @@ class TextureAtlasPagesTest {
 
     @Test
     fun add_largeImage_returnsNull() {
-        val atlas = pages(pageSize = 64, maxRegion = 32)
+        val atlas = pages(pageSize = 128, maxRegion = 32)
         atlas.beginSession()
-        assertNull(atlas.add(source(33, 8), TextureOptions.BILINEAR))
-        assertNull(atlas.add(source(8, 33), TextureOptions.BILINEAR))
+        // Over the area of 32x32, or longer than twice the size on one side.
+        assertNull(atlas.add(source(33, 33), TextureOptions.BILINEAR))
+        assertNull(atlas.add(source(65, 8), TextureOptions.BILINEAR))
+        assertNull(atlas.add(source(8, 65), TextureOptions.BILINEAR))
         atlas.endSession()
         assertEquals(0, atlas.pageCount)
         assertTrue(manager.loaded.isEmpty())
+    }
+
+    @Test
+    fun add_longThinImage_accepted() {
+        val atlas = pages(pageSize = 128, maxRegion = 32)
+        atlas.beginSession()
+        // 64x16 = 1024 = 32x32 in area: accepted although wider than 32.
+        val wide = atlas.add(source(64, 16), TextureOptions.BILINEAR)
+        val tall = atlas.add(source(16, 64), TextureOptions.BILINEAR)
+        atlas.endSession()
+        assertNotNull(wide)
+        assertNotNull(tall)
+        assertSame(wide!!.texture, tall!!.texture)
     }
 
     @Test
