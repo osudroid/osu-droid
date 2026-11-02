@@ -26,6 +26,12 @@ class RecordingGL : GL32 {
     val vertexUploads: MutableList<ByteArray> = ArrayList()
     /** The 16 values of every [glUniformMatrix4fv] call, in call order. */
     val uniformMatrices: MutableList<FloatArray> = ArrayList()
+    /** `GL_COMPILE_STATUS` and info log of every shader; set the status to 0 to fail compilation. */
+    var shaderCompileStatus = 1
+    var shaderInfoLog = ""
+    /** `GL_LINK_STATUS` and info log of every program; set the status to 0 to fail linking. */
+    var programLinkStatus = 1
+    var programInfoLog = ""
     private var nextId = 1
 
     override fun glGetString(name: Int): String? {
@@ -314,12 +320,12 @@ class RecordingGL : GL32 {
 
     override fun glGetShaderiv(shader: Int, pname: Int, params: IntArray, offset: Int) {
         calls += "glGetShaderiv($shader,$pname,buf,$offset)"
-        params[offset] = 1
+        params[offset] = shaderCompileStatus
     }
 
     override fun glGetShaderInfoLog(shader: Int): String {
         calls += "glGetShaderInfoLog($shader)"
-        return ""
+        return shaderInfoLog
     }
 
     override fun glCreateProgram(): Int {
@@ -337,12 +343,12 @@ class RecordingGL : GL32 {
 
     override fun glGetProgramiv(program: Int, pname: Int, params: IntArray, offset: Int) {
         calls += "glGetProgramiv($program,$pname,buf,$offset)"
-        params[offset] = 1
+        params[offset] = programLinkStatus
     }
 
     override fun glGetProgramInfoLog(program: Int): String {
         calls += "glGetProgramInfoLog($program)"
-        return ""
+        return programInfoLog
     }
 
     override fun glDeleteShader(shader: Int) {

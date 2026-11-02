@@ -2,12 +2,17 @@ package org.andengine.graphics.gles
 
 import android.opengl.GLES20
 import android.opengl.GLES32
+import android.os.Build
 import org.andengine.graphics.GpuProgram
+import org.andengine.opengl.exception.GLESVersionUnsupportedException
 
 /**
  * Shader program compiled and linked from GLSL ES source, recompiled after a context loss. Sources
  * declaring `#version 310 es` need ES 3.1 and `#version 320 es` ES 3.2. Each sampler uniform named
  * in [samplerUnits] is set to its texture unit after every link. GL thread only.
+ *
+ * A program the driver cannot build throws [GLESVersionUnsupportedException], so players see the
+ * unsupported device dialog instead of a raw crash; the driver log stays in its cause.
  */
 class GlesProgram(
     val vertexSource: String,
@@ -28,14 +33,39 @@ class GlesProgram(
     private val uniformLocations = HashMap<String, Int>()
 
     init {
-        checkVersion(vertexSource, "vertex")
-        checkVersion(fragmentSource, "fragment")
-        create()
+        build()
         GlesBackend.registry.register(this)
     }
 
+    private fun build() {
+        try {
+            checkVersion(vertexSource, "vertex")
+            checkVersion(fragmentSource, "fragment")
+            create()
+        } catch (e: IllegalStateException) {
+            throw unsupported(e)
+        }
+    }
+
+    private fun unsupported(cause: IllegalStateException): GLESVersionUnsupportedException {
+        val required = maxOf(versionOf(vertexSource) ?: 300, versionOf(fragmentSource) ?: 300)
+        val gl = GlesBackend.gl
+        val glsl = gl.glGetString(GLES20.GL_SHADING_LANGUAGE_VERSION)
+        val version = gl.glGetString(GLES20.GL_VERSION)
+        return GLESVersionUnsupportedException(
+            "GLSL ES ${required / 100}.${"%02d".format(required % 100)}",
+            (glsl ?: "unknown") + (if (version != null) " ($version)" else ""),
+            Build.MANUFACTURER + " " + Build.MODEL,
+            Build.HARDWARE,
+            Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")",
+            cause
+        )
+    }
+
+    private fun versionOf(source: String): Int? = VERSION_REGEX.find(source)?.groupValues?.get(1)?.toInt()
+
     private fun checkVersion(source: String, stage: String) {
-        val version = VERSION_REGEX.find(source)?.groupValues?.get(1)?.toInt() ?: return
+        val version = versionOf(source) ?: return
         val caps = GlesBackend.caps
         val supported = when {
             version >= 320 -> caps.hasGl32
@@ -117,7 +147,7 @@ class GlesProgram(
         uniformLocations.clear()
     }
 
-    override fun restore(backend: GlesBackend) = create()
+    override fun restore(backend: GlesBackend) = build()
 
     override fun dispose() {
         if (isDisposed) return

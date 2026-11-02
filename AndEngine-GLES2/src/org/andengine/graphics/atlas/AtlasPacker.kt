@@ -24,6 +24,17 @@ class AtlasPacker(val pageSize: Int, val padding: Int = 2) {
         ws[0] = pageSize
     }
 
+    /** An independent packer in the same state, to try placements without touching this one. */
+    fun copy(): AtlasPacker {
+        val copy = AtlasPacker(pageSize, padding)
+        copy.xs = xs.copyOf()
+        copy.ys = ys.copyOf()
+        copy.ws = ws.copyOf()
+        copy.count = count
+        copy.usedArea = usedArea
+        return copy
+    }
+
     fun tryPlace(width: Int, height: Int): AtlasSlot? {
         val rw = width + 2 * padding
         val rh = height + 2 * padding

@@ -5,7 +5,9 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
+import org.andengine.opengl.texture.region.ITiledTextureRegion
 import org.andengine.opengl.texture.region.TextureRegion
+import org.andengine.opengl.texture.region.TiledTextureRegion
 import java.util.IdentityHashMap
 import java.util.WeakHashMap
 
@@ -23,13 +25,19 @@ import java.util.WeakHashMap
  * Every region holds a reference on its page; [release] drops it and unloads the page once no region
  * is left. All methods are thread-safe (loading usually runs on background threads while the GL
  * thread renders).
+ *
+ * With [allowRotation], an image that does not fit upright on the open page is tried turned by 90°
+ * before a new page is opened; its region is then [TextureRegion.isRotated]. Only entities that honour
+ * rotated regions (such as [org.andengine.entity.sprite.Sprite]) draw those correctly, so it is off by
+ * default.
  */
 class TextureAtlasPages @JvmOverloads constructor(
     private val textureManager: TextureManager,
     val maxPageSize: Int = 2048,
     val maxRegionSize: Int = 512,
     val padding: Int = 2,
-    val maxRegionLength: Int = maxRegionSize * 2
+    val maxRegionLength: Int = maxRegionSize * 2,
+    val allowRotation: Boolean = false
 ) {
 
     /**
@@ -44,7 +52,7 @@ class TextureAtlasPages @JvmOverloads constructor(
 
     private class Page(
         @JvmField val atlas: BitmapTextureAtlas,
-        @JvmField val packer: AtlasPacker,
+        @JvmField var packer: AtlasPacker,
         @JvmField val options: TextureOptions
     ) {
         @JvmField var references = 0
@@ -109,47 +117,93 @@ class TextureAtlasPages @JvmOverloads constructor(
     private fun sameOptions(a: TextureOptions, b: TextureOptions): Boolean =
         a === b || a.mMinFilter == b.mMinFilter && a.mMagFilter == b.mMagFilter && a.mPreMultiplyAlpha == b.mPreMultiplyAlpha
 
-    fun add(source: IBitmapTextureAtlasSource, options: TextureOptions): TextureRegion? {
+    fun add(source: IBitmapTextureAtlasSource, options: TextureOptions): TextureRegion? =
+        synchronized(lock) { place(listOf(source), options)?.get(0) }
+
+    /**
+     * Places all of [sources] on one page, in order, and returns them as the tiles of a
+     * [TiledTextureRegion] on that page. The set is never split: if it does not fit on the open page, all
+     * tiles go onto a new one. Returns `null` for an empty list, outside a session, if any image is
+     * rejected the way [add] rejects it, or if the set does not fit on an empty page. Release it with
+     * [release] for tiled regions.
+     */
+    fun addTiled(sources: List<IBitmapTextureAtlasSource>, options: TextureOptions): TiledTextureRegion? {
+        val regions = synchronized(lock) { place(sources, options) } ?: return null
+        return TiledTextureRegion(regions[0].texture, *regions.toTypedArray())
+    }
+
+    private fun accepts(source: IBitmapTextureAtlasSource): Boolean {
         val width = source.textureWidth
         val height = source.textureHeight
-        if (width <= 0 || height <= 0 || width > maxRegionLength || height > maxRegionLength) return null
-        if (width.toLong() * height > maxRegionArea) return null
+        if (width <= 0 || height <= 0 || width > maxRegionLength || height > maxRegionLength) return false
+        return width.toLong() * height <= maxRegionArea
+    }
+
+    /** Places every image on [packer], upright or, if allowed, turned; `null` if one does not fit. */
+    private fun placeAll(packer: AtlasPacker, sources: List<IBitmapTextureAtlasSource>): Array<AtlasSlot>? {
+        val slots = arrayOfNulls<AtlasSlot>(sources.size)
+        for (i in sources.indices) {
+            val width = sources[i].textureWidth
+            val height = sources[i].textureHeight
+            slots[i] = packer.tryPlace(width, height)
+                ?: (if (allowRotation) packer.tryPlace(height, width) else null)
+                ?: return null
+        }
+        @Suppress("UNCHECKED_CAST")
+        return slots as Array<AtlasSlot>
+    }
+
+    /** Puts all of [sources] on one page and returns their regions; `null` if they cannot be placed. Holds [lock]. */
+    private fun place(sources: List<IBitmapTextureAtlasSource>, options: TextureOptions): List<TextureRegion>? {
+        if (sessionDepth == 0 || sources.isEmpty()) return null
         if (options.mWrapS != CLAMPED.mWrapS || options.mWrapT != CLAMPED.mWrapT) return null
+        for (i in sources.indices) if (!accepts(sources[i])) return null
 
-        synchronized(lock) {
-            if (sessionDepth == 0) return null
-
-            // At most one page per options is open at a time (see below).
-            var openIndex = -1
-            for (i in 0 until pages.size) {
-                val candidate = pages[i]
-                if (!candidate.submitted && sameOptions(candidate.options, options)) {
-                    openIndex = i
-                    break
-                }
+        // At most one page per options is open at a time (see below).
+        var openIndex = -1
+        for (i in 0 until pages.size) {
+            val candidate = pages[i]
+            if (!candidate.submitted && sameOptions(candidate.options, options)) {
+                openIndex = i
+                break
             }
+        }
 
-            var page: Page? = if (openIndex >= 0) pages[openIndex] else null
-            var slot: AtlasSlot? = page?.packer?.tryPlace(width, height)
+        // Placements are tried on a copy of the packer, so a set that does not fit leaves the page as it was.
+        var page: Page? = if (openIndex >= 0) pages[openIndex] else null
+        var packer = page?.packer?.copy()
+        var slots = packer?.let { placeAll(it, sources) }
 
-            if (page == null || slot == null) {
-                val size = pageSize
-                val packer = AtlasPacker(size, padding)
-                slot = packer.tryPlace(width, height) ?: return null
-                // The open page is full for this image: close it now instead of at the end of the session.
-                if (openIndex >= 0) close(openIndex)
-                val atlas = BitmapTextureAtlas(textureManager, size, size, options)
-                page = Page(atlas, packer, options)
-                pages.add(page)
-                pageTextures[atlas] = true
-            }
+        if (page == null || slots == null) {
+            packer = AtlasPacker(pageSize, padding)
+            slots = placeAll(packer, sources) ?: return null
+            // The open page is full for these images: close it now instead of at the end of the session.
+            if (openIndex >= 0) close(openIndex)
+            val atlas = BitmapTextureAtlas(textureManager, packer.pageSize, packer.pageSize, options)
+            page = Page(atlas, packer, options)
+            pages.add(page)
+            pageTextures[atlas] = true
+        } else {
+            page.packer = packer!!
+        }
 
-            page.atlas.addTextureAtlasSource(ExtrudedBitmapSource(source, padding), slot.x - padding, slot.y - padding)
-            val region = TextureRegion(page.atlas, slot.x.toFloat(), slot.y.toFloat(), width.toFloat(), height.toFloat())
+        val regions = ArrayList<TextureRegion>(sources.size)
+        for (i in sources.indices) {
+            val source = sources[i]
+            val slot = slots[i]
+            // A turned image lies on the page with its sides swapped.
+            val rotated = slot.width != source.textureWidth || slot.height != source.textureHeight
+            page.atlas.addTextureAtlasSource(ExtrudedBitmapSource(source, padding, rotated), slot.x - padding, slot.y - padding)
+            // A rotated region takes the image's own size and swaps it for its extent on the page.
+            val region = TextureRegion(
+                page.atlas, slot.x.toFloat(), slot.y.toFloat(),
+                source.textureWidth.toFloat(), source.textureHeight.toFloat(), rotated
+            )
             page.references++
             regionPages[region] = page
-            return region
+            regions.add(region)
         }
+        return regions
     }
 
     /**
@@ -167,6 +221,16 @@ class TextureAtlasPages @JvmOverloads constructor(
             }
             return true
         }
+    }
+
+    /** Releases every tile of [tiled] like [release]; `true` if they lie on pages of this instance. */
+    fun release(tiled: ITiledTextureRegion): Boolean {
+        var ours = false
+        for (i in 0 until tiled.tileCount) {
+            val tile = tiled.getTextureRegion(i)
+            if (tile is TextureRegion && release(tile)) ours = true
+        }
+        return ours
     }
 
     /** Whether [region] lies on a page created by this instance (including copies and already released regions). */

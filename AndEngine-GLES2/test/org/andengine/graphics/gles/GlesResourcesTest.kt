@@ -12,6 +12,7 @@ import org.andengine.graphics.TextureFilter
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.TextureSource
 import org.andengine.graphics.debug.GpuFrameTimer
+import org.andengine.opengl.exception.GLESVersionUnsupportedException
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -377,7 +378,7 @@ class GlesResourcesTest {
         GlesDebugOptions.simulateEs30 = true
         newContext()
 
-        assertThrows(IllegalStateException::class.java) {
+        assertThrows(GLESVersionUnsupportedException::class.java) {
             track(device.createProgram("#version 320 es\nvoid main() {}", "#version 320 es\nvoid main() {}", "p"))
         }
     }

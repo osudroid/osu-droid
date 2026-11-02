@@ -356,6 +356,161 @@ class TextureAtlasPagesTest {
         assertEquals(0xFF0000FF.toInt(), bmp.getPixel(3, 2))
     }
 
+    @Test
+    fun add_rotationOff_tallImageOpensNewPage() {
+        val atlas = pages(pageSize = 64, maxRegion = 64)
+        atlas.beginSession()
+        val a = atlas.add(source(60, 20), TextureOptions.BILINEAR)!!
+        // 20x50 does not fit below the first image upright (24 + 54 > 64).
+        val b = atlas.add(source(20, 50), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertNotSame(a.texture, b.texture)
+        assertFalse(b.isRotated)
+    }
+
+    @Test
+    fun add_rotationOn_tallImageIsTurnedIntoTheGap() {
+        val atlas = TextureAtlasPages(manager, 64, 64, allowRotation = true)
+        atlas.beginSession()
+        val a = atlas.add(source(60, 20), TextureOptions.BILINEAR)!!
+        val b = atlas.add(source(20, 50), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertSame(a.texture, b.texture)
+        assertFalse(a.isRotated)
+        assertTrue(b.isRotated)
+        // The region keeps the image's own size; on the page it lies on its side.
+        assertEquals(20f, b.width)
+        assertEquals(50f, b.height)
+        assertEquals(50f, (b.u2 - b.u) * 64f, 1e-4f)
+        assertEquals(20f, (b.v2 - b.v) * 64f, 1e-4f)
+        val placed = sourcesOf(manager.loaded.single() as BitmapTextureAtlas)[1]
+        assertEquals(54, placed.textureWidth)
+        assertEquals(24, placed.textureHeight)
+    }
+
+    @Test
+    fun add_rotationOn_uprightWhenItFits() {
+        val atlas = TextureAtlasPages(manager, 64, 64, allowRotation = true)
+        atlas.beginSession()
+        val a = atlas.add(source(10, 30), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertFalse(a.isRotated)
+    }
+
+    @Test
+    fun extrudedSource_rotated_turnsImageClockwise() {
+        val inner = object : BaseTextureAtlasSource(0, 0, 2, 1), IBitmapTextureAtlasSource {
+            override fun deepCopy(): IBitmapTextureAtlasSource = this
+            override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap {
+                val bmp = Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888)
+                bmp.setPixel(0, 0, 0xFFFF0000.toInt())
+                bmp.setPixel(1, 0, 0xFF0000FF.toInt())
+                return bmp
+            }
+        }
+        val rotated = ExtrudedBitmapSource(inner, 1, rotated = true)
+        assertEquals(3, rotated.textureWidth)
+        assertEquals(4, rotated.textureHeight)
+        assertFalse(rotated.canLoadPixels(false))
+
+        // Turned clockwise: the image's top-left pixel lands at the top-right of the region, where a
+        // sprite reads its top-left corner from a rotated region (u2, v).
+        val bmp = rotated.onLoadBitmap(Bitmap.Config.ARGB_8888)!!
+        assertEquals(3, bmp.width)
+        assertEquals(4, bmp.height)
+        assertEquals(0xFFFF0000.toInt(), bmp.getPixel(1, 1))
+        assertEquals(0xFF0000FF.toInt(), bmp.getPixel(1, 2))
+        assertEquals(0xFFFF0000.toInt(), bmp.getPixel(0, 0))
+        assertEquals(0xFF0000FF.toInt(), bmp.getPixel(2, 3))
+    }
+
+    @Test
+    fun addTiled_fitsOnOpenPage_sharesIt() {
+        val atlas = pages(pageSize = 64, maxRegion = 64)
+        atlas.beginSession()
+        val single = atlas.add(source(10, 10), TextureOptions.BILINEAR)!!
+        val tiled = atlas.addTiled(listOf(source(8, 8), source(8, 8), source(8, 8)), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertEquals(3, tiled.tileCount)
+        assertSame(single.texture, tiled.texture)
+        for (i in 0 until 3) assertSame(tiled.texture, tiled.getTextureRegion(i).texture)
+        assertEquals(1, atlas.pageCount)
+    }
+
+    @Test
+    fun addTiled_partlyFittingOnOpenPage_movesAllTilesToNewPage() {
+        val atlas = pages(pageSize = 64, maxRegion = 64)
+        atlas.beginSession()
+        val first = atlas.add(source(40, 40), TextureOptions.BILINEAR)!!
+        // Only one 16x40 tile still fits beside the first image; the set must not be split.
+        val tiled = atlas.addTiled(listOf(source(16, 40), source(16, 40), source(16, 40)), TextureOptions.BILINEAR)!!
+
+        // The open page is handed over at once, the new one at the end of the session.
+        assertEquals(listOf(first.texture), manager.loaded)
+        atlas.endSession()
+
+        assertNotSame(first.texture, tiled.texture)
+        for (i in 0 until 3) assertSame(tiled.texture, tiled.getTextureRegion(i).texture)
+        assertEquals(1, sourcesOf(first.texture as BitmapTextureAtlas).size)
+        assertEquals(3, sourcesOf(tiled.texture as BitmapTextureAtlas).size)
+    }
+
+    @Test
+    fun addTiled_tooLargeForEmptyPage_returnsNullAndKeepsOpenPage() {
+        val atlas = pages(pageSize = 64, maxRegion = 64)
+        atlas.beginSession()
+        val first = atlas.add(source(10, 10), TextureOptions.BILINEAR)!!
+        assertNull(atlas.addTiled(List(5) { source(30, 30) }, TextureOptions.BILINEAR))
+        val later = atlas.add(source(10, 10), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertSame(first.texture, later.texture)
+        assertEquals(2, sourcesOf(first.texture as BitmapTextureAtlas).size)
+    }
+
+    @Test
+    fun addTiled_invalidInput_returnsNull() {
+        val atlas = pages(pageSize = 64, maxRegion = 32)
+        assertNull(atlas.addTiled(listOf(source(8, 8)), TextureOptions.BILINEAR))
+        atlas.beginSession()
+        assertNull(atlas.addTiled(emptyList(), TextureOptions.BILINEAR))
+        assertNull(atlas.addTiled(listOf(source(8, 8), source(33, 33)), TextureOptions.BILINEAR))
+        assertNull(atlas.addTiled(listOf(source(8, 8)), TextureOptions.REPEATING_BILINEAR))
+        atlas.endSession()
+        assertEquals(0, atlas.pageCount)
+    }
+
+    @Test
+    fun addTiled_rotationOn_turnsTilesThatOnlyFitSideways() {
+        val atlas = TextureAtlasPages(manager, 64, 64, allowRotation = true)
+        atlas.beginSession()
+        val first = atlas.add(source(60, 20), TextureOptions.BILINEAR)!!
+        val tiled = atlas.addTiled(listOf(source(20, 50)), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertSame(first.texture, tiled.texture)
+        assertTrue(tiled.getTextureRegion(0).isRotated)
+    }
+
+    @Test
+    fun releaseTiled_dropsEveryTile_unloadsPage() {
+        val atlas = pages(pageSize = 64, maxRegion = 64)
+        atlas.beginSession()
+        val tiled = atlas.addTiled(listOf(source(8, 8), source(8, 8)), TextureOptions.BILINEAR)!!
+        atlas.endSession()
+
+        assertTrue(atlas.release(tiled))
+        assertEquals(listOf(tiled.texture), manager.unloaded)
+        assertEquals(0, atlas.pageCount)
+        // A second release changes nothing.
+        assertTrue(atlas.release(tiled))
+        assertEquals(1, manager.unloaded.size)
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun sourcesOf(page: BitmapTextureAtlas): List<IBitmapTextureAtlasSource> {
         val field = org.andengine.opengl.texture.atlas.TextureAtlas::class.java.getDeclaredField("mTextureAtlasSources")
