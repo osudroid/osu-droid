@@ -62,7 +62,6 @@ public class TextureManager {
 	private final ArrayList<ITexture> mTexturesToBeLoaded = new ArrayList<ITexture>();
 	private final ArrayList<ITexture> mTexturesToBeUnloaded = new ArrayList<ITexture>();
 
-	private TextureWarmUpVertexBufferObject mTextureWarmUpVertexBufferObject;
 	private boolean mReloading;
 
 	/* Background preparation of atlas pixels, see updateTextures. */
@@ -115,7 +114,6 @@ public class TextureManager {
 	// ===========================================================
 
 	public synchronized void onCreate() {
-		this.mTextureWarmUpVertexBufferObject = new TextureWarmUpVertexBufferObject();
 	}
 
 	public synchronized void onReload() {
@@ -143,10 +141,6 @@ public class TextureManager {
 		if(!this.mTexturesToBeUnloaded.isEmpty()) {
 			this.mTexturesManaged.removeAll(this.mTexturesToBeUnloaded); // TODO Check if removeAll uses iterator internally!
 			this.mTexturesToBeUnloaded.clear();
-		}
-
-		if(this.mTextureWarmUpVertexBufferObject != null) {
-			this.mTextureWarmUpVertexBufferObject.setNotLoadedToHardware();
 		}
 	}
 
@@ -194,11 +188,6 @@ public class TextureManager {
 		this.mTexturesLoaded.clear();
 		this.mTexturesManaged.clear();
 		this.mTexturesMapped.clear();
-
-		if(this.mTextureWarmUpVertexBufferObject != null) {
-			this.mTextureWarmUpVertexBufferObject.dispose();
-			this.mTextureWarmUpVertexBufferObject = null;
-		}
 	}
 
 	public synchronized boolean hasMappedTexture(final String pID) {
@@ -400,11 +389,6 @@ public class TextureManager {
 						((BitmapTextureAtlas) textureToBeLoaded).usePreparedPixels(preparation);
 					}
 					textureToBeLoaded.loadToHardware(pGLState);
-
-					/* Execute the warm-up to ensure the texture data is actually moved to the GPU. */
-					if(this.mTextureWarmUpVertexBufferObject != null) {
-						this.mTextureWarmUpVertexBufferObject.warmup(pGLState, textureToBeLoaded);
-					}
 				} catch (final IOException e) {
 					Debug.e(e);
 				} finally {

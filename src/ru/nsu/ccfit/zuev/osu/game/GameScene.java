@@ -384,7 +384,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
         if (textureRegion == null) {
-            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), engine.getVertexBufferObjectManager());
+            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
             Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
@@ -394,7 +394,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             beatmapBackground = rectangle;
         } else {
-            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion, engine.getVertexBufferObjectManager());
+            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion);
         }
     }
 
@@ -621,7 +621,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
         } else {
-            dimRectangle = new Rectangle(0f, 0f, 0f, 0f, engine.getVertexBufferObjectManager());
+            dimRectangle = new Rectangle(0f, 0f, 0f, 0f);
         }
 
         dimRectangle.setSize(backgroundW, backgroundH);
@@ -1367,7 +1367,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (!Config.isHideReplayMarquee()) {
-                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000, engine.getVertexBufferObjectManager());
+                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
                 replayText.setPosition(0, 140);

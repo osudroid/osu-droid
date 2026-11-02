@@ -260,7 +260,7 @@ class HUDLeaderboard : HUDElement() {
     }
 
 
-    private inner class BoardItem(val data: ScoreBoardItem) : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("menu-button-background"), GlobalManager.getInstance().engine.vertexBufferObjectManager) {
+    private inner class BoardItem(val data: ScoreBoardItem) : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("menu-button-background")) {
 
         val info: Text
 
@@ -277,7 +277,7 @@ class HUDLeaderboard : HUDElement() {
             height = SPRITE_HEIGHT
             width = SPRITE_WIDTH
 
-            info = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+            info = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100)
             info.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
@@ -287,8 +287,7 @@ class HUDLeaderboard : HUDElement() {
                 15f,
                 ResourceManager.getInstance().getFont("CaptionFont"),
                 "",
-                5,
-                GlobalManager.getInstance().engine.vertexBufferObjectManager
+                5
             )
             rank.setBlendFunction(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)

@@ -4,7 +4,6 @@ import android.opengl.GLES20
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
-import org.andengine.entity.primitive.vbo.HighPerformanceRectangleVertexBufferObject
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
@@ -13,9 +12,7 @@ import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.graphics.shape.ShapeMasks
 import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.opengl.shader.ShaderProgram
 import org.andengine.opengl.util.GLState
-import org.andengine.opengl.vbo.DrawType
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -61,11 +58,9 @@ class RectangleBatchingTest {
         GlesBackend.surfaceHeight = 0
     }
 
-    private fun vbo() = HighPerformanceRectangleVertexBufferObject(
-        null, Rectangle.RECTANGLE_SIZE, DrawType.STATIC, false, Rectangle.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT
-    )
+    private fun rect(x: Float = 10f) = Rectangle(x, 0f, 8f, 6f)
 
-    private fun rect(x: Float = 10f) = Rectangle(x, 0f, 8f, 6f, vbo())
+    private fun vertices(): ByteBuffer = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
 
     private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
     private fun legacyDraws() = gl.calls.count { it.startsWith("glDrawArrays") }
@@ -115,22 +110,54 @@ class RectangleBatchingTest {
     }
 
     @Test
-    fun rectangleSubclassWithOwnDraw_notBatched() {
-        val r = object : Rectangle(0f, 0f, 8f, 6f, vbo()) {
-            override fun draw(pGLState: GLState, pCamera: Camera) = super.draw(pGLState, pCamera)
-        }
-        assertFalse(RectangleBatching.canBatch(r))
-    }
-
-    @Test
-    fun plainSubclass_canBatch() {
-        assertTrue(RectangleBatching.canBatch(object : Rectangle(0f, 0f, 8f, 6f, vbo()) {}))
-    }
-
-    @Test
-    fun rectangleWithCustomShader_notBatched() {
+    fun rectangle_colorReadAtDraw() {
         val r = rect()
-        r.shaderProgram = ShaderProgram("void main(){}", "void main(){}")
-        assertFalse(RectangleBatching.canBatch(r))
+        r.setColor(1f, 0f, 0f, 1f)
+        r.onDraw(glState, camera)
+        QuadBatcher.flush()
+        assertEquals(255, vertices().get(16).toInt() and 0xFF)
+        assertEquals(0, vertices().get(18).toInt() and 0xFF)
+
+        r.setColor(0f, 0f, 1f)
+        r.onDraw(glState, camera)
+        QuadBatcher.flush()
+        assertEquals(0, vertices().get(16).toInt() and 0xFF)
+        assertEquals(255, vertices().get(18).toInt() and 0xFF)
+    }
+
+    @Test
+    fun rectangle_sizeReadAtDraw() {
+        val r = rect()
+        r.setSize(20f, 4f)
+        r.onDraw(glState, camera)
+        QuadBatcher.flush()
+        assertEquals(30f, vertices().getFloat(48), 0f)
+        assertEquals(4f, vertices().getFloat(52), 0f)
+    }
+
+    @Test
+    fun rectangleSubclassWithOwnDraw_stillBatched() {
+        val r = object : Rectangle(0f, 0f, 8f, 6f) {
+            override fun preDraw(pGLState: GLState, pCamera: Camera) = super.preDraw(pGLState, pCamera)
+            override fun draw(pGLState: GLState, pCamera: Camera) = super.draw(pGLState, pCamera)
+            override fun postDraw(pGLState: GLState, pCamera: Camera) = super.postDraw(pGLState, pCamera)
+        }
+        r.onDraw(glState, camera)
+        assertTrue(QuadBatcher.hasPending)
+        QuadBatcher.flush()
+        assertEquals(0, legacyDraws())
+        assertEquals(1, draws())
+    }
+
+    @Test
+    fun rectangle_unknownBlendFallsBackToAlpha() {
+        val r = rect()
+        r.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
+        r.onDraw(glState, camera)
+        QuadBatcher.flush()
+
+        assertEquals(1, draws())
+        val alpha = "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"
+        assertTrue(gl.calls.toString(), gl.calls.any { it == alpha })
     }
 }

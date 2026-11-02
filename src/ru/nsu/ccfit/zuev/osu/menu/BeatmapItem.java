@@ -37,11 +37,10 @@ public class BeatmapItem extends Sprite {
 
     public BeatmapItem() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                "menu-button-background"));
 
-        final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
         beatmapTitle = new Text(Utils.toRes(32), Utils.toRes(22),
-                ResourceManager.getInstance().getFont("font"), "", 200, vbo);
+                ResourceManager.getInstance().getFont("font"), "", 200);
 
         ComponentsKt.setColor4(this, OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR));
 
@@ -54,12 +53,12 @@ public class BeatmapItem extends Sprite {
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
             stars[i] = new Sprite(Utils.toRes(60 + 52 * i), Utils.toRes(50),
-                    ResourceManager.getInstance().getTexture("star"), vbo);
+                    ResourceManager.getInstance().getTexture("star"));
             attachChild(stars[i]);
         }
         final TextureRegion starTex = ResourceManager.getInstance()
                 .getTexture("star").deepCopy();
-        halfStar = new Sprite(0, 0, starTex, vbo);
+        halfStar = new Sprite(0, 0, starTex);
         attachChild(halfStar);
     }
 
@@ -116,7 +115,7 @@ public class BeatmapItem extends Sprite {
         }
         if (newmark != null) {
             mark = new Sprite(Utils.toRes(25), Utils.toRes(55), ResourceManager
-                    .getInstance().getTexture("ranking-" + newmark + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    .getInstance().getTexture("ranking-" + newmark + "-small"));
             attachChild(mark);
         } else {
             mark = null;

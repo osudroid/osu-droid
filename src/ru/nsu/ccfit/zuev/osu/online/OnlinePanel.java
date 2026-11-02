@@ -9,7 +9,6 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.math.MathUtils;
 
@@ -32,8 +31,7 @@ public class OnlinePanel extends Entity {
     private Sprite avatar = null;
 
     public OnlinePanel() {
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
-        rect = new Rectangle(0, 0, 410, 110, vbo) {
+        rect = new Rectangle(0, 0, 410, 110) {
             boolean moved = false;
             float dx = 0, dy = 0;
 
@@ -78,7 +76,7 @@ public class OnlinePanel extends Entity {
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
-        Rectangle avatarFooter = new Rectangle(0, 0, 110, 110, vbo);
+        Rectangle avatarFooter = new Rectangle(0, 0, 110, 110);
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
 		
@@ -88,7 +86,7 @@ public class OnlinePanel extends Entity {
 
         rankText = new Text(0, 0,
                 ResourceManager.getInstance().getFont("CaptionFont"), "#1",
-                12, new TextOptions(HorizontalAlign.RIGHT), vbo);
+                12, new TextOptions(HorizontalAlign.RIGHT));
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
@@ -96,26 +94,26 @@ public class OnlinePanel extends Entity {
         onlineLayer.attachChild(rankText);
 
         nameText = new Text(120, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16, vbo);
+                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
         onlineLayer.attachChild(nameText);
         ppText = new Text(120, 50,
                 ResourceManager.getInstance().getFont("smallFont"), "Performance: 0pp",
-                25, new TextOptions(HorizontalAlign.LEFT), vbo);
+                25, new TextOptions(HorizontalAlign.LEFT));
         ppText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(ppText);
 
         accText = new Text(120, 75,
                 ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
-                17, new TextOptions(HorizontalAlign.LEFT), vbo);
+                17, new TextOptions(HorizontalAlign.LEFT));
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
         messageText = new Text(110, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16, vbo);
+                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
         messageLayer.attachChild(messageText);
 
         submessageText = new Text(110, 60,
-                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40, vbo);
+                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
         messageLayer.attachChild(submessageText);
 
         attachChild(messageLayer);
@@ -162,7 +160,6 @@ public class OnlinePanel extends Entity {
         profileBanner = null;
         avatar = null;
 
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
 
         var profileBannerUrl = OnlineManager.getInstance().getProfileBannerURL();
 
@@ -170,7 +167,7 @@ public class OnlinePanel extends Entity {
             var bannerTexture = ResourceManager.getInstance().getProfileBannerTextureIfLoaded(profileBannerUrl);
 
             if (bannerTexture != null) {
-                profileBanner = new Sprite(0, 0, 410, 110, bannerTexture, vbo);
+                profileBanner = new Sprite(0, 0, 410, 110, bannerTexture);
                 profileBanner.setColor(0.5f, 0.5f, 0.5f);
                 frontLayer.attachChild(profileBanner);
             }
@@ -186,7 +183,7 @@ public class OnlinePanel extends Entity {
             return;
         }
 
-        avatar = new Sprite(0, 0, 110, 110, avatarTexture, vbo);
+        avatar = new Sprite(0, 0, 110, 110, avatarTexture);
         frontLayer.attachChild(avatar);
     }
 }

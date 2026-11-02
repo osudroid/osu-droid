@@ -5,6 +5,7 @@ import android.opengl.GLES30
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.Texture
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.gles.GlesBackend
@@ -15,8 +16,6 @@ import org.andengine.graphics.gles.GlesTexture
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
-import org.andengine.opengl.vbo.DrawType
-import org.andengine.opengl.vbo.VertexBufferObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -45,11 +44,11 @@ class QuadBatcherMixedTest {
         0f, 0f, 0f, 1f
     )
 
-    private class TestVbo : VertexBufferObject(null, 4, DrawType.STATIC, false, null) {
-        override fun onBufferData() = Unit
-        override fun getHeapMemoryByteSize() = 0
-        override fun getNativeHeapMemoryByteSize() = 0
-    }
+    private val triangle = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f)
+
+    private fun drawMesh() = MeshRenderer.draw(
+        PrimitiveType.Triangles, triangle, 0, 3, identity, identity, -1, BlendMode.Alpha, null, false
+    )
 
     private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
 
@@ -99,6 +98,7 @@ class QuadBatcherMixedTest {
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
+        MeshRenderer.releaseResources()
         val context = GlesRenderContext.instance
         if (context.isInPass) context.endPass()
         spriteA.dispose()
@@ -227,14 +227,15 @@ class QuadBatcherMixedTest {
 
     @Test
     fun externalFlush_restoresUnit0State() {
-        // Set up by a legacy draw before the quads were added: unit 0 active with its texture.
+        // Set up by someone else before the quads were added: unit 0 active with its texture.
         val state = GlesBackend.state
         state.activeTexture(0)
         state.bindTexture(GLES20.GL_TEXTURE_2D, 55)
         sprite()
         glyph()
 
-        TestVbo().draw(GLES20.GL_TRIANGLES, 3)
+        // The mesh flushes the quads first and binds no texture of its own.
+        drawMesh()
 
         val draw = indexOf("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
         val batch = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }

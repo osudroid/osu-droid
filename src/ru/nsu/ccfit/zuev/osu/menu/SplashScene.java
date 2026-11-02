@@ -16,7 +16,6 @@ import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 
 import org.andengine.util.HorizontalAlign;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -65,9 +64,8 @@ public class SplashScene implements IUpdateHandler {
 
     private void initializeLoading() {
         var loadTex = ResourceManager.getInstance().getTexture("loading_start");
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
 
-        mLoading = new Sprite(0, 0, loadTex, vbo);
+        mLoading = new Sprite(0, 0, loadTex);
         mLoading.setPosition((Config.getRES_WIDTH() - mLoading.getWidth()) / 2f, (Config.getRES_HEIGHT() - mLoading.getHeight()) / 2f);
         mLoading.setRotationCenter(mLoading.getWidth() / 2f, mLoading.getHeight() / 2f);
         mLoading.setScale(0.4f);
@@ -78,8 +76,7 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeInfo() {
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
-        infoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1024, new TextOptions(HorizontalAlign.CENTER), vbo);
+        infoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1024, new TextOptions(HorizontalAlign.CENTER));
         infoText.setPosition((Config.getRES_WIDTH() - infoText.getWidth()) / 2, Config.getRES_HEIGHT() - infoText.getHeight() - 20);
         infoText.setAlpha(0);
         infoText.setScale(0.6f);
@@ -109,8 +106,7 @@ public class SplashScene implements IUpdateHandler {
         }
 
         var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
-        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"), vbo);
+        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"));
 
         var welcomeSound = ResourceManager.getInstance().getSound("welcome");
         var welcomePiano = ResourceManager.getInstance().getSound("welcome_piano");
@@ -132,8 +128,7 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeProgress() {
-        final VertexBufferObjectManager vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
-        progressText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", 10, new TextOptions(HorizontalAlign.CENTER), vbo);
+        progressText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", 10, new TextOptions(HorizontalAlign.CENTER));
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
         progressText.setAlpha(0);
         progressText.setScale(0.5f);

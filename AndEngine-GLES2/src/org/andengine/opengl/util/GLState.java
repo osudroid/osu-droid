@@ -11,7 +11,6 @@ import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.gles.GlesStateCache;
 import org.andengine.opengl.exception.GLException;
 import org.andengine.opengl.exception.GLFrameBufferException;
-import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.view.ConfigChooser;
 import org.andengine.util.debug.Debug;
@@ -128,8 +127,7 @@ public class GLState {
 
 		// GlesBackend.onContextCreated() has just installed a fresh cache for this context (everything
 		// unknown, so the next bind of any id and the next scissor/line width change reach GL). Only
-		// the defaults are set here. Bind VAO 0 first: the restore may have bound another one, and the
-		// legacy renderer's attribute arrays below belong to VAO 0.
+		// the defaults are set here. Bind VAO 0 first: the restore may have bound another one.
 		final GlesStateCache state = GlesBackend.getState();
 		state.bindVertexArray(0);
 
@@ -138,10 +136,6 @@ public class GLState {
 
 		this.disableBlend();
 		this.disableCulling();
-
-		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
-		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 	}
 
 	public boolean isScissorTestEnabled() {
@@ -304,56 +298,6 @@ public class GLState {
 		}
 	}
 
-	public int generateBuffer() {
-		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
-		return this.mHardwareIDContainer[0];
-	}
-
-	public int generateArrayBuffer(final int pSize, final int pUsage) {
-		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
-		final int hardwareBufferID = this.mHardwareIDContainer[0];
-
-		this.bindArrayBuffer(hardwareBufferID);
-		GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, pSize, null, pUsage);
-		this.bindArrayBuffer(0);
-
-		return hardwareBufferID;
-	}
-
-	public void bindArrayBuffer(final int pHardwareBufferID) {
-		GlesBackend.getState().bindArrayBuffer(pHardwareBufferID);
-	}
-
-	public void deleteArrayBuffer(final int pHardwareBufferID) {
-		this.deleteBuffer(pHardwareBufferID);
-	}
-
-	public int generateIndexBuffer(final int pSize, final int pUsage) {
-		GLES32.glGenBuffers(1, this.mHardwareIDContainer, 0);
-		final int hardwareBufferID = this.mHardwareIDContainer[0];
-		
-		this.bindIndexBuffer(hardwareBufferID);
-		GLES32.glBufferData(GLES32.GL_ELEMENT_ARRAY_BUFFER, pSize, null, pUsage);
-		this.bindIndexBuffer(0);
-		
-		return hardwareBufferID;
-	}
-
-	public void bindIndexBuffer(final int pHardwareBufferID) {
-		GlesBackend.getState().bindElementBuffer(pHardwareBufferID);
-	}
-
-	public void deleteIndexBuffer(final int pHardwareBufferID) {
-		this.deleteBuffer(pHardwareBufferID);
-	}
-
-	private void deleteBuffer(final int pHardwareBufferID) {
-		// The cache first: queued drawing is drawn while the object still exists.
-		GlesBackend.getState().onBufferDeleted(pHardwareBufferID);
-		this.mHardwareIDContainer[0] = pHardwareBufferID;
-		GlesBackend.getGl().glDeleteBuffers(1, this.mHardwareIDContainer, 0);
-	}
-
 	public int generateFramebuffer() {
 		GLES32.glGenFramebuffers(1, this.mHardwareIDContainer, 0);
 		return this.mHardwareIDContainer[0];
@@ -395,15 +339,6 @@ public class GLState {
 		GlesBackend.getState().onFramebufferDeleted(pHardwareFramebufferID);
 		this.mHardwareIDContainer[0] = pHardwareFramebufferID;
 		GlesBackend.getGl().glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
-	}
-
-	public void useProgram(final int pShaderProgramID) {
-		GlesBackend.getState().useProgram(pShaderProgramID);
-	}
-
-	public void deleteProgram(final int pShaderProgramID) {
-		GlesBackend.getState().onProgramDeleted(pShaderProgramID);
-		GlesBackend.getGl().glDeleteProgram(pShaderProgramID);
 	}
 
 	public int generateTexture() {

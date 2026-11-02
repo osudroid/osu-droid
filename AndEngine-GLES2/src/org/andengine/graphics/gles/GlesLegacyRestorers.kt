@@ -1,7 +1,6 @@
 package org.andengine.graphics.gles
 
 import org.andengine.engine.Engine
-import org.andengine.opengl.shader.ShaderProgram
 
 /**
  * Bridges the pre-registry context-loss handling of AndEngine and the app into the
@@ -12,6 +11,10 @@ import org.andengine.opengl.shader.ShaderProgram
 object GlesLegacyRestorers {
 
     private val entries = HashMap<String, Entry>()
+
+    /** Names of the registered entries, in no particular order; a snapshot. */
+    @JvmStatic
+    val names: Set<String> get() = synchronized(entries) { HashSet(entries.keys) }
 
     @JvmStatic
     fun register(name: String, action: Runnable) {
@@ -30,12 +33,17 @@ object GlesLegacyRestorers {
     /** What `EngineRenderer.onSurfaceCreated` and `Engine.onReloadResources` used to do per new context. */
     @JvmStatic
     fun registerEngine(engine: Engine) {
-        // Programs are reset before the managers reload.
-        register("shader-programs") { ShaderProgram.resetAllForContextLoss() }
-        register("vbo-manager") { engine.vertexBufferObjectManager.onReload() }
         register("texture-manager") { engine.textureManager.onReload() }
         register("font-manager") { engine.fontManager.onReload() }
-        register("shader-program-manager") { engine.shaderProgramManager.onReload() }
+    }
+
+    /** Removes all entries; for tests that must not leave an engine registered globally. */
+    @JvmStatic
+    fun clearForTest() {
+        synchronized(entries) {
+            entries.values.forEach { GlesBackend.registry.unregister(it) }
+            entries.clear()
+        }
     }
 
     private class Entry(val name: String, @Volatile var action: Runnable) : GlesRestorable {

@@ -58,21 +58,12 @@ class GLStateForwardingTest {
     }
 
     @Test
-    fun bindsAndProgram_shareCacheWithBackend() {
-        glState.useProgram(3)
-        GlesBackend.state.useProgram(3)
-        glState.bindArrayBuffer(7)
-        GlesBackend.state.bindArrayBuffer(7)
-        glState.bindIndexBuffer(8)
-        GlesBackend.state.bindElementBuffer(8)
+    fun framebufferAndBlend_shareCacheWithBackend() {
         glState.bindFramebuffer(9)
         GlesBackend.state.bindFramebuffer(9)
         glState.blendFunction(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
         GlesBackend.state.blendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-        assertEquals(1, count("glUseProgram(3)"))
-        assertEquals(1, count("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},7)"))
-        assertEquals(1, count("glBindBuffer(${GLES20.GL_ELEMENT_ARRAY_BUFFER},8)"))
         assertEquals(1, count("glBindFramebuffer(${GLES20.GL_FRAMEBUFFER},9)"))
         assertEquals(1, count("glBlendFunc(${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"))
     }

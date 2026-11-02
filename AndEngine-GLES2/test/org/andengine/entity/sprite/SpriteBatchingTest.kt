@@ -4,21 +4,16 @@ import android.opengl.GLES20
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
-import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject
-import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.opengl.shader.ShaderProgram
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.texture.region.TiledTextureRegion
 import org.andengine.opengl.util.GLState
-import org.andengine.opengl.vbo.DrawType
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -34,7 +29,7 @@ class SpriteBatchingTest {
     private val glState = GLState()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
-    private class Page(id: Int) : BitmapTextureAtlas(TextureManager(), 16, 16, TextureOptions.BILINEAR) {
+    private class Page(id: Int, width: Int = 16, height: Int = 16) : BitmapTextureAtlas(TextureManager(), width, height, TextureOptions.BILINEAR) {
         init {
             mHardwareTextureID = id
         }
@@ -56,12 +51,8 @@ class SpriteBatchingTest {
         QuadBatcher.releaseResources()
     }
 
-    private fun defaultVbo() = HighPerformanceSpriteVertexBufferObject(
-        null, Sprite.SPRITE_SIZE, DrawType.STATIC, false, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT
-    )
-
     private fun sprite(page: Page, x: Float = 0f): Sprite =
-        Sprite(x, 0f, 8f, 8f, TextureRegion(page, 2f, 2f, 8f, 8f), defaultVbo())
+        Sprite(x, 0f, 8f, 8f, TextureRegion(page, 2f, 2f, 8f, 8f))
 
     private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
     private fun legacyDraws() = gl.calls.count { it.startsWith("glDrawArrays") }
@@ -116,55 +107,113 @@ class SpriteBatchingTest {
         assertTrue(gl.calls.toString(), gl.calls.any { it == expected })
     }
 
-    @Test
-    fun customShaderSprite_usesLegacyPath() {
-        val shader = ShaderProgram("void main(){}", "void main(){}")
-        val s = Sprite(0f, 0f, 8f, 8f, TextureRegion(Page(7), 2f, 2f, 8f, 8f), defaultVbo(), shader)
-        s.onDraw(glState, camera)
-
-        assertEquals(1, legacyDraws())
-        assertFalse(QuadBatcher.hasPending)
-    }
-
     private fun region() = TextureRegion(Page(7), 2f, 2f, 8f, 8f)
 
     @Test
-    fun overriddenDraw_cannotBatch() {
-        val s = object : Sprite(0f, 0f, 8f, 8f, region(), defaultVbo()) {
-            override fun draw(pGLState: GLState, pCamera: Camera) = super.draw(pGLState, pCamera)
-        }
-        assertFalse(SpriteBatching.canBatch(s))
-    }
-
-    @Test
-    fun overriddenPreDraw_cannotBatch() {
-        val s = object : Sprite(0f, 0f, 8f, 8f, region(), defaultVbo()) {
+    fun spriteSubclassWithOwnDraw_stillBatched() {
+        var drawn = 0
+        val s = object : Sprite(0f, 0f, 8f, 8f, region()) {
             override fun preDraw(pGLState: GLState, pCamera: Camera) = super.preDraw(pGLState, pCamera)
-        }
-        assertFalse(SpriteBatching.canBatch(s))
-    }
-
-    @Test
-    fun overriddenPostDraw_cannotBatch() {
-        val s = object : Sprite(0f, 0f, 8f, 8f, region(), defaultVbo()) {
+            override fun draw(pGLState: GLState, pCamera: Camera) {
+                drawn++
+                super.draw(pGLState, pCamera)
+            }
             override fun postDraw(pGLState: GLState, pCamera: Camera) = super.postDraw(pGLState, pCamera)
         }
-        assertFalse(SpriteBatching.canBatch(s))
-    }
+        s.onDraw(glState, camera)
 
-    @Test
-    fun plainSubclass_canBatch() {
-        val s = object : Sprite(0f, 0f, 8f, 8f, region(), defaultVbo()) {}
-        assertTrue(SpriteBatching.canBatch(s))
+        assertEquals(1, drawn)
+        assertTrue(QuadBatcher.hasPending)
+        assertEquals(0, legacyDraws())
+        QuadBatcher.flush()
+        assertEquals(1, draws())
     }
 
     @Test
     fun subclassWithoutOverrides_stillBatches() {
-        val s = object : Sprite(0f, 0f, 8f, 8f, TextureRegion(Page(7), 2f, 2f, 8f, 8f), defaultVbo()) {}
+        val s = object : Sprite(0f, 0f, 8f, 8f, region()) {}
         s.onDraw(glState, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(0, legacyDraws())
+    }
+
+    @Test
+    fun sprite_unknownBlendFallsBackToAlpha() {
+        val s = sprite(Page(7))
+        s.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
+        s.onDraw(glState, camera)
+
+        assertTrue(QuadBatcher.hasPending)
+        QuadBatcher.flush()
+        assertEquals(1, draws())
+        assertEquals(0, legacyDraws())
+        val expected = "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"
+        assertTrue(gl.calls.toString(), gl.calls.any { it == expected })
+    }
+
+    @Test
+    fun sprite_colorReadAtDraw() {
+        val s = sprite(Page(7))
+        s.setColor(1f, 0f, 0f, 1f)
+        s.onDraw(glState, camera)
+        QuadBatcher.flush()
+        var v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+        assertEquals(255, v.get(16).toInt() and 0xFF)
+        assertEquals(0, v.get(18).toInt() and 0xFF)
+        assertEquals(255, v.get(19).toInt() and 0xFF)
+
+        s.setColor(0f, 0f, 1f)
+        s.alpha = 0.5f
+        s.onDraw(glState, camera)
+        QuadBatcher.flush()
+        v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+        for (corner in 0 until 4) {
+            // The color sits 16 bytes into each vertex.
+            val o = corner * QuadBatcher.VERTEX_SIZE_BYTES + 16
+            assertEquals(0, v.get(o).toInt() and 0xFF)
+            assertEquals(0, v.get(o + 1).toInt() and 0xFF)
+            assertEquals(255, v.get(o + 2).toInt() and 0xFF)
+            assertEquals(127, v.get(o + 3).toInt() and 0xFF)
+        }
+    }
+
+    /**
+     * Corners and UVs in batch order as the removed per-sprite vertex buffer produced them, for a
+     * 12x6 sprite on the region (4, 8, 16, 8) of a 64x32 page, unrotated and rotated, in every
+     * flip combination.
+     */
+    @Test
+    fun sprite_flippedUvsMatchOldVbo() {
+        val page = Page(7, 64, 32)
+        val corners = floatArrayOf(0f, 0f, 0f, 6f, 12f, 6f, 12f, 0f)
+        // (rotated, flipped horizontal, flipped vertical) to u,v per corner.
+        val expected = mapOf(
+            Triple(false, false, false) to floatArrayOf(0.0625f, 0.25f, 0.0625f, 0.5f, 0.3125f, 0.5f, 0.3125f, 0.25f),
+            Triple(false, false, true) to floatArrayOf(0.0625f, 0.5f, 0.0625f, 0.25f, 0.3125f, 0.25f, 0.3125f, 0.5f),
+            Triple(false, true, false) to floatArrayOf(0.3125f, 0.25f, 0.3125f, 0.5f, 0.0625f, 0.5f, 0.0625f, 0.25f),
+            Triple(false, true, true) to floatArrayOf(0.3125f, 0.5f, 0.3125f, 0.25f, 0.0625f, 0.25f, 0.0625f, 0.5f),
+            Triple(true, false, false) to floatArrayOf(0.1875f, 0.25f, 0.0625f, 0.25f, 0.0625f, 0.75f, 0.1875f, 0.75f),
+            Triple(true, false, true) to floatArrayOf(0.1875f, 0.75f, 0.0625f, 0.75f, 0.0625f, 0.25f, 0.1875f, 0.25f),
+            Triple(true, true, false) to floatArrayOf(0.0625f, 0.25f, 0.1875f, 0.25f, 0.1875f, 0.75f, 0.0625f, 0.75f),
+            Triple(true, true, true) to floatArrayOf(0.0625f, 0.75f, 0.1875f, 0.75f, 0.1875f, 0.25f, 0.0625f, 0.25f),
+        )
+        for ((key, uvs) in expected) {
+            val (rotated, h, v) = key
+            val s = Sprite(0f, 0f, 12f, 6f, TextureRegion(page, 4f, 8f, 16f, 8f, rotated))
+            s.setFlipped(h, v)
+            assertArrayEquals("corners $key", corners, s.corners, 0f)
+            assertArrayEquals("uvs $key", uvs, s.textureCoordinates, 0f)
+            // Flipping back restores the unflipped coordinates.
+            s.setFlipped(false, false)
+            assertArrayEquals("unflipped $key", expected.getValue(Triple(rotated, false, false)), s.textureCoordinates, 0f)
+        }
+
+        // A size change moves the corners and keeps the coordinates.
+        val s = Sprite(0f, 0f, 12f, 6f, TextureRegion(page, 4f, 8f, 16f, 8f))
+        s.setSize(20f, 10f)
+        assertArrayEquals(floatArrayOf(0f, 0f, 0f, 10f, 20f, 10f, 20f, 0f), s.corners, 0f)
+        assertArrayEquals(expected.getValue(Triple(false, false, false)), s.textureCoordinates, 0f)
     }
 
     @Test
@@ -179,18 +228,6 @@ class SpriteBatchingTest {
     }
 
     @Test
-    fun batchedThenLegacy_batchIsDrawnFirst() {
-        val page = Page(7)
-        sprite(page).onDraw(glState, camera)
-        val legacy = Sprite(0f, 0f, 8f, 8f, TextureRegion(page, 2f, 2f, 8f, 8f), defaultVbo(), ShaderProgram("void main(){}", "void main(){}"))
-        legacy.onDraw(glState, camera)
-
-        val indexed = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
-        val arrays = gl.calls.indexOfFirst { it.startsWith("glDrawArrays") }
-        assertTrue(gl.calls.toString(), indexed >= 0 && arrays > indexed)
-    }
-
-    @Test
     fun sameTexture_twoSprites_oneDraw() {
         val page = Page(7)
         sprite(page, 0f).onDraw(glState, camera)
@@ -199,21 +236,5 @@ class SpriteBatchingTest {
 
         assertEquals(1, draws())
         assertEquals(0, legacyDraws())
-    }
-
-    @Test
-    fun tiledSprite_drawsCurrentTile() {
-        val page = Page(7)
-        val tiles = TiledTextureRegion(
-            page, false, TextureRegion(page, 0f, 0f, 8f, 8f), TextureRegion(page, 8f, 0f, 8f, 8f)
-        )
-        val s = TiledSprite(0f, 0f, tiles, null as VertexBufferObjectManager?)
-        s.currentTileIndex = 1
-        s.onDraw(glState, camera)
-        QuadBatcher.flush()
-
-        assertEquals(1, draws())
-        val v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
-        assertEquals(0.5f, v.getFloat(8), 1e-6f)
     }
 }

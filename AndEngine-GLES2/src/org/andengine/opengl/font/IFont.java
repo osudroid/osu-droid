@@ -1,7 +1,6 @@
 package org.andengine.opengl.font;
 
 import org.andengine.opengl.font.exception.LetterNotFoundException;
-import org.andengine.opengl.texture.ITexture;
 
 /**
  * (c) Zynga 2011
@@ -20,8 +19,6 @@ public interface IFont {
 
 	public void load();
 	public void unload();
-
-	public ITexture getTexture();
 
 	public float getLineHeight();
 

@@ -1,62 +1,43 @@
 package org.andengine.entity.text
 
 import org.andengine.entity.sprite.SpriteBatching
-import org.andengine.entity.text.vbo.HighPerformanceTextVertexBufferObject
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.Letter
 import org.andengine.opengl.font.StrokeFont
-import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram
 import org.andengine.opengl.util.GLState
 
 /**
- * Decides whether an engine [Text] is drawn through the [QuadBatcher] and hands it over: the
- * glyph rectangles are taken from the text's own vertex data, the slots from its letters, the
- * blend mode from its blend function. GL thread only.
+ * Hands an engine [Text] to the [QuadBatcher]: the glyph rectangles and letters are taken from the
+ * text's own layout, the color from the text when it is drawn, the blend mode from its blend
+ * function. GL thread only.
  */
 object TextBatching {
 
     /**
-     * True if [text] can be drawn through the batch: its font has glyphs in the shared atlas (no
-     * page texture), the default shader, the engine's own vertex buffer and a blend function the
-     * batch knows.
+     * Adds the first [count] letters of [text] to the batch, transformed by the current model-view
+     * matrix of [glState]. A [StrokeFont] letter adds its fill first and its outline on top of it.
+     * The color is the font color times the text color.
      */
     @JvmStatic
-    fun canBatch(text: Text): Boolean =
-        text.font.texture == null &&
-            text.font is Font &&
-            text.shaderProgram === PositionColorTextureCoordinatesShaderProgram.getInstance() &&
-            text.vertexBufferObject is HighPerformanceTextVertexBufferObject &&
-            SpriteBatching.blendOf(text) != null
-
-    /**
-     * Adds the first [count] of [letters] (in the order of the text's vertex data) to the batch,
-     * transformed by the current model-view matrix of [glState]. A [StrokeFont] letter adds its
-     * fill first and its outline on top of it. The color is the font color times the text color.
-     */
-    @JvmStatic
-    fun add(text: Text, glState: GLState, letters: Array<Letter?>, count: Int) {
-        val blend = SpriteBatching.blendOf(text) ?: return
-        val data = (text.vertexBufferObject as HighPerformanceTextVertexBufferObject).bufferData
-        val font = text.font as Font
-        val matrix = glState.modelViewGLMatrix
-        val n = minOf(count, letters.size)
+    fun add(text: Text, glState: GLState, count: Int) {
+        val font = text.font as? Font ?: return
+        val letters = text.letters
+        val quads = text.letterQuads
+        val n = minOf(count, text.letterCount)
         if (n <= 0) return
 
+        val blend = SpriteBatching.batchBlendOf(text)
+        val matrix = glState.modelViewGLMatrix
         QuadBatcher.setProjection(glState.projectionGLMatrix)
         val fillColor = fillColor(font, text.red, text.green, text.blue, text.alpha)
         val strokeColor = strokeColor(font, text.red, text.green, text.blue, text.alpha)
 
         for (i in 0 until n) {
             val letter = letters[i] ?: continue
-            val o = i * Text.LETTER_SIZE
-            // Vertex 0 is the top-left, vertex 2 the bottom-right corner of the glyph.
-            val x0 = data[o + Text.VERTEX_INDEX_X]
-            val y0 = data[o + Text.VERTEX_INDEX_Y]
-            val x1 = data[o + 2 * Text.VERTEX_SIZE + Text.VERTEX_INDEX_X]
-            val y1 = data[o + 2 * Text.VERTEX_SIZE + Text.VERTEX_INDEX_Y]
-            addLetter(font, letter, blend, matrix, x0, y0, x1, y1, fillColor, strokeColor)
+            val o = i * Text.LETTER_QUAD_SIZE
+            addLetter(font, letter, blend, matrix, quads[o], quads[o + 1], quads[o + 2], quads[o + 3], fillColor, strokeColor)
         }
     }
 

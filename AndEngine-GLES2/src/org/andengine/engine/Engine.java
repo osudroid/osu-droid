@@ -37,11 +37,9 @@ import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.controller.SingleTouchController;
 import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.font.FontManager;
-import org.andengine.opengl.shader.ShaderProgramManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
@@ -110,10 +108,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private ITouchController mTouchController;
 
-	private final VertexBufferObjectManager mVertexBufferObjectManager = new VertexBufferObjectManager();
 	private final TextureManager mTextureManager = new TextureManager();
 	private final FontManager mFontManager = new FontManager();
-	private final ShaderProgramManager mShaderProgramManager = new ShaderProgramManager();
 
 	private final SoundManager mSoundManager;
 	private final MusicManager mMusicManager;
@@ -148,10 +144,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		SoundFactory.onCreate();
 		MusicFactory.onCreate();
 		FontFactory.onCreate();
-		this.mVertexBufferObjectManager.onCreate();
 		this.mTextureManager.onCreate();
 		this.mFontManager.onCreate();
-		this.mShaderProgramManager.onCreate();
 		/* The managers are reloaded by the GLES resource registry on every new context, the first
 		 * one included. That reload makes the next onDrawFrame upload everything again, so
 		 * mIsLagging is set for one frame (one fixed 16.6 ms update step); this is harmless. */
@@ -283,20 +277,12 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mOrientationData;
 	}
 
-	public VertexBufferObjectManager getVertexBufferObjectManager() {
-		return this.mVertexBufferObjectManager;
-	}
-
 	public TextureManager getTextureManager() {
 		return this.mTextureManager;
 	}
 
 	public FontManager getFontManager() {
 		return this.mFontManager;
-	}
-
-	public ShaderProgramManager getShaderProgramManager() {
-		return this.mShaderProgramManager;
 	}
 
 	public SoundManager getSoundManager() throws IllegalStateException {
@@ -537,10 +523,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mUpdateThread.interrupt();
 		}
 
-		this.mVertexBufferObjectManager.onDestroy();
 		this.mTextureManager.onDestroy();
 		this.mFontManager.onDestroy();
-		this.mShaderProgramManager.onDestroy();
 	}
 
 	/**
@@ -650,7 +634,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			RenderStats.beginDraw();
 
 			this.mIsLagging = false;
-			this.mIsLagging |= this.mVertexBufferObjectManager.updateVertexBufferObjects(pGLState);
 			this.mIsLagging |= this.mTextureManager.updateTextures(pGLState);
 			this.mIsLagging |= this.mFontManager.updateFonts(pGLState);
 

@@ -134,6 +134,7 @@ public class Entity implements IEntity {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+	/** Shapes read their color when they are drawn, so there is nothing to update. */
 	protected void onUpdateColor() {
 
 	}

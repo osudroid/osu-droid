@@ -7,6 +7,7 @@ import org.andengine.engine.options.EngineOptions
 import org.andengine.engine.options.ScreenOrientation
 import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.graphics.gles.GlesBackend
@@ -16,8 +17,6 @@ import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.opengl.util.GLState
-import org.andengine.opengl.vbo.DrawType
-import org.andengine.opengl.vbo.VertexBufferObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -42,11 +41,11 @@ class QuadBatcherOrderingTest {
         0f, 0f, 0f, 1f
     )
 
-    private class TestVbo : VertexBufferObject(null, 4, DrawType.STATIC, false, null) {
-        override fun onBufferData() = Unit
-        override fun getHeapMemoryByteSize() = 0
-        override fun getNativeHeapMemoryByteSize() = 0
-    }
+    private val triangle = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f)
+
+    private fun drawMesh() = MeshRenderer.draw(
+        PrimitiveType.Triangles, triangle, 0, 3, identity, identity, -1, BlendMode.Alpha, null, false
+    )
 
     private fun newContext() {
         gl = RecordingGL()
@@ -89,6 +88,7 @@ class QuadBatcherOrderingTest {
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
+        MeshRenderer.releaseResources()
         val context = GlesRenderContext.instance
         if (context.isInPass) context.endPass()
         texture.dispose()
@@ -96,18 +96,11 @@ class QuadBatcherOrderingTest {
     }
 
     @Test
-    fun nonBatchedDraw_flushesPendingQuadsFirst() {
-        add()
-
-        TestVbo().draw(GLES20.GL_TRIANGLES, 3)
-
-        assertBatchDrawnBefore("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
-        assertFalse(QuadBatcher.hasPending)
-    }
-
-    @Test
-    fun nonBatchedDraw_drawsWithItsOwnState() {
-        // Set up by the foreign draw before the quad was added: the flush must leave it in place.
+    fun meshDraw_afterQuads_leavesStateFoundBeforeThem() {
+        // The first mesh draw creates its buffer; the state below is set up after that.
+        drawMesh()
+        gl.calls.clear()
+        // Set up by someone else before the quad was added: the flush and the mesh both put it back.
         val state = GlesBackend.state
         state.useProgram(77)
         state.bindTexture(GLES20.GL_TEXTURE_2D, 55)
@@ -115,15 +108,17 @@ class QuadBatcherOrderingTest {
         state.bindArrayBuffer(33)
         add()
 
-        TestVbo().draw(GLES20.GL_TRIANGLES, 3)
+        drawMesh()
 
-        val draw = indexOf("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
-        assertEquals("glUseProgram(77)", lastBefore(draw, "glUseProgram"))
-        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", lastBefore(draw, "glBindTexture"))
+        assertBatchDrawnBefore("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
+        assertFalse(QuadBatcher.hasPending)
+        val end = gl.calls.size
+        assertEquals("glUseProgram(77)", lastBefore(end, "glUseProgram"))
+        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", lastBefore(end, "glBindTexture(${GLES20.GL_TEXTURE_2D},"))
         val blendCalls = setOf("glEnable(${GLES20.GL_BLEND})", "glDisable(${GLES20.GL_BLEND})")
-        assertEquals("glDisable(${GLES20.GL_BLEND})", gl.calls.subList(0, draw).lastOrNull { it in blendCalls })
-        assertEquals("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},33)", lastBefore(draw, "glBindBuffer(${GLES20.GL_ARRAY_BUFFER}"))
-        assertEquals("glBindVertexArray(0)", lastBefore(draw, "glBindVertexArray"))
+        assertEquals("glDisable(${GLES20.GL_BLEND})", gl.calls.lastOrNull { it in blendCalls })
+        assertEquals("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},33)", lastBefore(end, "glBindBuffer(${GLES20.GL_ARRAY_BUFFER}"))
+        assertEquals("glBindVertexArray(0)", lastBefore(end, "glBindVertexArray"))
     }
 
     @Test
@@ -153,10 +148,10 @@ class QuadBatcherOrderingTest {
 
     @Test
     fun dedupedStateChange_doesNotFlush() {
-        GlesBackend.state.useProgram(77)
+        glState.bindTexture(99)
         add()
 
-        glState.useProgram(77)
+        glState.bindTexture(99)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(-1, indexOfBatchDraw())

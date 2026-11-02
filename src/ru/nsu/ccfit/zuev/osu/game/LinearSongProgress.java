@@ -27,13 +27,12 @@ public class LinearSongProgress extends GameObject {
         this.time = time;
         this.startTime = startTime;
 
-        final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
-        bgRect = new Rectangle(pos.x, pos.y, width, height, vbo);
+        bgRect = new Rectangle(pos.x, pos.y, width, height);
         bgRect.setColor(0, 0, 0, 0.3f);
         scene.attachChild(bgRect);
 
         progressRect = new Rectangle(bgRect.getX(), bgRect.getY(), 0,
-                bgRect.getHeight(), vbo);
+                bgRect.getHeight());
         progressRect.setColor(153f / 255f, 204f / 255f, 51f / 255f);
         scene.attachChild(progressRect);
     }

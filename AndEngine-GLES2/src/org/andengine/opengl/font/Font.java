@@ -9,7 +9,6 @@ import org.andengine.graphics.text.GlyphMetrics;
 import org.andengine.graphics.text.GlyphRasterizer;
 import org.andengine.graphics.text.GlyphSlot;
 import org.andengine.opengl.font.exception.FontException;
-import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.util.GLState;
 
 import android.util.SparseArray;
@@ -123,14 +122,6 @@ public class Font implements IFont {
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
-
-	/**
-	 * @return <code>null</code>: glyphs live in the shared glyph atlas, see {@link Letter#mGlyph}.
-	 */
-	@Override
-	public ITexture getTexture() {
-		return null;
-	}
 
 	@Override
 	public synchronized void load() {

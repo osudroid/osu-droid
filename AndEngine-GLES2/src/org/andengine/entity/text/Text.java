@@ -5,25 +5,13 @@ import java.util.ArrayList;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.text.exception.OutOfCharactersException;
-import org.andengine.entity.text.vbo.HighPerformanceTextVertexBufferObject;
-import org.andengine.entity.text.vbo.ITextVertexBufferObject;
-import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.opengl.font.IFont;
-import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
-import org.andengine.opengl.shader.ShaderProgram;
-import org.andengine.opengl.shader.constants.ShaderProgramConstants;
+import org.andengine.opengl.font.Letter;
 import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.DrawType;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
-import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
 import org.andengine.util.HorizontalAlign;
-import org.andengine.util.adt.DataConstants;
 import org.andengine.util.adt.list.FloatArrayList;
 import org.andengine.util.adt.list.IFloatList;
-
-import android.opengl.GLES32;
 
 /**
  * TODO Try Degenerate Triangles?
@@ -41,22 +29,8 @@ public class Text extends RectangularShape {
 
 	public static final float LEADING_DEFAULT = 0;
 
-	public static final int VERTEX_INDEX_X = 0;
-	public static final int VERTEX_INDEX_Y = Text.VERTEX_INDEX_X + 1;
-	public static final int COLOR_INDEX = Text.VERTEX_INDEX_Y + 1;
-	public static final int TEXTURECOORDINATES_INDEX_U = Text.COLOR_INDEX + 1;
-	public static final int TEXTURECOORDINATES_INDEX_V = Text.TEXTURECOORDINATES_INDEX_U + 1;
-
-	public static final int VERTEX_SIZE = 2 + 1 + 2;
-	public static final int VERTICES_PER_LETTER = 6;
-	public static final int LETTER_SIZE = Text.VERTEX_SIZE * Text.VERTICES_PER_LETTER;
-	public static final int VERTEX_STRIDE = Text.VERTEX_SIZE * DataConstants.BYTES_PER_FLOAT;
-
-	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(3)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES32.GL_UNSIGNED_BYTE, true)
-		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES32.GL_FLOAT, false)
-		.build();
+	/** Floats per letter in {@link #getLetterQuads()}: x0, y0, x1, y1. */
+	public static final int LETTER_QUAD_SIZE = 4;
 
 	// ===========================================================
 	// Fields
@@ -70,102 +44,47 @@ public class Text extends RectangularShape {
 	protected TextOptions mTextOptions;
 	protected final int mCharactersMaximum;
 	protected int mCharactersToDraw;
-	protected int mVertexCountToDraw;
-	protected final int mVertexCount;
-
-	protected final ITextVertexBufferObject mTextVertexBufferObject;
 
 	protected CharSequence mText;
 	protected ArrayList<CharSequence> mLines = new ArrayList<CharSequence>(1);
 	protected IFloatList mLineWidths = new FloatArrayList(1);
 
+	/** The local rectangle of each visible letter as x0, y0 (top left), x1, y1 (bottom right). */
+	private final float[] mLetterQuads;
+	/** The visible letters, one per rectangle of {@link #mLetterQuads}. */
+	private final Letter[] mLetters;
+	private int mLetterCount;
+
 	// ===========================================================
 	// Constructors
 	// ===========================================================
 
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pFont, pText, pVertexBufferObjectManager, DrawType.STATIC);
+	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText) {
+		this(pX, pY, pFont, pText, pText.length(), new TextOptions());
 	}
 
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final VertexBufferObjectManager pVertexBufferObjectManager, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pVertexBufferObjectManager, DrawType.STATIC, pShaderProgram);
+	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final TextOptions pTextOptions) {
+		this(pX, pY, pFont, pText, pText.length(), pTextOptions);
 	}
 
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pFont, pText, new TextOptions(), pVertexBufferObjectManager, pDrawType);
+	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum) {
+		this(pX, pY, pFont, pText, pCharactersMaximum, new TextOptions());
 	}
 
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, new TextOptions(), pVertexBufferObjectManager, pDrawType, pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pFont, pText, pTextOptions, pVertexBufferObjectManager, DrawType.STATIC);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pTextOptions, pVertexBufferObjectManager, DrawType.STATIC, pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pFont, pText, pText.length(), pTextOptions, pVertexBufferObjectManager, pDrawType);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pText.length(), pTextOptions, pVertexBufferObjectManager, pDrawType, pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pVertexBufferObjectManager, DrawType.STATIC);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final VertexBufferObjectManager pVertexBufferObjectManager, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pVertexBufferObjectManager, DrawType.STATIC, pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, new TextOptions(), pVertexBufferObjectManager, pDrawType);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, new TextOptions(), pVertexBufferObjectManager, pDrawType, pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pTextOptions, pVertexBufferObjectManager, DrawType.STATIC);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pTextOptions, new HighPerformanceTextVertexBufferObject(pVertexBufferObjectManager, Text.LETTER_SIZE * pCharactersMaximum, pDrawType, true, Text.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT));
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pTextOptions, new HighPerformanceTextVertexBufferObject(pVertexBufferObjectManager, Text.LETTER_SIZE * pCharactersMaximum, pDrawType, true, Text.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT), pShaderProgram);
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions, final ITextVertexBufferObject pTextVertexBufferObject) {
-		this(pX, pY, pFont, pText, pCharactersMaximum, pTextOptions, pTextVertexBufferObject, PositionColorTextureCoordinatesShaderProgram.getInstance());
-	}
-
-	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions, final ITextVertexBufferObject pTextVertexBufferObject, final ShaderProgram pShaderProgram) {
-		super(pX, pY, 0, 0, pShaderProgram);
+	public Text(final float pX, final float pY, final IFont pFont, final CharSequence pText, final int pCharactersMaximum, final TextOptions pTextOptions) {
+		super(pX, pY, 0, 0);
 
 		this.mFont = pFont;
 		this.mTextOptions = pTextOptions;
 		this.mCharactersMaximum = pCharactersMaximum;
-		this.mVertexCount = Text.VERTICES_PER_LETTER * this.mCharactersMaximum;
-		this.mTextVertexBufferObject = pTextVertexBufferObject;
+		this.mLetterQuads = new float[Text.LETTER_QUAD_SIZE * pCharactersMaximum];
+		this.mLetters = new Letter[pCharactersMaximum];
 
-		this.onUpdateColor();
 		this.setText(pText);
 
+		// Glyph atlas fonts are alpha-only and not premultiplied.
 		this.setBlendingEnabled(true);
-		if(this.mFont.getTexture() != null) {
-			this.initBlendFunction(this.mFont.getTexture());
-		} else {
-			// Glyph atlas fonts are alpha-only and not premultiplied.
-			this.setBlendFunction(Text.BLENDFUNCTION_SOURCE_DEFAULT, Text.BLENDFUNCTION_DESTINATION_DEFAULT);
-		}
+		this.setBlendFunction(Text.BLENDFUNCTION_SOURCE_DEFAULT, Text.BLENDFUNCTION_DESTINATION_DEFAULT);
 	}
 
 	// ===========================================================
@@ -293,12 +212,37 @@ public class Text extends RectangularShape {
 		this.mTextOptions = pTextOptions;
 	}
 
+	public int getCharactersToDraw() {
+		return this.mCharactersToDraw;
+	}
+
 	public void setCharactersToDraw(final int pCharactersToDraw) {
 		if(pCharactersToDraw > this.mCharactersMaximum) {
 			throw new OutOfCharactersException("Characters: maximum: '" + this.mCharactersMaximum + "' required: '" + pCharactersToDraw + "'.");
 		}
 		this.mCharactersToDraw = pCharactersToDraw;
-		this.mVertexCountToDraw = pCharactersToDraw * Text.VERTICES_PER_LETTER;
+	}
+
+	/**
+	 * @return the local rectangle of each visible letter, {@link #LETTER_QUAD_SIZE} floats per letter:
+	 * x0, y0 (top left), x1, y1 (bottom right). Only the first {@link #getLetterCount()} are set. The
+	 * array is the text's own, read only.
+	 */
+	public float[] getLetterQuads() {
+		return this.mLetterQuads;
+	}
+
+	/**
+	 * @return the visible letters, one per rectangle of {@link #getLetterQuads()}. The array is the
+	 * text's own, read only.
+	 */
+	public Letter[] getLetters() {
+		return this.mLetters;
+	}
+
+	/** @return how many entries of {@link #getLetters()} and {@link #getLetterQuads()} are set. */
+	public int getLetterCount() {
+		return this.mLetterCount;
 	}
 
 	// ===========================================================
@@ -306,159 +250,87 @@ public class Text extends RectangularShape {
 	// ===========================================================
 
 	@Override
-	public ITextVertexBufferObject getVertexBufferObject() {
-		return this.mTextVertexBufferObject;
-	}
-
-	// osu!droid modified: fonts can span several atlas pages, so letters are drawn in runs per page.
-	private int mPageRunCount;
-	/** Set by preDraw: the glyphs go through the quad batch instead of the text's own buffer. */
-	boolean mDrawBatched;
-	/** The letters of the drawn quads in buffer order, filled for atlas fonts only. */
-	private org.andengine.opengl.font.Letter[] mBatchLetters;
-	private int mBatchLetterCount;
-	private int[] mPageRunVertexCounts;
-	private org.andengine.opengl.texture.ITexture[] mPageRunTextures;
-
-	/**
-	 * Mirrors the letter order of the vertex buffer (non-whitespace letters only, up to the character maximum)
-	 * and groups consecutive letters on the same atlas page.
-	 */
-	private void updatePageRuns() {
-		this.mPageRunCount = 0;
-		this.mBatchLetterCount = 0;
-
-		// Allocated lazily, vertices may be updated before the field initializers of this class ran.
-		if(this.mPageRunTextures == null) {
-			this.mPageRunTextures = new org.andengine.opengl.texture.ITexture[4];
-			this.mPageRunVertexCounts = new int[4];
-		}
-		if(this.mFont == null || this.mLines == null) {
-			return;
-		}
-
-		final IFont font = this.mFont;
-		final java.util.ArrayList<CharSequence> lines = this.mLines;
-		int letters = 0;
-		final boolean recordLetters = font.getTexture() == null;
-		if(recordLetters && (this.mBatchLetters == null || this.mBatchLetters.length < this.mCharactersMaximum)) {
-			this.mBatchLetters = new org.andengine.opengl.font.Letter[this.mCharactersMaximum];
-		}
-
-		for(int row = 0; row < lines.size() && letters < this.mCharactersMaximum; row++) {
-			final CharSequence line = lines.get(row);
-			for(int i = 0; i < line.length() && letters < this.mCharactersMaximum; i++) {
-				final org.andengine.opengl.font.Letter letter = font.getLetter(line.charAt(i));
-				if(letter.isWhitespace()) {
-					continue;
-				}
-				final org.andengine.opengl.texture.ITexture texture = letter.mTexture != null ? letter.mTexture : font.getTexture();
-
-				if(this.mPageRunCount > 0 && this.mPageRunTextures[this.mPageRunCount - 1] == texture) {
-					this.mPageRunVertexCounts[this.mPageRunCount - 1] += Text.VERTICES_PER_LETTER;
-				} else {
-					if(this.mPageRunCount == this.mPageRunTextures.length) {
-						this.mPageRunTextures = java.util.Arrays.copyOf(this.mPageRunTextures, this.mPageRunCount * 2);
-						this.mPageRunVertexCounts = java.util.Arrays.copyOf(this.mPageRunVertexCounts, this.mPageRunCount * 2);
-					}
-					this.mPageRunTextures[this.mPageRunCount] = texture;
-					this.mPageRunVertexCounts[this.mPageRunCount] = Text.VERTICES_PER_LETTER;
-					this.mPageRunCount++;
-				}
-				if(recordLetters) {
-					this.mBatchLetters[letters] = letter;
-				}
-				letters++;
-			}
-		}
-		if(recordLetters) {
-			this.mBatchLetterCount = letters;
-		}
-	}
-
-	/**
-	 * @return true if this text is drawn through the quad batch: glyphs from the shared atlas, the default
-	 * shader and the engine's own vertex buffer.
-	 */
-	protected boolean isBatchable() {
-		return TextBatching.canBatch(this);
-	}
-
-	/**
-	 * Adds the first <code>pCharacters</code> letters to the quad batch.
-	 */
-	protected void drawBatched(final GLState pGLState, final int pCharacters) {
-		TextBatching.add(this, pGLState, this.mBatchLetters, Math.min(pCharacters, this.mBatchLetterCount));
-	}
-
-	@Override
-	protected void preDraw(final GLState pGLState, final Camera pCamera) {
-		this.mDrawBatched = this.isBatchable();
-		if(this.mDrawBatched) {
-			return;
-		}
-		// Pending batched quads are drawn before this text, so the order stays the draw order.
-		QuadBatcher.flush();
-
-		super.preDraw(pGLState, pCamera);
-
-		final org.andengine.opengl.texture.ITexture texture = this.mFont.getTexture();
-		if(texture != null) {
-			texture.bind(pGLState);
-		}
-
-		this.mTextVertexBufferObject.bind(pGLState, this.mShaderProgram);
-	}
-
-	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		if(this.mDrawBatched) {
-			this.drawBatched(pGLState, this.mCharactersToDraw);
-			return;
-		}
-		final int[] runs = this.mPageRunVertexCounts;
-		final org.andengine.opengl.texture.ITexture[] runTextures = this.mPageRunTextures;
-
-		if(this.mPageRunCount <= 1) {
-			// Glyph atlas letters have no page texture; drawing them here would sample whatever is bound.
-			final org.andengine.opengl.texture.ITexture texture = this.mPageRunCount == 1 ? runTextures[0] : this.mFont.getTexture();
-			if(texture != null) {
-				this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertexCountToDraw);
-			}
-			return;
-		}
-
-		// One draw call per run of letters on the same font atlas page.
-		int offset = 0;
-		for(int i = 0; i < this.mPageRunCount && offset < this.mVertexCountToDraw; i++) {
-			final int count = Math.min(runs[i], this.mVertexCountToDraw - offset);
-			if(runTextures[i] != null) {
-				runTextures[i].bind(pGLState);
-				this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, offset, count);
-			}
-			offset += runs[i];
-		}
+		TextBatching.add(this, pGLState, Math.min(this.mCharactersToDraw, this.mLetterCount));
 	}
 
-	@Override
-	protected void postDraw(final GLState pGLState, final Camera pCamera) {
-		if(this.mDrawBatched) {
-			return;
-		}
-		this.mTextVertexBufferObject.unbind(pGLState, this.mShaderProgram);
-
-		super.postDraw(pGLState, pCamera);
-	}
-
-	@Override
-	protected void onUpdateColor() {
-		this.mTextVertexBufferObject.onUpdateColor(this);
-	}
-
+	/**
+	 * Lays out the letters of {@link #mLines}: each line is aligned in {@link #mLineAlignmentWidth},
+	 * lines are {@link IFont#getLineHeight()} plus the leading apart. Whitespace takes up its advance
+	 * but gets no rectangle.
+	 */
 	@Override
 	protected void onUpdateVertices() {
-		this.mTextVertexBufferObject.onUpdateVertices(this);
-		this.updatePageRuns();
+		final float[] quads = this.mLetterQuads;
+
+		final IFont font = this.mFont;
+		final ArrayList<CharSequence> lines = this.mLines;
+		final float lineHeight = font.getLineHeight();
+		final IFloatList lineWidths = this.mLineWidths;
+
+		final float lineAlignmentWidth = this.mLineAlignmentWidth;
+		final int capacity = this.mCharactersMaximum;
+
+		int charactersToDraw = 0;
+		int letterCount = 0;
+
+		final int lineCount = lines.size();
+		for (int row = 0; row < lineCount; row++) {
+			final CharSequence line = lines.get(row);
+
+			float xBase;
+			switch(this.mTextOptions.mHorizontalAlign) {
+				case RIGHT:
+					xBase = lineAlignmentWidth - lineWidths.get(row);
+					break;
+				case CENTER:
+					xBase = (lineAlignmentWidth - lineWidths.get(row)) * 0.5f;
+					break;
+				case LEFT:
+				default:
+					xBase = 0;
+			}
+
+			final float yBase = row * (lineHeight + this.mTextOptions.mLeading);
+
+			final int lineLength = line.length();
+			Letter previousLetter = null;
+			for(int i = 0; i < lineLength; i++) {
+				final Letter letter = font.getLetter(line.charAt(i));
+				if(previousLetter != null) {
+					xBase += previousLetter.getKerning(letter.mCharacter);
+				}
+
+				if(!letter.isWhitespace()) {
+					if(letterCount < capacity) {
+						final float x = xBase + letter.mOffsetX;
+						final float y = yBase + letter.mOffsetY;
+
+						final int o = letterCount * Text.LETTER_QUAD_SIZE;
+						quads[o] = x;
+						quads[o + 1] = y;
+						quads[o + 2] = x + letter.mWidth;
+						quads[o + 3] = y + letter.mHeight;
+
+						this.mLetters[letterCount] = letter;
+						letterCount++;
+					}
+					charactersToDraw++;
+				}
+
+				xBase += letter.mAdvance;
+
+				previousLetter = letter;
+			}
+		}
+
+		// Letters left over from a longer text are not drawn, but should not be kept alive either.
+		for(int i = letterCount; i < this.mLetterCount; i++) {
+			this.mLetters[i] = null;
+		}
+		this.mLetterCount = letterCount;
+
+		this.setCharactersToDraw(charactersToDraw);
 	}
 
 	// ===========================================================

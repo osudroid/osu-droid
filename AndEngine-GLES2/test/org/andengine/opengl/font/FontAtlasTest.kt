@@ -100,7 +100,6 @@ class FontAtlasTest {
         // Top of the image below the line top: (-30 - (-40)) / 2.
         assertEquals(5f, letter.mOffsetY, 0f)
         assertEquals(25f, font.lineHeight, 0f)
-        assertNull(font.texture)
     }
 
     @Test
@@ -108,9 +107,6 @@ class FontAtlasTest {
         val glyph = font().getLetter('A').mGlyph!!
         assertEquals(20, glyph.width)
         assertEquals(30, glyph.height)
-        val letter = fonts[0].getLetter('A')
-        assertEquals(glyph.u, letter.mU, 0f)
-        assertEquals(glyph.v2, letter.mV2, 0f)
     }
 
     @Test

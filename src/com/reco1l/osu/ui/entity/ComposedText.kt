@@ -7,9 +7,9 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 class ComposedText(x: Float, y: Float, font: Font, max: Int) : Entity(x, y) {
 
-    val tag = Text(x, y, font, "", 16, getGlobal().engine.vertexBufferObjectManager)
+    val tag = Text(x, y, font, "", 16)
 
-    val content = Text(x, y, font, "", max, getGlobal().engine.vertexBufferObjectManager)
+    val content = Text(x, y, font, "", max)
 
     init {
         attachChild(tag)

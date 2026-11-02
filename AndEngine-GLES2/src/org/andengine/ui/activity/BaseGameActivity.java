@@ -14,10 +14,8 @@ import org.andengine.input.sensor.location.LocationSensorOptions;
 import org.andengine.input.sensor.orientation.IOrientationListener;
 import org.andengine.input.sensor.orientation.OrientationSensorOptions;
 import org.andengine.opengl.font.FontManager;
-import org.andengine.opengl.shader.ShaderProgramManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.opengl.view.IRendererListener;
 import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.ui.IGameInterface;
@@ -319,20 +317,12 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		return this.mGameCreated;
 	}
 
-	public VertexBufferObjectManager getVertexBufferObjectManager() {
-		return this.mEngine.getVertexBufferObjectManager();
-	}
-
 	public TextureManager getTextureManager() {
 		return this.mEngine.getTextureManager();
 	}
 
 	public FontManager getFontManager() {
 		return this.mEngine.getFontManager();
-	}
-
-	public ShaderProgramManager getShaderProgramManager() {
-		return this.mEngine.getShaderProgramManager();
 	}
 
 	public SoundManager getSoundManager() {

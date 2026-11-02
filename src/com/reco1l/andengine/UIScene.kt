@@ -9,10 +9,7 @@ import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.scene.Scene
 import org.andengine.entity.shape.IShape
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.shader.ShaderProgram
 import org.andengine.opengl.util.GLState
-import org.andengine.opengl.vbo.IVertexBufferObject
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
@@ -302,14 +299,6 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
     override fun setBlendFunctionSource(pBlendFunctionSource: Int) { }
 
     override fun setBlendFunctionDestination(pBlendFunctionDestination: Int) { }
-
-    override fun getVertexBufferObjectManager(): VertexBufferObjectManager? = null
-
-    override fun getVertexBufferObject(): IVertexBufferObject? = null
-
-    override fun getShaderProgram(): ShaderProgram? = null
-
-    override fun setShaderProgram(pShaderProgram: ShaderProgram?) { }
 
     //endregion
 

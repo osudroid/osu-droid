@@ -2,25 +2,13 @@ package org.andengine.entity.sprite;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
-import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject;
-import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject;
-import org.andengine.graphics.batch.QuadBatcher;
-import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
-import org.andengine.opengl.shader.ShaderProgram;
-import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.DrawType;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
-import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
-
-import android.opengl.GLES32;
 
 /**
  * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga Inc.
- * 
+ *
  * @author Nicolas Gramlich
  * @since 19:22:38 - 09.03.2010
  */
@@ -29,94 +17,39 @@ public class Sprite extends RectangularShape {
 	// Constants
 	// ===========================================================
 
-	public static final int VERTEX_INDEX_X = 0;
-	public static final int VERTEX_INDEX_Y = Sprite.VERTEX_INDEX_X + 1;
-	public static final int COLOR_INDEX = Sprite.VERTEX_INDEX_Y + 1;
-	public static final int TEXTURECOORDINATES_INDEX_U = Sprite.COLOR_INDEX + 1;
-	public static final int TEXTURECOORDINATES_INDEX_V = Sprite.TEXTURECOORDINATES_INDEX_U + 1;
-
-	public static final int VERTEX_SIZE = 2 + 1 + 2;
 	public static final int VERTICES_PER_SPRITE = 4;
-	public static final int SPRITE_SIZE = Sprite.VERTEX_SIZE * Sprite.VERTICES_PER_SPRITE;
-
-	public static final VertexBufferObjectAttributes VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT = new VertexBufferObjectAttributesBuilder(3)
-		.add(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, ShaderProgramConstants.ATTRIBUTE_POSITION, 2, GLES32.GL_FLOAT, false)
-		.add(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, ShaderProgramConstants.ATTRIBUTE_COLOR, 4, GLES32.GL_UNSIGNED_BYTE, true)
-		.add(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES, 2, GLES32.GL_FLOAT, false)
-		.build();
 
 	// ===========================================================
 	// Fields
 	// ===========================================================
 
 	protected final ITextureRegion mTextureRegion;
-	protected final ISpriteVertexBufferObject mSpriteVertexBufferObject;
 
 	protected boolean mFlippedVertical;
 	protected boolean mFlippedHorizontal;
 
-	/** Set by preDraw: this draw goes through the quad batch instead of the sprite's own buffer. */
-	boolean mDrawBatched;
+	/** Local corners as x,y pairs, in order around the quad: (0,0), (0,h), (w,h), (w,0). */
+	private final float[] mCorners = new float[2 * Sprite.VERTICES_PER_SPRITE];
+	/** Texture coordinates as u,v pairs, one per corner of {@link #mCorners}. */
+	private final float[] mTextureCoordinates = new float[2 * Sprite.VERTICES_PER_SPRITE];
 
 	// ===========================================================
 	// Constructors
 	// ===========================================================
 
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObjectManager, DrawType.STATIC);
+	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion) {
+		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion);
 	}
 
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObjectManager, DrawType.STATIC, pShaderProgram);
-	}
+	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion) {
+		super(pX, pY, pWidth, pHeight);
 
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObjectManager, pDrawType);
-	}
-
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObjectManager, pDrawType, pShaderProgram);
-	}
-
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final ISpriteVertexBufferObject pVertexBufferObject) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObject);
-	}
-
-	public Sprite(final float pX, final float pY, final ITextureRegion pTextureRegion, final ISpriteVertexBufferObject pVertexBufferObject, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pTextureRegion.getWidth(), pTextureRegion.getHeight(), pTextureRegion, pVertexBufferObject, pShaderProgram);
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(pX, pY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager, DrawType.STATIC);
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager, DrawType.STATIC, pShaderProgram);
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType) {
-		this(pX, pY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager, pDrawType, PositionColorTextureCoordinatesShaderProgram.getInstance());
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager, final DrawType pDrawType, final ShaderProgram pShaderProgram) {
-		this(pX, pY, pWidth, pHeight, pTextureRegion, new HighPerformanceSpriteVertexBufferObject(pVertexBufferObjectManager, Sprite.SPRITE_SIZE, pDrawType, true, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT), pShaderProgram);
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final ISpriteVertexBufferObject pSpriteVertexBufferObject) {
-		this(pX, pY, pWidth, pHeight, pTextureRegion, pSpriteVertexBufferObject, PositionColorTextureCoordinatesShaderProgram.getInstance());
-	}
-
-	public Sprite(final float pX, final float pY, final float pWidth, final float pHeight, final ITextureRegion pTextureRegion, final ISpriteVertexBufferObject pSpriteVertexBufferObject, final ShaderProgram pShaderProgram) {
-		super(pX, pY, pWidth, pHeight, pShaderProgram);
-		
 		this.mTextureRegion = pTextureRegion;
-		this.mSpriteVertexBufferObject = pSpriteVertexBufferObject;
 
 		this.setBlendingEnabled(true);
 		this.initBlendFunction(pTextureRegion);
-		
+
 		this.onUpdateVertices();
-		this.onUpdateColor();
 		this.onUpdateTextureCoordinates();
 	}
 
@@ -126,6 +59,22 @@ public class Sprite extends RectangularShape {
 
 	public ITextureRegion getTextureRegion() {
 		return this.mTextureRegion;
+	}
+
+	/**
+	 * @return the local corners as x,y pairs, in order around the quad. The array is the sprite's
+	 * own, read only.
+	 */
+	public float[] getCorners() {
+		return this.mCorners;
+	}
+
+	/**
+	 * @return the texture coordinates as u,v pairs, one per corner of {@link #getCorners()}. The array
+	 * is the sprite's own, read only.
+	 */
+	public float[] getTextureCoordinates() {
+		return this.mTextureCoordinates;
 	}
 
 	public boolean isFlippedHorizontal() {
@@ -166,11 +115,6 @@ public class Sprite extends RectangularShape {
 	// ===========================================================
 
 	@Override
-	public ISpriteVertexBufferObject getVertexBufferObject() {
-		return this.mSpriteVertexBufferObject;
-	}
-
-	@Override
 	public void reset() {
 		super.reset();
 
@@ -186,61 +130,82 @@ public class Sprite extends RectangularShape {
 		return this.getTextureRegion().getTexture().isLoadedToHardware();
 	}
 
-	/**
-	 * @return true if this sprite is drawn through the quad batch: the default shader, the engine's own
-	 * vertex buffer, and no subclass that draws itself.
-	 */
-	protected boolean isBatchable() {
-		return SpriteBatching.canBatch(this);
-	}
-
-	@Override
-	protected void preDraw(final GLState pGLState, final Camera pCamera) {
-		this.mDrawBatched = this.isBatchable();
-		if(this.mDrawBatched) {
-			return;
-		}
-		// Pending batched quads are drawn before this sprite, so the order stays the draw order.
-		QuadBatcher.flush();
-
-		super.preDraw(pGLState, pCamera);
-
-		this.getTextureRegion().getTexture().bind(pGLState);
-
-		this.mSpriteVertexBufferObject.bind(pGLState, this.mShaderProgram);
-	}
-
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
-		if(this.mDrawBatched) {
-			SpriteBatching.add(this, pGLState, 0, 0, 1, 3, 2);
-			return;
-		}
-		this.mSpriteVertexBufferObject.draw(GLES32.GL_TRIANGLE_STRIP, Sprite.VERTICES_PER_SPRITE);
-	}
-
-	@Override
-	protected void postDraw(final GLState pGLState, final Camera pCamera) {
-		if(this.mDrawBatched) {
-			return;
-		}
-		this.mSpriteVertexBufferObject.unbind(pGLState, this.mShaderProgram);
-
-		super.postDraw(pGLState, pCamera);
+		SpriteBatching.add(this, pGLState);
 	}
 
 	@Override
 	protected void onUpdateVertices() {
-		this.mSpriteVertexBufferObject.onUpdateVertices(this);
-	}
+		final float[] corners = this.mCorners;
 
-	@Override
-	protected void onUpdateColor() {
-		this.mSpriteVertexBufferObject.onUpdateColor(this);
+		final float x2 = this.getWidth();
+		final float y2 = this.getHeight();
+
+		corners[0] = 0;
+		corners[1] = 0;
+
+		corners[2] = 0;
+		corners[3] = y2;
+
+		corners[4] = x2;
+		corners[5] = y2;
+
+		corners[6] = x2;
+		corners[7] = 0;
 	}
 
 	protected void onUpdateTextureCoordinates() {
-		this.mSpriteVertexBufferObject.onUpdateTextureCoordinates(this);
+		final float[] uvs = this.mTextureCoordinates;
+
+		final ITextureRegion textureRegion = this.mTextureRegion;
+
+		final float u;
+		final float v;
+		final float u2;
+		final float v2;
+
+		if(this.mFlippedHorizontal) {
+			u = textureRegion.getU2();
+			u2 = textureRegion.getU();
+		} else {
+			u = textureRegion.getU();
+			u2 = textureRegion.getU2();
+		}
+
+		if(this.mFlippedVertical) {
+			v = textureRegion.getV2();
+			v2 = textureRegion.getV();
+		} else {
+			v = textureRegion.getV();
+			v2 = textureRegion.getV2();
+		}
+
+		if(textureRegion.isRotated()) {
+			uvs[0] = u2;
+			uvs[1] = v;
+
+			uvs[2] = u;
+			uvs[3] = v;
+
+			uvs[4] = u;
+			uvs[5] = v2;
+
+			uvs[6] = u2;
+			uvs[7] = v2;
+		} else {
+			uvs[0] = u;
+			uvs[1] = v;
+
+			uvs[2] = u;
+			uvs[3] = v2;
+
+			uvs[4] = u2;
+			uvs[5] = v2;
+
+			uvs[6] = u2;
+			uvs[7] = v;
+		}
 	}
 
 	// ===========================================================
