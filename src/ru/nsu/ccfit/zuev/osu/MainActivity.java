@@ -73,6 +73,7 @@ import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.debug.RenderStatsOverlay;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
@@ -486,6 +487,10 @@ public class MainActivity extends BaseGameActivity implements
         // in the frame layout (where fragments are attached, see ActivityOverlay) are not properly
         // displayed on the screen.
         mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+        if (BuildConfig.DEBUG) {
+            RenderStatsOverlay.attach(mainLayout);
+        }
 
         setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());

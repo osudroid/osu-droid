@@ -8,6 +8,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 import org.andengine.BuildConfig;
 import org.andengine.engine.options.RenderOptions;
+import org.andengine.graphics.debug.RenderStats;
 import org.andengine.opengl.exception.GLException;
 import org.andengine.opengl.exception.GLFrameBufferException;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -384,6 +385,7 @@ public class GLState {
 		if(this.mCurrentArrayBufferID != pHardwareBufferID) {
 			this.mCurrentArrayBufferID = pHardwareBufferID;
 			GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, pHardwareBufferID);
+			RenderStats.bufferBind();
 		}
 	}
 
@@ -410,6 +412,7 @@ public class GLState {
 		if(this.mCurrentIndexBufferID != pHardwareBufferID) {
 			this.mCurrentIndexBufferID = pHardwareBufferID;
 			GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, pHardwareBufferID);
+			RenderStats.bufferBind();
 		}
 	}
 
@@ -434,6 +437,7 @@ public class GLState {
 		if(this.mCurrentFramebufferID != pFramebufferID) {
 			this.mCurrentFramebufferID = pFramebufferID;
 			GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, pFramebufferID);
+			RenderStats.framebufferBind();
 		}
 	}
 
@@ -477,6 +481,7 @@ public class GLState {
 		if(this.mCurrentShaderProgramID != pShaderProgramID) {
 			this.mCurrentShaderProgramID = pShaderProgramID;
 			GLES32.glUseProgram(pShaderProgramID);
+			RenderStats.programSwitch();
 		}
 	}
 
@@ -527,6 +532,7 @@ public class GLState {
 		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] != pHardwareTextureID) {
 			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = pHardwareTextureID;
 			GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, pHardwareTextureID);
+			RenderStats.textureBind();
 		}
 	}
 
@@ -543,6 +549,7 @@ public class GLState {
 			this.mCurrentSourceBlendMode = pSourceBlendMode;
 			this.mCurrentDestinationBlendMode = pDestinationBlendMode;
 			GLES32.glBlendFunc(pSourceBlendMode, pDestinationBlendMode);
+			RenderStats.blendChange();
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.edlplan.andengine;
 
+import org.andengine.graphics.debug.RenderStats;
 import android.opengl.GLES32;
 
 import com.edlplan.framework.utils.FloatArraySlice;
@@ -68,6 +69,7 @@ public class TriangleRenderer {
         // Upload data to the GPU. Route through GLState to keep its internal cache in sync.
         pGLState.bindArrayBuffer(mVboId);
         GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, byteCount, mStagingBuffer, GLES32.GL_DYNAMIC_DRAW);
+        RenderStats.upload(byteCount);
 
         // Point the position attribute at offset 0 inside the currently bound VBO.
         GLES32.glVertexAttribPointer(
@@ -75,6 +77,7 @@ public class TriangleRenderer {
             2, GLES32.GL_FLOAT, false, 0, 0
         );
         GLES32.glDrawArrays(GLES32.GL_TRIANGLES, 0, floatCount / 2);
+        RenderStats.draw(floatCount / 2);
 
         // Leave no VBO bound. Use pGLState so its cache stays in sync with the actual GL state,
         // preventing a false cache hit that would cause the next VBO bind to be skipped.

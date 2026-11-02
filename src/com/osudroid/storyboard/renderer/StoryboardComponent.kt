@@ -1,6 +1,7 @@
 package com.osudroid.storyboard.renderer
 
 import android.graphics.Color
+import org.andengine.graphics.debug.RenderStats
 import com.edlplan.andengine.TextureHelper
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.game.GameplayHitSampleInfo
@@ -255,11 +256,13 @@ class StoryboardComponent : UIComponent() {
 
         val playback = playback ?: return
 
+        val drawStart = RenderStats.now()
         batch.begin(pGLState)
         drawBackground(playback)
         drawLayers(playback, MAIN_LAYERS, drawAlpha)
         drawDim()
         batch.end()
+        RenderStats.addTime(StoryboardRenderStats.TIME_TOTAL, drawStart)
     }
 
     /**
@@ -292,11 +295,14 @@ class StoryboardComponent : UIComponent() {
             }
 
             val sprites = playback.activeSprites(layer)
+            RenderStats.count(StoryboardRenderStats.COUNT_ACTIVE, sprites.size)
 
             for (i in sprites.indices) {
                 val sprite = sprites[i]
 
+                val evalStart = RenderStats.now()
                 sprite.update(playback.currentTime)
+                RenderStats.addTime(StoryboardRenderStats.TIME_EVAL, evalStart)
 
                 if (!sprite.isVisible || sprite.alpha * alpha < ALPHA_EPSILON) {
                     continue
@@ -306,6 +312,7 @@ class StoryboardComponent : UIComponent() {
                 val path = (element as? StoryboardAnimation)?.framePath(sprite.frameIndex) ?: element.filePath
 
                 batch.draw(sprite, pool.get(path), alpha, colorMultiplier)
+                RenderStats.count(StoryboardRenderStats.COUNT_DRAWN, 1)
             }
         }
 

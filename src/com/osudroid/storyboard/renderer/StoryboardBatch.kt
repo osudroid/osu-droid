@@ -1,5 +1,6 @@
 package com.osudroid.storyboard.renderer
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.osudroid.storyboard.playback.PlayableSprite
 import java.nio.ByteBuffer
@@ -268,6 +269,7 @@ class StoryboardBatch {
             return
         }
 
+        val flushStart = RenderStats.now()
         val shader = StoryboardShaderProgram.getInstance()
         shader.bind(glState)
 
@@ -288,6 +290,7 @@ class StoryboardBatch {
 
         vertexBuffer.position(0)
         vertexBuffer.put(vertices, 0, offset)
+        RenderStats.upload(offset * 4)
 
         vertexBuffer.position(0)
         GLES32.glEnableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_POSITION_LOCATION)
@@ -317,6 +320,7 @@ class StoryboardBatch {
             GLES32.GL_UNSIGNED_SHORT,
             indexBuffer
         )
+        RenderStats.draw(offset / FLOATS_PER_QUAD * 4)
 
         // Restore the vertex attribute arrays AndEngine expects to be enabled: slot 0 = position,
         // slot 1 = color. The storyboard-specific color slot (2) must be disabled.
@@ -326,6 +330,7 @@ class StoryboardBatch {
         GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         offset = 0
+        RenderStats.addTime(StoryboardRenderStats.TIME_FLUSH, flushStart)
     }
 
     companion object {

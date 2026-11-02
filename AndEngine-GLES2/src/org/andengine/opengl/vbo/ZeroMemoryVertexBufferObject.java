@@ -3,6 +3,7 @@ package org.andengine.opengl.vbo;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.andengine.graphics.debug.RenderStats;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.util.BufferUtils;
 import org.andengine.opengl.util.GLState;
@@ -158,6 +159,7 @@ public abstract class ZeroMemoryVertexBufferObject implements IVertexBufferObjec
 				this.onPopulateBufferData(byteBuffer);
 	
 				GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, byteBuffer.limit(), byteBuffer, this.mUsage);
+				RenderStats.upload(byteBuffer.limit());
 			} finally {
 				if(byteBuffer != null) {
 					this.releaseByteBuffer(byteBuffer);
@@ -192,11 +194,13 @@ public abstract class ZeroMemoryVertexBufferObject implements IVertexBufferObjec
 	@Override
 	public void draw(final int pPrimitiveType, final int pCount) {
 		GLES32.glDrawArrays(pPrimitiveType, 0, pCount);
+		RenderStats.draw(pCount);
 	}
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pOffset, final int pCount) {
 		GLES32.glDrawArrays(pPrimitiveType, pOffset, pCount);
+		RenderStats.draw(pCount);
 	}
 
 	@Override

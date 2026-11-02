@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import org.andengine.opengl.util.GLState
 import java.nio.ByteBuffer
@@ -99,6 +100,7 @@ abstract class Buffer(
                 bufferUsage
             )
             mDirty = false
+            RenderStats.upload(mFloatBuffer.capacity() * 4)
         }
     }
 

@@ -17,6 +17,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.debug.RenderStats;
 import org.andengine.input.sensor.SensorDelay;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
@@ -567,7 +568,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			try {
 				this.throwOnDestroyed();
 
+				final long updateStart = System.nanoTime();
 				this.onUpdate(secondsElapsed);
+				RenderStats.onUpdate(System.nanoTime() - updateStart);
 
 				this.throwOnDestroyed();
 
@@ -634,6 +637,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		engineLock.lock();
 		try {
 			engineLock.waitUntilCanDraw();
+			RenderStats.beginDraw();
 
 			this.mIsLagging = false;
 			this.mIsLagging |= this.mVertexBufferObjectManager.updateVertexBufferObjects(pGLState);
@@ -642,6 +646,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 			this.onUpdateDrawHandlers(pGLState, this.mCamera);
 			this.onDrawScene(pGLState, this.mCamera);
+			RenderStats.endDraw();
 
 			engineLock.notifyCanUpdate();
 		} finally {

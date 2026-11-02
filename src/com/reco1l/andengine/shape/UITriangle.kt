@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -56,6 +57,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             entity as UITriangle
             GLES32.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GLES32.GL_TRIANGLES else GLES32.GL_LINE_LOOP, 0, vertexCount)
+            RenderStats.draw(vertexCount)
         }
 
     }

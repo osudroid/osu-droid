@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
@@ -126,6 +127,7 @@ class UIGradientBox(
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
             GLES32.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+            RenderStats.draw(4)
         }
     }
 

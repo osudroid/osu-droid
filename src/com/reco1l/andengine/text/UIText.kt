@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.debug.RenderStats
 import org.andengine.opengl.texture.ITexture
 import android.opengl.GLES32
 import android.util.Log
@@ -310,6 +311,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 val texture = run.texture ?: continue
                 texture.bind(gl)
                 GLES32.glDrawArrays(drawTopology, run.startVertex, min(run.vertexCount, vertexLimit - run.startVertex))
+                RenderStats.draw(min(run.vertexCount, vertexLimit - run.startVertex))
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.osudroid.storyboard.renderer
 
 import com.osudroid.storyboard.model.StoryboardLayerType
+import org.andengine.graphics.debug.RenderStats
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.util.GLState
@@ -28,9 +29,11 @@ class StoryboardOverlayComponent internal constructor(
         val playback = storyboardComponent.playback ?: return
         val batch = storyboardComponent.batch
 
+        val drawStart = RenderStats.now()
         batch.begin(pGLState)
         storyboardComponent.drawLayers(playback, OVERLAY_LAYERS, drawAlpha, storyboardComponent.brightness)
         batch.end()
+        RenderStats.addTime(StoryboardRenderStats.TIME_TOTAL, drawStart)
     }
 
     companion object {

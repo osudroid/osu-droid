@@ -1,5 +1,6 @@
 package com.osudroid.game.cursor.trail
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
@@ -230,6 +231,7 @@ class CursorTrail(
             GLES32.glUniform4f(shader.uniformColorLocation, drawRed, drawGreen, drawBlue, alpha)
 
             GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, 4)
+            RenderStats.draw(4)
         }
 
         // Restore state expected by other renderers.

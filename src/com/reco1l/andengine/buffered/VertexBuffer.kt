@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.osudroid.math.toRadians
 import org.andengine.opengl.util.GLState
@@ -28,6 +29,7 @@ abstract class VertexBuffer(
 
     override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
         GLES32.glDrawArrays(drawTopology, 0, vertexCount)
+        RenderStats.draw(vertexCount)
     }
 
     //endregion

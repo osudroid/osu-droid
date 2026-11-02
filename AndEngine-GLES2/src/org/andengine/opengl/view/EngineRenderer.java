@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.RenderOptions;
+import org.andengine.graphics.debug.RenderStats;
 import org.andengine.opengl.exception.GLESVersionUnsupportedException;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.exception.ShaderProgramCompileException;
@@ -68,6 +69,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 			// Note: Buffer.onContextLost() (VBO ID reset) is called from
 			// MainActivity.onSurfaceCreated, which is in the app module.
 			ShaderProgram.resetAllForContextLoss();
+			RenderStats.reset();
 
 			// TODO Check if available and make available through EngineOptions-RenderOptions
 //			GLES32.glEnable(GLES32.GL_POLYGON_SMOOTH);
