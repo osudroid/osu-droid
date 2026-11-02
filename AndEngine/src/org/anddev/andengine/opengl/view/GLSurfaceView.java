@@ -950,6 +950,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			 */
 			this.mEgl.eglMakeCurrent(this.mEglDisplay, this.mEglSurface, this.mEglSurface, this.mEglContext);
 
+			// BEGIN osu!droid modified: frame pacing controls
+			// The EGL14 getters allocate a new wrapper object on every call, so look the handles up once per surface
+			// instead of every frame.
+			this.mEgl14Display = EGL14.eglGetCurrentDisplay();
+			this.mEgl14Surface = EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW);
+
+			// A new native window starts out with automatic timestamps.
+			this.mHasPresentationTime = false;
+			// END osu!droid modified
+
 			GL gl = this.mEglContext.getGL();
 			if(GLSurfaceView.this.mGLWrapper != null) {
 				gl = GLSurfaceView.this.mGLWrapper.wrap(gl);
@@ -998,7 +1008,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 				return;
 			}
 
-			if (!EGLExt.eglPresentationTimeANDROID(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), nanoseconds)) {
+			if (!EGLExt.eglPresentationTimeANDROID(this.mEgl14Display, this.mEgl14Surface, nanoseconds)) {
 				this.mPresentationTimeUnsupported = true;
 				Debug.w("eglPresentationTimeANDROID failed with EGL error 0x" + Integer.toHexString(EGL14.eglGetError()) + ", not using presentation times");
 				return;
@@ -1021,19 +1031,20 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			}
 
 			this.mHasPresentationTime = false;
-			EGLExt.eglPresentationTimeANDROID(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), NATIVE_WINDOW_TIMESTAMP_AUTO);
+			EGLExt.eglPresentationTimeANDROID(this.mEgl14Display, this.mEgl14Surface, NATIVE_WINDOW_TIMESTAMP_AUTO);
 		}
 
 		/**
 		 * Sets the swap interval of the surface that is current on the calling (GL) thread.
 		 * <p>
 		 * {@link EGL10} has no swap interval API, so this goes through {@link EGL14}. Both wrap the same native EGL
-		 * display, so {@link EGL14#eglGetCurrentDisplay()} returns the display this helper made current.
+		 * display, so the {@link EGL14} handle looked up in {@link #createSurface(SurfaceHolder)} is the display this
+		 * helper made current.
 		 *
 		 * @param interval The minimum number of display refreshes per buffer swap. 0 disables vertical sync.
 		 */
 		public void applySwapInterval(final int interval) {
-			if (!EGL14.eglSwapInterval(EGL14.eglGetCurrentDisplay(), interval)) {
+			if (!EGL14.eglSwapInterval(this.mEgl14Display, interval)) {
 				Debug.w("eglSwapInterval(" + interval + ") failed with EGL error 0x" + Integer.toHexString(EGL14.eglGetError()));
 			}
 		}
@@ -1044,6 +1055,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 				this.mEgl.eglMakeCurrent(this.mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
 				this.mEgl.eglDestroySurface(this.mEglDisplay, this.mEglSurface);
 				this.mEglSurface = null;
+
+				// BEGIN osu!droid modified: frame pacing controls
+				this.mEgl14Display = null;
+				this.mEgl14Surface = null;
+				// END osu!droid modified
 			}
 			if(this.mEglContext != null) {
 				this.mEgl.eglDestroyContext(this.mEglDisplay, this.mEglContext);
@@ -1062,6 +1078,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		EGLContext mEglContext;
 
 		// BEGIN osu!droid modified: frame pacing controls
+		/**
+		 * {@link EGL14} handles of the current display and surface, looked up once per surface in
+		 * {@link #createSurface(SurfaceHolder)}.
+		 */
+		private android.opengl.EGLDisplay mEgl14Display;
+		private android.opengl.EGLSurface mEgl14Surface;
+
 		private boolean mPresentationTimeUnsupported;
 
 		/**
