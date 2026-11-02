@@ -380,6 +380,52 @@ class RenderThreadTest {
         assertTrue(work.all { it >= 0 })
     }
 
+    @Test
+    fun frameWorkListener_toldAboutThreadStartAndExit() {
+        val events = ArrayList<String>()
+        var startedThreadId = 0
+        thread.frameWorkListener = object : FrameWorkListener {
+            override fun onRenderThreadStarted(threadId: Int) {
+                startedThreadId = threadId
+                events.add("started")
+            }
+
+            override fun onFrameWork(workNanos: Long) {}
+
+            override fun onRenderThreadExited() {
+                events.add("exited")
+            }
+        }
+
+        thread.start()
+        thread.requestExitAndWait()
+
+        assertFalse(thread.isAlive)
+        assertEquals(listOf("started", "exited"), events)
+        assertTrue(startedThreadId != 0)
+    }
+
+    @Test
+    fun listenerThrowsOnStart_threadStillDraws() {
+        val frames = CountDownLatch(2)
+        thread.frameWorkListener = object : FrameWorkListener {
+            override fun onRenderThreadStarted(threadId: Int) {
+                throw IllegalStateException("listener failed")
+            }
+
+            override fun onFrameWork(workNanos: Long) {
+                frames.countDown()
+            }
+        }
+        backend.presentDelayMillis = 1
+        showWindow()
+
+        thread.start()
+
+        assertTrue(frames.await(2, TimeUnit.SECONDS))
+        assertTrue(thread.isAlive)
+    }
+
     // Whether the reported value is CPU time is verified on device: on the JVM the CPU time reads as 0 or -1.
     @Test
     fun frameWork_neverIncludesPresentTime() {

@@ -2,6 +2,7 @@ package org.andengine.graphics.view
 
 import android.view.Surface
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** Calls recorded by [FakeSurfaceBackend] and [RecordingFrameRenderer], in order, safe to read from the test thread. */
 class CallLog {
@@ -98,7 +99,7 @@ class FakeSurfaceBackend(private val log: CallLog) : SurfaceBackend {
     }
 
     /** The values passed to [setPresentationTime], in order. */
-    val presentationTimes = java.util.concurrent.CopyOnWriteArrayList<Long>()
+    val presentationTimes = CopyOnWriteArrayList<Long>()
 
     override fun setPresentationTime(nanos: Long) {
         log.add("setPresentationTime")

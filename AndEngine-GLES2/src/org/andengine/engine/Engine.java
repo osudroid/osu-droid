@@ -145,6 +145,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	protected int mSurfaceWidth = 1; // 1 to prevent accidental DIV/0
 	private volatile boolean mIsLagging;
+	// Written by the update thread, read by the render thread for its performance hints.
+	private volatile long mLastUpdateNanos;
 	protected int mSurfaceHeight = 1; // 1 to prevent accidental DIV/0
 
 	// ===========================================================
@@ -196,6 +198,16 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mUpdateThread = new UpdateThread();
 		}
 		this.mUpdateThread.setEngine(this);
+	}
+
+	/** @return The kernel thread id of the update thread, or 0 while it has not started. */
+	public int getUpdateThreadId() {
+		return this.mUpdateThread.getThreadId();
+	}
+
+	/** @return The wall time of the last update tick, in nanoseconds, or 0 before the first tick. */
+	public long getLastUpdateNanos() {
+		return this.mLastUpdateNanos;
 	}
 
 	public void startUpdateThread() throws IllegalThreadStateException {
@@ -577,7 +589,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 				final long updateStart = System.nanoTime();
 				this.onUpdate(secondsElapsed);
-				RenderStats.onUpdate(System.nanoTime() - updateStart);
+				final long updateNanos = System.nanoTime() - updateStart;
+				this.mLastUpdateNanos = updateNanos;
+				RenderStats.onUpdate(updateNanos);
 
 				this.throwOnDestroyed();
 
@@ -866,6 +880,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 		private Engine mEngine;
 		private final RunnableHandler mRunnableHandler = new RunnableHandler();
+		private volatile int mThreadId;
 
 		// ===========================================================
 		// Constructors
@@ -883,12 +898,18 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mEngine = pEngine;
 		}
 
+		/** @return The kernel thread id of this thread, or 0 while it has not started. */
+		public int getThreadId() {
+			return this.mThreadId;
+		}
+
 		// ===========================================================
 		// Methods for/from SuperClass/Interfaces
 		// ===========================================================
 
 		@Override
 		public void run() {
+			this.mThreadId = android.os.Process.myTid();
 			android.os.Process.setThreadPriority(this.mEngine.getEngineOptions().getUpdateThreadPriority());
 			try {
 				while(true) {

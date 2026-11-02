@@ -18,5 +18,11 @@ interface FrameRenderer {
 /** Receives the CPU time a [RenderThread] spent drawing each presented frame; waiting for the display or other threads is not counted. */
 interface FrameWorkListener {
 
+    /** Called on the render thread when it starts, with its thread id, before any frame is reported. */
+    fun onRenderThreadStarted(threadId: Int) {}
+
     fun onFrameWork(workNanos: Long)
+
+    /** Called on the render thread when it ends, after its last frame was reported. */
+    fun onRenderThreadExited() {}
 }

@@ -1,11 +1,13 @@
 package org.andengine.graphics.view
 
 import android.os.Debug
+import android.os.Process
 import android.view.Surface
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import org.andengine.graphics.debug.RenderStats
+import org.andengine.util.debug.Debug as EngineDebug
 
 /**
  * Renders frames continuously on its own thread and drives the lifecycle of the backend's context and surface.
@@ -27,8 +29,12 @@ class RenderThread(
     private val vsyncWaiterFactory: () -> VsyncWaiter = { VsyncWaiter() }
 ) : Thread(THREAD_NAME) {
 
+    /** Read once when the thread starts; set it before [start]. */
     @Volatile
     var frameWorkListener: FrameWorkListener? = null
+
+    // The listener read at the start, render thread only: the one told about the start also gets every frame and the end.
+    private var workListener: FrameWorkListener? = null
 
     private val lock = ReentrantLock()
 
@@ -166,12 +172,23 @@ class RenderThread(
      *
      * @return Whether [FrameRenderer.onDrawFrame] ran.
      */
-    fun runOneIterationForTest(): Boolean = iterate(blocking = false)
+    fun runOneIterationForTest(): Boolean {
+        workListener = frameWorkListener
+        return iterate(blocking = false)
+    }
 
     override fun run() {
         var failure: Throwable? = null
+        val workListener = frameWorkListener
+        this.workListener = workListener
 
         try {
+            try {
+                workListener?.onRenderThreadStarted(Process.myTid())
+            } catch (e: RuntimeException) {
+                // Only the listener's own bookkeeping is missing; the frames are drawn regardless.
+                EngineDebug.w("Frame work listener failed on start: $e")
+            }
             while (!exiting) {
                 iterate(blocking = true)
             }
@@ -187,15 +204,26 @@ class RenderThread(
                 vsyncWaiter?.quit()
                 vsyncWaiter = null
             } catch (e: Throwable) {
-                val original = failure ?: throw e
+                val original = failure
+                if (original == null) {
+                    failure = e
+                    throw e
+                }
                 original.addSuppressed(e)
             } finally {
-                lock.withLock {
-                    exited = true
-                    takePendingRedrawsLocked()
-                    stateChanged.signalAll()
+                try {
+                    workListener?.onRenderThreadExited()
+                } catch (e: Throwable) {
+                    val original = failure ?: throw e
+                    original.addSuppressed(e)
+                } finally {
+                    lock.withLock {
+                        exited = true
+                        takePendingRedrawsLocked()
+                        stateChanged.signalAll()
+                    }
+                    runFrameRedraws(failure)
                 }
-                runFrameRedraws(failure)
             }
         }
     }
@@ -311,8 +339,8 @@ class RenderThread(
         renderer.onDrawFrame()
 
         if (pacing.presentationTimeEnabled) {
-            // The current time, not the expected presentation time of the vsync just waited for: by the end of
-            // update and draw that deadline has often passed already, and the frame would be shown as late.
+            // Stamped when the frame is done: an earlier vsync deadline has usually passed by then and the frame
+            // would be shown late.
             backend.setPresentationTime(System.nanoTime())
             presentationTimeSet = true
         } else if (presentationTimeSet) {
@@ -356,11 +384,13 @@ class RenderThread(
         RenderTiming.lastWorkNanos = workNanos
         RenderStats.onRenderWork(workNanos)
 
+        // Before the vsync wait as well, so that the hint is not a refresh period late.
+        workListener?.onFrameWork(workNanos)
+
         if (pacing.choreographerPacingEnabled) {
             (vsyncWaiter ?: vsyncWaiterFactory().also { vsyncWaiter = it }).waitForVsync()
         }
 
-        frameWorkListener?.onFrameWork(workNanos)
         return true
     }
 

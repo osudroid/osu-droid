@@ -200,6 +200,10 @@ public class MainActivity extends BaseGameActivity implements
                 if (displayId == display.getDisplayId()) {
                     currentRefreshRate = display.getRefreshRate();
 
+                    if (mRenderSurfaceView != null) {
+                        mRenderSurfaceView.setTargetFrameRate(currentRefreshRate);
+                    }
+
                     // Refresh-rate multiples of the frame limiter depend on the current refresh rate.
                     applyFrameLimiterSetting(Config.getFrameLimiter());
                 }
@@ -507,6 +511,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine, this);
+        this.mRenderSurfaceView.setTargetFrameRate(currentRefreshRate);
         applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);

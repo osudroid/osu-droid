@@ -14,6 +14,8 @@ import android.view.SurfaceView
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.function.IntSupplier
+import java.util.function.LongSupplier
 import org.andengine.engine.Engine
 import org.andengine.graphics.gles.EglSurfaceBackend
 import org.andengine.graphics.gles.GlesConfigChooser
@@ -49,6 +51,20 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     }
 
     private var engine: Engine? = null
+
+    // Kept across the threads started for this view, so that a restarted thread replaces the old session.
+    private val performanceHints = PerformanceHints(
+        PerformanceHints.PlatformSessionFactory(context),
+        // The update thread is never restarted, so its id stays valid for the engine's lifetime.
+        IntSupplier { engine?.updateThreadId ?: 0 },
+        LongSupplier { engine?.lastUpdateNanos ?: 0L }
+    )
+
+    /** The refresh rate of the display, in Hz, which every frame's work should fit into. See [PerformanceHints]. */
+    fun setTargetFrameRate(rate: Float) {
+        performanceHints.setTargetFrameRate(rate)
+    }
+
     private var renderer: GlesEngineRenderer? = null
     private var configChooser: GlesConfigChooser? = null
     private var renderThread: RenderThread? = null
@@ -178,7 +194,7 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     }
 
     /** Reports the redraw finished exactly once: after the frame, or on the timeout, whichever comes first. */
-    private inner class RedrawRequest(private val drawingFinished: Runnable) : Runnable {
+    private class RedrawRequest(private val drawingFinished: Runnable) : Runnable {
 
         private val finished = AtomicBoolean(false)
 
@@ -205,6 +221,7 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         }
 
         val thread = RenderThread(EglSurfaceBackend(configChooser!!), renderer!!, framePacing)
+        thread.frameWorkListener = performanceHints
         renderThread = thread
         thread.start()
 
