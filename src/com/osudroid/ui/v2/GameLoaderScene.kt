@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2
 
+import android.util.Log
 import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
@@ -32,6 +33,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
     private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
     private var multiplayerLoadElapsed = 0f
+    private var textureWaitStart = 0L
 
     private val dimBox: UIBox
     private val mainContainer: UIContainer
@@ -222,6 +224,26 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         mainContainer.paddingBottom = if (Multiplayer.isConnected) Multiplayer.roomScene!!.chat.buttonHeight + 12f else 0f
     }
 
+    /**
+     * Whether texture loads are still pending once everything else is ready ([isOtherwiseReady]); gives up
+     * after [TEXTURE_WAIT_TIMEOUT_MS] of waiting.
+     */
+    private fun isWaitingForTextures(isOtherwiseReady: Boolean): Boolean {
+        if (!isOtherwiseReady || !GlobalManager.getInstance().engine.textureManager.hasPendingTextureLoads()) {
+            textureWaitStart = 0L
+            return false
+        }
+        val now = System.currentTimeMillis()
+        if (textureWaitStart == 0L) {
+            textureWaitStart = now
+        }
+        if (now - textureWaitStart > TEXTURE_WAIT_TIMEOUT_MS) {
+            Log.w("GameLoaderScene", "Texture loads still pending after ${TEXTURE_WAIT_TIMEOUT_MS} ms, starting anyway")
+            return false
+        }
+        return true
+    }
+
     override fun onLoadComplete() {
         mainContainer.fadeIn(0.2f, Easing.OutCubic)
         mainContainer.scaleTo(1f, 0.2f, Easing.OutCubic)
@@ -265,7 +287,11 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
                 // storyboard, as all players must start at the same time.
                 val isTimeoutElapsed = System.currentTimeMillis() - lastTimeTouched > minimumTimeout
 
-                if (Multiplayer.isMultiplayer || (isTimeoutElapsed && !isStoryboardLoading)) {
+                // Textures whose pixels are still prepared in the background would only appear after the start.
+                // A load that never finishes must not block the start, so the wait is limited.
+                val isTextureLoadPending = isWaitingForTextures(isTimeoutElapsed && !isStoryboardLoading)
+
+                if (Multiplayer.isMultiplayer || (isTimeoutElapsed && !isStoryboardLoading && !isTextureLoadPending)) {
                     isStarting = true
 
                     // This is used instead of getBackgroundBrightness to directly obtain the
@@ -534,5 +560,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         private var settingsCardCollapsed = false
 
         private const val MULTIPLAYER_LOAD_TIMEOUT_SEC = 60f
+
+        /** Longest wait for pending texture loads once everything else is ready. */
+        private const val TEXTURE_WAIT_TIMEOUT_MS = 5000L
     }
 }

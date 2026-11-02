@@ -7,17 +7,23 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import com.edlplan.andengine.TextureHelper
 import com.osudroid.storyboard.model.Storyboard
 import com.reco1l.andengine.texture.BlankTextureRegion
 import java.io.File
+import java.nio.ByteBuffer
+import org.andengine.graphics.atlas.PixelPage
+import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.ITexture
+import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
+import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.region.TextureRegion
+import org.andengine.opengl.texture.region.TextureRegionFactory
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource
 
 /**
  * Loads and manages the textures of a storyboard, rooted at the beatmap folder.
@@ -26,6 +32,9 @@ import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource
  * enough are shelf-packed into shared [BitmapTextureAtlas] pages so that the sprite batch can
  * draw them without texture switches. All other textures are loaded individually. Missing or
  * corrupt files resolve to a 1x1 red placeholder, matching the previous implementation.
+ *
+ * Every texture is a [FileImageSource]: it composes its image files whenever the texture is
+ * loaded (also after a context loss), so no composed page is kept in memory.
  */
 class StoryboardTexturePool @JvmOverloads constructor(
     private val directory: File,
@@ -33,12 +42,15 @@ class StoryboardTexturePool @JvmOverloads constructor(
     /**
      * Whether textures of the current skin are preferred over the textures in [directory].
      */
-    private val useSkinSprites: Boolean = false
+    private val useSkinSprites: Boolean = false,
+
+    /**
+     * The texture manager to load the textures with, or `null` for the engine's.
+     */
+    private val textureManager: TextureManager? = null
 ) {
     private val textures = HashMap<String, TextureRegion>()
     private val createdTextures = HashSet<ITexture>()
-
-    private val bitmapOptions = BitmapFactory.Options().also { it.inPremultiplied = true }
 
     // Shelf packing state.
     private var currentPage = 0
@@ -92,7 +104,7 @@ class StoryboardTexturePool @JvmOverloads constructor(
     fun clear() {
         textures.clear()
 
-        val textureManager = GlobalManager.getInstance().engine?.textureManager
+        val textureManager = textureManager ?: GlobalManager.getInstance().engine?.textureManager
 
         for (texture in createdTextures) {
             textureManager?.unloadTexture(texture)
@@ -104,6 +116,9 @@ class StoryboardTexturePool @JvmOverloads constructor(
         currentY = 0
         lineMaxY = 0
     }
+
+    private fun requireTextureManager(): TextureManager =
+        textureManager ?: GlobalManager.getInstance().engine.textureManager
 
     private fun getSkinTexture(name: String): TextureRegion? {
         val resources = ResourceManager.getInstance()
@@ -146,12 +161,22 @@ class StoryboardTexturePool @JvmOverloads constructor(
             }
         }
 
-        val bitmap = loadBitmap(resolve(name))
-        val region = TextureHelper.createRegion(bitmap)
+        val info = loadInfo(name)
+        val source = FileImageSource(info.width, info.height, arrayOf(info.file), intArrayOf(0), intArrayOf(0))
 
-        createdTextures.add(region.texture)
+        // Power-of-two texture of at least 4x4, as for any other single image.
+        var textureWidth = 4
+        var textureHeight = 4
+        while (textureWidth < info.width) textureWidth *= 2
+        while (textureHeight < info.height) textureHeight *= 2
+
+        val textureManager = requireTextureManager()
+        val texture = BitmapTextureAtlas(textureManager, textureWidth, textureHeight, TextureOptions.BILINEAR)
+        val region = TextureRegionFactory.createFromSource(texture, source, 0, 0, false)
+        textureManager.loadTexture(texture)
+
+        createdTextures.add(texture)
         textures[name] = region
-        bitmap.recycle()
 
         return region
     }
@@ -176,33 +201,21 @@ class StoryboardTexturePool @JvmOverloads constructor(
             return
         }
 
-        val textureManager = GlobalManager.getInstance().engine.textureManager
+        val textureManager = requireTextureManager()
         val byPage = toPack.groupBy { it.pageIndex }
 
         // The first (and possibly only) page can be shrunk to the used height.
         val singlePageHeight = if (byPage.size == 1) lineMaxY + 10 else PAGE_SIZE
-
-        val pageBitmap = Bitmap.createBitmap(
-            PAGE_SIZE,
-            singlePageHeight.coerceAtMost(PAGE_SIZE),
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(pageBitmap)
-        val paint = Paint().also {
-            it.isAntiAlias = true
-            it.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
-        }
+        val pageHeight = singlePageHeight.coerceAtMost(PAGE_SIZE)
 
         for ((_, pageInfos) in byPage) {
-            pageBitmap.eraseColor(Color.argb(0, 0, 0, 0))
-
-            for (info in pageInfos) {
-                val bitmap = loadBitmap(resolve(info.name))
-                canvas.drawBitmap(bitmap, info.x.toFloat(), info.y.toFloat(), paint)
-                bitmap.recycle()
-            }
-
-            val source = QualityFileBitmapSource(TextureHelper.createFactoryFromBitmap(pageBitmap))
+            val source = FileImageSource(
+                PAGE_SIZE,
+                pageHeight,
+                Array(pageInfos.size) { pageInfos[it].file },
+                IntArray(pageInfos.size) { pageInfos[it].x },
+                IntArray(pageInfos.size) { pageInfos[it].y }
+            )
             val atlas = BitmapTextureAtlas(textureManager, PAGE_SIZE, PAGE_SIZE, TextureOptions.BILINEAR)
 
             atlas.addTextureAtlasSource(source, 0, 0)
@@ -217,8 +230,6 @@ class StoryboardTexturePool @JvmOverloads constructor(
                 )
             }
         }
-
-        pageBitmap.recycle()
     }
 
     private fun placeInPack(info: TextureInfo) {
@@ -241,10 +252,10 @@ class StoryboardTexturePool @JvmOverloads constructor(
         lineMaxY = maxOf(lineMaxY, currentY + info.height + MARGIN)
     }
 
-    private fun loadInfo(name: String) = TextureInfo(name).also {
+    private fun loadInfo(name: String) = TextureInfo(name, resolve(name)).also {
         try {
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeFile(resolve(name).absolutePath, options)
+            BitmapFactory.decodeFile(it.file.absolutePath, options)
 
             if (options.outWidth > 0 && options.outHeight > 0) {
                 it.width = options.outWidth
@@ -254,24 +265,123 @@ class StoryboardTexturePool @JvmOverloads constructor(
         }
     }
 
-    private fun loadBitmap(file: File): Bitmap {
-        return try {
-            BitmapFactory.decodeFile(file.absolutePath, bitmapOptions) ?: errorBitmap()
-        } catch (_: Exception) {
-            errorBitmap()
-        }
-    }
-
-    private fun errorBitmap(): Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).also {
-        it.setPixel(0, 0, Color.argb(255, 255, 0, 0))
-    }
-
-    private class TextureInfo(@JvmField val name: String) {
+    private class TextureInfo(@JvmField val name: String, @JvmField val file: File) {
         @JvmField var width = 1
         @JvmField var height = 1
         @JvmField var x = 0
         @JvmField var y = 0
         @JvmField var pageIndex = -1
+    }
+
+    /**
+     * A [width]x[height] image composed of the image [files], each with its top-left corner at
+     * ([xs], [ys]). Files that cannot be decoded become a 1x1 red pixel; texels no file covers are
+     * transparent. Nothing is kept between loads: every load decodes the files again.
+     *
+     * On a straight-alpha atlas the files are decoded without premultiplication ([decode]) and
+     * composed as bytes ([onLoadPixels]); a single file that fills the whole image is delivered as
+     * decoded, without a copy. [onLoadBitmap] composes the files on a canvas instead.
+     */
+    class FileImageSource @JvmOverloads constructor(
+        width: Int,
+        height: Int,
+        private val files: Array<File>,
+        private val xs: IntArray,
+        private val ys: IntArray,
+        private val decode: (File) -> Pixels? = { StraightPixels.decodeFile(it.absolutePath) }
+    ) : BaseTextureAtlasSource(0, 0, width, height), IPixelTextureAtlasSource {
+
+        override fun deepCopy() = FileImageSource(mTextureWidth, mTextureHeight, files, xs, ys, decode).also {
+            it.setTextureX(mTextureX)
+            it.setTextureY(mTextureY)
+        }
+
+        override fun onLoadPixels(): Pixels? {
+            var page: PixelPage? = null
+
+            try {
+                for (i in files.indices) {
+                    var image = decode(files[i])
+
+                    if (image == null) {
+                        if (isDecodable(files[i])) {
+                            // Only this decoder's premultiplied output is available: the bitmap path composes the page.
+                            return null
+                        }
+
+                        image = errorPixels()
+                    }
+
+                    if (xs[i] + image.width > mTextureWidth || ys[i] + image.height > mTextureHeight) {
+                        // Larger than its reserved space (the bounds could not be read): drawn clipped, as on a canvas.
+                        return null
+                    }
+
+                    if (files.size == 1 && xs[i] == 0 && ys[i] == 0 && image.width == mTextureWidth && image.height == mTextureHeight) {
+                        // The image is the whole texture: no page to compose.
+                        return image
+                    }
+
+                    if (page == null) {
+                        page = PixelPage(mTextureWidth, mTextureHeight)
+                    }
+
+                    page.put(image, xs[i], ys[i])
+                }
+
+                return (page ?: PixelPage(mTextureWidth, mTextureHeight)).toPixels()
+            } finally {
+                page?.release()
+            }
+        }
+
+        override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap {
+            val page = Bitmap.createBitmap(mTextureWidth, mTextureHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(page)
+            val paint = Paint().also {
+                it.isAntiAlias = true
+                it.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+            }
+
+            for (i in files.indices) {
+                val bitmap = loadBitmap(files[i])
+                canvas.drawBitmap(bitmap, xs[i].toFloat(), ys[i].toFloat(), paint)
+                bitmap.recycle()
+            }
+
+            return page
+        }
+
+        override fun toString() = "${javaClass.simpleName}(${files.size} files, ${mTextureWidth}x$mTextureHeight)"
+
+        private fun isDecodable(file: File): Boolean {
+            val bitmap = try {
+                BitmapFactory.decodeFile(file.absolutePath)
+            } catch (_: Exception) {
+                null
+            } ?: return false
+
+            bitmap.recycle()
+            return true
+        }
+
+        private fun loadBitmap(file: File): Bitmap {
+            return try {
+                BitmapFactory.decodeFile(file.absolutePath, BitmapFactory.Options().also { it.inPremultiplied = true }) ?: errorBitmap()
+            } catch (_: Exception) {
+                errorBitmap()
+            }
+        }
+
+        private fun errorBitmap(): Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).also {
+            it.setPixel(0, 0, Color.argb(255, 255, 0, 0))
+        }
+
+        private fun errorPixels(): Pixels {
+            val data = ByteBuffer.allocateDirect(4)
+            data.put(0, 255.toByte()).put(3, 255.toByte())
+            return Pixels(1, 1, data)
+        }
     }
 
     companion object {

@@ -152,7 +152,7 @@ class TextureStore {
             }
 
             val source = QualityFileBitmapSource(texFile, if (isHDTexture) 2 else 1)
-            if (source.width == 0 || source.height == 0 || !source.preload()) {
+            if (source.width == 0 || source.height == 0 || !source.preload(opt.mPreMultiplyAlpha)) {
                 return null
             }
 
@@ -164,7 +164,7 @@ class TextureStore {
                 return BlankTextureRegion()
             }
 
-            if (source.width == 0 || source.height == 0 || !source.preload()) {
+            if (source.width == 0 || source.height == 0 || !source.preload(opt.mPreMultiplyAlpha)) {
                 return null
             }
 

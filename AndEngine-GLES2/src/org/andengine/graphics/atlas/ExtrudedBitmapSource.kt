@@ -1,7 +1,9 @@
 package org.andengine.graphics.atlas
 
 import android.graphics.Bitmap
+import org.andengine.graphics.texture.Pixels
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
+import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 
 /**
@@ -9,18 +11,44 @@ import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
  * bitmap whose border repeats the outermost pixels of the original, so linear filtering at the
  * region edge never samples a neighbouring image. The texture position of this source is the
  * padded corner; the image content starts [padding] pixels further in.
+ *
+ * On an RGBA page the image is delivered as bytes ([onLoadPixels]) with the border extruded in the
+ * byte buffer, if [source] is an [IPixelTextureAtlasSource] that delivers pixels of the page's variant
+ * (straight or premultiplied) and of its declared size. The extrusion copies texels as they are, so it
+ * fits either variant. Any other source keeps the bitmap path ([onLoadBitmap]). The source holds no
+ * state between loads.
  */
 class ExtrudedBitmapSource(
     val source: IBitmapTextureAtlasSource,
     val padding: Int
 ) : BaseTextureAtlasSource(0, 0, source.textureWidth + 2 * padding, source.textureHeight + 2 * padding),
-    IBitmapTextureAtlasSource {
+    IPixelTextureAtlasSource {
 
     override fun deepCopy(): ExtrudedBitmapSource {
         val copy = ExtrudedBitmapSource(source.deepCopy(), padding)
         copy.setTextureX(mTextureX)
         copy.setTextureY(mTextureY)
         return copy
+    }
+
+    override fun canLoadPixels(premultiplied: Boolean): Boolean =
+        source is IPixelTextureAtlasSource && source.canLoadPixels(premultiplied)
+
+    override fun onLoadPixels(): Pixels? = onLoadPixels(false)
+
+    override fun onLoadPixels(premultiplied: Boolean): Pixels? {
+        if (source !is IPixelTextureAtlasSource) return null
+        // A null here makes the atlas decode again through onLoadBitmap: a rare fallback, accepted on purpose.
+        val image = source.onLoadPixels(premultiplied) ?: return null
+        if (image.premultiplied != premultiplied) return null
+        if (image.width != source.textureWidth || image.height != source.textureHeight) return null
+        if (padding == 0) return image
+
+        val page = PixelPage(image.width + 2 * padding, image.height + 2 * padding)
+        page.put(image, padding, padding, padding)
+        val composed = page.toPixels()
+        page.release()
+        return if (premultiplied) Pixels(composed.width, composed.height, composed.data, true) else composed
     }
 
     override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap? {

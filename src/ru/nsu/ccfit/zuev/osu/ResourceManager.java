@@ -631,7 +631,8 @@ public class ResourceManager {
         for (final String s : customTextureStore.getKeys()) {
             TextureRegion tex = customTextureStore.get(s);
             // Atlas regions are released by customTextureStore.clear() below instead.
-            if (tex != null && !customTextureStore.isAtlasRegion(tex) && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
+            // Also while still queued (pixels prepared in the background): unloading cancels the load.
+            if (tex != null && !customTextureStore.isAtlasRegion(tex) && tex.getTexture() != null) {
                 engine.getTextureManager().unloadTexture(tex.getTexture());
             }
         }
@@ -650,12 +651,18 @@ public class ResourceManager {
         return textureStore.getFrameCount(texname);
     }
 
+    /** A texture that is neither on the GPU nor queued for loading (a queued one may still be preparing its pixels). */
+    private boolean isTextureLost(final TextureRegion tex) {
+        return tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()
+                && !engine.getTextureManager().isTextureLoadPending(tex.getTexture());
+    }
+
     public void checkSpinnerTextures() {
         final String[] names = {"spinner-background", "spinner-circle",
                 "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
             TextureRegion tex = textureStore.get(s);
-            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
+            if (isTextureLost(tex)) {
                 engine.getTextureManager().onReload();
                 break;
             }
@@ -674,7 +681,7 @@ public class ResourceManager {
         };
         for (final String s : names) {
             TextureRegion tex = textureStore.get(s);
-            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
+            if (isTextureLost(tex)) {
                 engine.getTextureManager().onReload();
                 break;
             }

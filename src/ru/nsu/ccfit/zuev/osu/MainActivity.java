@@ -30,6 +30,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -125,6 +126,8 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    /** Longest wait for pending texture loads before the splash screen hands over to the menu. */
+    private static final long TEXTURE_WAIT_TIMEOUT_MS = 5000L;
     private ScheduledFuture<?> logFlushFuture;
     private Display display;
     private DisplayManager.DisplayListener displayListener;
@@ -427,6 +430,16 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+
+                // Skin textures prepare their pixels in the background; show the menu once they are on
+                // the GPU, but never let a stuck load keep the splash screen up.
+                try {
+                    if (!GlobalManager.getInstance().getEngine().getTextureManager().awaitPendingTextureLoads(TEXTURE_WAIT_TIMEOUT_MS)) {
+                        Log.w("MainActivity", "Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
 
                 // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
                 // Never enqueue a bare setScene() and a follow-up action as two separate
