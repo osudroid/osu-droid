@@ -8,7 +8,10 @@ enum class VertexFormat(val sizeBytes: Int) {
     Float4(16),
 
     /** Four unsigned bytes mapped to 0..1, e.g. a packed RGBA color. */
-    UByte4Normalized(4)
+    UByte4Normalized(4),
+
+    /** One unsigned 16-bit integer, not normalized, read as a float in the shader. */
+    UShort1(2)
 }
 
 /** One attribute of a vertex: shader input [location], data [format] and byte offset in the vertex. */

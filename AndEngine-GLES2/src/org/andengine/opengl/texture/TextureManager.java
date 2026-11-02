@@ -89,6 +89,23 @@ public class TextureManager {
 		this.mTextureWarmUpVertexBufferObject.setNotLoadedToHardware();
 	}
 
+	/**
+	 * Uploads every loaded texture again while the GL context stays alive (e.g. after a skin
+	 * change). Unlike {@link #onReload()}, which is for a lost context, the old texture names are
+	 * deleted by {@link #updateTextures(GLState)} before the upload, and textures already queued
+	 * for unloading stay queued.
+	 */
+	public synchronized void reloadLoadedTextures() {
+		this.mReloading = true;
+		final ArrayList<ITexture> texturesLoaded = this.mTexturesLoaded;
+		for(int i = texturesLoaded.size() - 1; i >= 0; i--) {
+			final ITexture texture = texturesLoaded.get(i);
+			if(!this.mTexturesToBeUnloaded.contains(texture)) {
+				texture.setUpdateOnHardwareNeeded(true);
+			}
+		}
+	}
+
 	public synchronized void onDestroy() {
 		final HashSet<ITexture> managedTextures = this.mTexturesManaged;
 		for(final ITexture texture : managedTextures) { // TODO Can the use of the iterator be avoided somehow?

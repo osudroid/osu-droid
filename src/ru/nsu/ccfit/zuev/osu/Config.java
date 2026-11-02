@@ -87,6 +87,7 @@ public class Config {
         kiaiCatJam;
 
 
+    private static int realDisplayWidth;
     private static int RES_WIDTH,
         RES_HEIGHT,
         spinnerStyle,
@@ -300,6 +301,7 @@ public class Config {
         // resolution, so we try to approximate the scale factor.
         float ratio = 1280f / width;
 
+        realDisplayWidth = width;
         RES_WIDTH = (int) (width * ratio);
         RES_HEIGHT = (int) (height * ratio);
 
@@ -404,6 +406,11 @@ public class Config {
 
     public static void setBeatmapPath(final String path) {
         beatmapPath = path;
+    }
+
+    /** The real display width in physical pixels (longer side), as measured by the last {@link #measureDisplaySize()}. */
+    public static int getRealDisplayWidth() {
+        return realDisplayWidth;
     }
 
     public static int getRES_WIDTH() {

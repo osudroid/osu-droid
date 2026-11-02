@@ -1,5 +1,6 @@
 package org.andengine.opengl.font;
 
+import org.andengine.graphics.text.GlyphSlot;
 import org.andengine.opengl.texture.ITexture;
 
 import android.util.SparseIntArray;
@@ -22,14 +23,27 @@ public class Letter {
 
 	public final char mCharacter;
 	/**
-	 * The atlas page holding this glyph, or <code>null</code> for whitespace (nothing to draw).
+	 * The page texture of a {@link BitmapFont} glyph; <code>null</code> for whitespace and for glyphs in the shared
+	 * glyph atlas (see {@link #mGlyph}).
 	 */
 	public final ITexture mTexture;
+	/**
+	 * The fill image of this glyph in the shared glyph atlas, or <code>null</code> for whitespace and
+	 * {@link BitmapFont} glyphs.
+	 */
+	public final GlyphSlot mGlyph;
+	/**
+	 * The outline image of this glyph in the shared glyph atlas; only set by {@link StrokeFont}. It has its own
+	 * position in the atlas (and its own texture coordinates), only the pen placement and size
+	 * ({@link #mOffsetX}, {@link #mOffsetY}, {@link #mWidth}, {@link #mHeight}) are shared with {@link #mGlyph}.
+	 */
+	public final GlyphSlot mStrokeGlyph;
 	private final boolean mWhitespace;
 	public final int mTextureX;
 	public final int mTextureY;
-	public final int mWidth;
-	public final int mHeight;
+	/** Size, offsets and advance are in virtual units (raster pixels / raster scale for atlas glyphs). */
+	public final float mWidth;
+	public final float mHeight;
 	public final float mOffsetX;
 	public final float mOffsetY;
 	public final float mAdvance;
@@ -47,15 +61,24 @@ public class Letter {
 	 * For invisible letters or letters without an extent (i.e. whitespaces).
 	 */
 	/* package */ Letter(final char pCharacter, final float pAdvance) {
-		this(null, pCharacter, true, 0, 0, 0, 0, 0, 0, pAdvance, 0, 0, 0, 0);
+		this(null, null, null, pCharacter, true, 0, 0, 0, 0, 0, 0, pAdvance, 0, 0, 0, 0);
 	}
 
-	/* package */ Letter(final ITexture pTexture, final char pCharacter, final int pTextureX, final int pTextureY, final int pWidth, final int pHeight, final float pOffsetX, final float pOffsetY, final float pAdvance, final float pU, final float pV, final float pU2, final float pV2) {
-		this(pTexture, pCharacter, false, pTextureX, pTextureY, pWidth, pHeight, pOffsetX, pOffsetY, pAdvance, pU, pV, pU2, pV2);
+	/* package */ Letter(final ITexture pTexture, final char pCharacter, final int pTextureX, final int pTextureY, final float pWidth, final float pHeight, final float pOffsetX, final float pOffsetY, final float pAdvance, final float pU, final float pV, final float pU2, final float pV2) {
+		this(pTexture, null, null, pCharacter, false, pTextureX, pTextureY, pWidth, pHeight, pOffsetX, pOffsetY, pAdvance, pU, pV, pU2, pV2);
 	}
 
-	private Letter(final ITexture pTexture, final char pCharacter, final boolean pWhitespace, final int pTextureX, final int pTextureY, final int pWidth, final int pHeight, final float pOffsetX, final float pOffsetY, final float pAdvance, final float pU, final float pV, final float pU2, final float pV2) {
+	/**
+	 * For glyphs in the shared glyph atlas. The texture coordinates mirror those of <code>pGlyph</code>.
+	 */
+	/* package */ Letter(final char pCharacter, final GlyphSlot pGlyph, final GlyphSlot pStrokeGlyph, final float pWidth, final float pHeight, final float pOffsetX, final float pOffsetY, final float pAdvance) {
+		this(null, pGlyph, pStrokeGlyph, pCharacter, false, 0, 0, pWidth, pHeight, pOffsetX, pOffsetY, pAdvance, pGlyph.u, pGlyph.v, pGlyph.u2, pGlyph.v2);
+	}
+
+	private Letter(final ITexture pTexture, final GlyphSlot pGlyph, final GlyphSlot pStrokeGlyph, final char pCharacter, final boolean pWhitespace, final int pTextureX, final int pTextureY, final float pWidth, final float pHeight, final float pOffsetX, final float pOffsetY, final float pAdvance, final float pU, final float pV, final float pU2, final float pV2) {
 		this.mTexture = pTexture;
+		this.mGlyph = pGlyph;
+		this.mStrokeGlyph = pStrokeGlyph;
 		this.mCharacter = pCharacter;
 		this.mWhitespace = pWhitespace;
 		this.mWidth = pWidth;

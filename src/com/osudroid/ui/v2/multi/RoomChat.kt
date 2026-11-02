@@ -59,9 +59,6 @@ class RoomChat : UILinearContainer() {
     private val body = UILinearContainer()
 
     //region Buffers
-    private val messageTimestampBuffer = UITextCompoundBuffer(8).asSharedDynamically()
-    private val messagePlayerTagBuffer = UITextCompoundBuffer(32).asSharedDynamically()
-    private val messageTextBuffer = UITextCompoundBuffer(128).asSharedDynamically()
     private val messageBackgroundBuffer = UIBox.BoxVBO(0f, 0, PaintStyle.Fill).asSharedDynamically()
     //endregion
 
@@ -415,7 +412,6 @@ class RoomChat : UILinearContainer() {
 
                 if (message is SystemMessage) {
                     text {
-                        buffer = messageTextBuffer
                         width = FillParent
                         anchor = Anchor.CenterLeft
                         origin = Anchor.CenterLeft
@@ -439,14 +435,12 @@ class RoomChat : UILinearContainer() {
                         justifyContent = JustifyContent.SpaceBetween
 
                         text {
-                            buffer = messageTimestampBuffer
                             applyTheme = { color = it.accentColor * 0.5f }
                             text = timestampFormat.format(message.time)
                         }
 
                         if (showSender) {
                             text {
-                                buffer = messagePlayerTagBuffer
                                 color = getPlayerTagColor(message.player)
                                 text = message.player.name
                             }
@@ -454,7 +448,6 @@ class RoomChat : UILinearContainer() {
                     }
 
                     text {
-                        buffer = messageTextBuffer
                         width = FillParent
                         applyTheme = { color = it.accentColor }
                         text = message.content

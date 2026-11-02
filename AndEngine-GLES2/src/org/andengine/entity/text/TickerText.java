@@ -107,6 +107,10 @@ public class TickerText extends Text {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			this.drawBatched(pGLState, this.mCharactersVisible);
+			return;
+		}
 		this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mCharactersVisible * Text.VERTICES_PER_LETTER);
 	}
 

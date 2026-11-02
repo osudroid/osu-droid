@@ -120,11 +120,15 @@ object GlesPipeline {
         VertexFormat.Float3 -> 3
         VertexFormat.Float4 -> 4
         VertexFormat.UByte4Normalized -> 4
+        VertexFormat.UShort1 -> 1
     }
 
     /** GL component type of [format]. */
-    fun componentType(format: VertexFormat): Int =
-        if (format == VertexFormat.UByte4Normalized) GLES20.GL_UNSIGNED_BYTE else GLES20.GL_FLOAT
+    fun componentType(format: VertexFormat): Int = when (format) {
+        VertexFormat.UByte4Normalized -> GLES20.GL_UNSIGNED_BYTE
+        VertexFormat.UShort1 -> GLES20.GL_UNSIGNED_SHORT
+        else -> GLES20.GL_FLOAT
+    }
 
     fun isNormalized(format: VertexFormat): Boolean = format == VertexFormat.UByte4Normalized
 }

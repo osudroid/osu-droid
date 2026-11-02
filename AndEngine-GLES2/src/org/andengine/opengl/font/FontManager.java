@@ -21,6 +21,8 @@ public class FontManager {
 	// Fields
 	// ===========================================================
 
+	private static volatile float sRasterScale = 1f;
+
 	private final ArrayList<Font> mFontsManaged = new ArrayList<Font>();
 	private boolean mReloading;
 
@@ -31,6 +33,20 @@ public class FontManager {
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
+
+	/**
+	 * Sets the physical pixels per virtual unit that fonts created afterwards rasterize their glyphs with.
+	 */
+	public static void setRasterScale(final float pScale) {
+		if(!(pScale > 0)) {
+			throw new IllegalArgumentException("pScale must be positive: " + pScale);
+		}
+		FontManager.sRasterScale = pScale;
+	}
+
+	public static float getRasterScale() {
+		return FontManager.sRasterScale;
+	}
 
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
@@ -96,6 +112,9 @@ public class FontManager {
 		}
 	}
 
+	/**
+	 * Uploads every existing glyph again into its atlas slot, e.g. after a context loss left the atlas empty.
+	 */
 	public synchronized void onReload() {
 		this.mReloading = true;
 		final ArrayList<Font> managedFonts = this.mFontsManaged;

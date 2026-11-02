@@ -57,6 +57,11 @@ class UISpriteBatchingTest {
             for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
         } else if ((name == "glGetShaderiv" || name == "glGetProgramiv") && args!![2] is IntArray) {
             (args[2] as IntArray)[args[3] as Int] = 1
+        } else if (name == "glBufferData" && args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
+            val copy = (args[2] as ByteBuffer).duplicate()
+            val bytes = ByteArray(minOf(args[1] as Int, copy.remaining()))
+            copy.get(bytes)
+            uploads += bytes
         } else if (name == "glBufferSubData" && args!![3] is ByteBuffer) {
             val copy = (args[3] as ByteBuffer).duplicate()
             val bytes = ByteArray(minOf(args[2] as Int, copy.remaining()))

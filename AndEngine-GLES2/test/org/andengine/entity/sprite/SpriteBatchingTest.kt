@@ -80,7 +80,7 @@ class SpriteBatchingTest {
         QuadBatcher.flush()
         assertEquals(1, draws())
 
-        val v = ByteBuffer.wrap(gl.bufferSubDataBytes.last()).order(ByteOrder.nativeOrder())
+        val v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
         // Corners in order around the quad: (x,y), (x,y2), (x2,y2), (x2,y); 20 bytes per vertex,
         // position at +0, UV at +8, color at +16.
         assertEquals(10f, v.getFloat(0), 0f)
@@ -210,7 +210,7 @@ class SpriteBatchingTest {
         QuadBatcher.flush()
 
         assertEquals(1, draws())
-        val v = ByteBuffer.wrap(gl.bufferSubDataBytes.last()).order(ByteOrder.nativeOrder())
+        val v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
         assertEquals(0.5f, v.getFloat(8), 1e-6f)
     }
 }

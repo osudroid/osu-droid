@@ -35,7 +35,7 @@ object SpriteBatching {
      * blend function. A sprite without blending replaces the destination, which is
      * [BlendMode.Opaque]. Null for factors that have no [BlendFactor].
      */
-    private fun blendOf(shape: Shape): BlendMode? {
+    fun blendOf(shape: Shape): BlendMode? {
         if (!shape.isBlendingEnabled) return BlendMode.Opaque
         val src = GlesPipeline.blendFactorOf(shape.blendFunctionSource) ?: return null
         val dst = GlesPipeline.blendFactorOf(shape.blendFunctionDestination) ?: return null

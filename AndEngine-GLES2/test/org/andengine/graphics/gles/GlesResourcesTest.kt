@@ -274,21 +274,30 @@ class GlesResourcesTest {
     }
 
     @Test
-    fun streamBuffer_orphanReallocatesWithoutData() {
+    fun streamBuffer_replaceGivesNewStorageWithData() {
         val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, 8, "stream")) as GlesBuffer
+        val data = pixels(4)
+        for (i in 0 until 4) data.put(i, (i + 1).toByte())
         gl.bufferDataBytes.clear()
         gl.calls.clear()
 
-        buffer.orphan()
+        buffer.replace(data, 4)
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,8,buf,${GLES30.GL_STREAM_DRAW})"))
-        assertEquals(0, gl.bufferDataBytes.size)
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,4,buf,${GLES30.GL_STREAM_DRAW})"))
+        assertEquals(1, gl.bufferDataBytes.size)
+        assertArrayEquals(byteArrayOf(1, 2, 3, 4), gl.bufferDataBytes[0])
     }
 
     @Test
-    fun staticBuffer_orphan_throws() {
+    fun streamBuffer_replaceLargerThanBuffer_throws() {
+        val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, 8, "stream"))
+        assertThrows(IllegalArgumentException::class.java) { buffer.replace(pixels(16), 16) }
+    }
+
+    @Test
+    fun staticBuffer_replace_throws() {
         val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Static, 8, "static"))
-        assertThrows(IllegalStateException::class.java) { buffer.orphan() }
+        assertThrows(IllegalStateException::class.java) { buffer.replace(pixels(8), 8) }
     }
 
     @Test

@@ -60,7 +60,7 @@ class QuadBatcherTest {
 
     /** The vertex data of the last vertex upload, in the device's byte order. */
     private fun lastVertices(): ByteBuffer =
-        ByteBuffer.wrap(gl.bufferSubDataBytes.last()).order(ByteOrder.nativeOrder())
+        ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
 
     @Before
     fun setUp() {
@@ -105,7 +105,7 @@ class QuadBatcherTest {
         assertEquals(gl.calls.toString(), 1, draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},600,${GLES20.GL_UNSIGNED_SHORT},0)"))
         assertFalse(QuadBatcher.hasPending)
-        assertEquals(100 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.bufferSubDataBytes.last().size)
+        assertEquals(100 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
     }
 
     @Test
@@ -335,7 +335,7 @@ class QuadBatcherTest {
         add(rgba = abgr)
         QuadBatcher.flush()
 
-        val bytes = gl.bufferSubDataBytes.last()
+        val bytes = gl.vertexUploads.last()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         for (i in 0 until 4) {
             val o = i * stride + 16
@@ -432,7 +432,7 @@ class QuadBatcherTest {
     }
 
     @Test
-    fun everyFlush_orphansTheVertexBufferBeforeUpload() {
+    fun everyFlush_givesTheVertexBufferNewStorageWithTheQuads() {
         add()
         QuadBatcher.flush()
         gl.calls.clear()
@@ -441,11 +441,9 @@ class QuadBatcherTest {
         add()
         QuadBatcher.flush()
 
-        val size = QuadBatcher.MAX_QUADS * 4 * QuadBatcher.VERTEX_SIZE_BYTES
         val uploads = gl.calls.filter { it.startsWith("glBufferData") || it.startsWith("glBufferSubData") }
-        val orphan = "glBufferData(${GLES20.GL_ARRAY_BUFFER},$size,buf,${android.opengl.GLES30.GL_STREAM_DRAW})"
-        val upload = "glBufferSubData(${GLES20.GL_ARRAY_BUFFER},0,${4 * QuadBatcher.VERTEX_SIZE_BYTES},buf)"
-        assertEquals(listOf(orphan, upload, orphan, upload), uploads)
+        val replace = "glBufferData(${GLES20.GL_ARRAY_BUFFER},${4 * QuadBatcher.VERTEX_SIZE_BYTES},buf,${android.opengl.GLES30.GL_STREAM_DRAW})"
+        assertEquals(listOf(replace, replace), uploads)
     }
 
     @Test

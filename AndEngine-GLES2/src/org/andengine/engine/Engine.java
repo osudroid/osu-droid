@@ -544,15 +544,14 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	}
 
 	/**
-	 * Explicitly reloads all managed resources (e.g. after a skin change). A new GL context does
-	 * not go through here: the managers are registered via {@link GlesLegacyRestorers#registerEngine}
-	 * and reloaded by {@link org.andengine.graphics.gles.GlesBackend#onContextCreated}.
+	 * Explicitly reloads the textures while the GL context stays alive (e.g. after a skin change); the
+	 * old texture names are deleted first. Buffers, shaders and the glyph atlas (not managed by the
+	 * TextureManager) stay valid in a live context and are left alone. A new GL context does not go
+	 * through here: the managers are registered via {@link GlesLegacyRestorers#registerEngine} and
+	 * reloaded by {@link org.andengine.graphics.gles.GlesBackend#onContextCreated}.
 	 */
 	public void onReloadResources() {
-		this.mVertexBufferObjectManager.onReload();
-		this.mTextureManager.onReload();
-		this.mFontManager.onReload();
-		this.mShaderProgramManager.onReload();
+		this.mTextureManager.reloadLoadedTextures();
 	}
 
 	protected Camera getCameraFromSurfaceTouchEvent(final TouchEvent pTouchEvent) {

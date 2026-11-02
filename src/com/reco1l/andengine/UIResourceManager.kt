@@ -5,15 +5,18 @@ package com.reco1l.andengine
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
-import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.component.UIComponent
+import org.andengine.graphics.text.AndroidGlyphRasterizer
+import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.opengl.font.Font
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.opengl.font.FontManager
 import java.lang.ref.WeakReference
 
-class UIResourceManager(private val context: Context) {
+class UIResourceManager(
+    private val context: Context,
+    private val fontManager: () -> FontManager = { UIEngine.current.fontManager }
+) {
 
     private val fonts = mutableMapOf<String, Font>()
     private val fontSubscribers = mutableMapOf<Font, MutableList<WeakReference<UIComponent>>>()
@@ -28,29 +31,15 @@ class UIResourceManager(private val context: Context) {
             return fetchedFont
         }
 
-        val engine = UIEngine.current
-        val buf = IntArray(1)
-        GLES32.glGetIntegerv(GLES32.GL_MAX_TEXTURE_SIZE, buf, 0)
-
-        // Fonts grow by adding pages when one is full, so a page can stay small. Allocating the GPU maximum
-        // (16384x16384, 1 GiB, on current devices) per font froze the song select for seconds on open.
-        val pageSize = buf[0].coerceIn(256, FONT_PAGE_SIZE)
-
-        Log.i("UIResourceManager", "Loading font: $fontIdentifier with page size ${pageSize}x${pageSize}")
-
-        val pageFactory = Font.IPageFactory {
-            BitmapTextureAtlas(engine.textureManager, pageSize, pageSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
-        }
-        val texture = pageFactory.createPage()
+        val manager = fontManager()
         val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
-        val font = Font(engine.fontManager, texture, pageFactory, typeface, size, true, Color.WHITE)
+        val rasterizer = AndroidGlyphRasterizer(typeface, size * FontManager.getRasterScale(), true)
+        val font = Font(manager, rasterizer, GlyphAtlas.shared, Color.WHITE)
 
-        engine.apply {
-            textureManager.loadTexture(texture)
-            fontManager.loadFont(font)
+        Log.i("UIResourceManager", "Loading font: $fontIdentifier")
 
-            fonts[fontIdentifier] = font
-        }
+        manager.loadFont(font)
+        fonts[fontIdentifier] = font
 
         return font
     }
@@ -67,25 +56,7 @@ class UIResourceManager(private val context: Context) {
         val subscribers = fontSubscribers[font] ?: return
         subscribers.removeAll { it.get() === component || it.get() == null }
 
-        if (subscribers.isEmpty()) {
-            val fontKey = fonts.entries.find { it.value == font }?.key
-            Log.i("UIResourceManager", "Unloading font: $fontKey")
-
-            fonts.remove(fontKey)
-            fontSubscribers.remove(font)
-
-            UIEngine.current.apply {
-                fontManager.unloadFont(font)
-                font.pages.forEach { textureManager.unloadTexture(it) }
-            }
-        }
-    }
-
-
-    companion object {
-        /**
-         * The maximum side length of a font atlas page.
-         */
-        private const val FONT_PAGE_SIZE = 2048
+        // The font stays loaded for the process lifetime: fonts own no GPU pages, and unloading would
+        // create new atlas slots (the atlas never reuses space) the next time the font is needed.
     }
 }

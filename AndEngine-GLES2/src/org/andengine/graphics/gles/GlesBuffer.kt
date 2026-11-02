@@ -116,12 +116,14 @@ class GlesBuffer(
         RenderStats.upload(byteCount)
     }
 
-    override fun orphan() {
+    override fun replace(data: Buffer, byteCount: Int) {
         check(!isDisposed) { "Buffer '$label' is disposed" }
-        // Static/Dynamic keep a CPU copy of their content, which orphaning would contradict.
-        check(usage == BufferUsage.Stream) { "Buffer '$label' is $usage; only stream buffers can be orphaned" }
+        // Static/Dynamic keep a CPU copy of their content, which replacing would contradict.
+        check(usage == BufferUsage.Stream) { "Buffer '$label' is $usage; only stream buffers can be replaced" }
+        require(byteCount in 0..sizeBytes) { "Replace with $byteCount bytes outside $sizeBytes bytes of '$label'" }
         bind()
-        GlesBackend.gl.glBufferData(glTarget, sizeBytes, null, glUsage)
+        GlesBackend.gl.glBufferData(glTarget, byteCount, data, glUsage)
+        RenderStats.upload(byteCount)
     }
 
     private fun copyToShadow(offsetBytes: Int, data: Buffer, byteCount: Int) {

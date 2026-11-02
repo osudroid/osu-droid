@@ -69,6 +69,7 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.andengine.engine.Engine;
+import org.andengine.opengl.font.FontManager;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.options.EngineOptions;
@@ -168,6 +169,8 @@ public class MainActivity extends BaseGameActivity implements
         reportGlesVersion();
 
         Config.loadConfig(this);
+        // Fonts rasterize in physical pixels; Config measured the real display width in the same call.
+        FontManager.setRasterScale(Config.getRealDisplayWidth() / (float) Math.max(1, Config.getRES_WIDTH()));
         StringTable.setContext(this);
         ToastLogger.init(this);
         initialGameDirectory();

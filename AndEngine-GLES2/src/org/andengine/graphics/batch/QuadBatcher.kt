@@ -20,6 +20,8 @@ import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesStateCache
+import org.andengine.graphics.text.GlyphArray
+import org.andengine.graphics.text.GlyphSlot
 
 /**
  * Collects textured, colored quads and draws them with as few draw calls as possible: quads that
@@ -57,6 +59,12 @@ object QuadBatcher {
 
     private fun colorByte(value: Float): Int = (value.coerceIn(0f, 1f) * 255f + 0.5f).toInt()
 
+    /** float2 position + float2 UV + 4 normalized bytes color + UShort layer + 2 bytes padding. */
+    const val GLYPH_VERTEX_SIZE_BYTES = 24
+
+    private const val GLYPH_INTS_PER_VERTEX = GLYPH_VERTEX_SIZE_BYTES / 4
+    private const val GLYPH_INTS_PER_QUAD = GLYPH_INTS_PER_VERTEX * 4
+    private const val GLYPH_QUAD_SIZE_BYTES = GLYPH_VERTEX_SIZE_BYTES * 4
     private const val INTS_PER_VERTEX = VERTEX_SIZE_BYTES / 4
     private const val INTS_PER_QUAD = INTS_PER_VERTEX * 4
     private const val QUAD_SIZE_BYTES = VERTEX_SIZE_BYTES * 4
@@ -104,6 +112,47 @@ object QuadBatcher {
         )
     )
 
+    @JvmField
+    val glyphLayout = VertexLayout(
+        GLYPH_VERTEX_SIZE_BYTES,
+        listOf(
+            VertexAttribute(0, VertexFormat.Float2, 0),
+            VertexAttribute(1, VertexFormat.Float2, 8),
+            VertexAttribute(2, VertexFormat.UByte4Normalized, 16),
+            VertexAttribute(3, VertexFormat.UShort1, 20)
+        )
+    )
+
+    private const val GLYPH_VERTEX_SHADER = """#version 300 es
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+layout(location = 2) in vec4 aColor;
+layout(location = 3) in float aLayer;
+uniform mat4 uProjection;
+out vec2 vTexCoord;
+out vec4 vColor;
+flat out float vLayer;
+void main() {
+    vTexCoord = aTexCoord;
+    vColor = aColor;
+    vLayer = aLayer;
+    gl_Position = uProjection * vec4(aPosition, 0.0, 1.0);
+}
+"""
+
+    private const val GLYPH_FRAGMENT_SHADER = """#version 300 es
+precision mediump float;
+precision mediump sampler2DArray;
+uniform sampler2DArray uGlyphs;
+in highp vec2 vTexCoord;
+in vec4 vColor;
+flat in float vLayer;
+out vec4 fragColor;
+void main() {
+    fragColor = vec4(vColor.rgb, vColor.a * texture(uGlyphs, vec3(vTexCoord, vLayer)).r);
+}
+"""
+
     private const val VERTEX_SHADER = """#version 300 es
 layout(location = 0) in vec2 aPosition;
 layout(location = 1) in vec2 aTexCoord;
@@ -121,7 +170,7 @@ void main() {
     private const val FRAGMENT_SHADER = """#version 300 es
 precision mediump float;
 uniform sampler2D uTexture;
-in vec2 vTexCoord;
+in highp vec2 vTexCoord;
 in vec4 vColor;
 out vec4 fragColor;
 void main() {
@@ -133,6 +182,11 @@ void main() {
     private val vertices = IntArray(MAX_QUADS * INTS_PER_QUAD)
     private var quadCount = 0
     private var texture: Texture? = null
+
+    /** The pending quads are glyphs of [glyphArray] (in [glyphVertices]) instead of sprites. */
+    private var glyphMode = false
+    private var glyphArray: GlyphArray? = null
+    private var glyphVertices: IntArray? = null
     private var blend: BlendMode? = null
 
     private val projection = floatArrayOf(
@@ -149,6 +203,9 @@ void main() {
     private var vertexBuffer: GpuBuffer? = null
     private var indexBuffer: GpuBuffer? = null
     private val pipelines = HashMap<BlendMode, Pipeline>()
+    private var glyphProgram: GpuProgram? = null
+    private var glyphVertexBuffer: GpuBuffer? = null
+    private val glyphPipelines = HashMap<BlendMode, Pipeline>()
 
     /** The state found by an outside flush, set again after it; see [GlesStateCache.saveDrawState]. */
     private val savedState = IntArray(GlesStateCache.DRAW_STATE_SIZE)
@@ -160,6 +217,8 @@ void main() {
     /** Staging for the vertex upload; CPU memory, kept across [releaseResources]. */
     private var uploadBytes: ByteBuffer? = null
     private var uploadInts: IntBuffer? = null
+    private var glyphUploadBytes: ByteBuffer? = null
+    private var glyphUploadInts: IntBuffer? = null
 
     /** True while quads wait to be drawn. */
     @JvmStatic
@@ -270,6 +329,57 @@ void main() {
     }
 
     /**
+     * Adds the glyph rectangle ([x0], [y0])-([x1], [y1]) in local coordinates, transformed by
+     * [matrix] like [add], with the UVs and layer of [slot] and the ABGR packed color [rgba]. Only
+     * the alpha of the glyph image is used. The transformed top-left corner is then rounded to a
+     * whole physical pixel (through the current projection and the surface size) and all corners
+     * move by the same amount, so the size stays; without a surface size nothing is rounded.
+     */
+    @JvmStatic
+    fun addGlyph(slot: GlyphSlot, blend: BlendMode, matrix: FloatArray, x0: Float, y0: Float, x1: Float, y1: Float, rgba: Int) {
+        // Not uploaded to the current texture (yet): its texels are undefined, draw nothing.
+        if (!slot.uploaded) return
+        prepareGlyph(slot.array, blend)
+        arm()
+        val a = matrix[0]
+        val b = matrix[1]
+        val c = matrix[4]
+        val d = matrix[5]
+        val tx = matrix[12]
+        val ty = matrix[13]
+
+        var ox = a * x0 + c * y0 + tx
+        var oy = b * x0 + d * y0 + ty
+        val sw = GlesBackend.surfaceWidth
+        val sh = GlesBackend.surfaceHeight
+        val p = projection
+        if (sw > 0 && sh > 0 && p[0] != 0f && p[5] != 0f) {
+            val clipX = p[0] * ox + p[4] * oy + p[12]
+            val clipY = p[1] * ox + p[5] * oy + p[13]
+            val px = (clipX + 1f) * 0.5f * sw
+            val py = (clipY + 1f) * 0.5f * sh
+            val snappedX = Math.round(px) * 2f / sw - 1f
+            val snappedY = Math.round(py) * 2f / sh - 1f
+            ox += (snappedX - clipX) / p[0]
+            oy += (snappedY - clipY) / p[5]
+        }
+
+        val w0 = a * (x1 - x0)
+        val w1 = b * (x1 - x0)
+        val h0 = c * (y1 - y0)
+        val h1 = d * (y1 - y0)
+        val color = vertexColor(rgba)
+        val layer = if (littleEndian) slot.layer else slot.layer shl 16
+        val v = glyphVertices!!
+        var i = quadCount * GLYPH_INTS_PER_QUAD
+        i = putGlyph(v, i, ox, oy, slot.u, slot.v, color, layer)
+        i = putGlyph(v, i, ox + w0, oy + w1, slot.u2, slot.v, color, layer)
+        i = putGlyph(v, i, ox + w0 + h0, oy + w1 + h1, slot.u2, slot.v2, color, layer)
+        putGlyph(v, i, ox + h0, oy + h1, slot.u, slot.v2, color, layer)
+        quadCount++
+    }
+
+    /**
      * Draws the pending quads, if any, and sets the GL state the draw changed back to what it was
      * before, so code that set up state for a draw of its own can call this right before drawing.
      * A no-op without pending quads.
@@ -316,23 +426,41 @@ void main() {
         if (count == 0) return
         countFlush(reason)
         disarm()
-        val tex = texture!!
+        val glyphs = glyphMode
         val pipelineBlend = blend!!
+        val array = glyphArray
+        val spriteTexture = texture
         // Dropped even if the draw fails, so a broken batch is not retried with every add.
         quadCount = 0
 
         ensureResources()
-        val vb = vertexBuffer!!
-        val ints = uploadInts!!
-        ints.clear()
-        ints.put(vertices, 0, count * INTS_PER_QUAD)
-        val bytes = uploadBytes!!
-        bytes.clear()
-        // New storage per flush: the previous draw may still read the old content.
-        vb.orphan()
-        vb.update(0, bytes, count * QUAD_SIZE_BYTES)
-
-        val pipeline = pipelineFor(pipelineBlend)
+        val vb: GpuBuffer
+        val pipeline: Pipeline
+        val tex: Texture
+        if (glyphs) {
+            ensureGlyphResources()
+            vb = glyphVertexBuffer!!
+            val ints = glyphUploadInts!!
+            ints.clear()
+            ints.put(glyphVertices!!, 0, count * GLYPH_INTS_PER_QUAD)
+            val bytes = glyphUploadBytes!!
+            bytes.clear()
+            vb.replace(bytes, count * GLYPH_QUAD_SIZE_BYTES)
+            pipeline = glyphPipelineFor(pipelineBlend)
+            tex = array!!.texture
+        } else {
+            vb = vertexBuffer!!
+            val ints = uploadInts!!
+            ints.clear()
+            ints.put(vertices, 0, count * INTS_PER_QUAD)
+            val bytes = uploadBytes!!
+            bytes.clear()
+            // New storage per flush: rewriting storage that earlier draws still read makes the
+            // driver wait or copy the whole buffer on every flush.
+            vb.replace(bytes, count * QUAD_SIZE_BYTES)
+            pipeline = pipelineFor(pipelineBlend)
+            tex = spriteTexture!!
+        }
         val context = GlesRenderContext.instance
         val ownPass = !context.isInPass
         if (ownPass) context.beginInlinePass()
@@ -394,8 +522,15 @@ void main() {
         quadCount = 0
         disarm()
         texture = null
+        glyphArray = null
+        glyphMode = false
         blend = null
         pipelines.clear()
+        glyphPipelines.clear()
+        glyphProgram?.dispose()
+        glyphVertexBuffer?.dispose()
+        glyphProgram = null
+        glyphVertexBuffer = null
         program?.dispose()
         vertexBuffer?.dispose()
         indexBuffer?.dispose()
@@ -406,16 +541,33 @@ void main() {
         reasonCounters.fill(COUNTER_UNREGISTERED)
     }
 
-    private fun prepare(texture: Texture, blend: BlendMode) {
+    private fun prepareGlyph(array: GlyphArray, blend: BlendMode) {
         if (quadCount == MAX_QUADS) {
             drawPending(REASON_FULL)
         } else if (quadCount > 0) {
-            if (texture !== this.texture) {
+            if (!glyphMode || array !== glyphArray) {
                 drawPending(REASON_TEXTURE)
             } else if (blend !== this.blend && blend != this.blend) {
                 drawPending(REASON_BLEND)
             }
         }
+        if (glyphVertices == null) glyphVertices = IntArray(MAX_QUADS * GLYPH_INTS_PER_QUAD)
+        glyphMode = true
+        glyphArray = array
+        this.blend = blend
+    }
+
+    private fun prepare(texture: Texture, blend: BlendMode) {
+        if (quadCount == MAX_QUADS) {
+            drawPending(REASON_FULL)
+        } else if (quadCount > 0) {
+            if (glyphMode || texture !== this.texture) {
+                drawPending(REASON_TEXTURE)
+            } else if (blend !== this.blend && blend != this.blend) {
+                drawPending(REASON_BLEND)
+            }
+        }
+        glyphMode = false
         this.texture = texture
         this.blend = blend
     }
@@ -430,6 +582,45 @@ void main() {
         a[index + 3] = java.lang.Float.floatToRawIntBits(v)
         a[index + 4] = color
         return index + INTS_PER_VERTEX
+    }
+
+    private fun putGlyph(a: IntArray, index: Int, x: Float, y: Float, u: Float, v: Float, color: Int, layer: Int): Int {
+        a[index] = java.lang.Float.floatToRawIntBits(x)
+        a[index + 1] = java.lang.Float.floatToRawIntBits(y)
+        a[index + 2] = java.lang.Float.floatToRawIntBits(u)
+        a[index + 3] = java.lang.Float.floatToRawIntBits(v)
+        a[index + 4] = color
+        a[index + 5] = layer
+        return index + GLYPH_INTS_PER_VERTEX
+    }
+
+    private fun glyphPipelineFor(blend: BlendMode): Pipeline {
+        val cached = glyphPipelines[blend]
+        if (cached != null) return cached
+        val created = Pipeline(glyphProgram!!, glyphLayout, blend, null, false, CullMode.None, PrimitiveType.Triangles)
+        glyphPipelines[blend] = created
+        return created
+    }
+
+    private fun ensureGlyphResources() {
+        if (glyphProgram != null) return
+        val device = GlesGraphicsDevice.instance
+        var newProgram: GpuProgram? = null
+        try {
+            newProgram = device.createProgram(GLYPH_VERTEX_SHADER, GLYPH_FRAGMENT_SHADER, "quad-batch-glyph")
+            if (glyphVertexBuffer == null) {
+                glyphVertexBuffer = device.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, MAX_QUADS * GLYPH_QUAD_SIZE_BYTES, "quad-batch-glyph-vertices")
+            }
+        } catch (e: RuntimeException) {
+            newProgram?.dispose()
+            throw e
+        }
+        if (glyphUploadBytes == null) {
+            val bytes = ByteBuffer.allocateDirect(MAX_QUADS * GLYPH_QUAD_SIZE_BYTES).order(ByteOrder.nativeOrder())
+            glyphUploadBytes = bytes
+            glyphUploadInts = bytes.asIntBuffer()
+        }
+        glyphProgram = newProgram
     }
 
     private fun pipelineFor(blend: BlendMode): Pipeline {

@@ -7,6 +7,7 @@ import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.text.exception.OutOfCharactersException;
 import org.andengine.entity.text.vbo.HighPerformanceTextVertexBufferObject;
 import org.andengine.entity.text.vbo.ITextVertexBufferObject;
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
@@ -159,7 +160,12 @@ public class Text extends RectangularShape {
 		this.setText(pText);
 
 		this.setBlendingEnabled(true);
-		this.initBlendFunction(this.mFont.getTexture());
+		if(this.mFont.getTexture() != null) {
+			this.initBlendFunction(this.mFont.getTexture());
+		} else {
+			// Glyph atlas fonts are alpha-only and not premultiplied.
+			this.setBlendFunction(Text.BLENDFUNCTION_SOURCE_DEFAULT, Text.BLENDFUNCTION_DESTINATION_DEFAULT);
+		}
 	}
 
 	// ===========================================================
@@ -306,6 +312,11 @@ public class Text extends RectangularShape {
 
 	// osu!droid modified: fonts can span several atlas pages, so letters are drawn in runs per page.
 	private int mPageRunCount;
+	/** Set by preDraw: the glyphs go through the quad batch instead of the text's own buffer. */
+	boolean mDrawBatched;
+	/** The letters of the drawn quads in buffer order, filled for atlas fonts only. */
+	private org.andengine.opengl.font.Letter[] mBatchLetters;
+	private int mBatchLetterCount;
 	private int[] mPageRunVertexCounts;
 	private org.andengine.opengl.texture.ITexture[] mPageRunTextures;
 
@@ -315,6 +326,7 @@ public class Text extends RectangularShape {
 	 */
 	private void updatePageRuns() {
 		this.mPageRunCount = 0;
+		this.mBatchLetterCount = 0;
 
 		// Allocated lazily, vertices may be updated before the field initializers of this class ran.
 		if(this.mPageRunTextures == null) {
@@ -328,6 +340,10 @@ public class Text extends RectangularShape {
 		final IFont font = this.mFont;
 		final java.util.ArrayList<CharSequence> lines = this.mLines;
 		int letters = 0;
+		final boolean recordLetters = font.getTexture() == null;
+		if(recordLetters && (this.mBatchLetters == null || this.mBatchLetters.length < this.mCharactersMaximum)) {
+			this.mBatchLetters = new org.andengine.opengl.font.Letter[this.mCharactersMaximum];
+		}
 
 		for(int row = 0; row < lines.size() && letters < this.mCharactersMaximum; row++) {
 			final CharSequence line = lines.get(row);
@@ -349,27 +365,66 @@ public class Text extends RectangularShape {
 					this.mPageRunVertexCounts[this.mPageRunCount] = Text.VERTICES_PER_LETTER;
 					this.mPageRunCount++;
 				}
+				if(recordLetters) {
+					this.mBatchLetters[letters] = letter;
+				}
 				letters++;
 			}
 		}
+		if(recordLetters) {
+			this.mBatchLetterCount = letters;
+		}
+	}
+
+	/**
+	 * @return true if this text is drawn through the quad batch: glyphs from the shared atlas, the default
+	 * shader and the engine's own vertex buffer.
+	 */
+	protected boolean isBatchable() {
+		return TextBatching.canBatch(this);
+	}
+
+	/**
+	 * Adds the first <code>pCharacters</code> letters to the quad batch.
+	 */
+	protected void drawBatched(final GLState pGLState, final int pCharacters) {
+		TextBatching.add(this, pGLState, this.mBatchLetters, Math.min(pCharacters, this.mBatchLetterCount));
 	}
 
 	@Override
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
+		this.mDrawBatched = this.isBatchable();
+		if(this.mDrawBatched) {
+			return;
+		}
+		// Pending batched quads are drawn before this text, so the order stays the draw order.
+		QuadBatcher.flush();
+
 		super.preDraw(pGLState, pCamera);
 
-		this.mFont.getTexture().bind(pGLState);
+		final org.andengine.opengl.texture.ITexture texture = this.mFont.getTexture();
+		if(texture != null) {
+			texture.bind(pGLState);
+		}
 
 		this.mTextVertexBufferObject.bind(pGLState, this.mShaderProgram);
 	}
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			this.drawBatched(pGLState, this.mCharactersToDraw);
+			return;
+		}
 		final int[] runs = this.mPageRunVertexCounts;
 		final org.andengine.opengl.texture.ITexture[] runTextures = this.mPageRunTextures;
 
 		if(this.mPageRunCount <= 1) {
-			this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertexCountToDraw);
+			// Glyph atlas letters have no page texture; drawing them here would sample whatever is bound.
+			final org.andengine.opengl.texture.ITexture texture = this.mPageRunCount == 1 ? runTextures[0] : this.mFont.getTexture();
+			if(texture != null) {
+				this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mVertexCountToDraw);
+			}
 			return;
 		}
 
@@ -377,14 +432,19 @@ public class Text extends RectangularShape {
 		int offset = 0;
 		for(int i = 0; i < this.mPageRunCount && offset < this.mVertexCountToDraw; i++) {
 			final int count = Math.min(runs[i], this.mVertexCountToDraw - offset);
-			runTextures[i].bind(pGLState);
-			this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, offset, count);
+			if(runTextures[i] != null) {
+				runTextures[i].bind(pGLState);
+				this.mTextVertexBufferObject.draw(GLES32.GL_TRIANGLES, offset, count);
+			}
 			offset += runs[i];
 		}
 	}
 
 	@Override
 	protected void postDraw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			return;
+		}
 		this.mTextVertexBufferObject.unbind(pGLState, this.mShaderProgram);
 
 		super.postDraw(pGLState, pCamera);

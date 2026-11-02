@@ -54,7 +54,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
             text {
                 text = mod.name
                 font = ResourceManager.getInstance().getFont("smallFont")
-                buffer = sharedTextCB
             }
 
             text {
@@ -63,7 +62,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
                 text = mod.description
                 clipToBounds = true
                 alpha = 0.75f
-                buffer = sharedTextCB
             }
         }
 
@@ -109,7 +107,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
     companion object {
 
         private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
-        private val sharedTextCB = UITextCompoundBuffer(256).asSharedDynamically()
 
     }
 

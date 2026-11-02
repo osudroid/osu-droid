@@ -17,10 +17,13 @@ interface GpuBuffer : GpuResource {
     fun update(offsetBytes: Int, data: java.nio.Buffer, byteCount: Int)
 
     /**
-     * Replaces the storage with new, undefined storage of the same size, so the next [update] need
-     * not wait for draws still reading the old content. Call before rewriting the whole buffer.
+     * Gives the buffer new storage holding exactly the first [byteCount] bytes of [data] (read from
+     * its current position). Draws already issued keep reading the old storage, so this never waits
+     * for them, unlike an [update] of a buffer that queued draws still use. For data rewritten for
+     * every draw. Afterwards the storage is exactly [byteCount] bytes, so a later [update] must stay
+     * within it; stream buffers are meant to be only replaced.
      *
      * @throws IllegalStateException unless the buffer is [BufferUsage.Stream].
      */
-    fun orphan()
+    fun replace(data: java.nio.Buffer, byteCount: Int)
 }

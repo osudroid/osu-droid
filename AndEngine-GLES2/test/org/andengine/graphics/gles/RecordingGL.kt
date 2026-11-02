@@ -15,6 +15,12 @@ class RecordingGL : GL32 {
     val bufferDataBytes: MutableList<ByteArray> = ArrayList()
     /** The bytes of every [glBufferSubData] upload from a ByteBuffer, in call order. */
     val bufferSubDataBytes: MutableList<ByteArray> = ArrayList()
+
+    /** The bytes of every [glTexSubImage3D] upload, in call order. */
+    val texSubImage3DBytes: MutableList<ByteArray> = ArrayList()
+
+    /** Data written to the array buffer, by glBufferData or glBufferSubData, in order. */
+    val vertexUploads: MutableList<ByteArray> = ArrayList()
     /** The 16 values of every [glUniformMatrix4fv] call, in call order. */
     val uniformMatrices: MutableList<FloatArray> = ArrayList()
     private var nextId = 1
@@ -239,6 +245,12 @@ class RecordingGL : GL32 {
 
     override fun glTexSubImage3D(target: Int, level: Int, xoffset: Int, yoffset: Int, zoffset: Int, width: Int, height: Int, depth: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
         calls += "glTexSubImage3D($target,$level,$xoffset,$yoffset,$zoffset,$width,$height,$depth,$format,$type,buf)"
+        if (pixels is java.nio.ByteBuffer) {
+            val copy = pixels.duplicate()
+            val bytes = ByteArray(copy.remaining())
+            copy.get(bytes)
+            texSubImage3DBytes += bytes
+        }
     }
 
     override fun glTexParameteri(target: Int, pname: Int, param: Int) {
@@ -256,6 +268,7 @@ class RecordingGL : GL32 {
             val bytes = ByteArray(minOf(size, copy.remaining()))
             copy.get(bytes)
             bufferDataBytes += bytes
+            if (target == 34962) vertexUploads += bytes
         }
     }
 
@@ -266,6 +279,7 @@ class RecordingGL : GL32 {
             val bytes = ByteArray(minOf(size, copy.remaining()))
             copy.get(bytes)
             bufferSubDataBytes += bytes
+            if (target == 34962) vertexUploads += bytes
         }
     }
 

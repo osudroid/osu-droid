@@ -28,7 +28,7 @@ class UITextureTextBatchingTest {
 
     private val glCalls = ArrayList<String>()
 
-    /** The bytes of every vertex upload (glBufferSubData on the array buffer), in order. */
+    /** The bytes of every vertex upload (glBufferData or glBufferSubData on the array buffer), in order. */
     private val vertexUploads = ArrayList<ByteArray>()
 
     private var nextId = 1
@@ -58,6 +58,13 @@ class UITextureTextBatchingTest {
             "glGenBuffers", "glGenTextures", "glGenVertexArrays", "glGenSamplers", "glGenFramebuffers" -> {
                 val ids = args!![1] as IntArray
                 for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
+            }
+            "glBufferData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
+                val data = (args[2] as ByteBuffer).duplicate()
+                data.position(0)
+                val bytes = ByteArray(args[1] as Int)
+                data.get(bytes)
+                vertexUploads += bytes
             }
             "glBufferSubData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER) {
                 val data = (args[3] as ByteBuffer).duplicate()
