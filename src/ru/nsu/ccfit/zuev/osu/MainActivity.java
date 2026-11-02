@@ -81,7 +81,7 @@ import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.graphics.text.FontManager;
-import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.graphics.view.RenderSurfaceView;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.ui.activity.BaseGameActivity;
@@ -501,7 +501,6 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine, this);
 

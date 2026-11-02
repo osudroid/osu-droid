@@ -16,8 +16,8 @@ import org.andengine.input.sensor.orientation.IOrientationListener;
 import org.andengine.input.sensor.orientation.OrientationSensorOptions;
 import org.andengine.graphics.text.FontManager;
 import org.andengine.opengl.texture.TextureManager;
-import org.andengine.opengl.view.IRendererListener;
-import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.graphics.view.IRendererListener;
+import org.andengine.graphics.view.RenderSurfaceView;
 import org.andengine.ui.IGameInterface;
 import org.andengine.util.ActivityUtils;
 import org.andengine.util.Constants;
@@ -96,7 +96,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		}
 
 		/* Resources of a new GL context are restored by GlesBackend.onContextCreated (called from
-		 * EngineRenderer before this listener), so this listener has nothing to reload. */
+		 * GlesEngineRenderer before this listener), so this listener has nothing to reload. */
 		if(this.mGameCreated) {
 			if(this.mGamePaused) {
 				this.onResumeGame();

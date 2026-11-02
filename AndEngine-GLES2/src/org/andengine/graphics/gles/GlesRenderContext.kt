@@ -58,7 +58,7 @@ class GlesRenderContext private constructor() : RenderContext {
         if (target == null) {
             check(GlesBackend.surfaceWidth > 0 && GlesBackend.surfaceHeight > 0) {
                 "beginPass on the screen before the surface size is known " +
-                    "(${GlesBackend.surfaceWidth}x${GlesBackend.surfaceHeight}); EngineRenderer.onSurfaceChanged sets it"
+                    "(${GlesBackend.surfaceWidth}x${GlesBackend.surfaceHeight}); GlesEngineRenderer.onSurfaceChanged sets it"
             }
             state.bindFramebuffer(0)
             state.viewport(0, 0, GlesBackend.surfaceWidth, GlesBackend.surfaceHeight)

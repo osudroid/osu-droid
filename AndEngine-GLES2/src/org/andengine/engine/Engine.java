@@ -100,6 +100,18 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private final EngineLock mEngineLock;
 
+	/**
+	 * Whether the update is released once the frame was swapped instead of right after drawing.
+	 * Read once per frame.
+	 */
+	private volatile boolean mReleaseUpdateAfterSwap;
+	/**
+	 * Whether the last drawn frame still owes the update its release. Only accessed on the render thread,
+	 * which calls both {@link #onDrawFrame(DrawContext)} and {@link #onFrameSwapped()}; the release itself
+	 * happens under {@link #mEngineLock}.
+	 */
+	private boolean mUpdateReleasePending;
+
 	private final UpdateThread mUpdateThread;
 	private final RunnableHandler mUpdateThreadRunnableHandler = new RunnableHandler();
 
@@ -632,6 +644,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		engineLock.lock();
 		try {
 			engineLock.waitUntilCanDraw();
+			this.mUpdateReleasePending = false;
+			final boolean releaseAfterSwap = this.mReleaseUpdateAfterSwap;
 			RenderStats.beginDraw();
 
 			this.mIsLagging = false;
@@ -643,10 +657,45 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			QuadBatcher.flushFrame();
 			RenderStats.endDraw();
 
+			if(releaseAfterSwap) {
+				this.mUpdateReleasePending = true;
+			} else {
+				engineLock.notifyCanUpdate();
+			}
+		} finally {
+			engineLock.unlock();
+		}
+	}
+
+	/**
+	 * Tells the {@link Engine} that the frame it just drew was swapped. Releases the update if
+	 * {@link #onDrawFrame(DrawContext)} deferred it. A frame whose swap is never reported keeps the update
+	 * parked until the next drawn frame. Must be called on the thread that calls
+	 * {@link #onDrawFrame(DrawContext)}.
+	 */
+	public void onFrameSwapped() {
+		if(!this.mUpdateReleasePending) {
+			return;
+		}
+
+		final EngineLock engineLock = this.mEngineLock;
+
+		engineLock.lock();
+		try {
+			this.mUpdateReleasePending = false;
 			engineLock.notifyCanUpdate();
 		} finally {
 			engineLock.unlock();
 		}
+	}
+
+	/**
+	 * With <code>true</code> the update only runs after {@link #onFrameSwapped()}, so it cannot race the
+	 * buffer swap. The value is read once at the start of each frame. A frame whose swap is never reported
+	 * keeps the update parked until the next drawn frame.
+	 */
+	public void setReleaseUpdateAfterSwap(final boolean pReleaseUpdateAfterSwap) {
+		this.mReleaseUpdateAfterSwap = pReleaseUpdateAfterSwap;
 	}
 
 	protected void onDrawScene(final DrawContext pDrawContext, final Camera pCamera) {

@@ -1,4 +1,4 @@
-package org.andengine.opengl.view;
+package org.andengine.graphics.view;
 
 import org.andengine.graphics.DrawContext;
 

@@ -12,7 +12,7 @@ import android.util.Log
  * `glGetDebugMessageLog` overloads, but some of their JNI stubs only throw
  * `UnsupportedOperationException("not yet implemented")` (seen for the callback and the `byte[]`
  * overload on Android 10 and 14). [install] probes them in order; with a polling path, [poll]
- * (called once per frame by `EngineRenderer`) drains the context's debug message log. When no path
+ * (called once per frame by `GlesEngineRenderer`) drains the context's debug message log. When no path
  * works but [GlesDebugOptions.debugOutput] is set, [poll] falls back to `glGetError` instead and
  * logs each distinct error code as a warning, at most once per [ERROR_LOG_INTERVAL_MS] per code.
  *

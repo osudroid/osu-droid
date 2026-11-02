@@ -41,7 +41,7 @@ object GlesBackend {
     @JvmStatic
     val registry = GlesResourceRegistry()
 
-    /** Size of the screen surface in pixels, set by `EngineRenderer.onSurfaceChanged`. */
+    /** Size of the screen surface in pixels, set by `GlesEngineRenderer.onSurfaceChanged`. */
     @JvmField
     var surfaceWidth = 0
 
