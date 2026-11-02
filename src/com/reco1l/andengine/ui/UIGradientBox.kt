@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.buffered.Buffer
@@ -56,7 +57,7 @@ class UIGradientBox(
         }
 
         // Texture coordinates are unused, keep them disabled.
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     /**
@@ -109,18 +110,18 @@ class UIGradientBox(
             bindAndUpload()
 
             // Position attribute: 2 floats, stride=24, byte-offset 0
-            GLES32.glVertexAttribPointer(
+            GlesBackend.state.vertexAttribPointer(
                 ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
                 2, GLES32.GL_FLOAT, false, STRIDE_BYTES, 0
             )
-            GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
 
             // Color attribute: 4 floats, stride=24, byte-offset 8 (skip x,y)
-            GLES32.glVertexAttribPointer(
+            GlesBackend.state.vertexAttribPointer(
                 ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION,
                 4, GLES32.GL_FLOAT, false, STRIDE_BYTES, 8
             )
-            GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         }
 
         override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) { /* using beginDraw */ }

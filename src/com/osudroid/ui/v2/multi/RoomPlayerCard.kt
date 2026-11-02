@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.multi
 
-import android.opengl.GLES32
+import org.andengine.graphics.gles.GlesBackend
 import com.edlplan.ui.fragment.WebViewFragment
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
@@ -171,7 +171,7 @@ class RoomPlayerCard : UILinearContainer() {
                     }
 
                     override fun beginDraw(pGLState: GLState) {
-                        GLES32.glDepthMask(true)
+                        GlesBackend.state.depthMask(true)
                         super.beginDraw(pGLState)
                     }
                 }
@@ -193,7 +193,7 @@ class RoomPlayerCard : UILinearContainer() {
                     }
 
                     override fun beginDraw(pGLState: GLState) {
-                        GLES32.glDepthMask(true)
+                        GlesBackend.state.depthMask(true)
                         super.beginDraw(pGLState)
                     }
                 }

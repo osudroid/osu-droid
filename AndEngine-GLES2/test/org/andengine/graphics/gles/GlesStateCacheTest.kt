@@ -1,0 +1,233 @@
+package org.andengine.graphics.gles
+
+import android.opengl.GLES20
+import android.opengl.GLES30
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+class GlesStateCacheTest {
+
+    private val oes = 0x8D65
+    private lateinit var gl: RecordingGL
+    private lateinit var cache: GlesStateCache
+
+    @Before
+    fun setUp() {
+        gl = RecordingGL()
+        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
+        cache = GlesStateCache(gl)
+        gl.calls.clear()
+    }
+
+    private fun count(call: String) = gl.calls.count { it == call }
+
+    @Test
+    fun bindTexture_sameIdTwice_oneCall() {
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        assertEquals(1, count("glBindTexture(3553,5)"))
+    }
+
+    @Test
+    fun bindTexture_targetsTrackedSeparately() {
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        cache.bindTexture(oes, 5)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        assertEquals(1, count("glBindTexture(3553,5)"))
+        assertEquals(1, count("glBindTexture($oes,5)"))
+        assertEquals(2, gl.calls.count { it.startsWith("glBindTexture") })
+    }
+
+    @Test
+    fun bindTexture_perUnit() {
+        cache.activeTexture(0)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        cache.activeTexture(1)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        assertEquals(2, count("glBindTexture(3553,5)"))
+        assertEquals(2, gl.calls.count { it.startsWith("glActiveTexture") })
+    }
+
+    @Test
+    fun externalRebind_forcesCorrectNextBind() {
+        cache.activeTexture(0)
+        cache.bindTexture(oes, 7)
+        cache.noteTextureBound(oes, 8)
+        cache.bindTexture(oes, 7)
+        assertEquals(2, count("glBindTexture($oes,7)"))
+    }
+
+    @Test
+    fun externalRebind_sameIdAsNoted_skipsBind() {
+        cache.activeTexture(0)
+        cache.noteTextureBound(oes, 8)
+        cache.bindTexture(oes, 8)
+        assertEquals(0, count("glBindTexture($oes,8)"))
+    }
+
+    @Test
+    fun externalRebind_onlyAffectsActiveUnit() {
+        cache.activeTexture(1)
+        cache.bindTexture(oes, 7)
+        cache.activeTexture(0)
+        cache.noteTextureBound(oes, 8)
+        cache.activeTexture(1)
+        cache.bindTexture(oes, 7)
+        assertEquals(1, count("glBindTexture($oes,7)"))
+    }
+
+    @Test
+    fun externalRebind_unknownUnit_nextBindReachesGl() {
+        cache.invalidate()
+        cache.noteTextureBound(oes, 7)
+        cache.bindTexture(oes, 7)
+        assertEquals(1, count("glBindTexture($oes,7)"))
+    }
+
+    @Test
+    fun invalidate_forcesNextCall() {
+        cache.useProgram(3)
+        cache.invalidate()
+        cache.useProgram(3)
+        assertEquals(2, count("glUseProgram(3)"))
+    }
+
+    @Test
+    fun blendFunc_equalsSeparate() {
+        cache.blendFunc(1, 771)
+        cache.blendFuncSeparate(1, 771, 1, 771)
+        assertEquals(1, gl.calls.count { it.startsWith("glBlendFunc") })
+    }
+
+    @Test
+    fun bindVertexArray_forgetsElementBuffer() {
+        cache.bindElementBuffer(4)
+        cache.bindVertexArray(2)
+        cache.bindElementBuffer(4)
+        assertEquals(2, count("glBindBuffer(34963,4)"))
+    }
+
+    @Test
+    fun vertexAttribArray_mask() {
+        cache.enableVertexAttribArray(0)
+        cache.enableVertexAttribArray(0)
+        cache.disableVertexAttribArray(0)
+        cache.disableVertexAttribArray(0)
+        assertEquals(1, count("glEnableVertexAttribArray(0)"))
+        assertEquals(1, count("glDisableVertexAttribArray(0)"))
+    }
+
+    @Test
+    fun onTextureDeleted_forgetsBinding() {
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 7)
+        cache.onTextureDeleted(7)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 7)
+        assertEquals(2, count("glBindTexture(3553,7)"))
+    }
+
+    @Test
+    fun enableFlags_dedupAndGetters() {
+        cache.setBlendEnabled(true)
+        cache.setBlendEnabled(true)
+        assertEquals(1, count("glEnable(${GLES20.GL_BLEND})"))
+        assertEquals(true, cache.isBlendEnabled)
+        cache.setBlendEnabled(false)
+        assertEquals(1, count("glDisable(${GLES20.GL_BLEND})"))
+    }
+
+    @Test
+    fun bindFramebuffer_dedup() {
+        cache.bindFramebuffer(2)
+        cache.bindFramebuffer(2)
+        assertEquals(1, count("glBindFramebuffer(${GLES30.GL_FRAMEBUFFER},2)"))
+    }
+
+    @Test
+    fun bindVertexArray_forgetsAttribEnables() {
+        cache.enableVertexAttribArray(0)
+        cache.bindVertexArray(2)
+        cache.enableVertexAttribArray(0)
+        assertEquals(2, count("glEnableVertexAttribArray(0)"))
+    }
+
+    @Test
+    fun onBufferDeleted_forgetsBinding() {
+        cache.bindArrayBuffer(3)
+        cache.onBufferDeleted(3)
+        cache.bindArrayBuffer(3)
+        assertEquals(2, count("glBindBuffer(34962,3)"))
+    }
+
+    @Test
+    fun onProgramDeleted_forgetsBinding() {
+        cache.useProgram(3)
+        cache.onProgramDeleted(3)
+        cache.useProgram(3)
+        assertEquals(2, count("glUseProgram(3)"))
+    }
+
+    @Test
+    fun onFramebufferDeleted_forgetsBinding() {
+        cache.bindFramebuffer(3)
+        cache.onFramebufferDeleted(3)
+        cache.bindFramebuffer(3)
+        assertEquals(2, gl.calls.count { it.startsWith("glBindFramebuffer") })
+    }
+
+    @Test
+    fun onVertexArrayDeleted_forgetsBinding() {
+        cache.bindVertexArray(3)
+        cache.onVertexArrayDeleted(3)
+        cache.bindVertexArray(3)
+        assertEquals(2, count("glBindVertexArray(3)"))
+    }
+
+    @Test
+    fun vertexAttribArray_outOfRange_passesThrough() {
+        cache.enableVertexAttribArray(40)
+        cache.enableVertexAttribArray(40)
+        assertEquals(2, count("glEnableVertexAttribArray(40)"))
+    }
+
+    @Test
+    fun onVertexArrayDeleted_forgetsVaoScopedState() {
+        cache.bindVertexArray(3)
+        cache.bindElementBuffer(4)
+        cache.onVertexArrayDeleted(3)
+        cache.bindElementBuffer(4)
+        assertEquals(2, count("glBindBuffer(34963,4)"))
+    }
+
+    @Test
+    fun onRenderbufferDeleted_forgetsBinding() {
+        cache.bindRenderbuffer(3)
+        cache.onRenderbufferDeleted(3)
+        cache.bindRenderbuffer(3)
+        assertEquals(2, gl.calls.count { it.startsWith("glBindRenderbuffer") })
+    }
+
+    @Test
+    fun bindSampler_cachedPerUnit_forgottenOnDelete() {
+        cache.bindSampler(1, 4)
+        cache.bindSampler(1, 4)
+        cache.bindSampler(2, 4)
+        assertEquals(2, gl.calls.count { it.startsWith("glBindSampler") })
+        cache.onSamplerDeleted(4)
+        cache.bindSampler(1, 4)
+        assertEquals(3, gl.calls.count { it.startsWith("glBindSampler") })
+    }
+
+    @Test
+    fun bindUniformBufferBase_cachedPerIndex_forgottenOnBufferDelete() {
+        cache.bindUniformBufferBase(0, 6)
+        cache.bindUniformBufferBase(0, 6)
+        cache.bindUniformBuffer(6)
+        assertEquals(1, gl.calls.count { it.startsWith("glBindBufferBase") })
+        // glBindBufferBase also set the generic binding.
+        assertEquals(0, gl.calls.count { it.startsWith("glBindBuffer(") })
+        cache.onBufferDeleted(6)
+        cache.bindUniformBufferBase(0, 6)
+        assertEquals(2, gl.calls.count { it.startsWith("glBindBufferBase") })
+    }
+}

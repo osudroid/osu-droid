@@ -22,6 +22,9 @@ android {
             // but is no longer declared as a jniLibs source so the .so files
             // are not packaged into the APK.
         }
+        test {
+            java.srcDirs = ['test']
+        }
     }
 
     buildTypes {
@@ -49,10 +52,19 @@ android {
         buildConfig = true
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
 }
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.11.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
 }

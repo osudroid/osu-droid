@@ -21,7 +21,7 @@ public class PositionColorTextureCoordinatesShaderProgram extends ShaderProgram 
 	private static PositionColorTextureCoordinatesShaderProgram INSTANCE;
 
 	public static final String VERTEXSHADER =
-			"#version 320 es\n" +
+			"#version 300 es\n" +
 			"uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
 			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
 			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_COLOR + ";\n" +
@@ -35,7 +35,7 @@ public class PositionColorTextureCoordinatesShaderProgram extends ShaderProgram 
 			"}";
 
 	public static final String FRAGMENTSHADER =
-			"#version 320 es\n" +
+			"#version 300 es\n" +
 			"precision lowp float;\n" +
 			"uniform sampler2D " + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ";\n" +
 			"in lowp vec4 " + ShaderProgramConstants.VARYING_COLOR + ";\n" +

@@ -1,5 +1,6 @@
 package com.osudroid.storyboard.renderer
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.osudroid.storyboard.playback.PlayableSprite
@@ -286,29 +287,29 @@ class StoryboardBatch {
 
         // Unbind any VBO so glVertexAttribPointer reads from the client-side buffer.
         glState.bindArrayBuffer(0)
-        GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, 0)
+        GlesBackend.state.bindElementBuffer(0)
 
         vertexBuffer.position(0)
         vertexBuffer.put(vertices, 0, offset)
         RenderStats.upload(offset * 4)
 
         vertexBuffer.position(0)
-        GLES32.glEnableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_POSITION_LOCATION)
-        GLES32.glVertexAttribPointer(
+        GlesBackend.state.enableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_POSITION_LOCATION)
+        GlesBackend.state.vertexAttribPointer(
             StoryboardShaderProgram.ATTRIBUTE_POSITION_LOCATION, 2,
             GLES32.GL_FLOAT, false, VERTEX_STRIDE_BYTES, vertexBuffer
         )
 
         vertexBuffer.position(2)
-        GLES32.glEnableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_TEXCOORD_LOCATION)
-        GLES32.glVertexAttribPointer(
+        GlesBackend.state.enableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_TEXCOORD_LOCATION)
+        GlesBackend.state.vertexAttribPointer(
             StoryboardShaderProgram.ATTRIBUTE_TEXCOORD_LOCATION, 2,
             GLES32.GL_FLOAT, false, VERTEX_STRIDE_BYTES, vertexBuffer
         )
 
         vertexBuffer.position(4)
-        GLES32.glEnableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glVertexAttribPointer(
+        GlesBackend.state.enableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.vertexAttribPointer(
             StoryboardShaderProgram.ATTRIBUTE_COLOR_LOCATION, 4,
             GLES32.GL_FLOAT, false, VERTEX_STRIDE_BYTES, vertexBuffer
         )
@@ -324,10 +325,10 @@ class StoryboardBatch {
 
         // Restore the vertex attribute arrays AndEngine expects to be enabled: slot 0 = position,
         // slot 1 = color. The storyboard-specific color slot (2) must be disabled.
-        GLES32.glDisableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_TEXCOORD_LOCATION)
-        GLES32.glDisableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_TEXCOORD_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(StoryboardShaderProgram.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         offset = 0
         RenderStats.addTime(StoryboardRenderStats.TIME_FLUSH, flushStart)

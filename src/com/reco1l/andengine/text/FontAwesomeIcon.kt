@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.*
@@ -149,7 +150,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
             )
         }
 
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
     }
 
     override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {

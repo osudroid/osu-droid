@@ -53,7 +53,7 @@ class StoryboardShaderProgram private constructor() : ShaderProgram(VERTEX_SHADE
         const val ATTRIBUTE_TEXCOORD_LOCATION = 1
         const val ATTRIBUTE_COLOR_LOCATION = 2
 
-        private const val VERTEX_SHADER = """#version 320 es
+        private const val VERTEX_SHADER = """#version 300 es
 uniform mat4 u_mvpMatrix;
 in vec2 a_position;
 in vec2 a_texCoord;
@@ -67,7 +67,7 @@ void main() {
 }
 """
 
-        private const val FRAGMENT_SHADER = """#version 320 es
+        private const val FRAGMENT_SHADER = """#version 300 es
 precision mediump float;
 uniform sampler2D s_texture;
 in vec2 v_texCoord;

@@ -55,7 +55,7 @@ class CatJamCircleShader private constructor() : ShaderProgram(VERTEX_SHADER, FR
         val INSTANCE: CatJamCircleShader by lazy { CatJamCircleShader() }
 
         private val VERTEX_SHADER = """
-            #version 320 es
+            #version 300 es
             uniform mat4 u_modelViewProjectionMatrix;
             in vec4 a_position;
             in vec2 a_textureCoordinates;
@@ -72,7 +72,7 @@ class CatJamCircleShader private constructor() : ShaderProgram(VERTEX_SHADER, FR
         // u_radius: circle radius in quad-UV space (default 0.5 = fills whole quad).
         // A small smooth edge avoids aliasing at the circle rim.
         private val FRAGMENT_SHADER = """
-            #version 320 es
+            #version 300 es
             precision mediump float;
             uniform sampler2D u_texture_0;
             uniform vec4 u_color;

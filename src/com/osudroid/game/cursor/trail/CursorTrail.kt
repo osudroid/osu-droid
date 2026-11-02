@@ -1,5 +1,6 @@
 package com.osudroid.game.cursor.trail
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.component.UIComponent
@@ -185,17 +186,17 @@ class CursorTrail(
         GLES32.glUniformMatrix4fv(shader.uniformMVPMatrixLocation, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
         GLES32.glUniform1i(shader.uniformTexture0Location, 0)
 
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.bindArrayBuffer(0)
 
         textureRegion.texture.bind(pGLState)
 
-        GLES32.glEnable(GLES32.GL_BLEND)
+        GlesBackend.state.setBlendEnabled(true)
         // "Attached" (has cursormiddle) trails glow additively "disjoint" ones use normal alpha,
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, if (disjointTrail) GLES32.GL_ONE_MINUS_SRC_ALPHA else GLES32.GL_ONE)
+        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, if (disjointTrail) GLES32.GL_ONE_MINUS_SRC_ALPHA else GLES32.GL_ONE)
 
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         for (i in 0 until MAX_PARTS) {
             val spawnMs = partSpawnMs[i]
@@ -224,9 +225,9 @@ class CursorTrail(
             putVertex(3, halfW + offsetX, halfH + offsetY, cx, cy, sin, cos, u2, v2)
 
             vertexBuffer.position(0)
-            GLES32.glVertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
+            GlesBackend.state.vertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
             vertexBuffer.position(2)
-            GLES32.glVertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
+            GlesBackend.state.vertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
 
             GLES32.glUniform4f(shader.uniformColorLocation, drawRed, drawGreen, drawBlue, alpha)
 
@@ -235,8 +236,8 @@ class CursorTrail(
         }
 
         // Restore state expected by other renderers.
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
     }
 
     private fun putVertex(index: Int, dx: Float, dy: Float, cx: Float, cy: Float, sin: Float, cos: Float, texU: Float, texV: Float) {

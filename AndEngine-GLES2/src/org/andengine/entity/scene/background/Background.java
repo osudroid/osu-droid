@@ -1,5 +1,6 @@
 package org.andengine.entity.scene.background;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.engine.camera.Camera;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.color.Color;
@@ -132,8 +133,8 @@ public class Background implements IBackground {
 	@Override
 	public void onDraw(final GLState pGLState, final Camera pCamera) {
 		if(this.mColorEnabled) {
-			GLES32.glClearColor(this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
-			GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT); // TODO Does this cause problems when multisampling?
+			GlesBackend.getState().clearColor(this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
+			GlesBackend.getState().clear(GLES32.GL_COLOR_BUFFER_BIT); // TODO Does this cause problems when multisampling?
 		}
 	}
 

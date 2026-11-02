@@ -1,5 +1,6 @@
 package org.andengine.engine.splitscreen;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
@@ -71,8 +72,8 @@ public class SingleSceneSplitScreenEngine extends Engine {
 	
 			/* First Screen. With first camera, on the left half of the screens width. */
 			{
-				GLES32.glScissor(0, 0, surfaceWidthHalf, surfaceHeight);
-				GLES32.glViewport(0, 0, surfaceWidthHalf, surfaceHeight);
+				GlesBackend.getState().scissor(0, 0, surfaceWidthHalf, surfaceHeight);
+				GlesBackend.getState().viewport(0, 0, surfaceWidthHalf, surfaceHeight);
 	
 				super.mScene.onDraw(pGLState, pFirstCamera);
 				pFirstCamera.onDrawHUD(pGLState);
@@ -80,8 +81,8 @@ public class SingleSceneSplitScreenEngine extends Engine {
 	
 			/* Second Screen. With second camera, on the right half of the screens width. */
 			{
-				GLES32.glScissor(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
-				GLES32.glViewport(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
+				GlesBackend.getState().scissor(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
+				GlesBackend.getState().viewport(surfaceWidthHalf, 0, surfaceWidthHalf, surfaceHeight);
 	
 				super.mScene.onDraw(pGLState, secondCamera);
 				secondCamera.onDrawHUD(pGLState);

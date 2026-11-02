@@ -59,7 +59,6 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	private boolean mGamePaused;
 	private boolean mGameCreated;
 	private boolean mCreateGameCalled;
-	private boolean mOnReloadResourcesScheduled;
 
 	// ===========================================================
 	// Constructors
@@ -98,19 +97,15 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 			Debug.d(this.getClass().getSimpleName() + ".onSurfaceCreated" + " @(Thread: '" + Thread.currentThread().getName() + "')");
 		}
 
+		/* Resources of a new GL context are restored by GlesBackend.onContextCreated (called from
+		 * EngineRenderer before this listener), so there is no onReloadResources() here. */
 		if(this.mGameCreated) {
-			this.onReloadResources();
-
-			if(this.mGamePaused && this.mGameCreated) {
+			if(this.mGamePaused) {
 				this.onResumeGame();
 			}
-		} else {
-			if(this.mCreateGameCalled) {
-				this.mOnReloadResourcesScheduled = true;
-			} else {
-				this.mCreateGameCalled = true;
-				this.onCreateGame();
-			}
+		} else if(!this.mCreateGameCalled) {
+			this.mCreateGameCalled = true;
+			this.onCreateGame();
 		}
 	}
 
@@ -189,18 +184,6 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	public synchronized void onGameCreated() {
 		this.mGameCreated = true;
-
-		/* Since the potential asynchronous resource creation,
-		 * the surface might already be invalid
-		 * and a resource reloading might be necessary. */
-		if(this.mOnReloadResourcesScheduled) {
-			this.mOnReloadResourcesScheduled = false;
-			try {
-				this.onReloadResources();
-			} catch(final Throwable pThrowable) {
-				Debug.e(this.getClass().getSimpleName() + ".onReloadResources failed." + " @(Thread: '" + Thread.currentThread().getName() + "')", pThrowable);
-			}
-		}
 	}
 
 	@Override

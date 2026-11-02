@@ -1,5 +1,6 @@
 package org.andengine.opengl.shader;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.util.GLState;
@@ -21,12 +22,13 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 	private static PositionTextureCoordinatesPositionInterpolationTextureSelectShaderProgram INSTANCE;
 
 	public static final String VERTEXSHADER =
+			"#version 300 es\n" +
 			"uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
 			"uniform float " + ShaderProgramConstants.UNIFORM_POSITION_INTERPOLATION_MIX_0 + ";\n" +
-			"attribute vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION_0 + ";\n" +
-			"attribute vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION_1 + ";\n" +
-			"attribute vec2 " + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ";\n" +
-			"varying vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
+			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION_0 + ";\n" +
+			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION_1 + ";\n" +
+			"in vec2 " + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ";\n" +
+			"out vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
 			"void main() {\n" +
 			"	vec4 position = vec4(0, 0, 0, 1);\n" +
 			"	position.xy = mix(" + ShaderProgramConstants.ATTRIBUTE_POSITION_0 + ".xy," + ShaderProgramConstants.ATTRIBUTE_POSITION_1 + ".xy," + ShaderProgramConstants.UNIFORM_POSITION_INTERPOLATION_MIX_0 + ");\n" +
@@ -102,10 +104,10 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 
 	@Override
 	public void bind(final GLState pGLState, final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
-		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_0_LOCATION);
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_1_LOCATION);
+		GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+		GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_0_LOCATION);
+		GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_1_LOCATION);
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
@@ -116,10 +118,10 @@ public class PositionTextureCoordinatesPositionInterpolationTextureSelectShaderP
 
 	@Override
 	public void unbind(final GLState pGLState) {
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_0_LOCATION);
-		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_1_LOCATION);
+		GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+		GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_0_LOCATION);
+		GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_1_LOCATION);
 		
 		super.unbind(pGLState);
 	}

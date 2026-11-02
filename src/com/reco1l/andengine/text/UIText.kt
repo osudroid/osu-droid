@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.opengl.texture.ITexture
 import android.opengl.GLES32
@@ -181,7 +182,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         }
 
         // Disable color vertex attribute (this shader uses uniform color)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         // UV (attr 3) is already set up by TextTextureBuffer inside the CompoundBuffer.beginDraw()
     }
 

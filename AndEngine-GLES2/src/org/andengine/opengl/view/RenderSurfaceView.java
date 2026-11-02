@@ -102,6 +102,18 @@ public class RenderSurfaceView extends GLSurfaceView {
 		this.setRenderer(this.mEngineRenderer);
 	}
 
+	/**
+	 * Debug aid: destroys the EGL context and creates a new one, as the system does under memory
+	 * pressure, so that the resource restore path can be exercised on demand. UI thread only.
+	 * Only this view is paused and resumed; the engine and the activity are not.
+	 */
+	public void debugRecreateContext() {
+		this.setPreserveEGLContextOnPause(false);
+		this.onPause();
+		this.onResume();
+		this.setPreserveEGLContextOnPause(true);
+	}
+
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================

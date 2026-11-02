@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import android.os.Handler
 import android.os.Looper
@@ -83,7 +84,7 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
             )
         }
 
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // UV attribute (attribute location 3).
         uvBuffer.beginDraw(pGLState)

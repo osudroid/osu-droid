@@ -6,8 +6,9 @@ import javax.microedition.khronos.opengles.GL10;
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.RenderOptions;
 import org.andengine.graphics.debug.RenderStats;
+import org.andengine.graphics.gles.GlesBackend;
+import org.andengine.graphics.gles.GlesDebugOutput;
 import org.andengine.opengl.exception.GLESVersionUnsupportedException;
-import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.exception.ShaderProgramCompileException;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.debug.Debug;
@@ -62,29 +63,21 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceCreated(final GL10 pGL, final EGLConfig pEGLConfig) {
 		synchronized(GLState.class) {
 			final RenderOptions renderOptions = this.mEngine.getEngineOptions().getRenderOptions();
+			// New EGL context: detect capabilities, start with an empty state cache and replay the
+			// resource registry (shader programs, AndEngine managers and the app's legacy restorers).
+			// Must run before GLState.reset(), which sets its defaults through that new cache.
+			// This also happens for the very first context, so the managers reload and the engine
+			// reports one lagging frame (Engine.mIsLagging) right after startup; harmless.
+			GlesBackend.onContextCreated();
 			this.mGLState.reset(renderOptions, this.mConfigChooser, pEGLConfig);
-
-			// EGL context loss recovery: reset all shader programs so they are re-linked
-			// against the new GL context on next draw.
-			// Note: Buffer.onContextLost() (VBO ID reset) is called from
-			// MainActivity.onSurfaceCreated, which is in the app module.
-			ShaderProgram.resetAllForContextLoss();
 			RenderStats.reset();
-
-			// TODO Check if available and make available through EngineOptions-RenderOptions
-//			GLES32.glEnable(GLES32.GL_POLYGON_SMOOTH);
-//			GLES32.glHint(GLES32.GL_POLYGON_SMOOTH_HINT, GLES32.GL_NICEST);
-//			GLES32.glEnable(GLES32.GL_LINE_SMOOTH);
-//			GLES32.glHint(GLES32.GL_LINE_SMOOTH_HINT, GLES32.GL_NICEST);
-//			GLES32.glEnable(GLES32.GL_POINT_SMOOTH);
-//			GLES32.glHint(GLES32.GL_POINT_SMOOTH_HINT, GLES32.GL_NICEST);
 
 			this.mGLState.disableDepthTest();
 			// Ensure initial depth clear value is 1.0 (maximum) so that GL_LESS tests
 			// pass on first draw and per-entity ClearInfo.ClearDepthBuffer calls work correctly.
-			GLES32.glClearDepthf(1.0f);
-			GLES32.glDepthFunc(GLES32.GL_LESS);
-			GLES32.glDepthMask(true);
+			GlesBackend.getState().clearDepth(1.0f);
+			GlesBackend.getState().depthFunc(GLES32.GL_LESS);
+			GlesBackend.getState().depthMask(true);
 			this.mGLState.enableBlend();
 			this.mGLState.setDitherEnabled(renderOptions.isDithering());
 
@@ -102,7 +95,9 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(final GL10 pGL, final int pWidth, final int pHeight) {
 		this.mEngine.setSurfaceSize(pWidth, pHeight);
-		GLES32.glViewport(0, 0, pWidth, pHeight);
+		GlesBackend.surfaceWidth = pWidth;
+		GlesBackend.surfaceHeight = pHeight;
+		GlesBackend.getState().viewport(0, 0, pWidth, pHeight);
 		this.mGLState.loadProjectionGLMatrixIdentity();
 
 		if(this.mRendererListener != null) {
@@ -115,16 +110,17 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 		synchronized(GLState.class) {
 			if (this.mMultiSampling && this.mConfigChooser.isCoverageMultiSampling()) {
 				final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
-				GLES32.glClear(GL_COVERAGE_BUFFER_BIT_NV);
+				GlesBackend.getState().clear(GL_COVERAGE_BUFFER_BIT_NV);
 			}
 
 			// Clear the depth buffer at the start of every frame so leftover depth values
 			// from the previous frame (written by slider-body triangle meshes) never bleed
 			// into the current frame and cause artifacts on sprites / circles.
-			GLES32.glClear(GLES32.GL_DEPTH_BUFFER_BIT);
+			GlesBackend.getState().clear(GLES32.GL_DEPTH_BUFFER_BIT);
 
 			try {
 				this.mEngine.onDrawFrame(this.mGLState);
+				GlesDebugOutput.poll();
 			} catch (final InterruptedException e) {
 				Debug.e("GLThread interrupted!", e);
 			} catch (final ShaderProgramCompileException e) {
@@ -144,7 +140,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 		final String detected = (glslVersion != null ? glslVersion : "unknown") + (glVersion != null ? " (" + glVersion + ")" : "");
 
 		return new GLESVersionUnsupportedException(
-				"GLSL ES 3.20",
+				"GLSL ES 3.00",
 				detected,
 				Build.MANUFACTURER + " " + Build.MODEL,
 				Build.HARDWARE,

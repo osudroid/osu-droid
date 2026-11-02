@@ -1,5 +1,6 @@
 package com.osudroid.game.cursor.trail
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.reco1l.andengine.component.UIComponent
@@ -170,7 +171,7 @@ class FancyCursorTrail : UIComponent() {
         shader.bindProgram(pGLState)
 
         // Disable the texture-coord attrib array (PositionColor shader doesn't use it)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Upload the MVP matrix so the ribbon maps to screen coordinates
         GLES32.glUniformMatrix4fv(
@@ -179,26 +180,26 @@ class FancyCursorTrail : UIComponent() {
         )
 
         // Additive blending gives a nice neon glow effect
-        GLES32.glEnable(GLES32.GL_BLEND)
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE)
+        GlesBackend.state.setBlendEnabled(true)
+        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE)
 
         // Ensure no VBO is bound so GL uses our client-side buffer
-        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0)
+        GlesBackend.state.bindArrayBuffer(0)
 
         val stride = floatsPerVert * 4   // 24 bytes between consecutive vertices
 
         // Position attribute – 2 floats starting at float-offset 0
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
         buf.position(0)
-        GLES32.glVertexAttribPointer(
+        GlesBackend.state.vertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
             2, GLES32.GL_FLOAT, false, stride, buf
         )
 
         // Color attribute – 4 floats starting at float-offset 2 (byte-offset 8)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
         buf.position(2)
-        GLES32.glVertexAttribPointer(
+        GlesBackend.state.vertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION,
             4, GLES32.GL_FLOAT, false, stride, buf
         )
@@ -209,9 +210,9 @@ class FancyCursorTrail : UIComponent() {
         // Restore state expected by other renderers
 
         // Restore normal alpha blending
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
         // Re-enable the texture-coord attrib array (PositionColor shader disables it)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     // Helpers

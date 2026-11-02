@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import org.andengine.opengl.util.GLState
@@ -90,7 +91,7 @@ abstract class Buffer(
             GLES32.glGenBuffers(1, ids, 0)
             mVboId = ids[0]
         }
-        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, mVboId)
+        GlesBackend.state.bindArrayBuffer(mVboId)
         if (mDirty) {
             mFloatBuffer.position(0)
             GLES32.glBufferData(
@@ -124,9 +125,10 @@ abstract class Buffer(
         private val sAllBuffers = java.util.concurrent.CopyOnWriteArrayList<java.lang.ref.WeakReference<Buffer>>()
 
         /**
-         * Called from [EngineRenderer.onSurfaceCreated] when the EGL context has been
-         * recreated (context loss recovery). Resets every live Buffer's VBO ID to 0 so
-         * that [bindAndUpload] re-generates and re-uploads the buffer on next draw.
+         * Called by the GLES resource registry (registered in `MainActivity` via
+         * [org.andengine.graphics.gles.GlesLegacyRestorers]) on every new EGL context. Resets every
+         * live Buffer's VBO ID to 0 so that [bindAndUpload] re-generates and re-uploads the
+         * buffer on next draw.
          */
         @JvmStatic
         fun onContextLost() {

@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
 import com.osudroid.math.toRadians
@@ -19,8 +20,8 @@ abstract class VertexBuffer(
     override fun beginDraw(gl: GLState) {
         bindAndUpload()
         // Attribute 0 = position (matches standard position attribute location in shaders)
-        GLES32.glVertexAttribPointer(0, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
-        GLES32.glEnableVertexAttribArray(0)
+        GlesBackend.state.vertexAttribPointer(0, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
+        GlesBackend.state.enableVertexAttribArray(0)
     }
 
     override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {

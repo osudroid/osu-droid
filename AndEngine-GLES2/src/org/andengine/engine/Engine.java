@@ -18,6 +18,7 @@ import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
 import org.andengine.graphics.debug.RenderStats;
+import org.andengine.graphics.gles.GlesLegacyRestorers;
 import org.andengine.input.sensor.SensorDelay;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
@@ -150,6 +151,10 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		this.mTextureManager.onCreate();
 		this.mFontManager.onCreate();
 		this.mShaderProgramManager.onCreate();
+		/* The managers are reloaded by the GLES resource registry on every new context, the first
+		 * one included. That reload makes the next onDrawFrame upload everything again, so
+		 * mIsLagging is set for one frame (one fixed 16.6 ms update step); this is harmless. */
+		GlesLegacyRestorers.registerEngine(this);
 
 		/* Apply EngineOptions. */
 		this.mEngineOptions = pEngineOptions;
@@ -537,6 +542,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		this.mShaderProgramManager.onDestroy();
 	}
 
+	/**
+	 * Explicitly reloads all managed resources (e.g. after a skin change). A new GL context does
+	 * not go through here: the managers are registered via {@link GlesLegacyRestorers#registerEngine}
+	 * and reloaded by {@link org.andengine.graphics.gles.GlesBackend#onContextCreated}.
+	 */
 	public void onReloadResources() {
 		this.mVertexBufferObjectManager.onReload();
 		this.mTextureManager.onReload();

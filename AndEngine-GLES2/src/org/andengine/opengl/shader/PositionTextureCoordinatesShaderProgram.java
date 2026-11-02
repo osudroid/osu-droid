@@ -1,5 +1,6 @@
 package org.andengine.opengl.shader;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
 import org.andengine.opengl.util.GLState;
@@ -21,7 +22,7 @@ public class PositionTextureCoordinatesShaderProgram extends ShaderProgram {
 	private static PositionTextureCoordinatesShaderProgram INSTANCE;
 
 	public static final String VERTEXSHADER =
-			"#version 320 es\n" +
+			"#version 300 es\n" +
 			"uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
 			"in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
 			"in vec2 " + ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES + ";\n" +
@@ -32,7 +33,7 @@ public class PositionTextureCoordinatesShaderProgram extends ShaderProgram {
 			"}";
 
 	public static final String FRAGMENTSHADER =
-			"#version 320 es\n" +
+			"#version 300 es\n" +
 			"precision lowp float;\n" +
 			"uniform sampler2D " + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ";\n" +
 			"in mediump vec2 " + ShaderProgramConstants.VARYING_TEXTURECOORDINATES + ";\n" +
@@ -94,7 +95,7 @@ public class PositionTextureCoordinatesShaderProgram extends ShaderProgram {
 
 	@Override
 	public void bind(final GLState pGLState, final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-		GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
 
 		super.bind(pGLState, pVertexBufferObjectAttributes);
 
@@ -104,7 +105,7 @@ public class PositionTextureCoordinatesShaderProgram extends ShaderProgram {
 
 	@Override
 	public void unbind(final GLState pGLState) {
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
 		
 		super.unbind(pGLState);
 	}

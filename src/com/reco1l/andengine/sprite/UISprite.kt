@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import org.andengine.graphics.gles.GlesBackend
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
@@ -177,7 +178,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         }
 
         // Disable color vertex attribute (this shader uses uniform color)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Set up UV coordinates at attribute 3
         uvBuffer.beginDraw(pGLState)

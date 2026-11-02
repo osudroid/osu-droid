@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.text.UITextureText.*
@@ -189,14 +190,13 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
-        // Reset GL buffer binding so legacy VBO binding is not tricked by a stale
-        // cache entry left over from Buffer.bindAndUpload(), which calls glBindBuffer
-        // directly without going through GLState.  Without this, the first legacy sprite
-        // drawn after any UITextureText will silently skip its own bind call and render
-        // from the wrong buffer (causing corrupted geometry / wrong draw order).
+        // Leave no array buffer bound after this draw. Buffer.bindAndUpload() binds through
+        // GlesBackend.state, the same cache GLState forwards to, so there is no stale cache entry
+        // to repair any more and this reset is redundant; it is kept until Step 3 replaces the
+        // buffer handling, so the binding left behind stays the same as before.
         pGLState.bindArrayBuffer(0)
     }
 
@@ -226,7 +226,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         }
 
         // Disable per-vertex color array
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Set up full-range UV VBO at attribute 3
         fullUVBuffer.beginDraw(pGLState)

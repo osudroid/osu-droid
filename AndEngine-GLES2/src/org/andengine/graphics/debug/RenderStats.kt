@@ -2,6 +2,7 @@ package org.andengine.graphics.debug
 
 import android.os.SystemClock
 import android.util.Log
+import org.andengine.graphics.gles.GlesGraphicsDevice
 
 /**
  * Lightweight per-frame render counters, used to measure the GL layer before and after
@@ -55,7 +56,7 @@ object RenderStats {
     private val timerNanos = LongArray(TIMER_COUNT)
     private val counters = IntArray(COUNTER_COUNT)
 
-    private val gpuTimer = GpuFrameTimer()
+    private val gpuTimer = GpuFrameTimer(GlesGraphicsDevice.instance)
 
     // Current window.
     private var windowStartMs = 0L

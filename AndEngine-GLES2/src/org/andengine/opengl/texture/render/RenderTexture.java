@@ -1,5 +1,7 @@
 package org.andengine.opengl.texture.render;
 
+import org.andengine.graphics.gles.GlesBackend;
+import org.andengine.graphics.gles.GlesStateCache;
 import java.io.IOException;
 import java.nio.IntBuffer;
 
@@ -214,11 +216,11 @@ public class RenderTexture extends Texture {
 		/* Save clear color. */
 		GLES32.glGetFloatv(GLES32.GL_COLOR_CLEAR_VALUE, RenderTexture.CLEARCOLOR_CONTAINER, 0);
 
-		GLES32.glClearColor(pRed, pGreen, pBlue, pAlpha);
-		GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT);
+		GlesBackend.getState().clearColor(pRed, pGreen, pBlue, pAlpha);
+		GlesBackend.getState().clear(GLES32.GL_COLOR_BUFFER_BIT);
 
 		/* Restore clear color. */
-		GLES32.glClearColor(RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_RED_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_GREEN_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_BLUE_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_ALPHA_INDEX]);
+		GlesBackend.getState().clearColor(RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_RED_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_GREEN_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_BLUE_INDEX], RenderTexture.CLEARCOLOR_CONTAINER[RenderTexture.CLEARCOLOR_CONTAINER_ALPHA_INDEX]);
 	}
 
 	/**
@@ -227,7 +229,7 @@ public class RenderTexture extends Texture {
 	 */
 	public void begin(final GLState pGLState, final boolean pFlipX, final boolean pFlipY) {
 		this.savePreviousViewport();
-		GLES32.glViewport(0, 0, this.mWidth, this.mHeight);
+		GlesBackend.getState().viewport(0, 0, this.mWidth, this.mHeight);
 
 		pGLState.pushProjectionGLMatrix();
 
@@ -329,16 +331,27 @@ public class RenderTexture extends Texture {
 	}
 
 	protected void savePreviousViewport() {
-		GLES32.glGetIntegerv(GLES32.GL_VIEWPORT, RenderTexture.VIEWPORT_CONTAINER, 0);
+		final GlesStateCache state = GlesBackend.getState();
 
-		this.mPreviousViewPortX = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_X_INDEX];
-		this.mPreviousViewPortY = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_Y_INDEX];
-		this.mPreviousViewPortWidth = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_WIDTH_INDEX];
-		this.mPreviousViewPortHeight = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_HEIGHT_INDEX];
+		if(state.getViewportWidth() < 0) {
+			/* The cache does not know the viewport yet, read it back from the driver. */
+			GlesBackend.getGl().glGetIntegerv(GLES32.GL_VIEWPORT, RenderTexture.VIEWPORT_CONTAINER, 0);
+
+			this.mPreviousViewPortX = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_X_INDEX];
+			this.mPreviousViewPortY = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_Y_INDEX];
+			this.mPreviousViewPortWidth = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_WIDTH_INDEX];
+			this.mPreviousViewPortHeight = RenderTexture.VIEWPORT_CONTAINER[RenderTexture.VIEWPORT_CONTAINER_HEIGHT_INDEX];
+			return;
+		}
+
+		this.mPreviousViewPortX = state.getViewportX();
+		this.mPreviousViewPortY = state.getViewportY();
+		this.mPreviousViewPortWidth = state.getViewportWidth();
+		this.mPreviousViewPortHeight = state.getViewportHeight();
 	}
 
 	protected void resotorePreviousViewport() {
-		GLES32.glViewport(this.mPreviousViewPortX, this.mPreviousViewPortY, this.mPreviousViewPortWidth, this.mPreviousViewPortHeight);
+		GlesBackend.getState().viewport(this.mPreviousViewPortX, this.mPreviousViewPortY, this.mPreviousViewPortWidth, this.mPreviousViewPortHeight);
 	}
 
 	public int[] getPixelsARGB_8888(final GLState pGLState) {

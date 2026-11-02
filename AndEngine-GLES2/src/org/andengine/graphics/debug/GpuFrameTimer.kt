@@ -1,22 +1,25 @@
 package org.andengine.graphics.debug
 
-import android.opengl.GLES30
+import org.andengine.graphics.GpuQuery
+import org.andengine.graphics.GraphicsDevice
 
 /**
- * Measures the GPU time of a frame with `GL_EXT_disjoint_timer_query`.
+ * Measures the GPU time of a frame with [GpuQuery] timer queries.
  *
  * Query results arrive a few frames late, so a small ring of queries is used and each result
- * is read once it is available. Results from frames where the GPU reported a disjoint event
- * (e.g. a frequency change) are dropped.
+ * is read once it is available. Results invalidated by the GPU (disjoint event, e.g. a frequency
+ * change) are dropped by the query. The queries are created on the first [begin] and restore
+ * themselves after a context loss.
  *
- * All methods must be called on the GL thread. Devices without the extension report
- * [isSupported] = `false` and every call is a no-op.
+ * All methods must be called on the GL thread, except [invalidate]. Devices without timer queries
+ * report [isSupported] = `false`; nothing is created and every call is a no-op.
  */
-internal class GpuFrameTimer {
+class GpuFrameTimer(private val device: GraphicsDevice) {
 
-    private val queries = IntArray(RING_SIZE)
-    private val pending = BooleanArray(RING_SIZE)
-    private val result = IntArray(1)
+    private val queries = arrayOfNulls<GpuQuery>(RING_SIZE)
+
+    /** Pending results to drop instead of count, see [invalidate]. */
+    private val stale = BooleanArray(RING_SIZE)
 
     private var initialized = false
     private var writeIndex = 0
@@ -25,46 +28,43 @@ internal class GpuFrameTimer {
     var isSupported = false
         private set
 
-    /** Invalidates all queries, e.g. after the GL context was recreated. Safe on any thread. */
     @Volatile
-    private var invalidated = true
+    private var invalidated = false
 
+    /** Drops all pending results, e.g. after the collected data was reset. Safe on any thread. */
     fun invalidate() {
         invalidated = true
     }
 
     private fun ensureInitialized() {
-        if (!invalidated) return
-        invalidated = false
-        initialized = false
-        running = false
-        pending.fill(false)
+        if (invalidated) {
+            invalidated = false
+            for (i in 0 until RING_SIZE) stale[i] = queries[i]?.isPending == true
+        }
+        if (initialized) return
+        initialized = true
 
-        val extensions = GLES30.glGetString(GLES30.GL_EXTENSIONS) ?: ""
-        isSupported = extensions.contains("GL_EXT_disjoint_timer_query")
+        isSupported = device.capabilities.supportsTimerQuery
         if (!isSupported) return
 
-        // Old query names belong to the lost context and are not deleted.
-        GLES30.glGenQueries(RING_SIZE, queries, 0)
-        clearDisjoint()
-        initialized = true
+        for (i in 0 until RING_SIZE) queries[i] = device.createQuery("GpuFrameTimer[$i]")
     }
 
     fun begin() {
         ensureInitialized()
-        if (!initialized || running) return
+        if (!isSupported || running) return
 
+        val query = queries[writeIndex]!!
         // Ring is full: the oldest query is still pending, skip this frame instead of stalling.
-        if (pending[writeIndex]) return
+        if (query.isPending) return
 
-        GLES30.glBeginQuery(GL_TIME_ELAPSED_EXT, queries[writeIndex])
+        query.begin()
         running = true
     }
 
     fun end() {
         if (!running) return
-        GLES30.glEndQuery(GL_TIME_ELAPSED_EXT)
-        pending[writeIndex] = true
+        queries[writeIndex]!!.end()
         writeIndex = (writeIndex + 1) % RING_SIZE
         running = false
     }
@@ -84,25 +84,27 @@ internal class GpuFrameTimer {
     fun collect(): Long {
         collectedFrames = 0
         collectedMaxNanos = 0L
-        if (!initialized) return 0L
+        if (!isSupported) return 0L
+        ensureInitialized()
 
         var sum = 0L
-        val disjoint = clearDisjoint()
-
         for (i in 0 until RING_SIZE) {
-            if (!pending[i]) continue
+            val query = queries[i]!!
+            if (!query.isPending) {
+                stale[i] = false
+                continue
+            }
 
-            GLES30.glGetQueryObjectuiv(queries[i], GLES30.GL_QUERY_RESULT_AVAILABLE, result, 0)
-            if (result[0] == 0) continue
+            val nanos = query.resultNanos()
+            // Still waiting for the GPU.
+            if (query.isPending) continue
 
-            GLES30.glGetQueryObjectuiv(queries[i], GLES30.GL_QUERY_RESULT, result, 0)
-            pending[i] = false
-
-            val nanos = result[0].toLong() and 0xFFFFFFFFL
+            val drop = stale[i]
+            stale[i] = false
 
             // Some Adreno drivers report ~2^32 ns for queries that did not complete properly.
             // No real frame takes a second on the GPU, so such results are dropped.
-            if (!disjoint && nanos < MAX_PLAUSIBLE_NANOS) {
+            if (nanos >= 0L && !drop && nanos < MAX_PLAUSIBLE_NANOS) {
                 sum += nanos
                 collectedFrames++
                 if (nanos > collectedMaxNanos) collectedMaxNanos = nanos
@@ -112,16 +114,18 @@ internal class GpuFrameTimer {
         return sum
     }
 
-    /** Reads and thereby resets the disjoint flag. */
-    private fun clearDisjoint(): Boolean {
-        GLES30.glGetIntegerv(GL_GPU_DISJOINT_EXT, result, 0)
-        return result[0] != 0
+    /** Releases the queries; the timer must not be used afterwards. */
+    fun dispose() {
+        for (i in 0 until RING_SIZE) {
+            queries[i]?.dispose()
+            queries[i] = null
+        }
+        isSupported = false
+        running = false
     }
 
     private companion object {
         const val RING_SIZE = 4
         const val MAX_PLAUSIBLE_NANOS = 1_000_000_000L
-        const val GL_TIME_ELAPSED_EXT = 0x88BF
-        const val GL_GPU_DISJOINT_EXT = 0x8FBB
     }
 }

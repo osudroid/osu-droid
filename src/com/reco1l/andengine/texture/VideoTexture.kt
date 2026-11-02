@@ -1,5 +1,6 @@
 package com.reco1l.andengine.texture
 
+import org.andengine.graphics.gles.GlesBackend
 import android.graphics.*
 import android.net.Uri
 import android.opengl.*
@@ -137,8 +138,11 @@ class VideoTexture(val source: String) : Texture(
      */
     fun latch() {
         if (isLoadedToHardware) {
-            surfaceTexture?.updateTexImage()
-            surfaceTexture?.getTransformMatrix(stMatrix)
+            val st = surfaceTexture ?: return
+            st.updateTexImage()
+            // updateTexImage() binds the OES texture on the active unit without telling the cache.
+            GlesBackend.state.noteTextureBound(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+            st.getTransformMatrix(stMatrix)
         }
     }
 
@@ -171,7 +175,7 @@ class VideoTexture(val source: String) : Texture(
         mHardwareTextureID = textures[0]
 
         // OES external textures must be bound to the OES target.
-        GLES32.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+        GlesBackend.state.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
         // Required filter settings for GL_TEXTURE_EXTERNAL_OES.
         GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_MIN_FILTER,
@@ -227,7 +231,7 @@ class VideoTexture(val source: String) : Texture(
     /** Binds the OES texture. Call [latch] first to update the frame and ST matrix. */
     override fun bind(pGLState: GLState) {
         if (isLoadedToHardware) {
-            GLES32.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+            GlesBackend.state.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
         }
     }
 

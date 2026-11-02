@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
@@ -62,13 +63,13 @@ class UITriangleMesh : UIComponent() {
         if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
-            GLES32.glClear(clearMask)
+            GlesBackend.state.clear(clearMask)
         }
 
         // Depth testing
         if (depthInfo.test) {
-            GLES32.glDepthFunc(depthInfo.function)
-            GLES32.glDepthMask(depthInfo.mask)
+            GlesBackend.state.depthFunc(depthInfo.function)
+            GlesBackend.state.depthMask(depthInfo.mask)
 
             pGLState.enableDepthTest()
         } else {
@@ -122,21 +123,21 @@ class UITriangleMesh : UIComponent() {
         }
 
         // Provide constant color (disable per-vertex color array)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.vertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
 
         // Disable texture coordinates
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Ensure position attribute array is enabled
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
 
 
         TriangleRenderer.get().renderTriangles(vertices, pGLState)
 
         // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
 
         // Disable depth test after drawing so subsequent entities (sprites, circles, etc.)
         // are not accidentally depth-tested against values we wrote.

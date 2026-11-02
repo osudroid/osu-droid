@@ -154,7 +154,7 @@ public class ShaderProgram {
 
 	/**
 	 * Resets every known {@link ShaderProgram} instance for EGL context loss recovery.
-	 * Call this from {@link org.andengine.opengl.view.EngineRenderer#onSurfaceCreated}.
+	 * Registered as a legacy restorer in {@link org.andengine.graphics.gles.GlesLegacyRestorers#registerEngine}.
 	 */
 	public static void resetAllForContextLoss() {
 		for (final ShaderProgram program : sAllInstances) {

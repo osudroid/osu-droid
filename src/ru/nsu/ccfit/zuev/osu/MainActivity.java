@@ -7,9 +7,12 @@ import static com.reco1l.andengine.buffered.Buffer.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -74,10 +77,11 @@ import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.graphics.debug.RenderStatsOverlay;
+import org.andengine.graphics.gles.GlesDebugOptions;
+import org.andengine.graphics.gles.GlesLegacyRestorers;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
@@ -134,6 +138,17 @@ public class MainActivity extends BaseGameActivity implements
     // Set to true by MainScene.exit() before calling finish(), so that onDestroy() kills the
     // process after the full Activity lifecycle has run (Firebase, SongService, SharedPrefs, etc.).
     public volatile boolean killOnDestroy = false;
+
+    /** Broadcast action of the GL debug receiver (debug builds only), see {@link #registerDebugGlReceiver()}. */
+    public static final String ACTION_DEBUG_GL = "ru.nsu.ccfit.zuev.osuplus.DEBUG_GL";
+
+    private BroadcastReceiver debugGlReceiver;
+
+    static {
+        // Once per process, before the engine creates its first GL context. Later changes through
+        // the debug broadcast survive an activity recreation.
+        GlesDebugOptions.debugOutput = BuildConfig.DEBUG;
+    }
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -205,6 +220,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public Engine onCreateEngine(final EngineOptions pEngineOptions) {
         UIEngine engine = new UIEngine(this, pEngineOptions);
+
+        // Context loss recovery: forget VBO IDs so they are re-created against a new EGL context.
+        // Name-keyed, so a recreated activity replaces instead of duplicating the entries.
+        // Shader programs (incl. storyboard / external OES) are reset by the registry as well.
+        GlesLegacyRestorers.register("ui-buffers", com.reco1l.andengine.buffered.Buffer::onContextLost);
+        GlesLegacyRestorers.register("triangle-renderer", () -> com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss());
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -718,8 +739,48 @@ public class MainActivity extends BaseGameActivity implements
                 Runtime.getRuntime().exec(new String[]{"logcat", "-f", f.getAbsolutePath()});
             } catch (IOException ignored) {
             }
+            registerDebugGlReceiver();
         }
         onBeginBindService();
+    }
+
+    /**
+     * Debug builds only: lets adb destroy and recreate the GL context and switch the GL debug options,
+     * e.g. {@code adb shell am broadcast -a ru.nsu.ccfit.zuev.osuplus.DEBUG_GL --ez recreate true -p <package>}.
+     * Extras: {@code recreate}, {@code es30} (simulate ES 3.0) and {@code debugOutput}; changing an
+     * option also recreates the context so that it takes effect.
+     */
+    private void registerDebugGlReceiver() {
+        debugGlReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                boolean recreate = intent.getBooleanExtra("recreate", false);
+
+                if (intent.hasExtra("es30")) {
+                    GlesDebugOptions.simulateEs30 = intent.getBooleanExtra("es30", false);
+                    recreate = true;
+                }
+                if (intent.hasExtra("debugOutput")) {
+                    GlesDebugOptions.debugOutput = intent.getBooleanExtra("debugOutput", false);
+                    recreate = true;
+                }
+
+                Debug.i("DEBUG_GL: recreate=" + recreate + " simulateEs30=" + GlesDebugOptions.simulateEs30
+                        + " debugOutput=" + GlesDebugOptions.debugOutput);
+
+                // Receivers run on the main thread, which is where the view must be paused and resumed.
+                if (recreate && mRenderSurfaceView != null) {
+                    mRenderSurfaceView.debugRecreateContext();
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(ACTION_DEBUG_GL);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(debugGlReceiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(debugGlReceiver, filter);
+        }
     }
 
     public void onBeginBindService() {
@@ -929,20 +990,6 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public synchronized void onSurfaceCreated(final GLState pGLState) {
-        // Reset all VBO IDs so they are re-generated against the new EGL context.
-        // This handles the case where the system destroyed the context while the app
-        // was backgrounded (context loss recovery).
-        com.reco1l.andengine.buffered.Buffer.onContextLost();
-        // Reset the TriangleRenderer VBO so it is re-created against the new context.
-        com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss();
-        // Note: the storyboard shader (StoryboardShaderProgram) and ExternalOESShaderProgram
-        // extend ShaderProgram and are reset by ShaderProgram.resetAllForContextLoss() called
-        // in EngineRenderer.onSurfaceCreated.
-        super.onSurfaceCreated(pGLState);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         activityVisible = false;
@@ -990,6 +1037,11 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (debugGlReceiver != null) {
+            unregisterReceiver(debugGlReceiver);
+            debugGlReceiver = null;
+        }
 
         // Safety net: if the Activity is destroyed while the user is still in a room (e.g.
         // swiped away from the task switcher, or system-killed), teardownSession() may never

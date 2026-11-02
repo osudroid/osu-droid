@@ -2,13 +2,13 @@ package org.andengine.opengl.util;
 
 import java.nio.Buffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
 import org.andengine.BuildConfig;
 import org.andengine.engine.options.RenderOptions;
-import org.andengine.graphics.debug.RenderStats;
+import org.andengine.graphics.gles.GlesBackend;
+import org.andengine.graphics.gles.GlesStateCache;
 import org.andengine.opengl.exception.GLException;
 import org.andengine.opengl.exception.GLFrameBufferException;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -51,27 +51,8 @@ public class GLState {
 	private int mMaximumTextureSize;
 	private int mMaximumTextureUnits;
 
-	private int mCurrentArrayBufferID = -1;
-	private int mCurrentIndexBufferID = -1;
-	private int mCurrentShaderProgramID = -1;
-	// osu!droid fix: GL_TEXTURE31 - GL_TEXTURE0 = 31, but there are 32 texture units (indices 0..31).
-	// The old size of 31 would throw ArrayIndexOutOfBoundsException for any code that activates
-	// GL_TEXTURE31 (index 31) and then calls bindTexture / deleteTexture.
-	private final int[] mCurrentBoundTextureIDs = new int[GLES32.GL_TEXTURE31 - GLES32.GL_TEXTURE0 + 1];
-	private int mCurrentFramebufferID = -1;
-	private int mCurrentActiveTextureIndex = 0;
-
-	private int mCurrentSourceBlendMode = -1;
-	private int mCurrentDestinationBlendMode = -1;
-
-	private boolean mDitherEnabled = true;
-	private boolean mDepthTestEnabled = true;
-
-	private boolean mScissorTestEnabled = false;
-	private boolean mBlendEnabled = false;
-	private boolean mCullingEnabled = false;
-
-	private float mLineWidth = 1;
+	// The binding and capability state lives in GlesBackend.state, shared with the new GL core. It is
+	// read on every call because GlesBackend replaces the cache on every new context.
 
 	private final GLMatrixStack mModelViewGLMatrixStack = new GLMatrixStack();
 	private final GLMatrixStack mProjectionGLMatrixStack = new GLMatrixStack();
@@ -146,21 +127,12 @@ public class GLState {
 		this.mModelViewGLMatrixStack.reset();
 		this.mProjectionGLMatrixStack.reset();
 
-		this.mCurrentArrayBufferID = -1;
-		this.mCurrentIndexBufferID = -1;
-		this.mCurrentShaderProgramID = -1;
-		Arrays.fill(this.mCurrentBoundTextureIDs, -1);
-		this.mCurrentFramebufferID = -1;
-		this.mCurrentActiveTextureIndex = 0;
-
-		this.mCurrentSourceBlendMode = -1;
-		this.mCurrentDestinationBlendMode = -1;
-
-		// osu!droid: explicitly reset scissor cache — a new GL context always starts with
-		// GL_SCISSOR_TEST disabled, but mScissorTestEnabled may be stale from before context loss.
-		// Without this, enableScissorTest() would be a no-op (thinks it's already on) while the
-		// actual GL context has scissor off. No glDisable call needed; it's already off.
-		this.mScissorTestEnabled = false;
+		// GlesBackend.onContextCreated() has just installed a fresh cache for this context (everything
+		// unknown, so the next bind of any id and the next scissor/line width change reach GL). Only
+		// the defaults are set here. Bind VAO 0 first: the restore may have bound another one, and the
+		// legacy renderer's attribute arrays below belong to VAO 0.
+		final GlesStateCache state = GlesBackend.getState();
+		state.bindVertexArray(0);
 
 		this.enableDither();
 		this.enableDepthTest();
@@ -168,39 +140,31 @@ public class GLState {
 		this.disableBlend();
 		this.disableCulling();
 
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
-		GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
-
-		this.mLineWidth = 1;
+		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION);
+		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+		state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION);
 	}
 
 	public boolean isScissorTestEnabled() {
-		return this.mScissorTestEnabled;
+		return GlesBackend.getState().isScissorEnabled();
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean enableScissorTest() {
-		if(this.mScissorTestEnabled) {
-			return true;
-		}
-		
-		this.mScissorTestEnabled = true;
-		GLES32.glEnable(GLES32.GL_SCISSOR_TEST);
-		return false;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isScissorEnabled();
+		state.setScissorEnabled(true);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean disableScissorTest() {
-		if(!this.mScissorTestEnabled) {
-			return false;
-		}
-
-		this.mScissorTestEnabled = false;
-		GLES32.glDisable(GLES32.GL_SCISSOR_TEST);
-		return true;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isScissorEnabled();
+		state.setScissorEnabled(false);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
@@ -214,31 +178,25 @@ public class GLState {
 	}
 
 	public boolean isBlendEnabled() {
-		return this.mBlendEnabled;
+		return GlesBackend.getState().isBlendEnabled();
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean enableBlend() {
-		if(this.mBlendEnabled) {
-			return true;
-		}
-
-		this.mBlendEnabled = true;
-		GLES32.glEnable(GLES32.GL_BLEND);
-		return false;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isBlendEnabled();
+		state.setBlendEnabled(true);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean disableBlend() {
-		if(!this.mBlendEnabled) {
-			return false;
-		}
-
-		this.mBlendEnabled = false;
-		GLES32.glDisable(GLES32.GL_BLEND);
-		return true;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isBlendEnabled();
+		state.setBlendEnabled(false);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
@@ -252,31 +210,25 @@ public class GLState {
 	}
 
 	public boolean isCullingEnabled() {
-		return this.mCullingEnabled;
+		return GlesBackend.getState().isCullFaceEnabled();
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean enableCulling() {
-		if(this.mCullingEnabled) {
-			return true;
-		}
-
-		this.mCullingEnabled = true;
-		GLES32.glEnable(GLES32.GL_CULL_FACE);
-		return false;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isCullFaceEnabled();
+		state.setCullFaceEnabled(true);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean disableCulling() {
-		if(!this.mCullingEnabled) {
-			return false;
-		}
-
-		this.mCullingEnabled = false;
-		GLES32.glDisable(GLES32.GL_CULL_FACE);
-		return true;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isCullFaceEnabled();
+		state.setCullFaceEnabled(false);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
@@ -290,31 +242,25 @@ public class GLState {
 	}
 
 	public boolean isDitherEnabled() {
-		return this.mDitherEnabled;
+		return GlesBackend.getState().isDitherEnabled();
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean enableDither() {
-		if(this.mDitherEnabled) {
-			return true;
-		}
-
-		this.mDitherEnabled = true;
-		GLES32.glEnable(GLES32.GL_DITHER);
-		return false;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isDitherEnabled();
+		state.setDitherEnabled(true);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean disableDither() {
-		if(!this.mDitherEnabled) {
-			return false;
-		}
-
-		this.mDitherEnabled = false;
-		GLES32.glDisable(GLES32.GL_DITHER);
-		return true;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isDitherEnabled();
+		state.setDitherEnabled(false);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
@@ -328,31 +274,25 @@ public class GLState {
 	}
 
 	public boolean isDepthTestEnabled() {
-		return this.mDepthTestEnabled;
+		return GlesBackend.getState().isDepthTestEnabled();
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean enableDepthTest() {
-		if(this.mDepthTestEnabled) {
-			return true;
-		}
-
-		this.mDepthTestEnabled = true;
-		GLES32.glEnable(GLES32.GL_DEPTH_TEST);
-		return false;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isDepthTestEnabled();
+		state.setDepthTestEnabled(true);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
 	 */
 	public boolean disableDepthTest() {
-		if(!this.mDepthTestEnabled) {
-			return false;
-		}
-
-		this.mDepthTestEnabled = false;
-		GLES32.glDisable(GLES32.GL_DEPTH_TEST);
-		return true;
+		final GlesStateCache state = GlesBackend.getState();
+		final boolean previous = state.isDepthTestEnabled();
+		state.setDepthTestEnabled(false);
+		return previous;
 	}
 	/**
 	 * @return the previous state.
@@ -382,19 +322,11 @@ public class GLState {
 	}
 
 	public void bindArrayBuffer(final int pHardwareBufferID) {
-		if(this.mCurrentArrayBufferID != pHardwareBufferID) {
-			this.mCurrentArrayBufferID = pHardwareBufferID;
-			GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, pHardwareBufferID);
-			RenderStats.bufferBind();
-		}
+		GlesBackend.getState().bindArrayBuffer(pHardwareBufferID);
 	}
 
 	public void deleteArrayBuffer(final int pHardwareBufferID) {
-		if(this.mCurrentArrayBufferID == pHardwareBufferID) {
-			this.mCurrentArrayBufferID = -1;
-		}
-		this.mHardwareIDContainer[0] = pHardwareBufferID;
-		GLES32.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
+		this.deleteBuffer(pHardwareBufferID);
 	}
 
 	public int generateIndexBuffer(final int pSize, final int pUsage) {
@@ -409,19 +341,17 @@ public class GLState {
 	}
 
 	public void bindIndexBuffer(final int pHardwareBufferID) {
-		if(this.mCurrentIndexBufferID != pHardwareBufferID) {
-			this.mCurrentIndexBufferID = pHardwareBufferID;
-			GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, pHardwareBufferID);
-			RenderStats.bufferBind();
-		}
+		GlesBackend.getState().bindElementBuffer(pHardwareBufferID);
 	}
 
 	public void deleteIndexBuffer(final int pHardwareBufferID) {
-		if(this.mCurrentIndexBufferID == pHardwareBufferID) {
-			this.mCurrentIndexBufferID = -1;
-		}
+		this.deleteBuffer(pHardwareBufferID);
+	}
+
+	private void deleteBuffer(final int pHardwareBufferID) {
 		this.mHardwareIDContainer[0] = pHardwareBufferID;
-		GLES32.glDeleteBuffers(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getGl().glDeleteBuffers(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getState().onBufferDeleted(pHardwareBufferID);
 	}
 
 	public int generateFramebuffer() {
@@ -430,15 +360,7 @@ public class GLState {
 	}
 
 	public void bindFramebuffer(final int pFramebufferID) {
-		// osu!droid fix: cache the bound FBO ID, mirroring all other bind methods in GLState.
-		// The old code called glBindFramebuffer unconditionally on every invocation — the
-		// mCurrentFramebufferID field was never written here, making the cache useless and
-		// deleteFramebuffer()'s invalidation check always false.
-		if(this.mCurrentFramebufferID != pFramebufferID) {
-			this.mCurrentFramebufferID = pFramebufferID;
-			GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, pFramebufferID);
-			RenderStats.framebufferBind();
-		}
+		GlesBackend.getState().bindFramebuffer(pFramebufferID);
 	}
 
 	public int getFramebufferStatus() {
@@ -470,26 +392,18 @@ public class GLState {
 	}
 
 	public void deleteFramebuffer(final int pHardwareFramebufferID) {
-		if(this.mCurrentFramebufferID == pHardwareFramebufferID) {
-			this.mCurrentFramebufferID = -1;
-		}
 		this.mHardwareIDContainer[0] = pHardwareFramebufferID;
-		GLES32.glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getGl().glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getState().onFramebufferDeleted(pHardwareFramebufferID);
 	}
 
 	public void useProgram(final int pShaderProgramID) {
-		if(this.mCurrentShaderProgramID != pShaderProgramID) {
-			this.mCurrentShaderProgramID = pShaderProgramID;
-			GLES32.glUseProgram(pShaderProgramID);
-			RenderStats.programSwitch();
-		}
+		GlesBackend.getState().useProgram(pShaderProgramID);
 	}
 
 	public void deleteProgram(final int pShaderProgramID) {
-		if(this.mCurrentShaderProgramID == pShaderProgramID) {
-			this.mCurrentShaderProgramID = -1;
-		}
-		GLES32.glDeleteProgram(pShaderProgramID);
+		GlesBackend.getGl().glDeleteProgram(pShaderProgramID);
+		GlesBackend.getState().onProgramDeleted(pShaderProgramID);
 	}
 
 	public int generateTexture() {
@@ -505,21 +419,16 @@ public class GLState {
 	 * @return {@link GLES20#GL_TEXTURE0} to {@link GLES20#GL_TEXTURE31}
 	 */
 	public int getActiveTexture() {
-		return this.mCurrentActiveTextureIndex + GLES32.GL_TEXTURE0;
+		final int unit = GlesBackend.getState().getCurrentActiveTextureUnit();
+		// Unknown (fresh context) is unit 0, the GL default.
+		return (unit < 0 ? 0 : unit) + GLES32.GL_TEXTURE0;
 	}
 
 	/**
 	 * @param pGLActiveTexture from {@link GLES20#GL_TEXTURE0} to {@link GLES20#GL_TEXTURE31}.
 	 */
 	public void activeTexture(final int pGLActiveTexture) {
-		final int activeTextureIndex = pGLActiveTexture - GLES32.GL_TEXTURE0;
-		// osu!droid fix: compare the 0-based index against mCurrentActiveTextureIndex, not the raw
-		// GL enum. The old code compared e.g. GL_TEXTURE0 (33984) against index 0 — always unequal,
-		// so glActiveTexture was called on every invocation and the cache was never used.
-		if(activeTextureIndex != this.mCurrentActiveTextureIndex) {
-			this.mCurrentActiveTextureIndex = activeTextureIndex;
-			GLES32.glActiveTexture(pGLActiveTexture);
-		}
+		GlesBackend.getState().activeTexture(pGLActiveTexture - GLES32.GL_TEXTURE0);
 	}
 
 	/**
@@ -529,35 +438,21 @@ public class GLState {
 	 * @param pHardwareTextureID the hardware texture ID to bind.
 	 */
 	public void bindTexture(final int pHardwareTextureID) {
-		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] != pHardwareTextureID) {
-			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = pHardwareTextureID;
-			GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, pHardwareTextureID);
-			RenderStats.textureBind();
-		}
+		GlesBackend.getState().bindTexture(GLES32.GL_TEXTURE_2D, pHardwareTextureID);
 	}
 
 	public void deleteTexture(final int pHardwareTextureID) {
-		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] == pHardwareTextureID) {
-			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = -1;
-		}
 		this.mHardwareIDContainer[0] = pHardwareTextureID;
-		GLES32.glDeleteTextures(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getGl().glDeleteTextures(1, this.mHardwareIDContainer, 0);
+		GlesBackend.getState().onTextureDeleted(pHardwareTextureID);
 	}
 
 	public void blendFunction(final int pSourceBlendMode, final int pDestinationBlendMode) {
-		if(this.mCurrentSourceBlendMode != pSourceBlendMode || this.mCurrentDestinationBlendMode != pDestinationBlendMode) {
-			this.mCurrentSourceBlendMode = pSourceBlendMode;
-			this.mCurrentDestinationBlendMode = pDestinationBlendMode;
-			GLES32.glBlendFunc(pSourceBlendMode, pDestinationBlendMode);
-			RenderStats.blendChange();
-		}
+		GlesBackend.getState().blendFunc(pSourceBlendMode, pDestinationBlendMode);
 	}
 
 	public void lineWidth(final float pLineWidth) {
-		if(this.mLineWidth  != pLineWidth) {
-			this.mLineWidth = pLineWidth;
-			GLES32.glLineWidth(pLineWidth);
-		}
+		GlesBackend.getState().lineWidth(pLineWidth);
 	}
 
 	public void pushModelViewGLMatrix() {

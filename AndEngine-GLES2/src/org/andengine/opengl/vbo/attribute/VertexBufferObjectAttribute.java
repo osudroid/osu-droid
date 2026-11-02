@@ -1,5 +1,6 @@
 package org.andengine.opengl.vbo.attribute;
 
+import org.andengine.graphics.gles.GlesBackend;
 import android.opengl.GLES32;
 
 /**
@@ -70,8 +71,8 @@ public class VertexBufferObjectAttribute {
 	// ===========================================================
 
 	public void glVertexAttribPointer(final int pStride) {
-		GLES32.glVertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
-		GLES32.glEnableVertexAttribArray(this.mLocation);
+		GlesBackend.getState().vertexAttribPointer(this.mLocation, this.mSize, this.mType, this.mNormalized, pStride, this.mOffset);
+		GlesBackend.getState().enableVertexAttribArray(this.mLocation);
 	}
 
 	// ===========================================================

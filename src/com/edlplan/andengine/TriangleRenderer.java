@@ -1,5 +1,6 @@
 package com.edlplan.andengine;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.debug.RenderStats;
 import android.opengl.GLES32;
 
@@ -27,8 +28,9 @@ public class TriangleRenderer {
     }
 
     /**
-     * Must be called from {@code MainActivity.onSurfaceCreated} when the EGL context is
-     * recreated so the old VBO handle is discarded and a fresh one is generated on next draw.
+     * Called by the GLES resource registry (registered in {@code MainActivity} via
+     * {@link org.andengine.graphics.gles.GlesLegacyRestorers}) on every new EGL context, so the old VBO
+     * handle is discarded and a fresh one is generated on next draw.
      */
     public void resetForContextLoss() {
         // The old VBO ID is invalid; glDeleteBuffers is unnecessary because the context is gone.
@@ -72,7 +74,7 @@ public class TriangleRenderer {
         RenderStats.upload(byteCount);
 
         // Point the position attribute at offset 0 inside the currently bound VBO.
-        GLES32.glVertexAttribPointer(
+        GlesBackend.getState().vertexAttribPointer(
             ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
             2, GLES32.GL_FLOAT, false, 0, 0
         );

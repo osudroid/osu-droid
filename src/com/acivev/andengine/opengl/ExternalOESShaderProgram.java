@@ -1,5 +1,6 @@
 package com.acivev.andengine.opengl;
 
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.shader.exception.ShaderProgramLinkException;
@@ -40,7 +41,7 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     // ===========================================================
 
     public static final String VERTEXSHADER =
-            "#version 320 es\n" +
+            "#version 300 es\n" +
             "uniform mat4 " + ShaderProgramConstants.UNIFORM_MODELVIEWPROJECTIONMATRIX + ";\n" +
             "uniform mat4 u_stMatrix;\n" +
             "in vec4 " + ShaderProgramConstants.ATTRIBUTE_POSITION + ";\n" +
@@ -54,7 +55,7 @@ public class ExternalOESShaderProgram extends ShaderProgram {
             "}";
 
     public static final String FRAGMENTSHADER =
-            "#version 320 es\n" +
+            "#version 300 es\n" +
             "#extension GL_OES_EGL_image_external_essl3 : require\n" +
             "precision mediump float;\n" +
             "uniform samplerExternalOES " + ShaderProgramConstants.UNIFORM_TEXTURE_0 + ";\n" +
@@ -118,13 +119,13 @@ public class ExternalOESShaderProgram extends ShaderProgram {
     @Override
     public void bind(final GLState pGLState,
                      final VertexBufferObjectAttributes pVertexBufferObjectAttributes) {
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+        GlesBackend.getState().disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
         super.bind(pGLState, pVertexBufferObjectAttributes);
     }
 
     @Override
     public void unbind(final GLState pGLState) {
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
+        GlesBackend.getState().enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION);
         super.unbind(pGLState);
     }
 

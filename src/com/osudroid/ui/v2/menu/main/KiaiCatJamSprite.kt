@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.menu.main
 
+import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader
 import com.reco1l.andengine.buffered.VertexBuffer
@@ -63,7 +64,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
             GLES32.glUniform1f(shader.uniformRadius, clipRadius)
 
         // This shader does not use per-vertex color
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
 
         // Catjam atlas UVs at attribute 3
         uvBuffer.beginDraw(pGLState)
@@ -75,7 +76,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
     override fun onDrawBuffer(pGLState: GLState) {
         textureRegion?.texture?.bind(pGLState)
         super.onDrawBuffer(pGLState)
-        GLES32.glDisableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
+        GlesBackend.state.disableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
     }
 
 
@@ -100,10 +101,10 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
 
         fun bindAsQuadPosAttribute() {
             bindAndUpload()
-            GLES32.glVertexAttribPointer(
+            GlesBackend.state.vertexAttribPointer(
                 CatJamCircleShader.QUAD_POS_LOCATION,
                 VERTEX_2D, GLES32.GL_FLOAT, false, 0, 0)
-            GLES32.glEnableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
+            GlesBackend.state.enableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
         }
     }
 
