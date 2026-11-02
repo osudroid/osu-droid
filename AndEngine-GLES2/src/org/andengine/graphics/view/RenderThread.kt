@@ -5,6 +5,7 @@ import android.view.Surface
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import org.andengine.graphics.debug.RenderStats
 
 /**
  * Renders frames continuously on its own thread and drives the lifecycle of the backend's context and surface.
@@ -45,6 +46,8 @@ class RenderThread(
     private var pauseRequested = false
     private var recreateContextRequested = false
     private var exitRequested = false
+    // Callbacks of redraw requests not yet taken by a frame.
+    private val pendingRedraws = ArrayList<Runnable>(2)
 
     // Acknowledgements, guarded by lock.
     private var paused = false
@@ -64,8 +67,11 @@ class RenderThread(
     private var surfaceWindowGeneration = 0
     private var acknowledgedSizeGeneration = 0
     private var presentationTimeSet = false
-    private var lastVsyncNanos = 0L
     private var vsyncWaiter: VsyncWaiter? = null
+    // Redraw callbacks to run once the current frame is done, or at once if no frame can be drawn.
+    private var frameRedraws = ArrayList<Runnable>(2)
+    // Swapped with frameRedraws while its callbacks run, so each is taken out before it runs and none can run twice.
+    private var runningRedraws = ArrayList<Runnable>(2)
 
     fun surfaceCreated(surface: Surface) = lock.withLock {
         window = surface
@@ -111,6 +117,23 @@ class RenderThread(
         pauseRequested = false
         stateChanged.signalAll()
         awaitAcknowledgement { !paused || pauseRequested }
+    }
+
+    /**
+     * Runs [drawingFinished] once the window can be shown with up-to-date content: on the render thread, at the
+     * latest when the next frame attempt that starts after this call ends, whether that frame was presented or not.
+     * If the thread can no longer draw or exits before that, it runs then. Runs it at once, on the calling thread,
+     * if no frame can be drawn (paused, no window, zero size or the thread has ended).
+     */
+    fun requestRedraw(drawingFinished: Runnable) {
+        lock.withLock {
+            if (!exited && !exitRequested && canDrawLocked()) {
+                pendingRedraws.add(drawingFinished)
+                stateChanged.signalAll()
+                return
+            }
+        }
+        drawingFinished.run()
     }
 
     /** Releases the surface and the context before the next frame, so that both are created anew. */
@@ -169,8 +192,10 @@ class RenderThread(
             } finally {
                 lock.withLock {
                     exited = true
+                    takePendingRedrawsLocked()
                     stateChanged.signalAll()
                 }
+                runFrameRedraws(failure)
             }
         }
     }
@@ -195,6 +220,55 @@ class RenderThread(
     }
 
     private fun iterate(blocking: Boolean): Boolean {
+        var failure: Throwable? = null
+        try {
+            return drawFrame(blocking)
+        } catch (e: Throwable) {
+            failure = e
+            throw e
+        } finally {
+            // A frame that failed to present cannot be waited for either, the window would stay blank.
+            runFrameRedraws(failure)
+        }
+    }
+
+    /**
+     * Runs every callback even if one throws, since each one holds back a window. The first failure is thrown
+     * afterwards, or added to [failure] if one is already on its way so that it does not replace it.
+     */
+    private fun runFrameRedraws(failure: Throwable?) {
+        if (frameRedraws.isEmpty()) {
+            return
+        }
+
+        val running = frameRedraws
+        frameRedraws = runningRedraws
+        runningRedraws = running
+
+        var first: Throwable? = null
+        try {
+            for (i in running.indices) {
+                try {
+                    running[i].run()
+                } catch (e: Throwable) {
+                    val original = failure ?: first
+                    if (original == null) {
+                        first = e
+                    } else {
+                        original.addSuppressed(e)
+                    }
+                }
+            }
+        } finally {
+            running.clear()
+        }
+
+        if (first != null) {
+            throw first
+        }
+    }
+
+    private fun drawFrame(blocking: Boolean): Boolean {
         val window = awaitDrawableWindow(blocking) ?: return false
         if (!backend.hasContext) {
             backend.createContext()
@@ -237,7 +311,9 @@ class RenderThread(
         renderer.onDrawFrame()
 
         if (pacing.presentationTimeEnabled) {
-            backend.setPresentationTime(if (lastVsyncNanos != 0L) lastVsyncNanos else System.nanoTime())
+            // The current time, not the expected presentation time of the vsync just waited for: by the end of
+            // update and draw that deadline has often passed already, and the frame would be shown as late.
+            backend.setPresentationTime(System.nanoTime())
             presentationTimeSet = true
         } else if (presentationTimeSet) {
             backend.clearPresentationTime()
@@ -274,12 +350,14 @@ class RenderThread(
             }
         }
 
-        RenderTiming.lastWorkNanos = workNanos
+        // Before the vsync wait, which would only delay showing the window.
+        runFrameRedraws(null)
 
-        lastVsyncNanos = if (pacing.choreographerPacingEnabled) {
+        RenderTiming.lastWorkNanos = workNanos
+        RenderStats.onRenderWork(workNanos)
+
+        if (pacing.choreographerPacingEnabled) {
             (vsyncWaiter ?: vsyncWaiterFactory().also { vsyncWaiter = it }).waitForVsync()
-        } else {
-            0L
         }
 
         frameWorkListener?.onFrameWork(workNanos)
@@ -341,7 +419,14 @@ class RenderThread(
                     frameWidth = width
                     frameHeight = height
                     frameSizeGeneration = sizeGeneration
+                    takePendingRedrawsLocked()
                     return window
+                }
+
+                // Nothing will be drawn until the state changes, so the callers are not kept waiting.
+                takePendingRedrawsLocked()
+                if (frameRedraws.isNotEmpty()) {
+                    return null
                 }
 
                 if (!blocking) {
@@ -352,6 +437,17 @@ class RenderThread(
             }
         } finally {
             lock.unlock()
+        }
+    }
+
+    // Must be called with the lock held.
+    private fun takePendingRedrawsLocked() {
+        if (pendingRedraws.isNotEmpty()) {
+            // Element by element: addAll() would copy the list into a new array.
+            for (i in pendingRedraws.indices) {
+                frameRedraws.add(pendingRedraws[i])
+            }
+            pendingRedraws.clear()
         }
     }
 

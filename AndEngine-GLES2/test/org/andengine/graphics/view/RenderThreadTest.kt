@@ -300,6 +300,30 @@ class RenderThreadTest {
     }
 
     @Test
+    fun presentationTime_isNowWithAndWithoutPacing() {
+        pacing.presentationTimeEnabled = true
+        showWindow()
+        assertPresentationTimeIsNow(0)
+
+        val source = ImmediateVsyncSource()
+        thread = RenderThread(backend, renderer, pacing) { VsyncWaiter(source, timeoutMillis = 100) }
+        showWindow()
+        pacing.choreographerPacingEnabled = true
+        // Once the second wait has a vsync to wait for, a frame paced to it is still stamped with the time it ends.
+        repeat(2) { runFrame() }
+        assertPresentationTimeIsNow(3)
+    }
+
+    private fun assertPresentationTimeIsNow(frame: Int) {
+        val before = System.nanoTime()
+        runFrame()
+        val after = System.nanoTime()
+
+        val time = backend.presentationTimes[frame]
+        assertTrue("time $time not in $before..$after", time in before..after)
+    }
+
+    @Test
     fun exit_whilePaused_releasesEverythingAndJoins() {
         backend.presentDelayMillis = 1
         val firstFrame = CountDownLatch(1)
@@ -419,6 +443,113 @@ class RenderThreadTest {
     }
 
     @Test
+    fun redrawNeeded_drawsAFrameThenReportsFinished() {
+        showWindow()
+        runFrame()
+
+        thread.requestRedraw(Runnable { log.add("drawingFinished") })
+        assertEquals(emptyList<String>(), log.take())
+
+        assertEquals(listOf("makeCurrent", "onDrawFrame", "present", "onFrameSwapped", "drawingFinished"), runFrame())
+        assertFalse("drawingFinished" in runFrame())
+    }
+
+    @Test
+    fun redrawNeeded_whilePaused_reportsFinishedWithoutDrawing() {
+        showWindow()
+        runFrame()
+        thread.onPause()
+
+        thread.requestRedraw(Runnable { log.add("drawingFinished") })
+
+        assertEquals(listOf("drawingFinished"), log.take())
+        assertFalse("onDrawFrame" in runFrame())
+    }
+
+    @Test
+    fun redrawNeeded_contextLostOnThatFrame_reportsFinished() {
+        showWindow()
+        runFrame()
+        thread.requestRedraw(Runnable { log.add("drawingFinished") })
+        backend.presentResults.add(PresentResult.CONTEXT_LOST)
+
+        val frame = runFrame()
+
+        assertFalse("onFrameSwapped" in frame)
+        assertEquals(1, frame.count { it == "drawingFinished" })
+        assertFalse("drawingFinished" in runFrame())
+    }
+
+    @Test
+    fun redrawNeeded_pausedAfterRequest_reportsFinished() {
+        showWindow()
+        runFrame()
+        thread.requestRedraw(Runnable { log.add("drawingFinished") })
+        thread.onPause()
+
+        val frame = runFrame()
+
+        assertFalse("onDrawFrame" in frame)
+        assertEquals(1, frame.count { it == "drawingFinished" })
+        assertFalse("drawingFinished" in runFrame())
+    }
+
+    @Test
+    fun redrawNeeded_pendingAtExit_reportsFinishedOnce() {
+        var finished = 0
+        showWindow()
+        thread.requestRedraw(Runnable { finished++ })
+        thread.requestExitAndWait()
+
+        thread.start()
+        thread.join(2000)
+
+        assertFalse(thread.isAlive)
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun redrawCallbackThrows_othersRunOnce_andFailureReachesThread() {
+        val failure = IllegalStateException("drawingFinished failed")
+        var thrown = 0
+        var finished = 0
+        val caught = AtomicReference<Throwable>()
+        val handled = CountDownLatch(1)
+        thread.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
+            caught.set(e)
+            handled.countDown()
+        }
+        showWindow()
+        thread.requestRedraw(Runnable {
+            thrown++
+            throw failure
+        })
+        thread.requestRedraw(Runnable { finished++ })
+
+        thread.start()
+
+        assertTrue(handled.await(2, TimeUnit.SECONDS))
+        thread.join(2000)
+        assertSame(failure, caught.get())
+        assertEquals(1, thrown)
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun frameThrows_redrawCallbackFailureIsSuppressed() {
+        val frameFailure = IllegalStateException("context")
+        val callbackFailure = IllegalStateException("drawingFinished failed")
+        backend.createContextFailure = frameFailure
+        showWindow()
+        thread.requestRedraw(Runnable { throw callbackFailure })
+
+        val thrown = runCatching { thread.runOneIterationForTest() }.exceptionOrNull()
+
+        assertSame(frameFailure, thrown)
+        assertSame(callbackFailure, frameFailure.suppressed.single())
+    }
+
+    @Test
     fun uiCalls_afterThreadDied_returnPromptly() {
         backend.createContextFailure = IllegalStateException("context")
         val handled = CountDownLatch(1)
@@ -445,10 +576,9 @@ class RenderThreadTest {
         @Volatile
         var quits = 0
 
-        override fun requestNextVsync(callback: VsyncSource.Callback) {
+        override fun requestNextVsync(callback: VsyncSource.Callback, request: Long) {
             requests.countDown()
-            val now = System.nanoTime()
-            callback.onVsync(now, now)
+            callback.onVsync(request, System.nanoTime())
         }
 
         override fun quit() {

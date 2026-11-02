@@ -92,6 +92,7 @@ public class Config {
         RES_HEIGHT,
         spinnerStyle,
         metronomeSwitch,
+        frameLimiter,
         backButtonPressTime;
 
     private static float soundVolume,
@@ -107,6 +108,35 @@ public class Config {
 
     private static Color4[] comboColors;
     private static Context context;
+
+    /**
+     * Value for {@link #getFrameLimiter()}.
+     * <p>
+     * Frames are paced by the display's vertical sync (default).
+     */
+    public static final int FRAME_LIMITER_VSYNC = 1;
+
+    /**
+     * Value for {@link #getFrameLimiter()}.
+     * <p>
+     * Vertical sync is disabled and the update rate is only capped by the update
+     * clock's hard limit.
+     */
+    public static final int FRAME_LIMITER_UNLIMITED = 0;
+
+    /**
+     * Value for {@link #getFrameLimiter()}.
+     * <p>
+     * Like {@link #FRAME_LIMITER_VSYNC}, but:
+     * <ul>
+     *     <li>Frames carry a presentation time</li>
+     *     <li>Are paced by Choreographer</li>
+     *     <li>The next frame is only started after the vertical sync wait</li>
+     * </ul>
+     * <p>
+     * This trades throughput for lower input-to-display latency.
+     */
+    public static final int FRAME_LIMITER_VSYNC_LOW_LATENCY = -1;
 
     public static final Set<String> SENSITIVE_KEYS = Set.of(
         "installID",
@@ -157,6 +187,7 @@ public class Config {
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
+        frameLimiter = parseFrameLimiter(prefs.getString("frameLimiter", String.valueOf(FRAME_LIMITER_VSYNC)));
 
         measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -811,6 +842,33 @@ public class Config {
 
     public static boolean isForceMaxRefreshRate() {
         return forceMaxRefreshRate;
+    }
+
+    /**
+     * Gets the frame limiter setting.
+     *
+     * @return {@link #FRAME_LIMITER_VSYNC}, {@link #FRAME_LIMITER_VSYNC_LOW_LATENCY}, {@link #FRAME_LIMITER_UNLIMITED},
+     * or a multiple of the display refresh rate (2, 4, or 8) that the update rate is capped at while vertical sync is
+     * disabled.
+     */
+    public static int getFrameLimiter() {
+        return frameLimiter;
+    }
+
+    public static void setFrameLimiter(int frameLimiter) {
+        Config.frameLimiter = frameLimiter;
+    }
+
+    /**
+     * Parses a frame limiter preference value, falling back to {@link #FRAME_LIMITER_VSYNC} if it is invalid.
+     */
+    public static int parseFrameLimiter(String value) {
+        try {
+            int parsed = Integer.parseInt(value);
+            return parsed >= FRAME_LIMITER_VSYNC_LOW_LATENCY ? parsed : FRAME_LIMITER_VSYNC;
+        } catch (NumberFormatException e) {
+            return FRAME_LIMITER_VSYNC;
+        }
     }
 
     public static boolean isShiftPitchInRateChange() {

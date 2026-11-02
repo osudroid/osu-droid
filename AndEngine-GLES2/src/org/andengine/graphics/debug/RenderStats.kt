@@ -52,6 +52,7 @@ object RenderStats {
     private var uploadBytes = 0L
     private var drawStartNanos = 0L
     private var updateNanos = 0L
+    private var renderNanos = 0L
     private val timerNanos = LongArray(TIMER_COUNT)
     private val counters = IntArray(COUNTER_COUNT)
 
@@ -78,6 +79,8 @@ object RenderStats {
     private var maxDrawNanos = 0L
     private var sumUpdateNanos = 0L
     private var maxUpdateNanos = 0L
+    private var sumRenderNanos = 0L
+    private var maxRenderNanos = 0L
     private val sumTimerNanos = LongArray(TIMER_COUNT)
     private val sumCounters = LongArray(COUNTER_COUNT)
     private var sumGpuNanos = 0L
@@ -190,6 +193,15 @@ object RenderStats {
         if (enabled) updateNanos = nanos
     }
 
+    /**
+     * Called by the render thread with its CPU time for the latest presented frame. It is taken after
+     * [endDraw], so it shows up with the next frame.
+     */
+    @JvmStatic
+    fun onRenderWork(nanos: Long) {
+        if (enabled) renderNanos = nanos
+    }
+
     /** Called on the GL thread once the update finished and the scene is about to be drawn. */
     @JvmStatic
     fun beginDraw() {
@@ -233,6 +245,8 @@ object RenderStats {
         if (drawNanos > maxDrawNanos) maxDrawNanos = drawNanos
         sumUpdateNanos += updateNanos
         if (updateNanos > maxUpdateNanos) maxUpdateNanos = updateNanos
+        sumRenderNanos += renderNanos
+        if (renderNanos > maxRenderNanos) maxRenderNanos = renderNanos
         for (i in 0 until TIMER_COUNT) sumTimerNanos[i] += timerNanos[i]
         for (i in 0 until COUNTER_COUNT) sumCounters[i] += counters[i].toLong()
 
@@ -254,6 +268,7 @@ object RenderStats {
         resetFrame()
         resetWindow(0L)
         lastFrameNanos = 0L
+        renderNanos = 0L
         gpuTimer.invalidate()
     }
 
@@ -265,6 +280,7 @@ object RenderStats {
             append("FPS ").append(fmt(windowFrames * 1000.0 / elapsedMs))
             append("  frame ").append(ms(sumFrameNanos / frames)).append('/').append(ms(maxFrameNanos)).append(" ms\n")
             append("draw ").append(ms(sumDrawNanos / frames)).append('/').append(ms(maxDrawNanos))
+            append("  render ").append(ms(sumRenderNanos / frames)).append('/').append(ms(maxRenderNanos))
             append("  update ").append(ms(sumUpdateNanos / frames)).append('/').append(ms(maxUpdateNanos)).append(" ms\n")
             append("calls ").append(sumDrawCalls / frames).append('/').append(maxDrawCalls)
             append("  verts ").append(sumVertices / frames).append('\n')
@@ -330,6 +346,8 @@ object RenderStats {
         maxDrawNanos = 0L
         sumUpdateNanos = 0L
         maxUpdateNanos = 0L
+        sumRenderNanos = 0L
+        maxRenderNanos = 0L
         sumTimerNanos.fill(0L)
         sumCounters.fill(0L)
         sumGpuNanos = 0L

@@ -11,6 +11,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import org.andengine.engine.Engine
 import org.andengine.graphics.gles.EglSurfaceBackend
 import org.andengine.graphics.gles.GlesConfigChooser
@@ -21,7 +24,7 @@ import org.andengine.util.debug.Debug
  * Shows the frames of an [Engine], drawn on a [RenderThread] that runs while the view is attached to a window.
  * Every method is called from the UI thread.
  */
-open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback {
+open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
 
     constructor(context: Context) : super(context)
 
@@ -29,6 +32,21 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback {
 
     /** The frame pacing of the render thread; kept across the threads started for this view. */
     val framePacing = FramePacing()
+
+    /** See [FramePacing.vsyncEnabled]. */
+    fun setVSyncEnabled(enabled: Boolean) {
+        framePacing.vsyncEnabled = enabled
+    }
+
+    /** See [FramePacing.presentationTimeEnabled]. */
+    fun setPresentationTimeEnabled(enabled: Boolean) {
+        framePacing.presentationTimeEnabled = enabled
+    }
+
+    /** See [FramePacing.choreographerPacingEnabled]. */
+    fun setChoreographerPacingEnabled(enabled: Boolean) {
+        framePacing.choreographerPacingEnabled = enabled
+    }
 
     private var engine: Engine? = null
     private var renderer: GlesEngineRenderer? = null
@@ -132,6 +150,47 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback {
         renderThread?.surfaceDestroyed()
     }
 
+    /**
+     * Lets the window wait for a frame drawn for its current state before it is shown, e.g. after a resize or
+     * when it becomes visible. Gives up after [REDRAW_TIMEOUT_MILLIS], so a stuck render thread cannot keep the
+     * window from being shown.
+     */
+    override fun surfaceRedrawNeededAsync(holder: SurfaceHolder, drawingFinished: Runnable) {
+        val request = RedrawRequest(drawingFinished)
+        val thread = renderThread
+        if (thread == null) {
+            request.run()
+            return
+        }
+        postDelayed(request, REDRAW_TIMEOUT_MILLIS)
+        thread.requestRedraw(request)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun surfaceRedrawNeeded(holder: SurfaceHolder) {
+        val drawn = CountDownLatch(1)
+        surfaceRedrawNeededAsync(holder) { drawn.countDown() }
+        try {
+            drawn.await(REDRAW_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+    }
+
+    /** Reports the redraw finished exactly once: after the frame, or on the timeout, whichever comes first. */
+    private inner class RedrawRequest(private val drawingFinished: Runnable) : Runnable {
+
+        private val finished = AtomicBoolean(false)
+
+        override fun run() {
+            // Also runs on the render thread, so the pending timeout is not removed here: View.removeCallbacks
+            // belongs to the UI thread, and the flag already turns the timeout into a no-op.
+            if (finished.compareAndSet(false, true)) {
+                drawingFinished.run()
+            }
+        }
+    }
+
     private fun startRenderThread() {
         val previous = exitingRenderThread
         if (previous != null) {
@@ -156,5 +215,10 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback {
             thread.surfaceCreated(holder.surface)
             thread.surfaceChanged(surfaceWidth, surfaceHeight)
         }
+    }
+
+    private companion object {
+        // Matches the time the render thread's other UI calls wait for an acknowledgement.
+        const val REDRAW_TIMEOUT_MILLIS = 2000L
     }
 }

@@ -46,6 +46,7 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
+import com.osudroid.FrameLimiterMode;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
@@ -198,6 +199,9 @@ public class MainActivity extends BaseGameActivity implements
             public void onDisplayChanged(int displayId) {
                 if (displayId == display.getDisplayId()) {
                     currentRefreshRate = display.getRefreshRate();
+
+                    // Refresh-rate multiples of the frame limiter depend on the current refresh rate.
+                    applyFrameLimiterSetting(Config.getFrameLimiter());
                 }
             }
         };
@@ -503,6 +507,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine, this);
+        applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
@@ -1341,6 +1346,32 @@ public class MainActivity extends BaseGameActivity implements
 
             getWindow().setAttributes(lp);
         });
+    }
+
+    /**
+     * Applies a frame limiter setting to the render surface and the update clock.
+     *
+     * @param frameLimiter A value returned by {@link Config#getFrameLimiter()}.
+     */
+    public void applyFrameLimiterSetting(int frameLimiter) {
+        FrameLimiterMode mode = FrameLimiterMode.of(frameLimiter, currentRefreshRate);
+
+        if (mRenderSurfaceView != null) {
+            mRenderSurfaceView.setVSyncEnabled(mode.getVsync());
+            mRenderSurfaceView.setPresentationTimeEnabled(mode.getPresentationTime());
+            mRenderSurfaceView.setChoreographerPacingEnabled(mode.getChoreographerPacing());
+        }
+
+        if (mEngine != null) {
+            mEngine.setReleaseUpdateAfterSwap(mode.getReleaseUpdateAfterSwap());
+        }
+
+        if (mEngine instanceof UIEngine uiEngine) {
+            float maximumUpdateHz = mode.getMaximumUpdateHz();
+
+            // The clock is read on the update thread, so change it there.
+            uiEngine.runOnUpdateThread(() -> uiEngine.getClock().setMaximumUpdateHz(maximumUpdateHz));
+        }
     }
 
     private boolean checkPermissions() {

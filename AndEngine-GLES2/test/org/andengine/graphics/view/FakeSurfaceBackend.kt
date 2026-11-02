@@ -97,8 +97,12 @@ class FakeSurfaceBackend(private val log: CallLog) : SurfaceBackend {
         log.add("setSwapInterval($interval)")
     }
 
+    /** The values passed to [setPresentationTime], in order. */
+    val presentationTimes = java.util.concurrent.CopyOnWriteArrayList<Long>()
+
     override fun setPresentationTime(nanos: Long) {
         log.add("setPresentationTime")
+        presentationTimes.add(nanos)
     }
 
     override fun clearPresentationTime() {
