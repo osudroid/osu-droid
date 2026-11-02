@@ -339,7 +339,7 @@ void main() {
         u0: Float, v0: Float, u1: Float, v1: Float,
         rgba: Int
     ) {
-        if (!BatchTexture.isLoaded(texture)) return
+        if (!isDrawable(texture)) return
         val a = matrix[0]
         val b = matrix[1]
         val c = matrix[4]
@@ -360,7 +360,7 @@ void main() {
      */
     @JvmStatic
     fun addQuad(texture: Texture, blend: BlendMode, x: FloatArray, y: FloatArray, u: FloatArray, v: FloatArray, rgba: Int) {
-        if (!BatchTexture.isLoaded(texture)) return
+        if (!isDrawable(texture)) return
         for (k in 0 until 4) corner(k, x[k], y[k], u[k], v[k])
         addSpriteCorners(texture, blend, rgba)
     }
@@ -376,7 +376,7 @@ void main() {
         x: FloatArray, y: FloatArray, u: FloatArray, v: FloatArray,
         rgba: Int
     ) {
-        if (!BatchTexture.isLoaded(texture)) return
+        if (!isDrawable(texture)) return
         val a = matrix[0]
         val b = matrix[1]
         val c = matrix[4]
@@ -388,6 +388,62 @@ void main() {
             val ly = y[k]
             corner(k, a * lx + c * ly + tx, b * lx + d * ly + ty, u[k], v[k])
         }
+        addSpriteCorners(texture, blend, rgba)
+    }
+
+    /**
+     * [addQuad] with the corners passed as values, for callers that add many quads in a row
+     * (storyboards, particles): the corners ([x0], [y0]) to ([x3], [y3]) in local coordinates in
+     * the order of [addQuad], transformed by the 2D part of the column-major model-view [matrix];
+     * the texture rectangle ([u0], [v0])-([u1], [v1]) runs from corner 0 to corner 2 (swap the
+     * ends to mirror). A quad that continues the pending batch (same texture and blend mode, no
+     * clip, room left) is written straight away; any other goes the general way of [addQuad].
+     */
+    @JvmStatic
+    fun addQuad(
+        texture: Texture,
+        blend: BlendMode,
+        matrix: FloatArray,
+        x0: Float, y0: Float, x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float,
+        u0: Float, v0: Float, u1: Float, v1: Float,
+        rgba: Int
+    ) {
+        val a = matrix[0]
+        val b = matrix[1]
+        val c = matrix[4]
+        val d = matrix[5]
+        val tx = matrix[12]
+        val ty = matrix[13]
+        val px0 = a * x0 + c * y0 + tx
+        val py0 = b * x0 + d * y0 + ty
+        val px1 = a * x1 + c * y1 + tx
+        val py1 = b * x1 + d * y1 + ty
+        val px2 = a * x2 + c * y2 + tx
+        val py2 = b * x2 + d * y2 + ty
+        val px3 = a * x3 + c * y3 + tx
+        val py3 = b * x3 + d * y3 + ty
+
+        val count = quadCount
+        if (count > 0 && count < MAX_QUADS && texture === this.texture && blend === this.blend &&
+            !clipActive && !pendingScissored
+        ) {
+            // Continues the pending batch: already checked, keyed and armed when it started.
+            val color = vertexColor(rgba)
+            val layer = spriteLayer
+            var i = count * INTS_PER_QUAD
+            i = put(i, px0, py0, u0, v0, color, layer)
+            i = put(i, px1, py1, u1, v0, color, layer)
+            i = put(i, px2, py2, u1, v1, color, layer)
+            put(i, px3, py3, u0, v1, color, layer)
+            quadCount = count + 1
+            return
+        }
+
+        if (!isDrawable(texture)) return
+        corner(0, px0, py0, u0, v0)
+        corner(1, px1, py1, u1, v0)
+        corner(2, px2, py2, u1, v1)
+        corner(3, px3, py3, u0, v1)
         addSpriteCorners(texture, blend, rgba)
     }
 
@@ -616,7 +672,17 @@ void main() {
 
     /** [flush] for the end of a frame; counted as the "batch.flush.frame" reason. */
     @JvmStatic
-    fun flushFrame() = flushFor(REASON_FRAME)
+    fun flushFrame() {
+        flushFor(REASON_FRAME)
+        BatchTexture.endFrame()
+    }
+
+    /**
+     * [BatchTexture.isLoaded], skipped for the texture of the pending quads: it was checked when
+     * they started, and textures are only loaded or unloaded between batches, not within one.
+     */
+    private fun isDrawable(texture: Texture): Boolean =
+        (texture === this.texture && quadCount > 0) || BatchTexture.isLoaded(texture)
 
     private fun flushFor(reason: Int) {
         if (quadCount == 0) return
@@ -763,6 +829,7 @@ void main() {
     fun releaseResources() {
         quadCount = 0
         disarm()
+        BatchTexture.endFrame()
         texture = null
         glyphArray = null
         blend = null
@@ -847,7 +914,8 @@ void main() {
     /** [layer] as the last int of a vertex: the UShort first in memory, then the padding. */
     private fun layerInt(layer: Int): Int = if (littleEndian) layer else layer shl 16
 
-    private fun put(index: Int, x: Float, y: Float, u: Float, v: Float, color: Int, layer: Int): Int {
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun put(index: Int, x: Float, y: Float, u: Float, v: Float, color: Int, layer: Int): Int {
         val a = vertices
         a[index] = java.lang.Float.floatToRawIntBits(x)
         a[index + 1] = java.lang.Float.floatToRawIntBits(y)

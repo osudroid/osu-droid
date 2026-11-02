@@ -102,6 +102,20 @@ object GlesPipeline {
         return BlendMode(source, destination, source, destination)
     }
 
+    /** The [CompareFunction] of a `glDepthFunc` argument, or null if [function] is not one.
+     * Allocation free. */
+    fun compareFunctionOf(function: Int): CompareFunction? = when (function) {
+        GLES20.GL_NEVER -> CompareFunction.Never
+        GLES20.GL_LESS -> CompareFunction.Less
+        GLES20.GL_LEQUAL -> CompareFunction.LessOrEqual
+        GLES20.GL_EQUAL -> CompareFunction.Equal
+        GLES20.GL_GREATER -> CompareFunction.Greater
+        GLES20.GL_GEQUAL -> CompareFunction.GreaterOrEqual
+        GLES20.GL_NOTEQUAL -> CompareFunction.NotEqual
+        GLES20.GL_ALWAYS -> CompareFunction.Always
+        else -> null
+    }
+
     fun compareFunction(function: CompareFunction): Int = when (function) {
         CompareFunction.Never -> GLES20.GL_NEVER
         CompareFunction.Less -> GLES20.GL_LESS

@@ -21,15 +21,16 @@ object BatchTexture {
 
     private val entries = WeakHashMap<ITexture, Entry>()
 
-    // One-entry cache in front of the map. It references the texture only weakly (through the
-    // entry's provider), so it does not keep a texture alive either.
+    // One-entry cache in front of the map. Its key is held strongly, so a hit costs no weak
+    // reference lookup; [endFrame] drops it, so it keeps a texture alive for one frame at most.
+    private var lastLegacy: ITexture? = null
     private var last: Entry? = null
 
     /** The view of [legacy]; the same instance for as long as [legacy] lives. */
     @JvmStatic
     fun of(legacy: ITexture): Texture {
         val cached = last
-        if (cached != null && cached.provider.texture === legacy) return cached.view
+        if (cached != null && lastLegacy === legacy) return cached.view
 
         var entry = entries[legacy]
         if (entry == null) {
@@ -37,7 +38,15 @@ object BatchTexture {
             entries[legacy] = entry
         }
         last = entry
+        lastLegacy = legacy
         return entry.view
+    }
+
+    /** Drops the strong reference of the one-entry cache; called at the end of every frame. */
+    @JvmStatic
+    fun endFrame() {
+        lastLegacy = null
+        last = null
     }
 
     /**

@@ -22,8 +22,8 @@ object RenderStats {
     const val TAG = "RenderStats"
 
     // Callers register their own named timers and counters, see [registerTimer]/[registerCounter].
-    private const val TIMER_COUNT = 8
-    private const val COUNTER_COUNT = 8
+    private const val TIMER_COUNT = 16
+    private const val COUNTER_COUNT = 16
     private const val WINDOW_MS = 500L
     private const val NANOS_PER_MS = 1_000_000.0
 
@@ -133,18 +133,16 @@ object RenderStats {
 
     /**
      * Registers a named timer shown in the summary and returns its slot for [addTime].
-     * Registering the same name again returns the existing slot.
-     *
-     * @throws IllegalStateException if all slots are taken.
+     * Registering the same name again returns the existing slot. Returns -1 if all slots are
+     * taken; [addTime] ignores that slot, so statistics never stop the caller.
      */
     @JvmStatic
     fun registerTimer(name: String): Int = register(timerNames, name)
 
     /**
      * Registers a named counter shown in the summary and returns its slot for [count].
-     * Registering the same name again returns the existing slot.
-     *
-     * @throws IllegalStateException if all slots are taken.
+     * Registering the same name again returns the existing slot. Returns -1 if all slots are
+     * taken; [count] ignores that slot, so statistics never stop the caller.
      */
     @JvmStatic
     fun registerCounter(name: String): Int = register(counterNames, name)
@@ -160,7 +158,8 @@ object RenderStats {
                 return i
             }
         }
-        throw IllegalStateException("No free RenderStats slot for '$name'")
+        Log.w(TAG, "No free RenderStats slot for '$name'")
+        return -1
     }
 
     /** Returns the current time for [addTime], or 0 while disabled. */
@@ -170,12 +169,12 @@ object RenderStats {
     /** Adds the time since [start] (from [now]) to the given timer slot of the current frame. */
     @JvmStatic
     fun addTime(timer: Int, start: Long) {
-        if (enabled && start != 0L) timerNanos[timer] += System.nanoTime() - start
+        if (enabled && start != 0L && timer >= 0) timerNanos[timer] += System.nanoTime() - start
     }
 
     @JvmStatic
     fun count(counter: Int, amount: Int) {
-        if (enabled) counters[counter] += amount
+        if (enabled && counter >= 0) counters[counter] += amount
     }
 
     /** The value of a counter in the current, unfinished frame. */

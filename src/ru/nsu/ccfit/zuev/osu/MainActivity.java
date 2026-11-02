@@ -228,7 +228,6 @@ public class MainActivity extends BaseGameActivity implements
         // Name-keyed, so a recreated activity replaces instead of duplicating the entries.
         // Shader programs (incl. storyboard / external OES) are reset by the registry as well.
         GlesLegacyRestorers.register("ui-buffers", com.reco1l.andengine.buffered.Buffer::onContextLost);
-        GlesLegacyRestorers.register("triangle-renderer", () -> com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss());
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.

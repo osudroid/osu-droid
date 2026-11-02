@@ -18,6 +18,7 @@ import org.andengine.graphics.gles.GlesTexture
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.opengl.texture.ITexture
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
@@ -472,6 +473,94 @@ class QuadBatcherTest {
         assertTrue(view.isLoaded)
         add(view)
         assertTrue(QuadBatcher.hasPending)
+    }
+
+    private val moved = floatArrayOf(
+        2f, 0.5f, 0f, 0f,
+        -0.25f, 3f, 0f, 0f,
+        0f, 0f, 1f, 0f,
+        5f, 7f, 0f, 1f
+    )
+
+    private fun valueQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
+        QuadBatcher.addQuad(
+            texture, BlendMode.Alpha, moved,
+            x, 0f, x + 1f, 0.1f, x + 1.2f, 1f, x - 0.1f, 0.9f,
+            0.1f, 0.2f, 0.7f, 0.9f, rgba
+        )
+
+    private fun arrayQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
+        QuadBatcher.addQuad(
+            texture, BlendMode.Alpha, moved,
+            floatArrayOf(x, x + 1f, x + 1.2f, x - 0.1f), floatArrayOf(0f, 0.1f, 1f, 0.9f),
+            floatArrayOf(0.1f, 0.7f, 0.7f, 0.1f), floatArrayOf(0.2f, 0.2f, 0.9f, 0.9f), rgba
+        )
+
+    @Test
+    fun valueQuad_sameVerticesAsArrayQuad() {
+        arrayQuad()
+        arrayQuad(x = 2f, rgba = -1)
+        QuadBatcher.flush()
+        val expected = gl.vertexUploads.last().copyOf()
+
+        valueQuad()
+        valueQuad(x = 2f, rgba = -1)
+        QuadBatcher.flush()
+
+        assertArrayEquals(expected, gl.vertexUploads.last())
+        assertEquals(2 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, expected.size)
+    }
+
+    @Test
+    fun valueQuad_continuesPendingBatch() {
+        valueQuad()
+        valueQuad(x = 1f)
+        valueQuad(x = 2f)
+        assertEquals("no flush within one texture", 0, draws())
+        valueQuad(textureB)
+        assertEquals("another texture flushes", 1, draws())
+        QuadBatcher.flush()
+        assertEquals(2, draws())
+    }
+
+    @Test
+    fun valueQuad_continuingBatch_isStillClipped() {
+        // Identity projection: the left half of the surface is x < 0 in world units.
+        QuadBatcher.setClip(0, 0, 400, 480)
+        QuadBatcher.addQuad(textureA, BlendMode.Alpha, identity, -0.9f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.9f, 0.5f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.addQuad(textureA, BlendMode.Alpha, identity, 0.2f, -0.5f, 0.6f, -0.5f, 0.6f, 0.5f, 0.2f, 0.5f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.clearClip()
+        QuadBatcher.flush()
+        assertEquals("the quad outside the clip is dropped", 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
+    }
+
+    @Test
+    fun pendingTexture_notCheckedAgain_untilFlushed() {
+        var id = 7
+        var checks = 0
+        val view = GlesLegacyTextureView({ checks++; id }, 16, 16, "legacy")
+        add(view)
+        val afterFirst = checks
+        add(view)
+        add(view)
+        assertEquals("quads of the pending texture skip the load check", afterFirst, checks)
+
+        QuadBatcher.flush()
+        id = -1
+        checks = 0
+        add(view)
+        assertTrue("checked again once the batch was drawn", checks > 0)
+        assertFalse(QuadBatcher.hasPending)
+    }
+
+    @Test
+    fun batchTexture_endFrame_keepsTheView() {
+        val legacy = fakeLegacyTexture(4, 4) { 2 }
+        val view = BatchTexture.of(legacy)
+        QuadBatcher.flushFrame()
+        assertSame(view, BatchTexture.of(legacy))
+        BatchTexture.endFrame()
+        assertSame(view, BatchTexture.of(legacy))
     }
 
     @Test

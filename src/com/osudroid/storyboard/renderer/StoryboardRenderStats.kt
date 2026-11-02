@@ -8,17 +8,14 @@ import org.andengine.graphics.debug.RenderStats
  */
 internal object StoryboardRenderStats {
 
-    /** Total CPU time of drawing the storyboard (evaluation, vertex building and flushes). */
+    /** Total CPU time of drawing the storyboard (evaluation and handing the quads to the
+     * quad batch; the batch's draws are counted by the engine). */
     @JvmField
     val TIME_TOTAL = RenderStats.registerTimer("sb")
 
     /** CPU time of evaluating the sprite states (`PlayableSprite.update`). */
     @JvmField
     val TIME_EVAL = RenderStats.registerTimer("sb.eval")
-
-    /** CPU time of issuing the batched quads to GL. */
-    @JvmField
-    val TIME_FLUSH = RenderStats.registerTimer("sb.flush")
 
     /** Sprites in the active windows of the visible layers. */
     @JvmField

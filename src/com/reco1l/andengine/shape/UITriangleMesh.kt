@@ -1,15 +1,16 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
+import org.andengine.graphics.gles.GlesPipeline
 import android.opengl.GLES32
-import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
 import com.reco1l.andengine.buffered.UIBufferedComponent
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.*
-import org.andengine.entity.shape.IShape
-import org.andengine.opengl.shader.PositionColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.*
 
 // TODO: This class should be replaced with a more efficient BufferedEntity implementation.
@@ -52,6 +53,10 @@ class UITriangleMesh : UIComponent() {
     }
 
 
+    private var cachedSource = -1
+    private var cachedDestination = -1
+    private var cachedBlend = BlendMode.Alpha
+
     override fun beginDraw(pGLState: GLState) {
         super.beginDraw(pGLState)
 
@@ -63,22 +68,33 @@ class UITriangleMesh : UIComponent() {
         if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
+            // Pending quads belong before the clear; and a clear ignores the depth buffer while the
+            // depth mask is off, which the mesh renderer's state restore can leave behind.
+            QuadBatcher.flush()
+            if (clearInfo.depthBuffer) GlesBackend.state.depthMask(true)
             GlesBackend.state.clear(clearMask)
         }
 
-        // Depth testing
-        if (depthInfo.test) {
-            GlesBackend.state.depthFunc(depthInfo.function)
-            GlesBackend.state.depthMask(depthInfo.mask)
-
-            pGLState.enableDepthTest()
-        } else {
+        // The depth state itself comes from the pipeline of the draw.
+        if (!depthInfo.test) {
             pGLState.disableDepthTest()
+        }
+    }
+
+    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+        super.doDraw(pGLState, pCamera)
+
+        if (vertices.length == 0) {
+            // Ensure depth test is cleaned up even if there's nothing to render.
+            if (depthInfo.test) {
+                pGLState.disableDepthTest()
+            }
+            return
         }
 
         // Blending
-        var sourceFactor = IShape.BLENDFUNCTION_SOURCE_DEFAULT
-        var destinationFactor = IShape.BLENDFUNCTION_DESTINATION_DEFAULT
+        var sourceFactor = GLES32.GL_SRC_ALPHA
+        var destinationFactor = GLES32.GL_ONE_MINUS_SRC_ALPHA
 
         if (blendInfo == BlendInfo.Inherit) {
             val parent = parent
@@ -95,52 +111,25 @@ class UITriangleMesh : UIComponent() {
             destinationFactor = blendInfo.destinationFactor
         }
 
-        pGLState.enableBlend()
-        pGLState.blendFunction(sourceFactor, destinationFactor)
-    }
-
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
-        super.doDraw(pGLState, pCamera)
-
-        if (vertices.length == 0) {
-            // Ensure depth test is cleaned up even if there's nothing to render.
-            if (depthInfo.test) {
-                pGLState.disableDepthTest()
-            }
-            return
+        if (sourceFactor != cachedSource || destinationFactor != cachedDestination) {
+            cachedSource = sourceFactor
+            cachedDestination = destinationFactor
+            // Factors without an engine equivalent draw as straight alpha.
+            cachedBlend = GlesPipeline.blendModeOf(sourceFactor, destinationFactor) ?: BlendMode.Alpha
         }
 
-        // Bind PositionColor shader
-        val shader = PositionColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
+        val depthTest = if (depthInfo.test) GlesPipeline.compareFunctionOf(depthInfo.function) else null
 
-        // Upload MVP matrix
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
-        }
+        MeshRenderer.draw(
+            PrimitiveType.Triangles,
+            vertices.ary, vertices.offset, vertices.length / 2,
+            pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            cachedBlend, depthTest, depthInfo.mask
+        )
 
-        // Provide constant color (disable per-vertex color array)
-        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GlesBackend.state.vertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
-
-        // Disable texture coordinates
-        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-
-        // Ensure position attribute array is enabled
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-
-
-        TriangleRenderer.get().renderTriangles(vertices, pGLState)
-
-        // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-
-        // Disable depth test after drawing so subsequent entities (sprites, circles, etc.)
-        // are not accidentally depth-tested against values we wrote.
+        // The mesh renderer restores the state it found; disable the depth test after drawing so
+        // subsequent entities (sprites, circles, etc.) are not accidentally tested against values we wrote.
         if (depthInfo.test) {
             pGLState.disableDepthTest()
         }
