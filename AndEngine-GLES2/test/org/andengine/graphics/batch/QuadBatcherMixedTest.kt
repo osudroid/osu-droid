@@ -2,8 +2,6 @@ package org.andengine.graphics.batch
 
 import android.opengl.GLES20
 import android.opengl.GLES30
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.Texture
@@ -13,7 +11,13 @@ import org.andengine.graphics.gles.GlesDebugOptions
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.indexOfCall
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastCallBefore
+import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
 import org.junit.After
@@ -26,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 /** Sprites and glyphs share one program, one vertex format and one draw. */
 @RunWith(RobolectricTestRunner::class)
@@ -37,48 +42,24 @@ class QuadBatcherMixedTest {
     private lateinit var spriteB: GlesTexture
     private val slots = ArrayList<GlyphSlot>()
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
     private val triangle = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f)
 
     private fun drawMesh() = MeshRenderer.draw(
-        PrimitiveType.Triangles, triangle, 0, 3, identity, identity, -1, BlendMode.Alpha, null, false
+        PrimitiveType.Triangles, triangle, 0, 3, IDENTITY, IDENTITY, -1, BlendMode.Alpha, null, false
     )
 
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
-
-    private fun lastVertices(): ByteBuffer =
-        ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
-
     private fun sprite(texture: Texture = spriteA) =
-        QuadBatcher.add(texture, BlendMode.Alpha, identity, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.add(texture, BlendMode.Alpha, IDENTITY, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
 
     private fun glyph(slot: GlyphSlot = slots[0]) =
-        QuadBatcher.addGlyph(slot, BlendMode.Alpha, identity, 0f, 0f, 4f, 4f, -1)
+        QuadBatcher.addGlyph(slot, BlendMode.Alpha, IDENTITY, 0f, 0f, 4f, 4f, -1)
 
     private fun id(texture: Texture) = (texture as GlesTexture).textureId
-
-    private fun indexOf(call: String): Int {
-        val index = gl.calls.indexOf(call)
-        assertTrue("$call missing in ${gl.calls}", index >= 0)
-        return index
-    }
-
-    private fun lastBefore(index: Int, prefix: String): String? =
-        gl.calls.subList(0, index).lastOrNull { it.startsWith(prefix) }
 
     @Before
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         // Two layers per array: the third 60x60 slot lands in the second array.
@@ -91,7 +72,7 @@ class QuadBatcherMixedTest {
         for (s in slots) s.uploaded = true
         // Created up front, so the textures exist before any batch is pending.
         for (s in slots) s.array.texture
-        QuadBatcher.setProjection(identity)
+        QuadBatcher.setProjection(IDENTITY)
         gl.calls.clear()
     }
 
@@ -99,8 +80,7 @@ class QuadBatcherMixedTest {
     fun tearDown() {
         QuadBatcher.releaseResources()
         MeshRenderer.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         spriteA.dispose()
         spriteB.dispose()
         for (s in slots) if (s.array.hasTexture) s.array.texture.dispose()
@@ -114,11 +94,11 @@ class QuadBatcherMixedTest {
         glyph()
         sprite()
         glyph()
-        assertEquals(gl.calls.toString(), 0, draws())
+        assertEquals(gl.calls.toString(), 0, gl.draws())
 
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},24,${GLES20.GL_UNSIGNED_SHORT},0)"))
         assertEquals(4 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
         assertEquals(1, QuadBatcher.pipelineCount)
@@ -130,14 +110,14 @@ class QuadBatcherMixedTest {
         sprite(spriteA)
         glyph()
         sprite(spriteB)
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertEquals(2 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
 
         // The glyph array stays the same: no flush for the glyph after the new sprite texture.
         glyph()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 2, draws())
+        assertEquals(gl.calls.toString(), 2, gl.draws())
         assertEquals(2 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
     }
 
@@ -148,16 +128,16 @@ class QuadBatcherMixedTest {
         glyph(slots[0])
         sprite()
         glyph(slots[2])
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
 
         // The sprite texture stays the same: no flush for the sprite after the new array.
         sprite()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 2, draws())
+        assertEquals(gl.calls.toString(), 2, gl.draws())
 
         val first = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
-        val bind = indexOf("glBindTexture(${GLES30.GL_TEXTURE_2D_ARRAY},${id(slots[2].array.texture)})")
+        val bind = gl.indexOfCall("glBindTexture(${GLES30.GL_TEXTURE_2D_ARRAY},${id(slots[2].array.texture)})")
         assertTrue(gl.calls.toString(), first < bind)
     }
 
@@ -165,8 +145,8 @@ class QuadBatcherMixedTest {
     fun blendChange_flushesMixedBatch() {
         sprite()
         glyph()
-        QuadBatcher.add(spriteA, BlendMode.Additive, identity, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
-        assertEquals(gl.calls.toString(), 1, draws())
+        QuadBatcher.add(spriteA, BlendMode.Additive, IDENTITY, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        assertEquals(gl.calls.toString(), 1, gl.draws())
     }
 
     @Test
@@ -176,7 +156,7 @@ class QuadBatcherMixedTest {
         QuadBatcher.flush()
 
         assertEquals(24, QuadBatcher.VERTEX_SIZE_BYTES)
-        val b = lastVertices()
+        val b = gl.lastVertices()
         for (vertex in 0 until 4) {
             val base = vertex * QuadBatcher.VERTEX_SIZE_BYTES
             assertEquals(QuadBatcher.SPRITE_LAYER, b.getShort(base + 20).toInt() and 0xFFFF)
@@ -220,7 +200,7 @@ class QuadBatcherMixedTest {
         glyph()
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertFalse(gl.calls.toString(), gl.calls.any { it.startsWith("glBindTexture(${GLES20.GL_TEXTURE_2D},") })
         assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", gl.calls.last { it.startsWith("glActiveTexture") })
     }
@@ -237,11 +217,11 @@ class QuadBatcherMixedTest {
         // The mesh flushes the quads first and binds no texture of its own.
         drawMesh()
 
-        val draw = indexOf("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
+        val draw = gl.indexOfCall("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
         val batch = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
         assertTrue(gl.calls.toString(), batch in 0 until draw)
-        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", lastBefore(draw, "glActiveTexture"))
-        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", lastBefore(draw, "glBindTexture(${GLES20.GL_TEXTURE_2D},"))
+        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", gl.lastCallBefore(draw, "glActiveTexture"))
+        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", gl.lastCallBefore(draw, "glBindTexture(${GLES20.GL_TEXTURE_2D},"))
         assertFalse(QuadBatcher.hasPending)
     }
 
@@ -271,13 +251,13 @@ class QuadBatcherMixedTest {
         glyph(slots[0])
         // Another array: flushes inside the open pass, which the batch does not end.
         glyph(slots[2])
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(context.isInPass)
 
         assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", gl.calls.last { it.startsWith("glActiveTexture") })
-        // A legacy bind now lands on unit 0.
+        // A bind through the state cache lands on unit 0.
         GlesBackend.state.bindTexture(GLES20.GL_TEXTURE_2D, 77)
-        val bind = indexOf("glBindTexture(${GLES20.GL_TEXTURE_2D},77)")
-        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", lastBefore(bind, "glActiveTexture"))
+        val bind = gl.indexOfCall("glBindTexture(${GLES20.GL_TEXTURE_2D},77)")
+        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE0})", gl.lastCallBefore(bind, "glActiveTexture"))
     }
 }

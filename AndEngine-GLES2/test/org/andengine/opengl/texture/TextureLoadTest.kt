@@ -6,6 +6,7 @@ import android.opengl.GLES30
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesTextures
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
@@ -31,10 +32,7 @@ class TextureLoadTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
     }
 
     private fun count(call: String) = gl.calls.count { it == call }
@@ -124,7 +122,7 @@ class TextureLoadTest {
     @Test
     fun newContext_forgetsBindings() {
         GlesTextures.bind(5)
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
         GlesTextures.bind(5)
 
         assertEquals(2, count(bind(5)))

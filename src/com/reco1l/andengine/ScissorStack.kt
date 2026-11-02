@@ -2,7 +2,6 @@ package com.reco1l.andengine
 
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
-import android.opengl.*
 import androidx.core.util.Pools.*
 import com.reco1l.framework.math.*
 import java.util.Stack

@@ -5,9 +5,9 @@ import org.andengine.entity.shape.IShape;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.SpriteBatching;
+import org.andengine.graphics.DrawContext;
 import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.shape.ShapeBatching;
-import org.andengine.graphics.DrawContext;
 import org.andengine.util.algorithm.collision.LineCollisionChecker;
 import org.andengine.util.algorithm.collision.RectangularShapeCollisionChecker;
 import org.andengine.util.exception.MethodNotSupportedException;
@@ -181,7 +181,6 @@ public class Line extends Shape {
 	/** The end points are read from the line when it is drawn. */
 	@Override
 	protected void onUpdateVertices() {
-		/* Nothing. */
 	}
 
 	@Override

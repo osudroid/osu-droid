@@ -2,12 +2,10 @@ package com.reco1l.andengine.text
 
 import com.reco1l.andengine.buffered.*
 import org.andengine.engine.camera.*
-import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.texture.region.*
-import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -152,17 +150,13 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
-        val clearMask = clearMask()
-        if (clearMask != 0) {
-            GlesBackend.state.clear(clearMask)
-        }
+        clearIfRequested()
 
         if (textureRegions.isEmpty()) {
             return
         }
 
-        // Every GL blend factor the UI uses has a batch counterpart.
-        val blend = batchBlendMode() ?: BlendMode.Alpha
+        val blend = meshBlendMode()
         val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
 
         QuadBatcher.setProjection(pGLState.projectionGLMatrix)
@@ -195,15 +189,6 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
 
             offsetX += cellWidth + spacing
         }
-    }
-
-    override fun onCreateBuffer(): IBuffer? {
-        // The glyphs go through the quad batch; there is no buffer of its own.
-        return null
-    }
-
-    override fun onUpdateBuffer() {
-        // Nothing to do here, there is no buffer.
     }
 }
 

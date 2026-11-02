@@ -4,9 +4,8 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Typeface
 import org.andengine.engine.Engine
-import org.andengine.graphics.text.AndroidGlyphRasterizer
-import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.opengl.font.Font
+import org.andengine.opengl.font.FontFactory
 import org.andengine.opengl.font.FontManager
 import org.andengine.opengl.font.StrokeFont
 import ru.nsu.ccfit.zuev.osu.Config
@@ -69,8 +68,10 @@ class FontStore {
 
         existing(resname, spec)?.let { return it }
 
-        val rasterizer = AndroidGlyphRasterizer(typeface(file), scaledSize * FontManager.getRasterScale(), true)
-        return register(resname, spec, Font(fontManager, rasterizer, GlyphAtlas.shared, color))
+        val font =
+            if (file == null) FontFactory.create(fontManager, defaultTypeface(), scaledSize.toFloat(), true, color)
+            else FontFactory.createFromAsset(fontManager, assets, "fonts/$file", scaledSize.toFloat(), true, color)
+        return register(resname, spec, font)
     }
 
     @Synchronized
@@ -82,20 +83,19 @@ class FontStore {
 
         (existing(resname, spec) as? StrokeFont)?.let { return it }
 
-        val scale = FontManager.getRasterScale()
-        val rasterizer = AndroidGlyphRasterizer(typeface(file), scaledSize * scale, true, strokeWidth * scale)
-        return register(resname, spec, StrokeFont(fontManager, rasterizer, GlyphAtlas.shared, color1, color2, false))
+        val font =
+            if (file == null) FontFactory.createStroke(fontManager, defaultTypeface(), scaledSize.toFloat(), true, color1, strokeWidth, color2, false)
+            else FontFactory.createStrokeFromAsset(fontManager, assets, "fonts/$file", scaledSize.toFloat(), true, color1, strokeWidth, color2, false)
+        return register(resname, spec, font)
     }
 
     private fun existing(resname: String, spec: Spec): Font? =
         if (specs[resname] == spec) fonts[resname] else null
 
-    private fun typeface(file: String?): Typeface =
-        if (file == null) Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        else Typeface.createFromAsset(assets, "fonts/$file")
+    private fun defaultTypeface(): Typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
+    /** [font] comes from [FontFactory], which already loaded it into [fontManager]. */
     private fun <T : Font> register(resname: String, spec: Spec, font: T): T {
-        fontManager.loadFont(font)
         val old = fonts.put(resname, font)
         specs[resname] = spec
         if (old != null) fontManager.unloadFont(old)

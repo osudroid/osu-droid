@@ -2,7 +2,6 @@ package org.andengine.opengl.font;
 
 import java.util.ArrayList;
 
-
 /**
  * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga Inc.
@@ -67,11 +66,14 @@ public class FontManager {
 		this.mFontsManaged.clear();
 	}
 
+	/** Registers the font once; loading an already managed font again changes nothing. */
 	public synchronized void loadFont(final Font pFont) {
 		if(pFont == null) {
 			throw new IllegalArgumentException("pFont must not be null!");
 		}
-		this.mFontsManaged.add(pFont);
+		if(!this.mFontsManaged.contains(pFont)) {
+			this.mFontsManaged.add(pFont);
+		}
 	}
 
 	public synchronized void loadFonts(final Font ...pFonts) {

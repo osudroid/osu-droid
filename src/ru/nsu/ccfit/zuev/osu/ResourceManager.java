@@ -144,15 +144,11 @@ public class ResourceManager {
      * Sessions may nest. Always pair with {@link #endTextureSession()} in a {@code finally} block.
      */
     public void beginTextureSession() {
-        if (atlasPages != null) {
-            atlasPages.beginSession();
-        }
+        atlasPages.beginSession();
     }
 
     public void endTextureSession() {
-        if (atlasPages != null) {
-            atlasPages.endSession();
-        }
+        atlasPages.endSession();
     }
 
     public void loadCustomSkin(String folder) {
@@ -631,7 +627,7 @@ public class ResourceManager {
         for (final String s : customTextureStore.getKeys()) {
             TextureRegion tex = customTextureStore.get(s);
             // Atlas regions are released by customTextureStore.clear() below instead.
-            // Also while still queued (pixels prepared in the background): unloading cancels the load.
+            // Queued textures are unloaded too: unloading cancels a pending load.
             if (tex != null && !customTextureStore.isAtlasRegion(tex) && tex.getTexture() != null) {
                 engine.getTextureManager().unloadTexture(tex.getTexture());
             }

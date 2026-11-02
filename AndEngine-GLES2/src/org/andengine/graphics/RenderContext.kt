@@ -3,9 +3,9 @@ package org.andengine.graphics
 /**
  * Records the draws of a frame, pass by pass. Bindings ([setPipeline], [setTexture], buffers,
  * scissor, viewport) stay in effect until changed, also across passes, except the samplers that
- * [endPass] unbinds. Draws are only allowed
- * between [beginPass] or [beginInlinePass] and [endPass]. The interface never returns backend state, so a backend may
- * execute immediately or record commands. Call on the render thread.
+ * [endPass] unbinds. Draws are only allowed between [beginPass] or [beginInlinePass] and [endPass].
+ * The interface never returns backend state, so a backend may execute immediately or record
+ * commands. Call on the render thread.
  */
 interface RenderContext {
 

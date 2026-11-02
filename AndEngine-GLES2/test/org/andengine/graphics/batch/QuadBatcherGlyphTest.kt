@@ -2,16 +2,17 @@ package org.andengine.graphics.batch
 
 import android.opengl.GLES20
 import android.opengl.GLES30
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesDebugOptions
 import org.andengine.graphics.gles.GlesGraphicsDevice
-import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
 import org.junit.After
@@ -21,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 @RunWith(RobolectricTestRunner::class)
 class QuadBatcherGlyphTest {
@@ -30,31 +32,16 @@ class QuadBatcherGlyphTest {
     private lateinit var sprite: GlesTexture
     private val slots = ArrayList<GlyphSlot>()
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
-
-    private fun lastVertices(): ByteBuffer =
-        ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
-
-    private fun glyph(slot: GlyphSlot, matrix: FloatArray = identity, x0: Float = 0f, y0: Float = 0f, x1: Float = 4f, y1: Float = 4f) =
+    private fun glyph(slot: GlyphSlot, matrix: FloatArray = IDENTITY, x0: Float = 0f, y0: Float = 0f, x1: Float = 4f, y1: Float = 4f) =
         QuadBatcher.addGlyph(slot, BlendMode.Alpha, matrix, x0, y0, x1, y1, -1)
 
     private fun sprite() =
-        QuadBatcher.add(sprite, BlendMode.Alpha, identity, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.add(sprite, BlendMode.Alpha, IDENTITY, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
 
     @Before
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         atlas = GlyphAtlas(GlesGraphicsDevice.instance, 64, 2, 2)
@@ -62,15 +49,14 @@ class QuadBatcherGlyphTest {
         slots += atlas.allocate(8, 8)!!
         slots += atlas.allocate(60, 60)!!
         for (s in slots) s.uploaded = true
-        QuadBatcher.setProjection(identity)
+        QuadBatcher.setProjection(IDENTITY)
         gl.calls.clear()
     }
 
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         sprite.dispose()
         for (s in slots) if (s.array.hasTexture) s.array.texture.dispose()
         GlesBackend.surfaceWidth = 0
@@ -80,10 +66,10 @@ class QuadBatcherGlyphTest {
     @Test
     fun addGlyph_usesGlyphProgramAndArrayTarget() {
         glyph(slots[0])
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         val id = slots[0].array.texture.let { (it as GlesTexture).textureId }
         assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES30.GL_TEXTURE_2D_ARRAY},$id)"))
         assertTrue(gl.calls.toString(), gl.calls.contains("glVertexAttribPointer(3,1,${GLES20.GL_UNSIGNED_SHORT},false,24,20)"))
@@ -96,7 +82,7 @@ class QuadBatcherGlyphTest {
         glyph(slots[1])
         QuadBatcher.flush()
 
-        val b = lastVertices()
+        val b = gl.lastVertices()
         for (quad in 0 until 2) {
             for (vertex in 0 until 4) {
                 val base = (quad * 4 + vertex) * QuadBatcher.VERTEX_SIZE_BYTES
@@ -110,15 +96,15 @@ class QuadBatcherGlyphTest {
     fun glyphAfterSprite_sharesTheDrawInOrder() {
         sprite()
         glyph(slots[0])
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         sprite()
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},18,${GLES20.GL_UNSIGNED_SHORT},0)"))
 
         // The quads keep the order of the calls: sprite, glyph, sprite.
-        val b = lastVertices()
+        val b = gl.lastVertices()
         val layers = (0 until 3).map { b.getShort(it * 4 * QuadBatcher.VERTEX_SIZE_BYTES + 20).toInt() and 0xFFFF }
         assertEquals(listOf(QuadBatcher.SPRITE_LAYER, slots[0].layer, QuadBatcher.SPRITE_LAYER), layers)
 
@@ -133,7 +119,7 @@ class QuadBatcherGlyphTest {
         slots[0].uploaded = false
         glyph(slots[0])
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 0, draws())
+        assertEquals(gl.calls.toString(), 0, gl.draws())
     }
 
     @Test
@@ -141,7 +127,7 @@ class QuadBatcherGlyphTest {
         glyph(slots[0])
         glyph(slots[1])
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},12,${GLES20.GL_UNSIGNED_SHORT},0)"))
     }
 
@@ -161,7 +147,7 @@ class QuadBatcherGlyphTest {
         glyph(slots[0], x0 = 10.3f, y0 = 20.2f, x1 = 20.3f, y1 = 40.2f)
         QuadBatcher.flush()
 
-        val b = lastVertices()
+        val b = gl.lastVertices()
         val x0 = b.getFloat(0)
         val y0 = b.getFloat(4)
         val x2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES)
@@ -177,12 +163,12 @@ class QuadBatcherGlyphTest {
         GlesBackend.surfaceWidth = 2400
         GlesBackend.surfaceHeight = 1080
         QuadBatcher.setProjection(ortho(1280f, 720f))
-        val scaled = identity.copyOf().also { it[0] = 1.5f; it[5] = 1.5f; it[12] = 3.1f; it[13] = 2.7f }
+        val scaled = IDENTITY.copyOf().also { it[0] = 1.5f; it[5] = 1.5f; it[12] = 3.1f; it[13] = 2.7f }
 
         glyph(slots[0], scaled, 10.3f, 20.2f, 20.3f, 40.2f)
         QuadBatcher.flush()
 
-        val b = lastVertices()
+        val b = gl.lastVertices()
         val x0 = b.getFloat(0)
         val y0 = b.getFloat(4)
         val x2 = b.getFloat(2 * QuadBatcher.VERTEX_SIZE_BYTES)
@@ -199,7 +185,7 @@ class QuadBatcherGlyphTest {
         GlesBackend.surfaceHeight = 0
         glyph(slots[0], x0 = 10.3f, y0 = 20.2f, x1 = 14.3f, y1 = 24.2f)
         QuadBatcher.flush()
-        assertEquals(10.3f, lastVertices().getFloat(0), 0f)
+        assertEquals(10.3f, gl.lastVertices().getFloat(0), 0f)
     }
 
     private fun assertWholePixel(pixels: Float, tolerance: Float) {

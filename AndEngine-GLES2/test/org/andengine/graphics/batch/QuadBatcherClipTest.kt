@@ -2,16 +2,18 @@ package org.andengine.graphics.batch
 
 import android.opengl.GLES20
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesDebugOptions
 import org.andengine.graphics.gles.GlesGraphicsDevice
-import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
 import org.junit.After
@@ -22,6 +24,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 /** Quads are cut to the clip rectangle on the CPU, so clipped quads still share one draw. */
 @RunWith(RobolectricTestRunner::class)
@@ -33,13 +36,6 @@ class QuadBatcherClipTest {
     private lateinit var atlas: GlyphAtlas
     private lateinit var slot: GlyphSlot
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
     /** World units are surface pixels, y grows downwards. */
     private val ortho = floatArrayOf(
         2f / 800f, 0f, 0f, 0f,
@@ -48,11 +44,7 @@ class QuadBatcherClipTest {
         -1f, 1f, 0f, 1f
     )
 
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
-
     private fun indexOfDraw() = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
-
-    private fun vertices(): ByteBuffer = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
 
     private fun ByteBuffer.x(vertex: Int) = getFloat(vertex * QuadBatcher.VERTEX_SIZE_BYTES)
     private fun ByteBuffer.y(vertex: Int) = getFloat(vertex * QuadBatcher.VERTEX_SIZE_BYTES + 4)
@@ -67,7 +59,7 @@ class QuadBatcherClipTest {
         for (i in expected.indices) assertEquals(actual.toString(), expected[i], actual[i], 1e-3f)
     }
 
-    private fun add(x0: Float, y0: Float, x1: Float, y1: Float, matrix: FloatArray = identity, tex: GlesTexture = texture) =
+    private fun add(x0: Float, y0: Float, x1: Float, y1: Float, matrix: FloatArray = IDENTITY, tex: GlesTexture = texture) =
         QuadBatcher.add(tex, BlendMode.Alpha, matrix, x0, y0, x1, y1, 0f, 0f, 1f, 1f, -1)
 
     /** A square around ([cx], [cy]) turned by 45 degrees. */
@@ -87,10 +79,7 @@ class QuadBatcherClipTest {
     @Before
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         texture = GlesGraphicsDevice.instance.createTexture(4, 4, TextureFormat.RGBA8, label = "a") as GlesTexture
@@ -106,8 +95,7 @@ class QuadBatcherClipTest {
     fun tearDown() {
         QuadBatcher.clearClip()
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         texture.dispose()
         textureB.dispose()
         if (slot.array.hasTexture) slot.array.texture.dispose()
@@ -126,7 +114,7 @@ class QuadBatcherClipTest {
         assertFalse(QuadBatcher.hasPending)
         assertTrue("no state change for a dropped quad: ${gl.calls}", gl.calls.isEmpty())
         QuadBatcher.flush()
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
     }
 
     @Test
@@ -136,8 +124,8 @@ class QuadBatcherClipTest {
         add(150f, 120f, 250f, 180f)
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
-        val b = vertices()
+        assertEquals(1, gl.draws())
+        val b = gl.lastVertices()
         assertNear(listOf(150f, 250f, 250f, 150f), (0 until 4).map { b.x(it) })
         assertNear(listOf(120f, 120f, 180f, 180f), (0 until 4).map { b.y(it) })
         assertNear(listOf(0f, 1f, 1f, 0f), (0 until 4).map { b.u(it) })
@@ -151,12 +139,12 @@ class QuadBatcherClipTest {
 
         add(50f, 150f, 150f, 250f)
         // Through a matrix, overlapping the right and top edge.
-        val shifted = identity.copyOf().also { it[12] = 250f; it[13] = 50f }
+        val shifted = IDENTITY.copyOf().also { it[12] = 250f; it[13] = 50f }
         add(0f, 0f, 100f, 100f, matrix = shifted)
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
-        val b = vertices()
+        assertEquals(1, gl.draws())
+        val b = gl.lastVertices()
         assertNear(listOf(100f, 150f, 150f, 100f), (0 until 4).map { b.x(it) })
         assertNear(listOf(150f, 150f, 200f, 200f), (0 until 4).map { b.y(it) })
         assertNear(listOf(250f, 300f, 300f, 250f), (4 until 8).map { b.x(it) })
@@ -178,15 +166,15 @@ class QuadBatcherClipTest {
         // Red rises from 0 on the left to 255 on the right, alpha from 255 at the top to 51 below.
         val colors = intArrayOf(0xFF000000.toInt(), 0xFF0000FF.toInt(), 0x330000FF, 0x33000000)
         QuadBatcher.addGlyphQuad(
-            slot, BlendMode.Alpha, identity,
+            slot, BlendMode.Alpha, IDENTITY,
             floatArrayOf(50f, 150f, 150f, 50f), floatArrayOf(150f, 150f, 250f, 250f),
             floatArrayOf(0f, 1f, 1f, 0f), floatArrayOf(0f, 0f, 1f, 1f),
             colors
         )
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
-        val b = vertices()
+        assertEquals(1, gl.draws())
+        val b = gl.lastVertices()
         for (quad in 0 until 2) {
             val o = quad * 4
             assertNear(listOf(0.5f, 1f, 1f, 0.5f), (o until o + 4).map { b.u(it) })
@@ -201,11 +189,11 @@ class QuadBatcherClipTest {
         clip()
 
         // 40 x 40 glyph from (280, 90): cut at the right edge (x 300) and the top edge (y 100).
-        QuadBatcher.addGlyph(slot, BlendMode.Alpha, identity, 280f, 90f, 320f, 130f, -1)
+        QuadBatcher.addGlyph(slot, BlendMode.Alpha, IDENTITY, 280f, 90f, 320f, 130f, -1)
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
-        val b = vertices()
+        assertEquals(1, gl.draws())
+        val b = gl.lastVertices()
         assertNear(listOf(280f, 300f, 300f, 280f), (0 until 4).map { b.x(it) })
         assertNear(listOf(100f, 100f, 130f, 130f), (0 until 4).map { b.y(it) })
         val uMid = slot.u + (slot.u2 - slot.u) * 0.5f
@@ -223,14 +211,14 @@ class QuadBatcherClipTest {
         add(-50f, -50f, 50f, 50f, matrix = rotated(110f, 150f))
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         val draw = indexOfDraw()
         val scissor = gl.calls.indexOf("glScissor(100,280,200,100)")
         val enable = gl.calls.indexOf("glEnable(${GLES20.GL_SCISSOR_TEST})")
         assertTrue(gl.calls.toString(), scissor in 0 until draw)
         assertTrue(gl.calls.toString(), enable in 0 until draw)
         // The corners are not moved; the GPU cuts them.
-        val b = vertices()
+        val b = gl.lastVertices()
         assertEquals(110f, b.x(0) + b.x(2) - 110f, 1e-3f)
         assertTrue(b.x(3) < 100f)
     }
@@ -244,11 +232,11 @@ class QuadBatcherClipTest {
         QuadBatcher.clearClip()
         add(500f, 300f, 600f, 400f)
 
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertEquals(3 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
-        val b = vertices()
+        val b = gl.lastVertices()
         // Second clip: x 0..400, world y 80..480.
         assertNear(listOf(350f, 400f, 400f, 350f), (4 until 8).map { b.x(it) })
         assertNear(listOf(600f, 300f), listOf(b.x(9), b.y(9)))
@@ -262,17 +250,17 @@ class QuadBatcherClipTest {
 
         state.setScissorEnabled(true)
         state.scissor(1, 2, 3, 4)
-        assertEquals("a CPU-clipped batch does not depend on the GL scissor", 0, draws())
+        assertEquals("a CPU-clipped batch does not depend on the GL scissor", 0, gl.draws())
         assertTrue(QuadBatcher.hasPending)
 
         RenderStats.enabled = true
         RenderStats.reset()
         add(-50f, -50f, 50f, 50f, matrix = rotated(110f, 150f))
-        assertEquals("the scissor key differs from the pending batch", 1, draws())
+        assertEquals("the scissor key differs from the pending batch", 1, gl.draws())
         assertEquals(1, RenderStats.currentCount(QuadBatcher.flushCounterIndex(QuadBatcher.REASON_SCISSOR)))
 
         state.scissor(5, 6, 7, 8)
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         val lastDraw = gl.calls.indexOfLast { it.startsWith("glDrawElements") }
         assertTrue(gl.calls.toString(), lastDraw < gl.calls.indexOf("glScissor(5,6,7,8)"))
         assertFalse(QuadBatcher.hasPending)
@@ -286,7 +274,7 @@ class QuadBatcherClipTest {
         gl.calls.clear()
 
         add(0f, 0f, 10f, 10f)
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         QuadBatcher.flush()
 
         val draw = indexOfDraw()
@@ -320,8 +308,8 @@ class QuadBatcherClipTest {
         add(50f, 150f, 150f, 250f)
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
         assertTrue(gl.calls.toString(), gl.calls.indexOf("glScissor(100,280,200,100)") in 0 until indexOfDraw())
-        assertEquals(50f, vertices().x(0), 1e-3f)
+        assertEquals(50f, gl.lastVertices().x(0), 1e-3f)
     }
 }

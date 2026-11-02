@@ -1,5 +1,7 @@
 package org.andengine.graphics.gles
 
+import com.osudroid.testing.codeLines
+import com.osudroid.testing.sourceFiles
 import java.io.File
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -18,34 +20,31 @@ class ShaderVersionTest {
     fun shadersUseEs300() {
         roots.forEach { assertTrue("Missing source root ${it.absolutePath}", it.isDirectory) }
 
-        var found = 0
-        val offenders = mutableListOf<String>()
+        val directives = sourceFiles(roots)
+            .flatMap { codeLines(it) }
+            .filter { (_, line) -> line.contains("#version") }
+            .toList()
+        val offenders = directives
+            .filter { (_, line) -> !ES_300.containsMatchIn(line) }
+            .map { (location, line) -> "$location: ${line.trim()}" }
 
-        for (root in roots) {
-            root.walkTopDown()
-                .filter { it.isFile && (it.extension == "kt" || it.extension == "java") }
-                .forEach { file ->
-                    val path = file.invariantSeparatorsPath
-                    file.readLines().forEachIndexed { index, line ->
-                        val trimmed = line.trimStart()
-                        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) {
-                            return@forEachIndexed
-                        }
-                        if (!line.contains("#version")) return@forEachIndexed
-
-                        found++
-                        if (!ES_300.containsMatchIn(line)) {
-                            offenders += "$path:${index + 1}: ${line.trim()}"
-                        }
-                    }
-                }
-        }
-
-        assertTrue("No #version directive found; the scan is vacuous", found > 0)
+        assertTrue("No #version directive found; the scan is vacuous", directives.isNotEmpty())
         assertTrue(
             "Shaders must use '#version 300 es':\n" + offenders.joinToString("\n"),
             offenders.isEmpty()
         )
+    }
+
+    @Test
+    fun es100Detector_matchesShaderKeywordsOnly() {
+        // The scan below is only as good as this detector.
+        assertTrue(isEs100Source("\t\"attribute vec4 \" + ATTRIBUTE_POSITION + \";\\n\" +", inRawString = false))
+        assertTrue(isEs100Source("\"attribute highp vec2 a;\"", inRawString = false))
+        assertTrue(isEs100Source("\"varying vec2 v;\"", inRawString = false))
+        assertTrue(isEs100Source("    gl_FragColor = color;", inRawString = true))
+        assertFalse(isEs100Source("// varying attribute vec4 gl_FragColor", inRawString = false))
+        assertFalse(isEs100Source(" * results may be varying across devices", inRawString = false))
+        assertFalse(isEs100Source("\"in vec2 v;\" // varying ", inRawString = false))
     }
 
     /**
@@ -55,36 +54,23 @@ class ShaderVersionTest {
      */
     @Test
     fun shadersUseNoGlslEs100Keywords() {
-        // The detector itself must work, or the scan below would be vacuous.
-        assertTrue(isEs100Source("\t\"attribute vec4 \" + ATTRIBUTE_POSITION + \";\\n\" +", inRawString = false))
-        assertTrue(isEs100Source("\"attribute highp vec2 a;\"", inRawString = false))
-        assertTrue(isEs100Source("\"varying vec2 v;\"", inRawString = false))
-        assertTrue(isEs100Source("    gl_FragColor = color;", inRawString = true))
-        assertFalse(isEs100Source("// varying attribute vec4 gl_FragColor", inRawString = false))
-        assertFalse(isEs100Source(" * results may be varying across devices", inRawString = false))
-        assertFalse(isEs100Source("\"in vec2 v;\" // varying ", inRawString = false))
+        roots.forEach { assertTrue("Missing source root ${it.absolutePath}", it.isDirectory) }
 
         val offenders = mutableListOf<String>()
-
-        for (root in roots) {
-            assertTrue("Missing source root ${root.absolutePath}", root.isDirectory)
-            root.walkTopDown()
-                .filter { it.isFile && (it.extension == "kt" || it.extension == "java") }
-                .forEach { file ->
-                    val path = file.invariantSeparatorsPath
-                    var inRawString = false
-                    file.readLines().forEachIndexed { index, line ->
-                        // Segments between triple quotes alternate between code and raw string.
-                        val segments = line.split(RAW_QUOTE)
-                        for (s in segments.indices) {
-                            if (isEs100Source(segments[s], inRawString)) {
-                                offenders += "$path:${index + 1}: ${line.trim()}"
-                                break
-                            }
-                            if (s < segments.lastIndex) inRawString = !inRawString
-                        }
+        for (file in sourceFiles(roots)) {
+            val path = file.invariantSeparatorsPath
+            var inRawString = false
+            file.readLines().forEachIndexed { index, line ->
+                // Segments between triple quotes alternate between code and raw string.
+                val segments = line.split(RAW_QUOTE)
+                for (s in segments.indices) {
+                    if (isEs100Source(segments[s], inRawString)) {
+                        offenders += "$path:${index + 1}: ${line.trim()}"
+                        break
                     }
+                    if (s < segments.lastIndex) inRawString = !inRawString
                 }
+            }
         }
 
         assertTrue(

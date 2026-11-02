@@ -1,7 +1,7 @@
 package org.andengine.graphics.atlas
 
-import org.andengine.graphics.texture.Pixels
 import java.nio.ByteBuffer
+import org.andengine.graphics.texture.Pixels
 
 /**
  * Composes straight RGBA images into one [width]x[height] block of [Pixels], for example a whole

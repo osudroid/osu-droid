@@ -12,11 +12,8 @@ import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
  * region edge never samples a neighbouring image. The texture position of this source is the
  * padded corner; the image content starts [padding] pixels further in.
  *
- * On an RGBA page the image is delivered as bytes ([onLoadPixels]) with the border extruded in the
- * byte buffer, if [source] is an [IPixelTextureAtlasSource] that delivers pixels of the page's variant
- * (straight or premultiplied) and of its declared size. The extrusion copies texels as they are, so it
- * fits either variant. Any other source keeps the bitmap path ([onLoadBitmap]). The source holds no
- * state between loads.
+ * On an RGBA page a pixel source is delivered as bytes with the border extruded ([onLoadPixels]);
+ * any other source keeps the bitmap path ([onLoadBitmap]). The source holds no state between loads.
  *
  * With [rotated], the image is turned 90° clockwise on the page (its width and height swap), the way a
  * rotated [org.andengine.opengl.texture.region.TextureRegion] expects it. Rotated images always take
@@ -45,9 +42,15 @@ class ExtrudedBitmapSource @JvmOverloads constructor(
 
     override fun onLoadPixels(): Pixels? = onLoadPixels(false)
 
+    /**
+     * The image with its border extruded in the byte buffer, if [source] is an
+     * [IPixelTextureAtlasSource] that delivers pixels of the page's variant (straight or
+     * premultiplied) and of its declared size. The extrusion copies texels as they are, so it fits
+     * either variant.
+     */
     override fun onLoadPixels(premultiplied: Boolean): Pixels? {
         if (rotated || source !is IPixelTextureAtlasSource) return null
-        // A null here makes the atlas decode again through onLoadBitmap: a rare fallback, accepted on purpose.
+        // A null here makes the atlas decode again through onLoadBitmap.
         val image = source.onLoadPixels(premultiplied) ?: return null
         if (image.premultiplied != premultiplied) return null
         if (image.width != source.textureWidth || image.height != source.textureHeight) return null

@@ -1,5 +1,7 @@
 package org.andengine.graphics
 
+import java.nio.Buffer
+
 enum class BufferTarget { Vertex, Index, Uniform, PixelUnpack, PixelPack, Storage }
 
 /**
@@ -14,7 +16,7 @@ interface GpuBuffer : GpuResource {
     val sizeBytes: Int
 
     /** Writes [byteCount] bytes of [data], starting at its current position, at [offsetBytes]. */
-    fun update(offsetBytes: Int, data: java.nio.Buffer, byteCount: Int)
+    fun update(offsetBytes: Int, data: Buffer, byteCount: Int)
 
     /**
      * Gives the buffer new storage holding exactly the first [byteCount] bytes of [data] (read from
@@ -25,5 +27,5 @@ interface GpuBuffer : GpuResource {
      *
      * @throws IllegalStateException unless the buffer is [BufferUsage.Stream].
      */
-    fun replace(data: java.nio.Buffer, byteCount: Int)
+    fun replace(data: Buffer, byteCount: Int)
 }

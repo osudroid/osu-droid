@@ -13,9 +13,10 @@ import org.andengine.graphics.debug.RenderStats
 /**
  * [RenderContext] that executes immediately on the current GL context. All state goes through
  * [GlesBackend.state]; pipeline state and the VAO are applied lazily at the next draw, and only
- * when the pipeline, a buffer or the GL context changed, or a new pass began (pipeline only). [endPass] unbinds the VAO so code outside
- * the render context cannot change the cached VAOs, and resets texture unit 0 and the samplers it
- * bound, which legacy code assumes. GL thread only.
+ * when the pipeline, a buffer or the GL context changed, or a new pass began (a new pass re-applies
+ * only the pipeline). [endPass] unbinds the VAO so code outside the render context cannot change
+ * the cached VAOs, and resets texture unit 0 and the samplers it bound, which legacy code assumes.
+ * GL thread only.
  */
 class GlesRenderContext private constructor() : RenderContext {
 

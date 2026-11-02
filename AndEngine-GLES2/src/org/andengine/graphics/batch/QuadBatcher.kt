@@ -34,10 +34,10 @@ import org.andengine.graphics.text.GlyphSlot
  * The pending quads are drawn ("flushed") when a sprite needs another 2D texture or a glyph another
  * array than the pending quads use, the blend mode or the projection changes, the batch is full, or
  * [flush] is called; switching between sprites and glyphs alone does not flush. So that the order
- * on screen stays the order of the calls, they are also flushed before anyone else changes GL
- * state through the [org.andengine.graphics.gles.GlesStateCache] (see
- * [GlesStateCache.beforeExternalChange]), and every other draw call must [flush] first. Such a flush leaves the state as it found it, so the code
- * that interrupted the batch draws with the state it set up.
+ * on screen stays the order of the calls, they are also flushed before anyone else changes GL state
+ * through the [org.andengine.graphics.gles.GlesStateCache] (see [GlesStateCache.beforeExternalChange]),
+ * and every other draw call must [flush] first. Such a flush leaves the state as it found it, so
+ * the code that interrupted the batch draws with the state it set up.
  *
  * While a clip rectangle is set ([setClip]), every quad is cut to it on the CPU: one wholly outside
  * is dropped, an axis-aligned one that crosses an edge is shrunk to the clip with its texture
@@ -95,9 +95,6 @@ object QuadBatcher {
     private const val CLIP_DROP = 1
     private const val CLIP_SCISSOR = 2
 
-    /** An unknown value in [GlesStateCache.saveScissorState]. */
-    private const val UNKNOWN_STATE = -1
-
     /** Registers a named [RenderStats] counter and returns its index. */
     fun interface CounterRegistration {
         fun register(name: String): Int
@@ -110,9 +107,10 @@ object QuadBatcher {
     @JvmField
     var counterRegistration = DEFAULT_COUNTER_REGISTRATION
 
-    private const val COUNTER_UNREGISTERED = -2
-    private const val COUNTER_UNAVAILABLE = -1
-    private var quadCounter = COUNTER_UNREGISTERED
+    // Counters are registered at the first flush that needs them; -1 until then, and for good when
+    // RenderStats has no free slot (RenderStats.count ignores -1).
+    private var quadCounter = -1
+    private var quadCounterRegistered = false
 
     const val REASON_TEXTURE = 0
     const val REASON_BLEND = 1
@@ -124,11 +122,12 @@ object QuadBatcher {
         "batch.flush.texture", "batch.flush.blend", "batch.flush.foreign", "batch.flush.full", "batch.flush.frame",
         "batch.flush.scissor"
     )
-    private val reasonCounters = IntArray(REASON_NAMES.size) { COUNTER_UNREGISTERED }
+    private val reasonCounters = IntArray(REASON_NAMES.size) { -1 }
+    private var reasonCountersRegistered = false
 
     /**
-     * Index of the [RenderStats] counter of the quads drawn; -1 if registering it failed (then
-     * nothing is counted), -2 before the first flush.
+     * Index of the [RenderStats] counter of the quads drawn; -1 before the first flush or if no
+     * counter slot was free (then nothing is counted).
      */
     val quadCounterIndex: Int get() = quadCounter
 
@@ -162,8 +161,7 @@ void main() {
 
     // The layer is flat, so all fragments of one quad take the same branch. Highp, as mediump
     // need not hold the sprite marker exactly. Sampling inside the branch is safe because the
-    // selector is constant per primitive (derivatives stay uniform); keep it flat and do not
-    // switch to per-vertex selection.
+    // selector is constant per primitive (derivatives stay uniform).
     private const val FRAGMENT_SHADER = """#version 300 es
 precision mediump float;
 precision mediump sampler2DArray;
@@ -589,7 +587,7 @@ void main() {
 
     /**
      * Moves the corners of an axis-aligned quad into the clip and interpolates their UVs (and
-     * colors) bilinearly between the original corners, so the visible part looks as before.
+     * colors) bilinearly between the original corners, so the visible part looks unchanged.
      */
     private fun clampCorners(alongX: Boolean, perCornerColor: Boolean) {
         val x = cornerX
@@ -780,46 +778,31 @@ void main() {
             }
             state.restoreScissorState(scissor, 0)
             // Not known before: off, as GL starts, so later draws are not cut by this clip.
-            if (scissored && scissor[0] == UNKNOWN_STATE) state.setScissorEnabled(false)
+            if (scissored && scissor[0] == GlesStateCache.UNKNOWN) state.setScissorEnabled(false)
         }
-        var counter = quadCounter
-        if (counter == COUNTER_UNREGISTERED) counter = registerQuadCounter()
-        if (counter >= 0) RenderStats.count(counter, count)
+        if (!quadCounterRegistered) {
+            quadCounter = counterRegistration.register("batch.quads")
+            quadCounterRegistered = true
+        }
+        RenderStats.count(quadCounter, count)
     }
 
     /** Counts one flush that draws, for [reason]; free while [RenderStats] is disabled. */
     private fun countFlush(reason: Int) {
         if (!RenderStats.enabled) return
-        if (reasonCounters[0] == COUNTER_UNREGISTERED) registerReasonCounters()
-        val counter = reasonCounters[reason]
-        if (counter >= 0) RenderStats.count(counter, 1)
-    }
-
-    private fun registerReasonCounters() {
-        try {
+        if (!reasonCountersRegistered) {
             for (i in reasonCounters.indices) reasonCounters[i] = RenderStats.registerCounter(REASON_NAMES[i])
-        } catch (e: RuntimeException) {
-            reasonCounters.fill(COUNTER_UNAVAILABLE)
+            reasonCountersRegistered = true
         }
+        RenderStats.count(reasonCounters[reason], 1)
     }
 
     /**
      * Index of the [RenderStats] counter of the flushes for [reason] (one of the REASON_*
-     * values: texture, blend, foreign, full, frame, scissor); -1 if registering failed, -2 before the
-     * first counted flush.
+     * values: texture, blend, foreign, full, frame, scissor); -1 before the first counted flush or
+     * if no counter slot was free.
      */
     fun flushCounterIndex(reason: Int): Int = reasonCounters[reason]
-
-    /** Statistics must never stop the batcher: a failed registration only disables counting. */
-    private fun registerQuadCounter(): Int {
-        val index = try {
-            counterRegistration.register("batch.quads")
-        } catch (e: RuntimeException) {
-            COUNTER_UNAVAILABLE
-        }
-        quadCounter = index
-        return index
-    }
 
     /**
      * Drops the pending quads and disposes the GPU resources; the next flush creates them again.
@@ -843,8 +826,10 @@ void main() {
         program = null
         vertexBuffer = null
         indexBuffer = null
-        quadCounter = COUNTER_UNREGISTERED
-        reasonCounters.fill(COUNTER_UNREGISTERED)
+        quadCounter = -1
+        quadCounterRegistered = false
+        reasonCounters.fill(-1)
+        reasonCountersRegistered = false
     }
 
     /**
@@ -887,7 +872,7 @@ void main() {
 
     /** Flushes the pending quads if their blend mode or scissor differs. */
     private fun flushForKey(blend: BlendMode, scissored: Boolean) {
-        if (blend !== this.blend && blend != this.blend) {
+        if (blend != this.blend) {
             drawPending(REASON_BLEND)
         } else if (scissored != pendingScissored || scissored && !pendingScissorIsClip()) {
             drawPending(REASON_SCISSOR)
@@ -917,10 +902,10 @@ void main() {
     @Suppress("NOTHING_TO_INLINE")
     private inline fun put(index: Int, x: Float, y: Float, u: Float, v: Float, color: Int, layer: Int): Int {
         val a = vertices
-        a[index] = java.lang.Float.floatToRawIntBits(x)
-        a[index + 1] = java.lang.Float.floatToRawIntBits(y)
-        a[index + 2] = java.lang.Float.floatToRawIntBits(u)
-        a[index + 3] = java.lang.Float.floatToRawIntBits(v)
+        a[index] = x.toRawBits()
+        a[index + 1] = y.toRawBits()
+        a[index + 2] = u.toRawBits()
+        a[index + 3] = v.toRawBits()
         a[index + 4] = color
         a[index + 5] = layer
         return index + INTS_PER_VERTEX

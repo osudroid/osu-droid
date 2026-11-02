@@ -20,6 +20,7 @@ class GlesVertexArrayCache : GlesRestorable {
     private val entries = ArrayList<Entry>()
     private val scratch = IntArray(1)
 
+    /** The number of cached vertex arrays, read by tests. */
     val size: Int get() = entries.size
 
     override val restorePhase: RestorePhase get() = RestorePhase.VertexArrays
@@ -80,7 +81,7 @@ class GlesVertexArrayCache : GlesRestorable {
         entries.clear()
     }
 
-    override fun restore(backend: GlesBackend) {
+    override fun restore() {
         // Lazy: the next draw creates the VAOs it needs.
     }
 

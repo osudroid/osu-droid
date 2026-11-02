@@ -13,8 +13,8 @@ import org.andengine.engine.Engine
 import org.andengine.engine.options.EngineOptions
 import org.andengine.entity.IEntity
 import org.andengine.entity.scene.*
-import org.andengine.input.touch.*
 import org.andengine.graphics.DrawContext
+import org.andengine.input.touch.*
 import kotlin.math.*
 import org.andengine.engine.camera.Camera
 

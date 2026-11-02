@@ -3,16 +3,16 @@ package org.andengine.graphics.gles
 import org.andengine.engine.Engine
 
 /**
- * Bridges the pre-registry context-loss handling of AndEngine and the app into the
- * [GlesResourceRegistry] as [RestorePhase.Legacy] entries. Entries are keyed by name: registering a
- * name again replaces the action in place (same position), so a recreated activity or engine does
- * not add duplicates.
+ * Lets AndEngine and app code that reload their own GL objects take part in the
+ * [GlesResourceRegistry] restore, as [RestorePhase.Legacy] entries. Entries are keyed by name:
+ * registering a name again replaces the action in place (same position), so a recreated activity
+ * or engine does not add duplicates.
  */
 object GlesLegacyRestorers {
 
     private val entries = HashMap<String, Entry>()
 
-    /** Names of the registered entries, in no particular order; a snapshot. */
+    /** A snapshot of the registered entry names in no particular order, read by tests. */
     @JvmStatic
     val names: Set<String> get() = synchronized(entries) { HashSet(entries.keys) }
 
@@ -30,14 +30,14 @@ object GlesLegacyRestorers {
         }
     }
 
-    /** What `EngineRenderer.onSurfaceCreated` and `Engine.onReloadResources` used to do per new context. */
+    /** Reloads the engine's texture and font managers on every new context. */
     @JvmStatic
     fun registerEngine(engine: Engine) {
         register("texture-manager") { engine.textureManager.onReload() }
         register("font-manager") { engine.fontManager.onReload() }
     }
 
-    /** Removes all entries; for tests that must not leave an engine registered globally. */
+    /** Removes all entries, so that tests leave no engine registered globally. */
     @JvmStatic
     fun clearForTest() {
         synchronized(entries) {
@@ -51,7 +51,7 @@ object GlesLegacyRestorers {
 
         override fun onContextLost() {}
 
-        override fun restore(backend: GlesBackend) = action.run()
+        override fun restore() = action.run()
 
         override fun toString() = "Legacy($name)"
     }

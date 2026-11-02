@@ -7,6 +7,7 @@ import org.andengine.engine.options.EngineOptions
 import org.andengine.engine.options.ScreenOrientation
 import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.debug.RenderStats
@@ -16,8 +17,11 @@ import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
 import org.andengine.graphics.gles.GlesTextures
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.graphics.DrawContext
+import org.andengine.graphics.gles.indexOfCall
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastCallBefore
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -26,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 /** The batch must not change the order of what reaches the screen. */
 @RunWith(RobolectricTestRunner::class)
@@ -35,45 +40,25 @@ class QuadBatcherOrderingTest {
     private lateinit var texture: GlesTexture
     private val glState = DrawContext()
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
     private val triangle = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f)
 
     private fun drawMesh() = MeshRenderer.draw(
-        PrimitiveType.Triangles, triangle, 0, 3, identity, identity, -1, BlendMode.Alpha, null, false
+        PrimitiveType.Triangles, triangle, 0, 3, IDENTITY, IDENTITY, -1, BlendMode.Alpha, null, false
     )
 
     private fun newContext() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
     }
 
-    private fun add() = QuadBatcher.add(texture, BlendMode.Alpha, identity, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+    private fun add() = QuadBatcher.add(texture, BlendMode.Alpha, IDENTITY, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
 
     private fun indexOfBatchDraw() = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
-
-    private fun indexOf(call: String): Int {
-        val index = gl.calls.indexOf(call)
-        assertTrue("$call missing in ${gl.calls}", index >= 0)
-        return index
-    }
 
     private fun assertBatchDrawnBefore(call: String) {
         val batch = indexOfBatchDraw()
         assertTrue("no batch draw in ${gl.calls}", batch >= 0)
-        assertTrue(gl.calls.toString(), batch < indexOf(call))
+        assertTrue(gl.calls.toString(), batch < gl.indexOfCall(call))
     }
-
-    /** The last call starting with [prefix] before [index]. */
-    private fun lastBefore(index: Int, prefix: String): String? =
-        gl.calls.subList(0, index).lastOrNull { it.startsWith(prefix) }
 
     @Before
     fun setUp() {
@@ -82,7 +67,7 @@ class QuadBatcherOrderingTest {
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         texture = GlesGraphicsDevice.instance.createTexture(4, 4, TextureFormat.RGBA8, label = "t") as GlesTexture
-        QuadBatcher.setProjection(identity)
+        QuadBatcher.setProjection(IDENTITY)
         gl.calls.clear()
     }
 
@@ -90,8 +75,7 @@ class QuadBatcherOrderingTest {
     fun tearDown() {
         QuadBatcher.releaseResources()
         MeshRenderer.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         texture.dispose()
         RenderStats.enabled = false
     }
@@ -114,12 +98,12 @@ class QuadBatcherOrderingTest {
         assertBatchDrawnBefore("glDrawArrays(${GLES20.GL_TRIANGLES},0,3)")
         assertFalse(QuadBatcher.hasPending)
         val end = gl.calls.size
-        assertEquals("glUseProgram(77)", lastBefore(end, "glUseProgram"))
-        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", lastBefore(end, "glBindTexture(${GLES20.GL_TEXTURE_2D},"))
+        assertEquals("glUseProgram(77)", gl.lastCallBefore(end, "glUseProgram"))
+        assertEquals("glBindTexture(${GLES20.GL_TEXTURE_2D},55)", gl.lastCallBefore(end, "glBindTexture(${GLES20.GL_TEXTURE_2D},"))
         val blendCalls = setOf("glEnable(${GLES20.GL_BLEND})", "glDisable(${GLES20.GL_BLEND})")
         assertEquals("glDisable(${GLES20.GL_BLEND})", gl.calls.lastOrNull { it in blendCalls })
-        assertEquals("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},33)", lastBefore(end, "glBindBuffer(${GLES20.GL_ARRAY_BUFFER}"))
-        assertEquals("glBindVertexArray(0)", lastBefore(end, "glBindVertexArray"))
+        assertEquals("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},33)", gl.lastCallBefore(end, "glBindBuffer(${GLES20.GL_ARRAY_BUFFER}"))
+        assertEquals("glBindVertexArray(0)", gl.lastCallBefore(end, "glBindVertexArray"))
     }
 
     @Test
@@ -142,9 +126,9 @@ class QuadBatcherOrderingTest {
 
         GlesTextures.bind(99)
 
-        val bind = indexOf("glBindTexture(${GLES20.GL_TEXTURE_2D},99)")
+        val bind = gl.indexOfCall("glBindTexture(${GLES20.GL_TEXTURE_2D},99)")
         assertTrue(indexOfBatchDraw() in 0 until bind)
-        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE1})", lastBefore(bind, "glActiveTexture"))
+        assertEquals("glActiveTexture(${GLES20.GL_TEXTURE1})", gl.lastCallBefore(bind, "glActiveTexture"))
     }
 
     @Test
@@ -174,7 +158,7 @@ class QuadBatcherOrderingTest {
     fun scissorChange_doesNotFlushCpuClippedBatch() {
         QuadBatcher.setClip(0, 0, 1, 1)
         // Mostly outside the clip: cut on the CPU.
-        QuadBatcher.add(texture, BlendMode.Alpha, identity, -1f, -1f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.add(texture, BlendMode.Alpha, IDENTITY, -1f, -1f, 1f, 1f, 0f, 0f, 1f, 1f, -1)
         try {
             GlesBackend.state.setScissorEnabled(true)
             GlesBackend.state.scissor(1, 2, 3, 4)
@@ -205,7 +189,7 @@ class QuadBatcherOrderingTest {
             GlesBackend.state.scissor(1, 2, 3, 4)
 
             assertEquals(2, gl.calls.count { it.startsWith("glDrawElements") })
-            assertTrue(gl.calls.indexOfLast { it.startsWith("glDrawElements") } < indexOf("glScissor(1,2,3,4)"))
+            assertTrue(gl.calls.indexOfLast { it.startsWith("glDrawElements") } < gl.indexOfCall("glScissor(1,2,3,4)"))
         } finally {
             QuadBatcher.clearClip()
         }

@@ -5,17 +5,12 @@ import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
 import com.osudroid.storyboard.model.StoryboardSprite
 import com.osudroid.storyboard.playback.PlayableSprite
-import java.lang.reflect.Proxy
+import com.osudroid.testing.Page
+import com.osudroid.testing.RecordingGl
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import kotlin.math.PI
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GL32
 import org.andengine.graphics.gles.GlesBackend
-import org.andengine.graphics.gles.GlesRenderContext
-import org.andengine.opengl.texture.TextureManager
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.graphics.DrawContext
 import org.junit.After
@@ -26,61 +21,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.osudroid.testing.endOpenPass
 
 @RunWith(RobolectricTestRunner::class)
 class StoryboardBatchTest {
 
-    private val glCalls = ArrayList<String>()
-    private val uploads = ArrayList<ByteArray>()
-    private var nextId = 100
+    private lateinit var gl: RecordingGl
     private val glState = DrawContext()
     private val batch = StoryboardBatch()
-
-    /**
-     * Fake GL that records every call as `name(args)`, hands out ids, reports compile and link
-     * success and keeps the bytes of every array buffer upload (the batch's vertices).
-     */
-    private fun recordingGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
-        val name = method.name
-        glCalls += "$name(${args?.joinToString(",") { if (it is IntArray || it is java.nio.Buffer) "buf" else "$it" } ?: ""})"
-        if (name == "glGetIntegerv") {
-            val params = args!![1] as IntArray
-            params[args[2] as Int] = when (args[0]) {
-                GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS -> 16
-                GLES20.GL_MAX_TEXTURE_SIZE -> 4096
-                else -> 0
-            }
-        } else if (name.startsWith("glGen") && args?.size == 3 && args[1] is IntArray) {
-            val ids = args[1] as IntArray
-            for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
-        } else if ((name == "glGetShaderiv" || name == "glGetProgramiv") && args!![2] is IntArray) {
-            (args[2] as IntArray)[args[3] as Int] = 1
-        } else if (name == "glBufferData" && args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
-            val copy = (args[2] as ByteBuffer).duplicate()
-            val bytes = ByteArray(minOf(args[1] as Int, copy.remaining()))
-            copy.get(bytes)
-            uploads += bytes
-        } else if (name == "glBufferSubData" && args!![3] is ByteBuffer) {
-            val copy = (args[3] as ByteBuffer).duplicate()
-            val bytes = ByteArray(minOf(args[2] as Int, copy.remaining()))
-            copy.get(bytes)
-            uploads += bytes
-        }
-        when (method.returnType) {
-            java.lang.Boolean.TYPE -> false
-            java.lang.Integer.TYPE -> if (name.startsWith("glCreate")) nextId++ else 0
-            java.lang.Long.TYPE -> 0L
-            java.lang.Float.TYPE -> 0f
-            String::class.java -> if (args?.get(0) == GLES20.GL_VERSION) "OpenGL ES 3.2 test" else ""
-            else -> null
-        }
-    } as GL32
-
-    private class Page(id: Int) : BitmapTextureAtlas(TextureManager(), 16, 16, TextureOptions.BILINEAR) {
-        init {
-            mHardwareTextureID = id
-        }
-    }
 
     // u 0.125..0.625, v 0.125..0.625, 8 x 8 pixels.
     private fun region(page: Page = Page(7)) = TextureRegion(page, 2f, 2f, 8f, 8f)
@@ -91,13 +39,6 @@ class StoryboardBatchTest {
             this.y = y
         }
 
-    private fun batchDraws() = glCalls.count { it.startsWith("glDrawElements") }
-
-    private fun setsBlend(src: Int, dst: Int) =
-        glCalls.contains("glBlendFunc($src,$dst)") || glCalls.contains("glBlendFuncSeparate($src,$dst,$src,$dst)")
-
-    private fun lastBatch(): ByteBuffer = ByteBuffer.wrap(uploads.last()).order(ByteOrder.nativeOrder())
-
     private fun ByteBuffer.x(corner: Int) = getFloat(corner * QuadBatcher.VERTEX_SIZE_BYTES)
     private fun ByteBuffer.y(corner: Int) = getFloat(corner * QuadBatcher.VERTEX_SIZE_BYTES + 4)
     private fun ByteBuffer.u(corner: Int) = getFloat(corner * QuadBatcher.VERTEX_SIZE_BYTES + 8)
@@ -107,25 +48,21 @@ class StoryboardBatchTest {
     private fun drawOne(sprite: PlayableSprite, region: TextureRegion = region(), alpha: Float = 1f): ByteBuffer {
         batch.begin(glState)
         batch.draw(sprite, region, alpha)
-        batch.end()
         QuadBatcher.flush()
-        return lastBatch()
+        return gl.lastUpload()
     }
 
     @Before
     fun setUp() {
-        GlesBackend.onContextCreatedForTest(recordingGl())
+        gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 100
         GlesBackend.surfaceHeight = 100
-        glCalls.clear()
-        uploads.clear()
     }
 
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
     }
 
     @Test
@@ -140,19 +77,18 @@ class StoryboardBatchTest {
         batch.draw(sprite(10f, 10f), region, 1f)
         batch.resetSpace()
         batch.drawQuad(region, 0f, 0f, 100f, 100f, 0f, 0f, 0f, 0.5f)
-        batch.end()
 
         assertTrue(QuadBatcher.hasPending)
-        assertFalse(glCalls.toString(), glCalls.any { it.startsWith("glDrawElements") || it.startsWith("glVertexAttribPointer") })
+        assertFalse(gl.calls.toString(), gl.calls.any { it.startsWith("glDrawElements") || it.startsWith("glVertexAttribPointer") })
 
         QuadBatcher.flush()
 
-        assertEquals(glCalls.toString(), 1, batchDraws())
-        assertTrue(glCalls.toString(), glCalls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},7)"))
-        assertEquals(4 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, uploads.last().size)
+        assertEquals(gl.calls.toString(), 1, gl.count("glDrawElements"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},7)"))
+        assertEquals(4 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
 
         // The second quad is the first sprite, mapped by the storyboard space: 5 + 1 * 2 = 7, 8 * 2 wide.
-        val vertices = lastBatch()
+        val vertices = gl.lastUpload()
         val base = 4
         assertEquals(7f, vertices.x(base), 0f)
         assertEquals(7f, vertices.y(base), 0f)
@@ -169,21 +105,20 @@ class StoryboardBatchTest {
         batch.begin(glState)
         batch.draw(sprite(), region, 1f)
         batch.draw(sprite().apply { additiveBlend = true }, region, 1f)
-        batch.end()
         QuadBatcher.flush()
 
-        assertEquals(glCalls.toString(), 2, batchDraws())
-        assertTrue(glCalls.toString(), setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA))
-        assertTrue(glCalls.toString(), setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE))
+        assertEquals(gl.calls.toString(), 2, gl.count("glDrawElements"))
+        assertTrue(gl.calls.toString(), gl.setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA))
+        assertTrue(gl.calls.toString(), gl.setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE))
 
         // The blend set up last before the second (additive) draw.
-        val lastDraw = glCalls.indexOfLast { it.startsWith("glDrawElements") }
-        val additiveAt = glCalls.subList(0, lastDraw).indexOfLast { it.startsWith("glBlendFunc") }
-        assertTrue(glCalls.toString(), additiveAt >= 0)
+        val lastDraw = gl.calls.indexOfLast { it.startsWith("glDrawElements") }
+        val additiveAt = gl.calls.subList(0, lastDraw).indexOfLast { it.startsWith("glBlendFunc") }
+        assertTrue(gl.calls.toString(), additiveAt >= 0)
         assertTrue(
-            glCalls[additiveAt],
-            glCalls[additiveAt] == "glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})" ||
-                glCalls[additiveAt] == "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})"
+            gl.calls[additiveAt],
+            gl.calls[additiveAt] == "glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})" ||
+                gl.calls[additiveAt] == "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})"
         )
     }
 
@@ -191,12 +126,18 @@ class StoryboardBatchTest {
     fun mirroredSprite_uvsSwapped() {
         val plain = drawOne(sprite(10f, 20f))
         // Corners: top-left, top-right, bottom-right, bottom-left.
-        assertEquals(10f, plain.x(0), 0f); assertEquals(20f, plain.y(0), 0f)
-        assertEquals(18f, plain.x(1), 0f); assertEquals(20f, plain.y(1), 0f)
-        assertEquals(18f, plain.x(2), 0f); assertEquals(28f, plain.y(2), 0f)
-        assertEquals(10f, plain.x(3), 0f); assertEquals(28f, plain.y(3), 0f)
-        assertEquals(0.125f, plain.u(0), 0f); assertEquals(0.125f, plain.v(0), 0f)
-        assertEquals(0.625f, plain.u(2), 0f); assertEquals(0.625f, plain.v(2), 0f)
+        assertEquals(10f, plain.x(0), 0f)
+        assertEquals(20f, plain.y(0), 0f)
+        assertEquals(18f, plain.x(1), 0f)
+        assertEquals(20f, plain.y(1), 0f)
+        assertEquals(18f, plain.x(2), 0f)
+        assertEquals(28f, plain.y(2), 0f)
+        assertEquals(10f, plain.x(3), 0f)
+        assertEquals(28f, plain.y(3), 0f)
+        assertEquals(0.125f, plain.u(0), 0f)
+        assertEquals(0.125f, plain.v(0), 0f)
+        assertEquals(0.625f, plain.u(2), 0f)
+        assertEquals(0.625f, plain.v(2), 0f)
 
         val flipped = drawOne(sprite(10f, 20f).apply { flipHorizontal = true; flipVertical = true })
         for (corner in 0 until 4) {
@@ -244,7 +185,7 @@ class StoryboardBatchTest {
             batch.begin(glState)
             batch.draw(sprite().apply { red = 1f; green = 1f; blue = 1f }, region(), 1f, 0.5f)
             QuadBatcher.flush()
-            lastBatch()
+            gl.lastUpload()
         }
         assertEquals(QuadBatcher.packColor(0.5f, 0.5f, 0.5f, 1f), dimmed.color(0))
     }

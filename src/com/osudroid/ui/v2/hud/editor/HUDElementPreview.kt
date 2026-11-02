@@ -11,8 +11,8 @@ import com.osudroid.ui.v2.hud.HUDElement
 import com.osudroid.ui.v2.hud.HUDElementSkinData
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
-import org.andengine.input.touch.TouchEvent
 import org.andengine.graphics.DrawContext
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.abs
 import kotlin.math.min

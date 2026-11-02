@@ -3,18 +3,16 @@ package com.reco1l.andengine.sprite
 import android.opengl.GLES20
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import com.osudroid.testing.IDENTITY
+import com.osudroid.testing.RecordingGl
+import com.osudroid.testing.silentPlayer
 import com.reco1l.andengine.texture.VideoTexture
-import java.lang.reflect.Proxy
-import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GL32
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesLegacyTextureView
-import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.graphics.DrawContext
 import org.junit.After
@@ -25,64 +23,15 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.osudroid.testing.endOpenPass
 
 @OptIn(UnstableApi::class)
 @RunWith(RobolectricTestRunner::class)
 class UIVideoSpriteTest {
 
-    private val glCalls = ArrayList<String>()
-    private val uploads = ArrayList<ByteArray>()
-    private val sources = ArrayList<String>()
-    private var nextId = 100
+    private lateinit var gl: RecordingGl
     private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
-
-    private fun recordingGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
-        val name = method.name
-        glCalls += "$name(${args?.joinToString(",") { if (it is IntArray || it is java.nio.Buffer) "buf" else "$it" } ?: ""})"
-        if (name == "glGetIntegerv") {
-            val params = args!![1] as IntArray
-            params[args[2] as Int] = when (args[0]) {
-                GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS -> 16
-                GLES20.GL_MAX_TEXTURE_SIZE -> 4096
-                else -> 0
-            }
-        } else if (name.startsWith("glGen") && args?.size == 3 && args[1] is IntArray) {
-            val ids = args[1] as IntArray
-            for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
-        } else if ((name == "glGetShaderiv" || name == "glGetProgramiv") && args!![2] is IntArray) {
-            (args[2] as IntArray)[args[3] as Int] = 1
-        } else if (name == "glShaderSource") {
-            sources += args!![1].toString()
-        } else if (name == "glBufferData" && args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
-            val copy = (args[2] as ByteBuffer).duplicate()
-            val bytes = ByteArray(minOf(args[1] as Int, copy.remaining()))
-            copy.get(bytes)
-            uploads += bytes
-        } else if (name == "glBufferSubData" && args!![3] is ByteBuffer) {
-            val copy = (args[3] as ByteBuffer).duplicate()
-            val bytes = ByteArray(minOf(args[2] as Int, copy.remaining()))
-            copy.get(bytes)
-            uploads += bytes
-        }
-        defaultValue(method.returnType, name.startsWith("glCreate"), args)
-    } as GL32
-
-    private fun defaultValue(type: Class<*>, create: Boolean, args: Array<Any?>?): Any? = when (type) {
-        java.lang.Boolean.TYPE -> false
-        java.lang.Integer.TYPE -> if (create) nextId++ else 0
-        java.lang.Long.TYPE -> 0L
-        java.lang.Float.TYPE -> 0f
-        java.lang.Double.TYPE -> 0.0
-        String::class.java -> if (args?.getOrNull(0) == GLES20.GL_VERSION) "OpenGL ES 3.2 test" else ""
-        else -> null
-    }
-
-    /** A player that ignores every call; the tests never play anything. */
-    private fun silentPlayer(): ExoPlayer =
-        Proxy.newProxyInstance(ExoPlayer::class.java.classLoader, arrayOf(ExoPlayer::class.java)) { _, method, args ->
-            defaultValue(method.returnType, false, args)
-        } as ExoPlayer
 
     /**
      * A video texture without a decoder: [latch] records itself in the GL call log and hands out
@@ -97,7 +46,7 @@ class UIVideoSpriteTest {
 
         override fun latch() {
             latches++
-            glCalls += "latch"
+            gl.calls += "latch"
         }
 
         override fun getTransformMatrix(): FloatArray = matrix
@@ -115,14 +64,9 @@ class UIVideoSpriteTest {
             onHandleInvalidations()
         }
 
-    private fun programDraws() = glCalls.count { it.startsWith("glDrawArrays") }
+    private fun programDraws() = gl.count("glDrawArrays")
 
-    private fun lastMesh(): ByteBuffer {
-        val bytes = uploads.last { it.size == 4 * MeshRenderer.PROGRAM_VERTEX_SIZE_BYTES }
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder())
-    }
-
-    /** The texture coordinate the old vertex shader produced: `(st * vec4(u, v, 0, 1)).xy`, column-major. */
+    /** Applies the frame transform [st] to a texture coordinate: `(st * vec4(u, v, 0, 1)).xy`, column-major. */
     private fun transformed(st: FloatArray, u: Float, v: Float): Pair<Float, Float> {
         val input = floatArrayOf(u, v, 0f, 1f)
         val out = FloatArray(4)
@@ -136,10 +80,9 @@ class UIVideoSpriteTest {
 
     @Before
     fun setUp() {
-        GlesBackend.onContextCreatedForTest(recordingGl())
+        gl = RecordingGl(EXTERNAL_ESSL3).install()
         GlesBackend.surfaceWidth = 100
         GlesBackend.surfaceHeight = 100
-        glCalls.clear()
     }
 
     @After
@@ -147,8 +90,7 @@ class UIVideoSpriteTest {
         MeshRenderer.releaseResources()
         UIVideoSprite.releaseProgram()
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
     }
 
     @Test
@@ -161,22 +103,19 @@ class UIVideoSpriteTest {
             0.1f, 0.9f, 0f, 1f
         )
         val sprite = video(FakeVideo(9, st))
-        glCalls.clear()
+        gl.calls.clear()
 
         sprite.doDraw(glState, camera)
 
-        assertEquals(glCalls.toString(), 1, programDraws())
+        assertEquals(gl.calls.toString(), 1, programDraws())
         assertFalse(QuadBatcher.hasPending)
-        assertTrue(glCalls.toString(), glCalls.contains("glBindTexture(${GlesLegacyTextureView.TEXTURE_EXTERNAL_OES},9)"))
-        val fragment = sources.last { it.contains("samplerExternalOES") }
-        assertTrue(fragment, fragment.contains("GL_OES_EGL_image_external_essl3"))
-        // Straight-alpha texture, straight-alpha blending as the old shader path had.
-        assertTrue(glCalls.toString(), glCalls.contains("glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA})") ||
-            glCalls.contains("glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GlesLegacyTextureView.TEXTURE_EXTERNAL_OES},9)"))
+        // Straight-alpha texture, so straight-alpha blending.
+        assertTrue(gl.calls.toString(), gl.setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA))
 
         // Sprite order top-left, bottom-left, top-right, bottom-right; the sprite flips V, then the
         // transform of the frame applies to those coordinates.
-        val bytes = lastMesh()
+        val bytes = gl.lastProgramQuad()
         val stride = MeshRenderer.PROGRAM_VERTEX_SIZE_BYTES
         val corners = listOf(0f to 0f, 0f to 1f, 1f to 0f, 1f to 1f)
         for ((i, c) in corners.withIndex()) {
@@ -196,14 +135,14 @@ class UIVideoSpriteTest {
     fun videoSprite_latchesBeforeDraw() {
         val texture = FakeVideo(9, IDENTITY)
         val sprite = video(texture)
-        glCalls.clear()
+        gl.calls.clear()
 
         sprite.doDraw(glState, camera)
-        val firstLatch = glCalls.indexOf("latch")
-        val firstDraw = glCalls.indexOfFirst { it.startsWith("glDrawArrays") }
+        val firstLatch = gl.calls.indexOf("latch")
+        val firstDraw = gl.calls.indexOfFirst { it.startsWith("glDrawArrays") }
         sprite.doDraw(glState, camera)
 
-        assertTrue(glCalls.toString(), firstLatch >= 0 && firstLatch < firstDraw)
+        assertTrue(gl.calls.toString(), firstLatch >= 0 && firstLatch < firstDraw)
         // Once per frame.
         assertEquals(2, texture.latches)
         assertEquals(2, programDraws())
@@ -213,16 +152,42 @@ class UIVideoSpriteTest {
     fun videoSprite_notDrawnBeforeReady() {
         val texture = FakeVideo(-1, IDENTITY)
         val sprite = video(texture)
-        glCalls.clear()
+        gl.calls.clear()
 
         sprite.doDraw(glState, camera)
 
-        assertEquals(glCalls.toString(), 0, programDraws())
+        assertEquals(gl.calls.toString(), 0, programDraws())
         assertEquals(0, texture.latches)
         assertFalse(QuadBatcher.hasPending)
     }
 
+    @Test
+    fun isSupported_followsTheExtensionOfTheCurrentContext() {
+        assertTrue(UIVideoSprite.isSupported())
+
+        gl = RecordingGl("GL_OES_EGL_image_external GL_KHR_debug").install()
+        assertFalse(UIVideoSprite.isSupported())
+
+        gl = RecordingGl(EXTERNAL_ESSL3).install()
+        assertTrue(UIVideoSprite.isSupported())
+    }
+
+    @Test
+    fun videoSprite_notDrawnWithoutExternalTextureSupport() {
+        gl = RecordingGl("").install()
+        val texture = FakeVideo(9, IDENTITY)
+        val sprite = video(texture)
+        gl.calls.clear()
+
+        sprite.doDraw(glState, camera)
+
+        assertEquals(gl.calls.toString(), 0, programDraws())
+        assertEquals(0, texture.latches)
+        // The program that needs the extension is never built.
+        assertTrue(gl.calls.toString(), gl.calls.none { it.startsWith("glShaderSource(") && it.contains("samplerExternalOES") })
+    }
+
     private companion object {
-        val IDENTITY = floatArrayOf(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+        const val EXTERNAL_ESSL3 = "GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3"
     }
 }

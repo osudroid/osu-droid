@@ -44,7 +44,7 @@ class GlesSampler(
         samplerId = 0
     }
 
-    override fun restore(backend: GlesBackend) = create()
+    override fun restore() = create()
 
     override fun dispose() {
         if (isDisposed) return

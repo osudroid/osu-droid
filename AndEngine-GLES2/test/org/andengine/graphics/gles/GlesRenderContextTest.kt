@@ -1,6 +1,7 @@
 package org.andengine.graphics.gles
 
 import android.opengl.GLES20
+import android.opengl.GLES30
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.BufferTarget
 import org.andengine.graphics.BufferUsage
@@ -9,11 +10,15 @@ import org.andengine.graphics.GpuBuffer
 import org.andengine.graphics.GpuResource
 import org.andengine.graphics.Pipeline
 import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.TextureFilter
+import org.andengine.graphics.TextureFormat
+import org.andengine.graphics.TextureWrap
 import org.andengine.graphics.VertexAttribute
 import org.andengine.graphics.VertexFormat
 import org.andengine.graphics.VertexLayout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -40,10 +45,7 @@ class GlesRenderContextTest {
     )
 
     private fun newContext() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
     }
 
     private fun <T : GpuResource> track(r: T): T {
@@ -75,7 +77,7 @@ class GlesRenderContextTest {
 
     @After
     fun tearDown() {
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         GlesDebugOptions.simulateEs30 = false
         for (r in created) if (!r.isDisposed) r.dispose()
     }
@@ -109,7 +111,7 @@ class GlesRenderContextTest {
         context.draw(0, 3)
         context.endPass()
 
-        // Legacy code between passes.
+        // State set outside the pass.
         GlesBackend.state.setBlendEnabled(false)
         GlesBackend.state.blendFunc(GLES20.GL_ONE, GLES20.GL_ZERO)
         gl.calls.clear()
@@ -253,7 +255,7 @@ class GlesRenderContextTest {
 
         // New context on the same fake: resources restore, VAOs are dropped.
         gl.calls.clear()
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
         assertEquals(0, context.vertexArrays.size)
         gl.calls.clear()
 
@@ -348,24 +350,20 @@ class GlesRenderContextTest {
     @Test
     fun beginPass_onTargetWhoseRestoreFailed_throws() {
         val target = track(device.createRenderTarget(64, 32, false, "rt")) as GlesRenderTarget
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        gl.framebufferStatus = GLES20.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = RecordingGL().apply { framebufferStatus = GLES20.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT }.install()
         assertEquals(0, target.framebufferId)
 
         val e = assertThrows(IllegalStateException::class.java) { context.beginPass(target, null, false) }
 
         assertTrue(e.message, e.message!!.contains("'rt'"))
         assertTrue(e.message, e.message!!.contains("restore"))
-        assertTrue(!context.isInPass)
+        assertFalse(context.isInPass)
     }
 
     @Test
     fun setTexture_bindsTextureAndSamplerOnUnit() {
-        val texture = track(device.createTexture(4, 4, org.andengine.graphics.TextureFormat.RGBA8, label = "t")) as GlesTexture
-        val sampler = track(device.createSampler(org.andengine.graphics.TextureFilter.Nearest, org.andengine.graphics.TextureWrap.Repeat, "s")) as GlesSampler
+        val texture = track(device.createTexture(4, 4, TextureFormat.RGBA8, label = "t")) as GlesTexture
+        val sampler = track(device.createSampler(TextureFilter.Nearest, TextureWrap.Repeat, "s")) as GlesSampler
         gl.calls.clear()
 
         context.setTexture(2, texture, sampler)
@@ -380,8 +378,8 @@ class GlesRenderContextTest {
 
     @Test
     fun endPass_resetsActiveUnitAndUnbindsSamplersOfThePass() {
-        val texture = track(device.createTexture(4, 4, org.andengine.graphics.TextureFormat.RGBA8, label = "t")) as GlesTexture
-        val sampler = track(device.createSampler(org.andengine.graphics.TextureFilter.Nearest, org.andengine.graphics.TextureWrap.Repeat, "s")) as GlesSampler
+        val texture = track(device.createTexture(4, 4, TextureFormat.RGBA8, label = "t")) as GlesTexture
+        val sampler = track(device.createSampler(TextureFilter.Nearest, TextureWrap.Repeat, "s")) as GlesSampler
         context.beginPass(null, null, false)
         context.setTexture(2, texture, sampler)
         gl.calls.clear()
@@ -413,7 +411,7 @@ class GlesRenderContextTest {
         context.setUniformBlock(1, ub)
         context.setUniformBlock(1, ub)
 
-        assertEquals(1, count("glBindBufferBase(${android.opengl.GLES30.GL_UNIFORM_BUFFER},1,${ub.bufferId})"))
+        assertEquals(1, count("glBindBufferBase(${GLES30.GL_UNIFORM_BUFFER},1,${ub.bufferId})"))
     }
 
     @Test
@@ -439,7 +437,7 @@ class GlesRenderContextTest {
     fun beginInlinePass_keepsFramebufferViewportAndScissor() {
         val vb = buffer(BufferTarget.Vertex, "vb")
         val p = pipeline()
-        // Legacy code drawing into its own framebuffer with a clip.
+        // Code outside the pass drawing into its own framebuffer with a clip.
         GlesBackend.state.bindFramebuffer(7)
         GlesBackend.state.viewport(0, 0, 128, 64)
         GlesBackend.state.setScissorEnabled(true)
@@ -458,7 +456,7 @@ class GlesRenderContextTest {
         assertEquals(gl.calls.toString(), 0, count("glClear"))
         assertEquals(1, count("glDrawArrays"))
         assertEquals(7, GlesBackend.state.currentFramebuffer)
-        assertTrue(!context.isInPass)
+        assertFalse(context.isInPass)
     }
 
     @Test

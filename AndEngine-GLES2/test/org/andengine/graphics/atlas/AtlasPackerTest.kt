@@ -25,9 +25,7 @@ class AtlasPackerTest {
         val rnd = Random(1234)
         val slots = ArrayList<AtlasSlot>()
         repeat(100) {
-            val s = packer.tryPlace(8 + rnd.nextInt(57), 8 + rnd.nextInt(57))
-            assertNotNull(s)
-            slots.add(s!!)
+            slots += packer.tryPlace(8 + rnd.nextInt(57), 8 + rnd.nextInt(57))!!
         }
         var area = 0
         for (s in slots) {

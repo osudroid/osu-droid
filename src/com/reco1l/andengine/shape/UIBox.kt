@@ -4,17 +4,16 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
-import org.andengine.engine.camera.Camera
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.font.FontManager
-import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
  * A rectangle shape based on [UIComponent].
  */
-open class UIBox : UIBufferedComponent<BoxVBO>() {
+open class UIBox : UIBufferedComponent<BoxVBO>(batchesShape = true) {
 
     /**
      * The style of painting for the box.
@@ -53,7 +52,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         requestNewBuffer()
     }
 
-    // The batch needs no buffer; it is only built when the box is drawn the legacy way.
+    // The batch needs no buffer; it is only built when the box cannot be batched (see canBatchShape()).
     override fun onCreateBuffer(): BoxVBO? {
 
         if (canBatchShape()) {
@@ -75,33 +74,19 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         buffer?.update(this)
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchShape()) batchBlendMode() else null
-        if (blend != null) {
-            onApplyColor(pGLState)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
 
-            if (drawAlpha == 0f) {
-                return
-            }
-
-            val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
-            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
-
-            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            if (paintStyle == Fill) {
-                ShapeBatching.roundedRect(pGLState.modelViewGLMatrix, 0f, 0f, width, height, radius, color, blend)
-            } else {
-                ShapeBatching.roundedOutline(
-                    pGLState.modelViewGLMatrix, 0f, 0f, width, height, radius,
-                    lineWidth / FontManager.getRasterScale(), color, blend
-                )
-            }
-            return
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        if (paintStyle == Fill) {
+            ShapeBatching.roundedRect(gl.modelViewGLMatrix, 0f, 0f, width, height, radius, color, blend)
+        } else {
+            ShapeBatching.roundedOutline(
+                gl.modelViewGLMatrix, 0f, 0f, width, height, radius,
+                ShapeBatching.lineWidthFromPixels(lineWidth), color, blend
+            )
         }
-
-        ensureBuffer()
-        super.doDraw(pGLState, pCamera)
     }
 
     override fun beginDraw(pGLState: DrawContext) {

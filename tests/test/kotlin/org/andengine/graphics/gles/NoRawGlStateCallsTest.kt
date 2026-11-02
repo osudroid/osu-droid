@@ -1,5 +1,7 @@
 package org.andengine.graphics.gles
 
+import com.osudroid.testing.codeLines
+import com.osudroid.testing.sourceFiles
 import java.io.File
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -12,29 +14,15 @@ class NoRawGlStateCallsTest {
 
     @Test
     fun noRawStateCallsOutsideBackend() {
-        val excluded = File("AndEngine-GLES2/src/org/andengine/graphics/gles").canonicalFile
+        val excluded = File("AndEngine-GLES2/src/org/andengine/graphics/gles")
         val roots = listOf(File("src"), File("AndEngine-GLES2/src"))
         roots.forEach { assertTrue("Missing source root ${it.absolutePath}", it.isDirectory) }
 
-        val findings = mutableListOf<String>()
-
-        for (root in roots) {
-            root.walkTopDown()
-                .onEnter { it.canonicalFile != excluded }
-                .filter { it.isFile && (it.extension == "kt" || it.extension == "java") }
-                .forEach { file ->
-                    val path = file.invariantSeparatorsPath
-                    file.readLines().forEachIndexed { index, line ->
-                        val trimmed = line.trimStart()
-                        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) {
-                            return@forEachIndexed
-                        }
-                        if (STATE_CALL.containsMatchIn(line)) {
-                            findings += "$path:${index + 1}: ${line.trim()}"
-                        }
-                    }
-                }
-        }
+        val findings = sourceFiles(roots, excluded)
+            .flatMap { codeLines(it) }
+            .filter { (_, line) -> STATE_CALL.containsMatchIn(line) }
+            .map { (location, line) -> "$location: ${line.trim()}" }
+            .toList()
 
         assertTrue(
             "Raw GL state calls outside org.andengine.graphics.gles (use GlesBackend.state):\n" +

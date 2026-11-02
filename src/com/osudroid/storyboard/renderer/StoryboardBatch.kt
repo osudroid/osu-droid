@@ -1,16 +1,14 @@
 package com.osudroid.storyboard.renderer
 
-import android.opengl.GLES20
 import com.osudroid.storyboard.playback.PlayableSprite
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.graphics.DrawContext
 
 /**
  * Builds the quads of a storyboard and hands them to the engine's [QuadBatcher], which draws
@@ -39,6 +37,10 @@ class StoryboardBatch {
     /**
      * Begins a batch. Must be called from the draw thread before any quads are added: captures the
      * current model-view matrix and sets the projection of the [QuadBatcher].
+     *
+     * There is no matching end: the quads stay pending in the [QuadBatcher], so that following
+     * quads of the same texture and blend mode can share their draw call; the batcher draws them
+     * before anyone else changes GL state.
      *
      * @param pGLState The current [DrawContext].
      */
@@ -110,7 +112,7 @@ class StoryboardBatch {
             sprite.alpha * alphaMultiplier
         )
         val texture = BatchTexture.of(region.texture)
-        val blend = if (sprite.additiveBlend) ADDITIVE_BLEND else ALPHA_BLEND
+        val blend = if (sprite.additiveBlend) BlendMode.AdditiveAllChannels else BlendMode.AlphaAllChannels
 
         // Corners top-left, top-right, bottom-right, bottom-left.
         if (sprite.rotation == 0f) {
@@ -157,29 +159,10 @@ class StoryboardBatch {
         red: Float, green: Float, blue: Float, alpha: Float
     ) {
         QuadBatcher.addQuad(
-            BatchTexture.of(region.texture), ALPHA_BLEND, modelView,
+            BatchTexture.of(region.texture), BlendMode.AlphaAllChannels, modelView,
             left, top, right, top, right, bottom, left, bottom,
             region.u, region.v, region.u2, region.v2,
             QuadBatcher.packColor(red, green, blue, alpha)
         )
-    }
-
-    /**
-     * Ends the batch. The quads stay pending in the [QuadBatcher], so that following quads of the
-     * same texture and blend mode can share their draw call; the batcher draws them before anyone
-     * else changes GL state.
-     */
-    fun end() = Unit
-
-    /**
-     * Draws the quads pending in the [QuadBatcher] now.
-     */
-    fun flush() = QuadBatcher.flush()
-
-    companion object {
-        private val ALPHA_BLEND: BlendMode =
-            GlesPipeline.blendModeOf(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)!!
-        private val ADDITIVE_BLEND: BlendMode =
-            GlesPipeline.blendModeOf(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)!!
     }
 }

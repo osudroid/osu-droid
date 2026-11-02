@@ -22,11 +22,7 @@ class GlesBackendTest {
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
         previousDeviceMaxTextureSize = TextureAtlasPages.deviceMaxTextureSize
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
     }
 
     @After
@@ -43,14 +39,10 @@ class GlesBackendTest {
     fun frameStart_resetsDrawState() {
         GlesBackend.resetDrawState(false)
 
-        // The same calls, in the same order, as the start state of a new context had before it moved
-        // into the backend: the reset defaults first, then the renderer's own settings.
+        // Each state of a fresh cache is set once.
         assertEquals(
             listOf(
                 "glBindVertexArray(0)",
-                "glEnable(${GLES20.GL_DITHER})",
-                "glEnable(${GLES20.GL_DEPTH_TEST})",
-                "glDisable(${GLES20.GL_BLEND})",
                 "glDisable(${GLES20.GL_CULL_FACE})",
                 "glDisable(${GLES20.GL_DEPTH_TEST})",
                 "glClearDepthf(1.0)",

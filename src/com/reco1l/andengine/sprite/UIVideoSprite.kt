@@ -8,14 +8,16 @@ import androidx.annotation.OptIn
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.texture.*
 import org.andengine.engine.Engine
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.BatchTexture
-import org.andengine.graphics.batch.MeshProgram
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.batch.SharedMeshProgram
+import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.region.*
-import org.andengine.graphics.DrawContext
 
+// Tests pass a fake texture and texture manager.
 @OptIn(UnstableApi::class)
 class UIVideoSprite(
     private val texture: VideoTexture,
@@ -59,6 +61,8 @@ class UIVideoSprite(
     // -----------------------------------------------------------------------
 
     override fun onDrawBuffer(gl: DrawContext) {
+        // The context can be recreated without the extension the program needs.
+        if (!isSupported()) return
         val positions = buffer?.data ?: return
         val view = externalView
         if (!BatchTexture.isLoaded(view)) return
@@ -79,7 +83,7 @@ class UIVideoSprite(
         }
 
         MeshRenderer.drawProgramQuad(
-            program, positions, transformed,
+            program.get(), positions, transformed,
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
             view,
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
@@ -167,17 +171,18 @@ void main() {
 }
 """
 
-        private var programInstance: MeshProgram? = null
+        // Shared by all video sprites.
+        private val program = SharedMeshProgram("video", FRAGMENT_SHADER, external = true)
 
-        // Shared by all video sprites; created at the first draw, the program restores itself after a context loss.
-        private val program: MeshProgram
-            get() = programInstance ?: MeshProgram("video", FRAGMENT_SHADER, emptyList(), external = true).also { programInstance = it }
-
-        /** Disposes the GL program; the next draw creates it again. For shutdown and tests. */
+        /**
+         * Whether the current GL context can draw video frames: the fragment shader samples the
+         * frame through `GL_OES_EGL_image_external_essl3`. False while there is no context yet.
+         */
         @JvmStatic
-        fun releaseProgram() {
-            programInstance?.releaseResources()
-            programInstance = null
-        }
+        fun isSupported(): Boolean = GlesBackend.hasCaps && GlesBackend.caps.hasExternalTextureEssl3
+
+        /** Disposes the shared GL program; the next draw creates it again. Tests call it to reset between cases. */
+        @JvmStatic
+        fun releaseProgram() = program.release()
     }
 }

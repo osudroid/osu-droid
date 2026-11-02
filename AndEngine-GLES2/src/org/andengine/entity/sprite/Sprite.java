@@ -2,8 +2,8 @@ package org.andengine.entity.sprite;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
-import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.graphics.DrawContext;
+import org.andengine.opengl.texture.region.ITextureRegion;
 
 /**
  * (c) 2010 Nicolas Gramlich

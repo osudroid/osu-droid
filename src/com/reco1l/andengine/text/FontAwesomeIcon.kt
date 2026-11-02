@@ -6,11 +6,9 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.IconVariant
 import org.andengine.engine.camera.*
 import org.andengine.entity.text.TextBatching
-import org.andengine.graphics.BlendMode
-import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
-import org.andengine.opengl.font.*
 import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.opengl.font.*
 import kotlin.math.*
 
 /**
@@ -58,15 +56,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
      * Called when the font settings (font size or family) change.
      */
     var onFontSettingsChange: () -> Unit = {
-        val oldFont = font
-
-        if (oldFont != null) {
-            UIEngine.current.resources.unsubscribeFromFont(oldFont, this)
-        }
-
-        val newFont = UIEngine.current.resources.getOrStoreFont(iconSize, iconVariant)
-        font = newFont
-        UIEngine.current.resources.subscribeToFont(newFont, this)
+        font = UIEngine.current.resources.getOrStoreFont(iconSize, iconVariant)
 
         invalidate(InvalidationFlag.Content)
     }
@@ -109,22 +99,10 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         contentHeight = font.lineHeight
     }
 
-    override fun onCreateBuffer(): IBuffer? {
-        // The glyph goes through the quad batch; there is no buffer of its own.
-        return null
-    }
-
-    override fun onUpdateBuffer() {
-        // Nothing to do here, there is no buffer.
-    }
-
     override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
-        val clearMask = clearMask()
-        if (clearMask != 0) {
-            GlesBackend.state.clear(clearMask)
-        }
+        clearIfRequested()
 
         val font = font ?: return
         val letter = letter ?: return
@@ -142,7 +120,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         QuadBatcher.setProjection(pGLState.projectionGLMatrix)
 
         TextBatching.addLetter(
-            font, letter, batchBlendMode() ?: BlendMode.Alpha, pGLState.modelViewGLMatrix,
+            font, letter, meshBlendMode(), pGLState.modelViewGLMatrix,
             x0, y0, x0 + letter.mWidth * scale, y0 + letter.mHeight * scale,
             TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha),
             TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
@@ -161,10 +139,9 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
     override fun onDetached() {
         super.onDetached()
 
-        val font = font ?: return
-        UIEngine.current.resources.unsubscribeFromFont(font, this)
-
-        this.font = null
-        fontSettingsChanged = true
+        if (font != null) {
+            font = null
+            fontSettingsChanged = true
+        }
     }
 }

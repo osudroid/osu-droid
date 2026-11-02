@@ -11,8 +11,8 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
 import org.andengine.engine.camera.*
-import org.andengine.opengl.texture.region.*
 import org.andengine.graphics.DrawContext
+import org.andengine.opengl.texture.region.*
 import com.osudroid.mods.*
 import com.osudroid.utils.allModsInstances
 import ru.nsu.ccfit.zuev.osu.*

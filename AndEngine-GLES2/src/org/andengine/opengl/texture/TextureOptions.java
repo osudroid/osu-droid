@@ -71,8 +71,6 @@ public class TextureOptions {
 	// ===========================================================
 
 	public void apply() {
-		// osu!droid fix: use glTexParameteri — all four parameters are integer-valued GL enums.
-		// The old code used glTexParameterf for wrap modes which is not spec-compliant in GLES2.
 		GlesTextures.parameters(this.mMinFilter, this.mMagFilter, this.mWrapS, this.mWrapT);
 	}
 

@@ -12,49 +12,56 @@ import org.andengine.graphics.debug.RenderStats
  */
 object GlesBackend {
 
-    @JvmStatic lateinit var gl: GL30
+    @JvmStatic
+    lateinit var gl: GL30
         private set
 
     /** Non-null when the context is ES 3.1 or newer. */
-    @JvmStatic var gl31: GL31? = null
+    @JvmStatic
+    var gl31: GL31? = null
         private set
 
     /** Non-null when the context is ES 3.2. */
-    @JvmStatic var gl32: GL32? = null
+    @JvmStatic
+    var gl32: GL32? = null
         private set
 
-    @JvmStatic lateinit var caps: GlesCapabilities
+    @JvmStatic
+    lateinit var caps: GlesCapabilities
         private set
 
-    @JvmStatic lateinit var state: GlesStateCache
+    /** Whether a context has been installed, so that [caps] can be read. */
+    @JvmStatic
+    val hasCaps: Boolean get() = ::caps.isInitialized
+
+    @JvmStatic
+    lateinit var state: GlesStateCache
         private set
 
-    @JvmStatic val registry = GlesResourceRegistry()
+    @JvmStatic
+    val registry = GlesResourceRegistry()
 
     /** Size of the screen surface in pixels, set by `EngineRenderer.onSurfaceChanged`. */
-    @JvmField var surfaceWidth = 0
+    @JvmField
+    var surfaceWidth = 0
 
-    @JvmField var surfaceHeight = 0
+    @JvmField
+    var surfaceHeight = 0
 
     /**
      * Call once per new EGL context, on the GL thread, before anything draws. Detects the
      * capabilities, installs a fresh (empty) state cache and restores every registered resource.
+     * Tests pass a fake [gl].
      */
     @JvmStatic
     @JvmOverloads
-    fun onContextCreated(gl: AndroidGL32 = AndroidGL32()) = install(gl)
-
-    /** Same as [onContextCreated], with a fake GL. */
-    fun onContextCreatedForTest(gl: GL32) = install(gl)
-
-    private fun install(gl: GL32) {
+    fun onContextCreated(gl: GL32 = AndroidGL32()) {
         val versionString = gl.glGetString(GLES20.GL_VERSION)
         val maxTextureSize = IntArray(1)
         gl.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0)
         val caps = GlesCapabilities.detect(
             versionString,
             gl.glGetString(GLES20.GL_EXTENSIONS),
-            GlesDebugOptions,
             maxTextureSize[0]
         )
         this.gl = gl
@@ -65,18 +72,17 @@ object GlesBackend {
 
         // Only through the ES 3.2 core entry points: with GL_KHR_debug on an older context the
         // *KHR variants would be needed. Installed before the restore so its errors are reported too.
-        val gl32 = gl32
-        val debugOutput = GlesDebugOptions.debugOutput && caps.hasDebugOutput && gl32 != null
+        val debugGl = if (GlesDebugOptions.debugOutput && caps.hasDebugOutput) gl32 else null
         Log.i(
             TAG,
             "context: ES ${caps.version.major}.${caps.version.minor} ($versionString) " +
                 "renderer=${gl.glGetString(GLES20.GL_RENDERER)} " +
-                "simulateEs30=${GlesDebugOptions.simulateEs30} debugOutput=$debugOutput"
+                "simulateEs30=${GlesDebugOptions.simulateEs30} debugOutput=${debugGl != null}"
         )
 
-        if (debugOutput && gl32 != null) GlesDebugOutput.install(gl32) else GlesDebugOutput.uninstall()
+        if (debugGl != null) GlesDebugOutput.install(debugGl) else GlesDebugOutput.uninstall()
 
-        registry.restoreAll(this)
+        registry.restoreAll()
     }
 
     /**
@@ -90,11 +96,6 @@ object GlesBackend {
         val state = state
         // The restore may have bound another VAO.
         state.bindVertexArray(0)
-        // The defaults of a fresh context first, then the renderer's own settings; the order (and
-        // with it every call and statistic) is the one the engine has always used.
-        state.setDitherEnabled(true)
-        state.setDepthTestEnabled(true)
-        state.setBlendEnabled(false)
         state.setCullFaceEnabled(false)
 
         TextureAtlasPages.deviceMaxTextureSize = caps.maxTextureSize

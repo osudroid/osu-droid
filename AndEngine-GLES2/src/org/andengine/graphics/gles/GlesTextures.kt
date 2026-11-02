@@ -3,9 +3,9 @@ package org.andengine.graphics.gles
 import android.graphics.Bitmap
 import android.opengl.GLES20
 import android.opengl.GLUtils
+import java.nio.ByteOrder
 import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.util.GLHelper
-import java.nio.ByteOrder
 
 /**
  * The GL work of the legacy textures (`org.andengine.opengl.texture`): creating, binding, deleting

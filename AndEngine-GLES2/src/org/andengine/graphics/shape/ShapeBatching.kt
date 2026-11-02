@@ -33,7 +33,14 @@ object ShapeBatching {
     private val qv = FloatArray(4)
     private val qc = IntArray(4)
 
-    private fun masks(): ShapeMasks = masks ?: ShapeMasks.shared
+    private fun currentMasks(): ShapeMasks = masks ?: ShapeMasks.shared
+
+    /**
+     * The virtual line width for a width given in physical pixels, for entities that take their
+     * line width in pixels and pass it to the outline and line functions here.
+     */
+    @JvmStatic
+    fun lineWidthFromPixels(px: Float): Float = px / FontManager.getRasterScale()
 
     private fun visible(rgba: Int): Boolean = (rgba ushr 24) != 0
 
@@ -83,7 +90,7 @@ object ShapeBatching {
     @JvmStatic
     fun rect(matrix: FloatArray, x0: Float, y0: Float, x1: Float, y1: Float, rgba: Int, blend: BlendMode) {
         if (!visible(rgba)) return
-        fill(masks().solid(), blend, matrix, x0, y0, x1, y1, rgba)
+        fill(currentMasks().solid(), blend, matrix, x0, y0, x1, y1, rgba)
     }
 
     @JvmStatic
@@ -93,7 +100,7 @@ object ShapeBatching {
     ) {
         if (!visible(topLeft) && !visible(topRight) && !visible(bottomLeft) && !visible(bottomRight)) return
         if (x1 <= x0 || y1 <= y0) return
-        val slot = masks().solid()
+        val slot = currentMasks().solid()
         qx[0] = x0; qy[0] = y0
         qx[1] = x1; qy[1] = y0
         qx[2] = x1; qy[2] = y1
@@ -112,7 +119,7 @@ object ShapeBatching {
             rect(matrix, x0, y0, x1, y1, rgba, blend)
             return
         }
-        val ms = masks()
+        val ms = currentMasks()
         val corner = ms.corner(px(r))
         val solid = ms.solid()
         val ix0 = x0 + r
@@ -144,7 +151,7 @@ object ShapeBatching {
         val r = max(0f, min(radius, half))
         val lw = min(lineWidth, if (r > 0f) r else half)
         if (!(lw > 0f)) return
-        val ms = masks()
+        val ms = currentMasks()
         val solid = ms.solid()
         if (r <= 0f) {
             fill(solid, blend, matrix, x0, y0, x1, y0 + lw, rgba)
@@ -202,7 +209,7 @@ object ShapeBatching {
         val ny = dx / length * lineWidth * 0.5f
         val ex = dx / length * extend
         val ey = dy / length * extend
-        val slot = masks().solid()
+        val slot = currentMasks().solid()
         qx[0] = x0 - ex + nx; qy[0] = y0 - ey + ny
         qx[1] = x1 + ex + nx; qy[1] = y1 + ey + ny
         qx[2] = x1 + ex - nx; qy[2] = y1 + ey - ny
@@ -217,7 +224,7 @@ object ShapeBatching {
     @JvmStatic
     fun triangle(matrix: FloatArray, ax: Float, ay: Float, bx: Float, by: Float, cx: Float, cy: Float, rgba: Int, blend: BlendMode) {
         if (!visible(rgba)) return
-        val slot = masks().solid()
+        val slot = currentMasks().solid()
         qx[0] = ax; qy[0] = ay
         qx[1] = bx; qy[1] = by
         qx[2] = cx; qy[2] = cy
@@ -231,14 +238,14 @@ object ShapeBatching {
     @JvmStatic
     fun circle(matrix: FloatArray, cx: Float, cy: Float, radius: Float, rgba: Int, blend: BlendMode) {
         if (!visible(rgba) || !(radius > 0f)) return
-        quarters(masks().corner(px(radius)), matrix, cx, cy, radius, rgba, blend)
+        quarters(currentMasks().corner(px(radius)), matrix, cx, cy, radius, rgba, blend)
     }
 
     /** A ring whose outer edge is [radius] and whose band is [lineWidth] wide. */
     @JvmStatic
     fun ring(matrix: FloatArray, cx: Float, cy: Float, radius: Float, lineWidth: Float, rgba: Int, blend: BlendMode) {
         if (!visible(rgba) || !(radius > 0f) || !(lineWidth > 0f)) return
-        quarters(masks().ring(px(radius), px(min(lineWidth, radius))), matrix, cx, cy, radius, rgba, blend)
+        quarters(currentMasks().ring(px(radius), px(min(lineWidth, radius))), matrix, cx, cy, radius, rgba, blend)
     }
 
     /**
@@ -254,7 +261,7 @@ object ShapeBatching {
         if (!visible(rgba) || segments < 2) return
         val start = toRadians(startAngle - 90f)
         val delta = (toRadians(endAngle - 90f) - start) / max(1, segments - 1)
-        val slot = masks().solid()
+        val slot = currentMasks().solid()
         qu.fill(ShapeMasks.centerU(slot))
         qv.fill(ShapeMasks.centerV(slot))
         qc.fill(rgba)
@@ -275,9 +282,9 @@ object ShapeBatching {
     }
 
     /**
-     * The outline of an elliptical arc as a strip of quads, [lineWidth] wide and centered on the arc
-     * (radius +- half the width). On ellipses (rx != ry) the band is offset radially per axis, not along the
-     * curve normal. Points as in [sector]. [lineWidth] is in the units of the
+     * The outline of an elliptical arc as a strip of quads, [lineWidth] wide and centered on the
+     * arc (radius +- half the width). On ellipses (rx != ry) the band is offset radially per axis,
+     * not along the curve normal. Points as in [sector]. [lineWidth] is in the units of the
      * geometry, the caller converts from pixels.
      */
     @JvmStatic
@@ -291,7 +298,7 @@ object ShapeBatching {
         val inY = max(0f, ry - half)
         val outX = rx + half
         val outY = ry + half
-        val slot = masks().solid()
+        val slot = currentMasks().solid()
         qu.fill(ShapeMasks.centerU(slot))
         qv.fill(ShapeMasks.centerV(slot))
         qc.fill(rgba)

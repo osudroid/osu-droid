@@ -85,8 +85,6 @@ object BatchTexture {
     private class WeakIdProvider(legacy: ITexture) : LegacyTextureIdProvider {
         private val ref = WeakReference(legacy)
 
-        val texture: ITexture? get() = ref.get()
-
         override fun hardwareTextureId(): Int = ref.get()?.hardwareTextureID ?: 0
     }
 }

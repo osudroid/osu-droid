@@ -31,7 +31,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  * Textures that are referenced frequently (at least [PACK_USAGE_THRESHOLD] times) and are small
  * enough are shelf-packed into shared [BitmapTextureAtlas] pages so that the sprite batch can
  * draw them without texture switches. All other textures are loaded individually. Missing or
- * corrupt files resolve to a 1x1 red placeholder, matching the previous implementation.
+ * corrupt files resolve to a 1x1 red placeholder.
  *
  * Every texture is a [FileImageSource]: it composes its image files whenever the texture is
  * loaded (also after a context loss), so no composed page is kept in memory.
@@ -45,9 +45,9 @@ class StoryboardTexturePool @JvmOverloads constructor(
     private val useSkinSprites: Boolean = false,
 
     /**
-     * The texture manager to load the textures with, or `null` for the engine's.
+     * The texture manager to load the textures with. Tests pass their own.
      */
-    private val textureManager: TextureManager? = null
+    private val textureManager: TextureManager = GlobalManager.getInstance().engine.textureManager
 ) {
     private val textures = HashMap<String, TextureRegion>()
     private val createdTextures = HashSet<ITexture>()
@@ -104,10 +104,8 @@ class StoryboardTexturePool @JvmOverloads constructor(
     fun clear() {
         textures.clear()
 
-        val textureManager = textureManager ?: GlobalManager.getInstance().engine?.textureManager
-
         for (texture in createdTextures) {
-            textureManager?.unloadTexture(texture)
+            textureManager.unloadTexture(texture)
         }
 
         createdTextures.clear()
@@ -116,9 +114,6 @@ class StoryboardTexturePool @JvmOverloads constructor(
         currentY = 0
         lineMaxY = 0
     }
-
-    private fun requireTextureManager(): TextureManager =
-        textureManager ?: GlobalManager.getInstance().engine.textureManager
 
     private fun getSkinTexture(name: String): TextureRegion? {
         val resources = ResourceManager.getInstance()
@@ -170,7 +165,6 @@ class StoryboardTexturePool @JvmOverloads constructor(
         while (textureWidth < info.width) textureWidth *= 2
         while (textureHeight < info.height) textureHeight *= 2
 
-        val textureManager = requireTextureManager()
         val texture = BitmapTextureAtlas(textureManager, textureWidth, textureHeight, TextureOptions.BILINEAR)
         val region = TextureRegionFactory.createFromSource(texture, source, 0, 0, false)
         textureManager.loadTexture(texture)
@@ -201,7 +195,6 @@ class StoryboardTexturePool @JvmOverloads constructor(
             return
         }
 
-        val textureManager = requireTextureManager()
         val byPage = toPack.groupBy { it.pageIndex }
 
         // The first (and possibly only) page can be shrunk to the used height.
@@ -282,12 +275,13 @@ class StoryboardTexturePool @JvmOverloads constructor(
      * composed as bytes ([onLoadPixels]); a single file that fills the whole image is delivered as
      * decoded, without a copy. [onLoadBitmap] composes the files on a canvas instead.
      */
-    class FileImageSource @JvmOverloads constructor(
+    class FileImageSource(
         width: Int,
         height: Int,
         private val files: Array<File>,
         private val xs: IntArray,
         private val ys: IntArray,
+        // Tests replace the decoder to observe what it decodes.
         private val decode: (File) -> Pixels? = { StraightPixels.decodeFile(it.absolutePath) }
     ) : BaseTextureAtlasSource(0, 0, width, height), IPixelTextureAtlasSource {
 
@@ -305,7 +299,8 @@ class StoryboardTexturePool @JvmOverloads constructor(
 
                     if (image == null) {
                         if (isDecodable(files[i])) {
-                            // Only this decoder's premultiplied output is available: the bitmap path composes the page.
+                            // decode() could not give straight pixels for this file; fall back to the bitmap path
+                            // (canvas composition).
                             return null
                         }
 

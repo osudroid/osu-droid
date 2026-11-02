@@ -1,9 +1,13 @@
 package org.andengine.opengl.texture
 
 import android.graphics.Bitmap
-import android.opengl.GLES20
-import org.andengine.graphics.gles.GlesBackend
+import java.nio.ByteBuffer
+import java.util.concurrent.Executor
+import java.util.concurrent.RejectedExecutionException
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.bitmapUploads
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
@@ -18,9 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.nio.ByteBuffer
-import java.util.concurrent.Executor
-import java.util.concurrent.RejectedExecutionException
 
 @RunWith(RobolectricTestRunner::class)
 class TextureManagerAsyncTest {
@@ -89,14 +90,11 @@ class TextureManagerAsyncTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
         gl.texSubImage2DBytes.clear()
     }
 
-    private fun manager(uploadBytesPerFrame: Long = 1L shl 30, bytesInFlight: Long = 1L shl 30) =
+    private fun manager(uploadBytesPerFrame: Long = UNLIMITED, bytesInFlight: Long = UNLIMITED) =
         TextureManager(executor, uploadBytesPerFrame, bytesInFlight)
 
     private fun atlas(manager: TextureManager, vararg sources: IBitmapTextureAtlasSource, options: TextureOptions = TextureOptions.BILINEAR, size: Int = 16) =
@@ -104,14 +102,27 @@ class TextureManagerAsyncTest {
             sources.forEachIndexed { i, source -> atlas.addTextureAtlasSource(source, i * 4, 0) }
         }
 
-    private fun pixelUploads() = gl.calls.count { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
+    private fun pixelUploads() = gl.subImageCalls().size
 
-    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
-    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
-        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
-        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
+    /** Runs the GL thread's part of [manager] until [texture] is uploaded; false after 5 seconds. */
+    private fun updateUntilLoaded(manager: TextureManager, texture: ITexture): Boolean {
+        val deadline = System.nanoTime() + 5_000_000_000L
+        while (System.nanoTime() < deadline) {
+            manager.updateTextures()
+            if (texture.isLoadedToHardware) return true
+            Thread.sleep(5)
+        }
+        return false
     }
 
+    /** Loads [textures] through the background path until all of them are on the GPU. */
+    private fun loadAll(manager: TextureManager, vararg textures: ITexture) {
+        textures.forEach { manager.loadTexture(it) }
+        while (textures.any { !it.isLoadedToHardware }) {
+            manager.updateTextures()
+            executor.runAll()
+        }
+    }
 
     @Test
     fun asyncPrepare_uploadsOnlyWhenReady() {
@@ -256,14 +267,15 @@ class TextureManagerAsyncTest {
         manager.updateTextures()
         assertEquals(1, executor.tasks.size)
 
-        val own = TextureManager(null, 1L shl 30, 1L shl 30)
+        // A manager with its own worker starts a new one after each onDestroy.
+        val own = TextureManager(null, UNLIMITED, UNLIMITED)
         own.onDestroy()
         val texture = atlas(own, FakePixelSource())
         own.loadTexture(texture)
-        own.updateTextures()
+        assertTrue(updateUntilLoaded(own, texture))
         own.onDestroy()
         own.loadTexture(texture)
-        own.updateTextures()
+        assertTrue(updateUntilLoaded(own, texture))
         own.onDestroy()
     }
 
@@ -427,7 +439,7 @@ class TextureManagerAsyncTest {
         assertTrue(texture.isLoadedToHardware)
         assertEquals("pixels not asked for again", 1, source.pixelLoads)
         assertEquals(1, source.bitmapLoads)
-        assertEquals(1, bitmapUploads().size)
+        assertEquals(1, gl.bitmapUploads().size)
     }
 
     @Test
@@ -519,15 +531,6 @@ class TextureManagerAsyncTest {
         manager.updateTextures()
         assertTrue(textures.all { it.isLoadedToHardware })
         assertEquals(0, manager.preparationsInFlight)
-    }
-
-    /** Loads [textures] through the background path until all of them are on the GPU. */
-    private fun loadAll(manager: TextureManager, vararg textures: ITexture) {
-        textures.forEach { manager.loadTexture(it) }
-        while (textures.any { !it.isLoadedToHardware }) {
-            manager.updateTextures()
-            executor.runAll()
-        }
     }
 
     @Test
@@ -954,5 +957,10 @@ class TextureManagerAsyncTest {
         executor.runAll()
         assertTrue("uploaded prepared pixels", manager.updateTextures())
         assertFalse(manager.updateTextures())
+    }
+
+    private companion object {
+        /** A byte budget that never limits a test. */
+        const val UNLIMITED = 1L shl 30
     }
 }

@@ -1,8 +1,8 @@
 package org.andengine.entity.scene.background;
 
-import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.engine.camera.Camera;
 import org.andengine.graphics.DrawContext;
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ModifierList;

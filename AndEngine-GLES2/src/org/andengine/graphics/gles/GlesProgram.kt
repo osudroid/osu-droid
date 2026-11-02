@@ -147,7 +147,7 @@ class GlesProgram(
         uniformLocations.clear()
     }
 
-    override fun restore(backend: GlesBackend) = build()
+    override fun restore() = build()
 
     override fun dispose() {
         if (isDisposed) return

@@ -1,11 +1,12 @@
 package org.andengine.graphics.batch
 
 import android.opengl.GLES20
-import java.lang.reflect.Proxy
+import android.opengl.GLES30
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.Texture
+import org.andengine.graphics.TextureData
 import org.andengine.graphics.TextureFormat
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.graphics.gles.GlesBackend
@@ -15,8 +16,12 @@ import org.andengine.graphics.gles.GlesLegacyTextureView
 import org.andengine.graphics.gles.GlesPlaceholderTexture
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.opengl.texture.ITexture
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastVertices
+import org.andengine.graphics.gles.proxyTexture
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -29,6 +34,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 @RunWith(RobolectricTestRunner::class)
 class QuadBatcherTest {
@@ -37,31 +43,36 @@ class QuadBatcherTest {
     private lateinit var textureA: GlesTexture
     private lateinit var textureB: GlesTexture
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
     private fun newContext() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
     }
 
     private fun texture(label: String) =
         GlesGraphicsDevice.instance.createTexture(4, 4, TextureFormat.RGBA8, label = label) as GlesTexture
 
-    private fun add(texture: Texture = textureA, blend: BlendMode = BlendMode.Alpha, matrix: FloatArray = identity, rgba: Int = -1) =
+    private fun add(texture: Texture = textureA, blend: BlendMode = BlendMode.Alpha, matrix: FloatArray = IDENTITY, rgba: Int = -1) =
         QuadBatcher.add(texture, blend, matrix, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, rgba)
 
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
+    private val moved = floatArrayOf(
+        2f, 0.5f, 0f, 0f,
+        -0.25f, 3f, 0f, 0f,
+        0f, 0f, 1f, 0f,
+        5f, 7f, 0f, 1f
+    )
 
-    /** The vertex data of the last vertex upload, in the device's byte order. */
-    private fun lastVertices(): ByteBuffer =
-        ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+    private fun valueQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
+        QuadBatcher.addQuad(
+            texture, BlendMode.Alpha, moved,
+            x, 0f, x + 1f, 0.1f, x + 1.2f, 1f, x - 0.1f, 0.9f,
+            0.1f, 0.2f, 0.7f, 0.9f, rgba
+        )
+
+    private fun arrayQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
+        QuadBatcher.addQuad(
+            texture, BlendMode.Alpha, moved,
+            floatArrayOf(x, x + 1f, x + 1.2f, x - 0.1f), floatArrayOf(0f, 0.1f, 1f, 0.9f),
+            floatArrayOf(0.1f, 0.7f, 0.7f, 0.1f), floatArrayOf(0.2f, 0.2f, 0.9f, 0.9f), rgba
+        )
 
     @Before
     fun setUp() {
@@ -71,7 +82,7 @@ class QuadBatcherTest {
         GlesBackend.surfaceHeight = 480
         textureA = texture("a")
         textureB = texture("b")
-        QuadBatcher.setProjection(identity)
+        QuadBatcher.setProjection(IDENTITY)
         gl.calls.clear()
     }
 
@@ -79,8 +90,7 @@ class QuadBatcherTest {
     fun tearDown() {
         QuadBatcher.releaseResources()
         QuadBatcher.counterRegistration = QuadBatcher.DEFAULT_COUNTER_REGISTRATION
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
         textureA.dispose()
         textureB.dispose()
         RenderStats.enabled = false
@@ -99,11 +109,11 @@ class QuadBatcherTest {
     fun sameTextureAndBlend_oneDraw() {
         repeat(100) { add() }
         assertTrue(QuadBatcher.hasPending)
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
 
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},600,${GLES20.GL_UNSIGNED_SHORT},0)"))
         assertFalse(QuadBatcher.hasPending)
         assertEquals(100 * 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
@@ -112,7 +122,7 @@ class QuadBatcherTest {
     @Test
     fun emptyFlush_drawsNothing() {
         QuadBatcher.flush()
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
         assertEquals(gl.calls.toString(), 0, gl.calls.size)
     }
 
@@ -122,13 +132,13 @@ class QuadBatcherTest {
         add(textureA)
         add(textureB)
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},12,${GLES20.GL_UNSIGNED_SHORT},0)"))
         assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},${textureA.textureId})"))
 
         QuadBatcher.flush()
 
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},${textureB.textureId})"))
     }
 
@@ -136,17 +146,17 @@ class QuadBatcherTest {
     fun blendChange_flushes() {
         add(blend = BlendMode.Alpha)
         add(blend = BlendMode.Alpha)
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
 
         add(blend = BlendMode.Additive)
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
 
         // Equal content, other instance: same batch.
         add(blend = BlendMode(BlendMode.Additive.srcColor, BlendMode.Additive.dstColor, BlendMode.Additive.srcAlpha, BlendMode.Additive.dstAlpha))
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
 
         QuadBatcher.flush()
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         assertTrue(
             gl.calls.toString(),
             gl.calls.contains("glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE},${GLES20.GL_ONE})")
@@ -181,28 +191,28 @@ class QuadBatcherTest {
     @Test
     fun projectionChange_flushes() {
         add()
-        QuadBatcher.setProjection(identity.copyOf())
-        assertEquals("same content must not flush", 0, draws())
+        QuadBatcher.setProjection(IDENTITY.copyOf())
+        assertEquals("same content must not flush", 0, gl.draws())
 
-        val moved = identity.copyOf().also { it[12] = 5f }
+        val moved = IDENTITY.copyOf().also { it[12] = 5f }
         QuadBatcher.setProjection(moved)
-        assertEquals(1, draws())
-        assertTrue("the old projection belongs to the flushed quads", identity.contentEquals(gl.uniformMatrices.last()))
+        assertEquals(1, gl.draws())
+        assertTrue("the old projection belongs to the flushed quads", IDENTITY.contentEquals(gl.uniformMatrices.last()))
 
         add()
         QuadBatcher.flush()
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         assertTrue(moved.contentEquals(gl.uniformMatrices.last()))
     }
 
     @Test
     fun setProjection_copiesTheMatrix() {
-        val m = identity.copyOf()
+        val m = IDENTITY.copyOf()
         QuadBatcher.setProjection(m)
         m[12] = 9f
         add()
         QuadBatcher.flush()
-        assertTrue(identity.contentEquals(gl.uniformMatrices.last()))
+        assertTrue(IDENTITY.contentEquals(gl.uniformMatrices.last()))
     }
 
     @Test
@@ -215,18 +225,18 @@ class QuadBatcherTest {
     }
 
     @Test
-    fun capacity_flushesAt4096() {
+    fun capacity_flushesWhenFull() {
         repeat(QuadBatcher.MAX_QUADS) { add() }
-        assertEquals(0, draws())
+        assertEquals(0, gl.draws())
 
         add()
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},${QuadBatcher.MAX_QUADS * 6},${GLES20.GL_UNSIGNED_SHORT},0)"))
         assertTrue(QuadBatcher.hasPending)
 
         QuadBatcher.flush()
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},6,${GLES20.GL_UNSIGNED_SHORT},0)"))
     }
 
@@ -243,14 +253,14 @@ class QuadBatcherTest {
 
     @Test
     fun matrixApplied_onCpu() {
-        val translate = identity.copyOf().also {
+        val translate = IDENTITY.copyOf().also {
             it[12] = 10f
             it[13] = 20f
         }
         QuadBatcher.add(textureA, BlendMode.Alpha, translate, 0f, 0f, 2f, 3f, 0.25f, 0.5f, 0.75f, 1f, -1)
         QuadBatcher.flush()
 
-        val v = lastVertices()
+        val v = gl.lastVertices()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         val expected = arrayOf(
             floatArrayOf(10f, 20f, 0.25f, 0.5f),
@@ -268,14 +278,14 @@ class QuadBatcherTest {
     @Test
     fun matrixApplied_rotationAndScale() {
         // Column-major: x' = 0*x - 2*y, y' = 2*x + 0*y (rotation by 90 degrees, scale 2).
-        val m = identity.copyOf().also {
+        val m = IDENTITY.copyOf().also {
             it[0] = 0f; it[1] = 2f
             it[4] = -2f; it[5] = 0f
         }
         QuadBatcher.add(textureA, BlendMode.Alpha, m, 1f, 0f, 2f, 1f, 0f, 0f, 1f, 1f, -1)
         QuadBatcher.flush()
 
-        val v = lastVertices()
+        val v = gl.lastVertices()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         // Corner 2 is (x1, y1) = (2, 1) -> (-2, 4).
         assertEquals(-2f, v.getFloat(2 * stride), 0f)
@@ -292,7 +302,7 @@ class QuadBatcherTest {
         )
         QuadBatcher.flush()
 
-        val v = lastVertices()
+        val v = gl.lastVertices()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         assertEquals(6f, v.getFloat(2 * stride), 0f)
         assertEquals(7f, v.getFloat(2 * stride + 4), 0f)
@@ -319,7 +329,7 @@ class QuadBatcherTest {
         )
         QuadBatcher.flush()
 
-        val v = lastVertices()
+        val v = gl.lastVertices()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         assertEquals(22f, v.getFloat(2 * stride), 0f)
         assertEquals(41f, v.getFloat(2 * stride + 4), 0f)
@@ -348,7 +358,7 @@ class QuadBatcherTest {
     }
 
     @Test
-    fun flush_keepsLegacyFramebufferViewportAndScissor() {
+    fun flush_keepsFramebufferViewportAndScissorSetThroughCache() {
         GlesBackend.state.bindFramebuffer(9)
         GlesBackend.state.viewport(0, 0, 100, 50)
         GlesBackend.state.setScissorEnabled(true)
@@ -357,7 +367,7 @@ class QuadBatcherTest {
         add()
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
         assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindFramebuffer") || it.startsWith("glViewport") })
         // Unclipped quads are drawn without the scissor test, which is switched on again after.
         val draw = gl.calls.indexOfFirst { it.startsWith("glDrawElements") }
@@ -375,7 +385,7 @@ class QuadBatcherTest {
         context.beginPass(null, null, false)
         add()
         QuadBatcher.flush()
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
         assertTrue(context.isInPass)
         context.endPass()
     }
@@ -401,7 +411,7 @@ class QuadBatcherTest {
         add()
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         // The registry restored the index buffer from its CPU copy; the batcher did not create a
         // second set of resources.
         assertTrue(gl.bufferDataBytes.any { it.size == QuadBatcher.MAX_QUADS * 6 * 2 })
@@ -426,14 +436,15 @@ class QuadBatcherTest {
     @Test
     fun statsCounter_registrationFailure_keepsDrawing() {
         RenderStats.enabled = true
-        QuadBatcher.counterRegistration = QuadBatcher.CounterRegistration { throw IllegalStateException("full") }
+        // What RenderStats returns when it has no free slot.
+        QuadBatcher.counterRegistration = QuadBatcher.CounterRegistration { -1 }
 
         add()
         QuadBatcher.flush()
         add()
         QuadBatcher.flush()
 
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
         assertEquals(-1, QuadBatcher.quadCounterIndex)
     }
 
@@ -448,7 +459,7 @@ class QuadBatcherTest {
         QuadBatcher.flush()
 
         val uploads = gl.calls.filter { it.startsWith("glBufferData") || it.startsWith("glBufferSubData") }
-        val replace = "glBufferData(${GLES20.GL_ARRAY_BUFFER},${4 * QuadBatcher.VERTEX_SIZE_BYTES},buf,${android.opengl.GLES30.GL_STREAM_DRAW})"
+        val replace = "glBufferData(${GLES20.GL_ARRAY_BUFFER},${4 * QuadBatcher.VERTEX_SIZE_BYTES},buf,${GLES30.GL_STREAM_DRAW})"
         assertEquals(listOf(replace, replace), uploads)
     }
 
@@ -461,9 +472,9 @@ class QuadBatcherTest {
 
         add(view)
 
-        assertEquals("no flush for a skipped quad", 0, draws())
+        assertEquals("no flush for a skipped quad", 0, gl.draws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertTrue(gl.calls.contains("glDrawElements(${GLES20.GL_TRIANGLES},6,${GLES20.GL_UNSIGNED_SHORT},0)"))
 
         QuadBatcher.addQuad(view, BlendMode.Additive, FloatArray(4), FloatArray(4), FloatArray(4), FloatArray(4), -1)
@@ -474,27 +485,6 @@ class QuadBatcherTest {
         add(view)
         assertTrue(QuadBatcher.hasPending)
     }
-
-    private val moved = floatArrayOf(
-        2f, 0.5f, 0f, 0f,
-        -0.25f, 3f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        5f, 7f, 0f, 1f
-    )
-
-    private fun valueQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
-        QuadBatcher.addQuad(
-            texture, BlendMode.Alpha, moved,
-            x, 0f, x + 1f, 0.1f, x + 1.2f, 1f, x - 0.1f, 0.9f,
-            0.1f, 0.2f, 0.7f, 0.9f, rgba
-        )
-
-    private fun arrayQuad(texture: Texture = textureA, x: Float = 0f, rgba: Int = 0x40FF8020) =
-        QuadBatcher.addQuad(
-            texture, BlendMode.Alpha, moved,
-            floatArrayOf(x, x + 1f, x + 1.2f, x - 0.1f), floatArrayOf(0f, 0.1f, 1f, 0.9f),
-            floatArrayOf(0.1f, 0.7f, 0.7f, 0.1f), floatArrayOf(0.2f, 0.2f, 0.9f, 0.9f), rgba
-        )
 
     @Test
     fun valueQuad_sameVerticesAsArrayQuad() {
@@ -516,19 +506,19 @@ class QuadBatcherTest {
         valueQuad()
         valueQuad(x = 1f)
         valueQuad(x = 2f)
-        assertEquals("no flush within one texture", 0, draws())
+        assertEquals("no flush within one texture", 0, gl.draws())
         valueQuad(textureB)
-        assertEquals("another texture flushes", 1, draws())
+        assertEquals("another texture flushes", 1, gl.draws())
         QuadBatcher.flush()
-        assertEquals(2, draws())
+        assertEquals(2, gl.draws())
     }
 
     @Test
     fun valueQuad_continuingBatch_isStillClipped() {
         // Identity projection: the left half of the surface is x < 0 in world units.
         QuadBatcher.setClip(0, 0, 400, 480)
-        QuadBatcher.addQuad(textureA, BlendMode.Alpha, identity, -0.9f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.9f, 0.5f, 0f, 0f, 1f, 1f, -1)
-        QuadBatcher.addQuad(textureA, BlendMode.Alpha, identity, 0.2f, -0.5f, 0.6f, -0.5f, 0.6f, 0.5f, 0.2f, 0.5f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.addQuad(textureA, BlendMode.Alpha, IDENTITY, -0.9f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.9f, 0.5f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.addQuad(textureA, BlendMode.Alpha, IDENTITY, 0.2f, -0.5f, 0.6f, -0.5f, 0.6f, 0.5f, 0.2f, 0.5f, 0f, 0f, 1f, 1f, -1)
         QuadBatcher.clearClip()
         QuadBatcher.flush()
         assertEquals("the quad outside the clip is dropped", 4 * QuadBatcher.VERTEX_SIZE_BYTES, gl.vertexUploads.last().size)
@@ -555,19 +545,19 @@ class QuadBatcherTest {
 
     @Test
     fun batchTexture_endFrame_keepsTheView() {
-        val legacy = fakeLegacyTexture(4, 4) { 2 }
-        val view = BatchTexture.of(legacy)
+        val texture = proxyTexture(4, 4) { 2 }
+        val view = BatchTexture.of(texture)
         QuadBatcher.flushFrame()
-        assertSame(view, BatchTexture.of(legacy))
+        assertSame(view, BatchTexture.of(texture))
         BatchTexture.endFrame()
-        assertSame(view, BatchTexture.of(legacy))
+        assertSame(view, BatchTexture.of(texture))
     }
 
     @Test
     fun batchTexture_isLoaded() {
         var id = 0
-        val legacy = fakeLegacyTexture(4, 4) { id }
-        val view = BatchTexture.of(legacy)
+        val texture = proxyTexture(4, 4) { id }
+        val view = BatchTexture.of(texture)
         assertFalse(BatchTexture.isLoaded(view))
         id = 3
         assertTrue(BatchTexture.isLoaded(view))
@@ -586,7 +576,7 @@ class QuadBatcherTest {
         add()
         QuadBatcher.flush()
 
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertEquals(1, gl.calls.count { it.startsWith("glCreateProgram") })
     }
 
@@ -615,20 +605,20 @@ class QuadBatcherTest {
     fun legacyTextureView_cannotUpload() {
         val view = GlesLegacyTextureView({ 1 }, 16, 16, "legacy")
         assertThrows(UnsupportedOperationException::class.java) {
-            view.upload(0, 0, 0, org.andengine.graphics.TextureData(1, 1, TextureFormat.RGBA8, ByteBuffer.allocateDirect(4)))
+            view.upload(0, 0, 0, TextureData(1, 1, TextureFormat.RGBA8, ByteBuffer.allocateDirect(4)))
         }
     }
 
     @Test
     fun batchTexture_cachesOneViewPerLegacyTexture() {
         var id = 21
-        val legacy = fakeLegacyTexture(64, 32) { id }
-        val other = fakeLegacyTexture(8, 8) { 5 }
+        val texture = proxyTexture(64, 32) { id }
+        val other = proxyTexture(8, 8) { 5 }
 
-        val view = BatchTexture.of(legacy)
-        assertSame(view, BatchTexture.of(legacy))
+        val view = BatchTexture.of(texture)
+        assertSame(view, BatchTexture.of(texture))
         assertNotSame(view, BatchTexture.of(other))
-        assertSame(view, BatchTexture.of(legacy))
+        assertSame(view, BatchTexture.of(texture))
         assertEquals(64, view.width)
         assertEquals(32, view.height)
 
@@ -636,21 +626,5 @@ class QuadBatcherTest {
         add(view)
         QuadBatcher.flush()
         assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},22)"))
-    }
-
-    private fun fakeLegacyTexture(width: Int, height: Int, id: () -> Int): ITexture {
-        lateinit var self: ITexture
-        self = Proxy.newProxyInstance(ITexture::class.java.classLoader, arrayOf(ITexture::class.java)) { _, method, args ->
-            when (method.name) {
-                "getHardwareTextureID" -> id()
-                "getWidth" -> width
-                "getHeight" -> height
-                "hashCode" -> System.identityHashCode(self)
-                "equals" -> self === args!![0]
-                "toString" -> "FakeTexture"
-                else -> throw UnsupportedOperationException(method.name)
-            }
-        } as ITexture
-        return self
     }
 }

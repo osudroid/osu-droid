@@ -5,6 +5,8 @@ import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
+import org.andengine.graphics.batch.MeshProgram
+import org.andengine.graphics.batch.QuadBatcher
 
 /**
  * Shows [RenderStats] as a plain Android [TextView] on top of the GL surface.
@@ -41,8 +43,10 @@ object RenderStatsOverlay {
             setMargins(margin, margin, 0, 0)
         })
 
+        // Called on the GL thread once per window, where the pipeline caches may be read.
         RenderStats.listener = RenderStats.Listener { summary ->
-            view.post { view.text = summary }
+            val text = summary + "\npipelines quad " + QuadBatcher.pipelineCount + "  mesh " + MeshProgram.totalPipelineCount
+            view.post { view.text = text }
         }
         RenderStats.reset()
         RenderStats.enabled = true

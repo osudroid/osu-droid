@@ -2,23 +2,27 @@ package org.andengine.entity.text
 
 import android.opengl.GLES20
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.gles.FakeRasterizer
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.arrayDraws
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphArray
 import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.graphics.text.GlyphMetrics
-import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
 import org.andengine.opengl.font.StrokeFont
-import org.andengine.graphics.DrawContext
 import org.andengine.util.HorizontalAlign
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -27,32 +31,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class TextBatchingTest {
-
-    /** Every visible glyph is 20x30 raster pixels; ' ' has no pixels. */
-    private class FakeRasterizer : GlyphRasterizer {
-        override val ascent: Float get() = -40f
-        override val descent: Float get() = 10f
-
-        override fun measure(c: Char, out: GlyphMetrics) {
-            if (c == ' ') {
-                out.width = 0
-                out.height = 0
-                out.offsetX = 0f
-                out.offsetY = 0f
-                out.advance = 12f
-                return
-            }
-            out.width = 20
-            out.height = 30
-            out.offsetX = 2f
-            out.offsetY = -30f
-            out.advance = 22f
-        }
-
-        override fun rasterize(c: Char, layer: Int, out: ByteBuffer) {
-            for (i in 0 until 20 * 30) out.put(1)
-        }
-    }
 
     private lateinit var gl: RecordingGL
     private lateinit var atlas: GlyphAtlas
@@ -63,10 +41,7 @@ class TextBatchingTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         atlas = GlyphAtlas(GlesGraphicsDevice.instance, 256, 2, 2)
@@ -95,12 +70,6 @@ class TextBatchingTest {
         return text
     }
 
-    private fun legacyDraws() = gl.calls.count { it.startsWith("glDrawArrays") }
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
-
-    private fun vertices(): ByteBuffer =
-        ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
-
     private fun quads() = gl.vertexUploads.last().size / (4 * QuadBatcher.VERTEX_SIZE_BYTES)
 
     /** Byte offset of vertex 0 of quad [quad]. */
@@ -119,9 +88,9 @@ class TextBatchingTest {
         t.onDraw(glState, camera)
 
         assertTrue(QuadBatcher.hasPending)
-        assertEquals(0, legacyDraws())
+        assertEquals(0, gl.arrayDraws())
         QuadBatcher.flush()
-        assertEquals(gl.calls.toString(), 1, draws())
+        assertEquals(gl.calls.toString(), 1, gl.draws())
         assertEquals(3, quads())
     }
 
@@ -132,16 +101,16 @@ class TextBatchingTest {
         t.onDraw(glState, camera)
         QuadBatcher.flush()
 
-        assertEquals(listOf(255, 0, 128, 128), color(vertices(), 0))
+        assertEquals(listOf(255, 0, 128, 128), color(gl.lastVertices(), 0))
     }
 
     @Test
     fun strokeText_drawsFillThenStroke() {
-        val font = StrokeFont(fontManager, FakeRasterizer(), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), false).also { fonts += it }
+        val font = StrokeFont(fontManager, FakeRasterizer(layers = 2), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), false).also { fonts += it }
         text(font, "a").onDraw(glState, camera)
         QuadBatcher.flush()
 
-        val v = vertices()
+        val v = gl.lastVertices()
         assertEquals(2, quads())
         val letter = font.getLetter('a')
         // The fill comes first; the outline goes on top, with its own atlas position and the stroke color.
@@ -156,7 +125,7 @@ class TextBatchingTest {
 
     @Test
     fun strokeOnlyText_skipsFill() {
-        val font = StrokeFont(fontManager, FakeRasterizer(), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), true).also { fonts += it }
+        val font = StrokeFont(fontManager, FakeRasterizer(layers = 2), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), true).also { fonts += it }
         text(font, "a").onDraw(glState, camera)
         QuadBatcher.flush()
         assertEquals(1, quads())
@@ -185,12 +154,8 @@ class TextBatchingTest {
         return sb.toString()
     }
 
-    /**
-     * The expected rectangles were read from the old per-text vertex buffer (vertex 0 and 2 of each
-     * letter) with the same font, before it was removed.
-     */
     @Test
-    fun text_letterQuadsMatchOldVbo() {
+    fun text_letterQuadsForAlignWrapLeadingAndSetText() {
         val font = font()
 
         assertEquals(
@@ -217,7 +182,7 @@ class TextBatchingTest {
         )
         assertEquals(
             "w=20.0 h=105.0 n=2 a(2.0,10.0,22.0,40.0)b(2.0,65.0,22.0,95.0)",
-            layout(text(font, "a\nb", 3,TextOptions(AutoWrap.NONE, 0f, HorizontalAlign.LEFT, 5f)))
+            layout(text(font, "a\nb", 3, TextOptions(AutoWrap.NONE, 0f, HorizontalAlign.LEFT, 5f)))
         )
 
         val t = text(font, "ab", 8)
@@ -230,7 +195,7 @@ class TextBatchingTest {
         t.setText("b")
         assertEquals("w=20.0 h=50.0 n=1 b(2.0,10.0,22.0,40.0)", layout(t))
         // Letters of the longer text are dropped.
-        for (i in 1 until t.letters.size) assertEquals(null, t.letters[i])
+        for (i in 1 until t.letters.size) assertNull(t.letters[i])
         t.setText("")
         assertEquals("w=0.0 h=50.0 n=0 ", layout(t))
 
@@ -249,7 +214,7 @@ class TextBatchingTest {
     @Test
     fun emptyText_drawsNothing() {
         text(font(), "", 4).onDraw(glState, camera)
-        assertTrue(!QuadBatcher.hasPending)
+        assertFalse(QuadBatcher.hasPending)
     }
 
     @Test
@@ -258,12 +223,12 @@ class TextBatchingTest {
         t.setColor(1f, 0f, 0f, 1f)
         t.onDraw(glState, camera)
         QuadBatcher.flush()
-        assertEquals(listOf(255, 0, 0, 255), color(vertices(), 0))
+        assertEquals(listOf(255, 0, 0, 255), color(gl.lastVertices(), 0))
 
         t.setColor(0f, 0f, 1f)
         t.onDraw(glState, camera)
         QuadBatcher.flush()
-        assertEquals(listOf(0, 0, 255, 255), color(vertices(), 0))
+        assertEquals(listOf(0, 0, 255, 255), color(gl.lastVertices(), 0))
     }
 
     @Test
@@ -274,8 +239,8 @@ class TextBatchingTest {
 
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()
-        assertEquals(1, draws())
-        assertEquals(0, legacyDraws())
+        assertEquals(1, gl.draws())
+        assertEquals(0, gl.arrayDraws())
         val expected = "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"
         assertTrue(gl.calls.toString(), gl.calls.any { it == expected })
     }

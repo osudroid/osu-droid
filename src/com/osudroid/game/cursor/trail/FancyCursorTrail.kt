@@ -1,10 +1,8 @@
 package com.osudroid.game.cursor.trail
 
-import android.opengl.GLES20
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.MeshRenderer
-import org.andengine.graphics.gles.GlesPipeline
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.DrawContext
@@ -48,8 +46,6 @@ class FancyCursorTrail : UIComponent() {
 
     // Reusable vertex staging (interleaved: x, y, r, g, b, a), grown only when needed
     private var vertexData = FloatArray(0)
-
-    private val additive = GlesPipeline.blendModeOf(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE) ?: BlendMode.Alpha
 
     // Reusable float array to avoid per-call allocation in rainbowColor()
     private val tempRgb = FloatArray(3)
@@ -121,7 +117,6 @@ class FancyCursorTrail : UIComponent() {
         val floatsPerVert = 6          // x, y, r, g, b, a
         val totalFloats = vertCount * floatsPerVert
 
-        // Grow the staging array when needed
         var data = vertexData
         if (data.size < totalFloats) {
             data = FloatArray(totalFloats + 12 * floatsPerVert)
@@ -167,7 +162,7 @@ class FancyCursorTrail : UIComponent() {
             PrimitiveType.TriangleStrip,
             data, 0, vertCount,
             pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
-            additive, null, false
+            BlendMode.AdditiveAllChannels, depthTest = null, depthWrite = false
         )
     }
 

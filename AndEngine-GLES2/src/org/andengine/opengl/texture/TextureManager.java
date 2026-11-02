@@ -46,7 +46,7 @@ public class TextureManager {
 	 */
 	public static final long PREPARED_BYTES_IN_FLIGHT_DEFAULT = 64L * 1024 * 1024;
 
-	/** Returned by {@link #startPreparation(ITexture, HashMap)} while the in-flight limit is reached. */
+	/** Returned by {@link #startPreparation(ITexture, HashMap)} while the in-flight limit is reached; compared by identity, never run. */
 	private static final PixelPreparation WAITING = new PixelPreparation(new ArrayList<IPixelTextureAtlasSource>(), 0, 0);
 
 	// ===========================================================
@@ -155,7 +155,7 @@ public class TextureManager {
 	 * <p>
 	 * An atlas whose pixels can be prepared in the background keeps its old texture loaded and drawn
 	 * until the new pixels are ready; they are then uploaded into a new texture name within the upload
-	 * budget of a frame. Everything else is reloaded in the next frame, as before. A request while a
+	 * budget of a frame. Everything else is reloaded in the next frame. A request while a
 	 * reload is still being prepared restarts that preparation (the cancelled one stops at its next
 	 * source, or is skipped if it has not started yet), so the reload always shows the sources'
 	 * content at the time of the latest request.
@@ -266,7 +266,6 @@ public class TextureManager {
 		if(this.mTexturesManaged.contains(pTexture)) {
 			/* Just make sure it doesn't get deleted. */
 			this.mTexturesToBeUnloaded.remove(pTexture);
-			/* Loaded now, so no longer waiting to be loaded. */
 			if(this.mTexturesToBeLoaded.remove(pTexture)) {
 				this.mTexturesLoaded.add(pTexture);
 				this.notifyIfNoLoadPending();
@@ -349,7 +348,7 @@ public class TextureManager {
 
 		/* First load pending Textures, oldest first. An atlas whose pixels can be prepared in the background
 		 * stays queued (not loaded, so it is not drawn) until they are ready; then only its upload runs here,
-		 * within the upload budget of the frame. Everything else is loaded right away, as before. Loads go
+		 * within the upload budget of the frame. Everything else is loaded right away. Loads go
 		 * before reloads: a reloaded texture is still drawn meanwhile, a queued one is missing until loaded. */
 		boolean loadsWaiting = false;
 		int texturesLoadedCount = 0;
@@ -411,8 +410,7 @@ public class TextureManager {
 		/* Then reload Textures that need to be updated. A reload requested by reloadLoadedTextures of an atlas
 		 * whose pixels can be prepared in the background keeps the old texture until they are ready, then uploads
 		 * them within what is left of the upload budget of the frame. No re-preparation starts while a queued load
-		 * waits for room in flight. Everything else (also an atlas whose sources changed) is reloaded right away,
-		 * as before. */
+		 * waits for room in flight. Everything else (also an atlas whose sources changed) is reloaded right away. */
 		for(int i = texturesLoaded.size() - 1; i >= 0; i--) {
 			final ITexture textureToBeReloaded = texturesLoaded.get(i);
 			if(!textureToBeReloaded.isUpdateOnHardwareNeeded()) {
@@ -505,7 +503,7 @@ public class TextureManager {
 	}
 
 	/**
-	 * For observing and testing only: nothing needs to wait for reloads.
+	 * Nothing needs to wait for reloads; tests use this to observe them.
 	 *
 	 * @return whether a reload requested by {@link #reloadLoadedTextures()} has not reached the GPU yet. The
 	 * old texture stays loaded and drawn meanwhile, so unlike {@link #hasPendingTextureLoads()} nothing is missing.
@@ -676,16 +674,11 @@ public class TextureManager {
 				final Thread thread = new Thread(new Runnable() {
 					@Override
 					public void run() {
-						try {
-							Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-						} catch (final RuntimeException e) {
-							Debug.e(e);
-						}
+						Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 						pRunnable.run();
 					}
 				}, "TexturePreparation");
 				thread.setDaemon(true);
-				thread.setPriority(Thread.MIN_PRIORITY);
 				return thread;
 			}
 		});

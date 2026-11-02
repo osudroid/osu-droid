@@ -42,7 +42,7 @@ class GlesFence(override val label: String) : GpuFence, GlesRestorable {
         sync = 0L
     }
 
-    override fun restore(backend: GlesBackend) {}
+    override fun restore() {}
 
     override fun dispose() {
         if (isDisposed) return

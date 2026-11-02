@@ -3,7 +3,6 @@ package org.andengine.opengl.font;
 import org.andengine.graphics.text.GlyphAtlas;
 import org.andengine.graphics.text.GlyphRasterizer;
 
-
 /**
  * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga Inc.
@@ -12,7 +11,7 @@ import org.andengine.graphics.text.GlyphRasterizer;
  * @since 10:39:33 - 03.04.2010
  */
 // osu!droid modified: fill and stroke are separate alpha-only atlas images (Letter#mGlyph, Letter#mStrokeGlyph),
-// colored when drawing with getFillColor() and getStrokeColor().
+// colored when drawing with getColor() (fill) and getStrokeColor().
 public class StrokeFont extends Font {
 	// ===========================================================
 	// Constants
@@ -45,10 +44,6 @@ public class StrokeFont extends Font {
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
-
-	public int getFillColor() {
-		return this.getColor();
-	}
 
 	public int getStrokeColor() {
 		return this.mStrokeColorARGBPackedInt;

@@ -48,6 +48,20 @@ class BlendMode(
         /** "Over" for colors that are already multiplied by their alpha. */
         @JvmField
         val Premultiplied = BlendMode(BlendFactor.One, BlendFactor.OneMinusSrcAlpha, BlendFactor.One, BlendFactor.OneMinusSrcAlpha)
+
+        /**
+         * [Alpha] with its color factors for the alpha channel too, as a single
+         * `glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)` sets them.
+         */
+        @JvmField
+        val AlphaAllChannels = BlendMode(BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha, BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha)
+
+        /**
+         * [Additive] with its color factors for the alpha channel too, as a single
+         * `glBlendFunc(GL_SRC_ALPHA, GL_ONE)` sets them.
+         */
+        @JvmField
+        val AdditiveAllChannels = BlendMode(BlendFactor.SrcAlpha, BlendFactor.One, BlendFactor.SrcAlpha, BlendFactor.One)
     }
 }
 

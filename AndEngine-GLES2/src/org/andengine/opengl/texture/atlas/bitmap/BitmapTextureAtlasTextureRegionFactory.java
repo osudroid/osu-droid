@@ -144,13 +144,13 @@ public class BitmapTextureAtlasTextureRegionFactory {
 		} catch (final IOException e) {
 			throw new AndEngineRuntimeException("Listing assets subdirectory: '" + directory + "' failed. Does it exist?", e);
 		}
-		if (files == null || files.length == 0) {
+		if(files == null || files.length == 0) {
 			return null;
 		}
 		Arrays.sort(files);
 
 		final List<IBitmapTextureAtlasSource> sources = new ArrayList<>(files.length);
-		for (final String file : files) {
+		for(final String file : files) {
 			sources.add(AssetBitmapTextureAtlasSource.create(pAssetManager, directory + "/" + file));
 		}
 		return pPages.addTiled(sources, pTextureOptions);

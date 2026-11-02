@@ -2,8 +2,8 @@ package org.andengine.entity.scene;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.IAreaShape;
-import org.andengine.input.touch.TouchEvent;
 import org.andengine.graphics.DrawContext;
+import org.andengine.input.touch.TouchEvent;
 
 /**
  * (c) 2010 Nicolas Gramlich

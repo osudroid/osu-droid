@@ -128,17 +128,14 @@ abstract class PropertyTrack(timeline: CommandTimeline<*>) {
         private const val FAR_AHEAD = 16
 
         /** A track for [timeline], or null if it has no commands. */
-        @JvmStatic
         fun floatOf(timeline: CommandTimeline<Float>): FloatTrack? =
             if (timeline.hasCommands) FloatTrack(timeline) else null
 
         /** A track for [timeline], or null if it has no commands. */
-        @JvmStatic
         fun colorOf(timeline: CommandTimeline<StoryboardColor>): ColorTrack? =
             if (timeline.hasCommands) ColorTrack(timeline) else null
 
         /** A track for [timeline], or null if it has no commands. */
-        @JvmStatic
         fun booleanOf(timeline: CommandTimeline<Boolean>): BooleanTrack? =
             if (timeline.hasCommands) BooleanTrack(timeline) else null
     }

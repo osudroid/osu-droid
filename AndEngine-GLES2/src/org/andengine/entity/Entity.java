@@ -1304,10 +1304,6 @@ public class Entity implements IEntity {
 	// Methods
 	// ===========================================================
 
-	/**
-	 * @param pGLState the currently active {@link DrawContext} i.e. to apply transformations to.
-	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
-	 */
 	// BEGIN osu!droid modified: let subclasses skip their own draw (e.g. texture not on the GPU yet).
 	private void drawSelf(final DrawContext pGLState, final Camera pCamera) {
 		if(!this.isSelfDrawable()) {
@@ -1327,6 +1323,10 @@ public class Entity implements IEntity {
 	}
 	// END osu!droid modified
 
+	/**
+	 * @param pGLState the currently active {@link DrawContext} i.e. to apply transformations to.
+	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
+	 */
 	protected void preDraw(final DrawContext pGLState, final Camera pCamera) {
 
 	}

@@ -32,7 +32,6 @@ class StoryboardOverlayComponent internal constructor(
         val drawStart = RenderStats.now()
         batch.begin(pGLState)
         storyboardComponent.drawLayers(playback, OVERLAY_LAYERS, drawAlpha, storyboardComponent.brightness)
-        batch.end()
         RenderStats.addTime(StoryboardRenderStats.TIME_TOTAL, drawStart)
     }
 

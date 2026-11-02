@@ -1,5 +1,7 @@
 package org.andengine.graphics
 
+import java.util.Collections
+
 /** Data type of one vertex attribute as stored in the vertex buffer. */
 enum class VertexFormat(val sizeBytes: Int) {
     Float1(4),
@@ -38,7 +40,7 @@ class VertexAttribute(val location: Int, val format: VertexFormat, val offsetByt
 class VertexLayout(val strideBytes: Int, attributes: List<VertexAttribute>) {
 
     /** Read-only copy of the attributes, so the cached hash and VAO keys cannot change. */
-    val attributes: List<VertexAttribute> = java.util.Collections.unmodifiableList(ArrayList(attributes))
+    val attributes: List<VertexAttribute> = Collections.unmodifiableList(ArrayList(attributes))
 
     private val hash: Int
 

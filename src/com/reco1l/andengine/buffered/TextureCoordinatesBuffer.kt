@@ -10,7 +10,7 @@ abstract class TextureCoordinatesBuffer(
     vertexSize: Int
 ) : VertexBuffer(0, vertexCount, vertexSize) {
 
-    // Texture coordinates of another buffer's vertices: nothing to draw on their own.
+    // Nothing to draw on their own.
     override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) = Unit
 
 }

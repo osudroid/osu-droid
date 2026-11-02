@@ -14,7 +14,7 @@ class GlesCapabilitiesTest {
     private fun detect(version: String, extensions: String, simulateEs30: Boolean = false): GlesCapabilities {
         GlesDebugOptions.simulateEs30 = simulateEs30
         try {
-            return GlesCapabilities.detect(version, extensions, GlesDebugOptions)
+            return GlesCapabilities.detect(version, extensions)
         } finally {
             GlesDebugOptions.simulateEs30 = false
         }

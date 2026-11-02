@@ -17,8 +17,8 @@ import com.rian.andengine.timing.IFrameBasedClock
 import org.andengine.engine.camera.*
 import org.andengine.entity.*
 import org.andengine.entity.scene.*
-import org.andengine.input.touch.*
 import org.andengine.graphics.DrawContext
+import org.andengine.input.touch.*
 import org.andengine.util.Constants.*
 import org.andengine.util.algorithm.collision.ShapeCollisionChecker
 import org.andengine.util.adt.transformation.Transformation

@@ -1,9 +1,11 @@
 package org.andengine.graphics.atlas
 
 import android.graphics.Bitmap
+import android.opengl.GLES20
 import org.andengine.opengl.texture.ITexture
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
+import org.andengine.opengl.texture.atlas.TextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
@@ -43,6 +45,24 @@ class TextureAtlasPagesTest {
     private fun pages(pageSize: Int = 64, maxRegion: Int = 32) = TextureAtlasPages(manager, pageSize, maxRegion)
 
     private fun source(w: Int, h: Int): IBitmapTextureAtlasSource = EmptyBitmapTextureAtlasSource(w, h)
+
+    /** A 2x1 bitmap source: red on the left, blue on the right. */
+    private fun redBlueSource() = object : BaseTextureAtlasSource(0, 0, 2, 1), IBitmapTextureAtlasSource {
+        override fun deepCopy(): IBitmapTextureAtlasSource = this
+        override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap {
+            val bmp = Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888)
+            bmp.setPixel(0, 0, 0xFFFF0000.toInt())
+            bmp.setPixel(1, 0, 0xFF0000FF.toInt())
+            return bmp
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun sourcesOf(page: BitmapTextureAtlas): List<IBitmapTextureAtlasSource> {
+        val field = TextureAtlas::class.java.getDeclaredField("mTextureAtlasSources")
+        field.isAccessible = true
+        return field.get(page) as List<IBitmapTextureAtlasSource>
+    }
 
     @Test
     fun add_withoutSession_returnsNull() {
@@ -105,8 +125,8 @@ class TextureAtlasPagesTest {
         atlas.beginSession()
         val a = atlas.add(source(8, 8), TextureOptions.BILINEAR)!!
         val copy = TextureOptions(
-            android.opengl.GLES20.GL_LINEAR, android.opengl.GLES20.GL_LINEAR,
-            android.opengl.GLES20.GL_CLAMP_TO_EDGE, android.opengl.GLES20.GL_CLAMP_TO_EDGE, false
+            GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+            GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE, false
         )
         val b = atlas.add(source(8, 8), copy)!!
         val nearest = atlas.add(source(8, 8), TextureOptions.NEAREST)!!
@@ -334,15 +354,7 @@ class TextureAtlasPagesTest {
 
     @Test
     fun extrudedSource_duplicatesEdgePixels() {
-        val inner = object : BaseTextureAtlasSource(0, 0, 2, 1), IBitmapTextureAtlasSource {
-            override fun deepCopy(): IBitmapTextureAtlasSource = this
-            override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap {
-                val bmp = Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888)
-                bmp.setPixel(0, 0, 0xFFFF0000.toInt())
-                bmp.setPixel(1, 0, 0xFF0000FF.toInt())
-                return bmp
-            }
-        }
+        val inner = redBlueSource()
         val extruded = ExtrudedBitmapSource(inner, 1)
         assertEquals(4, extruded.textureWidth)
         assertEquals(3, extruded.textureHeight)
@@ -402,15 +414,7 @@ class TextureAtlasPagesTest {
 
     @Test
     fun extrudedSource_rotated_turnsImageClockwise() {
-        val inner = object : BaseTextureAtlasSource(0, 0, 2, 1), IBitmapTextureAtlasSource {
-            override fun deepCopy(): IBitmapTextureAtlasSource = this
-            override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap {
-                val bmp = Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888)
-                bmp.setPixel(0, 0, 0xFFFF0000.toInt())
-                bmp.setPixel(1, 0, 0xFF0000FF.toInt())
-                return bmp
-            }
-        }
+        val inner = redBlueSource()
         val rotated = ExtrudedBitmapSource(inner, 1, rotated = true)
         assertEquals(3, rotated.textureWidth)
         assertEquals(4, rotated.textureHeight)
@@ -509,13 +513,6 @@ class TextureAtlasPagesTest {
         // A second release changes nothing.
         assertTrue(atlas.release(tiled))
         assertEquals(1, manager.unloaded.size)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun sourcesOf(page: BitmapTextureAtlas): List<IBitmapTextureAtlasSource> {
-        val field = org.andengine.opengl.texture.atlas.TextureAtlas::class.java.getDeclaredField("mTextureAtlasSources")
-        field.isAccessible = true
-        return field.get(page) as List<IBitmapTextureAtlasSource>
     }
 
     @Test

@@ -1,17 +1,18 @@
 package org.andengine.graphics.text
 
 import android.opengl.GLES20
+import android.opengl.GLES30
 import java.nio.ByteBuffer
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.installRecordingGL
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,18 +26,12 @@ class GlyphAtlasTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
-        baseline = gl.calls.count { it.startsWith("glTexStorage3D") }
+        gl = installRecordingGL()
     }
 
     private fun atlas(layerSize: Int = 64, layers: Int = 2) = GlyphAtlas(GlesGraphicsDevice.instance, layerSize, layers, 2)
 
-    private var baseline = 0
-
-    private fun storageCalls() = gl.calls.count { it.startsWith("glTexStorage3D") } - baseline
+    private fun storageCalls() = gl.calls.count { it.startsWith("glTexStorage3D") }
 
     @After
     fun tearDown() {
@@ -104,7 +99,7 @@ class GlyphAtlasTest {
         val slot = atlas.allocate(5, 3)!!
         created += slot.array
         atlas.upload(slot, ByteBuffer.allocateDirect(15))
-        val expected = "glTexSubImage3D($GL_TEXTURE_2D_ARRAY,0,${slot.x - 1},${slot.y - 1},${slot.layer},7,5,1,$GL_RED,${GLES20.GL_UNSIGNED_BYTE},buf)"
+        val expected = "glTexSubImage3D(${GLES30.GL_TEXTURE_2D_ARRAY},0,${slot.x - 1},${slot.y - 1},${slot.layer},7,5,1,${GLES30.GL_RED},${GLES20.GL_UNSIGNED_BYTE},buf)"
         assertTrue(gl.calls.toString(), gl.calls.contains(expected))
     }
 
@@ -118,7 +113,7 @@ class GlyphAtlasTest {
         for (i in 0 until 15) pixels.put(i, (i + 1).toByte())
         atlas.upload(slot, pixels)
 
-        val expected = "glTexSubImage3D($GL_TEXTURE_2D_ARRAY,0,${slot.x - 1},${slot.y - 1},${slot.layer},7,5,1,$GL_RED,${GLES20.GL_UNSIGNED_BYTE},buf)"
+        val expected = "glTexSubImage3D(${GLES30.GL_TEXTURE_2D_ARRAY},0,${slot.x - 1},${slot.y - 1},${slot.layer},7,5,1,${GLES30.GL_RED},${GLES20.GL_UNSIGNED_BYTE},buf)"
         assertTrue(gl.calls.toString(), gl.calls.contains(expected))
         val bytes = gl.texSubImage3DBytes.last()
         assertEquals(35, bytes.size)
@@ -137,10 +132,5 @@ class GlyphAtlasTest {
         assertFalse(slot.uploaded)
         atlas.upload(slot, ByteBuffer.allocateDirect(15))
         assertTrue(slot.uploaded)
-    }
-
-    private companion object {
-        const val GL_TEXTURE_2D_ARRAY = 0x8C1A
-        const val GL_RED = 0x1903
     }
 }

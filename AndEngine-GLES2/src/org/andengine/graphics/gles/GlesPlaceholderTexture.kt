@@ -68,7 +68,7 @@ object GlesPlaceholderTexture : GlesRestorable {
         textureId = 0
     }
 
-    override fun restore(backend: GlesBackend) {
+    override fun restore() {
         // A texture restored earlier in the same phase may have created it already.
         if (textureId == 0) create()
     }

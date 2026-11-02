@@ -33,7 +33,7 @@ class PixelPreparation @JvmOverloads constructor(
     /** Upper bound of the memory the pixels take: the whole atlas as RGBA bytes. */
     val estimatedBytes: Long = estimateBytes(width, height)
 
-    private var state = PENDING
+    private var state = State.PENDING
     private var finished = false
     private var pixels: Array<Pixels?>? = null
     private var preparedBytes = 0L
@@ -60,13 +60,13 @@ class PixelPreparation @JvmOverloads constructor(
             failure = t
         } finally {
             synchronized(this) {
-                if (state == PENDING) {
+                if (state == State.PENDING) {
                     if (result == null) {
-                        state = FAILED
+                        state = State.FAILED
                     } else {
                         pixels = result
                         preparedBytes = bytes
-                        state = READY
+                        state = State.READY
                     }
                 }
                 finished = true
@@ -74,29 +74,25 @@ class PixelPreparation @JvmOverloads constructor(
         }
 
         if (failure != null) {
-            try {
-                Debug.e("Preparing texture pixels failed, loading them on the GL thread instead", failure)
-            } catch (t: Throwable) {
-                // Logging must not end the worker either.
-            }
+            Debug.e("Preparing texture pixels failed, loading them on the GL thread instead", failure)
         }
     }
 
     /** Marks a preparation that could not be started as failed, so the atlas loads synchronously. */
     fun fail() = synchronized(this) {
-        if (state == PENDING) state = FAILED
+        if (state == State.PENDING) state = State.FAILED
         finished = true
     }
 
     /** Drops the result (or the result still being loaded). */
     fun cancel() = synchronized(this) {
-        state = CANCELLED
+        state = State.CANCELLED
         pixels = null
     }
 
-    val isReady: Boolean get() = synchronized(this) { state == READY }
-    val isFailed: Boolean get() = synchronized(this) { state == FAILED }
-    val isCancelled: Boolean get() = synchronized(this) { state == CANCELLED }
+    val isReady: Boolean get() = synchronized(this) { state == State.READY }
+    val isFailed: Boolean get() = synchronized(this) { state == State.FAILED }
+    val isCancelled: Boolean get() = synchronized(this) { state == State.CANCELLED }
 
     /** Whether [run] has returned (or will never run); a cancelled preparation holds memory until then. */
     val isFinished: Boolean get() = synchronized(this) { finished }
@@ -110,10 +106,10 @@ class PixelPreparation @JvmOverloads constructor(
      * was added or moved meanwhile; the atlas then loads on the synchronous path.
      */
     fun take(current: List<IBitmapTextureAtlasSource>): Array<Pixels?>? = synchronized(this) {
-        if (state != READY) return null
+        if (state != State.READY) return null
         val result = pixels
         pixels = null
-        state = CANCELLED
+        state = State.CANCELLED
         if (!matches(current)) null else result
     }
 
@@ -131,10 +127,7 @@ class PixelPreparation @JvmOverloads constructor(
         /** Memory of a [width] x [height] atlas as RGBA bytes. */
         @JvmStatic
         fun estimateBytes(width: Int, height: Int): Long = width.toLong() * height * 4
-
-        private const val PENDING = 0
-        private const val READY = 1
-        private const val FAILED = 2
-        private const val CANCELLED = 3
     }
+
+    private enum class State { PENDING, READY, FAILED, CANCELLED }
 }

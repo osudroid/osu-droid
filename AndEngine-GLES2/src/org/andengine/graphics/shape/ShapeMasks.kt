@@ -26,7 +26,7 @@ import org.andengine.graphics.text.GlyphSlot
  */
 class ShapeMasks(private val atlas: GlyphAtlas) : GlesRestorable {
 
-    private class Entry(val slot: GlyphSlot, val kind: Int, val a: Int, val b: Int)
+    private class Entry(val slot: GlyphSlot, val kind: Int, val radiusPx: Int, val widthPx: Int)
 
     private val entries = LongSparseArray<Entry>()
 
@@ -59,14 +59,16 @@ class ShapeMasks(private val atlas: GlyphAtlas) : GlesRestorable {
         synchronized(entries) { for (i in 0 until entries.size()) entries.valueAt(i).slot.uploaded = false }
     }
 
-    override fun restore(backend: GlesBackend) {
-        synchronized(entries) { for (i in 0 until entries.size()) {
+    override fun restore() {
+        synchronized(entries) {
+            for (i in 0 until entries.size()) {
                 val e = entries.valueAt(i)
-                atlas.upload(e.slot, raster(e.kind, e.a, e.b))
-            } }
+                atlas.upload(e.slot, raster(e.kind, e.radiusPx, e.widthPx))
+            }
+        }
     }
 
-    /** Removes this instance from the registry; for owners other than [shared]. */
+    /** Removes this instance from the registry; for owners other than [shared], such as tests. */
     fun dispose() {
         GlesBackend.registry.unregister(this)
     }
@@ -74,34 +76,36 @@ class ShapeMasks(private val atlas: GlyphAtlas) : GlesRestorable {
     /** Radii beyond what the atlas can hold degrade to the largest possible mask. */
     private fun clampSize(px: Int): Int = min(max(1, px), atlas.maxImageSize - 1)
 
-    private fun get(kind: Int, a: Int, b: Int): GlyphSlot {
-        val key = (kind.toLong() shl 56) or (a.toLong() shl 28) or b.toLong()
+    private fun get(kind: Int, radiusPx: Int, widthPx: Int): GlyphSlot {
+        val key = (kind.toLong() shl 56) or (radiusPx.toLong() shl 28) or widthPx.toLong()
         synchronized(entries) {
             val existing = entries.get(key)
             if (existing != null) {
-                if (!existing.slot.uploaded) atlas.upload(existing.slot, raster(kind, a, b))
+                if (!existing.slot.uploaded) atlas.upload(existing.slot, raster(kind, radiusPx, widthPx))
                 return existing.slot
             }
-            val size = if (kind == KIND_SOLID) SOLID_SIZE else a + 1
+            val size = if (kind == KIND_SOLID) SOLID_SIZE else radiusPx + 1
             val slot = atlas.allocate(size, size)
                 ?: throw IllegalStateException("Glyph atlas cannot hold a ${size}x$size shape mask")
-            entries.put(key, Entry(slot, kind, a, b))
-            atlas.upload(slot, raster(kind, a, b))
+            entries.put(key, Entry(slot, kind, radiusPx, widthPx))
+            atlas.upload(slot, raster(kind, radiusPx, widthPx))
             return slot
         }
     }
 
-    private fun raster(kind: Int, a: Int, b: Int): ByteBuffer {
-        val size = if (kind == KIND_SOLID) SOLID_SIZE else a + 1
+    private fun raster(kind: Int, radiusPx: Int, widthPx: Int): ByteBuffer {
+        val size = if (kind == KIND_SOLID) SOLID_SIZE else radiusPx + 1
         val buf = ByteBuffer.allocateDirect(size * size)
         for (y in 0 until size) for (x in 0 until size) {
             val coverage = when (kind) {
                 KIND_SOLID -> 1f
-                KIND_CORNER -> coverage(a.toFloat(), min(x, a - 1), min(y, a - 1), a)
+                KIND_CORNER -> coverage(radiusPx.toFloat(), min(x, radiusPx - 1), min(y, radiusPx - 1), radiusPx)
                 else -> {
-                    val cx = min(x, a - 1)
-                    val cy = min(y, a - 1)
-                    max(0f, coverage(a.toFloat(), cx, cy, a) - coverage((a - b).toFloat(), cx, cy, a))
+                    val cx = min(x, radiusPx - 1)
+                    val cy = min(y, radiusPx - 1)
+                    val outer = coverage(radiusPx.toFloat(), cx, cy, radiusPx)
+                    val inner = coverage((radiusPx - widthPx).toFloat(), cx, cy, radiusPx)
+                    max(0f, outer - inner)
                 }
             }
             buf.put(y * size + x, (coverage * 255f + 0.5f).toInt().toByte())

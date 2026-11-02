@@ -34,17 +34,13 @@ class GlesResourcesTest {
     private val created = ArrayList<GpuResource>()
 
     private fun newContext(extensions: String = "") {
-        gl = RecordingGL()
-        gl.extensionsString = extensions
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = RecordingGL().apply { extensionsString = extensions }.install()
     }
 
     /** Simulates a context loss: same resources, new context on the same fake (ids keep counting). */
     private fun recreateContext() {
         gl.calls.clear()
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
     }
 
     private fun <T : GpuResource> track(r: T): T {
@@ -80,8 +76,8 @@ class GlesResourcesTest {
         recreateContext()
 
         assertEquals(2, loads)
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(3553,1,32856,4,4)"))
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexSubImage2D(3553,0,0,0,4,4,6408,5121,buf)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(${GLES20.GL_TEXTURE_2D},1,${GLES30.GL_RGBA8},4,4)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,0,0,4,4,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"))
         assertNotEquals(oldId, texture.textureId)
         assertEquals(texture.textureId, texture.ownTextureId)
     }
@@ -119,7 +115,7 @@ class GlesResourcesTest {
 
         assertFalse(texture.usesPlaceholder)
         assertEquals(texture.ownTextureId, texture.textureId)
-        assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(3553,${texture.ownTextureId})"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBindTexture(${GLES20.GL_TEXTURE_2D},${texture.ownTextureId})"))
         gl.calls.clear()
         GlesRenderContext.instance.setTexture(0, texture, null)
         assertFalse(gl.calls.toString(), gl.calls.any { it.startsWith("glBindTexture") })
@@ -154,7 +150,7 @@ class GlesResourcesTest {
 
         assertTrue(texture.usesPlaceholder)
         assertEquals(GlesPlaceholderTexture.id, texture.textureId)
-        assertFalse(gl.calls.toString(), gl.calls.any { it.startsWith("glTexSubImage2D(3553,0,0,0,4,4,") })
+        assertFalse(gl.calls.toString(), gl.calls.any { it.startsWith("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,0,0,4,4,") })
     }
 
     @Test
@@ -177,7 +173,7 @@ class GlesResourcesTest {
         assertNotEquals(oldTexture, later.textureId)
         assertNotEquals(0, buffer.bufferId)
         assertNotEquals(oldBuffer, buffer.bufferId)
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(3553,1,33321,2,2)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(${GLES20.GL_TEXTURE_2D},1,${GLES30.GL_R8},2,2)"))
     }
 
     @Test
@@ -206,7 +202,7 @@ class GlesResourcesTest {
         query.end()
         gl.queryValues[GLES30.GL_QUERY_RESULT_AVAILABLE] = 1
         gl.queryValues[GLES30.GL_QUERY_RESULT] = 1234
-        gl.intValues[0x8FBB] = 1
+        gl.intValues[GlesQuery.GL_GPU_DISJOINT_EXT] = 1
 
         assertEquals(-1L, query.resultNanos())
         assertFalse(query.isPending)
@@ -233,10 +229,10 @@ class GlesResourcesTest {
         val source = TextureSource { TextureData(8, 8, TextureFormat.R8, pixels(8 * 8)) }
         track(device.createTexture(8, 8, TextureFormat.R8, source = source, label = "r8"))
 
-        val storage = gl.calls.indexOf("glTexStorage2D(3553,1,33321,8,8)")
-        val align1 = gl.calls.indexOf("glPixelStorei(3317,1)")
-        val upload = gl.calls.indexOf("glTexSubImage2D(3553,0,0,0,8,8,6403,5121,buf)")
-        val align4 = gl.calls.lastIndexOf("glPixelStorei(3317,4)")
+        val storage = gl.calls.indexOf("glTexStorage2D(${GLES20.GL_TEXTURE_2D},1,${GLES30.GL_R8},8,8)")
+        val align1 = gl.calls.indexOf("glPixelStorei(${GLES20.GL_UNPACK_ALIGNMENT},1)")
+        val upload = gl.calls.indexOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,0,0,8,8,${GLES30.GL_RED},${GLES20.GL_UNSIGNED_BYTE},buf)")
+        val align4 = gl.calls.lastIndexOf("glPixelStorei(${GLES20.GL_UNPACK_ALIGNMENT},4)")
         assertTrue(gl.calls.toString(), storage >= 0)
         assertTrue(gl.calls.toString(), align1 in (storage + 1) until upload)
         assertTrue(gl.calls.toString(), align4 > upload)
@@ -247,8 +243,8 @@ class GlesResourcesTest {
         val texture = track(device.createTexture(16, 16, TextureFormat.R8, layers = 3, label = "array"))
         texture.upload(2, 4, 5, TextureData(2, 2, TextureFormat.R8, pixels(4)))
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage3D(35866,1,33321,16,16,3)"))
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexSubImage3D(35866,0,4,5,2,2,2,1,6403,5121,buf)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage3D(${GLES30.GL_TEXTURE_2D_ARRAY},1,${GLES30.GL_R8},16,16,3)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexSubImage3D(${GLES30.GL_TEXTURE_2D_ARRAY},0,4,5,2,2,2,1,${GLES30.GL_RED},${GLES20.GL_UNSIGNED_BYTE},buf)"))
     }
 
     @Test
@@ -256,8 +252,8 @@ class GlesResourcesTest {
         val source = TextureSource { TextureData(16, 8, TextureFormat.RGBA8, pixels(16 * 8 * 4)) }
         track(device.createTexture(16, 8, TextureFormat.RGBA8, filter = TextureFilter.LinearMipmapLinear, source = source, label = "mip"))
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(3553,5,32856,16,8)"))
-        assertTrue(gl.calls.toString(), gl.calls.contains("glGenerateMipmap(3553)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glTexStorage2D(${GLES20.GL_TEXTURE_2D},5,${GLES30.GL_RGBA8},16,8)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glGenerateMipmap(${GLES20.GL_TEXTURE_2D})"))
     }
 
     @Test
@@ -269,7 +265,7 @@ class GlesResourcesTest {
         gl.calls.clear()
         recreateContext()
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,8,buf,${GLES30.GL_STREAM_DRAW})"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(${GLES20.GL_ARRAY_BUFFER},8,buf,${GLES30.GL_STREAM_DRAW})"))
         assertEquals(0, gl.bufferDataBytes.size)
         assertNotEquals(0, buffer.bufferId)
     }
@@ -284,7 +280,7 @@ class GlesResourcesTest {
 
         buffer.replace(data, 4)
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,4,buf,${GLES30.GL_STREAM_DRAW})"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(${GLES20.GL_ARRAY_BUFFER},4,buf,${GLES30.GL_STREAM_DRAW})"))
         assertEquals(1, gl.bufferDataBytes.size)
         assertArrayEquals(byteArrayOf(1, 2, 3, 4), gl.bufferDataBytes[0])
     }
@@ -325,7 +321,7 @@ class GlesResourcesTest {
         gl.bufferDataBytes.clear()
         recreateContext()
 
-        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,8,buf,35044)"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(${GLES20.GL_ARRAY_BUFFER},8,buf,${GLES20.GL_STATIC_DRAW})"))
         assertEquals(1, gl.bufferDataBytes.size)
         assertArrayEquals(byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8), gl.bufferDataBytes[0])
     }
@@ -425,7 +421,7 @@ class GlesResourcesTest {
         gl.queryValues[GLES30.GL_QUERY_RESULT] = 2_000_000
         assertEquals(2_000_000L, timer.collect())
         assertEquals(1, timer.collectedFrames)
-        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glBeginQuery(35007,") })
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glBeginQuery(${GlesQuery.GL_TIME_ELAPSED_EXT},") })
 
         timer.begin()
         timer.end()
@@ -445,7 +441,7 @@ class GlesResourcesTest {
 
         timer.begin()
         timer.end()
-        gl.intValues[0x8FBB] = 1
+        gl.intValues[GlesQuery.GL_GPU_DISJOINT_EXT] = 1
         assertEquals(0L, timer.collect())
         assertEquals(0, timer.collectedFrames)
 

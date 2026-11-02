@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class TextureManagerContextLossTest {
+class TextureManagerReloadTest {
 
     /** Records hardware loads, deletes and drops instead of calling GL. */
     private class FakeTexture(manager: TextureManager) :
@@ -104,5 +104,32 @@ class TextureManagerContextLossTest {
         assertEquals(1, released.drops)
         assertEquals(0, released.deletes)
         assertEquals(1, released.loads)
+    }
+
+    @Test
+    fun reloadLoadedTextures_deletesBeforeUploadingAgain() {
+        val texture = loadedTexture()
+
+        manager.reloadLoadedTextures()
+        manager.updateTextures()
+
+        assertEquals("old texture name deleted", 1, texture.deletes)
+        assertEquals(2, texture.loads)
+        assertTrue(texture.isLoadedToHardware)
+    }
+
+    @Test
+    fun reloadLoadedTextures_keepsPendingUnloads() {
+        val kept = loadedTexture()
+        val released = loadedTexture()
+        manager.unloadTexture(released)
+
+        manager.reloadLoadedTextures()
+        manager.updateTextures()
+
+        assertEquals("released texture deleted, not leaked", 1, released.deletes)
+        assertEquals("released texture not uploaded again", 1, released.loads)
+        assertFalse(released.isLoadedToHardware)
+        assertEquals(1, kept.deletes)
     }
 }

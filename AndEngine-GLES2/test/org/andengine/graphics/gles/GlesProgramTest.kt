@@ -21,8 +21,7 @@ class GlesProgramTest {
     @Before
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
-        gl = RecordingGL()
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
     }
 
     @After
@@ -61,7 +60,7 @@ class GlesProgramTest {
     @Test
     fun shaderNewerThanContext_reportsUnsupportedDevice() {
         GlesDebugOptions.simulateEs30 = true
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
 
         val e = assertThrows(GLESVersionUnsupportedException::class.java) {
             GlesProgram(vertex, fragment, "quad-batch")

@@ -7,12 +7,10 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.text.TextBatching
-import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.font.*
 import org.andengine.opengl.font.exception.FontException
-import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 
@@ -75,7 +73,7 @@ open class UIText : UIBufferedComponent<IBuffer>() {
     private var scrollYTimeoutElapsed = 0f
 
 
-    private var linesWidth: FloatArray? = null
+    private var linesWidth = FloatArray(0)
 
     /** The letters of every line, resolved when the content changes so drawing does not look them up. */
     private var lineLetters: Array<Array<Letter>> = emptyArray()
@@ -106,37 +104,24 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         this.lineLetters = lineLetters
         linesWidth = FloatArray(lines.size) { i -> lineLetters[i].fold(0f) { acc, letter -> acc + letter.mAdvance } }
 
-        contentWidth = linesWidth!!.max()
+        contentWidth = linesWidth.max()
         contentHeight = lines.size.toFloat() * font.lineHeight
-    }
-
-    override fun onCreateBuffer(): IBuffer? {
-        // The glyphs go through the quad batch; there is no buffer of its own.
-        return null
-    }
-
-    override fun onUpdateBuffer() {
-        // Nothing to do here, there is no buffer.
     }
 
     override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
-        val clearMask = clearMask()
-        if (clearMask != 0) {
-            GlesBackend.state.clear(clearMask)
-        }
+        clearIfRequested()
 
         val font = font ?: return
-        val linesWidth = linesWidth ?: return
+        val linesWidth = linesWidth
         val lineLetters = lineLetters
 
         if (lineLetters.isEmpty()) {
             return
         }
 
-        // Every GL blend factor the UI uses has a batch counterpart.
-        val blend = batchBlendMode() ?: BlendMode.Alpha
+        val blend = meshBlendMode()
         val fillColor = TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
         val strokeColor = TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
 

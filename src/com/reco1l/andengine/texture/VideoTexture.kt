@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * A texture fed by [player] through a `SurfaceTexture`: its hardware id is a `GL_TEXTURE_EXTERNAL_OES`
  * texture, drawn through an external program of the GL core (see `BatchTexture.externalOf`).
+ * Open, with the player injectable, so tests can stub the frame latch.
  */
 @UnstableApi
 open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
@@ -137,22 +138,32 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
         super.setNotLoadedToHardware()
     }
 
-    // The decoder may still be writing to the old Surface, so it is detached from the player first, on the
-    // player's thread, and only then released (the Surface wraps the SurfaceTexture, so it goes first).
-    // Releasing it while still attached abandons the decoder's output and the player stops with an error.
     private fun releaseSurfaces() {
         val s = surface ?: return
         val st = surfaceTexture
         surface = null
         surfaceTexture = null
 
+        postDetachAndRelease(s, st, releasePlayer = false)
+    }
+
+    // The decoder may still be writing to the old Surface, so it is detached from the player first, on the
+    // player's thread, and only then released (the Surface wraps the SurfaceTexture, so it goes first).
+    // Releasing it while still attached abandons the decoder's output and the player stops with an error.
+    // The player goes last, after the surface it was writing to is fully torn down.
+    private fun postDetachAndRelease(s: Surface?, st: SurfaceTexture?, releasePlayer: Boolean) {
         mainHandler.post {
             try {
                 player.setVideoSurface(null)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                // The player may already be released.
+            }
 
-            s.release()
+            s?.release()
             st?.release()
+            if (releasePlayer) {
+                player.release()
+            }
         }
     }
 
@@ -198,20 +209,7 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
         surfaceTexture = null
         surface = null
 
-        mainHandler.post {
-            // Order matters:
-            // 1. Clear ExoPlayer's surface so the codec thread stops writing to the native window.
-            // 2. Release the Java Surface wrapper.
-            // 3. Release the SurfaceTexture.
-            // 4. Release the player last, after the surface it was writing to is fully torn down.
-            try {
-                player.setVideoSurface(null)
-            } catch (_: Exception) {}
-
-            s?.release()
-            st?.release()
-            player.release()
-        }
+        postDetachAndRelease(s, st, releasePlayer = true)
 
         super.unloadFromHardware()
     }
@@ -222,13 +220,7 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
      * surfaces, if any, are already detached and released by [setNotLoadedToHardware].
      */
     override fun onDroppedWithoutUnload() {
-        mainHandler.post {
-            try {
-                player.setVideoSurface(null)
-            } catch (_: Exception) {}
-
-            player.release()
-        }
+        postDetachAndRelease(null, null, releasePlayer = true)
     }
 
     /** Binds the OES texture. Call [latch] first to update the frame and ST matrix. */

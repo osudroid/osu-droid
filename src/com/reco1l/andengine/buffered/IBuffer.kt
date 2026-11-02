@@ -43,9 +43,6 @@ abstract class Buffer(capacity: Int) : IBuffer {
     @JvmField
     val data = FloatArray(capacity)
 
-    /** The float at [index] of the client-side data. */
-    fun valueAt(index: Int): Float = data[index]
-
 }
 
 

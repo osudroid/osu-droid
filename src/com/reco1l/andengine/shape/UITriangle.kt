@@ -1,18 +1,17 @@
 package com.reco1l.andengine.shape
 
-import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.font.FontManager
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
+import org.andengine.graphics.BlendMode
 import org.andengine.graphics.DrawContext
 
 /**
  * A rectangle shape based on [UIComponent].
  */
-open class UITriangle : UIBufferedComponent<TriangleVBO>() {
+open class UITriangle : UIBufferedComponent<TriangleVBO>(batchesShape = true) {
 
     /**
      * The style of painting for the triangle.
@@ -30,7 +29,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         requestBufferUpdate()
     }
 
-    // The batch needs no buffer; it is only built when the triangle is drawn the legacy way.
+    // The batch needs no buffer; it is only built when the triangle cannot be batched (see canBatchShape()).
     override fun onCreateBuffer(): TriangleVBO? {
         return if (canBatchShape()) null else TriangleVBO()
     }
@@ -39,42 +38,28 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         buffer?.update(this)
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchShape()) batchBlendMode() else null
-        if (blend != null) {
-            onApplyColor(pGLState)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        val cx = width / 2f
+        val cy = height / 2f
+        val halfWidth = innerWidth / 2f
+        val halfHeight = innerHeight / 2f
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+        val matrix = gl.modelViewGLMatrix
 
-            if (drawAlpha == 0f) {
-                return
-            }
+        // Same corners as the buffer: apex on top, base at the bottom.
+        val ax = cx
+        val ay = cy - halfHeight
+        val bx = cx - halfWidth
+        val by = cy + halfHeight
+        val ex = cx + halfWidth
 
-            val cx = width / 2f
-            val cy = height / 2f
-            val halfWidth = innerWidth / 2f
-            val halfHeight = innerHeight / 2f
-            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
-            val matrix = pGLState.modelViewGLMatrix
-
-            // Same corners as the buffer: apex on top, base at the bottom.
-            val ax = cx
-            val ay = cy - halfHeight
-            val bx = cx - halfWidth
-            val by = cy + halfHeight
-            val ex = cx + halfWidth
-
-            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            if (paintStyle == PaintStyle.Fill) {
-                ShapeBatching.triangle(matrix, ax, ay, bx, by, ex, by, color, blend)
-            } else {
-                val w = lineWidth / FontManager.getRasterScale()
-                ShapeBatching.triangleOutline(matrix, ax, ay, bx, by, ex, by, w, color, blend)
-            }
-            return
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        if (paintStyle == PaintStyle.Fill) {
+            ShapeBatching.triangle(matrix, ax, ay, bx, by, ex, by, color, blend)
+        } else {
+            val w = ShapeBatching.lineWidthFromPixels(lineWidth)
+            ShapeBatching.triangleOutline(matrix, ax, ay, bx, by, ex, by, w, color, blend)
         }
-
-        ensureBuffer()
-        super.doDraw(pGLState, pCamera)
     }
 
     override fun beginDraw(pGLState: DrawContext) {

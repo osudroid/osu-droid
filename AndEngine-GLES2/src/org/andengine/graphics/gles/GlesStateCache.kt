@@ -3,6 +3,7 @@ package org.andengine.graphics.gles
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLES31
+import java.nio.Buffer
 import org.andengine.graphics.debug.RenderStats
 
 /**
@@ -18,10 +19,11 @@ class GlesStateCache(private val gl: GL30) {
 
     /**
      * Runs once right before a state change that really reaches GL (a skipped duplicate does not
-     * count; the scissor has [beforeScissorChange] instead), before a clear, and before an object is forgotten as deleted; it is cleared before
-     * it runs, so it is never re-entered. Used to draw queued work first: the callee must leave
-     * every value this cache tracks as it found it (see [saveDrawState]), because the change that
-     * triggered it goes on with values read before. Null while nothing waits.
+     * count; the scissor has [beforeScissorChange] instead), before a clear, and before an object
+     * is forgotten as deleted; it is cleared before it runs, so it is never re-entered. Used to
+     * draw queued work first: the callee must leave every value this cache tracks as it found it
+     * (see [saveDrawState]), because the change that triggered it goes on with values read before.
+     * Null while nothing waits.
      */
     @JvmField
     var beforeExternalChange: Runnable? = null
@@ -555,7 +557,7 @@ class GlesStateCache(private val gl: GL30) {
         gl.glVertexAttribPointer(index, size, type, normalized, stride, offset)
     }
 
-    fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, buffer: java.nio.Buffer) {
+    fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, buffer: Buffer) {
         runBeforeExternalChange()
         gl.glVertexAttribPointer(index, size, type, normalized, stride, buffer)
     }
@@ -581,9 +583,9 @@ class GlesStateCache(private val gl: GL30) {
 
     /**
      * Copies the state a draw of the render context may change (program, VAO with its element
-     * buffer, array buffer, active unit, the 2D and external textures and the sampler of unit 0, the array
-     * texture and the sampler of unit 1, blend, depth, cull and the scissor) into [out], which
-     * needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
+     * buffer, array buffer, active unit, the 2D and external textures and the sampler of unit 0,
+     * the array texture and the sampler of unit 1, blend, depth, cull and the scissor) into [out],
+     * which needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
      */
     fun saveDrawState(out: IntArray) {
         out[S_PROGRAM] = program
@@ -691,7 +693,8 @@ class GlesStateCache(private val gl: GL30) {
     }
 
     companion object {
-        private const val UNKNOWN = -1
+        /** A state the cache does not know, also in the values of [saveScissorState]. */
+        const val UNKNOWN = -1
         private const val TEXTURE_TARGETS = 3
         private const val MIN_UNITS = 8
         private const val MAX_UNITS = 32
@@ -703,20 +706,20 @@ class GlesStateCache(private val gl: GL30) {
         private const val S_ARRAY_BUFFER = 3
         private const val S_ACTIVE_UNIT = 4
         private const val S_TEXTURE_0 = 5
-        private const val S_SAMPLER_0 = 6
-        private const val S_BLEND = 7
-        private const val S_BLEND_SRC_RGB = 8
-        private const val S_BLEND_DST_RGB = 9
-        private const val S_BLEND_SRC_ALPHA = 10
-        private const val S_BLEND_DST_ALPHA = 11
-        private const val S_DEPTH_TEST = 12
-        private const val S_DEPTH_FUNC = 13
-        private const val S_DEPTH_MASK = 14
-        private const val S_CULL = 15
-        private const val S_CULL_MODE = 16
-        private const val S_TEXTURE_ARRAY_1 = 17
-        private const val S_SAMPLER_1 = 18
-        private const val S_TEXTURE_EXTERNAL_0 = 19
+        private const val S_TEXTURE_EXTERNAL_0 = 6
+        private const val S_SAMPLER_0 = 7
+        private const val S_TEXTURE_ARRAY_1 = 8
+        private const val S_SAMPLER_1 = 9
+        private const val S_BLEND = 10
+        private const val S_BLEND_SRC_RGB = 11
+        private const val S_BLEND_DST_RGB = 12
+        private const val S_BLEND_SRC_ALPHA = 13
+        private const val S_BLEND_DST_ALPHA = 14
+        private const val S_DEPTH_TEST = 15
+        private const val S_DEPTH_FUNC = 16
+        private const val S_DEPTH_MASK = 17
+        private const val S_CULL = 18
+        private const val S_CULL_MODE = 19
         private const val S_SCISSOR = 20
 
         /** Index of unit 1's 2D array binding in the texture bindings. */

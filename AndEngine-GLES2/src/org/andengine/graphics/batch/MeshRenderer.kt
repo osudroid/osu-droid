@@ -23,10 +23,11 @@ import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesStateCache
 
 /**
- * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails, storyboard shapes), or
- * with a [MeshProgram] of the caller (see [drawProgram]), in one draw call each. A mesh is given as 2D positions (or positions with a color per vertex), is
- * transformed on the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn with its own
- * program; the vertex shader only applies the projection passed to [draw].
+ * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails,
+ * storyboard shapes), or with a [MeshProgram] of the caller (see [drawProgram]), in one draw call
+ * each. A mesh is given as 2D positions (or positions with a color per vertex), is transformed on
+ * the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn with its own program; the
+ * vertex shader only applies the projection passed to [draw].
  *
  * Every draw first flushes the [QuadBatcher], so the order on screen stays the order of the calls.
  * The depth test, depth function and depth mask come from the pipeline (see the `depthTest` and
@@ -146,9 +147,10 @@ void main() {
 
     private const val TEXTURE_UNIT = 0
 
-    private const val COUNTER_UNREGISTERED = -2
-    private const val COUNTER_UNAVAILABLE = -1
-    private var vertexCounter = COUNTER_UNREGISTERED
+    // Registered at the first draw; -1 until then, and for good when RenderStats has no free slot
+    // (RenderStats.count ignores -1).
+    private var vertexCounter = -1
+    private var vertexCounterRegistered = false
 
     private val primitives = PrimitiveType.values()
 
@@ -157,16 +159,16 @@ void main() {
 
     private val littleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
 
+    /** The sources and sampler units a kit builds its own program from. */
+    private class Shaders(val vertex: String, val fragment: String, val samplerUnits: Map<String, Int>)
+
     /** Program, vertex buffer, staging and pipelines of one vertex format. */
     private class Kit(
         val vertexSize: Int,
         val layout: VertexLayout,
-        val vertexShader: String,
-        val fragmentShader: String,
         val name: String,
-        val samplerUnits: Map<String, Int>,
-        /** False for the kit of [drawProgram], whose program comes from the [MeshProgram]. */
-        val ownsProgram: Boolean = true
+        /** Null for the kit of [drawProgram], whose program comes from the [MeshProgram]. */
+        val shaders: Shaders?
     ) {
         var program: GpuProgram? = null
         var vertexBuffer: GpuBuffer? = null
@@ -181,14 +183,12 @@ void main() {
         val capacityVertices: Int get() = (staging?.capacity() ?: 0) / vertexSize
     }
 
-    private val plain = Kit(VERTEX_SIZE_BYTES, layout, VERTEX_SHADER, FRAGMENT_SHADER, "mesh", emptyMap())
+    private val plain = Kit(VERTEX_SIZE_BYTES, layout, "mesh", Shaders(VERTEX_SHADER, FRAGMENT_SHADER, emptyMap()))
     private val textured = Kit(
-        TEXTURED_VERTEX_SIZE_BYTES, texturedLayout, TEXTURED_VERTEX_SHADER, TEXTURED_FRAGMENT_SHADER, "mesh-textured",
-        mapOf("uTexture" to TEXTURE_UNIT)
+        TEXTURED_VERTEX_SIZE_BYTES, texturedLayout, "mesh-textured",
+        Shaders(TEXTURED_VERTEX_SHADER, TEXTURED_FRAGMENT_SHADER, mapOf("uTexture" to TEXTURE_UNIT))
     )
-    // The shaders of [drawProgram] come from its [MeshProgram] (ownsProgram = false), so this kit has
-    // none of its own: the empty sources are never compiled.
-    private val custom = Kit(PROGRAM_VERTEX_SIZE_BYTES, programLayout, "", "", "mesh-program", emptyMap(), ownsProgram = false)
+    private val custom = Kit(PROGRAM_VERTEX_SIZE_BYTES, programLayout, "mesh-program", null)
 
     private val savedState = IntArray(GlesStateCache.DRAW_STATE_SIZE)
 
@@ -206,8 +206,8 @@ void main() {
     val texturedCapacityVertices: Int get() = textured.capacityVertices
 
     /**
-     * Index of the [RenderStats] counter "mesh.vertices"; -1 if registering it failed, -2 before the
-     * first draw.
+     * Index of the [RenderStats] counter "mesh.vertices"; -1 before the first draw or if no counter
+     * slot was free.
      */
     val vertexCounterIndex: Int get() = vertexCounter
 
@@ -484,20 +484,11 @@ void main() {
             // The render context may think its pipeline is still applied.
             context.invalidatePipeline()
         }
-        var counter = vertexCounter
-        if (counter == COUNTER_UNREGISTERED) counter = registerVertexCounter()
-        if (counter >= 0) RenderStats.count(counter, vertexCount)
-    }
-
-    /** Statistics must never stop the renderer: a failed registration only disables counting. */
-    private fun registerVertexCounter(): Int {
-        val index = try {
-            RenderStats.registerCounter("mesh.vertices")
-        } catch (e: RuntimeException) {
-            COUNTER_UNAVAILABLE
+        if (!vertexCounterRegistered) {
+            vertexCounter = RenderStats.registerCounter("mesh.vertices")
+            vertexCounterRegistered = true
         }
-        vertexCounter = index
-        return index
+        RenderStats.count(vertexCounter, vertexCount)
     }
 
     private fun pipelineFor(kit: Kit, blend: BlendMode, depthTest: CompareFunction?, depthWrite: Boolean, primitive: PrimitiveType): Pipeline {
@@ -528,7 +519,8 @@ void main() {
         val bufferBytes = capacity * kit.vertexSize
 
         val oldBuffer = kit.vertexBuffer
-        val needProgram = kit.ownsProgram && kit.program == null
+        val programShaders = if (kit.program == null) kit.shaders else null
+        val needProgram = programShaders != null
         val needBuffer = oldBuffer == null || oldBuffer.sizeBytes < bufferBytes
         if (!needProgram && !needBuffer && capacity == oldCapacity) return
 
@@ -536,8 +528,10 @@ void main() {
         var newProgram: GpuProgram? = null
         var newBuffer: GpuBuffer? = null
         try {
-            if (needProgram) {
-                newProgram = GlesGraphicsDevice.instance.createProgram(kit.vertexShader, kit.fragmentShader, kit.name, kit.samplerUnits)
+            if (programShaders != null) {
+                newProgram = GlesGraphicsDevice.instance.createProgram(
+                    programShaders.vertex, programShaders.fragment, kit.name, programShaders.samplerUnits
+                )
             }
             if (needBuffer) {
                 newBuffer = GlesGraphicsDevice.instance.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, bufferBytes, "${kit.name}-vertices")
@@ -573,6 +567,7 @@ void main() {
             kit.program = null
             kit.vertexBuffer = null
         }
-        vertexCounter = COUNTER_UNREGISTERED
+        vertexCounter = -1
+        vertexCounterRegistered = false
     }
 }

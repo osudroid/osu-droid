@@ -1,13 +1,12 @@
 package com.osudroid.game.cursor.trail
 
-import org.andengine.graphics.BlendFactor
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.graphics.DrawContext
+import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite
@@ -20,17 +19,8 @@ import kotlin.math.sin
 private const val MAX_PARTS = 512
 private const val DISJOINT_SPAWN_INTERVAL_MS = 1000f / 60f
 
-// The blend functions apply to color and alpha alike.
-/** "Attached" trails (the skin has cursormiddle) glow additively. */
-private val ADDITIVE_BLEND = BlendMode(BlendFactor.SrcAlpha, BlendFactor.One, BlendFactor.SrcAlpha, BlendFactor.One)
-
-/** "Disjoint" trails use normal alpha. */
-private val ALPHA_BLEND = BlendMode(BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha, BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha)
-
 /**
- * Renders the skin's "cursortrail" texture behind the moving cursor, osu! legacy skin
- * cursor trail (see `osu.Game.Rulesets.Osu/Skinning/Legacy/LegacyCursorTrail.cs` and its
- * base `osu.Game.Rulesets.Osu/UI/Cursor/CursorTrail.cs`).
+ * Renders the skin's "cursortrail" texture behind the moving cursor.
  */
 class CursorTrail(
     private val textureRegion: TextureRegion,
@@ -190,7 +180,8 @@ class CursorTrail(
         cornerU[3] = u; cornerV[3] = v2
 
         val texture = BatchTexture.of(textureRegion.texture)
-        val blend = if (disjointTrail) ALPHA_BLEND else ADDITIVE_BLEND
+        // "Attached" trails (the skin has cursormiddle) glow additively; "disjoint" ones use normal alpha.
+        val blend = if (disjointTrail) BlendMode.AlphaAllChannels else BlendMode.AdditiveAllChannels
 
         val modelView = pGLState.modelViewGLMatrix
         QuadBatcher.setProjection(pGLState.projectionGLMatrix)

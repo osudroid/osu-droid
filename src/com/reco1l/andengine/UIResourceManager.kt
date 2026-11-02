@@ -4,22 +4,22 @@ package com.reco1l.andengine
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Typeface
 import android.util.Log
-import com.reco1l.andengine.component.UIComponent
-import org.andengine.graphics.text.AndroidGlyphRasterizer
-import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.opengl.font.Font
+import org.andengine.opengl.font.FontFactory
 import org.andengine.opengl.font.FontManager
-import java.lang.ref.WeakReference
 
+/**
+ * @param fontManager supplies the font manager the fonts are loaded with. Tests pass their own.
+ */
 class UIResourceManager(
     private val context: Context,
     private val fontManager: () -> FontManager = { UIEngine.current.fontManager }
 ) {
 
+    // Fonts stay loaded for the process lifetime: they own no GPU pages, and unloading would create
+    // new atlas slots (the atlas never reuses space) the next time the font is needed.
     private val fonts = mutableMapOf<String, Font>()
-    private val fontSubscribers = mutableMapOf<Font, MutableList<WeakReference<UIComponent>>>()
 
 
     fun getOrStoreFont(size: Float, family: String): Font {
@@ -31,32 +31,11 @@ class UIResourceManager(
             return fetchedFont
         }
 
-        val manager = fontManager()
-        val typeface = Typeface.createFromAsset(context.assets, "fonts/${family}")
-        val rasterizer = AndroidGlyphRasterizer(typeface, size * FontManager.getRasterScale(), true)
-        val font = Font(manager, rasterizer, GlyphAtlas.shared, Color.WHITE)
-
         Log.i("UIResourceManager", "Loading font: $fontIdentifier")
 
-        manager.loadFont(font)
+        val font = FontFactory.createFromAsset(fontManager(), context.assets, "fonts/${family}", size, true, Color.WHITE)
         fonts[fontIdentifier] = font
 
         return font
-    }
-
-    fun subscribeToFont(font: Font, component: UIComponent) {
-        val subscribers = fontSubscribers.getOrPut(font) { mutableListOf() }
-        if (subscribers.none { it.get() === component }) {
-            subscribers.add(WeakReference(component))
-        }
-    }
-
-    fun unsubscribeFromFont(font: Font, component: UIComponent) {
-
-        val subscribers = fontSubscribers[font] ?: return
-        subscribers.removeAll { it.get() === component || it.get() == null }
-
-        // The font stays loaded for the process lifetime: fonts own no GPU pages, and unloading would
-        // create new atlas slots (the atlas never reuses space) the next time the font is needed.
     }
 }

@@ -152,7 +152,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	/**
 	 * Called on the GL thread. Whether the pixels of all sources can be loaded on a background thread: this
 	 * atlas has sources, uploads RGBA bytes and every source can deliver them in this atlas' variant
-	 * (straight or premultiplied). Otherwise it is loaded on the GL thread as before.
+	 * (straight or premultiplied). Otherwise it is loaded on the GL thread.
 	 */
 	public boolean canPreparePixels() {
 		final ArrayList<IBitmapTextureAtlasSource> textureSources = this.mTextureAtlasSources;
@@ -181,7 +181,6 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	 * on the GL thread (the sources cannot have changed in between).
 	 */
 	public PixelPreparation createPixelPreparationUnchecked() {
-
 		final ArrayList<IBitmapTextureAtlasSource> textureSources = this.mTextureAtlasSources;
 		final int textureSourceCount = textureSources.size();
 		final ArrayList<IPixelTextureAtlasSource> pixelSources = new ArrayList<IPixelTextureAtlasSource>(textureSourceCount);
@@ -283,8 +282,8 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	/**
 	 * Uploads the RGBA bytes of {@code pSource} as they are: the prepared ones at {@code pIndex} if
 	 * {@code pPreparedPixels} is given (a {@code null} entry means the source had none), else loaded now.
-	 * Premultiplied atlases take premultiplied bytes (the memory the bitmap upload sent before), all others
-	 * straight ones.
+	 * Premultiplied atlases take premultiplied bytes, the same memory the bitmap path uploads; all others
+	 * take straight ones.
 	 *
 	 * @return {@code false} if the source has no pixels of this atlas' variant, so the bitmap path loads it instead.
 	 */

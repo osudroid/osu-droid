@@ -1,9 +1,14 @@
 package org.andengine.graphics.gles
 
 import android.opengl.GLES20
+import android.opengl.GLES32
+import java.nio.Buffer
+import java.nio.ByteBuffer
+import java.nio.IntBuffer
+import java.nio.ShortBuffer
 
 /** Test fake: records every call as `glName(arg1,arg2,...)`. */
-class RecordingGL : GL32 {
+class RecordingGL : NoOpGL32() {
     val calls: MutableList<String> = ArrayList()
     var versionString: String? = "OpenGL ES 3.2 test"
     var extensionsString: String? = ""
@@ -32,6 +37,30 @@ class RecordingGL : GL32 {
     /** `GL_LINK_STATUS` and info log of every program; set the status to 0 to fail linking. */
     var programLinkStatus = 1
     var programInfoLog = ""
+
+    /** Codes returned by [glGetError], first in first out; `GL_NO_ERROR` (0) once empty. */
+    val errorQueue: ArrayDeque<Int> = ArrayDeque()
+
+    /** Makes [glGenBuffers] throw, to simulate a failing buffer creation. */
+    var failGenBuffers = false
+
+    /** Returned by [glCheckFramebufferStatus]. */
+    var framebufferStatus = GLES20.GL_FRAMEBUFFER_COMPLETE
+
+    /** Makes [glDebugMessageCallback] throw like the Android bindings do. */
+    var debugCallbackUnsupported = false
+
+    /** Makes the `byte[]` overload of [glGetDebugMessageLog] throw like the Android bindings do. */
+    var debugLogBytesUnsupported = false
+
+    /** Makes the `String[]` overload of [glGetDebugMessageLog] throw like the Android bindings do. */
+    var debugLogStringsUnsupported = false
+
+    /** Pending debug messages returned by [glGetDebugMessageLog]: source, type, id, severity, text. */
+    val debugLog: ArrayDeque<DebugMessage> = ArrayDeque()
+
+    class DebugMessage(val source: Int, val type: Int, val id: Int, val severity: Int, val text: String)
+
     private var nextId = 1
 
     override fun glGetString(name: Int): String? {
@@ -48,9 +77,6 @@ class RecordingGL : GL32 {
         calls += "glGetIntegerv($pname,buf,$offset)"
         params[offset] = intValues[pname] ?: 0
     }
-
-    /** Codes returned by [glGetError], first in first out; `GL_NO_ERROR` (0) once empty. */
-    val errorQueue: ArrayDeque<Int> = ArrayDeque()
 
     override fun glGetError(): Int {
         calls += "glGetError()"
@@ -157,7 +183,7 @@ class RecordingGL : GL32 {
         calls += "glVertexAttribPointer($index,$size,$type,$normalized,$stride,$offset)"
     }
 
-    override fun glVertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, ptr: java.nio.Buffer) {
+    override fun glVertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, ptr: Buffer) {
         calls += "glVertexAttribPointer($index,$size,$type,$normalized,$stride,buf)"
     }
 
@@ -173,9 +199,6 @@ class RecordingGL : GL32 {
         calls += "glGenTextures($n,buf,$offset)"
         for (i in 0 until n) ids[offset + i] = nextId++
     }
-
-    /** Makes [glGenBuffers] throw, to simulate a failing buffer creation. */
-    var failGenBuffers = false
 
     override fun glGenBuffers(n: Int, ids: IntArray, offset: Int) {
         calls += "glGenBuffers($n,buf,$offset)"
@@ -237,19 +260,19 @@ class RecordingGL : GL32 {
     }
 
     /** `buf` for bytes (or none); `ints`/`shorts` for pixels converted from a bitmap into an int or short buffer. */
-    private fun pixelsToken(pixels: java.nio.Buffer?) = when (pixels) {
-        is java.nio.IntBuffer -> "ints"
-        is java.nio.ShortBuffer -> "shorts"
+    private fun pixelsToken(pixels: Buffer?) = when (pixels) {
+        is IntBuffer -> "ints"
+        is ShortBuffer -> "shorts"
         else -> "buf"
     }
 
-    override fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
+    override fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Buffer?) {
         calls += "glTexImage2D($target,$level,$internalformat,$width,$height,$border,$format,$type,${pixelsToken(pixels)})"
     }
 
-    override fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
+    override fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: Buffer?) {
         calls += "glTexSubImage2D($target,$level,$xoffset,$yoffset,$width,$height,$format,$type,${pixelsToken(pixels)})"
-        if (pixels is java.nio.ByteBuffer) {
+        if (pixels is ByteBuffer) {
             val copy = pixels.duplicate()
             val bytes = ByteArray(copy.remaining())
             copy.get(bytes)
@@ -265,9 +288,9 @@ class RecordingGL : GL32 {
         calls += "glTexStorage3D($target,$levels,$internalformat,$width,$height,$depth)"
     }
 
-    override fun glTexSubImage3D(target: Int, level: Int, xoffset: Int, yoffset: Int, zoffset: Int, width: Int, height: Int, depth: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
+    override fun glTexSubImage3D(target: Int, level: Int, xoffset: Int, yoffset: Int, zoffset: Int, width: Int, height: Int, depth: Int, format: Int, type: Int, pixels: Buffer?) {
         calls += "glTexSubImage3D($target,$level,$xoffset,$yoffset,$zoffset,$width,$height,$depth,$format,$type,buf)"
-        if (pixels is java.nio.ByteBuffer) {
+        if (pixels is ByteBuffer) {
             val copy = pixels.duplicate()
             val bytes = ByteArray(copy.remaining())
             copy.get(bytes)
@@ -283,25 +306,25 @@ class RecordingGL : GL32 {
         calls += "glGenerateMipmap($target)"
     }
 
-    override fun glBufferData(target: Int, size: Int, data: java.nio.Buffer?, usage: Int) {
+    override fun glBufferData(target: Int, size: Int, data: Buffer?, usage: Int) {
         calls += "glBufferData($target,$size,buf,$usage)"
-        if (data is java.nio.ByteBuffer) {
+        if (data is ByteBuffer) {
             val copy = data.duplicate()
             val bytes = ByteArray(minOf(size, copy.remaining()))
             copy.get(bytes)
             bufferDataBytes += bytes
-            if (target == 34962) vertexUploads += bytes
+            if (target == GLES20.GL_ARRAY_BUFFER) vertexUploads += bytes
         }
     }
 
-    override fun glBufferSubData(target: Int, offset: Int, size: Int, data: java.nio.Buffer?) {
+    override fun glBufferSubData(target: Int, offset: Int, size: Int, data: Buffer?) {
         calls += "glBufferSubData($target,$offset,$size,buf)"
-        if (data is java.nio.ByteBuffer) {
+        if (data is ByteBuffer) {
             val copy = data.duplicate()
             val bytes = ByteArray(minOf(size, copy.remaining()))
             copy.get(bytes)
             bufferSubDataBytes += bytes
-            if (target == 34962) vertexUploads += bytes
+            if (target == GLES20.GL_ARRAY_BUFFER) vertexUploads += bytes
         }
     }
 
@@ -410,9 +433,6 @@ class RecordingGL : GL32 {
         calls += "glRenderbufferStorage($target,$internalformat,$width,$height)"
     }
 
-    /** Returned by [glCheckFramebufferStatus]. */
-    var framebufferStatus = GLES20.GL_FRAMEBUFFER_COMPLETE
-
     override fun glCheckFramebufferStatus(target: Int): Int {
         calls += "glCheckFramebufferStatus($target)"
         return framebufferStatus
@@ -461,7 +481,7 @@ class RecordingGL : GL32 {
         calls += "glDrawElements($mode,$count,$type,$offset)"
     }
 
-    override fun glDrawElements(mode: Int, count: Int, type: Int, indices: java.nio.Buffer) {
+    override fun glDrawElements(mode: Int, count: Int, type: Int, indices: Buffer) {
         calls += "glDrawElements($mode,$count,$type,buf)"
     }
 
@@ -469,19 +489,10 @@ class RecordingGL : GL32 {
         calls += "glObjectLabel($identifier,$name,$length,$label)"
     }
 
-    override fun glDebugMessageCallback(callback: android.opengl.GLES32.DebugProc?) {
+    override fun glDebugMessageCallback(callback: GLES32.DebugProc?) {
         calls += "glDebugMessageCallback(buf)"
         if (debugCallbackUnsupported) throw UnsupportedOperationException("not yet implemented")
     }
-
-    /** Makes [glDebugMessageCallback] throw like the Android bindings do. */
-    var debugCallbackUnsupported = false
-
-    /** Makes the `byte[]` overload of [glGetDebugMessageLog] throw like the Android bindings do. */
-    var debugLogBytesUnsupported = false
-
-    /** Makes the `String[]` overload of [glGetDebugMessageLog] throw like the Android bindings do. */
-    var debugLogStringsUnsupported = false
 
     override fun glGetDebugMessageLog(
         count: Int,
@@ -502,11 +513,6 @@ class RecordingGL : GL32 {
         }
         return result.toTypedArray()
     }
-
-    /** Pending debug messages returned by [glGetDebugMessageLog]: source, type, id, severity, text. */
-    val debugLog: ArrayDeque<DebugMessage> = ArrayDeque()
-
-    class DebugMessage(val source: Int, val type: Int, val id: Int, val severity: Int, val text: String)
 
     override fun glGetDebugMessageLog(
         count: Int, bufSize: Int,
@@ -535,7 +541,7 @@ class RecordingGL : GL32 {
         return n
     }
 
-    override fun glDrawElementsBaseVertex(mode: Int, count: Int, type: Int, indices: java.nio.Buffer, basevertex: Int) {
+    override fun glDrawElementsBaseVertex(mode: Int, count: Int, type: Int, indices: Buffer, basevertex: Int) {
         calls += "glDrawElementsBaseVertex($mode,$count,$type,buf,$basevertex)"
     }
 

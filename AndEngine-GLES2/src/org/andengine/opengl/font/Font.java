@@ -9,6 +9,8 @@ import org.andengine.graphics.text.GlyphMetrics;
 import org.andengine.graphics.text.GlyphRasterizer;
 import org.andengine.graphics.text.GlyphSlot;
 import org.andengine.opengl.font.exception.FontException;
+import org.andengine.util.color.Color;
+import org.andengine.util.debug.Debug;
 
 import android.util.SparseArray;
 
@@ -26,8 +28,6 @@ public class Font implements IFont {
 	// ===========================================================
 	// Constants
 	// ===========================================================
-
-	private static final int WHITE_ARGB_PACKED_INT = 0xFFFFFFFF;
 
 	// ===========================================================
 	// Fields
@@ -57,7 +57,7 @@ public class Font implements IFont {
 	}
 
 	public Font(final FontManager pFontManager, final GlyphRasterizer pRasterizer, final GlyphAtlas pAtlas) {
-		this(pFontManager, pRasterizer, pAtlas, Font.WHITE_ARGB_PACKED_INT);
+		this(pFontManager, pRasterizer, pAtlas, Color.WHITE_ARGB_PACKED_INT);
 	}
 
 	public Font(final FontManager pFontManager, final GlyphRasterizer pRasterizer, final GlyphAtlas pAtlas, final int pColorARGBPackedInt) {
@@ -198,7 +198,7 @@ public class Font implements IFont {
 		final GlyphSlot strokeGlyph = (glyph != null && this.getGlyphLayerCount() > 1) ? this.mAtlas.allocate(metrics.width, metrics.height) : null;
 		if(glyph == null || (this.getGlyphLayerCount() > 1 && strokeGlyph == null)) {
 			// Larger than an atlas layer: keep the layout, draw nothing.
-			android.util.Log.w("Font", "Glyph '" + pCharacter + "' (" + metrics.width + "x" + metrics.height + ") does not fit into the glyph atlas");
+			Debug.w("Font: Glyph '" + pCharacter + "' (" + metrics.width + "x" + metrics.height + ") does not fit into the glyph atlas");
 			return new Letter(pCharacter, advance);
 		}
 

@@ -53,7 +53,10 @@ class MeshProgram(
 
     /** Number of cached pipelines. */
     var pipelineCount = 0
-        private set
+        private set(value) {
+            totalPipelineCount += value - field
+            field = value
+        }
 
     init {
         if (external) {
@@ -152,6 +155,11 @@ class MeshProgram(
     override fun toString() = "MeshProgram($label)"
 
     companion object {
+
+        /** Number of cached pipelines of all [MeshProgram]s together, for the render statistics. GL thread only. */
+        @JvmStatic
+        var totalPipelineCount = 0
+            private set
 
         /** The sampler of the fragment shader, on texture unit 0. */
         const val SAMPLER = "uTexture"

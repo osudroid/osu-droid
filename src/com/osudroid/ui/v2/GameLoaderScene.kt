@@ -1,6 +1,5 @@
 package com.osudroid.ui.v2
 
-import android.util.Log
 import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
@@ -24,6 +23,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.math.*
 import org.andengine.input.touch.*
+import org.andengine.util.debug.Debug
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -226,7 +226,7 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
 
     /**
      * Whether texture loads are still pending once everything else is ready ([isOtherwiseReady]); gives up
-     * after [TEXTURE_WAIT_TIMEOUT_MS] of waiting.
+     * after [MainActivity.TEXTURE_WAIT_TIMEOUT_MS] of waiting.
      */
     private fun isWaitingForTextures(isOtherwiseReady: Boolean): Boolean {
         if (!isOtherwiseReady || !GlobalManager.getInstance().engine.textureManager.hasPendingTextureLoads()) {
@@ -237,8 +237,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         if (textureWaitStart == 0L) {
             textureWaitStart = now
         }
-        if (now - textureWaitStart > TEXTURE_WAIT_TIMEOUT_MS) {
-            Log.w("GameLoaderScene", "Texture loads still pending after ${TEXTURE_WAIT_TIMEOUT_MS} ms, starting anyway")
+        if (now - textureWaitStart > MainActivity.TEXTURE_WAIT_TIMEOUT_MS) {
+            Debug.w("GameLoaderScene: Texture loads still pending after ${MainActivity.TEXTURE_WAIT_TIMEOUT_MS} ms, starting anyway")
             return false
         }
         return true
@@ -560,8 +560,5 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         private var settingsCardCollapsed = false
 
         private const val MULTIPLAYER_LOAD_TIMEOUT_SEC = 60f
-
-        /** Longest wait for pending texture loads once everything else is ready. */
-        private const val TEXTURE_WAIT_TIMEOUT_MS = 5000L
     }
 }

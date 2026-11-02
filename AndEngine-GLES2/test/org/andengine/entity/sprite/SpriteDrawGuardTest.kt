@@ -3,14 +3,13 @@ package org.andengine.entity.sprite
 import android.opengl.GLES20
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.Entity
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
+import org.andengine.graphics.gles.Page
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.opengl.texture.TextureManager
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -27,12 +26,6 @@ class SpriteDrawGuardTest {
     private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
-    private class Page(loadedId: Int) : BitmapTextureAtlas(TextureManager(), 16, 16, TextureOptions.BILINEAR) {
-        init {
-            mHardwareTextureID = loadedId
-        }
-    }
-
     /** Counts the draws the sprite hands to the batch. */
     private class CountingSprite(region: TextureRegion) : Sprite(0f, 0f, 8f, 8f, region) {
         var draws = 0
@@ -44,13 +37,9 @@ class SpriteDrawGuardTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
-        gl.calls.clear()
     }
 
     @After

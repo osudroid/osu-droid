@@ -5,8 +5,7 @@ import android.util.Log
 import org.andengine.graphics.gles.GlesGraphicsDevice
 
 /**
- * Lightweight per-frame render counters, used to measure the GL layer before and after
- * each step of the GL core rewrite.
+ * Lightweight per-frame render counters for profiling the GL layer.
  *
  * All counting methods are no-ops while [enabled] is `false`, so the call sites can stay
  * in release builds. Counters are written by the GL thread only, except [onUpdate], which

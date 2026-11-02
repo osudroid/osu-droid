@@ -3,8 +3,12 @@ package org.andengine.graphics.atlas
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.opengl.GLES20
-import org.andengine.graphics.gles.GlesBackend
+import java.nio.ByteBuffer
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.bitmapUploads
+import org.andengine.graphics.gles.bytesOf
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.TextureManager
@@ -15,13 +19,13 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.GraphicsMode
-import java.nio.ByteBuffer
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -31,10 +35,7 @@ class PixelPageTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
     }
 
     /** ARGB ints as straight R, G, B, A bytes. */
@@ -45,13 +46,6 @@ class PixelPageTest {
         }
         data.flip()
         return Pixels(width, height, data)
-    }
-
-    private fun bytesOf(pixels: Pixels): ByteArray {
-        val copy = pixels.data.duplicate()
-        val bytes = ByteArray(copy.remaining())
-        copy.get(bytes)
-        return bytes
     }
 
     private fun bytesOf(argb: IntArray): ByteArray = bytesOf(pixelsOf(argb, argb.size, 1))
@@ -112,7 +106,7 @@ class PixelPageTest {
     }
 
     @Test
-    fun pixelPage_matchesCanvasPageForOpaqueAndTransparent() {
+    fun pixelPage_matchesBitmapPathForOpaqueAndTransparent() {
         val colors = intArrayOf(
             Color.argb(255, 200, 10, 30), Color.argb(0, 0, 0, 0), Color.argb(255, 1, 2, 3),
             Color.argb(0, 0, 0, 0), Color.argb(255, 40, 50, 60), Color.argb(255, 255, 255, 255)
@@ -123,11 +117,11 @@ class PixelPageTest {
             return bitmap
         }
 
-        // The previous page content: the extruded bitmap as the bitmap upload converted it.
-        val canvasSource = ExtrudedBitmapSource(BitmapSource(3, 2, ::image), 2)
-        val canvasBitmap = canvasSource.onLoadBitmap(Bitmap.Config.ARGB_8888)!!
-        val expected = uploadedBytesOf(canvasBitmap)
-        canvasBitmap.recycle()
+        // Reference: the extruded bitmap as the bitmap path uploads it.
+        val bitmapSource = ExtrudedBitmapSource(BitmapSource(3, 2, ::image), 2)
+        val referenceBitmap = bitmapSource.onLoadBitmap(Bitmap.Config.ARGB_8888)!!
+        val expected = uploadedBytesOf(referenceBitmap)
+        referenceBitmap.recycle()
 
         val straight = image()
         straight.isPremultiplied = false
@@ -169,15 +163,6 @@ class PixelPageTest {
         override fun deepCopy() = this
     }
 
-    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
-
-    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
-    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
-        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
-        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
-    }
-
-
     /** Adds [source] to a fresh skin page set, uploads the page and returns it with the recorded bitmap uploads. */
     private fun uploadOnSkinPage(source: IBitmapTextureAtlasSource): List<String> {
         val pages = TextureAtlasPages(TextureManager(), 64, 32, padding = 1)
@@ -185,7 +170,7 @@ class PixelPageTest {
         val region = pages.add(source, TextureOptions.BILINEAR)!!
         pages.endSession()
         (region.texture as BitmapTextureAtlas).loadToHardware()
-        return bitmapUploads()
+        return gl.bitmapUploads()
     }
 
     @Test
@@ -200,7 +185,7 @@ class PixelPageTest {
         assertTrue(pixelUploads.isEmpty())
         assertEquals(0, pixelSource.bitmapLoads)
         assertEquals(1, pixelSource.pixelLoads)
-        assertEquals(listOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,0,0,4,3,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"), subImageCalls())
+        assertEquals(listOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,0,0,4,3,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"), gl.subImageCalls())
         assertArrayEquals(expected, gl.texSubImage2DBytes.single())
 
         // An inner bitmap source, even one with straight alpha, keeps the bitmap path with one decode.
@@ -215,7 +200,7 @@ class PixelPageTest {
         }
         assertEquals(listOf("bitmap(0,0,4,3)"), uploadOnSkinPage(straightSource))
         assertEquals(1, straightSource.loads)
-        assertTrue(subImageCalls().isEmpty())
+        assertTrue(gl.subImageCalls().isEmpty())
     }
 
     @Test
@@ -224,17 +209,17 @@ class PixelPageTest {
         val inner = PixelSource { pixelsOf(intArrayOf(Color.RED), 1, 1) }
         val extruded = ExtrudedBitmapSource(inner, 1)
 
-        assertEquals(null, extruded.onLoadPixels())
+        assertNull(extruded.onLoadPixels())
         assertEquals(listOf("bitmap(0,0,4,3)"), uploadOnSkinPage(inner))
         assertEquals(1, inner.bitmapLoads)
-        assertTrue(subImageCalls().isEmpty())
+        assertTrue(gl.subImageCalls().isEmpty())
     }
 
     @Test
     fun extrudedSource_bitmapSourceIsNotDecodedForPixels() {
         val source = BitmapSource(2, 1) { Bitmap.createBitmap(2, 1, Bitmap.Config.ARGB_8888) }
 
-        assertEquals(null, ExtrudedBitmapSource(source, 1).onLoadPixels())
+        assertNull(ExtrudedBitmapSource(source, 1).onLoadPixels())
         assertEquals(0, source.loads)
     }
 
@@ -249,7 +234,7 @@ class PixelPageTest {
         val uploads = uploadOnSkinPage(source)
 
         assertEquals(listOf("bitmap(0,0,4,3)"), uploads)
-        assertTrue(subImageCalls().isEmpty())
+        assertTrue(gl.subImageCalls().isEmpty())
         assertEquals("decoded exactly once", 1, source.loads)
     }
 

@@ -8,8 +8,8 @@ import org.andengine.entity.IEntity
 import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.scene.Scene
 import org.andengine.entity.shape.IShape
-import org.andengine.input.touch.TouchEvent
 import org.andengine.graphics.DrawContext
+import org.andengine.input.touch.TouchEvent
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock

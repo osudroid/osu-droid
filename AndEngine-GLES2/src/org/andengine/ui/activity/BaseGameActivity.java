@@ -7,6 +7,7 @@ import org.andengine.engine.Engine;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.sensor.location.ILocationListener;
@@ -15,7 +16,6 @@ import org.andengine.input.sensor.orientation.IOrientationListener;
 import org.andengine.input.sensor.orientation.OrientationSensorOptions;
 import org.andengine.opengl.font.FontManager;
 import org.andengine.opengl.texture.TextureManager;
-import org.andengine.graphics.DrawContext;
 import org.andengine.opengl.view.IRendererListener;
 import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.ui.IGameInterface;
@@ -96,7 +96,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		}
 
 		/* Resources of a new GL context are restored by GlesBackend.onContextCreated (called from
-		 * EngineRenderer before this listener), so there is no onReloadResources() here. */
+		 * EngineRenderer before this listener), so this listener has nothing to reload. */
 		if(this.mGameCreated) {
 			if(this.mGamePaused) {
 				this.onResumeGame();

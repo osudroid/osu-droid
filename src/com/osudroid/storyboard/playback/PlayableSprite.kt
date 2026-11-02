@@ -32,8 +32,8 @@ class PlayableSprite(
     @JvmField
     val declarationIndex: Int = 0
 ) {
-    // The own timelines as tracks for the per-frame evaluation, null where there are no commands.
-    // The unrolled timelines themselves are only needed while building them (see init).
+    // The sprite's timelines as tracks for the per-frame evaluation; null where a property has no
+    // commands. The EffectiveTimelines are only needed to build them.
     private val xTrack: FloatTrack?
     private val yTrack: FloatTrack?
     private val scaleTrack: FloatTrack?

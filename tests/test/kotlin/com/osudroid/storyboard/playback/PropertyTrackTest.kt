@@ -10,7 +10,7 @@ import org.junit.Test
 
 class PropertyTrackTest {
 
-    // The evaluation the tracks replace: search the last started command, interpolate it.
+    // Reference evaluation: find the last started command, interpolate it.
 
     private fun referenceFloat(timeline: CommandTimeline<Float>, time: Double): Float {
         val index = timeline.indexAt(time)

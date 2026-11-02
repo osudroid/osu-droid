@@ -17,8 +17,8 @@ import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.graphics.DrawContext
+import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
@@ -261,7 +261,6 @@ class StoryboardComponent : UIComponent() {
         drawBackground(playback)
         drawLayers(playback, MAIN_LAYERS, drawAlpha)
         drawDim()
-        batch.end()
         RenderStats.addTime(StoryboardRenderStats.TIME_TOTAL, drawStart)
     }
 
@@ -297,12 +296,17 @@ class StoryboardComponent : UIComponent() {
             val sprites = playback.activeSprites(layer)
             RenderStats.count(StoryboardRenderStats.COUNT_ACTIVE, sprites.size)
 
+            // The states are evaluated in a pass of their own, so the evaluation is timed once per layer.
+            val evalStart = RenderStats.now()
+            val time = playback.currentTime
+            for (i in sprites.indices) {
+                sprites[i].update(time)
+            }
+            RenderStats.addTime(StoryboardRenderStats.TIME_EVAL, evalStart)
+
+            var drawn = 0
             for (i in sprites.indices) {
                 val sprite = sprites[i]
-
-                val evalStart = RenderStats.now()
-                sprite.update(playback.currentTime)
-                RenderStats.addTime(StoryboardRenderStats.TIME_EVAL, evalStart)
 
                 if (!sprite.isVisible || sprite.alpha * alpha < ALPHA_EPSILON) {
                     continue
@@ -312,8 +316,9 @@ class StoryboardComponent : UIComponent() {
                 val path = (element as? StoryboardAnimation)?.framePath(sprite.frameIndex) ?: element.filePath
 
                 batch.draw(sprite, pool.get(path), alpha, colorMultiplier)
-                RenderStats.count(StoryboardRenderStats.COUNT_DRAWN, 1)
+                drawn++
             }
+            RenderStats.count(StoryboardRenderStats.COUNT_DRAWN, drawn)
         }
 
         batch.resetSpace()

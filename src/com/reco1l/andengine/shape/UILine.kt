@@ -3,16 +3,15 @@ package com.reco1l.andengine.shape
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
-import org.andengine.engine.camera.Camera
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.font.FontManager
-import org.andengine.graphics.DrawContext
 
 /**
  * A rectangle shape based on [UIComponent].
  */
-class UILine : UIBufferedComponent<LineVertexBuffer>() {
+class UILine : UIBufferedComponent<LineVertexBuffer>(batchesShape = true) {
 
     /**
      * The width of the line.
@@ -42,7 +41,7 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         }
 
 
-    // The batch needs no buffer; it is only built when the line is drawn the legacy way.
+    // The batch needs no buffer; it is only built when the line cannot be batched (see canBatchShape()).
     override fun onCreateBuffer(): LineVertexBuffer? {
         return if (canBatchShape()) null else LineVertexBuffer()
     }
@@ -51,28 +50,14 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
         buffer?.update(this)
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchShape()) batchBlendMode() else null
-        if (blend != null) {
-            onApplyColor(pGLState)
-
-            if (drawAlpha == 0f) {
-                return
-            }
-
-            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            ShapeBatching.line(
-                pGLState.modelViewGLMatrix,
-                fromPoint.x, fromPoint.y, toPoint.x, toPoint.y,
-                lineWidth / FontManager.getRasterScale(),
-                QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha), blend
-            )
-            return
-        }
-
-        ensureBuffer()
-        super.doDraw(pGLState, pCamera)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        ShapeBatching.line(
+            gl.modelViewGLMatrix,
+            fromPoint.x, fromPoint.y, toPoint.x, toPoint.y,
+            ShapeBatching.lineWidthFromPixels(lineWidth),
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha), blend
+        )
     }
 
     override fun beginDraw(pGLState: DrawContext) {

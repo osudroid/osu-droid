@@ -4,10 +4,10 @@ import android.util.Log
 import org.andengine.entity.shape.Shape
 import org.andengine.graphics.BlendFactor
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
-import org.andengine.graphics.DrawContext
 
 /**
  * Hands an engine [Sprite] to the [QuadBatcher]: the corners and texture coordinates are taken
@@ -73,7 +73,7 @@ object SpriteBatching {
         val d = m[5]
         val tx = m[12]
         val ty = m[13]
-        for (k in 0 until 4) {
+        for (k in 0 until Sprite.VERTICES_PER_SPRITE) {
             val lx = corners[2 * k]
             val ly = corners[2 * k + 1]
             x[k] = a * lx + c * ly + tx

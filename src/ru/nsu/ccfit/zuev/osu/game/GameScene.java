@@ -106,9 +106,9 @@ import org.andengine.entity.scene.background.EntityBackground;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.graphics.DrawContext;
 import org.andengine.util.debug.Debug;
 
 import java.io.File;
@@ -539,6 +539,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var videoFile = new File(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename);
 
         if (!videoFile.exists()) {
+            return;
+        }
+
+        if (!UIVideoSprite.isSupported()) {
+            Debug.i("Video background skipped: the GL context lacks GL_OES_EGL_image_external_essl3");
             return;
         }
 

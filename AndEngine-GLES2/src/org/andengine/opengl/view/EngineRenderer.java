@@ -63,7 +63,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 		synchronized(EngineRenderer.DRAW_LOCK) {
 			final RenderOptions renderOptions = this.mEngine.getEngineOptions().getRenderOptions();
 			// New EGL context: detect capabilities, start with an empty state cache and replay the
-			// resource registry (shader programs, AndEngine managers and the app's legacy restorers).
+			// resource registry (shader programs, AndEngine managers and the app's restorers).
 			// Must run before GlesBackend.resetDrawState(), which sets its defaults through that new cache.
 			// This also happens for the very first context, so the managers reload and the engine
 			// reports one lagging frame (Engine.mIsLagging) right after startup; harmless.

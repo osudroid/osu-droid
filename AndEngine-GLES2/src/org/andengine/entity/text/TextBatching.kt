@@ -2,11 +2,11 @@ package org.andengine.entity.text
 
 import org.andengine.entity.sprite.SpriteBatching
 import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.Letter
 import org.andengine.opengl.font.StrokeFont
-import org.andengine.graphics.DrawContext
 
 /**
  * Hands an engine [Text] to the [QuadBatcher]: the glyph rectangles and letters are taken from the
@@ -17,8 +17,7 @@ object TextBatching {
 
     /**
      * Adds the first [count] letters of [text] to the batch, transformed by the current model-view
-     * matrix of [glState]. A [StrokeFont] letter adds its fill first and its outline on top of it.
-     * The color is the font color times the text color.
+     * matrix of [glState] (see [addLetter]). The color is the font color times the text color.
      */
     @JvmStatic
     fun add(text: Text, glState: DrawContext, count: Int) {
@@ -35,7 +34,7 @@ object TextBatching {
         val strokeColor = strokeColor(font, text.red, text.green, text.blue, text.alpha)
 
         for (i in 0 until n) {
-            val letter = letters[i] ?: continue
+            val letter = letters[i]
             val o = i * Text.LETTER_QUAD_SIZE
             addLetter(font, letter, blend, matrix, quads[o], quads[o + 1], quads[o + 2], quads[o + 3], fillColor, strokeColor)
         }

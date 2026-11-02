@@ -28,7 +28,16 @@ class GlyphArray(
         get() {
             var t = created
             if (t == null) {
-                t = device.createTexture(layerSize, layerSize, TextureFormat.R8, layers, TextureFilter.Linear, TextureWrap.Clamp, null, "GlyphAtlas[$index]")
+                t = device.createTexture(
+                    layerSize,
+                    layerSize,
+                    TextureFormat.R8,
+                    layers,
+                    TextureFilter.Linear,
+                    TextureWrap.Clamp,
+                    null,
+                    "GlyphAtlas[$index]"
+                )
                 created = t
             }
             return t

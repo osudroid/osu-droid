@@ -5,9 +5,16 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.opengl.GLES20
 import android.opengl.GLES30
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.nio.ByteBuffer
 import org.andengine.graphics.atlas.ExtrudedBitmapSource
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.bitmapUploads
+import org.andengine.graphics.gles.bytesOf
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.TextureManager
@@ -20,24 +27,20 @@ import org.andengine.opengl.texture.bitmap.BitmapTextureFormat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.GraphicsMode
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.ByteBuffer
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class PixelSourceUploadTest {
 
     private lateinit var gl: RecordingGL
-
 
     private class Atlas(listener: ITextureAtlas.ITextureAtlasStateListener<IBitmapTextureAtlasSource>?) :
         BitmapTextureAtlas(TextureManager(), 16, 16, BitmapTextureFormat.RGBA_8888, TextureOptions.BILINEAR, listener) {
@@ -85,20 +88,8 @@ class PixelSourceUploadTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
     }
-
-    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
-
-    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
-    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
-        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
-        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
-    }
-
 
     @Test
     fun pixelSource_uploadsWithoutConversion() {
@@ -111,10 +102,10 @@ class PixelSourceUploadTest {
 
         assertEquals(
             listOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,5,7,3,2,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"),
-            subImageCalls()
+            gl.subImageCalls()
         )
         assertArrayEquals(source.bytes, gl.texSubImage2DBytes.single())
-        assertTrue("no getPixels conversion", bitmapUploads().isEmpty())
+        assertTrue("no getPixels conversion", gl.bitmapUploads().isEmpty())
         assertEquals("no bitmap decoded", 0, source.bitmapLoads)
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
         assertTrue(listener.failed.isEmpty())
@@ -132,7 +123,7 @@ class PixelSourceUploadTest {
     }
 
     @Test
-    fun bitmapSource_keepsLegacyUpload() {
+    fun bitmapSource_uploadsThroughGetPixels() {
         val listener = RecordingListener()
         val atlas = Atlas(listener)
         val source = FakeBitmapSource()
@@ -140,8 +131,8 @@ class PixelSourceUploadTest {
 
         atlas.write()
 
-        assertEquals(listOf("bitmap(2,3,3,2)"), bitmapUploads())
-        assertTrue(subImageCalls().isEmpty())
+        assertEquals(listOf("bitmap(2,3,3,2)"), gl.bitmapUploads())
+        assertTrue(gl.subImageCalls().isEmpty())
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
 
@@ -160,7 +151,7 @@ class PixelSourceUploadTest {
         assertEquals(1, gl.calls.count { it.startsWith("glDeleteTextures(") })
         assertEquals(2, gl.calls.count { it.startsWith("glTexStorage2D(") })
         assertEquals(2, source.pixelLoads)
-        assertEquals(2, subImageCalls().size)
+        assertEquals(2, gl.subImageCalls().size)
         assertArrayEquals(source.bytes, gl.texSubImage2DBytes[1])
     }
 
@@ -177,7 +168,7 @@ class PixelSourceUploadTest {
 
         atlas.write()
 
-        assertEquals(1, bitmapUploads().size)
+        assertEquals(1, gl.bitmapUploads().size)
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
 
@@ -189,13 +180,6 @@ class PixelSourceUploadTest {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         bitmap.recycle()
         return out.toByteArray()
-    }
-
-    private fun bytesOf(pixels: Pixels): ByteArray {
-        val copy = pixels.data.duplicate()
-        val bytes = ByteArray(copy.remaining())
-        copy.get(bytes)
-        return bytes
     }
 
     private fun rgba(vararg values: Int) = ByteArray(values.size) { values[it].toByte() }
@@ -237,7 +221,7 @@ class PixelSourceUploadTest {
 
     @Test
     fun straightDecode_returnsNullForGarbage() {
-        assertEquals(null, StraightPixels.decode(ByteArrayInputStream(byteArrayOf(1, 2, 3))))
+        assertNull(StraightPixels.decode(ByteArrayInputStream(byteArrayOf(1, 2, 3))))
     }
 
     @Test
@@ -343,26 +327,26 @@ class PixelSourceUploadTest {
 
         atlas.write()
 
-        // The bytes the bitmap path handed to GLUtils.texSubImage2D before: the premultiplied bitmap's memory.
-        val legacyBitmap = BitmapFactory.decodeByteArray(png, 0, png.size)
-        assertTrue(legacyBitmap.isPremultiplied)
-        val legacyBytes = bitmapMemoryAsRgba(legacyBitmap)
-        legacyBitmap.recycle()
+        // What the bitmap path uploads: the premultiplied bitmap's memory.
+        val bitmap = BitmapFactory.decodeByteArray(png, 0, png.size)
+        assertTrue(bitmap.isPremultiplied)
+        val bitmapBytes = bitmapMemoryAsRgba(bitmap)
+        bitmap.recycle()
 
         assertEquals(listOf(true), source.requestedVariants)
         assertEquals("no bitmap decoded", 0, source.bitmapLoads)
         assertEquals(
             listOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,2,3,4,1,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"),
-            subImageCalls()
+            gl.subImageCalls()
         )
         val uploaded = gl.texSubImage2DBytes.single()
-        assertArrayEquals(legacyBytes, uploaded)
+        assertArrayEquals(bitmapBytes, uploaded)
         // And they really are premultiplied, in R, G, B, A order.
         val expected = intArrayOf(100, 50, 25, 128, 0, 0, 0, 0, 10, 20, 30, 255, 1, 1, 1, 1)
         for (i in expected.indices) {
             assertTrue("byte $i: ${uploaded[i].toInt() and 0xFF} vs ${expected[i]}", Math.abs((uploaded[i].toInt() and 0xFF) - expected[i]) <= 1)
         }
-        assertTrue(bitmapUploads().isEmpty())
+        assertTrue(gl.bitmapUploads().isEmpty())
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
 
@@ -377,7 +361,7 @@ class PixelSourceUploadTest {
 
         assertEquals("straight pixels are never asked for", 0, source.pixelLoads)
         assertEquals(1, source.bitmapLoads)
-        assertTrue(subImageCalls().isEmpty())
+        assertTrue(gl.subImageCalls().isEmpty())
     }
 
     @Test
@@ -404,15 +388,15 @@ class PixelSourceUploadTest {
         premultipliedAtlas.addTextureAtlasSource(premultipliedSource, 0, 0)
         premultipliedAtlas.write()
         assertEquals(1, premultipliedSource.bitmapLoads)
-        assertTrue(subImageCalls().isEmpty())
+        assertTrue(gl.subImageCalls().isEmpty())
 
         val straightSource = WrongVariantSource(deliver = true)
         val straightAtlas = Atlas(null)
         straightAtlas.addTextureAtlasSource(straightSource, 0, 0)
         straightAtlas.write()
         assertEquals(1, straightSource.bitmapLoads)
-        assertEquals(listOf("bitmap(0,0,1,1)"), bitmapUploads())
-        assertTrue(subImageCalls().isEmpty())
+        assertEquals(listOf("bitmap(0,0,1,1)"), gl.bitmapUploads())
+        assertTrue(gl.subImageCalls().isEmpty())
     }
 
     @Test
@@ -454,11 +438,7 @@ class PixelSourceUploadTest {
         val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         bitmap.setPixel(0, 0, Color.argb(128, 200, 100, 50))
 
-        try {
-            StraightPixels.fromBitmap(bitmap)
-            fail("premultiplied bitmap accepted")
-        } catch (expected: IllegalArgumentException) {
-        }
+        assertThrows(IllegalArgumentException::class.java) { StraightPixels.fromBitmap(bitmap) }
 
         assertTrue(bitmap.isRecycled)
     }

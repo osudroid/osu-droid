@@ -14,8 +14,8 @@ public interface IRendererListener {
 	// Constants
 	// ===========================================================
 
-	public void onSurfaceCreated(final DrawContext pGlState);
-	public void onSurfaceChanged(final DrawContext pGlState, final int pWidth, final int pHeight);
+	public void onSurfaceCreated(final DrawContext pGLState);
+	public void onSurfaceChanged(final DrawContext pGLState, final int pWidth, final int pHeight);
 
 	// ===========================================================
 	// Methods

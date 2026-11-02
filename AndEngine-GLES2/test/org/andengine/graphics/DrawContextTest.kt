@@ -6,20 +6,23 @@ import org.andengine.graphics.debug.RenderStats
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesDebugOptions
 import org.andengine.graphics.gles.GlesGraphicsDevice
-import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.IDENTITY
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.opengl.util.GLMatrixStack
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.andengine.graphics.gles.endOpenPass
 
 // Robolectric for android.opengl.Matrix (the matrix stacks).
 @RunWith(RobolectricTestRunner::class)
@@ -29,32 +32,21 @@ class DrawContextTest {
     private lateinit var texture: GlesTexture
     private val context = DrawContext()
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
     @Before
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
         texture = GlesGraphicsDevice.instance.createTexture(4, 4, TextureFormat.RGBA8, label = "a") as GlesTexture
-        QuadBatcher.setProjection(identity)
+        QuadBatcher.setProjection(IDENTITY)
         gl.calls.clear()
     }
 
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
-        val renderContext = GlesRenderContext.instance
-        if (renderContext.isInPass) renderContext.endPass()
+        endOpenPass()
         texture.dispose()
         GlesBackend.state.beforeExternalChange = null
         GlesBackend.state.beforeScissorChange = null
@@ -63,9 +55,8 @@ class DrawContextTest {
         RenderStats.enabled = false
     }
 
-    /** Values recorded from the matrix stacks of the former GL state class before they moved here. */
     @Test
-    fun drawContext_matrixStacksMatchGlState() {
+    fun matrixStacks_pushPopTransformAndOrtho() {
         context.resetModelViewGLMatrixStack()
         context.resetProjectionGLMatrixStack()
         val translated = floatArrayOf(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 10f, 20f, 0f, 1f)
@@ -103,19 +94,15 @@ class DrawContextTest {
         context.popProjectionGLMatrix()
         assertArrayEquals(ortho, context.projectionGLMatrix, 0f)
         context.loadProjectionGLMatrixIdentity()
-        assertArrayEquals(identity, context.projectionGLMatrix, 0f)
+        assertArrayEquals(IDENTITY, context.projectionGLMatrix, 0f)
 
         // Reads reuse one array per stack, and a reset goes back to a single identity matrix.
         assertSame(context.modelViewGLMatrix, context.modelViewGLMatrix)
         assertSame(context.projectionGLMatrix, context.projectionGLMatrix)
         context.pushModelViewGLMatrix()
         context.resetModelViewGLMatrixStack()
-        assertArrayEquals(identity, context.modelViewGLMatrix, 0f)
-        try {
-            context.popModelViewGLMatrix()
-            throw AssertionError("pop below the bottom of the stack must throw")
-        } catch (expected: GLMatrixStack.GLMatrixStackUnderflowException) {
-        }
+        assertArrayEquals(IDENTITY, context.modelViewGLMatrix, 0f)
+        assertThrows(GLMatrixStack.GLMatrixStackUnderflowException::class.java) { context.popModelViewGLMatrix() }
     }
 
     @Test
@@ -141,7 +128,7 @@ class DrawContextTest {
         gl.calls.clear()
 
         // A queued quad is drawn before the depth test changes.
-        QuadBatcher.add(texture, BlendMode.Alpha, identity, 0f, 0f, 10f, 10f, 0f, 0f, 1f, 1f, -1)
+        QuadBatcher.add(texture, BlendMode.Alpha, IDENTITY, 0f, 0f, 10f, 10f, 0f, 0f, 1f, 1f, -1)
         assertTrue(QuadBatcher.hasPending)
         assertTrue(context.disableDepthTest())
         assertFalse(GlesBackend.state.isDepthTestEnabled)
@@ -171,7 +158,7 @@ class DrawContextTest {
         assertEquals(listOf("scissor", "glDisable(${GLES20.GL_SCISSOR_TEST})"), gl.calls)
         assertEquals(listOf("scissor", "scissor"), hooks)
 
-        // The line width does not flush, as before; it only skips duplicates.
+        // The line width does not flush; it only skips duplicates.
         gl.calls.clear()
         context.lineWidth(3f)
         context.lineWidth(3f)

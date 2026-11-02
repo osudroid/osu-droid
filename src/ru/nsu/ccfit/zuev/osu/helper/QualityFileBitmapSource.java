@@ -4,13 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-import com.osudroid.BuildSettings;
-import com.reco1l.framework.Bitmaps;
-
-import org.andengine.graphics.texture.Pixels;
-import org.andengine.graphics.texture.StraightPixels;
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource;
-import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource;
+import com.osudroid.resources.StreamBitmapSource;
 
 import org.andengine.util.StreamUtils;
 import org.andengine.util.debug.Debug;
@@ -20,18 +14,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
-        IPixelTextureAtlasSource {
+public class QualityFileBitmapSource extends StreamBitmapSource {
 
     private int mWidth;
     private int mHeight;
-    private Bitmap bitmap = null;
-
-    /**
-     * Pixels decoded by {@link #preload(boolean)}, handed out once by the next {@link #onLoadPixels(boolean)}
-     * of the same variant ({@link Pixels#getPremultiplied()}); a load of the other variant drops them.
-     */
-    private Pixels preloadedPixels = null;
 
     private InputFactory fileBitmapInput;
 
@@ -93,6 +79,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         this.mHeight = pHeight;
     }
 
+    @Override
     public InputStream openInputStream() throws IOException {
         return fileBitmapInput.openInput();
     }
@@ -123,123 +110,20 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         return this.mHeight;
     }
 
-    /**
-     * Decodes the image ahead of the upload of a straight-alpha atlas, see {@link #preload(boolean)}.
-     */
-    public boolean preload() {
-        return preload(false);
-    }
-
-    /**
-     * Decodes the image ahead of the upload and reports whether it can be decoded. The next load
-     * uses the result: as pixels of the given variant (for an atlas that premultiplies alpha if
-     * {@code premultiplied}) when possible, otherwise as a bitmap.
-     */
-    public boolean preload(final boolean premultiplied) {
-        if (!isNoTexturesMode()) {
-            final Pixels pixels = decodePixels(premultiplied);
-            if (pixels != null) {
-                synchronized (this) {
-                    preloadedPixels = pixels;
-                }
-                return true;
-            }
-        }
-        final Bitmap bmp = onLoadBitmap(Bitmap.Config.ARGB_8888);
-        synchronized (this) {
-            bitmap = bmp;
-        }
-        return bmp != null;
-    }
-
-    /**
-     * Whether textures are replaced by placeholders ({@link BuildSettings#NO_TEXTURES_MODE}), which
-     * only the bitmap path paints.
-     */
-    protected boolean isNoTexturesMode() {
-        return BuildSettings.NO_TEXTURES_MODE;
+    @Override
+    protected int sampleSize() {
+        return inSampleSize;
     }
 
     @Override
-    public boolean canLoadPixels(final boolean premultiplied) {
-        return true;
+    protected String sourceLabel() {
+        return "File: " + this.fileBitmapInput;
     }
 
+    // Always decoded as ARGB_8888, whatever the atlas asks for.
     @Override
-    public Pixels onLoadPixels() {
-        return onLoadPixels(false);
-    }
-
-    @Override
-    public Pixels onLoadPixels(final boolean premultiplied) {
-        synchronized (this) {
-            if (preloadedPixels != null) {
-                final Pixels pixels = preloadedPixels;
-                preloadedPixels = null;
-                if (pixels.getPremultiplied() == premultiplied) {
-                    return pixels;
-                }
-                // Preloaded for the other variant: dropped, this load decodes anew.
-            }
-            if (bitmap != null) {
-                // Preloaded as a bitmap: the bitmap path uses it.
-                return null;
-            }
-        }
-        if (isNoTexturesMode()) {
-            return null;
-        }
-        return decodePixels(premultiplied);
-    }
-
-    private Pixels decodePixels(final boolean premultiplied) {
-        InputStream in = null;
-        try {
-            in = openInputStream();
-            return StraightPixels.decode(in, inSampleSize, premultiplied);
-        } catch (final IOException e) {
-            Debug.e("Failed loading pixels in "
-                    + this.getClass().getSimpleName() + ". File: " + this.fileBitmapInput, e);
-            return null;
-        } finally {
-            StreamUtils.close(in);
-        }
-    }
-
-
-    public Bitmap onLoadBitmap(final Config pBitmapConfig) {
-        synchronized (this) {
-            // Pixels preloaded for the pixel path are of no use here.
-            preloadedPixels = null;
-            if (bitmap != null) {
-                final Bitmap bmp = bitmap;
-                bitmap = null;
-                return bmp;
-            }
-        }
-        final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-        decodeOptions.inPreferredConfig = Config.ARGB_8888;//pBitmapConfig;
-        decodeOptions.inSampleSize = inSampleSize;
-        decodeOptions.inMutable = isNoTexturesMode();
-
-        InputStream in = null;
-        try {
-            in = openInputStream();
-            var bitmap = BitmapFactory.decodeStream(in, null, decodeOptions);
-
-            if (isNoTexturesMode()) {
-                bitmap = Bitmaps.paintBitmap(bitmap);
-            }
-
-            return bitmap;
-        } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in "
-                            + this.getClass().getSimpleName() + ". File: " + this.fileBitmapInput,
-                    e);
-            return null;
-        } finally {
-            StreamUtils.close(in);
-        }
+    protected Bitmap.Config bitmapConfig(final Config requested) {
+        return Config.ARGB_8888;
     }
 
 

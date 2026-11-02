@@ -1,6 +1,5 @@
 package com.reco1l.andengine.shape
 
-import android.opengl.GLES20
 import com.reco1l.andengine.component.ClearInfo
 import com.reco1l.andengine.component.DepthInfo
 import com.osudroid.ui.v2.menu.main.Spectrum
@@ -9,21 +8,11 @@ import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.ui.UIGradientBox
 import com.reco1l.andengine.text.UIText
 import com.reco1l.framework.math.Vec2
-import java.lang.reflect.Proxy
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import com.osudroid.testing.RecordingGl
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GL32
 import org.andengine.graphics.gles.GlesBackend
-import org.andengine.graphics.gles.GlesGraphicsDevice
-import org.andengine.graphics.gles.GlesRenderContext
-import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.graphics.shape.ShapeMasks
-import org.andengine.graphics.text.GlyphArray
-import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.graphics.text.GlyphMetrics
-import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
 import org.andengine.graphics.DrawContext
@@ -37,142 +26,43 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import ru.nsu.ccfit.zuev.osu.ResourceManager
+import com.osudroid.testing.endOpenPass
+import com.osudroid.testing.disposeTestFontAndMasks
+import com.osudroid.testing.installTestFontAndMasks
 
 @RunWith(RobolectricTestRunner::class)
 class UIShapeBatchingTest {
 
-    /** Every visible glyph is 20 x 30 pixels; the space has none. */
-    private class FakeRasterizer : GlyphRasterizer {
-        override val ascent: Float get() = -40f
-        override val descent: Float get() = 10f
-
-        override fun measure(c: Char, out: GlyphMetrics) {
-            out.width = if (c == ' ') 0 else 20
-            out.height = if (c == ' ') 0 else 30
-            out.offsetX = 2f
-            out.offsetY = -30f
-            out.advance = 22f
-        }
-
-        override fun rasterize(c: Char, layer: Int, out: ByteBuffer) {
-            for (i in 0 until 20 * 30) out.put(0xFF.toByte())
-        }
+    /** A box that records the steps of its buffer draw instead of running them (they call GL past the fake). */
+    private class BufferPathBox : UIBox() {
+        val bufferCalls = ArrayList<String>()
+        override fun beginDraw(pGLState: DrawContext) { bufferCalls += "begin" }
+        override fun onDrawBuffer(gl: DrawContext) { bufferCalls += "draw" }
     }
 
-    /** Legacy box that records its draw steps instead of running them (they call GL past the fake). */
-    private class LegacyBox : UIBox() {
-        val legacyCalls = ArrayList<String>()
-        override fun beginDraw(pGLState: DrawContext) { legacyCalls += "begin" }
-        override fun onDrawBuffer(gl: DrawContext) { legacyCalls += "draw" }
-    }
-
-    private val glCalls = ArrayList<String>()
-    private val vertexUploads = ArrayList<ByteArray>()
-    private var nextId = 1
+    private lateinit var gl: RecordingGl
     private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
-    private lateinit var atlas: GlyphAtlas
     private lateinit var masks: ShapeMasks
     private lateinit var font: Font
-    private val fontManager = FontManager()
-
-    private fun fakeGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
-        glCalls += method.name
-        when (method.name) {
-            "glGetIntegerv" -> {
-                val params = args!![1] as IntArray
-                params[args[2] as Int] = when (args[0]) {
-                    GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS -> 16
-                    GLES20.GL_MAX_TEXTURE_SIZE -> 4096
-                    else -> 0
-                }
-            }
-            "glGetShaderiv", "glGetProgramiv" -> (args!![2] as IntArray)[args[3] as Int] = 1
-            "glGenBuffers", "glGenTextures", "glGenVertexArrays", "glGenSamplers", "glGenFramebuffers" -> {
-                val ids = args!![1] as IntArray
-                for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
-            }
-            "glBufferData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
-                val data = (args[2] as ByteBuffer).duplicate()
-                data.position(0)
-                val bytes = ByteArray(args[1] as Int)
-                data.get(bytes)
-                vertexUploads += bytes
-            }
-            "glBufferSubData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER) {
-                val data = (args[3] as ByteBuffer).duplicate()
-                data.position(0)
-                val bytes = ByteArray(args[2] as Int)
-                data.get(bytes)
-                vertexUploads += bytes
-            }
-        }
-        when (method.returnType) {
-            java.lang.Boolean.TYPE -> false
-            java.lang.Integer.TYPE -> if (method.name == "glCreateShader" || method.name == "glCreateProgram") nextId++ else 0
-            java.lang.Long.TYPE -> 0L
-            java.lang.Float.TYPE -> 0f
-            String::class.java -> if (args?.get(0) == GLES20.GL_VERSION) "OpenGL ES 3.2 test" else ""
-            else -> null
-        }
-    } as GL32
 
     @Before
     fun setUp() {
-        GlesBackend.onContextCreatedForTest(fakeGl())
+        gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 0
         GlesBackend.surfaceHeight = 0
-        FontManager.setRasterScale(1f)
-
-        atlas = GlyphAtlas(GlesGraphicsDevice.instance, 256, 2, 2)
-        masks = ShapeMasks(atlas)
-        ShapeBatching.masks = masks
-        font = Font(fontManager, FakeRasterizer(), atlas)
-
-        // UIText looks up its default font on creation, give the store one so it needs no engine.
-        val resources = ResourceManager.getInstance()
-        val store = ResourceManager::class.java.getDeclaredField("fontStore").apply { isAccessible = true }.get(resources)
-        @Suppress("UNCHECKED_CAST")
-        val fonts = store.javaClass.getDeclaredField("fonts").apply { isAccessible = true }.get(store) as MutableMap<String, Font>
-        fonts["smallFont"] = font
-        glCalls.clear()
+        val fixture = installTestFontAndMasks()
+        font = fixture.font
+        masks = fixture.masks
+        gl.calls.clear()
     }
 
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
-        ShapeBatching.masks = null
-
-        val arrays = HashSet<GlyphArray>()
-        arrays += masks.solid().array
-        font.getLetter('A').mGlyph?.let { arrays += it.array }
-        masks.dispose()
-        for (a in arrays) if (a.hasTexture) a.texture.dispose()
-        FontManager.setRasterScale(1f)
-    }
-
-    private fun draws() = glCalls.count { it == "glDrawElements" }
-
-    /** Corners of the quads in the last vertex upload: x0, y0, x1, y1 (top-left and bottom-right). */
-    private fun lastQuads(): List<FloatArray> {
-        val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
-        val stride = QuadBatcher.VERTEX_SIZE_BYTES
-        val quads = ArrayList<FloatArray>()
-        while (buffer.remaining() >= stride * 4) {
-            val xs = FloatArray(4)
-            val ys = FloatArray(4)
-            for (corner in 0 until 4) {
-                xs[corner] = buffer.float
-                ys[corner] = buffer.float
-                buffer.position(buffer.position() + stride - 8)
-            }
-            quads += floatArrayOf(xs[0], ys[0], xs[2], ys[2])
-        }
-        return quads
+        endOpenPass()
+        disposeTestFontAndMasks(font, masks)
     }
 
     private fun drawAndFlush(draw: () -> Unit) {
@@ -195,8 +85,8 @@ class UIShapeBatchingTest {
         val box = box()
         drawAndFlush { box.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        val quads = lastQuads()
+        assertEquals(1, gl.count("glDrawElements"))
+        val quads = gl.lastQuads()
         assertEquals(1, quads.size)
         assertEquals(listOf(0f, 0f, 20f, 10f), quads[0].toList())
         assertNull(box.buffer)
@@ -207,17 +97,17 @@ class UIShapeBatchingTest {
         val box = box { cornerRadius = 4f }
         drawAndFlush { box.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(9, lastQuads().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(9, gl.lastQuads().size)
     }
 
     @Test
-    fun uiBox_radiusClampedLikeBefore() {
+    fun uiBox_radiusClampedToHalfShortSide() {
         val box = box(10f, 6f) { cornerRadius = 20f }
         drawAndFlush { box.doDraw(glState, camera) }
 
         // The first quad is the top-left corner, as large as the clamped radius: half the short side.
-        assertEquals(listOf(0f, 0f, 3f, 3f), lastQuads()[0].toList())
+        assertEquals(listOf(0f, 0f, 3f, 3f), gl.lastQuads()[0].toList())
     }
 
     @Test
@@ -229,7 +119,7 @@ class UIShapeBatchingTest {
         }
         drawAndFlush { box.doDraw(glState, camera) }
 
-        val quads = lastQuads()
+        val quads = gl.lastQuads()
         assertEquals(4, quads.size)
         // Top edge: 2 physical pixels are 1 virtual unit.
         assertEquals(listOf(0f, 0f, 20f, 1f), quads[0].toList())
@@ -246,8 +136,8 @@ class UIShapeBatchingTest {
         line.onHandleInvalidations()
         drawAndFlush { line.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        val quads = lastQuads()
+        assertEquals(1, gl.count("glDrawElements"))
+        val quads = gl.lastQuads()
         assertEquals(1, quads.size)
         // 4 physical pixels are 2 virtual units, centered on y = 5.
         assertEquals(4f, minOf(quads[0][1], quads[0][3]), 1e-4f)
@@ -261,8 +151,8 @@ class UIShapeBatchingTest {
         triangle.onHandleInvalidations()
         drawAndFlush { triangle.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(1, lastQuads().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(1, gl.lastQuads().size)
         assertNull(triangle.buffer)
     }
 
@@ -275,27 +165,27 @@ class UIShapeBatchingTest {
         triangle.onHandleInvalidations()
         drawAndFlush { triangle.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(3, lastQuads().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(3, gl.lastQuads().size)
     }
 
     @Test
-    fun depthOrClear_usesLegacyPath() {
+    fun depthOrClear_usesBufferPath() {
         val cases = listOf<UIBox.() -> Unit>(
             { depthInfo = DepthInfo.Default },
             { clearInfo = ClearInfo.ClearDepthBuffer },
         )
         for (configure in cases) {
-            val box = LegacyBox().apply { setSize(20f, 10f) }
+            val box = BufferPathBox().apply { setSize(20f, 10f) }
             box.onHandleInvalidations()
             box.configure()
-            glCalls.clear()
+            gl.calls.clear()
 
             box.doDraw(glState, camera)
 
             assertFalse(QuadBatcher.hasPending)
-            assertEquals(listOf("begin", "draw"), box.legacyCalls)
-            // The buffer is built on demand once the legacy path is needed.
+            assertEquals(listOf("begin", "draw"), box.bufferCalls)
+            // The buffer is built on demand once the component is drawn through its buffer.
             assertNotNull(box.buffer)
         }
     }
@@ -311,23 +201,23 @@ class UIShapeBatchingTest {
     }
 
     @Test
-    fun zeroAlpha_depthMask_stillDrawsLegacy() {
-        val cases = listOf<LegacyBox.() -> Unit>(
+    fun zeroAlpha_depthMask_stillUsesBufferPath() {
+        val cases = listOf<BufferPathBox.() -> Unit>(
             { clearInfo = ClearInfo.ClearDepthBuffer },
             { depthInfo = DepthInfo.Default },
         )
         for (configure in cases) {
-            val legacy = LegacyBox().apply {
+            val box = BufferPathBox().apply {
                 setSize(20f, 10f)
                 alpha = 0f
             }
-            legacy.configure()
-            legacy.onHandleInvalidations()
+            box.configure()
+            box.onHandleInvalidations()
 
-            legacy.doDraw(glState, camera)
+            box.doDraw(glState, camera)
 
             assertFalse(QuadBatcher.hasPending)
-            assertEquals(listOf("begin", "draw"), legacy.legacyCalls)
+            assertEquals(listOf("begin", "draw"), box.bufferCalls)
         }
     }
 
@@ -344,17 +234,17 @@ class UIShapeBatchingTest {
         val circle = circle()
         drawAndFlush { circle.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(4, lastQuads().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(4, gl.lastQuads().size)
         assertNull(circle.buffer)
     }
 
     @Test
-    fun uiCircle_depthMask_usesLegacyPath() {
+    fun uiCircle_depthMask_usesBufferPath() {
         val circle = object : UICircle() {
-            val legacyCalls = ArrayList<String>()
-            override fun beginDraw(pGLState: DrawContext) { legacyCalls += "begin" }
-            override fun onDrawBuffer(gl: DrawContext) { legacyCalls += "draw" }
+            val bufferCalls = ArrayList<String>()
+            override fun beginDraw(pGLState: DrawContext) { bufferCalls += "begin" }
+            override fun onDrawBuffer(gl: DrawContext) { bufferCalls += "draw" }
         }
         circle.setSize(20f, 20f)
         circle.setPortion(0.5f)
@@ -364,7 +254,7 @@ class UIShapeBatchingTest {
         circle.doDraw(glState, camera)
 
         assertFalse(QuadBatcher.hasPending)
-        assertEquals(listOf("begin", "draw"), circle.legacyCalls)
+        assertEquals(listOf("begin", "draw"), circle.bufferCalls)
         assertNotNull(circle.buffer)
     }
 
@@ -373,8 +263,8 @@ class UIShapeBatchingTest {
         val circle = circle { setPortion(0.25f) }
         drawAndFlush { circle.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(UICircle.approximateSegments(20f, 20f) - 1, allQuadCorners().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(UICircle.approximateSegments(20f, 20f) - 1, gl.lastQuadCorners().size)
         assertNull(circle.buffer)
     }
 
@@ -384,33 +274,18 @@ class UIShapeBatchingTest {
         ellipse.onHandleInvalidations()
         drawAndFlush { ellipse.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.count("glDrawElements"))
         assertNull(ellipse.buffer)
-        val quads = allQuadCorners()
+        val quads = gl.lastQuadCorners()
         assertEquals(UICircle.approximateSegments(30f, 10f) - 1, quads.size)
         for (q in quads) {
             // Every triangle starts at the center and stays inside the bounding box.
-            assertEquals(15f, q[0][0], 1e-4f); assertEquals(5f, q[0][1], 1e-4f)
+            assertEquals(15f, q[0][0], 1e-4f)
+            assertEquals(5f, q[0][1], 1e-4f)
             for (c in q) {
                 assertTrue(c[0] in -1e-3f..30.001f && c[1] in -1e-3f..10.001f)
             }
         }
-    }
-
-    /** The four corners (x, y) of every quad of the last vertex upload. */
-    private fun allQuadCorners(): List<List<FloatArray>> {
-        val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
-        val stride = QuadBatcher.VERTEX_SIZE_BYTES
-        val quads = ArrayList<List<FloatArray>>()
-        while (buffer.remaining() >= stride * 4) {
-            quads += List(4) {
-                val x = buffer.float
-                val y = buffer.float
-                buffer.position(buffer.position() + stride - 8)
-                floatArrayOf(x, y)
-            }
-        }
-        return quads
     }
 
     @Test
@@ -432,16 +307,19 @@ class UIShapeBatchingTest {
             buffer.update(circle)
 
             drawAndFlush { circle.doDraw(glState, camera) }
-            val quads = allQuadCorners()
+            val quads = gl.lastQuadCorners()
 
             assertEquals(segments - 1, quads.size)
             // Buffer layout: center, then the arc points; fan triangle i is (center, point i, point i + 1).
             for ((i, q) in quads.withIndex()) {
-                assertEquals(buffer.valueAt(0), q[0][0], 1e-3f); assertEquals(buffer.valueAt(1), q[0][1], 1e-3f)
-                assertEquals(buffer.valueAt(2 * (i + 1)), q[1][0], 1e-3f); assertEquals(buffer.valueAt(2 * (i + 1) + 1), q[1][1], 1e-3f)
-                assertEquals(buffer.valueAt(2 * (i + 2)), q[2][0], 1e-3f); assertEquals(buffer.valueAt(2 * (i + 2) + 1), q[2][1], 1e-3f)
+                assertEquals(buffer.data[0], q[0][0], 1e-3f)
+                assertEquals(buffer.data[1], q[0][1], 1e-3f)
+                assertEquals(buffer.data[2 * (i + 1)], q[1][0], 1e-3f)
+                assertEquals(buffer.data[2 * (i + 1) + 1], q[1][1], 1e-3f)
+                assertEquals(buffer.data[2 * (i + 2)], q[2][0], 1e-3f)
+                assertEquals(buffer.data[2 * (i + 2) + 1], q[2][1], 1e-3f)
             }
-            vertexUploads.clear()
+            gl.vertexUploads.clear()
         }
     }
 
@@ -460,25 +338,28 @@ class UIShapeBatchingTest {
         buffer.update(circle)
 
         drawAndFlush { circle.doDraw(glState, camera) }
-        val quads = allQuadCorners()
+        val quads = gl.lastQuadCorners()
 
         assertEquals(segments - 1, quads.size)
         // The strip is centered on the buffer's line strip: the midpoint of inner and outer corner is the point.
         for ((i, q) in quads.withIndex()) {
-            assertEquals(buffer.valueAt(2 * i), (q[0][0] + q[1][0]) / 2f, 1e-3f)
-            assertEquals(buffer.valueAt(2 * i + 1), (q[0][1] + q[1][1]) / 2f, 1e-3f)
-            assertEquals(buffer.valueAt(2 * (i + 1)), (q[3][0] + q[2][0]) / 2f, 1e-3f)
-            assertEquals(buffer.valueAt(2 * (i + 1) + 1), (q[3][1] + q[2][1]) / 2f, 1e-3f)
+            assertEquals(buffer.data[2 * i], (q[0][0] + q[1][0]) / 2f, 1e-3f)
+            assertEquals(buffer.data[2 * i + 1], (q[0][1] + q[1][1]) / 2f, 1e-3f)
+            assertEquals(buffer.data[2 * (i + 1)], (q[3][0] + q[2][0]) / 2f, 1e-3f)
+            assertEquals(buffer.data[2 * (i + 1) + 1], (q[3][1] + q[2][1]) / 2f, 1e-3f)
         }
     }
 
     @Test
     fun uiCircle_outline_ring() {
-        val circle = circle { paintStyle = PaintStyle.Outline; lineWidth = 2f }
+        val circle = circle {
+            paintStyle = PaintStyle.Outline
+            lineWidth = 2f
+        }
         drawAndFlush { circle.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(4, lastQuads().size)
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(4, gl.lastQuads().size)
         assertNull(circle.buffer)
     }
 
@@ -491,12 +372,12 @@ class UIShapeBatchingTest {
         box.onHandleInvalidations()
         drawAndFlush { box.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
-        assertEquals(listOf(0f, 0f, 20f, 10f), lastQuads()[0].toList())
+        assertEquals(1, gl.count("glDrawElements"))
+        assertEquals(listOf(0f, 0f, 20f, 10f), gl.lastQuads()[0].toList())
         assertNull(box.buffer)
 
         // Corners are top-left, top-right, bottom-right, bottom-left; the packed color is at byte 16.
-        val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
+        val buffer = gl.lastUpload()
         val stride = QuadBatcher.VERTEX_SIZE_BYTES
         val alphas = IntArray(4) { corner -> (buffer.getInt(corner * stride + 16) ushr 24) and 0xFF }
         assertEquals(255, alphas[0])
@@ -518,9 +399,9 @@ class UIShapeBatchingTest {
 
         drawAndFlush { spectrum.doDraw(glState, camera) }
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.count("glDrawElements"))
         // Two live bars in each of the three rounds.
-        assertEquals(6, lastQuads().size)
+        assertEquals(6, gl.lastQuads().size)
         assertNull(spectrum.buffer)
         assertEquals(BlendInfo.Additive, spectrum.blendInfo)
     }
@@ -541,8 +422,8 @@ class UIShapeBatchingTest {
         text.onHandleInvalidations()
         second.onHandleInvalidations()
         font.update()
-        glCalls.clear()
-        vertexUploads.clear()
+        gl.calls.clear()
+        gl.vertexUploads.clear()
 
         drawAndFlush {
             first.doDraw(glState, camera)
@@ -550,8 +431,8 @@ class UIShapeBatchingTest {
             second.doDraw(glState, camera)
         }
 
-        assertEquals(1, draws())
+        assertEquals(1, gl.count("glDrawElements"))
         // Two boxes and one glyph.
-        assertEquals(3, lastQuads().size)
+        assertEquals(3, gl.lastQuads().size)
     }
 }

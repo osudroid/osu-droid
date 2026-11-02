@@ -1,17 +1,17 @@
 package org.andengine.entity.sprite
 
 import android.opengl.GLES20
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
+import org.andengine.graphics.gles.Page
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.opengl.texture.TextureManager
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.graphics.gles.arrayDraws
+import org.andengine.graphics.gles.draws
+import org.andengine.graphics.gles.installRecordingGL
+import org.andengine.graphics.gles.lastVertices
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -29,21 +29,11 @@ class SpriteBatchingTest {
     private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
-    private class Page(id: Int, width: Int = 16, height: Int = 16) : BitmapTextureAtlas(TextureManager(), width, height, TextureOptions.BILINEAR) {
-        init {
-            mHardwareTextureID = id
-        }
-    }
-
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         GlesBackend.surfaceWidth = 800
         GlesBackend.surfaceHeight = 480
-        gl.calls.clear()
     }
 
     @After
@@ -54,9 +44,6 @@ class SpriteBatchingTest {
     private fun sprite(page: Page, x: Float = 0f): Sprite =
         Sprite(x, 0f, 8f, 8f, TextureRegion(page, 2f, 2f, 8f, 8f))
 
-    private fun draws() = gl.calls.count { it.startsWith("glDrawElements") }
-    private fun legacyDraws() = gl.calls.count { it.startsWith("glDrawArrays") }
-
     @Test
     fun engineSprite_goesThroughBatcher() {
         val s = sprite(Page(7), 10f)
@@ -64,14 +51,14 @@ class SpriteBatchingTest {
         s.onDraw(glState, camera)
 
         assertTrue(QuadBatcher.hasPending)
-        assertEquals(0, legacyDraws())
+        assertEquals(0, gl.arrayDraws())
         // Batching changes no GL state on its own.
         assertFalse(gl.calls.any { it.startsWith("glBindTexture") || it.startsWith("glBlendFunc") })
 
         QuadBatcher.flush()
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
 
-        val v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+        val v = gl.lastVertices()
         // Corners in order around the quad: (x,y), (x,y2), (x2,y2), (x2,y); 24 bytes per vertex,
         // position at +0, UV at +8, color at +16, the sprite layer marker at +20.
         assertEquals(10f, v.getFloat(0), 0f)
@@ -110,32 +97,30 @@ class SpriteBatchingTest {
     private fun region() = TextureRegion(Page(7), 2f, 2f, 8f, 8f)
 
     @Test
-    fun spriteSubclassWithOwnDraw_stillBatched() {
+    fun spriteSubclassOverridingDraw_isBatched() {
         var drawn = 0
         val s = object : Sprite(0f, 0f, 8f, 8f, region()) {
-            override fun preDraw(pGLState: DrawContext, pCamera: Camera) = super.preDraw(pGLState, pCamera)
             override fun draw(pGLState: DrawContext, pCamera: Camera) {
                 drawn++
                 super.draw(pGLState, pCamera)
             }
-            override fun postDraw(pGLState: DrawContext, pCamera: Camera) = super.postDraw(pGLState, pCamera)
         }
         s.onDraw(glState, camera)
 
         assertEquals(1, drawn)
         assertTrue(QuadBatcher.hasPending)
-        assertEquals(0, legacyDraws())
+        assertEquals(0, gl.arrayDraws())
         QuadBatcher.flush()
-        assertEquals(1, draws())
+        assertEquals(1, gl.draws())
     }
 
     @Test
-    fun subclassWithoutOverrides_stillBatches() {
+    fun subclassWithoutOverrides_isBatched() {
         val s = object : Sprite(0f, 0f, 8f, 8f, region()) {}
         s.onDraw(glState, camera)
 
         assertTrue(QuadBatcher.hasPending)
-        assertEquals(0, legacyDraws())
+        assertEquals(0, gl.arrayDraws())
     }
 
     @Test
@@ -146,8 +131,8 @@ class SpriteBatchingTest {
 
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()
-        assertEquals(1, draws())
-        assertEquals(0, legacyDraws())
+        assertEquals(1, gl.draws())
+        assertEquals(0, gl.arrayDraws())
         val expected = "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"
         assertTrue(gl.calls.toString(), gl.calls.any { it == expected })
     }
@@ -158,7 +143,7 @@ class SpriteBatchingTest {
         s.setColor(1f, 0f, 0f, 1f)
         s.onDraw(glState, camera)
         QuadBatcher.flush()
-        var v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+        var v = gl.lastVertices()
         assertEquals(255, v.get(16).toInt() and 0xFF)
         assertEquals(0, v.get(18).toInt() and 0xFF)
         assertEquals(255, v.get(19).toInt() and 0xFF)
@@ -167,7 +152,7 @@ class SpriteBatchingTest {
         s.alpha = 0.5f
         s.onDraw(glState, camera)
         QuadBatcher.flush()
-        v = ByteBuffer.wrap(gl.vertexUploads.last()).order(ByteOrder.nativeOrder())
+        v = gl.lastVertices()
         for (corner in 0 until 4) {
             // The color sits 16 bytes into each vertex.
             val o = corner * QuadBatcher.VERTEX_SIZE_BYTES + 16
@@ -179,12 +164,11 @@ class SpriteBatchingTest {
     }
 
     /**
-     * Corners and UVs in batch order as the removed per-sprite vertex buffer produced them, for a
-     * 12x6 sprite on the region (4, 8, 16, 8) of a 64x32 page, unrotated and rotated, in every
-     * flip combination.
+     * Corners and UVs in batch order of a 12x6 sprite on the region (4, 8, 16, 8) of a 64x32 page,
+     * unrotated and rotated, in every flip combination.
      */
     @Test
-    fun sprite_flippedUvsMatchOldVbo() {
+    fun sprite_flipAndRotationUvs() {
         val page = Page(7, 64, 32)
         val corners = floatArrayOf(0f, 0f, 0f, 6f, 12f, 6f, 12f, 0f)
         // (rotated, flipped horizontal, flipped vertical) to u,v per corner.
@@ -234,7 +218,7 @@ class SpriteBatchingTest {
         sprite(page, 20f).onDraw(glState, camera)
         QuadBatcher.flush()
 
-        assertEquals(1, draws())
-        assertEquals(0, legacyDraws())
+        assertEquals(1, gl.draws())
+        assertEquals(0, gl.arrayDraws())
     }
 }

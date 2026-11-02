@@ -30,10 +30,10 @@ object GlesDebugOutput {
 
     private val POLL_MODES = arrayOf(Mode.POLL_BYTES, Mode.POLL_STRINGS)
 
-    /** Most `glGetError` calls per [poll] in the fallback; the error queue is drained up to this. */
+    /** Most `glGetError` calls per [poll] in the fallback, read by tests; the error queue is drained up to this. */
     const val MAX_ERRORS_PER_POLL = 8
 
-    /** Minimum time between two log lines for the same `glGetError` code. */
+    /** Minimum time between two log lines for the same `glGetError` code, read by tests. */
     const val ERROR_LOG_INTERVAL_MS = 1000L
 
     /** Distinct `glGetError` codes whose last log time is remembered (ES defines five). */
@@ -75,11 +75,14 @@ object GlesDebugOutput {
     private val lengths = IntArray(POLL_BATCH)
     private var messageLog = ByteArray(0)
 
-    /** Whether the current context delivers its messages through [poll]. */
+    /** Whether the current context delivers its messages through [poll], read by tests. */
     @JvmStatic
     val isPolling: Boolean get() = pollGl != null
 
-    /** Whether [poll] falls back to `glGetError` because the debug output bindings are unsupported. */
+    /**
+     * Whether [poll] falls back to `glGetError` because the debug output bindings are unsupported,
+     * read by tests.
+     */
     @JvmStatic
     val isPollingErrors: Boolean get() = errorGl != null
 
@@ -201,8 +204,7 @@ object GlesDebugOutput {
     }
 
     /** The log line for a `glGetError` code. */
-    @JvmStatic
-    fun formatError(error: Int): String = "glGetError: ${errorName(error)} (${hex(error)})"
+    private fun formatError(error: Int): String = "glGetError: ${errorName(error)} (${hex(error)})"
 
     private fun errorName(error: Int): String = when (error) {
         GLES32.GL_INVALID_ENUM -> "GL_INVALID_ENUM"
@@ -270,12 +272,15 @@ object GlesDebugOutput {
         if (isWarning(severity)) Log.w(TAG, text) else Log.d(TAG, text)
     }
 
-    /** Whether a message of this severity is logged as a warning. */
+    /** Whether a message of this severity is logged as a warning, read by tests. */
     @JvmStatic
     fun isWarning(severity: Int): Boolean =
         severity == GLES32.GL_DEBUG_SEVERITY_HIGH || severity == GLES32.GL_DEBUG_SEVERITY_MEDIUM
 
-    /** The log line for a debug message, or null when the message is filtered out (notifications). */
+    /**
+     * The log line for a debug message, or null when the message is filtered out (notifications).
+     * Tests call it directly.
+     */
     @JvmStatic
     fun format(source: Int, type: Int, id: Int, severity: Int, message: String?): String? {
         if (severity == GLES32.GL_DEBUG_SEVERITY_NOTIFICATION) return null

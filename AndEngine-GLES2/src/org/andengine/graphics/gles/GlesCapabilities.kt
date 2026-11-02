@@ -30,7 +30,6 @@ class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>, va
         fun detect(
             versionString: String?,
             extensionsString: String?,
-            options: GlesDebugOptions,
             maxTextureSize: Int = 0
         ): GlesCapabilities {
             val parsed = GlesVersion.parse(versionString)
@@ -44,7 +43,7 @@ class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>, va
                 )
             }
 
-            val version = if (options.simulateEs30) GlesVersion.ES30 else parsed
+            val version = if (GlesDebugOptions.simulateEs30) GlesVersion.ES30 else parsed
             val extensions = extensionsString
                 ?.split(' ')
                 ?.filterTo(HashSet()) { it.isNotEmpty() }

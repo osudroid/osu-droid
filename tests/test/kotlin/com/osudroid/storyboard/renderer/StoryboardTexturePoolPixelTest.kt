@@ -6,8 +6,9 @@ import com.osudroid.storyboard.model.Storyboard
 import com.osudroid.storyboard.model.StoryboardLayerType
 import com.osudroid.storyboard.model.StoryboardOrigin
 import com.osudroid.storyboard.model.StoryboardSprite
+import com.osudroid.testing.pixelAt
+import com.osudroid.testing.writePng
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Files
 import org.andengine.graphics.texture.Pixels
 import org.andengine.graphics.texture.StraightPixels
@@ -48,13 +49,8 @@ class StoryboardTexturePoolPixelTest {
         directory.deleteRecursively()
     }
 
-    /** Writes a [width]x[height] PNG filled with the straight color ([r], [g], [b], [a]). */
     private fun writeImage(name: String, width: Int, height: Int, r: Int, g: Int, b: Int, a: Int) {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        bitmap.isPremultiplied = false
-        bitmap.eraseColor(Color.argb(a, r, g, b))
-        FileOutputStream(File(directory, name)).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        bitmap.recycle()
+        writePng(File(directory, name), width, height, r, g, b, a)
     }
 
     private fun storyboardOf(vararg usages: Pair<String, Int>) = Storyboard().also { storyboard ->
@@ -77,11 +73,6 @@ class StoryboardTexturePoolPixelTest {
         val field = TextureAtlas::class.java.getDeclaredField("mTextureAtlasSources")
         field.isAccessible = true
         return field.get(atlas) as List<IBitmapTextureAtlasSource>
-    }
-
-    private fun pixelAt(pixels: Pixels, x: Int, y: Int): List<Int> {
-        val offset = pixels.data.position() + (y * pixels.width + x) * 4
-        return List(4) { pixels.data.get(offset + it).toInt() and 0xFF }
     }
 
     @Test

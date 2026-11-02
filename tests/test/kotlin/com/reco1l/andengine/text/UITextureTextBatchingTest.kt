@@ -1,128 +1,57 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES20
+import com.osudroid.testing.IDENTITY
+import com.osudroid.testing.Page
+import com.osudroid.testing.RecordingGl
+import com.osudroid.testing.quadVerticesOf
+import com.osudroid.testing.vertexLayersOf
 import com.reco1l.andengine.component.BlendInfo
-import java.lang.reflect.Proxy
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GL32
 import org.andengine.graphics.gles.GlesBackend
-import org.andengine.graphics.gles.GlesRenderContext
-import org.andengine.opengl.texture.TextureManager
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.osudroid.testing.endOpenPass
 
 @RunWith(RobolectricTestRunner::class)
 class UITextureTextBatchingTest {
 
-    private val glCalls = ArrayList<String>()
-
-    /** The bytes of every vertex upload (glBufferData or glBufferSubData on the array buffer), in order. */
-    private val vertexUploads = ArrayList<ByteArray>()
-
-    private var nextId = 1
+    private lateinit var gl: RecordingGl
     private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
-    private val identity = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 0f,
-        0f, 0f, 0f, 1f
-    )
-
-    /** Fake GL that records calls, hands out ids and reports every compile and link as successful. */
-    private fun fakeGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
-        glCalls += method.name
-        when (method.name) {
-            "glGetIntegerv" -> {
-                val params = args!![1] as IntArray
-                params[args[2] as Int] = when (args[0]) {
-                    GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS -> 16
-                    GLES20.GL_MAX_TEXTURE_SIZE -> 4096
-                    else -> 0
-                }
-            }
-            "glGetShaderiv", "glGetProgramiv" -> (args!![2] as IntArray)[args[3] as Int] = 1
-            "glGenBuffers", "glGenTextures", "glGenVertexArrays", "glGenSamplers", "glGenFramebuffers" -> {
-                val ids = args!![1] as IntArray
-                for (i in 0 until args[0] as Int) ids[args[2] as Int + i] = nextId++
-            }
-            "glBufferData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER && args[2] is ByteBuffer) {
-                val data = (args[2] as ByteBuffer).duplicate()
-                data.position(0)
-                val bytes = ByteArray(args[1] as Int)
-                data.get(bytes)
-                vertexUploads += bytes
-            }
-            "glBufferSubData" -> if (args!![0] == GLES20.GL_ARRAY_BUFFER) {
-                val data = (args[3] as ByteBuffer).duplicate()
-                data.position(0)
-                val bytes = ByteArray(args[2] as Int)
-                data.get(bytes)
-                vertexUploads += bytes
-            }
-        }
-        when (method.returnType) {
-            java.lang.Boolean.TYPE -> false
-            java.lang.Integer.TYPE -> if (method.name == "glCreateShader" || method.name == "glCreateProgram") nextId++ else 0
-            java.lang.Long.TYPE -> 0L
-            java.lang.Float.TYPE -> 0f
-            String::class.java -> if (args?.get(0) == GLES20.GL_VERSION) "OpenGL ES 3.2 test" else ""
-            else -> null
-        }
-    } as GL32
-
-    private class Page(id: Int, size: Int) : BitmapTextureAtlas(TextureManager(), size, size, TextureOptions.BILINEAR) {
-        init {
-            mHardwareTextureID = id
-        }
-    }
-
     @Before
     fun setUp() {
-        GlesBackend.onContextCreatedForTest(fakeGl())
+        gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 100
         GlesBackend.surfaceHeight = 100
-        QuadBatcher.setProjection(identity)
-        glCalls.clear()
+        QuadBatcher.setProjection(IDENTITY)
+        gl.calls.clear()
     }
 
     @After
     fun tearDown() {
         QuadBatcher.releaseResources()
-        val context = GlesRenderContext.instance
-        if (context.isInPass) context.endPass()
+        endOpenPass()
     }
 
-    private fun draws() = glCalls.count { it == "glDrawElements" }
+    private fun draws() = gl.count("glDrawElements")
 
-    /** Positions and UVs of the quads of the last vertex upload: x, y, u, v per corner, 4 corners per quad. */
-    private fun lastQuads(): List<FloatArray> {
-        val buffer = ByteBuffer.wrap(vertexUploads.last()).order(ByteOrder.nativeOrder())
-        val quads = ArrayList<FloatArray>()
-        while (buffer.remaining() >= QuadBatcher.VERTEX_SIZE_BYTES * 4) {
-            val quad = FloatArray(16)
-            for (corner in 0 until 4) {
-                for (k in 0 until 4) quad[corner * 4 + k] = buffer.float
-                buffer.int // color
-                assertEquals(QuadBatcher.SPRITE_LAYER, buffer.int and 0xFFFF) // layer marker + padding
-            }
-            quads += quad
-        }
-        return quads
+    /** Positions and UVs of the sprite quads of [upload]: x, y, u, v per corner, 4 corners per quad. */
+    private fun quadsOf(upload: ByteArray): List<FloatArray> {
+        assertTrue(vertexLayersOf(upload).all { it == QuadBatcher.SPRITE_LAYER })
+        return quadVerticesOf(upload)
     }
+
+    private fun lastQuads() = quadsOf(gl.vertexUploads.last())
 
     private fun draw(text: UITextureText) {
         glState.resetModelViewGLMatrixStack()
@@ -143,20 +72,18 @@ class UITextureTextBatchingTest {
 
         assertEquals(1, draws())
         assertEquals(5, lastQuads().size)
-        assertFalse("No glyph is uploaded on its own", glCalls.contains("glDrawArrays"))
+        assertFalse("No glyph is uploaded on its own", gl.calls.any { it.startsWith("glDrawArrays(") })
     }
 
     @Test
-    fun glyphsOnTexturesOfTheirOwn_matchThePreviousQuads() {
-        // Each glyph on a texture of its own, as the previous path assumed: its quad covered
-        // (0, 0)-(width, height) translated to its cell and the whole texture.
+    fun glyphsOnOwnTextures_quadCoversCellAndWholeTexture() {
+        // Each glyph on a texture of its own: its quad covers (0, 0)-(width, height) translated to
+        // its cell and the whole texture.
         val sizes = mapOf('1' to (10 to 20), '2' to (14 to 18), '3' to (8 to 20))
         val characters = mutableMapOf<Char, TextureRegion>()
         var id = 10
         for ((char, size) in sizes) {
-            val page = object : BitmapTextureAtlas(TextureManager(), size.first, size.second, TextureOptions.BILINEAR) {
-                init { mHardwareTextureID = id++ }
-            }
+            val page = Page(id++, size.first, size.second)
             characters[char] = TextureRegion(page, 0f, 0f, size.first.toFloat(), size.second.toFloat())
         }
 
@@ -177,17 +104,7 @@ class UITextureTextBatchingTest {
         assertEquals(3, draws())
 
         // Every glyph went out in its own upload; collect them.
-        val actual = ArrayList<FloatArray>()
-        for (upload in vertexUploads) {
-            val buffer = ByteBuffer.wrap(upload).order(ByteOrder.nativeOrder())
-            val quad = FloatArray(16)
-            for (corner in 0 until 4) {
-                for (k in 0 until 4) quad[corner * 4 + k] = buffer.float
-                buffer.int // color
-                assertEquals(QuadBatcher.SPRITE_LAYER, buffer.int and 0xFFFF) // layer marker + padding
-            }
-            actual += quad
-        }
+        val actual = gl.vertexUploads.flatMap { quadsOf(it) }
 
         var offsetX = 0f
         val expected = ArrayList<FloatArray>()
@@ -272,7 +189,7 @@ class UITextureTextBatchingTest {
         text.alpha = 0.5f
         draw(text)
 
-        val buffer = ByteBuffer.wrap(vertexUploads.last())
+        val buffer = gl.lastUpload()
         // Color bytes R, G, B, A follow position and UV.
         assertEquals(255, buffer.get(16).toInt() and 0xFF)
         assertEquals(0, buffer.get(17).toInt() and 0xFF)

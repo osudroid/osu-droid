@@ -1,14 +1,16 @@
 package org.andengine.graphics.gles
 
+import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.GLES30
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 class GlesStateCacheTest {
 
-    private val oes = 0x8D65
     private lateinit var gl: RecordingGL
     private lateinit var cache: GlesStateCache
 
@@ -26,16 +28,16 @@ class GlesStateCacheTest {
     fun bindTexture_sameIdTwice_oneCall() {
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
-        assertEquals(1, count("glBindTexture(3553,5)"))
+        assertEquals(1, count("glBindTexture(${GLES20.GL_TEXTURE_2D},5)"))
     }
 
     @Test
     fun bindTexture_targetsTrackedSeparately() {
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
-        cache.bindTexture(oes, 5)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 5)
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
-        assertEquals(1, count("glBindTexture(3553,5)"))
-        assertEquals(1, count("glBindTexture($oes,5)"))
+        assertEquals(1, count("glBindTexture(${GLES20.GL_TEXTURE_2D},5)"))
+        assertEquals(1, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},5)"))
         assertEquals(2, gl.calls.count { it.startsWith("glBindTexture") })
     }
 
@@ -45,44 +47,44 @@ class GlesStateCacheTest {
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
         cache.activeTexture(1)
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
-        assertEquals(2, count("glBindTexture(3553,5)"))
+        assertEquals(2, count("glBindTexture(${GLES20.GL_TEXTURE_2D},5)"))
         assertEquals(2, gl.calls.count { it.startsWith("glActiveTexture") })
     }
 
     @Test
     fun externalRebind_forcesCorrectNextBind() {
         cache.activeTexture(0)
-        cache.bindTexture(oes, 7)
-        cache.noteTextureBound(oes, 8)
-        cache.bindTexture(oes, 7)
-        assertEquals(2, count("glBindTexture($oes,7)"))
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
+        cache.noteTextureBound(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 8)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
+        assertEquals(2, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},7)"))
     }
 
     @Test
     fun externalRebind_sameIdAsNoted_skipsBind() {
         cache.activeTexture(0)
-        cache.noteTextureBound(oes, 8)
-        cache.bindTexture(oes, 8)
-        assertEquals(0, count("glBindTexture($oes,8)"))
+        cache.noteTextureBound(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 8)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 8)
+        assertEquals(0, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},8)"))
     }
 
     @Test
     fun externalRebind_onlyAffectsActiveUnit() {
         cache.activeTexture(1)
-        cache.bindTexture(oes, 7)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
         cache.activeTexture(0)
-        cache.noteTextureBound(oes, 8)
+        cache.noteTextureBound(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 8)
         cache.activeTexture(1)
-        cache.bindTexture(oes, 7)
-        assertEquals(1, count("glBindTexture($oes,7)"))
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
+        assertEquals(1, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},7)"))
     }
 
     @Test
     fun externalRebind_unknownUnit_nextBindReachesGl() {
         cache.invalidate()
-        cache.noteTextureBound(oes, 7)
-        cache.bindTexture(oes, 7)
-        assertEquals(1, count("glBindTexture($oes,7)"))
+        cache.noteTextureBound(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
+        assertEquals(1, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},7)"))
     }
 
     @Test
@@ -95,8 +97,8 @@ class GlesStateCacheTest {
 
     @Test
     fun blendFunc_equalsSeparate() {
-        cache.blendFunc(1, 771)
-        cache.blendFuncSeparate(1, 771, 1, 771)
+        cache.blendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        cache.blendFuncSeparate(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA, GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
         assertEquals(1, gl.calls.count { it.startsWith("glBlendFunc") })
     }
 
@@ -105,7 +107,7 @@ class GlesStateCacheTest {
         cache.bindElementBuffer(4)
         cache.bindVertexArray(2)
         cache.bindElementBuffer(4)
-        assertEquals(2, count("glBindBuffer(34963,4)"))
+        assertEquals(2, count("glBindBuffer(${GLES20.GL_ELEMENT_ARRAY_BUFFER},4)"))
     }
 
     @Test
@@ -123,7 +125,7 @@ class GlesStateCacheTest {
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 7)
         cache.onTextureDeleted(7)
         cache.bindTexture(GLES20.GL_TEXTURE_2D, 7)
-        assertEquals(2, count("glBindTexture(3553,7)"))
+        assertEquals(2, count("glBindTexture(${GLES20.GL_TEXTURE_2D},7)"))
     }
 
     @Test
@@ -131,7 +133,7 @@ class GlesStateCacheTest {
         cache.setBlendEnabled(true)
         cache.setBlendEnabled(true)
         assertEquals(1, count("glEnable(${GLES20.GL_BLEND})"))
-        assertEquals(true, cache.isBlendEnabled)
+        assertTrue(cache.isBlendEnabled)
         cache.setBlendEnabled(false)
         assertEquals(1, count("glDisable(${GLES20.GL_BLEND})"))
     }
@@ -156,7 +158,7 @@ class GlesStateCacheTest {
         cache.bindArrayBuffer(3)
         cache.onBufferDeleted(3)
         cache.bindArrayBuffer(3)
-        assertEquals(2, count("glBindBuffer(34962,3)"))
+        assertEquals(2, count("glBindBuffer(${GLES20.GL_ARRAY_BUFFER},3)"))
     }
 
     @Test
@@ -196,7 +198,7 @@ class GlesStateCacheTest {
         cache.bindElementBuffer(4)
         cache.onVertexArrayDeleted(3)
         cache.bindElementBuffer(4)
-        assertEquals(2, count("glBindBuffer(34963,4)"))
+        assertEquals(2, count("glBindBuffer(${GLES20.GL_ELEMENT_ARRAY_BUFFER},4)"))
     }
 
     @Test
@@ -244,7 +246,7 @@ class GlesStateCacheTest {
         cache.useProgram(4)
         cache.useProgram(5)
         assertEquals(listOf("hook after 0 calls"), seen)
-        assertEquals(null, cache.beforeExternalChange)
+        assertNull(cache.beforeExternalChange)
     }
 
     @Test
@@ -296,10 +298,10 @@ class GlesStateCacheTest {
         assertEquals(3, cache.currentProgram)
         assertEquals(4, cache.currentArrayBuffer)
         assertEquals(2, cache.currentActiveTextureUnit)
-        assertEquals(true, cache.isBlendEnabled)
+        assertTrue(cache.isBlendEnabled)
         assertEquals(GLES20.GL_ONE, cache.currentBlendSrcRgb)
         assertEquals(GLES20.GL_ZERO, cache.currentBlendDstRgb)
-        assertEquals(1, count("glBindTexture(3553,5)"))
+        assertEquals(1, count("glBindTexture(${GLES20.GL_TEXTURE_2D},5)"))
         // Unknown values (VAO, depth, cull, sampler) are left alone.
         assertEquals(0, gl.calls.count { it.startsWith("glBindVertexArray") || it.startsWith("glBindSampler") })
     }
@@ -307,27 +309,27 @@ class GlesStateCacheTest {
     @Test
     fun drawState_restoresKnownExternalTextureOfUnit0() {
         cache.activeTexture(0)
-        cache.bindTexture(oes, 7)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 7)
         val saved = IntArray(GlesStateCache.DRAW_STATE_SIZE)
         cache.saveDrawState(saved)
 
-        cache.bindTexture(oes, 9)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 9)
         cache.activeTexture(3)
         gl.calls.clear()
 
         cache.restoreDrawState(saved)
 
-        assertEquals(gl.calls.toString(), 1, count("glBindTexture($oes,7)"))
+        assertEquals(gl.calls.toString(), 1, count("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},7)"))
         // The external binding is set on unit 0, which stays active as it was saved.
-        val bind = gl.calls.indexOf("glBindTexture($oes,7)")
+        val bind = gl.calls.indexOf("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},7)")
         val unit0 = gl.calls.indexOf("glActiveTexture(${GLES20.GL_TEXTURE0})")
-        assertEquals(gl.calls.toString(), true, unit0 in 0 until bind)
+        assertTrue(gl.calls.toString(), unit0 in 0 until bind)
         assertEquals(0, cache.currentActiveTextureUnit)
 
         // Restoring again with the binding already in place changes nothing.
         gl.calls.clear()
         cache.restoreDrawState(saved)
-        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},") })
     }
 
     @Test
@@ -338,14 +340,14 @@ class GlesStateCacheTest {
         val saved = IntArray(GlesStateCache.DRAW_STATE_SIZE)
         cache.saveDrawState(saved)
 
-        cache.bindTexture(oes, 9)
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 9)
         gl.calls.clear()
 
         cache.restoreDrawState(saved)
 
         // The unknown binding is not guessed: the external texture the draw bound stays.
-        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
-        cache.bindTexture(oes, 9)
-        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},") })
+        cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 9)
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},") })
     }
 }

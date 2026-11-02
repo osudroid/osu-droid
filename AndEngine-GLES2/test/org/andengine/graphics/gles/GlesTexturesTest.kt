@@ -1,5 +1,6 @@
 package org.andengine.graphics.gles
 
+import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import org.andengine.graphics.atlas.TextureAtlasPages
 import org.junit.After
@@ -13,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class GlesTexturesTest {
 
-    private val oes = 0x8D65
+    private val oes = GLES11Ext.GL_TEXTURE_EXTERNAL_OES
     private lateinit var gl: RecordingGL
     private var previousDeviceMaxTextureSize = 0
 
@@ -21,11 +22,7 @@ class GlesTexturesTest {
     fun setUp() {
         GlesDebugOptions.simulateEs30 = false
         previousDeviceMaxTextureSize = TextureAtlasPages.deviceMaxTextureSize
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
-        gl.calls.clear()
+        gl = installRecordingGL()
     }
 
     @After

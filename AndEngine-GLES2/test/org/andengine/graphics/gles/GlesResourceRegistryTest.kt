@@ -1,6 +1,5 @@
 package org.andengine.graphics.gles
 
-import android.opengl.GLES20
 import android.util.Log
 import org.andengine.graphics.GpuResource
 import org.junit.After
@@ -24,7 +23,7 @@ class GlesResourceRegistryTest {
             log += "lost:$name"
         }
 
-        override fun restore(backend: GlesBackend) {
+        override fun restore() {
             log += "restore:$name"
         }
     }
@@ -40,8 +39,8 @@ class GlesResourceRegistryTest {
             if (throwOnLost) throw IllegalStateException("lost boom")
         }
 
-        override fun restore(backend: GlesBackend) {
-            super.restore(backend)
+        override fun restore() {
+            super.restore()
             if (throwOnRestore) throw IllegalStateException("restore boom")
         }
 
@@ -64,9 +63,7 @@ class GlesResourceRegistryTest {
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
     }
 
     @After
@@ -83,7 +80,7 @@ class GlesResourceRegistryTest {
         GlesBackend.state.useProgram(1)
         gl.calls.clear()
 
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
 
         assertEquals(
             listOf("lost:tex", "lost:prog", "lost:legacy", "restore:prog", "restore:tex", "restore:legacy"),
@@ -103,7 +100,7 @@ class GlesResourceRegistryTest {
         register(fake)
         assertEquals(before + 1, GlesBackend.registry.size)
 
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
 
         assertEquals(1, log.count { it == "lost:once" })
         assertEquals(1, log.count { it == "restore:once" })
@@ -116,7 +113,7 @@ class GlesResourceRegistryTest {
         register(Fake("alive", RestorePhase.Textures))
         disposed.dispose()
 
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
 
         assertTrue("restore:gone" !in log)
         assertTrue("restore:alive" in log)
@@ -131,7 +128,7 @@ class GlesResourceRegistryTest {
         register(Fake("progB", RestorePhase.Programs))
         register(Fake("tex", RestorePhase.Textures))
 
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
 
         assertEquals(
             listOf(
@@ -157,7 +154,7 @@ class GlesResourceRegistryTest {
         GlesBackend.registry.unregister(fake)
 
         assertEquals(before - 1, GlesBackend.registry.size)
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
         assertTrue(log.isEmpty())
     }
 }

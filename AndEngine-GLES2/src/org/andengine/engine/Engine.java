@@ -17,6 +17,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.DrawContext;
 import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.debug.RenderStats;
 import org.andengine.graphics.gles.GlesLegacyRestorers;
@@ -39,7 +40,6 @@ import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.font.FontManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.graphics.DrawContext;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
@@ -147,9 +147,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		FontFactory.onCreate();
 		this.mTextureManager.onCreate();
 		this.mFontManager.onCreate();
-		/* The managers are reloaded by the GLES resource registry on every new context, the first
-		 * one included. That reload makes the next onDrawFrame upload everything again, so
-		 * mIsLagging is set for one frame (one fixed 16.6 ms update step); this is harmless. */
 		GlesLegacyRestorers.registerEngine(this);
 
 		/* Apply EngineOptions. */
@@ -536,9 +533,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	/**
 	 * Explicitly reloads the textures while the GL context stays alive (e.g. after a skin change); the
 	 * old texture names are deleted first. Buffers, shaders and the glyph atlas (not managed by the
-	 * TextureManager) stay valid in a live context and are left alone. A new GL context does not go
-	 * through here: the managers are registered via {@link GlesLegacyRestorers#registerEngine} and
-	 * reloaded by {@link org.andengine.graphics.gles.GlesBackend#onContextCreated}.
+	 * TextureManager) stay valid in a live context and are left alone.
 	 */
 	public void onReloadResources() {
 		this.mTextureManager.reloadLoadedTextures();
@@ -645,7 +640,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 			this.onUpdateDrawHandlers(pGLState, this.mCamera);
 			this.onDrawScene(pGLState, this.mCamera);
-			// The last batched quads of the frame.
 			QuadBatcher.flushFrame();
 			RenderStats.endDraw();
 

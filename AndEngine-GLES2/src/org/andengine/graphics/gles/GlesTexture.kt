@@ -142,7 +142,7 @@ class GlesTexture(
         } else {
             gl.glTexSubImage2D(glTarget, 0, x, y, data.width, data.height, pixelFormat, GLES20.GL_UNSIGNED_BYTE, data.pixels)
         }
-        if (singleByte) gl.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, DEFAULT_UNPACK_ALIGNMENT)
+        if (singleByte) gl.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, GlesTextures.UNPACK_ALIGNMENT_DEFAULT)
         if (levels > 1) gl.glGenerateMipmap(glTarget)
         // The own texture has content again; [textureId] stops pointing at the placeholder, so
         // the next bind picks up the real texture.
@@ -155,7 +155,7 @@ class GlesTexture(
         ownTextureId = 0
     }
 
-    override fun restore(backend: GlesBackend) = create()
+    override fun restore() = create()
 
     override fun dispose() {
         if (isDisposed) return
@@ -171,11 +171,9 @@ class GlesTexture(
     override fun toString() = "GlesTexture($label, ${width}x$height x$layers $format)"
 
     companion object {
-        const val DEFAULT_UNPACK_ALIGNMENT = 4
-        const val TAG = "GlesTexture"
+        private const val TAG = "GlesTexture"
 
         /** Length of the full mip chain of a [width] x [height] texture. */
-        @JvmStatic
-        fun mipLevels(width: Int, height: Int): Int = 32 - Integer.numberOfLeadingZeros(maxOf(width, height))
+        private fun mipLevels(width: Int, height: Int): Int = 32 - Integer.numberOfLeadingZeros(maxOf(width, height))
     }
 }

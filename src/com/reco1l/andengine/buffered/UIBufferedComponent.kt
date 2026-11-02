@@ -6,12 +6,12 @@ import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.CompareFunction
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.entity.shape.Shape.*
-import org.andengine.graphics.DrawContext
 
 
 /**
@@ -20,8 +20,11 @@ import org.andengine.graphics.DrawContext
  * Entities that cannot go through the quad batch (depth testing, clearing) draw their buffer
  * through the [MeshRenderer] ([IBuffer.drawMesh]); entities with a program of their own override
  * [onDrawBuffer] and draw the buffer's data through [MeshRenderer.drawProgram].
+ *
+ * @param batchesShape whether this entity is a shape that [doDraw] sends through the quad batch
+ * ([onDrawBatch]) whenever [canBatchShape] allows, building its buffer only for the other draws.
  */
-abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
+abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean = false) : UIComponent() {
 
     /**
      * The buffer itself.
@@ -84,6 +87,20 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         return mask
     }
 
+    /**
+     * Clears the buffers [clearInfo] asks for. Entities whose [doDraw] skips [beginDraw] call this
+     * themselves.
+     */
+    protected fun clearIfRequested() {
+        val clearMask = clearMask()
+        if (clearMask == 0) return
+        // Pending quads belong before the clear; and a clear ignores the depth buffer while the
+        // depth mask is off, which the mesh renderer's state restore can leave behind.
+        QuadBatcher.flush()
+        if (clearInfo.depthBuffer) GlesBackend.state.depthMask(true)
+        GlesBackend.state.clear(clearMask)
+    }
+
     // The batch blend mode of [batchBlendSource]; recomputed only when the blend info changes.
     private var batchBlendSource: BlendInfo? = null
     private var batchBlend: BlendMode? = null
@@ -101,8 +118,9 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     }
 
     /**
-     * The blend mode the mesh renderer draws this entity with: the one of [resolvedBlendInfo], or
-     * straight alpha for factors without an engine equivalent (the UI uses none).
+     * The blend mode for draws that must happen whatever the blend factors (the mesh renderer, and
+     * text, which is always batched): the one of [resolvedBlendInfo], or straight alpha for factors
+     * without an engine equivalent (the UI uses none).
      */
     protected fun meshBlendMode(): BlendMode = batchBlendMode() ?: BlendMode.Alpha
 
@@ -133,7 +151,8 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      * drawn through their buffer.
      *
      * A batched shape does not run `beginDraw` and owns no buffer of its own, so do not assign
-     * shared buffers to shapes that can be batched.
+     * shared buffers to shapes that can be batched. Invisible shapes still take the buffer path
+     * when they cannot be batched: they serve as depth masks there.
      */
     protected fun canBatchShape(): Boolean {
         if (depthInfo.test) return false
@@ -146,14 +165,15 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     //region Buffer lifecycle
 
     /**
-     * Called when the buffer needs to be built.
+     * Called when the buffer needs to be built; null leaves the entity without a buffer, which
+     * entities drawn only through the batch do by default.
      */
-    protected abstract fun onCreateBuffer(): T?
+    protected open fun onCreateBuffer(): T? = null
 
     /**
      * Called when the buffer needs to be updated.
      */
-    abstract fun onUpdateBuffer()
+    open fun onUpdateBuffer() = Unit
 
 
     /**
@@ -210,6 +230,18 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     }
 
     override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
+        if (batchesShape) {
+            val blend = if (canBatchShape()) batchBlendMode() else null
+            if (blend != null) {
+                onApplyColor(pGLState)
+                if (drawAlpha != 0f) {
+                    onDrawBatch(pGLState, blend)
+                }
+                return
+            }
+            ensureBuffer()
+        }
+
         super.doDraw(pGLState, pCamera)
         onDrawBuffer(pGLState)
 
@@ -222,16 +254,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     override fun beginDraw(pGLState: DrawContext) {
         super.beginDraw(pGLState)
-
-        // Clearing
-        val clearMask = clearMask()
-        if (clearMask != 0) {
-            // Pending quads belong before the clear; and a clear ignores the depth buffer while the
-            // depth mask is off, which the mesh renderer's state restore can leave behind.
-            QuadBatcher.flush()
-            if (clearInfo.depthBuffer) GlesBackend.state.depthMask(true)
-            GlesBackend.state.clear(clearMask)
-        }
+        clearIfRequested()
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
@@ -243,6 +266,13 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             pGLState.disableDepthTest()
         }
     }
+
+    /**
+     * Adds this shape to the quad batch with [blend] and the current model-view and projection of
+     * [gl]; the draw color is applied and not transparent. Called instead of the buffer draw for
+     * entities built with `batchesShape` whenever [canBatchShape] allows.
+     */
+    protected open fun onDrawBatch(gl: DrawContext, blend: BlendMode) = Unit
 
     /**
      * Draws the buffer, through the [MeshRenderer] by default ([IBuffer.drawMesh]). Entities with a

@@ -6,9 +6,9 @@ import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.UIBufferedComponent
-import org.andengine.engine.camera.Camera
-import org.andengine.graphics.shape.ShapeBatching
+import org.andengine.graphics.BlendMode
 import org.andengine.graphics.DrawContext
+import org.andengine.graphics.shape.ShapeBatching
 
 /**
  * A rectangle that renders a smooth horizontal alpha gradient using per-vertex colors.
@@ -22,11 +22,11 @@ import org.andengine.graphics.DrawContext
 class UIGradientBox(
     private val fromAlpha: Float = 1f,
     private val toAlpha: Float = 0f,
-) : UIBufferedComponent<UIGradientBox.GradientVBO>() {
+) : UIBufferedComponent<UIGradientBox.GradientVBO>(batchesShape = true) {
 
     // Buffer lifecycle
 
-    // The batch needs no buffer; it is only built when the box is drawn the legacy way.
+    // The batch needs no buffer; it is only built when the box cannot be batched (see canBatchShape()).
     override fun onCreateBuffer(): GradientVBO? {
         if (canBatchShape()) {
             return null
@@ -37,27 +37,13 @@ class UIGradientBox(
         }
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchShape()) batchBlendMode() else null
-        if (blend != null) {
-            onApplyColor(pGLState)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        // Same corner colors as GradientVBO: the left edge fades with fromAlpha, the right with toAlpha.
+        val left = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, fromAlpha * drawAlpha)
+        val right = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, toAlpha * drawAlpha)
 
-            if (drawAlpha == 0f) {
-                return
-            }
-
-            // Same corner colors as GradientVBO: the left edge fades with fromAlpha, the right with toAlpha.
-            val left = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, fromAlpha * drawAlpha)
-            val right = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, toAlpha * drawAlpha)
-
-            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            ShapeBatching.gradientRect(pGLState.modelViewGLMatrix, 0f, 0f, width, height, left, right, left, right, blend)
-            return
-        }
-
-        ensureBuffer()
-        super.doDraw(pGLState, pCamera)
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        ShapeBatching.gradientRect(gl.modelViewGLMatrix, 0f, 0f, width, height, left, right, left, right, blend)
     }
 
     override fun onUpdateBuffer() {

@@ -5,11 +5,10 @@ import com.osudroid.math.toRadians
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.UICircle.*
-import org.andengine.engine.camera.Camera
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.font.FontManager
-import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 
@@ -18,7 +17,7 @@ import kotlin.math.*
  *
  * @author Reco1l
  */
-open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
+open class UICircle : UIBufferedComponent<CircleVertexBuffer>(batchesShape = true) {
 
     /**
      * The paint style of the circle.
@@ -83,50 +82,35 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         return abs(endAngle - startAngle) >= 360f && abs(width - height) <= 1e-3f
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        // Invisible shapes still reach the buffer path: they serve as depth masks there.
-        val blend = if (canBatchShape()) batchBlendMode() else null
-        if (blend != null) {
-            onApplyColor(pGLState)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+        val batchLineWidth = ShapeBatching.lineWidthFromPixels(lineWidth)
 
-            if (drawAlpha == 0f) {
-                return
-            }
-
-            val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
-            // The line width is given in pixels, the batch takes virtual units.
-            val batchLineWidth = lineWidth / FontManager.getRasterScale()
-
-            QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-            // Full circles use the ring band, which lies inside the radius; partial outlines follow the
-            // legacy centered line strip. An outline whose portion reaches exactly a full circle therefore
-            // switches between the two looks (no caller does this today).
-            if (isFullCircle()) {
-                val radius = width / 2f
-                if (paintStyle == PaintStyle.Fill) {
-                    ShapeBatching.circle(pGLState.modelViewGLMatrix, radius, radius, radius, color, blend)
-                } else {
-                    ShapeBatching.ring(pGLState.modelViewGLMatrix, radius, radius, radius, batchLineWidth, color, blend)
-                }
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        // Full circles use the ring band, which lies inside the radius; partial outlines follow a line
+        // strip centered on the radius. An outline whose portion reaches exactly a full circle therefore
+        // switches between the two looks.
+        if (isFullCircle()) {
+            val radius = width / 2f
+            if (paintStyle == PaintStyle.Fill) {
+                ShapeBatching.circle(gl.modelViewGLMatrix, radius, radius, radius, color, blend)
             } else {
-                // Same points as the buffer: radii of half the size, around the center.
-                val rx = width / 2f
-                val ry = height / 2f
-                val segments = approximateSegments(width, height)
-                if (paintStyle == PaintStyle.Fill) {
-                    ShapeBatching.sector(pGLState.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, color, blend)
-                } else {
-                    ShapeBatching.arc(pGLState.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, batchLineWidth, color, blend)
-                }
+                ShapeBatching.ring(gl.modelViewGLMatrix, radius, radius, radius, batchLineWidth, color, blend)
             }
-            return
+        } else {
+            // Same points as the buffer: radii of half the size, around the center.
+            val rx = width / 2f
+            val ry = height / 2f
+            val segments = approximateSegments(width, height)
+            if (paintStyle == PaintStyle.Fill) {
+                ShapeBatching.sector(gl.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, color, blend)
+            } else {
+                ShapeBatching.arc(gl.modelViewGLMatrix, rx, ry, rx, ry, startAngle, endAngle, segments, batchLineWidth, color, blend)
+            }
         }
-
-        ensureBuffer()
-        super.doDraw(pGLState, pCamera)
     }
 
-    // The batch needs no buffer; it is only built when the circle is drawn the legacy way.
+    // The batch needs no buffer; it is only built when the circle cannot be batched (see canBatchShape()).
     override fun onCreateBuffer(): CircleVertexBuffer? {
 
         if (canBatchShape()) {

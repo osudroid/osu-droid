@@ -15,7 +15,7 @@ interface GlesRestorable {
     fun onContextLost()
 
     /** Recreate the GL objects in the current (new) context. */
-    fun restore(backend: GlesBackend)
+    fun restore()
 }
 
 /**
@@ -26,6 +26,7 @@ class GlesResourceRegistry {
 
     private val entries = ArrayList<GlesRestorable>()
 
+    /** The number of registered resources, read by tests. */
     val size: Int get() = synchronized(entries) { entries.size }
 
     /** Adds [r]; registering the same object again is ignored, so it is restored only once. */
@@ -48,7 +49,7 @@ class GlesResourceRegistry {
      * Each call is isolated: an entry that throws is logged (tag [TAG]) and the remaining entries
      * are still processed, so one broken resource cannot leave the rest of the context unrestored.
      */
-    fun restoreAll(backend: GlesBackend) {
+    fun restoreAll() {
         // Snapshot so restorers may register or unregister without breaking the iteration.
         val snapshot = synchronized(entries) { entries.toTypedArray() }
 
@@ -69,7 +70,7 @@ class GlesResourceRegistry {
                 val r = snapshot[i]
                 if (r.restorePhase != phase || isDisposed(r)) continue
                 try {
-                    r.restore(backend)
+                    r.restore()
                 } catch (e: RuntimeException) {
                     Log.e(TAG, "restore ($phase) failed for ${describe(r)}", e)
                 }

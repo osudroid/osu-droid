@@ -1,5 +1,7 @@
 package org.andengine.graphics.atlas
 
+import java.util.IdentityHashMap
+import java.util.WeakHashMap
 import org.andengine.opengl.texture.ITexture
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
@@ -8,8 +10,6 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.region.ITiledTextureRegion
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.texture.region.TiledTextureRegion
-import java.util.IdentityHashMap
-import java.util.WeakHashMap
 
 /**
  * Packs small images into shared [BitmapTextureAtlas] pages so that sprites using them share one
@@ -107,16 +107,16 @@ class TextureAtlasPages @JvmOverloads constructor(
         textureManager.loadTexture(page.atlas)
     }
 
+    // Pages are shared by options with the same filtering and alpha handling; wrapping is always clamped.
+    private fun sameOptions(a: TextureOptions, b: TextureOptions): Boolean =
+        a === b || a.mMinFilter == b.mMinFilter && a.mMagFilter == b.mMagFilter && a.mPreMultiplyAlpha == b.mPreMultiplyAlpha
+
     /**
      * Places [source] on a page and returns a region covering exactly its content. Returns `null` when
      * no session is open, the image is larger than [maxRegionArea] or longer than [maxRegionLength] on a
      * side, it does not fit on an empty page, or [options] repeat (wrapping cannot be expressed inside a
      * shared page).
      */
-    // Pages are shared by options with the same filtering and alpha handling; wrapping is always clamped.
-    private fun sameOptions(a: TextureOptions, b: TextureOptions): Boolean =
-        a === b || a.mMinFilter == b.mMinFilter && a.mMagFilter == b.mMagFilter && a.mPreMultiplyAlpha == b.mPreMultiplyAlpha
-
     fun add(source: IBitmapTextureAtlasSource, options: TextureOptions): TextureRegion? =
         synchronized(lock) { place(listOf(source), options)?.get(0) }
 
@@ -159,7 +159,7 @@ class TextureAtlasPages @JvmOverloads constructor(
         if (options.mWrapS != CLAMPED.mWrapS || options.mWrapT != CLAMPED.mWrapT) return null
         for (i in sources.indices) if (!accepts(sources[i])) return null
 
-        // At most one page per options is open at a time (see below).
+        // At most one page per options is open at a time: a full one is closed before a new one opens.
         var openIndex = -1
         for (i in 0 until pages.size) {
             val candidate = pages[i]

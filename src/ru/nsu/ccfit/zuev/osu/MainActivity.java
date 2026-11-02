@@ -29,7 +29,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -69,7 +68,6 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.andengine.engine.Engine;
-import org.andengine.opengl.font.FontManager;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.options.EngineOptions;
@@ -82,6 +80,7 @@ import org.andengine.graphics.gles.GlesDebugOptions;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.FontManager;
 import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
@@ -124,8 +123,11 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-    /** Longest wait for pending texture loads before the splash screen hands over to the menu. */
-    private static final long TEXTURE_WAIT_TIMEOUT_MS = 5000L;
+    /**
+     * Longest wait for pending texture loads before the splash screen hands over to the menu, and
+     * before the game loader starts the game once everything else is ready.
+     */
+    public static final long TEXTURE_WAIT_TIMEOUT_MS = 5000L;
     private ScheduledFuture<?> logFlushFuture;
     private Display display;
     private DisplayManager.DisplayListener displayListener;
@@ -142,7 +144,7 @@ public class MainActivity extends BaseGameActivity implements
     public volatile boolean killOnDestroy = false;
 
     /** Broadcast action of the GL debug receiver (debug builds only), see {@link #registerDebugGlReceiver()}. */
-    public static final String ACTION_DEBUG_GL = "ru.nsu.ccfit.zuev.osuplus.DEBUG_GL";
+    private static final String ACTION_DEBUG_GL = "ru.nsu.ccfit.zuev.osuplus.DEBUG_GL";
 
     private BroadcastReceiver debugGlReceiver;
 
@@ -428,7 +430,7 @@ public class MainActivity extends BaseGameActivity implements
                 // the GPU, but never let a stuck load keep the splash screen up.
                 try {
                     if (!GlobalManager.getInstance().getEngine().getTextureManager().awaitPendingTextureLoads(TEXTURE_WAIT_TIMEOUT_MS)) {
-                        Log.w("MainActivity", "Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
+                        Debug.w("MainActivity: Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

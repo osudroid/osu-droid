@@ -11,8 +11,8 @@ import com.reco1l.andengine.ui.SizeVariant.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.*
-import org.andengine.opengl.font.Font
 import org.andengine.graphics.DrawContext
+import org.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 

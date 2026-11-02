@@ -82,7 +82,7 @@ class GlesQuery(override val label: String) : GpuQuery, GlesRestorable {
         isPending = false
     }
 
-    override fun restore(backend: GlesBackend) = create()
+    override fun restore() = create()
 
     override fun dispose() {
         if (isDisposed) return

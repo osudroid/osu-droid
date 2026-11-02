@@ -311,25 +311,25 @@ class GlesDebugOutputTest {
     @Test
     fun backend_installsOnlyWhenEnabledOnEs32() {
         val gl = RecordingGL()
-        GlesBackend.onContextCreatedForTest(gl)
+        GlesBackend.onContextCreated(gl)
         assertFalse("glDebugMessageCallback(buf)" in gl.calls)
 
         GlesDebugOptions.debugOutput = true
         val gl2 = RecordingGL()
-        GlesBackend.onContextCreatedForTest(gl2)
+        GlesBackend.onContextCreated(gl2)
         assertTrue("glDebugMessageCallback(buf)" in gl2.calls)
 
         GlesDebugOptions.simulateEs30 = true
         val gl3 = RecordingGL()
         gl3.extensionsString = "GL_KHR_debug"
-        GlesBackend.onContextCreatedForTest(gl3)
+        GlesBackend.onContextCreated(gl3)
         assertFalse("glDebugMessageCallback(buf)" in gl3.calls)
     }
 
     @Test
     fun backend_logsContextLine() {
         GlesDebugOptions.simulateEs30 = true
-        GlesBackend.onContextCreatedForTest(RecordingGL())
+        GlesBackend.onContextCreated(RecordingGL())
         val line = ShadowLog.getLogsForTag("GlesBackend").single().msg
         assertEquals(
             "context: ES 3.0 (OpenGL ES 3.2 test) renderer=RecordingGL simulateEs30=true debugOutput=false",

@@ -2,10 +2,10 @@ package ru.nsu.ccfit.zuev.osu.helper
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import com.osudroid.testing.pixelAt
+import com.osudroid.testing.writePng
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Files
-import org.andengine.graphics.texture.Pixels
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,21 +34,8 @@ class QualityBitmapSourcePixelTest {
         directory.deleteRecursively()
     }
 
-    /** Writes a [width]x[height] PNG filled with the straight color ([r], [g], [b], [a]). */
-    private fun writeImage(width: Int, height: Int, r: Int, g: Int, b: Int, a: Int): File {
-        val file = File(directory, "image.png")
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        bitmap.isPremultiplied = false
-        bitmap.eraseColor(Color.argb(a, r, g, b))
-        FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        bitmap.recycle()
-        return file
-    }
-
-    private fun pixelAt(pixels: Pixels, x: Int, y: Int): List<Int> {
-        val offset = pixels.data.position() + (y * pixels.width + x) * 4
-        return List(4) { pixels.data.get(offset + it).toInt() and 0xFF }
-    }
+    private fun writeImage(width: Int, height: Int, r: Int, g: Int, b: Int, a: Int): File =
+        writePng(File(directory, "image.png"), width, height, r, g, b, a)
 
     private class NoTexturesFileSource(file: File) : QualityFileBitmapSource(file) {
         override fun isNoTexturesMode() = true
@@ -124,7 +111,7 @@ class QualityBitmapSourcePixelTest {
     }
 
     @Test
-    fun noTexturesMode_stillWorks() {
+    fun noTexturesMode_paintsPlaceholderThroughBitmapPath() {
         val file = writeImage(8, 8, 200, 100, 50, 255)
         val source = NoTexturesFileSource(file)
 

@@ -46,7 +46,7 @@ class TextureStore {
         this.atlasPages = atlasPages
     }
 
-    /** For tests: everything except the asset-backed loads, which also need a [Context]. */
+    /** Sets up everything except the asset-backed loads, which need a [Context]. Tests use this. */
     fun init(textureManager: TextureManager, atlasPages: TextureAtlasPages?) {
         this.textureManager = textureManager
         this.atlasPages = atlasPages
@@ -107,7 +107,7 @@ class TextureStore {
 
     /**
      * Forgets every entry. Atlas regions give back their page reference; textures of their own are
-     * left loaded, as before.
+     * left loaded.
      */
     fun clear() {
         val pages = atlasPages

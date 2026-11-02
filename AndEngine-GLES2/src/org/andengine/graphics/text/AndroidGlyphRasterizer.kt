@@ -87,10 +87,14 @@ class AndroidGlyphRasterizer @JvmOverloads constructor(
         var bitmap = scratch
         if (bitmap == null || bitmap.width < width || bitmap.height < height) {
             bitmap?.recycle()
-            bitmap = Bitmap.createBitmap(max(width, bitmap?.width ?: 0), max(height, bitmap?.height ?: 0), Bitmap.Config.ALPHA_8)
+            bitmap = Bitmap.createBitmap(
+                max(width, bitmap?.width ?: 0),
+                max(height, bitmap?.height ?: 0),
+                Bitmap.Config.ALPHA_8
+            )
             scratch = bitmap
         }
-        bitmap!!.eraseColor(Color.TRANSPARENT)
+        bitmap.eraseColor(Color.TRANSPARENT)
         canvas.setBitmap(bitmap)
         canvas.drawText(chars, 0, 1, -bounds.left.toFloat(), -bounds.top.toFloat(), paint)
         canvas.setBitmap(null)

@@ -1,9 +1,8 @@
 package org.andengine.graphics.shape
 
-import android.opengl.GLES20
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.RecordingGL
+import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
 import org.junit.After
@@ -22,13 +21,11 @@ class ShapeMasksTest {
     private lateinit var gl: RecordingGL
     private lateinit var atlas: GlyphAtlas
     private lateinit var masks: ShapeMasks
+    private val used = ArrayList<GlyphSlot>()
 
     @Before
     fun setUp() {
-        gl = RecordingGL()
-        gl.intValues[GLES20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS] = 16
-        gl.intValues[GLES20.GL_MAX_TEXTURE_SIZE] = 4096
-        GlesBackend.onContextCreatedForTest(gl)
+        gl = installRecordingGL()
         atlas = GlyphAtlas(GlesGraphicsDevice.instance, 256, 2, 2)
         masks = ShapeMasks(atlas)
     }
@@ -39,11 +36,13 @@ class ShapeMasksTest {
         for (array in used.map { it.array }.distinct()) if (array.hasTexture) array.texture.dispose()
     }
 
-    private fun track(s: GlyphSlot): GlyphSlot { if (s !in used) used += s; return s }
+    private fun track(s: GlyphSlot): GlyphSlot {
+        if (s !in used) used += s
+        return s
+    }
+
     private fun trackC(r: Int) = track(masks.corner(r))
     private fun trackR(r: Int, w: Int) = track(masks.ring(r, w))
-
-    private val used = ArrayList<GlyphSlot>()
 
     /** Last uploaded image without its 1 texel border, row-major. */
     private fun lastContent(w: Int, h: Int): ByteArray {
@@ -136,7 +135,7 @@ class ShapeMasksTest {
         masks.onContextLost()
         assertFalse(a.uploaded)
         assertFalse(b.uploaded)
-        masks.restore(GlesBackend)
+        masks.restore()
         assertTrue(a.uploaded)
         assertTrue(b.uploaded)
         assertEquals(count + 2, gl.texSubImage3DBytes.size)

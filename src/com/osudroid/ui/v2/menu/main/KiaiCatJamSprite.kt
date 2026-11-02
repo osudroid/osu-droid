@@ -3,12 +3,13 @@ package com.osudroid.ui.v2.menu.main
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.sprite.ScaleType
 import com.reco1l.andengine.sprite.UISprite
+import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.MeshProgram
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.batch.SharedMeshProgram
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.graphics.DrawContext
 
 /**
  * A sprite that renders a catjam animation frame clipped to a circle.
@@ -52,7 +53,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
         val texture = textureRegion?.texture ?: return
         val positions = buffer?.data ?: return
 
-        val clipProgram = program
+        val clipProgram = program.get()
         clipProgram.set(RADIUS, clipRadius)
         MeshRenderer.drawProgramQuad(
             clipProgram, positions, uvBuffer.data,
@@ -92,16 +93,10 @@ void main() {
 }
 """
 
-        private var programInstance: MeshProgram? = null
+        // Shared by all cat sprites.
+        private val program = SharedMeshProgram("kiai-cat", FRAGMENT_SHADER, listOf(RADIUS))
 
-        // Shared by all cat sprites; created at the first draw, the program restores itself after a context loss.
-        private val program: MeshProgram
-            get() = programInstance ?: MeshProgram("kiai-cat", FRAGMENT_SHADER, listOf(RADIUS)).also { programInstance = it }
-
-        /** Disposes the GL program; the next draw creates it again. For shutdown and tests. */
-        fun releaseProgram() {
-            programInstance?.releaseResources()
-            programInstance = null
-        }
+        /** Disposes the shared GL program; the next draw creates it again. Tests call it to reset between cases. */
+        fun releaseProgram() = program.release()
     }
 }

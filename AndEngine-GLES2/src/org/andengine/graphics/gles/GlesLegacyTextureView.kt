@@ -16,11 +16,11 @@ fun interface LegacyTextureIdProvider {
  * A [Texture] that only views a texture owned by legacy code (`ITexture`), so it can be bound
  * through the render context. [glTarget] is the GL target it is bound to: `GL_TEXTURE_2D` for
  * ordinary textures, [TEXTURE_EXTERNAL_OES] for a texture fed by a `SurfaceTexture` (video), which
- * only an external program (`samplerExternalOES`) can sample. It owns no GL object and is not in the resource registry: the legacy
- * texture loads and restores itself, and its id is read from [idProvider] at every bind, so a
- * reload is picked up without telling the view. While the legacy texture is not on the GPU the
- * [GlesPlaceholderTexture] is bound instead. [format] is nominal (legacy textures have several);
- * [upload] is not supported. GL thread only.
+ * only an external program (`samplerExternalOES`) can sample. It owns no GL object and is not in
+ * the resource registry: the legacy texture loads and restores itself, and its id is read from
+ * [idProvider] at every bind, so a reload is picked up without telling the view. While the legacy
+ * texture is not on the GPU the [GlesPlaceholderTexture] is bound instead. [format] is nominal
+ * (legacy textures have several); [upload] is not supported. GL thread only.
  */
 class GlesLegacyTextureView(
     private val idProvider: LegacyTextureIdProvider,
