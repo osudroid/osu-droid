@@ -84,8 +84,7 @@ class UILine : UIBufferedComponent<LineVertexBuffer>() {
     class LineVertexBuffer : VertexBuffer(
         drawTopology = GL_LINES,
         vertexCount = 2,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        vertexSize = VERTEX_2D
     ) {
         fun update(entity: UILine) {
             putVertex(0, entity.fromPoint.x, entity.fromPoint.y)

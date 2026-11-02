@@ -13,7 +13,6 @@ import org.andengine.opengl.exception.GLException;
 import org.andengine.opengl.exception.GLFrameBufferException;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
 import org.andengine.opengl.texture.PixelFormat;
-import org.andengine.opengl.texture.render.RenderTexture;
 import org.andengine.opengl.view.ConfigChooser;
 import org.andengine.util.debug.Debug;
 
@@ -598,8 +597,7 @@ public class GLState {
 	/**
 	 * Tells the OpenGL driver to send all pending commands to the GPU immediately.
 	 *
-	 * @see {@link GLState#finish()},
-	 * 		{@link RenderTexture#end(GLState, boolean, boolean)}.
+	 * @see {@link GLState#finish()}.
 	 */
 	public void flush() {
 		GLES32.glFlush();
@@ -610,8 +608,7 @@ public class GLState {
 	 * and then blocks until the effects of those commands have been completed on the GPU.
 	 * Since this is a costly method it should be only called when really needed.
 	 *
-	 * @see {@link GLState#flush()},
-	 * 		{@link RenderTexture#end(GLState, boolean, boolean)}.
+	 * @see {@link GLState#flush()}.
 	 */
 	public void finish() {
 		GLES32.glFinish();

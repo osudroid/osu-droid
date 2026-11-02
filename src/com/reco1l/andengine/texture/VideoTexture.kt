@@ -4,8 +4,8 @@ import org.andengine.graphics.gles.GlesBackend
 import android.graphics.*
 import android.net.Uri
 import android.opengl.*
-import android.opengl.GLES32.GL_CLAMP_TO_EDGE
-import android.opengl.GLES32.GL_LINEAR
+import android.opengl.GLES20.GL_CLAMP_TO_EDGE
+import android.opengl.GLES20.GL_LINEAR
 import android.opengl.GLES20.GL_NEAREST
 import android.util.Log
 import android.view.*
@@ -25,8 +25,12 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.*
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * A texture fed by [player] through a `SurfaceTexture`: its hardware id is a `GL_TEXTURE_EXTERNAL_OES`
+ * texture, drawn through an external program of the GL core (see `BatchTexture.externalOf`).
+ */
 @UnstableApi
-class VideoTexture(val source: String) : Texture(
+open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
     null,
     PixelFormat.UNDEFINED,
     TextureOptions(
@@ -38,8 +42,6 @@ class VideoTexture(val source: String) : Texture(
     ),
     null
 ) {
-
-    val player: ExoPlayer
 
     private val onReadyRef = AtomicReference<Runnable?>()
 
@@ -72,43 +74,15 @@ class VideoTexture(val source: String) : Texture(
     private var surfaceTexture: SurfaceTexture? = null
     private var surface: Surface? = null
 
-    // ST transform matrix provided by SurfaceTexture — applied in the vertex shader to
-    // correctly orient the UV coordinates (hardware decoders often flip/rotate them).
+    // ST transform matrix provided by SurfaceTexture — applied to the UV coordinates to
+    // correctly orient them (hardware decoders often flip/rotate them).
     private val stMatrix = FloatArray(16).also {
         android.opengl.Matrix.setIdentityM(it, 0)
     }
 
+    constructor(source: String) : this(source, createPlayer())
+
     init {
-        val context = GlobalManager.getInstance().mainActivity.applicationContext
-
-        // DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON auto-discovers FfmpegAudioRenderer via reflection.
-        // ExperimentalFfmpegVideoRenderer must be appended manually because DefaultRenderersFactory looks for the old
-        // name "FfmpegVideoRenderer" (since renamed).
-        val renderersFactory = object : DefaultRenderersFactory(context) {
-            override fun buildVideoRenderers(
-                context: Context,
-                extensionRendererMode: Int,
-                mediaCodecSelector: MediaCodecSelector,
-                enableDecoderFallback: Boolean,
-                eventHandler: Handler,
-                eventListener: VideoRendererEventListener,
-                allowedVideoJoiningTimeMs: Long,
-                out: ArrayList<Renderer>
-            ) {
-                super.buildVideoRenderers(context, extensionRendererMode, mediaCodecSelector,
-                    enableDecoderFallback, eventHandler, eventListener, allowedVideoJoiningTimeMs, out)
-
-                out.add(ExperimentalFfmpegVideoRenderer(
-                    allowedVideoJoiningTimeMs, eventHandler, eventListener, 50))
-            }
-        }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-
-        // ExoPlayer's builder is thread-safe, but subsequent API calls are not.
-        // ExoPlayer enforces that they run on its designated looper (main thread here).
-        player = ExoPlayer.Builder(context, renderersFactory)
-            .setLooper(Looper.getMainLooper())
-            .build()
-
         mainHandler.post {
             player.volume = 0f
             player.repeatMode = Player.REPEAT_MODE_OFF
@@ -136,7 +110,7 @@ class VideoTexture(val source: String) : Texture(
      * Latches the latest decoded frame into the OES texture and updates the ST transform matrix.
      * Must be called once per frame, BEFORE [getTransformMatrix] and BEFORE [bind].
      */
-    fun latch() {
+    open fun latch() {
         if (isLoadedToHardware) {
             val st = surfaceTexture ?: return
             st.updateTexImage()
@@ -147,7 +121,7 @@ class VideoTexture(val source: String) : Texture(
     }
 
     /** Returns the ST transform matrix updated by the most recent [latch] call. */
-    fun getTransformMatrix(): FloatArray = stMatrix
+    open fun getTransformMatrix(): FloatArray = stMatrix
 
     override fun writeTextureToHardware(pGLState: GLState) {
         // Nothing – the SurfaceTexture pushes frames itself.
@@ -155,39 +129,46 @@ class VideoTexture(val source: String) : Texture(
 
     /**
      * Called by [TextureManager.onReload] after context loss.
-     * We must release the old [SurfaceTexture] here because [loadToHardware] will create
-     * a fresh one; leaving the old one alive leaks its native resources.
+     * We must release the old [Surface] and [SurfaceTexture] here because [loadToHardware] will create
+     * fresh ones; leaving the old ones alive leaks their native resources. The player is kept.
      */
     override fun setNotLoadedToHardware() {
-        surfaceTexture?.release()
-        surfaceTexture = null
+        releaseSurfaces()
         super.setNotLoadedToHardware()
     }
 
-    override fun loadToHardware(pGLState: GLState) {
-        // Release any lingering SurfaceTexture (safety net — normally cleared by
-        // setNotLoadedToHardware, but guard against direct loadToHardware calls too).
+    // The Surface wraps the SurfaceTexture, so it goes first.
+    private fun releaseSurfaces() {
+        surface?.release()
+        surface = null
         surfaceTexture?.release()
         surfaceTexture = null
+    }
 
+    override fun loadToHardware(pGLState: GLState) {
+        // Release any lingering Surface and SurfaceTexture (safety net — normally cleared by
+        // setNotLoadedToHardware, but guard against direct loadToHardware calls too).
+        releaseSurfaces()
+
+        val gl = GlesBackend.gl
         val textures = IntArray(1)
-        GLES32.glGenTextures(1, textures, 0)
+        gl.glGenTextures(1, textures, 0)
         mHardwareTextureID = textures[0]
 
         // OES external textures must be bound to the OES target.
         GlesBackend.state.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
         // Required filter settings for GL_TEXTURE_EXTERNAL_OES.
-        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_MIN_FILTER,
+        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER,
             GL_LINEAR
         )
-        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_MAG_FILTER,
+        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER,
             GL_LINEAR
         )
-        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_WRAP_S,
+        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S,
             GL_CLAMP_TO_EDGE
         )
-        GLES32.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES32.GL_TEXTURE_WRAP_T,
+        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T,
             GL_CLAMP_TO_EDGE
         )
 
@@ -200,6 +181,20 @@ class VideoTexture(val source: String) : Texture(
         surface = Surface(surfaceTexture)
 
         mainHandler.post { player.setVideoSurface(surface) }
+
+        mUpdateOnHardwareNeeded = false
+    }
+
+    /**
+     * A reload on a live context (e.g. returning to gameplay) keeps the SurfaceTexture: its frames come
+     * from the player and stay valid. Going through [unloadFromHardware] would release the player.
+     */
+    override fun reloadToHardware(pGLState: GLState) {
+        if (isLoadedToHardware) {
+            mUpdateOnHardwareNeeded = false
+        } else {
+            loadToHardware(pGLState)
+        }
     }
 
     override fun unloadFromHardware(pGLState: GLState) {
@@ -240,5 +235,37 @@ class VideoTexture(val source: String) : Texture(
 
     companion object {
         private val mainHandler = Handler(Looper.getMainLooper())
+
+        private fun createPlayer(): ExoPlayer {
+            val context = GlobalManager.getInstance().mainActivity.applicationContext
+
+            // DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON auto-discovers FfmpegAudioRenderer via reflection.
+            // ExperimentalFfmpegVideoRenderer must be appended manually because DefaultRenderersFactory looks for the old
+            // name "FfmpegVideoRenderer" (since renamed).
+            val renderersFactory = object : DefaultRenderersFactory(context) {
+                override fun buildVideoRenderers(
+                    context: Context,
+                    extensionRendererMode: Int,
+                    mediaCodecSelector: MediaCodecSelector,
+                    enableDecoderFallback: Boolean,
+                    eventHandler: Handler,
+                    eventListener: VideoRendererEventListener,
+                    allowedVideoJoiningTimeMs: Long,
+                    out: ArrayList<Renderer>
+                ) {
+                    super.buildVideoRenderers(context, extensionRendererMode, mediaCodecSelector,
+                        enableDecoderFallback, eventHandler, eventListener, allowedVideoJoiningTimeMs, out)
+
+                    out.add(ExperimentalFfmpegVideoRenderer(
+                        allowedVideoJoiningTimeMs, eventHandler, eventListener, 50))
+                }
+            }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+
+            // ExoPlayer's builder is thread-safe, but subsequent API calls are not.
+            // ExoPlayer enforces that they run on its designated looper (main thread here).
+            return ExoPlayer.Builder(context, renderersFactory)
+                .setLooper(Looper.getMainLooper())
+                .build()
+        }
     }
 }

@@ -53,7 +53,6 @@ class UISpriteDrawGuardTest {
         // Records the buffer path's steps, so it must not take the batch path.
         override val isBatchable: Boolean get() = false
         override fun beginDraw(pGLState: GLState) { calls += "begin" }
-        override fun onDeclarePointers(gl: GLState) { calls += "pointers" }
         override fun onDrawBuffer(pGLState: GLState) { calls += "draw" }
     }
 
@@ -78,7 +77,7 @@ class UISpriteDrawGuardTest {
         val sprite = RecordingSprite(TextureRegion(Page(7), 2f, 2f, 8f, 8f))
         sprite.doDraw(glState, camera)
 
-        assertEquals(listOf("begin", "pointers", "draw"), sprite.calls)
+        assertEquals(listOf("begin", "draw"), sprite.calls)
     }
 
     @Test
@@ -86,6 +85,6 @@ class UISpriteDrawGuardTest {
         val sprite = RecordingSprite(null)
         sprite.doDraw(glState, camera)
 
-        assertEquals(listOf("begin", "pointers", "draw"), sprite.calls)
+        assertEquals(listOf("begin", "draw"), sprite.calls)
     }
 }

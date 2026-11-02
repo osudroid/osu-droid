@@ -11,7 +11,6 @@ import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.entity.shape.Shape.*
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.util.*
 
 
@@ -19,8 +18,8 @@ import org.andengine.opengl.util.*
  * An entity that uses a buffer to draw itself.
  *
  * Entities that cannot go through the quad batch (depth testing, clearing) draw their buffer
- * through the [MeshRenderer]; only entities with a shader of their own ([drawsWithOwnShader]) keep
- * the legacy path that uploads the buffer to a VBO and binds the shader in [onBindShader].
+ * through the [MeshRenderer] ([IBuffer.drawMesh]); entities with a program of their own override
+ * [onDrawBuffer] and draw the buffer's data through [MeshRenderer.drawProgram].
  */
 abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
@@ -28,13 +27,6 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      * The buffer itself.
      */
     open var buffer: T? = null
-        set(value) {
-            if (field != value) {
-                // Shared buffers are owned elsewhere.
-                field?.let { if (it.sharingMode == BufferSharingMode.Off) it.finalize() }
-                field = value
-            }
-        }
 
 
     /**
@@ -109,15 +101,6 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
     }
 
     /**
-     * Whether this entity draws its buffer with a shader of its own, bound in [onBindShader], the
-     * legacy way: the buffer is uploaded to a VBO, its pointers declared in [IBuffer.beginDraw] and
-     * it is drawn with [IBuffer.draw]. False (the default) draws the buffer through the
-     * [MeshRenderer] ([IBuffer.drawMesh]) and never calls [onBindShader]. An entity that sets this
-     * must override [onBindShader] and bind its own shader.
-     */
-    protected open val drawsWithOwnShader: Boolean get() = false
-
-    /**
      * The blend mode the mesh renderer draws this entity with: the one of [resolvedBlendInfo], or
      * straight alpha for factors without an engine equivalent (the UI uses none).
      */
@@ -149,8 +132,8 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      * depth test, no clearing and a blend function the batch can express. Shapes that fail this are
      * drawn through their buffer.
      *
-     * A batched shape does not run `beginDraw` or `onBindShader` and owns no buffer of its own, so
-     * do not assign shared VBOs to shapes that can be batched.
+     * A batched shape does not run `beginDraw` and owns no buffer of its own, so do not assign
+     * shared buffers to shapes that can be batched.
      */
     protected fun canBatchShape(): Boolean {
         if (depthInfo.test) return false
@@ -184,7 +167,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         needsBufferUpdate = false
         val created = buffer
         if (created != null && created.sharingMode != BufferSharingMode.Dynamic) {
-            updateBuffer()
+            onUpdateBuffer()
         }
     }
 
@@ -221,26 +204,14 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             // need to update it before drawing every frame, this might be
             // CPU intensive, but the memory consumption is lower.
             if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
-                updateBuffer()
+                onUpdateBuffer()
             }
         }
     }
 
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
         super.doDraw(pGLState, pCamera)
-        onDeclarePointers(pGLState)
         onDrawBuffer(pGLState)
-
-        if (drawsWithOwnShader) {
-            // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-            GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-            // Leave no array buffer bound after this draw. Buffer.bindAndUpload() binds through
-            // GlesBackend.state, the same cache GLState forwards to, so there is no stale cache entry
-            // to repair any more and this reset is redundant; it is kept until Step 3 replaces the
-            // buffer handling, so the binding left behind stays the same as before.
-            pGLState.bindArrayBuffer(0)
-        }
 
         // Disable depth test after drawing so subsequent entities are not accidentally
         // depth-tested against values we wrote (same fix as in UITriangleMesh).
@@ -264,58 +235,22 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
-            updateBuffer()
+            onUpdateBuffer()
         }
 
-        if (!drawsWithOwnShader) {
-            // The mesh renderer takes depth and blend from the pipeline of the draw.
-            if (!depthInfo.test) {
-                pGLState.disableDepthTest()
-            }
-            return
-        }
-
-        // Depth testing
-        if (depthInfo.test) {
-            GlesBackend.state.depthFunc(depthInfo.function)
-            GlesBackend.state.depthMask(depthInfo.mask)
-            pGLState.enableDepthTest()
-        } else {
+        // The mesh renderer takes depth and blend from the pipeline of the draw.
+        if (!depthInfo.test) {
             pGLState.disableDepthTest()
         }
-
-        // Blending
-        val blend = resolvedBlendInfo
-
-        pGLState.enableBlend()
-        pGLState.blendFunction(blend.sourceFactor, blend.destinationFactor)
-
-        buffer?.beginDraw(pGLState)
-
-        onBindShader(pGLState)
     }
 
     /**
-     * Called during [beginDraw] after the position buffer is set up, only for entities that
-     * [drawsWithOwnShader]. Subclasses bind their shader and upload its uniforms.
+     * Draws the buffer, through the [MeshRenderer] by default ([IBuffer.drawMesh]). Entities with a
+     * program of their own override this and draw the buffer's data through
+     * [MeshRenderer.drawProgram].
      */
-    protected open fun onBindShader(pGLState: GLState) = Unit
-
-    private fun updateBuffer() {
-        onUpdateBuffer()
-        buffer?.invalidateOnHardware()
-    }
-
-    protected open fun onDeclarePointers(gl: GLState) {
-        buffer?.declarePointers(gl, this)
-    }
-
     protected open fun onDrawBuffer(gl: GLState) {
-        if (drawsWithOwnShader) {
-            buffer?.draw(gl, this)
-        } else {
-            buffer?.drawMesh(gl, this)
-        }
+        buffer?.drawMesh(gl, this)
     }
 
     //endregion
@@ -326,9 +261,8 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo.Mixture
     }
 
-    override fun finalize() {
-        buffer?.finalize()
-    }
+    // Buffers own no GL objects: nothing to release, and the entity is not disposed from the finalizer.
+    override fun finalize() = Unit
 
 
     private companion object {

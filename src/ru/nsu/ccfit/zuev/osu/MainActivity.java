@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import static com.reco1l.andengine.buffered.Buffer.*;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -80,7 +79,6 @@ import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.graphics.debug.RenderStatsOverlay;
 import org.andengine.graphics.gles.GlesDebugOptions;
-import org.andengine.graphics.gles.GlesLegacyRestorers;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
@@ -226,11 +224,6 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public Engine onCreateEngine(final EngineOptions pEngineOptions) {
         UIEngine engine = new UIEngine(this, pEngineOptions);
-
-        // Context loss recovery: forget VBO IDs so they are re-created against a new EGL context.
-        // Name-keyed, so a recreated activity replaces instead of duplicating the entries.
-        // Shader programs (incl. storyboard / external OES) are reset by the registry as well.
-        GlesLegacyRestorers.register("ui-buffers", com.reco1l.andengine.buffered.Buffer::onContextLost);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.

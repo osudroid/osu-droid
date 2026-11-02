@@ -51,6 +51,15 @@ interface RenderContext {
      */
     fun setUniformMatrix4(location: Int, matrix: FloatArray)
 
+    /**
+     * Sets the `float`, `vec2`, `vec3` or `vec4` uniform at [location] of the current pipeline's
+     * program to the first [components] (1..4) values of [values] from [offset] on. Like
+     * [setUniformMatrix4], the value belongs to the program; a [location] of -1 is ignored.
+     *
+     * @throws IllegalStateException without a pipeline.
+     */
+    fun setUniformFloat(location: Int, components: Int, values: FloatArray, offset: Int)
+
     /** Binds a [BufferTarget.Uniform] buffer to the uniform block [binding]. */
     fun setUniformBlock(binding: Int, buffer: GpuBuffer)
 

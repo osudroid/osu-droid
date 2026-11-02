@@ -83,7 +83,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
     }
 
 
-    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D, GL_STATIC_DRAW) {
+    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D) {
 
         fun update(entity: UITriangle) {
             addTriangle(

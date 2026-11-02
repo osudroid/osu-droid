@@ -369,6 +369,22 @@ class RecordingGL : GL32 {
         calls += "glUniform1i($location,$x)"
     }
 
+    override fun glUniform1f(location: Int, x: Float) {
+        calls += "glUniform1f($location,$x)"
+    }
+
+    override fun glUniform2f(location: Int, x: Float, y: Float) {
+        calls += "glUniform2f($location,$x,$y)"
+    }
+
+    override fun glUniform3f(location: Int, x: Float, y: Float, z: Float) {
+        calls += "glUniform3f($location,$x,$y,$z)"
+    }
+
+    override fun glUniform4f(location: Int, x: Float, y: Float, z: Float, w: Float) {
+        calls += "glUniform4f($location,$x,$y,$z,$w)"
+    }
+
     override fun glFramebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int) {
         calls += "glFramebufferTexture2D($target,$attachment,$textarget,$texture,$level)"
     }

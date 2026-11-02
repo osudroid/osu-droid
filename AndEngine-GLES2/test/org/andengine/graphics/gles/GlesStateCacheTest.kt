@@ -303,4 +303,49 @@ class GlesStateCacheTest {
         // Unknown values (VAO, depth, cull, sampler) are left alone.
         assertEquals(0, gl.calls.count { it.startsWith("glBindVertexArray") || it.startsWith("glBindSampler") })
     }
+
+    @Test
+    fun drawState_restoresKnownExternalTextureOfUnit0() {
+        cache.activeTexture(0)
+        cache.bindTexture(oes, 7)
+        val saved = IntArray(GlesStateCache.DRAW_STATE_SIZE)
+        cache.saveDrawState(saved)
+
+        cache.bindTexture(oes, 9)
+        cache.activeTexture(3)
+        gl.calls.clear()
+
+        cache.restoreDrawState(saved)
+
+        assertEquals(gl.calls.toString(), 1, count("glBindTexture($oes,7)"))
+        // The external binding is set on unit 0, which stays active as it was saved.
+        val bind = gl.calls.indexOf("glBindTexture($oes,7)")
+        val unit0 = gl.calls.indexOf("glActiveTexture(${GLES20.GL_TEXTURE0})")
+        assertEquals(gl.calls.toString(), true, unit0 in 0 until bind)
+        assertEquals(0, cache.currentActiveTextureUnit)
+
+        // Restoring again with the binding already in place changes nothing.
+        gl.calls.clear()
+        cache.restoreDrawState(saved)
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
+    }
+
+    @Test
+    fun drawState_leavesUnknownExternalTextureOfUnit0() {
+        // Unit 0's external binding was never set through the cache: unknown when saved.
+        cache.activeTexture(0)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        val saved = IntArray(GlesStateCache.DRAW_STATE_SIZE)
+        cache.saveDrawState(saved)
+
+        cache.bindTexture(oes, 9)
+        gl.calls.clear()
+
+        cache.restoreDrawState(saved)
+
+        // The unknown binding is not guessed: the external texture the draw bound stays.
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
+        cache.bindTexture(oes, 9)
+        assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture($oes,") })
+    }
 }

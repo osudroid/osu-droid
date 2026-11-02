@@ -333,7 +333,7 @@ class GlesStateCache(private val gl: GL30) {
     private fun textureTargetIndex(target: Int): Int = when (target) {
         GLES20.GL_TEXTURE_2D -> 0
         GLES30.GL_TEXTURE_2D_ARRAY -> 1
-        TEXTURE_EXTERNAL_OES -> 2
+        GlesLegacyTextureView.TEXTURE_EXTERNAL_OES -> 2
         else -> -1
     }
 
@@ -581,7 +581,7 @@ class GlesStateCache(private val gl: GL30) {
 
     /**
      * Copies the state a draw of the render context may change (program, VAO with its element
-     * buffer, array buffer, active unit, the 2D texture and the sampler of unit 0, the array
+     * buffer, array buffer, active unit, the 2D and external textures and the sampler of unit 0, the array
      * texture and the sampler of unit 1, blend, depth, cull and the scissor) into [out], which
      * needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
      */
@@ -592,6 +592,7 @@ class GlesStateCache(private val gl: GL30) {
         out[S_ARRAY_BUFFER] = arrayBuffer
         out[S_ACTIVE_UNIT] = activeUnit
         out[S_TEXTURE_0] = textures[0]
+        out[S_TEXTURE_EXTERNAL_0] = textures[TEXTURE_EXTERNAL_0]
         out[S_SAMPLER_0] = samplers[0]
         out[S_TEXTURE_ARRAY_1] = textures[TEXTURE_ARRAY_1]
         out[S_SAMPLER_1] = samplers[1]
@@ -673,10 +674,12 @@ class GlesStateCache(private val gl: GL30) {
         if (sampler1 != UNKNOWN) bindSampler(1, sampler1)
 
         val texture = saved[S_TEXTURE_0]
+        val external = saved[S_TEXTURE_EXTERNAL_0]
         val sampler = saved[S_SAMPLER_0]
-        if (texture != UNKNOWN || sampler != UNKNOWN) {
+        if (texture != UNKNOWN || sampler != UNKNOWN || (external != UNKNOWN && textures[TEXTURE_EXTERNAL_0] != external)) {
             activeTexture(0)
             if (texture != UNKNOWN) bindTexture(GLES20.GL_TEXTURE_2D, texture)
+            if (external != UNKNOWN) bindTexture(GlesLegacyTextureView.TEXTURE_EXTERNAL_OES, external)
             if (sampler != UNKNOWN) bindSampler(0, sampler)
         }
         val unit = saved[S_ACTIVE_UNIT]
@@ -692,7 +695,6 @@ class GlesStateCache(private val gl: GL30) {
         private const val TEXTURE_TARGETS = 3
         private const val MIN_UNITS = 8
         private const val MAX_UNITS = 32
-        private const val TEXTURE_EXTERNAL_OES = 0x8D65
         private const val UNIFORM_BINDINGS = 16
 
         private const val S_PROGRAM = 0
@@ -714,10 +716,14 @@ class GlesStateCache(private val gl: GL30) {
         private const val S_CULL_MODE = 16
         private const val S_TEXTURE_ARRAY_1 = 17
         private const val S_SAMPLER_1 = 18
-        private const val S_SCISSOR = 19
+        private const val S_TEXTURE_EXTERNAL_0 = 19
+        private const val S_SCISSOR = 20
 
         /** Index of unit 1's 2D array binding in the texture bindings. */
         private const val TEXTURE_ARRAY_1 = TEXTURE_TARGETS + 1
+
+        /** Index of unit 0's external binding in the texture bindings. */
+        private const val TEXTURE_EXTERNAL_0 = 2
 
         /** Number of values [saveScissorState] writes. */
         const val SCISSOR_STATE_SIZE = 5

@@ -1,10 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesPipeline
-import org.andengine.graphics.debug.RenderStats
-import android.opengl.GLES32
 import com.osudroid.math.toRadians
 import org.andengine.opengl.util.GLState
 import kotlin.math.*
@@ -12,9 +8,8 @@ import kotlin.math.*
 abstract class VertexBuffer(
     val drawTopology: Int,
     val vertexCount: Int,
-    val vertexSize: Int,
-    bufferUsage: Int
-) : Buffer(vertexCount * vertexSize, bufferUsage) {
+    val vertexSize: Int
+) : Buffer(vertexCount * vertexSize) {
 
 
     // Write position of the sequential [putVertex], in floats.
@@ -29,23 +24,6 @@ abstract class VertexBuffer(
 
 
     //region Draw pipeline
-
-    override fun beginDraw(gl: GLState) {
-        bindAndUpload()
-        // Attribute 0 = position (matches standard position attribute location in shaders)
-        GlesBackend.state.vertexAttribPointer(0, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
-        GlesBackend.state.enableVertexAttribArray(0)
-    }
-
-    override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
-        // Pointers are already declared in beginDraw for GLES2
-    }
-
-    override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-        QuadBatcher.flush()
-        GLES32.glDrawArrays(topology(entity), 0, vertexCount)
-        RenderStats.draw(vertexCount)
-    }
 
     override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
         check(vertexSize == VERTEX_2D) { "The mesh renderer draws 2D vertices, got $vertexSize components" }

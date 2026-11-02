@@ -1,5 +1,6 @@
 package org.andengine.graphics.gles
 
+import android.opengl.GLES20
 import org.andengine.graphics.Texture
 import org.andengine.graphics.TextureData
 import org.andengine.graphics.TextureFormat
@@ -12,8 +13,10 @@ fun interface LegacyTextureIdProvider {
 }
 
 /**
- * A [Texture] that only views a 2D texture owned by legacy code (`ITexture`), so it can be bound
- * through the render context. It owns no GL object and is not in the resource registry: the legacy
+ * A [Texture] that only views a texture owned by legacy code (`ITexture`), so it can be bound
+ * through the render context. [glTarget] is the GL target it is bound to: `GL_TEXTURE_2D` for
+ * ordinary textures, [TEXTURE_EXTERNAL_OES] for a texture fed by a `SurfaceTexture` (video), which
+ * only an external program (`samplerExternalOES`) can sample. It owns no GL object and is not in the resource registry: the legacy
  * texture loads and restores itself, and its id is read from [idProvider] at every bind, so a
  * reload is picked up without telling the view. While the legacy texture is not on the GPU the
  * [GlesPlaceholderTexture] is bound instead. [format] is nominal (legacy textures have several);
@@ -23,7 +26,8 @@ class GlesLegacyTextureView(
     private val idProvider: LegacyTextureIdProvider,
     override val width: Int,
     override val height: Int,
-    override val label: String
+    override val label: String,
+    val glTarget: Int = GLES20.GL_TEXTURE_2D
 ) : Texture {
 
     override val layers: Int get() = 1
@@ -53,4 +57,9 @@ class GlesLegacyTextureView(
     }
 
     override fun toString() = "GlesLegacyTextureView($label, ${width}x$height)"
+
+    companion object {
+        /** `GL_TEXTURE_EXTERNAL_OES`. */
+        const val TEXTURE_EXTERNAL_OES = 0x8D65
+    }
 }

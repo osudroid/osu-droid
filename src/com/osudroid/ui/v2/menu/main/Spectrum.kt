@@ -193,9 +193,8 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     fun update(dt: Float, kiaiActive: Boolean) {
         when (Config.getSpectrumQuality()) {
             "off" -> {
-                // Hide the component entirely so UIBufferedComponent never calls
-                // updateBuffer() / invalidateOnHardware(), avoiding the per-frame
-                // VBO re-upload that occurred even when onUpdateBuffer() returned early.
+                // Hide the component entirely so UIBufferedComponent never draws it
+                // or updates its buffer.
                 isVisible = false
                 frequencyAmplitudes.fill(0f)
                 return
@@ -270,8 +269,7 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
     class SpectrumVBO(barCount: Int) : VertexBuffer(
         drawTopology = GL_TRIANGLES,
         vertexCount = barCount * 6,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_DYNAMIC_DRAW
+        vertexSize = VERTEX_2D
     )
 
     companion object {

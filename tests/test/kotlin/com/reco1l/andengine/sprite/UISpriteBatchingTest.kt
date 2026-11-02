@@ -1,12 +1,16 @@
 package com.reco1l.andengine.sprite
 
 import android.opengl.GLES20
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import com.osudroid.ui.v2.menu.main.KiaiCatJamSprite
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.component.ClearInfo
 import com.reco1l.andengine.component.DepthInfo
 import com.reco1l.andengine.container.UIContainer
+import com.reco1l.andengine.texture.VideoTexture
 import java.lang.reflect.Proxy
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -29,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(UnstableApi::class)
 @RunWith(RobolectricTestRunner::class)
 class UISpriteBatchingTest {
 
@@ -85,20 +90,32 @@ class UISpriteBatchingTest {
     }
 
     /**
-     * Exposes the legacy buffers so both paths can be compared, and records the legacy draw steps
-     * instead of running them (the legacy shaders call GL directly, past the fake).
+     * Exposes the buffers so both paths can be compared, and records the buffer path's draw steps
+     * instead of running them.
      */
     private class Probe(region: TextureRegion?, private val batchable: Boolean = true) : UISprite(region) {
         val legacyCalls = ArrayList<String>()
         override val isBatchable: Boolean get() = batchable
         override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-        override fun onDeclarePointers(gl: GLState) { legacyCalls += "pointers" }
         override fun onDrawBuffer(pGLState: GLState) { legacyCalls += "draw" }
         fun position(vertex: Int, axis: Int) = buffer!!.valueAt(vertex * 2 + axis)
         fun uv(vertex: Int, axis: Int) = uvBuffer.valueAt(vertex * 2 + axis)
     }
 
-    private val legacyDraw = listOf("begin", "pointers", "draw")
+    private val legacyDraw = listOf("begin", "draw")
+
+    /** A player that ignores every call; nothing is played. */
+    private fun silentPlayer(): ExoPlayer =
+        Proxy.newProxyInstance(ExoPlayer::class.java.classLoader, arrayOf(ExoPlayer::class.java)) { _, method, _ ->
+            when (method.returnType) {
+                java.lang.Boolean.TYPE -> false
+                java.lang.Integer.TYPE -> 0
+                java.lang.Long.TYPE -> 0L
+                java.lang.Float.TYPE -> 0f
+                java.lang.Double.TYPE -> 0.0
+                else -> null
+            }
+        } as ExoPlayer
 
     private fun region(page: Page = Page(7)) = TextureRegion(page, 2f, 2f, 8f, 8f)
 
@@ -161,11 +178,8 @@ class UISpriteBatchingTest {
     }
 
     @Test
-    fun videoSprite_usesLegacyPath() {
-        // The video sprite cannot be built without a player; its flag does not depend on its state.
-        val unsafeField = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe").apply { isAccessible = true }
-        val unsafe = unsafeField.get(null)
-        val video = unsafe.javaClass.getMethod("allocateInstance", Class::class.java).invoke(unsafe, UIVideoSprite::class.java) as UISprite
+    fun videoSprite_isNotBatchable() {
+        val video = UIVideoSprite(VideoTexture("video.mp4", silentPlayer()), TextureManager())
         assertFalse(video.isBatchable)
         assertFalse(KiaiCatJamSprite(emptyArray()).isBatchable)
 

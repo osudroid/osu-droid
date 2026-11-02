@@ -64,7 +64,6 @@ class UIShapeBatchingTest {
     private class LegacyBox : UIBox() {
         val legacyCalls = ArrayList<String>()
         override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-        override fun onDeclarePointers(gl: GLState) { legacyCalls += "pointers" }
         override fun onDrawBuffer(gl: GLState) { legacyCalls += "draw" }
     }
 
@@ -295,7 +294,7 @@ class UIShapeBatchingTest {
             box.doDraw(glState, camera)
 
             assertFalse(QuadBatcher.hasPending)
-            assertEquals(listOf("begin", "pointers", "draw"), box.legacyCalls)
+            assertEquals(listOf("begin", "draw"), box.legacyCalls)
             // The buffer is built on demand once the legacy path is needed.
             assertNotNull(box.buffer)
         }
@@ -328,7 +327,7 @@ class UIShapeBatchingTest {
             legacy.doDraw(glState, camera)
 
             assertFalse(QuadBatcher.hasPending)
-            assertEquals(listOf("begin", "pointers", "draw"), legacy.legacyCalls)
+            assertEquals(listOf("begin", "draw"), legacy.legacyCalls)
         }
     }
 
@@ -355,7 +354,6 @@ class UIShapeBatchingTest {
         val circle = object : UICircle() {
             val legacyCalls = ArrayList<String>()
             override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-            override fun onDeclarePointers(gl: GLState) { legacyCalls += "pointers" }
             override fun onDrawBuffer(gl: GLState) { legacyCalls += "draw" }
         }
         circle.setSize(20f, 20f)
@@ -366,7 +364,7 @@ class UIShapeBatchingTest {
         circle.doDraw(glState, camera)
 
         assertFalse(QuadBatcher.hasPending)
-        assertEquals(listOf("begin", "pointers", "draw"), circle.legacyCalls)
+        assertEquals(listOf("begin", "draw"), circle.legacyCalls)
         assertNotNull(circle.buffer)
     }
 

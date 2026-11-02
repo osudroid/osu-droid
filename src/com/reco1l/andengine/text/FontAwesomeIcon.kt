@@ -118,10 +118,6 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         // Nothing to do here, there is no buffer.
     }
 
-    override fun onBindShader(pGLState: GLState) {
-        // The batch binds its own shader.
-    }
-
     override fun doDraw(pGLState: GLState, pCamera: Camera) {
         onApplyColor(pGLState)
 

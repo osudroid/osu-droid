@@ -123,7 +123,6 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         vertexCount = max(1, segments) * 4 + if (paintStyle == Fill) 2 else 1,
 
         vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW,
         drawTopology = when (paintStyle) {
             Fill -> GL_TRIANGLE_FAN
             Outline -> GL_LINE_STRIP

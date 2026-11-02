@@ -18,12 +18,13 @@ import org.andengine.graphics.VertexLayout
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesGraphicsDevice
+import org.andengine.graphics.gles.GlesLegacyTextureView
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesStateCache
 
 /**
- * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails, storyboard shapes), in one
- * draw call each. A mesh is given as 2D positions (or positions with a color per vertex), is
+ * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails, storyboard shapes), or
+ * with a [MeshProgram] of the caller (see [drawProgram]), in one draw call each. A mesh is given as 2D positions (or positions with a color per vertex), is
  * transformed on the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn with its own
  * program; the vertex shader only applies the projection passed to [draw].
  *
@@ -118,6 +119,31 @@ void main() {
 }
 """
 
+    /** float2 position + float2 uv + float2 local coordinate + 4 normalized bytes color. */
+    const val PROGRAM_VERTEX_SIZE_BYTES = 28
+
+    private const val PROGRAM_FLOATS = 6
+
+    /** The vertex layout of [drawProgram], matching [MeshProgram.VERTEX_SHADER]. */
+    @JvmField
+    val programLayout = VertexLayout(
+        PROGRAM_VERTEX_SIZE_BYTES,
+        listOf(
+            VertexAttribute(0, VertexFormat.Float2, 0),
+            VertexAttribute(1, VertexFormat.Float2, 8),
+            VertexAttribute(2, VertexFormat.Float2, 16),
+            VertexAttribute(3, VertexFormat.UByte4Normalized, 24)
+        )
+    )
+
+    private const val QUAD_VERTICES = 4
+
+    // Local coordinates of the corners of [drawProgramQuad] in sprite buffer order.
+    private val QUAD_LOCAL = floatArrayOf(0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f)
+
+    // The vertices of [drawProgramQuad]; GL thread only.
+    private val quadScratch = FloatArray(QUAD_VERTICES * PROGRAM_FLOATS)
+
     private const val TEXTURE_UNIT = 0
 
     private const val COUNTER_UNREGISTERED = -2
@@ -138,7 +164,9 @@ void main() {
         val vertexShader: String,
         val fragmentShader: String,
         val name: String,
-        val samplerUnits: Map<String, Int>
+        val samplerUnits: Map<String, Int>,
+        /** False for the kit of [drawProgram], whose program comes from the [MeshProgram]. */
+        val ownsProgram: Boolean = true
     ) {
         var program: GpuProgram? = null
         var vertexBuffer: GpuBuffer? = null
@@ -158,6 +186,9 @@ void main() {
         TEXTURED_VERTEX_SIZE_BYTES, texturedLayout, TEXTURED_VERTEX_SHADER, TEXTURED_FRAGMENT_SHADER, "mesh-textured",
         mapOf("uTexture" to TEXTURE_UNIT)
     )
+    // The shaders of [drawProgram] come from its [MeshProgram] (ownsProgram = false), so this kit has
+    // none of its own: the empty sources are never compiled.
+    private val custom = Kit(PROGRAM_VERTEX_SIZE_BYTES, programLayout, "", "", "mesh-program", emptyMap(), ownsProgram = false)
 
     private val savedState = IntArray(GlesStateCache.DRAW_STATE_SIZE)
 
@@ -165,9 +196,9 @@ void main() {
     @JvmStatic
     val capacityVertices: Int get() = plain.capacityVertices
 
-    private val kits = arrayOf(plain, textured)
+    private val kits = arrayOf(plain, textured, custom)
 
-    /** Number of cached pipelines, textured meshes included. */
+    /** Number of cached pipelines, textured meshes included; those of [MeshProgram]s are counted there. */
     val pipelineCount: Int get() = kits.sumOf { it.pipelineTotal }
 
     /** Vertices the staging memory of the textured meshes holds; 0 before the first one. */
@@ -223,7 +254,7 @@ void main() {
             src += 2
             dst += VERTEX_SIZE_BYTES
         }
-        submit(plain, primitive, vertexCount, projection, null, blend, depthTest, depthWrite)
+        submit(plain, pipelineFor(plain, blend, depthTest, depthWrite, primitive), vertexCount, projection, null, null)
     }
 
     /**
@@ -265,7 +296,7 @@ void main() {
             src += COLORED_FLOATS
             dst += VERTEX_SIZE_BYTES
         }
-        submit(plain, primitive, vertexCount, projection, null, blend, depthTest, depthWrite)
+        submit(plain, pipelineFor(plain, blend, depthTest, depthWrite, primitive), vertexCount, projection, null, null)
     }
 
     /**
@@ -313,7 +344,101 @@ void main() {
             src += TEXTURED_FLOATS
             dst += TEXTURED_VERTEX_SIZE_BYTES
         }
-        submit(textured, primitive, vertexCount, projection, texture, blend, depthTest, depthWrite)
+        submit(textured, pipelineFor(textured, blend, depthTest, depthWrite, primitive), vertexCount, projection, texture, null)
+    }
+
+    /**
+     * Draws [vertexCount] vertices as [primitive] with the caller's [program]. [vertices] holds
+     * (x, y, u, v, lx, ly) floats per vertex from [offset] on: the position, transformed by the 2D
+     * part of [matrix] as in [draw], the texture coordinate (`vTexCoord`) and the local coordinate
+     * (`vLocal`, passed through as given). Every vertex gets the ABGR packed color [rgba] as
+     * `vColor` (a vertex attribute, like [drawTextured]). [texture] is bound on unit 0: a 2D
+     * texture for a plain program, an external view ([BatchTexture.externalOf]) for an external
+     * one. The stored uniforms of [program] are sent after its pipeline is set. No depth test, no
+     * depth write. A legacy texture that is not on the GPU draws nothing.
+     */
+    @JvmStatic
+    fun drawProgram(
+        program: MeshProgram,
+        primitive: PrimitiveType,
+        vertices: FloatArray,
+        offset: Int,
+        vertexCount: Int,
+        matrix: FloatArray,
+        projection: FloatArray,
+        texture: Texture,
+        rgba: Int,
+        blend: BlendMode
+    ) {
+        if (vertexCount <= 0) return
+        require(offset >= 0 && offset + vertexCount * PROGRAM_FLOATS <= vertices.size) {
+            "Vertices of $vertexCount vertices from $offset exceed ${vertices.size} values"
+        }
+        val external = texture is GlesLegacyTextureView && texture.glTarget == GlesLegacyTextureView.TEXTURE_EXTERNAL_OES
+        require(external == program.external) {
+            if (program.external) "External program '${program.label}' needs an external texture, got '${texture.label}'"
+            else "Program '${program.label}' samples a 2D texture, got the external '${texture.label}'"
+        }
+        if (!BatchTexture.isLoaded(texture)) return
+        val bytes = reserve(custom, vertexCount)
+        // Created (or looked up) before the draw state is saved: linking sets the program in use.
+        val pipeline = program.pipelineFor(programLayout, blend, primitive)
+        val color = if (littleEndian) rgba else Integer.reverseBytes(rgba)
+        val a = matrix[0]
+        val b = matrix[1]
+        val c = matrix[4]
+        val d = matrix[5]
+        val tx = matrix[12]
+        val ty = matrix[13]
+        var src = offset
+        var dst = 0
+        for (i in 0 until vertexCount) {
+            val x = vertices[src]
+            val y = vertices[src + 1]
+            bytes.putFloat(dst, a * x + c * y + tx)
+            bytes.putFloat(dst + 4, b * x + d * y + ty)
+            bytes.putFloat(dst + 8, vertices[src + 2])
+            bytes.putFloat(dst + 12, vertices[src + 3])
+            bytes.putFloat(dst + 16, vertices[src + 4])
+            bytes.putFloat(dst + 20, vertices[src + 5])
+            bytes.putInt(dst + 24, color)
+            src += PROGRAM_FLOATS
+            dst += PROGRAM_VERTEX_SIZE_BYTES
+        }
+        submit(custom, pipeline, vertexCount, projection, texture, program)
+    }
+
+    /**
+     * Draws one quad with [drawProgram] as a triangle strip. [positions] and [uvs] hold the x, y
+     * pairs of its 4 corners in sprite buffer order: top-left, bottom-left, top-right,
+     * bottom-right. The local coordinates (`vLocal`) run from (0, 0) at the top-left to (1, 1) at
+     * the bottom-right corner. The other parameters are those of [drawProgram].
+     */
+    @JvmStatic
+    fun drawProgramQuad(
+        program: MeshProgram,
+        positions: FloatArray,
+        uvs: FloatArray,
+        matrix: FloatArray,
+        projection: FloatArray,
+        texture: Texture,
+        rgba: Int,
+        blend: BlendMode
+    ) {
+        require(positions.size >= QUAD_VERTICES * 2 && uvs.size >= QUAD_VERTICES * 2) {
+            "A quad needs ${QUAD_VERTICES * 2} positions and uvs, got ${positions.size} and ${uvs.size}"
+        }
+        val vertices = quadScratch
+        for (i in 0 until QUAD_VERTICES) {
+            val o = i * PROGRAM_FLOATS
+            vertices[o] = positions[i * 2]
+            vertices[o + 1] = positions[i * 2 + 1]
+            vertices[o + 2] = uvs[i * 2]
+            vertices[o + 3] = uvs[i * 2 + 1]
+            vertices[o + 4] = QUAD_LOCAL[i * 2]
+            vertices[o + 5] = QUAD_LOCAL[i * 2 + 1]
+        }
+        drawProgram(program, PrimitiveType.TriangleStrip, vertices, 0, QUAD_VERTICES, matrix, projection, texture, rgba, blend)
     }
 
     /**
@@ -328,13 +453,11 @@ void main() {
 
     private fun submit(
         kit: Kit,
-        primitive: PrimitiveType,
+        pipeline: Pipeline,
         vertexCount: Int,
         projection: FloatArray,
         texture: Texture?,
-        blend: BlendMode,
-        depthTest: CompareFunction?,
-        depthWrite: Boolean
+        program: MeshProgram?
     ) {
         require(projection.size >= 16) { "A projection needs 16 values, got ${projection.size}" }
         val state = GlesBackend.state
@@ -345,13 +468,13 @@ void main() {
         bytes.clear()
         // New storage per draw: rewriting storage that earlier draws still read makes the driver wait.
         vb.replace(bytes, vertexCount * kit.vertexSize)
-        val pipeline = pipelineFor(kit, blend, depthTest, depthWrite, primitive)
         val context = GlesRenderContext.instance
         val ownPass = !context.isInPass
         if (ownPass) context.beginInlinePass()
         try {
             context.setPipeline(pipeline)
             context.setUniformMatrix4(pipeline.program.uniformLocation("uProjection"), projection)
+            program?.applyUniforms(context)
             if (texture != null) context.setTexture(TEXTURE_UNIT, texture, null)
             context.setVertexBuffer(vb)
             context.draw(0, vertexCount)
@@ -405,7 +528,7 @@ void main() {
         val bufferBytes = capacity * kit.vertexSize
 
         val oldBuffer = kit.vertexBuffer
-        val needProgram = kit.program == null
+        val needProgram = kit.ownsProgram && kit.program == null
         val needBuffer = oldBuffer == null || oldBuffer.sizeBytes < bufferBytes
         if (!needProgram && !needBuffer && capacity == oldCapacity) return
 

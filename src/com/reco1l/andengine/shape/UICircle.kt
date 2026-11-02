@@ -154,7 +154,6 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>() {
         vertexCount = segments + if (paintStyle == PaintStyle.Fill) 1 else 0,
 
         vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW,
         drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_STRIP
     ) {
 

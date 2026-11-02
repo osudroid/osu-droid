@@ -113,26 +113,19 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
 
     /**
-     * The UV coordinate buffer for this sprite (attribute 3).
+     * The texture coordinates of this sprite, one pair per vertex of the position buffer.
      * Managed separately from the position buffer so it can be per-instance when position is shared.
-     * Protected so subclasses (e.g. UIVideoSprite) can call uvBuffer.beginDraw() with a custom shader.
+     * Protected so subclasses with a program of their own (e.g. [UIVideoSprite]) can read them.
      */
     protected val uvBuffer = SpriteUVBuffer()
 
     /**
-     * Whether this sprite may be drawn through the [QuadBatcher]. Subclasses that bind their own
-     * shader or draw differently return false and keep the buffer path. Even when true, a sprite
-     * without a texture, with depth testing or clearing, or with a blend function the batch cannot
-     * express is drawn through the buffer path.
+     * Whether this sprite may be drawn through the [QuadBatcher]. Subclasses that draw with a
+     * program of their own (overriding [onDrawBuffer]) return false and always take the buffer
+     * path. Even when true, a sprite without a texture, with depth testing or clearing, or with a
+     * blend function the batch cannot express is drawn through the buffer path.
      */
     open val isBatchable: Boolean get() = true
-
-    /**
-     * Sprites that are not [isBatchable] keep the legacy buffer path; a subclass that takes it must
-     * override [onBindShader] and bind its own shader. All others draw their buffers through the
-     * [MeshRenderer] when they cannot be batched.
-     */
-    override val drawsWithOwnShader: Boolean get() = !isBatchable
 
     // Scratch for [computeQuad], shared by both draw paths and the buffers.
     private val quad = SpriteQuad()
@@ -269,13 +262,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
     override fun onDrawBuffer(pGLState: GLState) {
-        if (drawsWithOwnShader) {
-            textureRegion?.texture?.bind(pGLState)
-            super.onDrawBuffer(pGLState)
-            return
-        }
-
-        // Without a texture there is nothing to sample (the legacy path sampled whatever was bound).
+        // Without a texture there is nothing to sample.
         val texture = textureRegion?.texture ?: return
         val positions = buffer?.data ?: return
         val uvs = uvBuffer.data
@@ -302,8 +289,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     class SpriteVBO : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
         vertexCount = SPRITE_VERTICES,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        vertexSize = VERTEX_2D
     ) {
         fun update(entity: UISprite) {
             val q = entity.quad
@@ -318,8 +304,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
      */
     class SpriteUVBuffer : TextureCoordinatesBuffer(
         vertexCount = SPRITE_VERTICES,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        vertexSize = VERTEX_2D
     ) {
         fun update(entity: UISprite) {
             val q = entity.quad
@@ -330,7 +315,6 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
             putVertex(1, q.u0, q.v1)
             putVertex(2, q.u1, q.v0)
             putVertex(3, q.u1, q.v1)
-            invalidateOnHardware()
         }
     }
 

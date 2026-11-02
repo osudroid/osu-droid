@@ -140,7 +140,7 @@ class GlesRenderContext private constructor() : RenderContext {
                 textureId = texture.textureId
             }
             is GlesLegacyTextureView -> {
-                glTarget = GLES20.GL_TEXTURE_2D
+                glTarget = texture.glTarget
                 textureId = texture.textureId
             }
             else -> throw IllegalArgumentException("Texture '${texture.label}' is not a GLES texture")
@@ -182,6 +182,25 @@ class GlesRenderContext private constructor() : RenderContext {
         // Uniform calls go to the program in use; the draw applies the same program again (deduped).
         program.use()
         GlesBackend.gl.glUniformMatrix4fv(location, 1, false, matrix, 0)
+    }
+
+    override fun setUniformFloat(location: Int, components: Int, values: FloatArray, offset: Int) {
+        require(components in 1..4) { "A float uniform has 1 to 4 components, got $components" }
+        require(offset >= 0 && offset + components <= values.size) {
+            "$components values from $offset exceed ${values.size} values"
+        }
+        val p = pipeline ?: throw IllegalStateException("setUniformFloat without a pipeline")
+        if (location < 0) return
+        val program = p.program as GlesProgram
+        check(!program.isDisposed) { "Pipeline uses the disposed program '${program.label}'" }
+        program.use()
+        val gl = GlesBackend.gl
+        when (components) {
+            1 -> gl.glUniform1f(location, values[offset])
+            2 -> gl.glUniform2f(location, values[offset], values[offset + 1])
+            3 -> gl.glUniform3f(location, values[offset], values[offset + 1], values[offset + 2])
+            else -> gl.glUniform4f(location, values[offset], values[offset + 1], values[offset + 2], values[offset + 3])
+        }
     }
 
     override fun setUniformBlock(binding: Int, buffer: GpuBuffer) {

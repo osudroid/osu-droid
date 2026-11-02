@@ -32,8 +32,7 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * Buffered components whose depth, clear or blend settings keep them out of the quad batch are
- * drawn through the [MeshRenderer]; only components with a shader of their own keep the legacy
- * buffer path.
+ * drawn through the [MeshRenderer].
  */
 @RunWith(RobolectricTestRunner::class)
 class UIBufferedComponentMeshTest {
@@ -93,12 +92,6 @@ class UIBufferedComponentMeshTest {
         }
     }
 
-    /** A box that records whether a legacy shader would have been bound. */
-    private class ProbeBox : UIBox() {
-        var shaderBinds = 0
-        override fun onBindShader(pGLState: GLState) { shaderBinds++ }
-    }
-
     @Before
     fun setUp() {
         GlesBackend.onContextCreatedForTest(fakeGl())
@@ -123,7 +116,7 @@ class UIBufferedComponentMeshTest {
 
     private fun lastUpload(): ByteBuffer = ByteBuffer.wrap(uploads.last()).order(ByteOrder.nativeOrder())
 
-    private fun depthMaskedBox(configure: ProbeBox.() -> Unit = {}) = ProbeBox().apply {
+    private fun depthMaskedBox(configure: UIBox.() -> Unit = {}) = UIBox().apply {
         setSize(20f, 10f)
         depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_ALWAYS)
         configure()
@@ -145,8 +138,7 @@ class UIBufferedComponentMeshTest {
         assertTrue(glCalls.toString(), depthMask in 0 until draw)
         assertTrue(glCalls.toString(), glCalls.contains("glEnable(${GLES20.GL_DEPTH_TEST})"))
 
-        // No legacy shader: every program in use was made by the engine's render context.
-        assertEquals(0, box.shaderBinds)
+        // Every program in use was made by the engine's render context.
         val used = glCalls.filter { it.startsWith("glUseProgram(") }
             .map { it.removePrefix("glUseProgram(").removeSuffix(")").toInt() }
             .filter { it != 0 }
@@ -262,44 +254,29 @@ class UIBufferedComponentMeshTest {
     /** Records which draw steps of the buffer contract run. */
     private class RecordingBuffer(private val calls: MutableList<String>) : IBuffer {
         override var sharingMode = BufferSharingMode.Off
-        override fun beginDraw(gl: GLState) { calls += "beginDraw" }
-        override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) { calls += "pointers" }
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) { calls += "draw" }
         override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) { calls += "drawMesh" }
     }
 
-    private class ShaderComponent(private val ownShader: Boolean) : UIBufferedComponent<RecordingBuffer>() {
+    private class RecordingComponent : UIBufferedComponent<RecordingBuffer>() {
         val calls = ArrayList<String>()
-        override val drawsWithOwnShader: Boolean get() = ownShader
         override fun onCreateBuffer() = RecordingBuffer(calls)
         override fun onUpdateBuffer() = Unit
-        override fun onBindShader(pGLState: GLState) { calls += "bindShader" }
     }
 
     @Test
-    fun customShaderComponent_keepsLegacyPath() {
-        val custom = ShaderComponent(ownShader = true).apply {
+    fun bufferedComponent_drawsBufferThroughMesh() {
+        val component = RecordingComponent().apply {
             setSize(10f, 10f)
             depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_EQUAL)
             onHandleInvalidations()
         }
         glCalls.clear()
 
-        custom.doDraw(glState, camera)
+        component.doDraw(glState, camera)
 
-        assertEquals(listOf("beginDraw", "bindShader", "pointers", "draw"), custom.calls)
-        // The legacy path sets up the depth state itself and turns the test off afterwards.
-        assertTrue(glCalls.toString(), glCalls.contains("glDepthFunc(${GLES20.GL_EQUAL})"))
+        // The buffer is drawn once through the mesh renderer; the component binds no state of its own.
+        assertEquals(listOf("drawMesh"), component.calls)
+        assertFalse(glCalls.toString(), glCalls.any { it.startsWith("glBindBuffer") || it.startsWith("glVertexAttribPointer") })
         assertFalse(glState.isDepthTestEnabled)
-
-        val plain = ShaderComponent(ownShader = false).apply {
-            setSize(10f, 10f)
-            depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_EQUAL)
-            onHandleInvalidations()
-        }
-
-        plain.doDraw(glState, camera)
-
-        assertEquals(listOf("pointers", "drawMesh"), plain.calls)
     }
 }

@@ -5,7 +5,6 @@ import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
-import com.reco1l.andengine.buffered.GL_DYNAMIC_DRAW
 import com.reco1l.andengine.buffered.UIBufferedComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.shape.ShapeBatching
@@ -83,8 +82,7 @@ class UIGradientBox(
      *   offset 20 : A  (float, gradient weight × drawAlpha)
      */
     inner class GradientVBO : Buffer(
-        capacity = 4 * VERTEX_FLOATS,
-        bufferUsage = GL_DYNAMIC_DRAW,
+        capacity = 4 * VERTEX_FLOATS
     ) {
 
         /** Re-fills the buffer with the current entity size, color, and composed alpha. */

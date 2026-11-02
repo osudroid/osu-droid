@@ -270,7 +270,6 @@ class ScissorStackBatchTest {
         val seen = ArrayList<List<Int>?>()
         val legacy = object : UIBox() {
             override fun beginDraw(pGLState: GLState) {}
-            override fun onDeclarePointers(gl: GLState) {}
             override fun onDrawBuffer(gl: GLState) { seen += scissors.lastOrNull() }
         }.apply {
             setSize(20f, 10f)
