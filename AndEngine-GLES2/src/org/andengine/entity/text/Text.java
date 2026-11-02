@@ -6,9 +6,9 @@ import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.text.exception.OutOfCharactersException;
 import org.andengine.graphics.DrawContext;
-import org.andengine.opengl.font.FontUtils;
-import org.andengine.opengl.font.IFont;
-import org.andengine.opengl.font.Letter;
+import org.andengine.graphics.text.FontUtils;
+import org.andengine.graphics.text.IFont;
+import org.andengine.graphics.text.Letter;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.adt.list.FloatArrayList;
 import org.andengine.util.adt.list.IFloatList;
@@ -249,8 +249,8 @@ public class Text extends RectangularShape {
 	// ===========================================================
 
 	@Override
-	protected void draw(final DrawContext pGLState, final Camera pCamera) {
-		TextBatching.add(this, pGLState, this.mCharactersToDraw);
+	protected void draw(final DrawContext pDrawContext, final Camera pCamera) {
+		TextBatching.add(this, pDrawContext, this.mCharactersToDraw);
 	}
 
 	/**

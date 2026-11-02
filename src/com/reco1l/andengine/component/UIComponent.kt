@@ -658,7 +658,7 @@ abstract class UIComponent : Entity(0f, 0f),
         drawAlpha = alpha
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, camera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, camera: Camera) {
 
         val isCulled = isCulled(camera)
 
@@ -676,7 +676,7 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = pGLState.isScissorTestEnabled
+            val wasScissorTestEnabled = drawContext.isScissorTestEnabled
 
             // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
@@ -689,16 +689,16 @@ abstract class UIComponent : Entity(0f, 0f),
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            pGLState.enableScissorTest()
+            drawContext.enableScissorTest()
             ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
-            doManagedDraw(pGLState, camera)
+            doManagedDraw(drawContext, camera)
             ScissorStack.pop()
 
             if (!wasScissorTestEnabled) {
-                pGLState.disableScissorTest()
+                drawContext.disableScissorTest()
             }
         } else {
-            doManagedDraw(pGLState, camera)
+            doManagedDraw(drawContext, camera)
         }
     }
 
@@ -756,44 +756,44 @@ abstract class UIComponent : Entity(0f, 0f),
         foreground?.onHandleInvalidations()
     }
 
-    private fun doManagedDraw(pGLState: DrawContext, camera: Camera) {
+    private fun doManagedDraw(drawContext: DrawContext, camera: Camera) {
 
         onHandleInvalidations()
-        pGLState.pushModelViewGLMatrix()
-        onApplyTransformations(pGLState)
+        drawContext.pushModelViewGLMatrix()
+        onApplyTransformations(drawContext)
 
         background?.setSize(width, height)
-        background?.onDraw(pGLState, camera)
+        background?.onDraw(drawContext, camera)
 
 
-        doDraw(pGLState, camera)
+        doDraw(drawContext, camera)
 
         // Draw children
         val children = mChildren
         if (children != null) {
             val childCount = children.size
             for (i in 0 until childCount) {
-                children.get(i)?.onDraw(pGLState, camera)
+                children.get(i)?.onDraw(drawContext, camera)
             }
         }
 
         foreground?.setSize(width, height)
-        foreground?.onDraw(pGLState, camera)
+        foreground?.onDraw(drawContext, camera)
 
         if (BuildSettings.SHOW_ENTITY_BOUNDARIES && DEBUG_FOREGROUND != this) {
             DEBUG_FOREGROUND.setSize(width, height)
-            DEBUG_FOREGROUND.onDraw(pGLState, camera)
+            DEBUG_FOREGROUND.onDraw(drawContext, camera)
         }
 
-        pGLState.popModelViewGLMatrix()
+        drawContext.popModelViewGLMatrix()
     }
 
-    open fun beginDraw(pGLState: DrawContext) {
-        onApplyColor(pGLState)
+    open fun beginDraw(drawContext: DrawContext) {
+        onApplyColor(drawContext)
     }
 
-    open fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        beginDraw(pGLState)
+    open fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        beginDraw(drawContext)
     }
 
     //endregion

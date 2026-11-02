@@ -7,8 +7,8 @@ import com.reco1l.framework.paintBitmap
 import java.io.IOException
 import java.io.InputStream
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.graphics.texture.StraightPixels
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.util.StreamUtils
 import org.andengine.util.debug.Debug
@@ -23,7 +23,7 @@ abstract class StreamBitmapSource(
     textureY: Int,
     textureWidth: Int,
     textureHeight: Int
-) : BaseTextureAtlasSource(textureX, textureY, textureWidth, textureHeight), IPixelTextureAtlasSource {
+) : BaseTextureAtlasSource(textureX, textureY, textureWidth, textureHeight), RawPixelSource {
 
     private var bitmap: Bitmap? = null
 

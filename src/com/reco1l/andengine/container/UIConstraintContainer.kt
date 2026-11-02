@@ -15,7 +15,7 @@ open class UIConstraintContainer : UIContainer() {
     private val constraints = mutableMapOf<UIComponent, UIComponent>()
 
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
 
         mChildren?.forEach { child ->
 
@@ -41,7 +41,7 @@ open class UIConstraintContainer : UIContainer() {
             child.y = -cancelledY + targetY + targetHeight * child.anchor.y
         }
 
-        super.doDraw(pGLState, pCamera)
+        super.doDraw(drawContext, pCamera)
     }
 
     /**

@@ -9,8 +9,8 @@ import org.andengine.engine.camera.Camera
 import org.andengine.entity.text.TextBatching
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.opengl.font.*
-import org.andengine.opengl.font.exception.FontException
+import org.andengine.graphics.text.*
+import org.andengine.graphics.text.exception.FontException
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 
@@ -108,8 +108,8 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         contentHeight = lines.size.toFloat() * font.lineHeight
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        onApplyColor(pGLState)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
         clearIfRequested()
 
@@ -125,8 +125,8 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         val fillColor = TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
         val strokeColor = TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
 
-        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-        val modelView = pGLState.modelViewGLMatrix
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
+        val modelView = drawContext.modelViewGLMatrix
 
         val lineHeight = font.lineHeight
         val alignment = alignment
@@ -157,16 +157,16 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         }
     }
 
-    override fun onApplyTransformations(pGLState: DrawContext) {
+    override fun onApplyTransformations(drawContext: DrawContext) {
 
         val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
         val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f
 
         if (scrollTranslationX != 0f || scrollTranslationY != 0f) {
-            pGLState.translateModelViewGLMatrixf(-scrollTranslationX, -scrollTranslationY, 0f)
+            drawContext.translateModelViewGLMatrixf(-scrollTranslationX, -scrollTranslationY, 0f)
         }
 
-        super.onApplyTransformations(pGLState)
+        super.onApplyTransformations(drawContext)
     }
 
 

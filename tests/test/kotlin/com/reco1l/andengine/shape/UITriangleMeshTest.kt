@@ -24,7 +24,7 @@ import com.osudroid.testing.endOpenPass
 class UITriangleMeshTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -32,8 +32,8 @@ class UITriangleMeshTest {
         gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 0
         GlesBackend.surfaceHeight = 0
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
         gl.calls.clear()
     }
 
@@ -54,8 +54,8 @@ class UITriangleMeshTest {
     }
 
     private fun drawMesh(mesh: UITriangleMesh) {
-        mesh.beginDraw(glState)
-        mesh.doDraw(glState, camera)
+        mesh.beginDraw(drawContext)
+        mesh.doDraw(drawContext, camera)
     }
 
     private val triangle = floatArrayOf(0f, 0f, 10f, 0f, 0f, 10f)

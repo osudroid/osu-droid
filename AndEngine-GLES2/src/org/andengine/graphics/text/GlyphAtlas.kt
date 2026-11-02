@@ -62,7 +62,7 @@ class GlyphSlot(
 ) {
     /**
      * True once the image of this slot was written to the current GPU texture by [GlyphAtlas.upload].
-     * Cleared by [Font.invalidateLetters][org.andengine.opengl.font.Font.invalidateLetters] and by
+     * Cleared by [Font.invalidateLetters][org.andengine.graphics.text.Font.invalidateLetters] and by
      * [ShapeMasks.onContextLost][org.andengine.graphics.shape.ShapeMasks.onContextLost] when
      * the atlas textures were lost; drawing skips slots that are not uploaded, because the texels
      * of a fresh texture are undefined.

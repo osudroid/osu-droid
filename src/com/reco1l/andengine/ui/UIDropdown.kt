@@ -88,7 +88,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
 
         if (isExpanded) {
             val (sceneSpaceX, sceneSpaceY) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
@@ -98,7 +98,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             maxHeight = min(optionsContainer.height, parent.getHeight() - sceneSpaceY)
         }
 
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
 

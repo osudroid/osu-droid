@@ -57,8 +57,8 @@ class UITriangleMesh : UIComponent() {
     private var cachedDestination = -1
     private var cachedBlend = BlendMode.Alpha
 
-    override fun beginDraw(pGLState: DrawContext) {
-        super.beginDraw(pGLState)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
 
         // Clearing
         var clearMask = 0
@@ -77,17 +77,17 @@ class UITriangleMesh : UIComponent() {
 
         // The depth state itself comes from the pipeline of the draw.
         if (!depthInfo.test) {
-            pGLState.disableDepthTest()
+            drawContext.disableDepthTest()
         }
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        super.doDraw(pGLState, pCamera)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        super.doDraw(drawContext, pCamera)
 
         if (vertices.length == 0) {
             // Ensure depth test is cleaned up even if there's nothing to render.
             if (depthInfo.test) {
-                pGLState.disableDepthTest()
+                drawContext.disableDepthTest()
             }
             return
         }
@@ -123,7 +123,7 @@ class UITriangleMesh : UIComponent() {
         MeshRenderer.draw(
             PrimitiveType.Triangles,
             vertices.ary, vertices.offset, vertices.length / 2,
-            pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
+            drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
             cachedBlend, depthTest, depthInfo.mask
         )
@@ -131,7 +131,7 @@ class UITriangleMesh : UIComponent() {
         // The mesh renderer restores the state it found; disable the depth test after drawing so
         // subsequent entities (sprites, circles, etc.) are not accidentally tested against values we wrote.
         if (depthInfo.test) {
-            pGLState.disableDepthTest()
+            drawContext.disableDepthTest()
         }
     }
 

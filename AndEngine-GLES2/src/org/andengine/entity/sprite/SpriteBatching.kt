@@ -58,15 +58,15 @@ object SpriteBatching {
     }
 
     /**
-     * Adds the sprite's quad, transformed by the current model-view matrix of [glState], colored
+     * Adds the sprite's quad, transformed by the current model-view matrix of [drawContext], colored
      * with the sprite's own color and alpha.
      */
     @JvmStatic
-    fun add(sprite: Sprite, glState: DrawContext) {
+    fun add(sprite: Sprite, drawContext: DrawContext) {
         val blend = batchBlendOf(sprite)
         val corners = sprite.corners
         val uvs = sprite.textureCoordinates
-        val m = glState.modelViewGLMatrix
+        val m = drawContext.modelViewGLMatrix
         val a = m[0]
         val b = m[1]
         val c = m[4]
@@ -82,7 +82,7 @@ object SpriteBatching {
             v[k] = uvs[2 * k + 1]
         }
         val rgba = sprite.color.abgrPackedInt
-        QuadBatcher.setProjection(glState.projectionGLMatrix)
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
         QuadBatcher.addQuad(BatchTexture.of(sprite.textureRegion.texture), blend, x, y, u, v, rgba)
     }
 }

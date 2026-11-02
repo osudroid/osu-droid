@@ -86,8 +86,8 @@ public class CameraScene extends Scene {
 	}
 
 	@Override
-	protected void onApplyMatrix(final DrawContext pGLState, final Camera pCamera) {
-		this.mCamera.onApplyCameraSceneMatrix(pGLState);
+	protected void onApplyMatrix(final DrawContext pDrawContext, final Camera pCamera) {
+		this.mCamera.onApplyCameraSceneMatrix(pDrawContext);
 	}
 
 	// ===========================================================

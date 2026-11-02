@@ -33,7 +33,7 @@ import com.osudroid.testing.endOpenPass
 class UIBufferedComponentMeshTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -41,8 +41,8 @@ class UIBufferedComponentMeshTest {
         gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 100
         GlesBackend.surfaceHeight = 100
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
     }
 
     @After
@@ -66,7 +66,7 @@ class UIBufferedComponentMeshTest {
         val box = depthMaskedBox()
         gl.calls.clear()
 
-        box.doDraw(glState, camera)
+        box.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 1, draws())
         val draw = gl.calls.indexOfFirst { it.startsWith("glDrawArrays") }
@@ -91,7 +91,7 @@ class UIBufferedComponentMeshTest {
         }
         gl.calls.clear()
 
-        box.doDraw(glState, camera)
+        box.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 1, draws())
         val draw = gl.calls.indexOfFirst { it.startsWith("glDrawArrays") }
@@ -107,11 +107,11 @@ class UIBufferedComponentMeshTest {
         val box = depthMaskedBox { clearInfo = ClearInfo.ClearDepthBuffer }
         // A batched box is pending; the clear must not overtake it.
         val batched = UIBox().apply { setSize(5f, 5f); onHandleInvalidations() }
-        batched.doDraw(glState, camera)
+        batched.doDraw(drawContext, camera)
         assertTrue(QuadBatcher.hasPending)
         gl.calls.clear()
 
-        box.doDraw(glState, camera)
+        box.doDraw(drawContext, camera)
 
         val clear = gl.calls.indexOf("glClear(${GLES20.GL_DEPTH_BUFFER_BIT})")
         assertTrue(gl.calls.toString(), clear >= 0)
@@ -129,7 +129,7 @@ class UIBufferedComponentMeshTest {
         }
         gl.calls.clear()
 
-        box.doDraw(glState, camera)
+        box.doDraw(drawContext, camera)
 
         val draw = gl.calls.indexOfFirst { it.startsWith("glDrawArrays(${GLES20.GL_LINE_STRIP}") }
         assertTrue(gl.calls.toString(), draw >= 0)
@@ -146,7 +146,7 @@ class UIBufferedComponentMeshTest {
         }
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertEquals(gl.calls.toString(), 1, draws())
@@ -171,7 +171,7 @@ class UIBufferedComponentMeshTest {
         }
         gl.calls.clear()
 
-        gradient.doDraw(glState, camera)
+        gradient.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 1, draws())
         assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glDrawArrays(${GLES20.GL_TRIANGLE_STRIP}") })
@@ -203,7 +203,7 @@ class UIBufferedComponentMeshTest {
         }
         gl.calls.clear()
 
-        component.doDraw(glState, camera)
+        component.doDraw(drawContext, camera)
 
         // The buffer is drawn once through the mesh renderer; the component binds no state of its own.
         assertEquals(listOf("drawMesh"), component.calls)

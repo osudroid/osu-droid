@@ -36,8 +36,8 @@ import org.andengine.input.touch.controller.ITouchController;
 import org.andengine.input.touch.controller.ITouchEventCallback;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.controller.SingleTouchController;
-import org.andengine.opengl.font.FontFactory;
-import org.andengine.opengl.font.FontManager;
+import org.andengine.graphics.text.FontFactory;
+import org.andengine.graphics.text.FontManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.util.debug.Debug;
@@ -622,11 +622,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		this.getCamera().onUpdate(pSecondsElapsed);
 	}
 
-	protected void onUpdateDrawHandlers(final DrawContext pGLState, final Camera pCamera) {
-		this.mDrawHandlers.onDraw(pGLState, pCamera);
+	protected void onUpdateDrawHandlers(final DrawContext pDrawContext, final Camera pCamera) {
+		this.mDrawHandlers.onDraw(pDrawContext, pCamera);
 	}
 
-	public void onDrawFrame(final DrawContext pGLState) throws InterruptedException {
+	public void onDrawFrame(final DrawContext pDrawContext) throws InterruptedException {
 		final EngineLock engineLock = this.mEngineLock;
 
 		engineLock.lock();
@@ -638,8 +638,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mIsLagging |= this.mTextureManager.updateTextures();
 			this.mIsLagging |= this.mFontManager.updateFonts();
 
-			this.onUpdateDrawHandlers(pGLState, this.mCamera);
-			this.onDrawScene(pGLState, this.mCamera);
+			this.onUpdateDrawHandlers(pDrawContext, this.mCamera);
+			this.onDrawScene(pDrawContext, this.mCamera);
 			QuadBatcher.flushFrame();
 			RenderStats.endDraw();
 
@@ -649,12 +649,12 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		}
 	}
 
-	protected void onDrawScene(final DrawContext pGLState, final Camera pCamera) {
+	protected void onDrawScene(final DrawContext pDrawContext, final Camera pCamera) {
 		if(this.mScene != null) {
-			this.mScene.onDraw(pGLState, pCamera);
+			this.mScene.onDraw(pDrawContext, pCamera);
 		}
 
-		pCamera.onDrawHUD(pGLState);
+		pCamera.onDrawHUD(pDrawContext);
 	}
 
 	private long getNanosecondsElapsed() {

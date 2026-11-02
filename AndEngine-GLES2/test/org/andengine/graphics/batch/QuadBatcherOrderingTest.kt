@@ -38,7 +38,7 @@ class QuadBatcherOrderingTest {
 
     private lateinit var gl: RecordingGL
     private lateinit var texture: GlesTexture
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
 
     private val triangle = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f)
 
@@ -257,7 +257,7 @@ class QuadBatcherOrderingTest {
         gl.calls.clear()
         add()
 
-        engine.onDrawFrame(glState)
+        engine.onDrawFrame(drawContext)
 
         assertFalse(QuadBatcher.hasPending)
         assertTrue(gl.calls.toString(), indexOfBatchDraw() >= 0)

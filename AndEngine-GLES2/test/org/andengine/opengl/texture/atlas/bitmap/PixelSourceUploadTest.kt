@@ -16,12 +16,12 @@ import org.andengine.graphics.gles.bytesOf
 import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.ITextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat
 import org.junit.Assert.assertArrayEquals
@@ -61,7 +61,7 @@ class PixelSourceUploadTest {
     }
 
     /** A 3x2 pixel source with distinct bytes per channel. */
-    private class FakePixelSource : BaseTextureAtlasSource(0, 0, 3, 2), IPixelTextureAtlasSource {
+    private class FakePixelSource : BaseTextureAtlasSource(0, 0, 3, 2), RawPixelSource {
         val bytes = ByteArray(3 * 2 * 4) { (it * 7 + 1).toByte() }
         var pixelLoads = 0
         var bitmapLoads = 0
@@ -159,7 +159,7 @@ class PixelSourceUploadTest {
     fun pixelSource_nullPixelsFallBackToBitmap() {
         val listener = RecordingListener()
         val atlas = Atlas(listener)
-        val source = object : BaseTextureAtlasSource(0, 0, 3, 2), IPixelTextureAtlasSource {
+        val source = object : BaseTextureAtlasSource(0, 0, 3, 2), RawPixelSource {
             override fun onLoadPixels(): Pixels? = null
             override fun onLoadBitmap(pBitmapConfig: Bitmap.Config): Bitmap = Bitmap.createBitmap(3, 2, Bitmap.Config.ARGB_8888)
             override fun deepCopy() = this
@@ -273,7 +273,7 @@ class PixelSourceUploadTest {
     }
 
     /** Decodes [png] like the app's sources: bitmap path with the default (premultiplied) decoding, pixels in either variant. */
-    private class PngSource(val png: ByteArray, width: Int) : BaseTextureAtlasSource(0, 0, width, 1), IPixelTextureAtlasSource {
+    private class PngSource(val png: ByteArray, width: Int) : BaseTextureAtlasSource(0, 0, width, 1), RawPixelSource {
         val requestedVariants = ArrayList<Boolean>()
         var bitmapLoads = 0
 
@@ -367,7 +367,7 @@ class PixelSourceUploadTest {
     @Test
     fun wrongVariant_fallsBackToBitmap() {
         /** Claims both variants but always delivers [deliver]. */
-        class WrongVariantSource(val deliver: Boolean) : BaseTextureAtlasSource(0, 0, 1, 1), IPixelTextureAtlasSource {
+        class WrongVariantSource(val deliver: Boolean) : BaseTextureAtlasSource(0, 0, 1, 1), RawPixelSource {
             var bitmapLoads = 0
             override fun canLoadPixels(premultiplied: Boolean) = true
             override fun onLoadPixels(): Pixels? = onLoadPixels(false)

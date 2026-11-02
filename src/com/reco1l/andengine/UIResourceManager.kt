@@ -5,9 +5,9 @@ package com.reco1l.andengine
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontFactory
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontFactory
+import org.andengine.graphics.text.FontManager
 
 /**
  * @param fontManager supplies the font manager the fonts are loaded with. Tests pass their own.

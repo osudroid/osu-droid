@@ -10,12 +10,12 @@ import org.andengine.graphics.gles.bytesOf
 import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -146,7 +146,7 @@ class PixelPageTest {
         override fun deepCopy() = this
     }
 
-    private class PixelSource(private val image: () -> Pixels) : BaseTextureAtlasSource(0, 0, 2, 1), IPixelTextureAtlasSource {
+    private class PixelSource(private val image: () -> Pixels) : BaseTextureAtlasSource(0, 0, 2, 1), RawPixelSource {
         var pixelLoads = 0
         var bitmapLoads = 0
 

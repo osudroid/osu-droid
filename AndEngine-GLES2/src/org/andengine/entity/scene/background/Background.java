@@ -131,7 +131,7 @@ public class Background implements IBackground {
 	}
 
 	@Override
-	public void onDraw(final DrawContext pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
 		if(this.mColorEnabled) {
 			GlesBackend.getState().clearColor(this.mColor.getRed(), this.mColor.getGreen(), this.mColor.getBlue(), this.mColor.getAlpha());
 			GlesBackend.getState().clear(GLES32.GL_COLOR_BUFFER_BIT); // TODO Does this cause problems when multisampling?

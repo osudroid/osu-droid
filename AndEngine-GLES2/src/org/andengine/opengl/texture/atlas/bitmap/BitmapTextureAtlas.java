@@ -4,14 +4,15 @@ import java.util.ArrayList;
 
 import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.gles.GlesTextures;
+import org.andengine.graphics.texture.AtlasPixelLoader;
 import org.andengine.graphics.texture.Pixels;
+import org.andengine.graphics.texture.RawPixelSource;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.TextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource;
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
 import org.andengine.util.exception.NullBitmapException;
@@ -137,16 +138,16 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	// ===========================================================
 
 	/**
-	 * Whether the sources are uploaded as RGBA bytes ({@link IPixelTextureAtlasSource#onLoadPixels(boolean)}),
+	 * Whether the sources are uploaded as RGBA bytes ({@link RawPixelSource#onLoadPixels(boolean)}),
 	 * premultiplied or straight as {@link TextureOptions#mPreMultiplyAlpha} says.
 	 */
 	private boolean uploadsPixelsDirectly() {
 		return this.mBitmapTextureFormat.getPixelFormat() == PixelFormat.RGBA_8888;
 	}
 
-	/** Whether {@code pSource} delivers the bytes of this atlas' variant (see {@link IPixelTextureAtlasSource#canLoadPixels(boolean)}). */
+	/** Whether {@code pSource} delivers the bytes of this atlas' variant (see {@link RawPixelSource#canLoadPixels(boolean)}). */
 	private boolean deliversPixels(final IBitmapTextureAtlasSource pSource) {
-		return pSource instanceof IPixelTextureAtlasSource && ((IPixelTextureAtlasSource) pSource).canLoadPixels(this.mTextureOptions.mPreMultiplyAlpha);
+		return pSource instanceof RawPixelSource && ((RawPixelSource) pSource).canLoadPixels(this.mTextureOptions.mPreMultiplyAlpha);
 	}
 
 	/**
@@ -169,41 +170,41 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	}
 
 	/**
-	 * Called on the GL thread. Returns a preparation that loads the pixels of all sources on a background
+	 * Called on the GL thread. Returns a loader that loads the pixels of all sources on a background
 	 * thread, or {@code null} unless {@link #canPreparePixels()}.
 	 */
-	public PixelPreparation createPixelPreparation() {
-		return this.canPreparePixels() ? this.createPixelPreparationUnchecked() : null;
+	public AtlasPixelLoader createPixelLoader() {
+		return this.canPreparePixels() ? this.createPixelLoaderUnchecked() : null;
 	}
 
 	/**
-	 * Like {@link #createPixelPreparation()}, for a caller that has just checked {@link #canPreparePixels()}
+	 * Like {@link #createPixelLoader()}, for a caller that has just checked {@link #canPreparePixels()}
 	 * on the GL thread (the sources cannot have changed in between).
 	 */
-	public PixelPreparation createPixelPreparationUnchecked() {
+	public AtlasPixelLoader createPixelLoaderUnchecked() {
 		final ArrayList<IBitmapTextureAtlasSource> textureSources = this.mTextureAtlasSources;
 		final int textureSourceCount = textureSources.size();
-		final ArrayList<IPixelTextureAtlasSource> pixelSources = new ArrayList<IPixelTextureAtlasSource>(textureSourceCount);
+		final ArrayList<RawPixelSource> pixelSources = new ArrayList<RawPixelSource>(textureSourceCount);
 		for(int i = 0; i < textureSourceCount; i++) {
-			pixelSources.add((IPixelTextureAtlasSource) textureSources.get(i));
+			pixelSources.add((RawPixelSource) textureSources.get(i));
 		}
-		return new PixelPreparation(pixelSources, this.mWidth, this.mHeight, this.mTextureOptions.mPreMultiplyAlpha);
+		return new AtlasPixelLoader(pixelSources, this.mWidth, this.mHeight, this.mTextureOptions.mPreMultiplyAlpha);
 	}
 
 	/**
-	 * Called on the GL thread right before loading: the next write uploads the pixels of {@code pPreparation}
+	 * Called on the GL thread right before loading: the next write uploads the pixels of {@code pPixelLoader}
 	 * instead of loading them, as long as they still belong to the current sources. {@code null} clears it.
 	 */
-	public void usePreparedPixels(final PixelPreparation pPreparation) {
-		this.mPreparedPixels = (pPreparation == null) ? null : pPreparation.take(this.mTextureAtlasSources);
+	public void usePreparedPixels(final AtlasPixelLoader pPixelLoader) {
+		this.mPreparedPixels = (pPixelLoader == null) ? null : pPixelLoader.take(this.mTextureAtlasSources);
 	}
 
 	/**
-	 * Called on the GL thread. Whether {@code pPreparation} was made from this atlas' current sources (none
+	 * Called on the GL thread. Whether {@code pPixelLoader} was made from this atlas' current sources (none
 	 * added or moved since), so its pixels would still be used by the next write.
 	 */
-	public boolean isPreparationCurrent(final PixelPreparation pPreparation) {
-		return pPreparation.matches(this.mTextureAtlasSources);
+	public boolean isPreparationCurrent(final AtlasPixelLoader pPixelLoader) {
+		return pPixelLoader.matches(this.mTextureAtlasSources);
 	}
 
 	@Override
@@ -234,7 +235,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 		final ITextureAtlasStateListener<IBitmapTextureAtlasSource> textureStateListener = this.getTextureAtlasStateListener();
 		for(int i = 0; i < textureSourceCount; i++) {
 			final IBitmapTextureAtlasSource bitmapTextureAtlasSource = textureSources.get(i);
-			if(uploadPixelsDirectly && this.deliversPixels(bitmapTextureAtlasSource) && this.uploadPixels((IPixelTextureAtlasSource) bitmapTextureAtlasSource, preparedPixels, i)) {
+			if(uploadPixelsDirectly && this.deliversPixels(bitmapTextureAtlasSource) && this.uploadPixels((RawPixelSource) bitmapTextureAtlasSource, preparedPixels, i)) {
 				if(textureStateListener != null) {
 					textureStateListener.onTextureAtlasSourceLoaded(this, bitmapTextureAtlasSource);
 				}
@@ -287,7 +288,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	 *
 	 * @return {@code false} if the source has no pixels of this atlas' variant, so the bitmap path loads it instead.
 	 */
-	private boolean uploadPixels(final IPixelTextureAtlasSource pSource, final Pixels[] pPreparedPixels, final int pIndex) {
+	private boolean uploadPixels(final RawPixelSource pSource, final Pixels[] pPreparedPixels, final int pIndex) {
 		final boolean premultiplied = this.mTextureOptions.mPreMultiplyAlpha;
 		final Pixels pixels = (pPreparedPixels != null && pIndex < pPreparedPixels.length) ? pPreparedPixels[pIndex] : pSource.onLoadPixels(premultiplied);
 		if(pixels == null || pixels.getPremultiplied() != premultiplied) {

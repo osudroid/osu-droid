@@ -15,8 +15,8 @@ import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphMetrics
 import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.graphics.texture.Pixels
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontManager
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas

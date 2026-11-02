@@ -80,7 +80,7 @@ import org.andengine.graphics.gles.GlesDebugOptions;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.font.FontManager;
+import org.andengine.graphics.text.FontManager;
 import org.andengine.opengl.view.RenderSurfaceView;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;

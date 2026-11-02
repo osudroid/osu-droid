@@ -51,7 +51,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         )
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
 
         // Scaling the element inside the box
         element.setScaleCenter(0f, 0f)
@@ -63,7 +63,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         }
 
 
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
     //region Input handling

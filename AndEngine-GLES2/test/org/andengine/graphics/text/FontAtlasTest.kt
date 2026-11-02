@@ -1,12 +1,10 @@
-package org.andengine.opengl.font
+package org.andengine.graphics.text
 
 import android.opengl.GLES30
 import org.andengine.graphics.gles.FakeRasterizer
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.gles.installRecordingGL
-import org.andengine.graphics.text.GlyphArray
-import org.andengine.graphics.text.GlyphAtlas
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

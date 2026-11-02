@@ -27,7 +27,7 @@ import com.osudroid.testing.endOpenPass
 class StoryboardBatchTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val batch = StoryboardBatch()
 
     // u 0.125..0.625, v 0.125..0.625, 8 x 8 pixels.
@@ -46,7 +46,7 @@ class StoryboardBatchTest {
     private fun ByteBuffer.color(corner: Int) = getInt(corner * QuadBatcher.VERTEX_SIZE_BYTES + 16)
 
     private fun drawOne(sprite: PlayableSprite, region: TextureRegion = region(), alpha: Float = 1f): ByteBuffer {
-        batch.begin(glState)
+        batch.begin(drawContext)
         batch.draw(sprite, region, alpha)
         QuadBatcher.flush()
         return gl.lastUpload()
@@ -70,7 +70,7 @@ class StoryboardBatchTest {
         val page = Page(7)
         val region = region(page)
 
-        batch.begin(glState)
+        batch.begin(drawContext)
         batch.drawQuad(region, 0f, 0f, 100f, 100f, 0f, 0f, 0f, 1f)
         batch.setSpace(5f, 5f, 2f)
         batch.draw(sprite(1f, 1f), region, 1f)
@@ -102,7 +102,7 @@ class StoryboardBatchTest {
     fun additiveSprite_usesAdditiveBlend() {
         val region = region()
 
-        batch.begin(glState)
+        batch.begin(drawContext)
         batch.draw(sprite(), region, 1f)
         batch.draw(sprite().apply { additiveBlend = true }, region, 1f)
         QuadBatcher.flush()
@@ -182,7 +182,7 @@ class StoryboardBatchTest {
         assertEquals(64, (vertices.color(0) ushr 24) and 0xFF)
 
         val dimmed = run {
-            batch.begin(glState)
+            batch.begin(drawContext)
             batch.draw(sprite().apply { red = 1f; green = 1f; blue = 1f }, region(), 1f, 0.5f)
             QuadBatcher.flush()
             gl.lastUpload()

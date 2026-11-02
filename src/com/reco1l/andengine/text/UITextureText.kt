@@ -147,8 +147,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         super.contentHeight = contentHeight
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        onApplyColor(pGLState)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
         clearIfRequested()
 
@@ -159,8 +159,8 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         val blend = meshBlendMode()
         val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
 
-        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
-        val modelView = pGLState.modelViewGLMatrix
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
+        val modelView = drawContext.modelViewGLMatrix
 
         var offsetX = when (textAlign) {
             TextAlign.Left -> 0f

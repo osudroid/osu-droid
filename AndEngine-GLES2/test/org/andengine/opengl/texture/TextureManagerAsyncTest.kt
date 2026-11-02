@@ -9,9 +9,9 @@ import org.andengine.graphics.gles.bitmapUploads
 import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.graphics.gles.subImageCalls
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat
 import org.junit.Assert.assertArrayEquals
@@ -48,7 +48,7 @@ class TextureManagerAsyncTest {
         var nullPixels: Boolean = false,
         var error: Error? = null,
         val premultipliedPixels: Boolean = false
-    ) : BaseTextureAtlasSource(0, 0, 2, 2), IPixelTextureAtlasSource {
+    ) : BaseTextureAtlasSource(0, 0, 2, 2), RawPixelSource {
         val bytes = ByteArray(2 * 2 * 4) { (it * 7 + seed).toByte() }
         var pixelLoads = 0
         var bitmapLoads = 0

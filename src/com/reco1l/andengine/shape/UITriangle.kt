@@ -62,9 +62,9 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>(batchesShape = true) {
         }
     }
 
-    override fun beginDraw(pGLState: DrawContext) {
-        super.beginDraw(pGLState)
-        pGLState.lineWidth(lineWidth)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
+        drawContext.lineWidth(lineWidth)
     }
 
 

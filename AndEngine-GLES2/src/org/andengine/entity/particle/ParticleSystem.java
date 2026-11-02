@@ -104,9 +104,9 @@ public class ParticleSystem<T extends IEntity> extends Entity {
 	}
 
 	@Override
-	protected void onManagedDraw(final DrawContext pGLState, final Camera pCamera) {
+	protected void onManagedDraw(final DrawContext pDrawContext, final Camera pCamera) {
 		for(int i = this.mParticlesAlive - 1; i >= 0; i--) {
-			this.mParticles[i].onDraw(pGLState, pCamera);
+			this.mParticles[i].onDraw(pDrawContext, pCamera);
 		}
 	}
 

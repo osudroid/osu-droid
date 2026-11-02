@@ -217,7 +217,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
 
     //region Drawing
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
         cameraWidth = pCamera.widthRaw
         cameraHeight = pCamera.heightRaw
 
@@ -226,7 +226,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = pGLState.isScissorTestEnabled
+            val wasScissorTestEnabled = drawContext.isScissorTestEnabled
 
             // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
@@ -239,16 +239,16 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            pGLState.enableScissorTest()
+            drawContext.enableScissorTest()
             ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
-            super.onManagedDraw(pGLState, pCamera)
+            super.onManagedDraw(drawContext, pCamera)
             ScissorStack.pop()
 
             if (!wasScissorTestEnabled) {
-                pGLState.disableScissorTest()
+                drawContext.disableScissorTest()
             }
         } else {
-            super.onManagedDraw(pGLState, pCamera)
+            super.onManagedDraw(drawContext, pCamera)
         }
     }
 

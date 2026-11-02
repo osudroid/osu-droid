@@ -25,7 +25,7 @@ import com.osudroid.testing.endOpenPass
 class UITextureTextBatchingTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -54,9 +54,9 @@ class UITextureTextBatchingTest {
     private fun lastQuads() = quadsOf(gl.vertexUploads.last())
 
     private fun draw(text: UITextureText) {
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        text.doDraw(glState, camera)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        text.doDraw(drawContext, camera)
         QuadBatcher.flush()
     }
 
@@ -94,11 +94,11 @@ class UITextureTextBatchingTest {
         text.fixedCharWidths = mapOf('2' to 20f)
         text.text = "123"
 
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        glState.translateModelViewGLMatrixf(30f, 40f, 0f)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        drawContext.translateModelViewGLMatrixf(30f, 40f, 0f)
 
-        text.doDraw(glState, camera)
+        text.doDraw(drawContext, camera)
         // Different textures: one draw per glyph.
         QuadBatcher.flush()
         assertEquals(3, draws())
@@ -170,11 +170,11 @@ class UITextureTextBatchingTest {
         val second = UITextureText(characters).apply { text = "11"; blendInfo = BlendInfo.Additive }
         val third = UITextureText(characters).apply { text = "11" }
 
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        first.doDraw(glState, camera)
-        second.doDraw(glState, camera)
-        third.doDraw(glState, camera)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        first.doDraw(drawContext, camera)
+        second.doDraw(drawContext, camera)
+        third.doDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(3, draws())

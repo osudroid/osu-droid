@@ -44,10 +44,10 @@ public class EntityBackground extends Background {
 	// ===========================================================
 
 	@Override
-	public void onDraw(final DrawContext pGLState, final Camera pCamera) {
-		super.onDraw(pGLState, pCamera);
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
+		super.onDraw(pDrawContext, pCamera);
 
-		this.mEntity.onDraw(pGLState, pCamera);
+		this.mEntity.onDraw(pDrawContext, pCamera);
 	}
 
 	// ===========================================================

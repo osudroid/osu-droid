@@ -154,8 +154,8 @@ class CursorTrail(
         writeIndex = (writeIndex + 1) % MAX_PARTS
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        super.doDraw(pGLState, pCamera)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        super.doDraw(drawContext, pCamera)
 
         val halfW = textureRegion.width * cursorSprite.scaleX / 2f
         val halfH = textureRegion.height * cursorSprite.scaleY / 2f
@@ -183,8 +183,8 @@ class CursorTrail(
         // "Attached" trails (the skin has cursormiddle) glow additively; "disjoint" ones use normal alpha.
         val blend = if (disjointTrail) BlendMode.AlphaAllChannels else BlendMode.AdditiveAllChannels
 
-        val modelView = pGLState.modelViewGLMatrix
-        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+        val modelView = drawContext.modelViewGLMatrix
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
 
         for (i in 0 until MAX_PARTS) {
             val spawnMs = partSpawnMs[i]

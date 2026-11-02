@@ -2,8 +2,8 @@ package org.andengine.graphics.atlas
 
 import android.graphics.Bitmap
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 
 /**
@@ -28,7 +28,7 @@ class ExtrudedBitmapSource @JvmOverloads constructor(
     0,
     (if (rotated) source.textureHeight else source.textureWidth) + 2 * padding,
     (if (rotated) source.textureWidth else source.textureHeight) + 2 * padding
-), IPixelTextureAtlasSource {
+), RawPixelSource {
 
     override fun deepCopy(): ExtrudedBitmapSource {
         val copy = ExtrudedBitmapSource(source.deepCopy(), padding, rotated)
@@ -38,18 +38,18 @@ class ExtrudedBitmapSource @JvmOverloads constructor(
     }
 
     override fun canLoadPixels(premultiplied: Boolean): Boolean =
-        !rotated && source is IPixelTextureAtlasSource && source.canLoadPixels(premultiplied)
+        !rotated && source is RawPixelSource && source.canLoadPixels(premultiplied)
 
     override fun onLoadPixels(): Pixels? = onLoadPixels(false)
 
     /**
      * The image with its border extruded in the byte buffer, if [source] is an
-     * [IPixelTextureAtlasSource] that delivers pixels of the page's variant (straight or
+     * [RawPixelSource] that delivers pixels of the page's variant (straight or
      * premultiplied) and of its declared size. The extrusion copies texels as they are, so it fits
      * either variant.
      */
     override fun onLoadPixels(premultiplied: Boolean): Pixels? {
-        if (rotated || source !is IPixelTextureAtlasSource) return null
+        if (rotated || source !is RawPixelSource) return null
         // A null here makes the atlas decode again through onLoadBitmap.
         val image = source.onLoadPixels(premultiplied) ?: return null
         if (image.premultiplied != premultiplied) return null

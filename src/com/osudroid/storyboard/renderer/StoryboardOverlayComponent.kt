@@ -23,14 +23,14 @@ class StoryboardOverlayComponent internal constructor(
         height = Config.getRES_HEIGHT().toFloat()
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        beginDraw(pGLState)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        beginDraw(drawContext)
 
         val playback = storyboardComponent.playback ?: return
         val batch = storyboardComponent.batch
 
         val drawStart = RenderStats.now()
-        batch.begin(pGLState)
+        batch.begin(drawContext)
         storyboardComponent.drawLayers(playback, OVERLAY_LAYERS, drawAlpha, storyboardComponent.brightness)
         RenderStats.addTime(StoryboardRenderStats.TIME_TOTAL, drawStart)
     }

@@ -13,12 +13,12 @@ import java.io.File
 import java.nio.ByteBuffer
 import org.andengine.graphics.atlas.PixelPage
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.ITexture
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.texture.region.TextureRegionFactory
@@ -283,7 +283,7 @@ class StoryboardTexturePool @JvmOverloads constructor(
         private val ys: IntArray,
         // Tests replace the decoder to observe what it decodes.
         private val decode: (File) -> Pixels? = { StraightPixels.decodeFile(it.absolutePath) }
-    ) : BaseTextureAtlasSource(0, 0, width, height), IPixelTextureAtlasSource {
+    ) : BaseTextureAtlasSource(0, 0, width, height), RawPixelSource {
 
         override fun deepCopy() = FileImageSource(mTextureWidth, mTextureHeight, files, xs, ys, decode).also {
             it.setTextureX(mTextureX)

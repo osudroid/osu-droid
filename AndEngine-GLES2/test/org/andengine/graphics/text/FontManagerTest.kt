@@ -1,8 +1,7 @@
-package org.andengine.opengl.font
+package org.andengine.graphics.text
 
 import android.graphics.Typeface
 import org.andengine.graphics.gles.installRecordingGL
-import org.andengine.graphics.text.AndroidGlyphRasterizer
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

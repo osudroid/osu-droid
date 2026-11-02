@@ -131,8 +131,8 @@ public class Sprite extends RectangularShape {
 	}
 
 	@Override
-	protected void draw(final DrawContext pGLState, final Camera pCamera) {
-		SpriteBatching.add(this, pGLState);
+	protected void draw(final DrawContext pDrawContext, final Camera pCamera) {
+		SpriteBatching.add(this, pDrawContext);
 	}
 
 	@Override

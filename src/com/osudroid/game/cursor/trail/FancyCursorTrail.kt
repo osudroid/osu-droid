@@ -106,8 +106,8 @@ class FancyCursorTrail : UIComponent() {
 
     // Entity rendering
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        super.doDraw(pGLState, pCamera)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        super.doDraw(drawContext, pCamera)
 
         val n = pieces.size
         if (n < 2) return
@@ -161,7 +161,7 @@ class FancyCursorTrail : UIComponent() {
         MeshRenderer.drawColored(
             PrimitiveType.TriangleStrip,
             data, 0, vertCount,
-            pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
+            drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
             BlendMode.AdditiveAllChannels, depthTest = null, depthWrite = false
         )
     }

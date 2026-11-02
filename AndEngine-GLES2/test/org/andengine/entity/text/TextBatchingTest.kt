@@ -15,9 +15,9 @@ import org.andengine.graphics.gles.installRecordingGL
 import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphArray
 import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.font.StrokeFont
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontManager
+import org.andengine.graphics.text.StrokeFont
 import org.andengine.util.HorizontalAlign
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -36,7 +36,7 @@ class TextBatchingTest {
     private lateinit var atlas: GlyphAtlas
     private val fontManager = FontManager()
     private val fonts = ArrayList<Font>()
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 800f, 480f)
 
     @Before
@@ -85,7 +85,7 @@ class TextBatchingTest {
     @Test
     fun text_drawsOneGlyphPerVisibleLetter() {
         val t = text(font(), "ab c")
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(0, gl.arrayDraws())
@@ -98,7 +98,7 @@ class TextBatchingTest {
     fun text_colorAndAlphaPacked() {
         val t = text(font(), "a")
         t.setColor(1f, 0f, 0.5f, 0.5f)
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(listOf(255, 0, 128, 128), color(gl.lastVertices(), 0))
@@ -107,7 +107,7 @@ class TextBatchingTest {
     @Test
     fun strokeText_drawsFillThenStroke() {
         val font = StrokeFont(fontManager, FakeRasterizer(layers = 2), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), false).also { fonts += it }
-        text(font, "a").onDraw(glState, camera)
+        text(font, "a").onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val v = gl.lastVertices()
@@ -126,14 +126,14 @@ class TextBatchingTest {
     @Test
     fun strokeOnlyText_skipsFill() {
         val font = StrokeFont(fontManager, FakeRasterizer(layers = 2), atlas, 0xFFFF0000.toInt(), 0xFF0000FF.toInt(), true).also { fonts += it }
-        text(font, "a").onDraw(glState, camera)
+        text(font, "a").onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(1, quads())
     }
 
     @Test
     fun text_defaultBlendIsStraightAlpha() {
-        text(font(), "a").onDraw(glState, camera)
+        text(font(), "a").onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val expected = "glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"
@@ -206,14 +206,14 @@ class TextBatchingTest {
     fun text_shorterTextDrawsOnlyItsLetters() {
         val t = text(font(), "abc", 8)
         t.setText("a")
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(1, quads())
     }
 
     @Test
     fun emptyText_drawsNothing() {
-        text(font(), "", 4).onDraw(glState, camera)
+        text(font(), "", 4).onDraw(drawContext, camera)
         assertFalse(QuadBatcher.hasPending)
     }
 
@@ -221,12 +221,12 @@ class TextBatchingTest {
     fun text_colorReadAtDraw() {
         val t = text(font(), "a")
         t.setColor(1f, 0f, 0f, 1f)
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(listOf(255, 0, 0, 255), color(gl.lastVertices(), 0))
 
         t.setColor(0f, 0f, 1f)
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(listOf(0, 0, 255, 255), color(gl.lastVertices(), 0))
     }
@@ -235,7 +235,7 @@ class TextBatchingTest {
     fun text_unknownBlendFallsBackToAlpha() {
         val t = text(font(), "a")
         t.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
-        t.onDraw(glState, camera)
+        t.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()

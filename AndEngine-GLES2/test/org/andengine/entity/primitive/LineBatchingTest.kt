@@ -29,7 +29,7 @@ class LineBatchingTest {
 
     private lateinit var gl: RecordingGL
     private lateinit var masks: ShapeMasks
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -57,7 +57,7 @@ class LineBatchingTest {
     fun line_drawsThroughShapeBatching() {
         val line = Line(10f, 0f, 30f, 0f, 4f)
         line.setColor(1f, 0f, 0f, 0.5f)
-        line.onDraw(glState, camera)
+        line.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()
@@ -79,7 +79,7 @@ class LineBatchingTest {
         val line = Line(0f, 0f, 10f, 0f)
         line.setPosition(0f, 0f, 0f, 20f)
         line.lineWidth = 2f
-        line.onDraw(glState, camera)
+        line.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(setOf(-1f to 0f, -1f to 20f, 1f to 20f, 1f to 0f), corners(gl.lastVertices()))
@@ -89,7 +89,7 @@ class LineBatchingTest {
     fun line_blendFunctionCarriedOver() {
         val line = Line(0f, 0f, 10f, 0f)
         line.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
-        line.onDraw(glState, camera)
+        line.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val expected = "glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})"
@@ -100,7 +100,7 @@ class LineBatchingTest {
     fun line_unknownBlendFallsBackToAlpha() {
         val line = Line(0f, 0f, 10f, 0f)
         line.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
-        line.onDraw(glState, camera)
+        line.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val alpha = "glBlendFuncSeparate(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE_MINUS_SRC_ALPHA},${GLES20.GL_ONE},${GLES20.GL_ONE_MINUS_SRC_ALPHA})"

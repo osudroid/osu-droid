@@ -15,7 +15,7 @@ import org.andengine.graphics.gles.installShapeMasks
 import org.andengine.graphics.gles.lastVertices
 import org.andengine.graphics.text.GlyphAtlas
 import org.andengine.graphics.text.GlyphSlot
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.FontManager
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

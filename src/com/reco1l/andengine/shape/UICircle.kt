@@ -67,9 +67,9 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>(batchesShape = tru
     }
 
 
-    override fun beginDraw(pGLState: DrawContext) {
-        super.beginDraw(pGLState)
-        pGLState.lineWidth(lineWidth)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
+        drawContext.lineWidth(lineWidth)
     }
 
     override fun onSizeChanged() {

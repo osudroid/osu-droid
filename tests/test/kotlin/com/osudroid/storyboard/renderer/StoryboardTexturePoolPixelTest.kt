@@ -11,12 +11,12 @@ import com.osudroid.testing.writePng
 import java.io.File
 import java.nio.file.Files
 import org.andengine.graphics.texture.Pixels
+import org.andengine.graphics.texture.RawPixelSource
 import org.andengine.graphics.texture.StraightPixels
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.atlas.TextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.region.TextureRegion
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -116,7 +116,7 @@ class StoryboardTexturePoolPixelTest {
         assertEquals(4, (big.texture as BitmapTextureAtlas).height)
 
         for (region in listOf(a, single, big)) {
-            assertTrue(sourcesOf(region.texture as BitmapTextureAtlas).single() is IPixelTextureAtlasSource)
+            assertTrue(sourcesOf(region.texture as BitmapTextureAtlas).single() is RawPixelSource)
         }
     }
 
@@ -128,7 +128,7 @@ class StoryboardTexturePoolPixelTest {
 
         val a = pool.get("a.png")
         val b = pool.get("b.png")
-        val source = sourcesOf(a.texture as BitmapTextureAtlas).single() as IPixelTextureAtlasSource
+        val source = sourcesOf(a.texture as BitmapTextureAtlas).single() as RawPixelSource
 
         val first = checkNotNull(source.onLoadPixels())
         assertEquals(2048, first.width)
@@ -154,13 +154,13 @@ class StoryboardTexturePoolPixelTest {
 
         val missing = pool.get("missing.png")
         assertRegion(missing, 0, 0, 1, 1)
-        val source = sourcesOf(missing.texture as BitmapTextureAtlas).single() as IPixelTextureAtlasSource
+        val source = sourcesOf(missing.texture as BitmapTextureAtlas).single() as RawPixelSource
         val pixels = checkNotNull(source.onLoadPixels())
         assertEquals(listOf(255, 0, 0, 255), pixelAt(pixels, 0, 0))
 
         val lone = pool.get("lone-missing.png")
         assertRegion(lone, 0, 0, 1, 1)
-        val loneSource = sourcesOf(lone.texture as BitmapTextureAtlas).single() as IPixelTextureAtlasSource
+        val loneSource = sourcesOf(lone.texture as BitmapTextureAtlas).single() as RawPixelSource
         assertEquals(listOf(255, 0, 0, 255), pixelAt(checkNotNull(loneSource.onLoadPixels()), 0, 0))
     }
 
@@ -188,7 +188,7 @@ class StoryboardTexturePoolPixelTest {
 
         // The pool's own single textures take the same route.
         val region = pool.get("bg.png")
-        val poolSource = sourcesOf(region.texture as BitmapTextureAtlas).single() as IPixelTextureAtlasSource
+        val poolSource = sourcesOf(region.texture as BitmapTextureAtlas).single() as RawPixelSource
         val poolPixels = checkNotNull(poolSource.onLoadPixels())
         assertEquals(7, poolPixels.width)
         assertEquals(5, poolPixels.height)

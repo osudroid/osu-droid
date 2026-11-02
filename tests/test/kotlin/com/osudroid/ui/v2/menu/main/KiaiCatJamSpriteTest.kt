@@ -23,7 +23,7 @@ import com.osudroid.testing.endOpenPass
 class KiaiCatJamSpriteTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private fun frames(page: Page) = arrayOf(
@@ -58,7 +58,7 @@ class KiaiCatJamSpriteTest {
         val sprite = cat(Page(7)).apply { clipRadius = 0.4f }
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 1, gl.count("glDrawArrays"))
         assertFalse(QuadBatcher.hasPending)
@@ -83,7 +83,7 @@ class KiaiCatJamSpriteTest {
     @Test
     fun catJam_frameChangesUvs() {
         val sprite = cat(Page(7))
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
         val first = gl.lastProgramQuad()
         val u0 = first.getFloat(8)
         val v0 = first.getFloat(12)
@@ -91,7 +91,7 @@ class KiaiCatJamSpriteTest {
 
         sprite.textureRegion = sprite.frames[1]
         sprite.onHandleInvalidations()
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
         val second = gl.lastProgramQuad()
 
         assertEquals(0f, u0, 1e-6f)
@@ -108,7 +108,7 @@ class KiaiCatJamSpriteTest {
         val sprite = cat(Page(-1))
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 0, gl.count("glDrawArrays"))
         assertFalse(QuadBatcher.hasPending)

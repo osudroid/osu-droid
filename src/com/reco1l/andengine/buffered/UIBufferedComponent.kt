@@ -229,31 +229,31 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
         }
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         if (batchesShape) {
             val blend = if (canBatchShape()) batchBlendMode() else null
             if (blend != null) {
-                onApplyColor(pGLState)
+                onApplyColor(drawContext)
                 if (drawAlpha != 0f) {
-                    onDrawBatch(pGLState, blend)
+                    onDrawBatch(drawContext, blend)
                 }
                 return
             }
             ensureBuffer()
         }
 
-        super.doDraw(pGLState, pCamera)
-        onDrawBuffer(pGLState)
+        super.doDraw(drawContext, pCamera)
+        onDrawBuffer(drawContext)
 
         // Disable depth test after drawing so subsequent entities are not accidentally
         // depth-tested against values we wrote (same fix as in UITriangleMesh).
         if (depthInfo.test) {
-            pGLState.disableDepthTest()
+            drawContext.disableDepthTest()
         }
     }
 
-    override fun beginDraw(pGLState: DrawContext) {
-        super.beginDraw(pGLState)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
         clearIfRequested()
 
         // If it's a shared buffer, we might need to update it before drawing.
@@ -263,7 +263,7 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
 
         // The mesh renderer takes depth and blend from the pipeline of the draw.
         if (!depthInfo.test) {
-            pGLState.disableDepthTest()
+            drawContext.disableDepthTest()
         }
     }
 

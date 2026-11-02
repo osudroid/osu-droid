@@ -89,11 +89,11 @@ open class UIBox : UIBufferedComponent<BoxVBO>(batchesShape = true) {
         }
     }
 
-    override fun beginDraw(pGLState: DrawContext) {
-        super.beginDraw(pGLState)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
 
         if (paintStyle == Outline) {
-            pGLState.lineWidth(lineWidth)
+            drawContext.lineWidth(lineWidth)
         }
     }
 

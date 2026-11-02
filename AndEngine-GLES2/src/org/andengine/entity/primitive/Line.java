@@ -173,9 +173,9 @@ public class Line extends Shape {
 	 * centered on the segment, with the line's color and blend function.
 	 */
 	@Override
-	protected void draw(final DrawContext pGLState, final Camera pCamera) {
-		QuadBatcher.setProjection(pGLState.getProjectionGLMatrix());
-		ShapeBatching.line(pGLState.getModelViewGLMatrix(), 0, 0, this.mX2 - this.mX, this.mY2 - this.mY, this.mLineWidth, this.getColor().getABGRPackedInt(), SpriteBatching.batchBlendOf(this));
+	protected void draw(final DrawContext pDrawContext, final Camera pCamera) {
+		QuadBatcher.setProjection(pDrawContext.getProjectionGLMatrix());
+		ShapeBatching.line(pDrawContext.getModelViewGLMatrix(), 0, 0, this.mX2 - this.mX, this.mY2 - this.mY, this.mLineWidth, this.getColor().getABGRPackedInt(), SpriteBatching.batchBlendOf(this));
 	}
 
 	/** The end points are read from the line when it is drawn. */

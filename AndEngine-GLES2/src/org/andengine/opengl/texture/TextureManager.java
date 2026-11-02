@@ -10,9 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 
+import org.andengine.graphics.texture.AtlasPixelLoader;
+import org.andengine.graphics.texture.RawPixelSource;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.andengine.opengl.texture.atlas.bitmap.PixelPreparation;
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
 import org.andengine.util.adt.io.in.AssetInputStreamOpener;
@@ -47,7 +47,7 @@ public class TextureManager {
 	public static final long PREPARED_BYTES_IN_FLIGHT_DEFAULT = 64L * 1024 * 1024;
 
 	/** Returned by {@link #startPreparation(ITexture, HashMap)} while the in-flight limit is reached; compared by identity, never run. */
-	private static final PixelPreparation WAITING = new PixelPreparation(new ArrayList<IPixelTextureAtlasSource>(), 0, 0);
+	private static final AtlasPixelLoader WAITING = new AtlasPixelLoader(new ArrayList<RawPixelSource>(), 0, 0);
 
 	// ===========================================================
 	// Fields
@@ -70,13 +70,13 @@ public class TextureManager {
 	private final long mUploadBytesPerFrame;
 	private final long mPreparedBytesInFlight;
 	/** The preparation of each texture waiting in mTexturesToBeLoaded. */
-	private final HashMap<ITexture, PixelPreparation> mPreparations = new HashMap<ITexture, PixelPreparation>();
+	private final HashMap<ITexture, AtlasPixelLoader> mPreparations = new HashMap<ITexture, AtlasPixelLoader>();
 	/** Loaded textures whose reload {@link #reloadLoadedTextures()} requested and that are not reloaded yet. */
 	private final HashSet<ITexture> mTexturesToBeReloaded = new HashSet<ITexture>();
 	/** The running preparation of each texture in mTexturesToBeReloaded that is reloaded with prepared pixels. */
-	private final HashMap<ITexture, PixelPreparation> mReloadPreparations = new HashMap<ITexture, PixelPreparation>();
+	private final HashMap<ITexture, AtlasPixelLoader> mReloadPreparations = new HashMap<ITexture, AtlasPixelLoader>();
 	/** Every submitted preparation that holds or may still produce pixels, including cancelled ones still running. */
-	private final ArrayList<PixelPreparation> mPreparationsInFlight = new ArrayList<PixelPreparation>();
+	private final ArrayList<AtlasPixelLoader> mPreparationsInFlight = new ArrayList<AtlasPixelLoader>();
 
 	// ===========================================================
 	// Constructors
@@ -354,7 +354,7 @@ public class TextureManager {
 		int texturesLoadedCount = 0;
 		for(int i = 0; i < texturesToBeLoaded.size(); ) {
 			final ITexture textureToBeLoaded = texturesToBeLoaded.get(i);
-			PixelPreparation preparation = null;
+			AtlasPixelLoader preparation = null;
 			if(!textureToBeLoaded.isLoadedToHardware()) {
 				preparation = this.mPreparations.get(textureToBeLoaded);
 				if(preparation == null) {
@@ -424,7 +424,7 @@ public class TextureManager {
 				/* A texture unloaded below in this frame is not uploaded again first; loading it later writes it anew. */
 				continue;
 			}
-			PixelPreparation preparation = null;
+			AtlasPixelLoader preparation = null;
 			if(this.mTexturesToBeReloaded.contains(textureToBeReloaded)) {
 				preparation = this.getReloadPreparation(textureToBeReloaded, !loadsWaiting);
 				if(preparation == TextureManager.WAITING) {
@@ -552,7 +552,7 @@ public class TextureManager {
 	 * @return the preparation (failed if it could not be submitted); {@code null} if the texture cannot be
 	 * prepared in the background, so it loads synchronously; {@link #WAITING} while too many pixels are in flight.
 	 */
-	private PixelPreparation startPreparation(final ITexture pTexture, final HashMap<ITexture, PixelPreparation> pPreparations) {
+	private AtlasPixelLoader startPreparation(final ITexture pTexture, final HashMap<ITexture, AtlasPixelLoader> pPreparations) {
 		if(!(pTexture instanceof BitmapTextureAtlas)) {
 			return null;
 		}
@@ -562,9 +562,9 @@ public class TextureManager {
 		}
 
 		/* Checked before anything is allocated: a waiting texture asks again every frame. */
-		final ArrayList<PixelPreparation> inFlight = this.mPreparationsInFlight;
+		final ArrayList<AtlasPixelLoader> inFlight = this.mPreparationsInFlight;
 		if(!inFlight.isEmpty()) {
-			long bytesInFlight = PixelPreparation.estimateBytes(atlas.getWidth(), atlas.getHeight());
+			long bytesInFlight = AtlasPixelLoader.estimateBytes(atlas.getWidth(), atlas.getHeight());
 			for(int i = inFlight.size() - 1; i >= 0; i--) {
 				bytesInFlight += inFlight.get(i).getEstimatedBytes();
 			}
@@ -573,7 +573,7 @@ public class TextureManager {
 			}
 		}
 
-		final PixelPreparation preparation = atlas.createPixelPreparationUnchecked();
+		final AtlasPixelLoader preparation = atlas.createPixelLoaderUnchecked();
 		try {
 			this.getPreparationExecutor().execute(preparation);
 		} catch (final RejectedExecutionException e) {
@@ -592,8 +592,8 @@ public class TextureManager {
 	 * @return {@link #WAITING} to keep the old texture for now; {@code null} to reload synchronously; otherwise a
 	 * ready or failed preparation.
 	 */
-	private PixelPreparation getReloadPreparation(final ITexture pTexture, final boolean pMayStart) {
-		PixelPreparation preparation = this.mReloadPreparations.get(pTexture);
+	private AtlasPixelLoader getReloadPreparation(final ITexture pTexture, final boolean pMayStart) {
+		AtlasPixelLoader preparation = this.mReloadPreparations.get(pTexture);
 		if(preparation != null && !((BitmapTextureAtlas) pTexture).isPreparationCurrent(preparation)) {
 			/* Sources were added or moved meanwhile: they must not wait for the preparation. */
 			this.cancelReloadPreparation(pTexture);
@@ -623,7 +623,7 @@ public class TextureManager {
 		this.cancelPreparation(this.mReloadPreparations.remove(pTexture));
 	}
 
-	private void cancelPreparation(final PixelPreparation preparation) {
+	private void cancelPreparation(final AtlasPixelLoader preparation) {
 		if(preparation != null) {
 			preparation.cancel();
 			/* Stays in flight until it has finished running, as it may still be loading pixels. */
@@ -634,11 +634,11 @@ public class TextureManager {
 	}
 
 	private void cancelPreparations() {
-		for(final PixelPreparation preparation : this.mPreparations.values()) {
+		for(final AtlasPixelLoader preparation : this.mPreparations.values()) {
 			preparation.cancel();
 		}
 		this.mPreparations.clear();
-		for(final PixelPreparation preparation : this.mReloadPreparations.values()) {
+		for(final AtlasPixelLoader preparation : this.mReloadPreparations.values()) {
 			preparation.cancel();
 		}
 		this.mReloadPreparations.clear();
@@ -649,9 +649,9 @@ public class TextureManager {
 
 	/** Forgets cancelled preparations that have finished running. */
 	private void purgeFinishedPreparations() {
-		final ArrayList<PixelPreparation> inFlight = this.mPreparationsInFlight;
+		final ArrayList<AtlasPixelLoader> inFlight = this.mPreparationsInFlight;
 		for(int i = inFlight.size() - 1; i >= 0; i--) {
-			final PixelPreparation preparation = inFlight.get(i);
+			final AtlasPixelLoader preparation = inFlight.get(i);
 			if(preparation.isCancelled() && preparation.isFinished()) {
 				inFlight.remove(i);
 			}

@@ -107,24 +107,24 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
     //region Indicator update & draw
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
-        super.onManagedDraw(pGLState, pCamera)
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
+        super.onManagedDraw(drawContext, pCamera)
 
         if (activeIndicators.isEmpty()) return
 
         // After super.onManagedDraw() the matrix has been popped; re-push our translation
         // so that indicatorBox draws in this element's local coordinate space.
-        pGLState.pushModelViewGLMatrix()
-        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
+        drawContext.pushModelViewGLMatrix()
+        drawContext.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
 
         activeIndicators.forEach {
             indicatorBox.x = it.x
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(pGLState, pCamera)
+            indicatorBox.onDraw(drawContext, pCamera)
         }
 
-        pGLState.popModelViewGLMatrix()
+        drawContext.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

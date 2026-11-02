@@ -4,9 +4,9 @@ import org.andengine.entity.sprite.SpriteBatching
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.Letter
-import org.andengine.opengl.font.StrokeFont
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.Letter
+import org.andengine.graphics.text.StrokeFont
 
 /**
  * Hands an engine [Text] to the [QuadBatcher]: the glyph rectangles and letters are taken from the
@@ -17,10 +17,10 @@ object TextBatching {
 
     /**
      * Adds the first [count] letters of [text] to the batch, transformed by the current model-view
-     * matrix of [glState] (see [addLetter]). The color is the font color times the text color.
+     * matrix of [drawContext] (see [addLetter]). The color is the font color times the text color.
      */
     @JvmStatic
-    fun add(text: Text, glState: DrawContext, count: Int) {
+    fun add(text: Text, drawContext: DrawContext, count: Int) {
         val font = text.font as? Font ?: return
         val letters = text.letters
         val quads = text.letterQuads
@@ -28,8 +28,8 @@ object TextBatching {
         if (n <= 0) return
 
         val blend = SpriteBatching.batchBlendOf(text)
-        val matrix = glState.modelViewGLMatrix
-        QuadBatcher.setProjection(glState.projectionGLMatrix)
+        val matrix = drawContext.modelViewGLMatrix
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
         val fillColor = fillColor(font, text.red, text.green, text.blue, text.alpha)
         val strokeColor = strokeColor(font, text.red, text.green, text.blue, text.alpha)
 

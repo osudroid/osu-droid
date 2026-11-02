@@ -20,5 +20,5 @@ public interface IDrawHandler {
 	// Methods
 	// ===========================================================
 
-	public void onDraw(final DrawContext pGLState, final Camera pCamera);
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera);
 }

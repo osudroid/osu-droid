@@ -66,7 +66,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     }
 
 
-    override fun onDrawScene(pGLState: DrawContext, pCamera: Camera) {
+    override fun onDrawScene(drawContext: DrawContext, pCamera: Camera) {
         val focusedEntity = focusedEntity
 
         if (focusedEntity != null) {
@@ -95,7 +95,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
             overlay.setPosition(0f, 0f)
         }
 
-        super.onDrawScene(pGLState, pCamera)
+        super.onDrawScene(drawContext, pCamera)
     }
 
 

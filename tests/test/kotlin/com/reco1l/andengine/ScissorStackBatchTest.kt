@@ -10,7 +10,7 @@ import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.shape.ShapeMasks
-import org.andengine.opengl.font.Font
+import org.andengine.graphics.text.Font
 import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -27,7 +27,7 @@ import com.osudroid.testing.installTestFontAndMasks
 class ScissorStackBatchTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private lateinit var masks: ShapeMasks
@@ -55,9 +55,9 @@ class ScissorStackBatchTest {
 
     /** Orthographic projection, one unit per surface pixel, y growing downwards. */
     private fun beginFrame() {
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        glState.orthoProjectionGLMatrixf(0f, 100f, 100f, 0f, -1f, 1f)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        drawContext.orthoProjectionGLMatrixf(0f, 100f, 100f, 0f, -1f, 1f)
     }
 
     private fun box(x: Float, y: Float, w: Float, h: Float) = UIBox().apply {
@@ -73,7 +73,7 @@ class ScissorStackBatchTest {
     }
 
     private fun drawFullSurfaceBox() {
-        box(0f, 0f, 100f, 100f).doDraw(glState, camera)
+        box(0f, 0f, 100f, 100f).doDraw(drawContext, camera)
         QuadBatcher.flush()
     }
 
@@ -132,8 +132,8 @@ class ScissorStackBatchTest {
         gl.vertexUploads.clear()
 
         beginFrame()
-        first.onDraw(glState, camera)
-        second.onDraw(glState, camera)
+        first.onDraw(drawContext, camera)
+        second.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(1, gl.count("glDrawElements"))
@@ -156,7 +156,7 @@ class ScissorStackBatchTest {
     fun bufferPathDrawInsideClip_seesGlScissor() {
         val seen = ArrayList<List<Int>?>()
         val buffered = object : UIBox() {
-            override fun beginDraw(pGLState: DrawContext) {}
+            override fun beginDraw(drawContext: DrawContext) {}
             override fun onDrawBuffer(gl: DrawContext) { seen += this@ScissorStackBatchTest.gl.scissors.lastOrNull() }
         }.apply {
             setSize(20f, 10f)
@@ -169,7 +169,7 @@ class ScissorStackBatchTest {
         buffered.onHandleInvalidations()
 
         beginFrame()
-        container.onDraw(glState, camera)
+        container.onDraw(drawContext, camera)
 
         // The container covers y 10..50 from the top, which is 50..90 above the bottom edge.
         assertEquals(listOf<List<Int>?>(listOf(10, 50, 40, 40)), seen)

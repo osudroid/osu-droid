@@ -93,9 +93,9 @@ public class Particle<T extends IEntity> {
 		}
 	}
 
-	public void onDraw(final DrawContext pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
 		if(!this.mExpired) {
-			this.mEntity.onDraw(pGLState, pCamera);
+			this.mEntity.onDraw(pDrawContext, pCamera);
 		}
 	}
 

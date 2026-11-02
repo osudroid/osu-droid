@@ -9,7 +9,7 @@ import com.reco1l.andengine.component.InvalidationFlag
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
-import org.andengine.opengl.font.Font
+import org.andengine.graphics.text.Font
 import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -27,7 +27,7 @@ import org.andengine.graphics.shape.ShapeMasks
 class UITextBatchingTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private lateinit var masks: ShapeMasks
@@ -60,9 +60,9 @@ class UITextBatchingTest {
     }
 
     private fun draw(draw: (DrawContext, Camera) -> Unit) {
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        draw(glState, camera)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        draw(drawContext, camera)
         QuadBatcher.flush()
     }
 
@@ -153,13 +153,13 @@ class UITextBatchingTest {
         GlesBackend.state.depthMask(false)
         val pending = text("AB")
         val clearing = text("A").apply { clearInfo = ClearInfo.ClearDepthBuffer }
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
-        pending.doDraw(glState, camera)
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
+        pending.doDraw(drawContext, camera)
         assertTrue(QuadBatcher.hasPending)
         gl.calls.clear()
 
-        clearing.doDraw(glState, camera)
+        clearing.doDraw(drawContext, camera)
 
         val clear = gl.calls.indexOf("glClear(${GLES20.GL_DEPTH_BUFFER_BIT})")
         assertTrue(gl.calls.toString(), clear >= 0)

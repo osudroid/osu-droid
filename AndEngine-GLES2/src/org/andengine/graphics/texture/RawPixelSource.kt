@@ -1,6 +1,6 @@
-package org.andengine.opengl.texture.atlas.bitmap.source
+package org.andengine.graphics.texture
 
-import org.andengine.graphics.texture.Pixels
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
 
 /**
  * An atlas source that can deliver its image as RGBA bytes, which an RGBA_8888 atlas uploads as they
@@ -9,7 +9,7 @@ import org.andengine.graphics.texture.Pixels
  * variant. [onLoadPixels] usually runs on the texture manager's background worker, possibly while the
  * GL thread loads the same source, so it must be thread-safe and leave no state for [onLoadBitmap].
  */
-interface IPixelTextureAtlasSource : IBitmapTextureAtlasSource {
+interface RawPixelSource : IBitmapTextureAtlasSource {
     /** The image as straight RGBA bytes, or `null` if they are not available. */
     fun onLoadPixels(): Pixels?
 

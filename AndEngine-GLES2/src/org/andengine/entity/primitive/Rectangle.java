@@ -46,9 +46,9 @@ public class Rectangle extends RectangularShape {
 	 * function. Alpha 0 adds nothing.
 	 */
 	@Override
-	protected void draw(final DrawContext pGLState, final Camera pCamera) {
-		QuadBatcher.setProjection(pGLState.getProjectionGLMatrix());
-		ShapeBatching.rect(pGLState.getModelViewGLMatrix(), 0, 0, this.getWidth(), this.getHeight(), this.getColor().getABGRPackedInt(), SpriteBatching.batchBlendOf(this));
+	protected void draw(final DrawContext pDrawContext, final Camera pCamera) {
+		QuadBatcher.setProjection(pDrawContext.getProjectionGLMatrix());
+		ShapeBatching.rect(pDrawContext.getModelViewGLMatrix(), 0, 0, this.getWidth(), this.getHeight(), this.getColor().getABGRPackedInt(), SpriteBatching.batchBlendOf(this));
 	}
 
 	/** The box is taken from the rectangle's size when it is drawn. */

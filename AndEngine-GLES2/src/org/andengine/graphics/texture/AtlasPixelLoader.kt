@@ -1,32 +1,31 @@
-package org.andengine.opengl.texture.atlas.bitmap
+package org.andengine.graphics.texture
 
-import org.andengine.graphics.texture.Pixels
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.util.debug.Debug
 
 /**
  * The pixels of all sources of a [BitmapTextureAtlas], loaded on a background thread so the GL thread
  * only has to upload them. Created on the GL thread with a snapshot of the atlas' sources and their
  * positions; [run] loads them on the worker. The GL thread then [take]s the result once, or the
- * preparation is [cancel]led and its pixels dropped.
+ * loader is [cancel]led and its pixels dropped.
  *
  * Each source is asked for the atlas' variant ([premultiplied] or straight bytes). A source whose
- * [IPixelTextureAtlasSource.onLoadPixels] returned `null` keeps a `null` entry: the upload uses its
- * bitmap path, as it would without a preparation; so does an entry of the other variant. If any source throws, the
- * preparation [isFailed] and the atlas loads on the synchronous path instead.
+ * [RawPixelSource.onLoadPixels] returned `null` keeps a `null` entry: the upload uses its
+ * bitmap path, as it would without a loader; so does an entry of the other variant. If any source throws, the
+ * loader [isFailed] and the atlas loads on the synchronous path instead.
  *
  * Thread-safe: the state and the pixels are guarded by this object's monitor; the snapshot is never
  * modified after construction.
  */
-class PixelPreparation @JvmOverloads constructor(
-    sources: List<IPixelTextureAtlasSource>,
+class AtlasPixelLoader @JvmOverloads constructor(
+    sources: List<RawPixelSource>,
     width: Int,
     height: Int,
     val premultiplied: Boolean = false
 ) : Runnable {
 
-    private val sources: Array<IPixelTextureAtlasSource> = sources.toTypedArray()
+    private val sources: Array<RawPixelSource> = sources.toTypedArray()
     private val xs = IntArray(sources.size) { sources[it].textureX }
     private val ys = IntArray(sources.size) { sources[it].textureY }
 
@@ -40,7 +39,7 @@ class PixelPreparation @JvmOverloads constructor(
 
     /**
      * Loads the pixels of every source; runs on the worker thread. Never throws: any failure (also an
-     * [Error]) is logged and marks the preparation failed, so the atlas loads on the synchronous path and
+     * [Error]) is logged and marks the loader failed, so the atlas loads on the synchronous path and
      * the worker keeps running.
      */
     override fun run() {
@@ -78,7 +77,7 @@ class PixelPreparation @JvmOverloads constructor(
         }
     }
 
-    /** Marks a preparation that could not be started as failed, so the atlas loads synchronously. */
+    /** Marks a loader that could not be started as failed, so the atlas loads synchronously. */
     fun fail() = synchronized(this) {
         if (state == State.PENDING) state = State.FAILED
         finished = true
@@ -94,7 +93,7 @@ class PixelPreparation @JvmOverloads constructor(
     val isFailed: Boolean get() = synchronized(this) { state == State.FAILED }
     val isCancelled: Boolean get() = synchronized(this) { state == State.CANCELLED }
 
-    /** Whether [run] has returned (or will never run); a cancelled preparation holds memory until then. */
+    /** Whether [run] has returned (or will never run); a cancelled loader holds memory until then. */
     val isFinished: Boolean get() = synchronized(this) { finished }
 
     /** Bytes of the loaded pixels, once [isReady]. */

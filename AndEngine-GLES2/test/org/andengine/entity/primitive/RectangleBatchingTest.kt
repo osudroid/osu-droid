@@ -28,7 +28,7 @@ class RectangleBatchingTest {
 
     private lateinit var gl: RecordingGL
     private lateinit var masks: ShapeMasks
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -53,7 +53,7 @@ class RectangleBatchingTest {
 
     @Test
     fun plainRectangle_addsOneBatchedQuad() {
-        rect().onDraw(glState, camera)
+        rect().onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(0, gl.arrayDraws())
@@ -71,7 +71,7 @@ class RectangleBatchingTest {
         val r = rect()
         r.setColor(1f, 0f, 0f, 0.5f)
         r.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val v = gl.lastVertices()
@@ -89,7 +89,7 @@ class RectangleBatchingTest {
     fun transparentRectangle_addsNothing() {
         val r = rect()
         r.setColor(1f, 1f, 1f, 0f)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertEquals(0, gl.arrayDraws())
@@ -99,13 +99,13 @@ class RectangleBatchingTest {
     fun rectangle_colorReadAtDraw() {
         val r = rect()
         r.setColor(1f, 0f, 0f, 1f)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(255, gl.lastVertices().get(16).toInt() and 0xFF)
         assertEquals(0, gl.lastVertices().get(18).toInt() and 0xFF)
 
         r.setColor(0f, 0f, 1f)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(0, gl.lastVertices().get(16).toInt() and 0xFF)
         assertEquals(255, gl.lastVertices().get(18).toInt() and 0xFF)
@@ -115,7 +115,7 @@ class RectangleBatchingTest {
     fun rectangle_sizeReadAtDraw() {
         val r = rect()
         r.setSize(20f, 4f)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         QuadBatcher.flush()
         assertEquals(30f, gl.lastVertices().getFloat(48), 0f)
         assertEquals(4f, gl.lastVertices().getFloat(52), 0f)
@@ -125,12 +125,12 @@ class RectangleBatchingTest {
     fun rectangleSubclassOverridingDraw_isBatched() {
         var ownDraws = 0
         val r = object : Rectangle(0f, 0f, 8f, 6f) {
-            override fun draw(pGLState: DrawContext, pCamera: Camera) {
+            override fun draw(drawContext: DrawContext, pCamera: Camera) {
                 ownDraws++
-                super.draw(pGLState, pCamera)
+                super.draw(drawContext, pCamera)
             }
         }
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         assertEquals(1, ownDraws)
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()
@@ -142,7 +142,7 @@ class RectangleBatchingTest {
     fun rectangle_unknownBlendFallsBackToAlpha() {
         val r = rect()
         r.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
-        r.onDraw(glState, camera)
+        r.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(1, gl.draws())

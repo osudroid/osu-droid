@@ -170,9 +170,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: DrawContext) {
+                    override fun beginDraw(drawContext: DrawContext) {
                         GlesBackend.state.depthMask(true)
-                        super.beginDraw(pGLState)
+                        super.beginDraw(drawContext)
                     }
                 }
 
@@ -192,9 +192,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: DrawContext) {
+                    override fun beginDraw(drawContext: DrawContext) {
                         GlesBackend.state.depthMask(true)
-                        super.beginDraw(pGLState)
+                        super.beginDraw(drawContext)
                     }
                 }
 

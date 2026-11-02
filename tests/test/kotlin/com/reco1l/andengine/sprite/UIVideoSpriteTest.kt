@@ -30,7 +30,7 @@ import com.osudroid.testing.endOpenPass
 class UIVideoSpriteTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     /**
@@ -105,7 +105,7 @@ class UIVideoSpriteTest {
         val sprite = video(FakeVideo(9, st))
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 1, programDraws())
         assertFalse(QuadBatcher.hasPending)
@@ -137,10 +137,10 @@ class UIVideoSpriteTest {
         val sprite = video(texture)
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
         val firstLatch = gl.calls.indexOf("latch")
         val firstDraw = gl.calls.indexOfFirst { it.startsWith("glDrawArrays") }
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertTrue(gl.calls.toString(), firstLatch >= 0 && firstLatch < firstDraw)
         // Once per frame.
@@ -154,7 +154,7 @@ class UIVideoSpriteTest {
         val sprite = video(texture)
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 0, programDraws())
         assertEquals(0, texture.latches)
@@ -179,7 +179,7 @@ class UIVideoSpriteTest {
         val sprite = video(texture)
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertEquals(gl.calls.toString(), 0, programDraws())
         assertEquals(0, texture.latches)

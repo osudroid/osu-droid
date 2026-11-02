@@ -23,15 +23,15 @@ import org.robolectric.RobolectricTestRunner
 class SpriteDrawGuardTest {
 
     private lateinit var gl: RecordingGL
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     /** Counts the draws the sprite hands to the batch. */
     private class CountingSprite(region: TextureRegion) : Sprite(0f, 0f, 8f, 8f, region) {
         var draws = 0
-        override fun draw(pGLState: DrawContext, pCamera: Camera) {
+        override fun draw(drawContext: DrawContext, pCamera: Camera) {
             draws++
-            super.draw(pGLState, pCamera)
+            super.draw(drawContext, pCamera)
         }
     }
 
@@ -52,7 +52,7 @@ class SpriteDrawGuardTest {
     @Test
     fun unloadedTexture_skipsDrawWithoutTouchingState() {
         val s = sprite(-1)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertEquals(0, s.draws)
         assertFalse(QuadBatcher.hasPending)
@@ -63,7 +63,7 @@ class SpriteDrawGuardTest {
     @Test
     fun loadedTexture_draws() {
         val s = sprite(7)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertEquals(1, s.draws)
         assertTrue(QuadBatcher.hasPending)
@@ -76,7 +76,7 @@ class SpriteDrawGuardTest {
         val parent = sprite(-1)
         val child = sprite(7)
         parent.attachChild(child)
-        parent.onDraw(glState, camera)
+        parent.onDraw(drawContext, camera)
 
         assertEquals(0, parent.draws)
         assertEquals(1, child.draws)
@@ -87,11 +87,11 @@ class SpriteDrawGuardTest {
     fun plainEntity_isSelfDrawable() {
         var drawn = false
         val entity = object : Entity() {
-            override fun draw(pGLState: DrawContext, pCamera: Camera) {
+            override fun draw(drawContext: DrawContext, pCamera: Camera) {
                 drawn = true
             }
         }
-        entity.onDraw(glState, camera)
+        entity.onDraw(drawContext, camera)
         assertTrue(drawn)
     }
 }

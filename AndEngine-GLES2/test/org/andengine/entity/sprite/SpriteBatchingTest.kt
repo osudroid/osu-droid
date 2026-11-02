@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 class SpriteBatchingTest {
 
     private lateinit var gl: RecordingGL
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -48,7 +48,7 @@ class SpriteBatchingTest {
     fun engineSprite_goesThroughBatcher() {
         val s = sprite(Page(7), 10f)
         s.setColor(1f, 0f, 0f, 0.5f)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(0, gl.arrayDraws())
@@ -87,7 +87,7 @@ class SpriteBatchingTest {
     fun blendFunction_followsTheSprite() {
         val s = sprite(Page(7))
         s.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val expected = "glBlendFunc(${GLES20.GL_SRC_ALPHA},${GLES20.GL_ONE})"
@@ -100,12 +100,12 @@ class SpriteBatchingTest {
     fun spriteSubclassOverridingDraw_isBatched() {
         var drawn = 0
         val s = object : Sprite(0f, 0f, 8f, 8f, region()) {
-            override fun draw(pGLState: DrawContext, pCamera: Camera) {
+            override fun draw(drawContext: DrawContext, pCamera: Camera) {
                 drawn++
-                super.draw(pGLState, pCamera)
+                super.draw(drawContext, pCamera)
             }
         }
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertEquals(1, drawn)
         assertTrue(QuadBatcher.hasPending)
@@ -117,7 +117,7 @@ class SpriteBatchingTest {
     @Test
     fun subclassWithoutOverrides_isBatched() {
         val s = object : Sprite(0f, 0f, 8f, 8f, region()) {}
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(0, gl.arrayDraws())
@@ -127,7 +127,7 @@ class SpriteBatchingTest {
     fun sprite_unknownBlendFallsBackToAlpha() {
         val s = sprite(Page(7))
         s.setBlendFunction(GLES20.GL_SRC_ALPHA_SATURATE, GLES20.GL_ONE)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         QuadBatcher.flush()
@@ -141,7 +141,7 @@ class SpriteBatchingTest {
     fun sprite_colorReadAtDraw() {
         val s = sprite(Page(7))
         s.setColor(1f, 0f, 0f, 1f)
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
         QuadBatcher.flush()
         var v = gl.lastVertices()
         assertEquals(255, v.get(16).toInt() and 0xFF)
@@ -150,7 +150,7 @@ class SpriteBatchingTest {
 
         s.setColor(0f, 0f, 1f)
         s.alpha = 0.5f
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
         QuadBatcher.flush()
         v = gl.lastVertices()
         for (corner in 0 until 4) {
@@ -204,7 +204,7 @@ class SpriteBatchingTest {
     fun blendingDisabled_replacesDestination() {
         val s = sprite(Page(7))
         s.isBlendingEnabled = false
-        s.onDraw(glState, camera)
+        s.onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val expected = "glBlendFunc(${GLES20.GL_ONE},${GLES20.GL_ZERO})"
@@ -214,8 +214,8 @@ class SpriteBatchingTest {
     @Test
     fun sameTexture_twoSprites_oneDraw() {
         val page = Page(7)
-        sprite(page, 0f).onDraw(glState, camera)
-        sprite(page, 20f).onDraw(glState, camera)
+        sprite(page, 0f).onDraw(drawContext, camera)
+        sprite(page, 20f).onDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(1, gl.draws())

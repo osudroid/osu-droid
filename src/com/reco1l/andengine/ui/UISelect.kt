@@ -101,7 +101,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
         }
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
         button.content.textEntity.width = width - button.padding.horizontal - button.trailingIcon!!.width
 
         if (listChanged) {
@@ -109,7 +109,7 @@ open class UISelect<T : Any>(initialValues: List<T> = emptyList()) : UIControl<L
             onOptionsChanged()
         }
 
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
     open fun onOptionsChanged() {

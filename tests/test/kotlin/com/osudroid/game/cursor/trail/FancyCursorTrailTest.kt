@@ -20,7 +20,7 @@ import com.osudroid.testing.endOpenPass
 class FancyCursorTrailTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 800f, 480f)
 
     @Before
@@ -28,8 +28,8 @@ class FancyCursorTrailTest {
         gl = RecordingGl().install()
         GlesBackend.surfaceWidth = 0
         GlesBackend.surfaceHeight = 0
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
     }
 
     @After
@@ -54,7 +54,7 @@ class FancyCursorTrailTest {
 
     @Test
     fun trail_drawsOneStrip() {
-        trail(4).doDraw(glState, camera)
+        trail(4).doDraw(drawContext, camera)
 
         assertEquals(1, gl.count("glDrawArrays"))
         // 4 control points make 3 segments of 2 vertices.
@@ -64,7 +64,7 @@ class FancyCursorTrailTest {
 
     @Test
     fun trail_additiveBlend() {
-        trail(3).doDraw(glState, camera)
+        trail(3).doDraw(drawContext, camera)
 
         assertTrue(gl.calls.toString(), gl.setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE))
     }
@@ -73,7 +73,7 @@ class FancyCursorTrailTest {
     fun trail_perVertexAlpha() {
         val trail = trail(3)
         trail.update(0.1f)
-        trail.doDraw(glState, camera)
+        trail.doDraw(drawContext, camera)
 
         val upload = gl.lastUpload()
         // Alpha is the top byte of the packed color; older pieces fade first.

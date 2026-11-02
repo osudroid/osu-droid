@@ -36,7 +36,7 @@ import com.osudroid.testing.endOpenPass
 class UISpriteBatchingTest {
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     /**
@@ -46,8 +46,8 @@ class UISpriteBatchingTest {
     private class Probe(region: TextureRegion?, private val batchable: Boolean = true) : UISprite(region) {
         val bufferCalls = ArrayList<String>()
         override val isBatchable: Boolean get() = batchable
-        override fun beginDraw(pGLState: DrawContext) { bufferCalls += "begin" }
-        override fun onDrawBuffer(pGLState: DrawContext) { bufferCalls += "draw" }
+        override fun beginDraw(drawContext: DrawContext) { bufferCalls += "begin" }
+        override fun onDrawBuffer(drawContext: DrawContext) { bufferCalls += "draw" }
         fun position(vertex: Int, axis: Int) = buffer!!.data[vertex * 2 + axis]
         fun uv(vertex: Int, axis: Int) = uvBuffer.data[vertex * 2 + axis]
     }
@@ -78,7 +78,7 @@ class UISpriteBatchingTest {
         sprite.onHandleInvalidations()
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertTrue(QuadBatcher.hasPending)
         assertTrue(sprite.bufferCalls.isEmpty())
@@ -97,8 +97,8 @@ class UISpriteBatchingTest {
         val a = Probe(region(page)).apply { setSize(8f, 8f); onHandleInvalidations() }
         val b = Probe(TextureRegion(page, 0f, 0f, 2f, 2f)).apply { setSize(2f, 2f); onHandleInvalidations() }
 
-        a.doDraw(glState, camera)
-        b.doDraw(glState, camera)
+        a.doDraw(drawContext, camera)
+        b.doDraw(drawContext, camera)
         QuadBatcher.flush()
 
         assertEquals(gl.calls.toString(), 1, batchDraws())
@@ -114,7 +114,7 @@ class UISpriteBatchingTest {
 
         val sprite = Probe(region(), batchable = false).apply { setSize(8f, 8f); onHandleInvalidations() }
         gl.calls.clear()
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertEquals(bufferDraw, sprite.bufferCalls)
@@ -133,7 +133,7 @@ class UISpriteBatchingTest {
             sprite.configure()
             gl.calls.clear()
 
-            sprite.doDraw(glState, camera)
+            sprite.doDraw(drawContext, camera)
 
             assertFalse(QuadBatcher.hasPending)
             assertEquals(bufferDraw, sprite.bufferCalls)
@@ -145,7 +145,7 @@ class UISpriteBatchingTest {
         val sprite = Probe(null).apply { setSize(8f, 8f); onHandleInvalidations() }
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertEquals(bufferDraw, sprite.bufferCalls)
@@ -160,7 +160,7 @@ class UISpriteBatchingTest {
             }
             gl.calls.clear()
 
-            sprite.doDraw(glState, camera)
+            sprite.doDraw(drawContext, camera)
 
             assertFalse(QuadBatcher.hasPending)
             assertTrue(sprite.bufferCalls.isEmpty())
@@ -186,7 +186,7 @@ class UISpriteBatchingTest {
             }
             gl.vertexUploads.clear()
 
-            sprite.doDraw(glState, camera)
+            sprite.doDraw(drawContext, camera)
             QuadBatcher.flush()
 
             val vertices = gl.lastUpload()
@@ -204,11 +204,11 @@ class UISpriteBatchingTest {
     @Test
     fun modelView_transformsCorners() {
         val sprite = Probe(region()).apply { setSize(8f, 8f); onHandleInvalidations() }
-        glState.pushModelViewGLMatrix()
-        glState.translateModelViewGLMatrixf(30f, 40f, 0f)
+        drawContext.pushModelViewGLMatrix()
+        drawContext.translateModelViewGLMatrixf(30f, 40f, 0f)
 
-        sprite.doDraw(glState, camera)
-        glState.popModelViewGLMatrix()
+        sprite.doDraw(drawContext, camera)
+        drawContext.popModelViewGLMatrix()
         QuadBatcher.flush()
 
         val vertices = gl.lastUpload()
@@ -231,7 +231,7 @@ class UISpriteBatchingTest {
         }
         sprite.onHandleInvalidations()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val color = gl.lastUpload().getInt(16)
@@ -256,7 +256,7 @@ class UISpriteBatchingTest {
             sprite.blendInfo = info
             gl.calls.clear()
 
-            sprite.doDraw(glState, camera)
+            sprite.doDraw(drawContext, camera)
             QuadBatcher.flush()
 
             val src = info.sourceFactor
@@ -274,7 +274,7 @@ class UISpriteBatchingTest {
         sprite.blendInfo = BlendInfo.Inherit
         gl.calls.clear()
 
-        sprite.doDraw(glState, camera)
+        sprite.doDraw(drawContext, camera)
         QuadBatcher.flush()
 
         val src = GLES20.GL_SRC_ALPHA

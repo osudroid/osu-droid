@@ -8,7 +8,7 @@ import org.andengine.engine.camera.*
 import org.andengine.entity.text.TextBatching
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.batch.QuadBatcher
-import org.andengine.opengl.font.*
+import org.andengine.graphics.text.*
 import kotlin.math.*
 
 /**
@@ -99,8 +99,8 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         contentHeight = font.lineHeight
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        onApplyColor(pGLState)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
         clearIfRequested()
 
@@ -117,22 +117,22 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         val x0 = width * 0.5f - letter.mWidth * scale * 0.5f
         val y0 = height * 0.5f - letter.mHeight * scale * 0.5f
 
-        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
 
         TextBatching.addLetter(
-            font, letter, meshBlendMode(), pGLState.modelViewGLMatrix,
+            font, letter, meshBlendMode(), drawContext.modelViewGLMatrix,
             x0, y0, x0 + letter.mWidth * scale, y0 + letter.mHeight * scale,
             TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha),
             TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
         )
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
         if (fontSettingsChanged) {
             fontSettingsChanged = false
             onFontSettingsChange()
         }
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
 

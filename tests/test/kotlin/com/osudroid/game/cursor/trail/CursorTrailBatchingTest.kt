@@ -47,8 +47,8 @@ class CursorTrailBatchingTest {
         val spawn = CursorTrail::class.java.getDeclaredField("partSpawnMs").apply { isAccessible = true }.get(trail) as FloatArray
         spawn.fill(0f)
 
-        val glState = DrawContext()
-        trail.doDraw(glState, Camera(0f, 0f, 800f, 480f))
+        val drawContext = DrawContext()
+        trail.doDraw(drawContext, Camera(0f, 0f, 800f, 480f))
         QuadBatcher.flush()
 
         val draw = gl.calls.single { it.startsWith("glDrawElements(") }

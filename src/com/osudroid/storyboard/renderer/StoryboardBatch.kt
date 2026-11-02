@@ -42,11 +42,11 @@ class StoryboardBatch {
      * quads of the same texture and blend mode can share their draw call; the batcher draws them
      * before anyone else changes GL state.
      *
-     * @param pGLState The current [DrawContext].
+     * @param drawContext The current [DrawContext].
      */
-    fun begin(pGLState: DrawContext) {
-        System.arraycopy(pGLState.modelViewGLMatrix, 0, modelView, 0, 16)
-        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
+    fun begin(drawContext: DrawContext) {
+        System.arraycopy(drawContext.modelViewGLMatrix, 0, modelView, 0, 16)
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
         resetSpace()
     }
 

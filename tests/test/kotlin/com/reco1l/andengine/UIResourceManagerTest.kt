@@ -1,7 +1,7 @@
 package com.reco1l.andengine
 
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame

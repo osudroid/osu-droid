@@ -6,7 +6,7 @@ import com.osudroid.testing.pixelAt
 import com.osudroid.testing.writePng
 import java.io.File
 import java.nio.file.Files
-import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
+import org.andengine.graphics.texture.RawPixelSource
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -44,7 +44,7 @@ class QualityBitmapSourcePixelTest {
     @Test
     fun qualityFileSource_deliversStraightPixels() {
         val file = writeImage(6, 4, 200, 100, 50, 128)
-        val source: IPixelTextureAtlasSource = QualityFileBitmapSource(file)
+        val source: RawPixelSource = QualityFileBitmapSource(file)
 
         val pixels = checkNotNull(source.onLoadPixels())
         assertEquals(6, pixels.width)

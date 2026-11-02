@@ -4247,10 +4247,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         @Override
-        protected void onManagedDraw(DrawContext pGLState, Camera pCamera) {
+        protected void onManagedDraw(DrawContext pDrawContext, Camera pCamera) {
             applyRawPointerFastPath(pCamera);
 
-            super.onManagedDraw(pGLState, pCamera);
+            super.onManagedDraw(pDrawContext, pCamera);
         }
 
         @Override

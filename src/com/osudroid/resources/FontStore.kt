@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Typeface
 import org.andengine.engine.Engine
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontFactory
-import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.font.StrokeFont
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontFactory
+import org.andengine.graphics.text.FontManager
+import org.andengine.graphics.text.StrokeFont
 import ru.nsu.ccfit.zuev.osu.Config
 import java.util.concurrent.ConcurrentHashMap
 

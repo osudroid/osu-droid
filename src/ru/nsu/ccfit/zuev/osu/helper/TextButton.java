@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.helper;
 
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
-import org.andengine.opengl.font.Font;
+import org.andengine.graphics.text.Font;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;

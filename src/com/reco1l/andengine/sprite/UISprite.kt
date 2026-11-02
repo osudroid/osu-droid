@@ -169,7 +169,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         // A texture that is not on the GPU yet (e.g. an atlas page still waiting for upload) would
         // bind the invalid id and sample whatever is still bound; skip the frame before touching state.
         val region = textureRegion
@@ -177,10 +177,10 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         if (texture != null && !texture.isLoadedToHardware) {
             return
         }
-        if (region != null && drawBatched(pGLState, region)) {
+        if (region != null && drawBatched(drawContext, region)) {
             return
         }
-        super.doDraw(pGLState, pCamera)
+        super.doDraw(drawContext, pCamera)
     }
 
     /**
@@ -261,7 +261,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         out.v1 = if (flippedVertical) v else v2
     }
 
-    override fun onDrawBuffer(pGLState: DrawContext) {
+    override fun onDrawBuffer(drawContext: DrawContext) {
         // Without a texture there is nothing to sample.
         val texture = textureRegion?.texture ?: return
         val positions = buffer?.data ?: return
@@ -278,7 +278,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
 
         MeshRenderer.drawTextured(
             PrimitiveType.TriangleStrip, vertices, 0, SPRITE_VERTICES,
-            pGLState.modelViewGLMatrix, pGLState.projectionGLMatrix,
+            drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
             BatchTexture.of(texture),
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
             meshBlendMode(), meshDepthTest(), depthInfo.mask

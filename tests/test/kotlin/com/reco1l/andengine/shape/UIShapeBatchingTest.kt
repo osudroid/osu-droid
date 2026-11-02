@@ -13,8 +13,8 @@ import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.shape.ShapeMasks
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontManager
 import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -36,12 +36,12 @@ class UIShapeBatchingTest {
     /** A box that records the steps of its buffer draw instead of running them (they call GL past the fake). */
     private class BufferPathBox : UIBox() {
         val bufferCalls = ArrayList<String>()
-        override fun beginDraw(pGLState: DrawContext) { bufferCalls += "begin" }
+        override fun beginDraw(drawContext: DrawContext) { bufferCalls += "begin" }
         override fun onDrawBuffer(gl: DrawContext) { bufferCalls += "draw" }
     }
 
     private lateinit var gl: RecordingGl
-    private val glState = DrawContext()
+    private val drawContext = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private lateinit var masks: ShapeMasks
@@ -66,8 +66,8 @@ class UIShapeBatchingTest {
     }
 
     private fun drawAndFlush(draw: () -> Unit) {
-        glState.resetModelViewGLMatrixStack()
-        glState.resetProjectionGLMatrixStack()
+        drawContext.resetModelViewGLMatrixStack()
+        drawContext.resetProjectionGLMatrixStack()
         draw()
         QuadBatcher.flush()
     }
@@ -83,7 +83,7 @@ class UIShapeBatchingTest {
     @Test
     fun uiBox_fill_goesThroughBatcher() {
         val box = box()
-        drawAndFlush { box.doDraw(glState, camera) }
+        drawAndFlush { box.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         val quads = gl.lastQuads()
@@ -95,7 +95,7 @@ class UIShapeBatchingTest {
     @Test
     fun uiBox_rounded_nineQuads() {
         val box = box { cornerRadius = 4f }
-        drawAndFlush { box.doDraw(glState, camera) }
+        drawAndFlush { box.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(9, gl.lastQuads().size)
@@ -104,7 +104,7 @@ class UIShapeBatchingTest {
     @Test
     fun uiBox_radiusClampedToHalfShortSide() {
         val box = box(10f, 6f) { cornerRadius = 20f }
-        drawAndFlush { box.doDraw(glState, camera) }
+        drawAndFlush { box.doDraw(drawContext, camera) }
 
         // The first quad is the top-left corner, as large as the clamped radius: half the short side.
         assertEquals(listOf(0f, 0f, 3f, 3f), gl.lastQuads()[0].toList())
@@ -117,7 +117,7 @@ class UIShapeBatchingTest {
             paintStyle = PaintStyle.Outline
             lineWidth = 2f
         }
-        drawAndFlush { box.doDraw(glState, camera) }
+        drawAndFlush { box.doDraw(drawContext, camera) }
 
         val quads = gl.lastQuads()
         assertEquals(4, quads.size)
@@ -134,7 +134,7 @@ class UIShapeBatchingTest {
             toPoint = Vec2(10f, 5f)
         }
         line.onHandleInvalidations()
-        drawAndFlush { line.doDraw(glState, camera) }
+        drawAndFlush { line.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         val quads = gl.lastQuads()
@@ -149,7 +149,7 @@ class UIShapeBatchingTest {
     fun uiTriangle_oneQuad() {
         val triangle = UITriangle().apply { setSize(10f, 8f) }
         triangle.onHandleInvalidations()
-        drawAndFlush { triangle.doDraw(glState, camera) }
+        drawAndFlush { triangle.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(1, gl.lastQuads().size)
@@ -163,7 +163,7 @@ class UIShapeBatchingTest {
             paintStyle = PaintStyle.Outline
         }
         triangle.onHandleInvalidations()
-        drawAndFlush { triangle.doDraw(glState, camera) }
+        drawAndFlush { triangle.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(3, gl.lastQuads().size)
@@ -181,7 +181,7 @@ class UIShapeBatchingTest {
             box.configure()
             gl.calls.clear()
 
-            box.doDraw(glState, camera)
+            box.doDraw(drawContext, camera)
 
             assertFalse(QuadBatcher.hasPending)
             assertEquals(listOf("begin", "draw"), box.bufferCalls)
@@ -194,7 +194,7 @@ class UIShapeBatchingTest {
     fun zeroAlpha_drawsNothing() {
         val batched = box { alpha = 0f }
 
-        batched.doDraw(glState, camera)
+        batched.doDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertNull(batched.buffer)
@@ -214,7 +214,7 @@ class UIShapeBatchingTest {
             box.configure()
             box.onHandleInvalidations()
 
-            box.doDraw(glState, camera)
+            box.doDraw(drawContext, camera)
 
             assertFalse(QuadBatcher.hasPending)
             assertEquals(listOf("begin", "draw"), box.bufferCalls)
@@ -232,7 +232,7 @@ class UIShapeBatchingTest {
     @Test
     fun uiCircle_full_fourQuads() {
         val circle = circle()
-        drawAndFlush { circle.doDraw(glState, camera) }
+        drawAndFlush { circle.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(4, gl.lastQuads().size)
@@ -243,7 +243,7 @@ class UIShapeBatchingTest {
     fun uiCircle_depthMask_usesBufferPath() {
         val circle = object : UICircle() {
             val bufferCalls = ArrayList<String>()
-            override fun beginDraw(pGLState: DrawContext) { bufferCalls += "begin" }
+            override fun beginDraw(drawContext: DrawContext) { bufferCalls += "begin" }
             override fun onDrawBuffer(gl: DrawContext) { bufferCalls += "draw" }
         }
         circle.setSize(20f, 20f)
@@ -251,7 +251,7 @@ class UIShapeBatchingTest {
         circle.depthInfo = DepthInfo.Default
         circle.onHandleInvalidations()
 
-        circle.doDraw(glState, camera)
+        circle.doDraw(drawContext, camera)
 
         assertFalse(QuadBatcher.hasPending)
         assertEquals(listOf("begin", "draw"), circle.bufferCalls)
@@ -261,7 +261,7 @@ class UIShapeBatchingTest {
     @Test
     fun portionCircle_batchedWithoutBuffer() {
         val circle = circle { setPortion(0.25f) }
-        drawAndFlush { circle.doDraw(glState, camera) }
+        drawAndFlush { circle.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(UICircle.approximateSegments(20f, 20f) - 1, gl.lastQuadCorners().size)
@@ -272,7 +272,7 @@ class UIShapeBatchingTest {
     fun ellipse_batched() {
         val ellipse = UICircle().apply { setSize(30f, 10f) }
         ellipse.onHandleInvalidations()
-        drawAndFlush { ellipse.doDraw(glState, camera) }
+        drawAndFlush { ellipse.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertNull(ellipse.buffer)
@@ -306,7 +306,7 @@ class UIShapeBatchingTest {
             val buffer = UICircle.CircleVertexBuffer(segments, PaintStyle.Fill)
             buffer.update(circle)
 
-            drawAndFlush { circle.doDraw(glState, camera) }
+            drawAndFlush { circle.doDraw(drawContext, camera) }
             val quads = gl.lastQuadCorners()
 
             assertEquals(segments - 1, quads.size)
@@ -337,7 +337,7 @@ class UIShapeBatchingTest {
         val buffer = UICircle.CircleVertexBuffer(segments, PaintStyle.Outline)
         buffer.update(circle)
 
-        drawAndFlush { circle.doDraw(glState, camera) }
+        drawAndFlush { circle.doDraw(drawContext, camera) }
         val quads = gl.lastQuadCorners()
 
         assertEquals(segments - 1, quads.size)
@@ -356,7 +356,7 @@ class UIShapeBatchingTest {
             paintStyle = PaintStyle.Outline
             lineWidth = 2f
         }
-        drawAndFlush { circle.doDraw(glState, camera) }
+        drawAndFlush { circle.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(4, gl.lastQuads().size)
@@ -370,7 +370,7 @@ class UIShapeBatchingTest {
             setColor(1f, 0f, 0f)
         }
         box.onHandleInvalidations()
-        drawAndFlush { box.doDraw(glState, camera) }
+        drawAndFlush { box.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         assertEquals(listOf(0f, 0f, 20f, 10f), gl.lastQuads()[0].toList())
@@ -397,7 +397,7 @@ class UIShapeBatchingTest {
         amplitudes[7] = 0.8f
         amplitudes[9] = 0.001f // below the dead zone
 
-        drawAndFlush { spectrum.doDraw(glState, camera) }
+        drawAndFlush { spectrum.doDraw(drawContext, camera) }
 
         assertEquals(1, gl.count("glDrawElements"))
         // Two live bars in each of the three rounds.
@@ -426,9 +426,9 @@ class UIShapeBatchingTest {
         gl.vertexUploads.clear()
 
         drawAndFlush {
-            first.doDraw(glState, camera)
-            text.doDraw(glState, camera)
-            second.doDraw(glState, camera)
+            first.doDraw(drawContext, camera)
+            text.doDraw(drawContext, camera)
+            second.doDraw(drawContext, camera)
         }
 
         assertEquals(1, gl.count("glDrawElements"))

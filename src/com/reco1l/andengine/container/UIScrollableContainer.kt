@@ -321,7 +321,7 @@ open class UIScrollableContainer : UIContainer() {
         updateIndicators(deltaTimeSec)
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
 
         firstChild?.also { child ->
             if (child.x != -scrollX || child.y != -scrollY) {
@@ -335,12 +335,12 @@ open class UIScrollableContainer : UIContainer() {
         // model-view matrix to obtain the container's 4 corners in scene space.
         // This is more accurate than convertLocalToSceneCoordinates, which uses raw mX/mY and
         // misses parent padding, anchor, and origin offsets.
-        pGLState.pushModelViewGLMatrix()
-        onApplyTransformations(pGLState)
+        drawContext.pushModelViewGLMatrix()
+        onApplyTransformations(drawContext)
 
-        val m = pGLState.modelViewGLMatrix
+        val m = drawContext.modelViewGLMatrix
 
-        pGLState.popModelViewGLMatrix()
+        drawContext.popModelViewGLMatrix()
 
         // Column-major 4×4: transform the 4 local corners through M to get scene coords.
         // (lx, ly) → scene = (M[0]*lx + M[4]*ly + M[12],  M[1]*lx + M[5]*ly + M[13])
@@ -359,29 +359,29 @@ open class UIScrollableContainer : UIContainer() {
         val maxX = maxOf(tlX, trX, brX, blX)
         val maxY = maxOf(tlY, trY, brY, blY)
 
-        val wasScissorTestEnabled = pGLState.isScissorTestEnabled
-        pGLState.enableScissorTest()
+        val wasScissorTestEnabled = drawContext.isScissorTestEnabled
+        drawContext.enableScissorTest()
         ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
 
         // Suppress UIComponent's own clipToBounds scissor to avoid double-scissoring.
         val savedClipToBounds = clipToBounds
         clipToBounds = false
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
         clipToBounds = savedClipToBounds
 
         // Draw indicators inside the scissor (already position-clamped to container bounds).
         val hasIndicators = horizontalIndicator != null || verticalIndicator != null
         if (hasIndicators) {
-            pGLState.pushModelViewGLMatrix()
-            onApplyTransformations(pGLState)
-            horizontalIndicator?.onDraw(pGLState, pCamera)
-            verticalIndicator?.onDraw(pGLState, pCamera)
-            pGLState.popModelViewGLMatrix()
+            drawContext.pushModelViewGLMatrix()
+            onApplyTransformations(drawContext)
+            horizontalIndicator?.onDraw(drawContext, pCamera)
+            verticalIndicator?.onDraw(drawContext, pCamera)
+            drawContext.popModelViewGLMatrix()
         }
 
         ScissorStack.pop()
         if (!wasScissorTestEnabled) {
-            pGLState.disableScissorTest()
+            drawContext.disableScissorTest()
         }
     }
     /**

@@ -1,7 +1,7 @@
 package com.osudroid.resources
 
 import android.graphics.Color
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.FontManager
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Before

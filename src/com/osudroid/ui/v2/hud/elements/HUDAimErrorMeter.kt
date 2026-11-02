@@ -259,15 +259,15 @@ class HUDAimErrorMeter : HUDElement() {
 
     //region Indicator update & draw
 
-    override fun onManagedDraw(pGLState: DrawContext, camera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, camera: Camera) {
         // averageMarker is hidden for this pass and re-drawn manually below (after the hit indicators) so
         // it always renders on top of them.
         averageMarker.isVisible = false
-        super.onManagedDraw(pGLState, camera)
+        super.onManagedDraw(drawContext, camera)
         averageMarker.isVisible = true
 
-        pGLState.pushModelViewGLMatrix()
-        onApplyTransformations(pGLState)
+        drawContext.pushModelViewGLMatrix()
+        onApplyTransformations(drawContext)
 
         activeIndicators.forEach {
             markerBar.x = it.x
@@ -276,15 +276,15 @@ class HUDAimErrorMeter : HUDElement() {
             markerBar.alpha = it.alpha
 
             markerBar.rotation = -45f
-            markerBar.onDraw(pGLState, camera)
+            markerBar.onDraw(drawContext, camera)
 
             markerBar.rotation = 45f
-            markerBar.onDraw(pGLState, camera)
+            markerBar.onDraw(drawContext, camera)
         }
 
-        averageMarker.onDraw(pGLState, camera)
+        averageMarker.onDraw(drawContext, camera)
 
-        pGLState.popModelViewGLMatrix()
+        drawContext.popModelViewGLMatrix()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

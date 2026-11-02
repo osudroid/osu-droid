@@ -8,7 +8,7 @@ import kotlin.math.sqrt
 import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.text.GlyphSlot
-import org.andengine.opengl.font.FontManager
+import org.andengine.graphics.text.FontManager
 
 /**
  * Breaks UI shapes (rectangles, rounded rectangles, outlines, lines, triangles, circles) into

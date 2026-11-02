@@ -12,7 +12,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.*
 import org.andengine.graphics.DrawContext
-import org.andengine.opengl.font.Font
+import org.andengine.graphics.text.Font
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 
@@ -163,9 +163,9 @@ open class UILabeledBadge : UILinearContainer(), ISizeVariable {
         (background as? UIBox)?.cornerRadius = cornerRadius
     }
 
-    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
         (labelEntity.background as? UIBox)?.cornerRadius = (background as? UIBox)?.cornerRadius ?: 0f
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 }
 

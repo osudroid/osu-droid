@@ -251,13 +251,13 @@ class StoryboardComponent : UIComponent() {
         sounds = null
     }
 
-    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
-        beginDraw(pGLState)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        beginDraw(drawContext)
 
         val playback = playback ?: return
 
         val drawStart = RenderStats.now()
-        batch.begin(pGLState)
+        batch.begin(drawContext)
         drawBackground(playback)
         drawLayers(playback, MAIN_LAYERS, drawAlpha)
         drawDim()
