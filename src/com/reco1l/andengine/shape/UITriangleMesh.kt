@@ -11,7 +11,7 @@ import com.edlplan.framework.utils.*
 import com.reco1l.andengine.buffered.UIBufferedComponent
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.*
-import org.andengine.opengl.util.*
+import org.andengine.graphics.DrawContext
 
 // TODO: This class should be replaced with a more efficient BufferedEntity implementation.
 class UITriangleMesh : UIComponent() {
@@ -57,7 +57,7 @@ class UITriangleMesh : UIComponent() {
     private var cachedDestination = -1
     private var cachedBlend = BlendMode.Alpha
 
-    override fun beginDraw(pGLState: GLState) {
+    override fun beginDraw(pGLState: DrawContext) {
         super.beginDraw(pGLState)
 
         // Clearing
@@ -81,7 +81,7 @@ class UITriangleMesh : UIComponent() {
         }
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         super.doDraw(pGLState, pCamera)
 
         if (vertices.length == 0) {

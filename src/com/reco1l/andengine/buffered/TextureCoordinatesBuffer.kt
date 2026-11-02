@@ -1,6 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * Texture coordinates of another buffer's vertices, one pair per vertex in the same order.
@@ -11,6 +11,6 @@ abstract class TextureCoordinatesBuffer(
 ) : VertexBuffer(0, vertexCount, vertexSize) {
 
     // Texture coordinates of another buffer's vertices: nothing to draw on their own.
-    override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) = Unit
+    override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) = Unit
 
 }

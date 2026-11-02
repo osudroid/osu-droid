@@ -12,7 +12,7 @@ import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.graphics.shape.ShapeMasks
 import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -28,7 +28,7 @@ class RectangleBatchingTest {
     private lateinit var gl: RecordingGL
     private lateinit var atlas: GlyphAtlas
     private lateinit var masks: ShapeMasks
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before
@@ -138,9 +138,9 @@ class RectangleBatchingTest {
     @Test
     fun rectangleSubclassWithOwnDraw_stillBatched() {
         val r = object : Rectangle(0f, 0f, 8f, 6f) {
-            override fun preDraw(pGLState: GLState, pCamera: Camera) = super.preDraw(pGLState, pCamera)
-            override fun draw(pGLState: GLState, pCamera: Camera) = super.draw(pGLState, pCamera)
-            override fun postDraw(pGLState: GLState, pCamera: Camera) = super.postDraw(pGLState, pCamera)
+            override fun preDraw(pGLState: DrawContext, pCamera: Camera) = super.preDraw(pGLState, pCamera)
+            override fun draw(pGLState: DrawContext, pCamera: Camera) = super.draw(pGLState, pCamera)
+            override fun postDraw(pGLState: DrawContext, pCamera: Camera) = super.postDraw(pGLState, pCamera)
         }
         r.onDraw(glState, camera)
         assertTrue(QuadBatcher.hasPending)

@@ -4,7 +4,7 @@ import com.osudroid.storyboard.model.StoryboardLayerType
 import org.andengine.graphics.debug.RenderStats
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.Config
 
 /**
@@ -23,7 +23,7 @@ class StoryboardOverlayComponent internal constructor(
         height = Config.getRES_HEIGHT().toFloat()
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         beginDraw(pGLState)
 
         val playback = storyboardComponent.playback ?: return

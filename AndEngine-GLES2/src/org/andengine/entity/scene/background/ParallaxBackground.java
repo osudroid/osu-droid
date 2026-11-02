@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.IAreaShape;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -48,7 +48,7 @@ public class ParallaxBackground extends Background {
 	// ===========================================================
 
 	@Override
-	public void onDraw(final GLState pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pGLState, final Camera pCamera) {
 		super.onDraw(pGLState, pCamera);
 
 		final float parallaxValue = this.mParallaxValue;
@@ -114,7 +114,7 @@ public class ParallaxBackground extends Background {
 		// Methods
 		// ===========================================================
 
-		public void onDraw(final GLState pGLState, final Camera pCamera, final float pParallaxValue) {
+		public void onDraw(final DrawContext pGLState, final Camera pCamera, final float pParallaxValue) {
 			pGLState.pushModelViewGLMatrix();
 			{
 				final float cameraWidth = pCamera.getWidth();

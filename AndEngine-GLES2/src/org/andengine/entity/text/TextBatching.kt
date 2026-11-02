@@ -6,7 +6,7 @@ import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.Letter
 import org.andengine.opengl.font.StrokeFont
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * Hands an engine [Text] to the [QuadBatcher]: the glyph rectangles and letters are taken from the
@@ -21,7 +21,7 @@ object TextBatching {
      * The color is the font color times the text color.
      */
     @JvmStatic
-    fun add(text: Text, glState: GLState, count: Int) {
+    fun add(text: Text, glState: DrawContext, count: Int) {
         val font = text.font as? Font ?: return
         val letters = text.letters
         val quads = text.letterQuads

@@ -8,7 +8,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -22,7 +22,7 @@ import java.lang.reflect.Proxy
 class UISpriteDrawGuardTest {
 
     private val glCalls = ArrayList<String>()
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     /** Fake GL that records every call as `name(args)` and answers with neutral values. */
@@ -52,8 +52,8 @@ class UISpriteDrawGuardTest {
         val calls = ArrayList<String>()
         // Records the buffer path's steps, so it must not take the batch path.
         override val isBatchable: Boolean get() = false
-        override fun beginDraw(pGLState: GLState) { calls += "begin" }
-        override fun onDrawBuffer(pGLState: GLState) { calls += "draw" }
+        override fun beginDraw(pGLState: DrawContext) { calls += "begin" }
+        override fun onDrawBuffer(pGLState: DrawContext) { calls += "draw" }
     }
 
     @Before

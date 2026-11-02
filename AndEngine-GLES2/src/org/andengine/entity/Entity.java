@@ -9,7 +9,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.entity.modifier.EntityModifierList;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
@@ -1214,7 +1214,7 @@ public class Entity implements IEntity {
 	 * otherwise hidden or culled entities will still be drawn.
 	 */
 	@Override
-	public void onDraw(final GLState pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pGLState, final Camera pCamera) {
 		if(this.mVisible && !(this.mCullingEnabled && this.isCulled(pCamera))) {
 			this.onManagedDraw(pGLState, pCamera);
 		}
@@ -1305,11 +1305,11 @@ public class Entity implements IEntity {
 	// ===========================================================
 
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @param pGLState the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
 	// BEGIN osu!droid modified: let subclasses skip their own draw (e.g. texture not on the GPU yet).
-	private void drawSelf(final GLState pGLState, final Camera pCamera) {
+	private void drawSelf(final DrawContext pGLState, final Camera pCamera) {
 		if(!this.isSelfDrawable()) {
 			return;
 		}
@@ -1327,23 +1327,23 @@ public class Entity implements IEntity {
 	}
 	// END osu!droid modified
 
-	protected void preDraw(final GLState pGLState, final Camera pCamera) {
+	protected void preDraw(final DrawContext pGLState, final Camera pCamera) {
 
 	}
 
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @param pGLState the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
-	protected void draw(final GLState pGLState, final Camera pCamera) {
+	protected void draw(final DrawContext pGLState, final Camera pCamera) {
 
 	}
 
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @param pGLState the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
-	protected void postDraw(final GLState pGLState, final Camera pCamera) {
+	protected void postDraw(final DrawContext pGLState, final Camera pCamera) {
 
 	}
 
@@ -1359,7 +1359,7 @@ public class Entity implements IEntity {
 		this.mUpdateHandlers = new UpdateHandlerList(Entity.UPDATEHANDLERS_CAPACITY_DEFAULT);
 	}
 
-	protected void onApplyTransformations(final GLState pGLState) {
+	protected void onApplyTransformations(final DrawContext pGLState) {
 		/* Translation. */
 		this.applyTranslation(pGLState);
 
@@ -1373,11 +1373,11 @@ public class Entity implements IEntity {
 		this.applyScale(pGLState);
 	}
 
-	protected void applyTranslation(final GLState pGLState) {
+	protected void applyTranslation(final DrawContext pGLState) {
 		pGLState.translateModelViewGLMatrixf(this.mX, this.mY, 0);
 	}
 
-	protected void applyRotation(final GLState pGLState) {
+	protected void applyRotation(final DrawContext pGLState) {
 		final float rotation = this.mRotation;
 
 		if(rotation != 0) {
@@ -1394,7 +1394,7 @@ public class Entity implements IEntity {
 		}
 	}
 
-	protected void applySkew(final GLState pGLState) {
+	protected void applySkew(final DrawContext pGLState) {
 		final float skewX = this.mSkewX;
 		final float skewY = this.mSkewY;
 
@@ -1408,7 +1408,7 @@ public class Entity implements IEntity {
 		}
 	}
 
-	protected void applyScale(final GLState pGLState) {
+	protected void applyScale(final DrawContext pGLState) {
 		final float scaleX = this.mScaleX;
 		final float scaleY = this.mScaleY;
 
@@ -1422,7 +1422,7 @@ public class Entity implements IEntity {
 		}
 	}
 
-	protected void onManagedDraw(final GLState pGLState, final Camera pCamera) {
+	protected void onManagedDraw(final DrawContext pGLState, final Camera pCamera) {
 		pGLState.pushModelViewGLMatrix();
 		{
 			this.onApplyTransformations(pGLState);

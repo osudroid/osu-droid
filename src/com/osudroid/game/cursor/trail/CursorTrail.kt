@@ -7,7 +7,7 @@ import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite
@@ -164,7 +164,7 @@ class CursorTrail(
         writeIndex = (writeIndex + 1) % MAX_PARTS
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         super.doDraw(pGLState, pCamera)
 
         val halfW = textureRegion.width * cursorSprite.scaleX / 2f

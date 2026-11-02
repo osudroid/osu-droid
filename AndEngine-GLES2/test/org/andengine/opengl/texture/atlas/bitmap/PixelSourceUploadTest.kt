@@ -10,7 +10,6 @@ import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.texture.Pixels
 import org.andengine.graphics.texture.StraightPixels
-import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.ITextureAtlas
@@ -18,7 +17,6 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat
-import org.andengine.opengl.util.GLState
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -40,24 +38,10 @@ class PixelSourceUploadTest {
 
     private lateinit var gl: RecordingGL
 
-    /** Records the legacy bitmap upload (the getPixels conversion) instead of calling GL. */
-    private class RecordingGLState : GLState() {
-        val bitmapUploads = ArrayList<String>()
-
-        override fun glTexSubImage2D(pTarget: Int, pLevel: Int, pX: Int, pY: Int, pBitmap: Bitmap, pPixelFormat: PixelFormat) {
-            bitmapUploads += "bitmap($pX,$pY,${pBitmap.width},${pBitmap.height})"
-        }
-
-        private var nextTextureName = 100
-
-        override fun generateTexture() = nextTextureName++
-    }
-
-    private val glState = RecordingGLState()
 
     private class Atlas(listener: ITextureAtlas.ITextureAtlasStateListener<IBitmapTextureAtlasSource>?) :
         BitmapTextureAtlas(TextureManager(), 16, 16, BitmapTextureFormat.RGBA_8888, TextureOptions.BILINEAR, listener) {
-        fun write(glState: GLState) = writeTextureToHardware(glState)
+        fun write() = writeTextureToHardware()
     }
 
     private class RecordingListener : ITextureAtlas.ITextureAtlasStateListener.TextureAtlasStateAdapter<IBitmapTextureAtlasSource>() {
@@ -107,7 +91,14 @@ class PixelSourceUploadTest {
         gl.calls.clear()
     }
 
-    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") }
+    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
+
+    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
+    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
+        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
+        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
+    }
+
 
     @Test
     fun pixelSource_uploadsWithoutConversion() {
@@ -116,14 +107,14 @@ class PixelSourceUploadTest {
         val source = FakePixelSource()
         atlas.addTextureAtlasSource(source, 5, 7)
 
-        atlas.write(glState)
+        atlas.write()
 
         assertEquals(
             listOf("glTexSubImage2D(${GLES20.GL_TEXTURE_2D},0,5,7,3,2,${GLES20.GL_RGBA},${GLES20.GL_UNSIGNED_BYTE},buf)"),
             subImageCalls()
         )
         assertArrayEquals(source.bytes, gl.texSubImage2DBytes.single())
-        assertTrue("no getPixels conversion", glState.bitmapUploads.isEmpty())
+        assertTrue("no getPixels conversion", bitmapUploads().isEmpty())
         assertEquals("no bitmap decoded", 0, source.bitmapLoads)
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
         assertTrue(listener.failed.isEmpty())
@@ -134,7 +125,7 @@ class PixelSourceUploadTest {
         val atlas = Atlas(null)
         atlas.addTextureAtlasSource(FakePixelSource(), 0, 0)
 
-        atlas.write(glState)
+        atlas.write()
 
         assertEquals(1, gl.calls.count { it == "glTexStorage2D(${GLES20.GL_TEXTURE_2D},1,${GLES30.GL_RGBA8},16,16)" })
         assertTrue(gl.calls.none { it.startsWith("glTexImage2D(") })
@@ -147,9 +138,9 @@ class PixelSourceUploadTest {
         val source = FakeBitmapSource()
         atlas.addTextureAtlasSource(source, 2, 3)
 
-        atlas.write(glState)
+        atlas.write()
 
-        assertEquals(listOf("bitmap(2,3,3,2)"), glState.bitmapUploads)
+        assertEquals(listOf("bitmap(2,3,3,2)"), bitmapUploads())
         assertTrue(subImageCalls().isEmpty())
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
@@ -160,11 +151,12 @@ class PixelSourceUploadTest {
         val source = FakePixelSource()
         atlas.addTextureAtlasSource(source, 0, 0)
 
-        atlas.loadToHardware(glState)
+        atlas.loadToHardware()
+        val oldName = atlas.hardwareTextureID
         // A reload (as after a context loss) deletes the old name and uploads onto a fresh one.
-        atlas.reloadToHardware(glState)
+        atlas.reloadToHardware()
 
-        assertEquals(101, atlas.hardwareTextureID)
+        assertTrue(atlas.hardwareTextureID != oldName)
         assertEquals(1, gl.calls.count { it.startsWith("glDeleteTextures(") })
         assertEquals(2, gl.calls.count { it.startsWith("glTexStorage2D(") })
         assertEquals(2, source.pixelLoads)
@@ -183,9 +175,9 @@ class PixelSourceUploadTest {
         }
         atlas.addTextureAtlasSource(source, 0, 0)
 
-        atlas.write(glState)
+        atlas.write()
 
-        assertEquals(1, glState.bitmapUploads.size)
+        assertEquals(1, bitmapUploads().size)
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
 
@@ -293,7 +285,7 @@ class PixelSourceUploadTest {
 
     private class PremultipliedAtlas(listener: ITextureAtlas.ITextureAtlasStateListener<IBitmapTextureAtlasSource>?) :
         BitmapTextureAtlas(TextureManager(), 16, 16, BitmapTextureFormat.RGBA_8888, TextureOptions.BILINEAR_PREMULTIPLYALPHA, listener) {
-        fun write(glState: GLState) = writeTextureToHardware(glState)
+        fun write() = writeTextureToHardware()
     }
 
     /** Decodes [png] like the app's sources: bitmap path with the default (premultiplied) decoding, pixels in either variant. */
@@ -349,7 +341,7 @@ class PixelSourceUploadTest {
         val source = PngSource(png, 4)
         atlas.addTextureAtlasSource(source, 2, 3)
 
-        atlas.write(glState)
+        atlas.write()
 
         // The bytes the bitmap path handed to GLUtils.texSubImage2D before: the premultiplied bitmap's memory.
         val legacyBitmap = BitmapFactory.decodeByteArray(png, 0, png.size)
@@ -370,7 +362,7 @@ class PixelSourceUploadTest {
         for (i in expected.indices) {
             assertTrue("byte $i: ${uploaded[i].toInt() and 0xFF} vs ${expected[i]}", Math.abs((uploaded[i].toInt() and 0xFF) - expected[i]) <= 1)
         }
-        assertTrue(glState.bitmapUploads.isEmpty())
+        assertTrue(bitmapUploads().isEmpty())
         assertEquals(listOf<IBitmapTextureAtlasSource>(source), listener.loaded)
     }
 
@@ -381,7 +373,7 @@ class PixelSourceUploadTest {
         atlas.addTextureAtlasSource(source, 0, 0)
 
         assertFalse(atlas.canPreparePixels())
-        atlas.write(glState)
+        atlas.write()
 
         assertEquals("straight pixels are never asked for", 0, source.pixelLoads)
         assertEquals(1, source.bitmapLoads)
@@ -410,16 +402,16 @@ class PixelSourceUploadTest {
         val premultipliedSource = WrongVariantSource(deliver = false)
         val premultipliedAtlas = PremultipliedAtlas(null)
         premultipliedAtlas.addTextureAtlasSource(premultipliedSource, 0, 0)
-        premultipliedAtlas.write(glState)
+        premultipliedAtlas.write()
         assertEquals(1, premultipliedSource.bitmapLoads)
         assertTrue(subImageCalls().isEmpty())
 
         val straightSource = WrongVariantSource(deliver = true)
         val straightAtlas = Atlas(null)
         straightAtlas.addTextureAtlasSource(straightSource, 0, 0)
-        straightAtlas.write(glState)
+        straightAtlas.write()
         assertEquals(1, straightSource.bitmapLoads)
-        assertEquals(listOf("bitmap(0,0,1,1)"), glState.bitmapUploads)
+        assertEquals(listOf("bitmap(0,0,1,1)"), bitmapUploads())
         assertTrue(subImageCalls().isEmpty())
     }
 

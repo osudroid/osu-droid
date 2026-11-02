@@ -20,7 +20,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -41,7 +41,7 @@ class UIBufferedComponentMeshTest {
     private val uploads = ArrayList<ByteArray>()
     private val createdPrograms = HashSet<Int>()
     private var nextId = 100
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private fun fakeGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
@@ -149,7 +149,7 @@ class UIBufferedComponentMeshTest {
         val vertexCount = box.buffer!!.vertexCount
         assertEquals(vertexCount * MeshRenderer.VERTEX_SIZE_BYTES, uploads.last().size)
         // Later entities are not tested against the depth values the box wrote.
-        assertFalse(glState.isDepthTestEnabled)
+        assertFalse(GlesBackend.state.isDepthTestEnabled)
     }
 
     @Test
@@ -254,7 +254,7 @@ class UIBufferedComponentMeshTest {
     /** Records which draw steps of the buffer contract run. */
     private class RecordingBuffer(private val calls: MutableList<String>) : IBuffer {
         override var sharingMode = BufferSharingMode.Off
-        override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) { calls += "drawMesh" }
+        override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) { calls += "drawMesh" }
     }
 
     private class RecordingComponent : UIBufferedComponent<RecordingBuffer>() {
@@ -277,6 +277,6 @@ class UIBufferedComponentMeshTest {
         // The buffer is drawn once through the mesh renderer; the component binds no state of its own.
         assertEquals(listOf("drawMesh"), component.calls)
         assertFalse(glCalls.toString(), glCalls.any { it.startsWith("glBindBuffer") || it.startsWith("glVertexAttribPointer") })
-        assertFalse(glState.isDepthTestEnabled)
+        assertFalse(GlesBackend.state.isDepthTestEnabled)
     }
 }

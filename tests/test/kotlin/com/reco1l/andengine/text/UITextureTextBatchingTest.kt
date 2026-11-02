@@ -14,7 +14,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -32,7 +32,7 @@ class UITextureTextBatchingTest {
     private val vertexUploads = ArrayList<ByteArray>()
 
     private var nextId = 1
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private val identity = floatArrayOf(

@@ -10,7 +10,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -24,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 class SpriteDrawGuardTest {
 
     private lateinit var gl: RecordingGL
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private class Page(loadedId: Int) : BitmapTextureAtlas(TextureManager(), 16, 16, TextureOptions.BILINEAR) {
@@ -36,7 +36,7 @@ class SpriteDrawGuardTest {
     /** Counts the draws the sprite hands to the batch. */
     private class CountingSprite(region: TextureRegion) : Sprite(0f, 0f, 8f, 8f, region) {
         var draws = 0
-        override fun draw(pGLState: GLState, pCamera: Camera) {
+        override fun draw(pGLState: DrawContext, pCamera: Camera) {
             draws++
             super.draw(pGLState, pCamera)
         }
@@ -98,7 +98,7 @@ class SpriteDrawGuardTest {
     fun plainEntity_isSelfDrawable() {
         var drawn = false
         val entity = object : Entity() {
-            override fun draw(pGLState: GLState, pCamera: Camera) {
+            override fun draw(pGLState: DrawContext, pCamera: Camera) {
                 drawn = true
             }
         }

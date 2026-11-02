@@ -18,7 +18,7 @@ import org.andengine.engine.camera.*
 import org.andengine.entity.*
 import org.andengine.entity.scene.*
 import org.andengine.input.touch.*
-import org.andengine.opengl.util.*
+import org.andengine.graphics.DrawContext
 import org.andengine.util.Constants.*
 import org.andengine.util.algorithm.collision.ShapeCollisionChecker
 import org.andengine.util.adt.transformation.Transformation
@@ -573,7 +573,7 @@ abstract class UIComponent : Entity(0f, 0f),
 
     //region Drawing
 
-    override fun onApplyTransformations(gl: GLState) {
+    override fun onApplyTransformations(gl: DrawContext) {
         val x = absoluteX
         val y = absoluteY
 
@@ -600,10 +600,10 @@ abstract class UIComponent : Entity(0f, 0f),
 
             if (centerX > 0f || centerY > 0f) {
                 gl.translateModelViewGLMatrixf(centerX, centerY, 0f)
-                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1)
+                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1f)
                 gl.translateModelViewGLMatrixf(-centerX, -centerY, 0f)
             } else {
-                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1)
+                gl.scaleModelViewGLMatrixf(mScaleX, mScaleY, 1f)
             }
         }
     }
@@ -618,7 +618,7 @@ abstract class UIComponent : Entity(0f, 0f),
     @JvmField var drawBlue  = 1f
     @JvmField var drawAlpha = 1f
 
-    open fun onApplyColor(gl: GLState) {
+    open fun onApplyColor(gl: DrawContext) {
 
         var red = red
         var green = green
@@ -658,7 +658,7 @@ abstract class UIComponent : Entity(0f, 0f),
         drawAlpha = alpha
     }
 
-    override fun onManagedDraw(pGLState: GLState, camera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, camera: Camera) {
 
         val isCulled = isCulled(camera)
 
@@ -756,7 +756,7 @@ abstract class UIComponent : Entity(0f, 0f),
         foreground?.onHandleInvalidations()
     }
 
-    private fun doManagedDraw(pGLState: GLState, camera: Camera) {
+    private fun doManagedDraw(pGLState: DrawContext, camera: Camera) {
 
         onHandleInvalidations()
         pGLState.pushModelViewGLMatrix()
@@ -788,11 +788,11 @@ abstract class UIComponent : Entity(0f, 0f),
         pGLState.popModelViewGLMatrix()
     }
 
-    open fun beginDraw(pGLState: GLState) {
+    open fun beginDraw(pGLState: DrawContext) {
         onApplyColor(pGLState)
     }
 
-    open fun doDraw(pGLState: GLState, pCamera: Camera) {
+    open fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         beginDraw(pGLState)
     }
 

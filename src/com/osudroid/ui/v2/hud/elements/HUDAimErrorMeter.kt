@@ -14,7 +14,7 @@ import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -259,7 +259,7 @@ class HUDAimErrorMeter : HUDElement() {
 
     //region Indicator update & draw
 
-    override fun onManagedDraw(pGLState: GLState, camera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, camera: Camera) {
         // averageMarker is hidden for this pass and re-drawn manually below (after the hit indicators) so
         // it always renders on top of them.
         averageMarker.isVisible = false

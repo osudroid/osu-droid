@@ -118,11 +118,11 @@ class FontAtlasTest {
         font.getLetter('A')
         assertEquals(0, uploads() - baseline)
 
-        font.update(null)
+        font.update()
         assertEquals(2, uploads() - baseline)
         assertEquals(listOf("A0", "B0"), rasterizer.rasterized)
 
-        font.update(null)
+        font.update()
         assertEquals(2, uploads() - baseline)
     }
 
@@ -132,7 +132,7 @@ class FontAtlasTest {
         val a = font.getLetter('A')
         val b = font.getLetter('B')
         font.getLetter(' ')
-        font.update(null)
+        font.update()
         val slotA = a.mGlyph
         val slotB = b.mGlyph
 
@@ -146,7 +146,7 @@ class FontAtlasTest {
         assertFalse(slotA!!.uploaded)
         assertFalse(slotB!!.uploaded)
         val before = uploads()
-        fontManager.updateFonts(null)
+        fontManager.updateFonts()
         assertTrue(slotA.uploaded)
         assertTrue(slotB!!.uploaded)
 
@@ -176,7 +176,7 @@ class FontAtlasTest {
         assertEquals(0xFFFF0000.toInt(), font.fillColor)
         assertEquals(0xFF000000.toInt(), font.strokeColor)
 
-        font.update(null)
+        font.update()
         assertEquals(2, uploads() - baseline)
         assertEquals(listOf("A0", "A1"), rasterizer.rasterized)
     }
@@ -192,7 +192,7 @@ class FontAtlasTest {
         assertNotNull(font.getLetter('A').mGlyph)
         assertNull(font.getLetter('A').mStrokeGlyph)
 
-        font.update(null)
+        font.update()
         assertEquals(1, uploads() - baseline)
     }
 

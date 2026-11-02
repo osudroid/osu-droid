@@ -15,7 +15,7 @@ import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
 import org.andengine.opengl.font.StrokeFont
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.andengine.util.HorizontalAlign
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -58,7 +58,7 @@ class TextBatchingTest {
     private lateinit var atlas: GlyphAtlas
     private val fontManager = FontManager()
     private val fonts = ArrayList<Font>()
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 800f, 480f)
 
     @Before
@@ -91,7 +91,7 @@ class TextBatchingTest {
 
     private fun text(font: Font, string: String, capacity: Int = string.length, options: TextOptions = TextOptions()): Text {
         val text = Text(0f, 0f, font, string, capacity, options)
-        font.update(null)
+        font.update()
         return text
     }
 

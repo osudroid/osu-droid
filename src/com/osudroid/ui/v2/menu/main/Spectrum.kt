@@ -5,7 +5,7 @@ import com.reco1l.andengine.buffered.*
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import kotlin.math.*
@@ -88,7 +88,7 @@ class Spectrum : UIBufferedComponent<Spectrum.SpectrumVBO>() {
         return SpectrumVBO(totalBars).also { it.sharingMode = BufferSharingMode.Dynamic }
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         val blend = if (canBatchShape()) batchBlendMode() else null
         if (blend == null) {
             ensureBuffer()

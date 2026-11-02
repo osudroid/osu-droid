@@ -23,7 +23,7 @@ import org.andengine.graphics.text.GlyphMetrics
 import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -58,7 +58,7 @@ class ScissorStackBatchTest {
     private val vertexUploads = ArrayList<ByteArray>()
     private val scissors = ArrayList<List<Int>>()
     private var nextId = 1
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private lateinit var atlas: GlyphAtlas
@@ -240,7 +240,7 @@ class ScissorStackBatchTest {
             container.onHandleInvalidations()
             for (i in 0 until container.childCount) (container.getChildByIndex(i) as? UIComponent)?.onHandleInvalidations()
         }
-        font.update(null)
+        font.update()
         glCalls.clear()
         vertexUploads.clear()
 
@@ -269,8 +269,8 @@ class ScissorStackBatchTest {
     fun legacyDrawInsideClip_keepsGlScissor() {
         val seen = ArrayList<List<Int>?>()
         val legacy = object : UIBox() {
-            override fun beginDraw(pGLState: GLState) {}
-            override fun onDrawBuffer(gl: GLState) { seen += scissors.lastOrNull() }
+            override fun beginDraw(pGLState: DrawContext) {}
+            override fun onDrawBuffer(gl: DrawContext) { seen += scissors.lastOrNull() }
         }.apply {
             setSize(20f, 10f)
             depthInfo = DepthInfo.Default

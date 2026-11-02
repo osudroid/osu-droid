@@ -12,7 +12,7 @@ import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.graphics.shape.ShapeMasks
 import org.andengine.graphics.text.GlyphAtlas
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -28,7 +28,7 @@ class LineBatchingTest {
     private lateinit var gl: RecordingGL
     private lateinit var atlas: GlyphAtlas
     private lateinit var masks: ShapeMasks
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     @Before

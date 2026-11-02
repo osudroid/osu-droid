@@ -2,7 +2,7 @@ package com.reco1l.andengine.buffered
 
 import org.andengine.graphics.gles.GlesPipeline
 import com.osudroid.math.toRadians
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 abstract class VertexBuffer(
@@ -25,7 +25,7 @@ abstract class VertexBuffer(
 
     //region Draw pipeline
 
-    override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
+    override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) {
         check(vertexSize == VERTEX_2D) { "The mesh renderer draws 2D vertices, got $vertexSize components" }
         val primitive = GlesPipeline.primitiveTypeOf(topology(entity)) ?: return
         entity.drawPositions(gl, primitive, data, 0, vertexCount)

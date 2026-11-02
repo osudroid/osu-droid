@@ -8,7 +8,7 @@ import com.reco1l.andengine.buffered.BufferSharingMode
 import com.reco1l.andengine.buffered.UIBufferedComponent
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * A rectangle that renders a smooth horizontal alpha gradient using per-vertex colors.
@@ -37,7 +37,7 @@ class UIGradientBox(
         }
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         // Invisible shapes still reach the buffer path: they serve as depth masks there.
         val blend = if (canBatchShape()) batchBlendMode() else null
         if (blend != null) {
@@ -103,7 +103,7 @@ class UIGradientBox(
             putVert(3, w,  h,  r, g, b, ta)
         }
 
-        override fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>) {
+        override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) {
             MeshRenderer.drawColored(
                 PrimitiveType.TriangleStrip, data, 0, 4,
                 gl.modelViewGLMatrix, gl.projectionGLMatrix,

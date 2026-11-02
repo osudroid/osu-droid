@@ -7,14 +7,12 @@ import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.RecordingGL
 import org.andengine.graphics.texture.Pixels
 import org.andengine.graphics.texture.StraightPixels
-import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
-import org.andengine.opengl.util.GLState
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -30,18 +28,6 @@ import java.nio.ByteBuffer
 class PixelPageTest {
 
     private lateinit var gl: RecordingGL
-
-    /** Records the legacy bitmap upload (the getPixels conversion) instead of calling GL. */
-    private class RecordingGLState : GLState() {
-        val bitmapUploads = ArrayList<String>()
-        private var nextTextureName = 100
-
-        override fun glTexSubImage2D(pTarget: Int, pLevel: Int, pX: Int, pY: Int, pBitmap: Bitmap, pPixelFormat: PixelFormat) {
-            bitmapUploads += "bitmap($pX,$pY,${pBitmap.width},${pBitmap.height})"
-        }
-
-        override fun generateTexture() = nextTextureName++
-    }
 
     @Before
     fun setUp() {
@@ -183,7 +169,14 @@ class PixelPageTest {
         override fun deepCopy() = this
     }
 
-    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") }
+    private fun subImageCalls() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
+
+    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
+    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
+        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
+        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
+    }
+
 
     /** Adds [source] to a fresh skin page set, uploads the page and returns it with the recorded bitmap uploads. */
     private fun uploadOnSkinPage(source: IBitmapTextureAtlasSource): List<String> {
@@ -191,9 +184,8 @@ class PixelPageTest {
         pages.beginSession()
         val region = pages.add(source, TextureOptions.BILINEAR)!!
         pages.endSession()
-        val glState = RecordingGLState()
-        (region.texture as BitmapTextureAtlas).loadToHardware(glState)
-        return glState.bitmapUploads
+        (region.texture as BitmapTextureAtlas).loadToHardware()
+        return bitmapUploads()
     }
 
     @Test

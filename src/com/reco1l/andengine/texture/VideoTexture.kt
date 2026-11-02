@@ -1,6 +1,7 @@
 package com.reco1l.andengine.texture
 
 import org.andengine.graphics.gles.GlesBackend
+import org.andengine.graphics.gles.GlesTextures
 import android.graphics.*
 import android.net.Uri
 import android.opengl.*
@@ -20,7 +21,6 @@ import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.decoder.ffmpeg.ExperimentalFfmpegVideoRenderer
 import org.andengine.opengl.texture.*
 import org.andengine.opengl.texture.PixelFormat
-import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.*
 import java.util.concurrent.atomic.AtomicReference
@@ -123,7 +123,7 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
     /** Returns the ST transform matrix updated by the most recent [latch] call. */
     open fun getTransformMatrix(): FloatArray = stMatrix
 
-    override fun writeTextureToHardware(pGLState: GLState) {
+    override fun writeTextureToHardware() {
         // Nothing – the SurfaceTexture pushes frames itself.
     }
 
@@ -137,40 +137,33 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
         super.setNotLoadedToHardware()
     }
 
-    // The Surface wraps the SurfaceTexture, so it goes first.
+    // The decoder may still be writing to the old Surface, so it is detached from the player first, on the
+    // player's thread, and only then released (the Surface wraps the SurfaceTexture, so it goes first).
+    // Releasing it while still attached abandons the decoder's output and the player stops with an error.
     private fun releaseSurfaces() {
-        surface?.release()
+        val s = surface ?: return
+        val st = surfaceTexture
         surface = null
-        surfaceTexture?.release()
         surfaceTexture = null
+
+        mainHandler.post {
+            try {
+                player.setVideoSurface(null)
+            } catch (_: Exception) {}
+
+            s.release()
+            st?.release()
+        }
     }
 
-    override fun loadToHardware(pGLState: GLState) {
+    override fun loadToHardware() {
         // Release any lingering Surface and SurfaceTexture (safety net — normally cleared by
         // setNotLoadedToHardware, but guard against direct loadToHardware calls too).
         releaseSurfaces()
 
-        val gl = GlesBackend.gl
-        val textures = IntArray(1)
-        gl.glGenTextures(1, textures, 0)
-        mHardwareTextureID = textures[0]
-
-        // OES external textures must be bound to the OES target.
-        GlesBackend.state.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
-
-        // Required filter settings for GL_TEXTURE_EXTERNAL_OES.
-        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER,
-            GL_LINEAR
-        )
-        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER,
-            GL_LINEAR
-        )
-        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S,
-            GL_CLAMP_TO_EDGE
-        )
-        gl.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T,
-            GL_CLAMP_TO_EDGE
-        )
+        mHardwareTextureID = GlesTextures.generate()
+        // OES external textures must be bound to the OES target, with the filters they require.
+        GlesTextures.setUpExternal(mHardwareTextureID)
 
         surfaceTexture = SurfaceTexture(mHardwareTextureID)
 
@@ -189,15 +182,15 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
      * A reload on a live context (e.g. returning to gameplay) keeps the SurfaceTexture: its frames come
      * from the player and stay valid. Going through [unloadFromHardware] would release the player.
      */
-    override fun reloadToHardware(pGLState: GLState) {
+    override fun reloadToHardware() {
         if (isLoadedToHardware) {
             mUpdateOnHardwareNeeded = false
         } else {
-            loadToHardware(pGLState)
+            loadToHardware()
         }
     }
 
-    override fun unloadFromHardware(pGLState: GLState) {
+    override fun unloadFromHardware() {
 
         val st = surfaceTexture
         val s = surface
@@ -220,11 +213,26 @@ open class VideoTexture(val source: String, val player: ExoPlayer) : Texture(
             player.release()
         }
 
-        super.unloadFromHardware(pGLState)
+        super.unloadFromHardware()
+    }
+
+    /**
+     * Called by [TextureManager] when it drops this texture without [unloadFromHardware]: the context was lost
+     * while it waited to be unloaded, or it is released before its upload. The player is released here. The
+     * surfaces, if any, are already detached and released by [setNotLoadedToHardware].
+     */
+    override fun onDroppedWithoutUnload() {
+        mainHandler.post {
+            try {
+                player.setVideoSurface(null)
+            } catch (_: Exception) {}
+
+            player.release()
+        }
     }
 
     /** Binds the OES texture. Call [latch] first to update the frame and ST matrix. */
-    override fun bind(pGLState: GLState) {
+    override fun bind() {
         if (isLoadedToHardware) {
             GlesBackend.state.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
         }

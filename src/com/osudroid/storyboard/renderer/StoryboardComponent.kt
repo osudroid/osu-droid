@@ -18,7 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import org.andengine.engine.camera.Camera
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
@@ -251,7 +251,7 @@ class StoryboardComponent : UIComponent() {
         sounds = null
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         beginDraw(pGLState)
 
         val playback = playback ?: return

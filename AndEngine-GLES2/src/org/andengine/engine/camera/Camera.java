@@ -7,7 +7,7 @@ import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.algorithm.collision.RectangularShapeCollisionChecker;
@@ -263,7 +263,7 @@ public class Camera implements IUpdateHandler {
 	// Methods
 	// ===========================================================
 
-	public void onDrawHUD(final GLState pGLState) {
+	public void onDrawHUD(final DrawContext pGLState) {
 		if(this.mHUD != null) {
 			this.mHUD.onDraw(pGLState, this);
 		}
@@ -288,7 +288,7 @@ public class Camera implements IUpdateHandler {
 		return RectangularShapeCollisionChecker.isVisible(this, pX, pY, pWidth, pHeight, pLocalToSceneTransformation);
 	}
 
-	public void onApplySceneMatrix(final GLState pGLState) {
+	public void onApplySceneMatrix(final DrawContext pGLState) {
 		pGLState.orthoProjectionGLMatrixf(this.getXMin(), this.getXMax(), this.getYMax(), this.getYMin(), this.mZNear, this.mZFar);
 
 		final float rotation = this.mRotation;
@@ -297,7 +297,7 @@ public class Camera implements IUpdateHandler {
 		}
 	}
 
-	public void onApplySceneBackgroundMatrix(final GLState pGLState) {
+	public void onApplySceneBackgroundMatrix(final DrawContext pGLState) {
 		final float widthRaw = this.getWidthRaw();
 		final float heightRaw = this.getHeightRaw();
 
@@ -309,7 +309,7 @@ public class Camera implements IUpdateHandler {
 		}
 	}
 
-	public void onApplyCameraSceneMatrix(final GLState pGLState) {
+	public void onApplyCameraSceneMatrix(final DrawContext pGLState) {
 		final float widthRaw = this.getWidthRaw();
 		final float heightRaw = this.getHeightRaw();
 		pGLState.orthoProjectionGLMatrixf(0, widthRaw, heightRaw, 0, this.mZNear, this.mZFar);
@@ -320,7 +320,7 @@ public class Camera implements IUpdateHandler {
 		}
 	}
 
-	private static void applyRotation(final GLState pGLState, final float pRotationCenterX, final float pRotationCenterY, final float pAngle) {
+	private static void applyRotation(final DrawContext pGLState, final float pRotationCenterX, final float pRotationCenterY, final float pAngle) {
 		pGLState.translateProjectionGLMatrixf(pRotationCenterX, pRotationCenterY, 0);
 		pGLState.rotateProjectionGLMatrixf(pAngle, 0, 0, 1);
 		pGLState.translateProjectionGLMatrixf(-pRotationCenterX, -pRotationCenterY, 0);

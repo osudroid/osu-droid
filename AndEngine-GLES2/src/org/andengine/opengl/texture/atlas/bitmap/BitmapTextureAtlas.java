@@ -3,6 +3,7 @@ package org.andengine.opengl.texture.atlas.bitmap;
 import java.util.ArrayList;
 
 import org.andengine.graphics.gles.GlesBackend;
+import org.andengine.graphics.gles.GlesTextures;
 import org.andengine.graphics.texture.Pixels;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
@@ -13,14 +14,12 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource;
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.exception.NullBitmapException;
 import org.andengine.util.math.MathUtils;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.opengl.GLES32;
-import android.opengl.GLUtils;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -40,7 +39,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 
 	private final BitmapTextureFormat mBitmapTextureFormat;
 
-	/** Pixels loaded in the background for the next {@link #writeTextureToHardware(GLState)}; GL thread only. */
+	/** Pixels loaded in the background for the next {@link #writeTextureToHardware()}; GL thread only. */
 	private Pixels[] mPreparedPixels;
 
 	// ===========================================================
@@ -209,9 +208,8 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 	}
 
 	@Override
-	protected void writeTextureToHardware(final GLState pGLState) {
+	protected void writeTextureToHardware() {
 		final PixelFormat pixelFormat = this.mBitmapTextureFormat.getPixelFormat();
-		final int glInternalFormat = pixelFormat.getGLInternalFormat();
 		final int glFormat = pixelFormat.getGLFormat();
 		final int glType = pixelFormat.getGLType();
 
@@ -219,7 +217,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 			/* Texture.loadToHardware generates a fresh texture name before every write (also on a reload), so immutable storage is always allowed here. */
 			GlesBackend.getGl().glTexStorage2D(GLES32.GL_TEXTURE_2D, 1, GLES32.GL_RGBA8, this.mWidth, this.mHeight);
 		} else {
-			GLES32.glTexImage2D(GLES32.GL_TEXTURE_2D, 0, glInternalFormat, this.mWidth, this.mHeight, 0, glFormat, glType, null);
+			GlesTextures.allocate(this.mWidth, this.mHeight, pixelFormat);
 		}
 
 		final boolean preMultipyAlpha = this.mTextureOptions.mPreMultiplyAlpha;
@@ -253,18 +251,18 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 				final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && pixelFormat == PixelFormat.RGBA_8888;
 				if(!useDefaultAlignment) {
 					/* Adjust unpack alignment. */
-					GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
+					GlesTextures.unpackAlignment(1);
 				}
 
 				if(preMultipyAlpha) {
-					GLUtils.texSubImage2D(GLES32.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, glFormat, glType);
+					GlesTextures.texSubImage2DPremultiplied(bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, glFormat, glType);
 				} else {
-					pGLState.glTexSubImage2D(GLES32.GL_TEXTURE_2D, 0, bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, this.mPixelFormat);
+					GlesTextures.texSubImage2D(bitmapTextureAtlasSource.getTextureX(), bitmapTextureAtlasSource.getTextureY(), bitmap, this.mPixelFormat);
 				}
 
 				if(!useDefaultAlignment) {
 					/* Restore default unpack alignment. */
-					GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+					GlesTextures.unpackAlignment(GlesTextures.UNPACK_ALIGNMENT_DEFAULT);
 				}
 
 				bitmap.recycle();

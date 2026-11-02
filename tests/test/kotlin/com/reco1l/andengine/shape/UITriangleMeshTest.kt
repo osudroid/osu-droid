@@ -13,7 +13,7 @@ import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GL32
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesRenderContext
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,7 +28,7 @@ class UITriangleMeshTest {
     private val glCalls = ArrayList<String>()
     private val vertexUploads = ArrayList<ByteArray>()
     private var nextId = 1
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private fun fakeGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->
@@ -124,7 +124,7 @@ class UITriangleMeshTest {
         assertTrue(glCalls.toString(), glCalls.contains("glEnable(${GLES20.GL_DEPTH_TEST})"))
         assertTrue(glCalls.toString(), glCalls.contains("glDepthFunc(${GLES20.GL_LESS})"))
         // Later entities are not tested against the depth values the mesh wrote.
-        assertTrue(!glState.isDepthTestEnabled)
+        assertTrue(!GlesBackend.state.isDepthTestEnabled)
         assertEquals(1, glCalls.count { it == "glDrawArrays" })
     }
 

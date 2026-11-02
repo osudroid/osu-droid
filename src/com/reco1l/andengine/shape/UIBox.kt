@@ -8,7 +8,7 @@ import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
 import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -75,7 +75,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         buffer?.update(this)
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         // Invisible shapes still reach the buffer path: they serve as depth masks there.
         val blend = if (canBatchShape()) batchBlendMode() else null
         if (blend != null) {
@@ -104,7 +104,7 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         super.doDraw(pGLState, pCamera)
     }
 
-    override fun beginDraw(pGLState: GLState) {
+    override fun beginDraw(pGLState: DrawContext) {
         super.beginDraw(pGLState)
 
         if (paintStyle == Outline) {

@@ -8,7 +8,7 @@ import org.andengine.entity.text.exception.OutOfCharactersException;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.font.Letter;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.adt.list.FloatArrayList;
 import org.andengine.util.adt.list.IFloatList;
@@ -250,7 +250,7 @@ public class Text extends RectangularShape {
 	// ===========================================================
 
 	@Override
-	protected void draw(final GLState pGLState, final Camera pCamera) {
+	protected void draw(final DrawContext pGLState, final Camera pCamera) {
 		TextBatching.add(this, pGLState, Math.min(this.mCharactersToDraw, this.mLetterCount));
 	}
 

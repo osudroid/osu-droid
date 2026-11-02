@@ -3,7 +3,7 @@ package org.andengine.entity.sprite;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.opengl.texture.region.ITextureRegion;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -131,7 +131,7 @@ public class Sprite extends RectangularShape {
 	}
 
 	@Override
-	protected void draw(final GLState pGLState, final Camera pCamera) {
+	protected void draw(final DrawContext pGLState, final Camera pCamera) {
 		SpriteBatching.add(this, pGLState);
 	}
 

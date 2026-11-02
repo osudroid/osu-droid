@@ -1,5 +1,7 @@
 package org.andengine.opengl.texture;
 
+import org.andengine.graphics.gles.GlesTextures;
+
 import android.opengl.GLES32;
 
 /**
@@ -71,10 +73,7 @@ public class TextureOptions {
 	public void apply() {
 		// osu!droid fix: use glTexParameteri — all four parameters are integer-valued GL enums.
 		// The old code used glTexParameterf for wrap modes which is not spec-compliant in GLES2.
-		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, this.mMinFilter);
-		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MAG_FILTER, this.mMagFilter);
-		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_S, this.mWrapS);
-		GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_T, this.mWrapT);
+		GlesTextures.parameters(this.mMinFilter, this.mMagFilter, this.mWrapS, this.mWrapT);
 	}
 
 	// ===========================================================

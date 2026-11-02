@@ -11,7 +11,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 class SpriteBatchingTest {
 
     private lateinit var gl: RecordingGL
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private class Page(id: Int, width: Int = 16, height: Int = 16) : BitmapTextureAtlas(TextureManager(), width, height, TextureOptions.BILINEAR) {
@@ -113,12 +113,12 @@ class SpriteBatchingTest {
     fun spriteSubclassWithOwnDraw_stillBatched() {
         var drawn = 0
         val s = object : Sprite(0f, 0f, 8f, 8f, region()) {
-            override fun preDraw(pGLState: GLState, pCamera: Camera) = super.preDraw(pGLState, pCamera)
-            override fun draw(pGLState: GLState, pCamera: Camera) {
+            override fun preDraw(pGLState: DrawContext, pCamera: Camera) = super.preDraw(pGLState, pCamera)
+            override fun draw(pGLState: DrawContext, pCamera: Camera) {
                 drawn++
                 super.draw(pGLState, pCamera)
             }
-            override fun postDraw(pGLState: GLState, pCamera: Camera) = super.postDraw(pGLState, pCamera)
+            override fun postDraw(pGLState: DrawContext, pCamera: Camera) = super.postDraw(pGLState, pCamera)
         }
         s.onDraw(glState, camera)
 

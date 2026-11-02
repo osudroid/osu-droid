@@ -17,7 +17,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -33,7 +33,7 @@ class StoryboardBatchTest {
     private val glCalls = ArrayList<String>()
     private val uploads = ArrayList<ByteArray>()
     private var nextId = 100
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val batch = StoryboardBatch()
 
     /**

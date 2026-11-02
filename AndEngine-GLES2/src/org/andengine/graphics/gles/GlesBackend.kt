@@ -2,6 +2,8 @@ package org.andengine.graphics.gles
 
 import android.opengl.GLES20
 import android.util.Log
+import org.andengine.graphics.atlas.TextureAtlasPages
+import org.andengine.graphics.debug.RenderStats
 
 /**
  * Process-wide entry point to the GLES backend: the GL interfaces, the capabilities and the state
@@ -47,10 +49,13 @@ object GlesBackend {
 
     private fun install(gl: GL32) {
         val versionString = gl.glGetString(GLES20.GL_VERSION)
+        val maxTextureSize = IntArray(1)
+        gl.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0)
         val caps = GlesCapabilities.detect(
             versionString,
             gl.glGetString(GLES20.GL_EXTENSIONS),
-            GlesDebugOptions
+            GlesDebugOptions,
+            maxTextureSize[0]
         )
         this.gl = gl
         this.caps = caps
@@ -73,6 +78,54 @@ object GlesBackend {
 
         registry.restoreAll(this)
     }
+
+    /**
+     * Sets the start state of a new context, after [onContextCreated] and before anything draws:
+     * VAO 0, no culling, depth test off with a clear depth of 1, `GL_LESS` and the depth mask on,
+     * blending on and dithering as [dithering] says. Also publishes the maximum texture size to
+     * the atlas pages and resets the render statistics. GL thread only.
+     */
+    @JvmStatic
+    fun resetDrawState(dithering: Boolean) {
+        val state = state
+        // The restore may have bound another VAO.
+        state.bindVertexArray(0)
+        // The defaults of a fresh context first, then the renderer's own settings; the order (and
+        // with it every call and statistic) is the one the engine has always used.
+        state.setDitherEnabled(true)
+        state.setDepthTestEnabled(true)
+        state.setBlendEnabled(false)
+        state.setCullFaceEnabled(false)
+
+        TextureAtlasPages.deviceMaxTextureSize = caps.maxTextureSize
+        RenderStats.reset()
+
+        state.setDepthTestEnabled(false)
+        // A clear depth of 1.0 (maximum) lets GL_LESS tests pass on the first draw and makes the
+        // per-entity depth buffer clears work.
+        state.clearDepth(1.0f)
+        state.depthFunc(GLES20.GL_LESS)
+        state.depthMask(true)
+        state.setBlendEnabled(true)
+        state.setDitherEnabled(dithering)
+        /* Enabling culling doesn't really make sense, because triangles are never drawn 'backwards' on purpose. */
+    }
+
+    /**
+     * Starts a frame: clears the coverage buffer when [clearCoverage] (coverage multisampling) and
+     * the depth buffer, so depth values left by the previous frame (slider bodies) never affect
+     * this one. `glClear` honours the depth mask, which a batch flush may have left off, so it is
+     * turned on first. GL thread only; does not allocate.
+     */
+    @JvmStatic
+    fun beginFrame(clearCoverage: Boolean) {
+        val state = state
+        if (clearCoverage) state.clear(GL_COVERAGE_BUFFER_BIT_NV)
+        state.depthMask(true)
+        state.clear(GLES20.GL_DEPTH_BUFFER_BIT)
+    }
+
+    private const val GL_COVERAGE_BUFFER_BIT_NV = 0x8000
 
     private const val TAG = "GlesBackend"
 }

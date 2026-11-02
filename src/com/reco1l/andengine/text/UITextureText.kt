@@ -7,7 +7,7 @@ import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -149,7 +149,7 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         super.contentHeight = contentHeight
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
         val clearMask = clearMask()

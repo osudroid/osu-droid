@@ -12,7 +12,7 @@ import com.reco1l.andengine.sprite.ScaleType.*
 import com.reco1l.framework.math.*
 import org.andengine.opengl.texture.region.*
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.*
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -169,7 +169,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
     }
 
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         // A texture that is not on the GPU yet (e.g. an atlas page still waiting for upload) would
         // bind the invalid id and sample whatever is still bound; skip the frame before touching state.
         val region = textureRegion
@@ -188,7 +188,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
      * buffer path. Same geometry, texture coordinates and color as the buffer path; the blend
      * function is the one the buffer path would set, for color and alpha alike.
      */
-    private fun drawBatched(gl: GLState, region: TextureRegion): Boolean {
+    private fun drawBatched(gl: DrawContext, region: TextureRegion): Boolean {
         if (!isBatchable || !canBatchShape()) {
             return false
         }
@@ -261,7 +261,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         out.v1 = if (flippedVertical) v else v2
     }
 
-    override fun onDrawBuffer(pGLState: GLState) {
+    override fun onDrawBuffer(pGLState: DrawContext) {
         // Without a texture there is nothing to sample.
         val texture = textureRegion?.texture ?: return
         val positions = buffer?.data ?: return

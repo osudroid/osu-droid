@@ -10,7 +10,7 @@ import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.font.*
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -118,7 +118,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         // Nothing to do here, there is no buffer.
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
         val clearMask = clearMask()
@@ -149,7 +149,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         )
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
         if (fontSettingsChanged) {
             fontSettingsChanged = false
             onFontSettingsChange()

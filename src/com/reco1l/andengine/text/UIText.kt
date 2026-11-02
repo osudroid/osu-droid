@@ -12,7 +12,7 @@ import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.font.*
 import org.andengine.opengl.font.exception.FontException
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 
@@ -119,7 +119,7 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         // Nothing to do here, there is no buffer.
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         onApplyColor(pGLState)
 
         val clearMask = clearMask()
@@ -172,7 +172,7 @@ open class UIText : UIBufferedComponent<IBuffer>() {
         }
     }
 
-    override fun onApplyTransformations(pGLState: GLState) {
+    override fun onApplyTransformations(pGLState: DrawContext) {
 
         val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
         val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f

@@ -230,12 +230,19 @@ class RecordingGL : GL32 {
         calls += "glDeleteQueries($n,buf,$offset)"
     }
 
+    /** `buf` for bytes (or none); `ints`/`shorts` for pixels converted from a bitmap into an int or short buffer. */
+    private fun pixelsToken(pixels: java.nio.Buffer?) = when (pixels) {
+        is java.nio.IntBuffer -> "ints"
+        is java.nio.ShortBuffer -> "shorts"
+        else -> "buf"
+    }
+
     override fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
-        calls += "glTexImage2D($target,$level,$internalformat,$width,$height,$border,$format,$type,buf)"
+        calls += "glTexImage2D($target,$level,$internalformat,$width,$height,$border,$format,$type,${pixelsToken(pixels)})"
     }
 
     override fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: java.nio.Buffer?) {
-        calls += "glTexSubImage2D($target,$level,$xoffset,$yoffset,$width,$height,$format,$type,buf)"
+        calls += "glTexSubImage2D($target,$level,$xoffset,$yoffset,$width,$height,$format,$type,${pixelsToken(pixels)})"
         if (pixels is java.nio.ByteBuffer) {
             val copy = pixels.duplicate()
             val bytes = ByteArray(copy.remaining())

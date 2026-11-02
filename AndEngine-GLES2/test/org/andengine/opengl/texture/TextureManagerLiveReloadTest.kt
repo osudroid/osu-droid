@@ -1,6 +1,5 @@
 package org.andengine.opengl.texture
 
-import org.andengine.opengl.util.GLState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -18,16 +17,16 @@ class TextureManagerLiveReloadTest {
 
         override fun getWidth() = 4
         override fun getHeight() = 4
-        override fun writeTextureToHardware(pGLState: GLState?) = Unit
+        override fun writeTextureToHardware() = Unit
         override fun isLoadedToHardware() = loaded
 
-        override fun loadToHardware(pGLState: GLState?) {
+        override fun loadToHardware() {
             loaded = true
             loads++
             mUpdateOnHardwareNeeded = false
         }
 
-        override fun unloadFromHardware(pGLState: GLState?) {
+        override fun unloadFromHardware() {
             loaded = false
             deletes++
         }
@@ -35,14 +34,14 @@ class TextureManagerLiveReloadTest {
 
     private val manager = TextureManager()
 
-    private fun loadedTexture() = FakeTexture(manager).also { manager.loadTexture(null, it) }
+    private fun loadedTexture() = FakeTexture(manager).also { manager.loadTextureNow(it) }
 
     @Test
     fun reloadLoadedTextures_deletesBeforeUploadingAgain() {
         val texture = loadedTexture()
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(null)
+        manager.updateTextures()
 
         assertEquals("old texture name deleted", 1, texture.deletes)
         assertEquals(2, texture.loads)
@@ -56,7 +55,7 @@ class TextureManagerLiveReloadTest {
         manager.unloadTexture(released)
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(null)
+        manager.updateTextures()
 
         assertEquals("released texture deleted, not leaked", 1, released.deletes)
         assertEquals("released texture not uploaded again", 1, released.loads)

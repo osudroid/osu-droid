@@ -1,7 +1,7 @@
 package com.reco1l.andengine.buffered
 
 import android.opengl.GLES32
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 // GLES20 draw topology constants (mirrored for convenience)
 const val GL_TRIANGLES = GLES32.GL_TRIANGLES
@@ -29,7 +29,7 @@ interface IBuffer {
      * and depth settings of [entity] (see [UIBufferedComponent.drawPositions]). Buffers that only
      * hold attributes for another buffer draw nothing.
      */
-    fun drawMesh(gl: GLState, entity: UIBufferedComponent<*>)
+    fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>)
 
 }
 

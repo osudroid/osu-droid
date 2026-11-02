@@ -7,7 +7,7 @@ import org.andengine.graphics.BlendMode
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * Hands an engine [Sprite] to the [QuadBatcher]: the corners and texture coordinates are taken
@@ -62,7 +62,7 @@ object SpriteBatching {
      * with the sprite's own color and alpha.
      */
     @JvmStatic
-    fun add(sprite: Sprite, glState: GLState) {
+    fun add(sprite: Sprite, glState: DrawContext) {
         val blend = batchBlendOf(sprite)
         val corners = sprite.corners
         val uvs = sprite.textureCoordinates

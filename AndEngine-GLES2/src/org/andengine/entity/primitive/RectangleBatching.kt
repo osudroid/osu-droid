@@ -3,7 +3,7 @@ package org.andengine.entity.primitive
 import org.andengine.entity.sprite.SpriteBatching
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * Hands an engine [Rectangle] to the [QuadBatcher]: the box, color and blend function are taken
@@ -16,7 +16,7 @@ object RectangleBatching {
      * entity's own color and alpha (straight alpha). Alpha 0 adds nothing.
      */
     @JvmStatic
-    fun add(rect: Rectangle, glState: GLState) {
+    fun add(rect: Rectangle, glState: DrawContext) {
         val blend = SpriteBatching.batchBlendOf(rect)
         val rgba = rect.color.abgrPackedInt
         QuadBatcher.setProjection(glState.projectionGLMatrix)

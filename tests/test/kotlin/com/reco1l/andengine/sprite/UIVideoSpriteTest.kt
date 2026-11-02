@@ -16,7 +16,7 @@ import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.gles.GlesLegacyTextureView
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.opengl.texture.TextureManager
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,7 +34,7 @@ class UIVideoSpriteTest {
     private val uploads = ArrayList<ByteArray>()
     private val sources = ArrayList<String>()
     private var nextId = 100
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private fun recordingGl(): GL32 = Proxy.newProxyInstance(GL32::class.java.classLoader, arrayOf(GL32::class.java)) { _, method, args ->

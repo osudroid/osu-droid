@@ -39,7 +39,7 @@ import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.font.FontManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
@@ -110,6 +110,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private final TextureManager mTextureManager = new TextureManager();
 	private final FontManager mFontManager = new FontManager();
+	private final DrawContext mDrawContext = new DrawContext();
 
 	private final SoundManager mSoundManager;
 	private final MusicManager mMusicManager;
@@ -283,6 +284,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	public FontManager getFontManager() {
 		return this.mFontManager;
+	}
+
+	/** The draw context the renderer passes to every frame. GL thread only. */
+	public DrawContext getDrawContext() {
+		return this.mDrawContext;
 	}
 
 	public SoundManager getSoundManager() throws IllegalStateException {
@@ -621,11 +627,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		this.getCamera().onUpdate(pSecondsElapsed);
 	}
 
-	protected void onUpdateDrawHandlers(final GLState pGLState, final Camera pCamera) {
+	protected void onUpdateDrawHandlers(final DrawContext pGLState, final Camera pCamera) {
 		this.mDrawHandlers.onDraw(pGLState, pCamera);
 	}
 
-	public void onDrawFrame(final GLState pGLState) throws InterruptedException {
+	public void onDrawFrame(final DrawContext pGLState) throws InterruptedException {
 		final EngineLock engineLock = this.mEngineLock;
 
 		engineLock.lock();
@@ -634,8 +640,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			RenderStats.beginDraw();
 
 			this.mIsLagging = false;
-			this.mIsLagging |= this.mTextureManager.updateTextures(pGLState);
-			this.mIsLagging |= this.mFontManager.updateFonts(pGLState);
+			this.mIsLagging |= this.mTextureManager.updateTextures();
+			this.mIsLagging |= this.mFontManager.updateFonts();
 
 			this.onUpdateDrawHandlers(pGLState, this.mCamera);
 			this.onDrawScene(pGLState, this.mCamera);
@@ -649,7 +655,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		}
 	}
 
-	protected void onDrawScene(final GLState pGLState, final Camera pCamera) {
+	protected void onDrawScene(final DrawContext pGLState, final Camera pCamera) {
 		if(this.mScene != null) {
 			this.mScene.onDraw(pGLState, pCamera);
 		}

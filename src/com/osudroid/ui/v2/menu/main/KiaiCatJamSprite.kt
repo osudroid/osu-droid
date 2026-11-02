@@ -8,7 +8,7 @@ import org.andengine.graphics.batch.MeshProgram
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * A sprite that renders a catjam animation frame clipped to a circle.
@@ -48,7 +48,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
         requestBufferUpdate()
     }
 
-    override fun onDrawBuffer(gl: GLState) {
+    override fun onDrawBuffer(gl: DrawContext) {
         val texture = textureRegion?.texture ?: return
         val positions = buffer?.data ?: return
 

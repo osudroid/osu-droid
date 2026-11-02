@@ -5,7 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import com.osudroid.beatmaps.constants.HitObjectType
 
 class HUDColorHitErrorMeter : HUDHitErrorMeter() {
@@ -52,7 +52,7 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
         indicators.forEach { it.alpha = 0f }
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
         super.onManagedDraw(pGLState, pCamera)
 
         // After super.onManagedDraw() the matrix has been popped; re-push our translation

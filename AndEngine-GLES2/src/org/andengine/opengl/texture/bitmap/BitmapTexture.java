@@ -3,12 +3,12 @@ package org.andengine.opengl.texture.bitmap;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.andengine.graphics.gles.GlesTextures;
 import org.andengine.opengl.texture.ITextureStateListener;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.Texture;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.StreamUtils;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.exception.NullBitmapException;
@@ -17,8 +17,6 @@ import org.andengine.util.math.MathUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.opengl.GLES32;
-import android.opengl.GLUtils;
 
 /**
  * (c) Zynga 2011
@@ -99,7 +97,7 @@ public class BitmapTexture extends Texture {
 	// ===========================================================
 
 	@Override
-	protected void writeTextureToHardware(final GLState pGLState) throws IOException {
+	protected void writeTextureToHardware() throws IOException {
 		final Config bitmapConfig = this.mBitmapTextureFormat.getBitmapConfig();
 		final Bitmap bitmap = this.onGetBitmap(bitmapConfig);
 
@@ -110,19 +108,19 @@ public class BitmapTexture extends Texture {
 		final boolean useDefaultAlignment = MathUtils.isPowerOfTwo(bitmap.getWidth()) && MathUtils.isPowerOfTwo(bitmap.getHeight()) && (this.mPixelFormat == PixelFormat.RGBA_8888);
 		if(!useDefaultAlignment) {
 			/* Adjust unpack alignment. */
-			GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, 1);
+			GlesTextures.unpackAlignment(1);
 		}
 
 		final boolean preMultipyAlpha = this.mTextureOptions.mPreMultiplyAlpha;
 		if(preMultipyAlpha) {
-			GLUtils.texImage2D(GLES32.GL_TEXTURE_2D, 0, bitmap, 0);
+			GlesTextures.texImage2DPremultiplied(bitmap);
 		} else {
-			pGLState.glTexImage2D(GLES32.GL_TEXTURE_2D, 0, bitmap, 0, this.mPixelFormat);
+			GlesTextures.texImage2D(bitmap, this.mPixelFormat);
 		}
 
 		if(!useDefaultAlignment) {
 			/* Restore default unpack alignment. */
-			GLES32.glPixelStorei(GLES32.GL_UNPACK_ALIGNMENT, GLState.GL_UNPACK_ALIGNMENT_DEFAULT);
+			GlesTextures.unpackAlignment(GlesTextures.UNPACK_ALIGNMENT_DEFAULT);
 		}
 
 		bitmap.recycle();

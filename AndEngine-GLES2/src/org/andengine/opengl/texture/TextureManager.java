@@ -15,7 +15,6 @@ import org.andengine.opengl.texture.atlas.bitmap.PixelPreparation;
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.adt.io.in.AssetInputStreamOpener;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.debug.Debug;
@@ -140,6 +139,10 @@ public class TextureManager {
 
 		if(!this.mTexturesToBeUnloaded.isEmpty()) {
 			this.mTexturesManaged.removeAll(this.mTexturesToBeUnloaded); // TODO Check if removeAll uses iterator internally!
+			/* Their names are gone with the old context; they only release what is not GL. */
+			for(int i = 0; i < this.mTexturesToBeUnloaded.size(); i++) {
+				this.mTexturesToBeUnloaded.get(i).onDroppedWithoutUnload();
+			}
 			this.mTexturesToBeUnloaded.clear();
 		}
 	}
@@ -147,7 +150,7 @@ public class TextureManager {
 	/**
 	 * Uploads every loaded texture again while the GL context stays alive (e.g. after a skin
 	 * change). Unlike {@link #onReload()}, which is for a lost context, the old texture names are
-	 * deleted by {@link #updateTextures(GLState)} before the upload, and textures already queued
+	 * deleted by {@link #updateTextures()} before the upload, and textures already queued
 	 * for unloading stay queued.
 	 * <p>
 	 * An atlas whose pixels can be prepared in the background keeps its old texture loaded and drawn
@@ -245,20 +248,19 @@ public class TextureManager {
 	/**
 	 * Must be called from the GL-{@link Thread}.
 	 *
-	 * @param pGLState
 	 * @param pTexture the {@link ITexture} to be loaded right now, if it is not loaded.
 	 * @return <code>true</code> when the {@link ITexture} was previously not managed by this {@link TextureManager}, <code>false</code> if it was already managed.
 	 */
-	public synchronized boolean loadTexture(final GLState pGLState, final ITexture pTexture) throws IOException {
+	public synchronized boolean loadTextureNow(final ITexture pTexture) throws IOException {
 		if(pTexture == null) {
 			throw new IllegalArgumentException("pTexture must not be null!");
 		}
 
 		this.cancelPreparation(pTexture);
 		if(!pTexture.isLoadedToHardware()) {
-			pTexture.loadToHardware(pGLState);
+			pTexture.loadToHardware();
 		} else if(pTexture.isUpdateOnHardwareNeeded()) {
-			pTexture.reloadToHardware(pGLState);
+			pTexture.reloadToHardware();
 		}
 
 		if(this.mTexturesManaged.contains(pTexture)) {
@@ -290,12 +292,17 @@ public class TextureManager {
 			/* If the Texture is loaded, unload it.
 			 * If the Texture is about to be loaded, stop it from being loaded. */
 			if(this.mTexturesLoaded.contains(pTexture)) {
-				this.mTexturesToBeUnloaded.add(pTexture);
+				/* Queued once, however often it is unloaded before the queue runs. */
+				if(!this.mTexturesToBeUnloaded.contains(pTexture)) {
+					this.mTexturesToBeUnloaded.add(pTexture);
+				}
 				/* Its pending reload is not prepared any more; the request itself stays until the unload happens,
 				 * so loadTexture rescuing it from the unload still reloads it the requested way. */
 				this.cancelReloadPreparation(pTexture);
 			} else if(this.mTexturesToBeLoaded.remove(pTexture)) {
 				this.mTexturesManaged.remove(pTexture);
+				/* Never uploaded on this context, so there is nothing to unload from hardware. */
+				pTexture.onDroppedWithoutUnload();
 				this.cancelPreparation(pTexture);
 				this.notifyIfNoLoadPending();
 			}
@@ -308,15 +315,14 @@ public class TextureManager {
 	/**
 	 * Must be called from the GL-{@link Thread}.
 	 *
-	 * @param pGLState
 	 * @param pTexture the {@link ITexture} to be unloaded right now, if it is loaded.
 	 * @return <code>true</code> when the {@link ITexture} was already managed by this {@link TextureManager}, <code>false</code> if it was not managed.
 	 */
-	public synchronized boolean unloadTexture(final GLState pGLState, final ITexture pTexture) {
+	public synchronized boolean unloadTextureNow(final ITexture pTexture) {
 		if(pTexture == null) {
 			throw new IllegalArgumentException("pTexture must not be null!");
 		} else if(pTexture.isLoadedToHardware()) {
-			pTexture.unloadFromHardware(pGLState);
+			pTexture.unloadFromHardware();
 		}
 
 		if(this.mTexturesManaged.contains(pTexture)) {
@@ -332,7 +338,7 @@ public class TextureManager {
 		}
 	}
 
-	public synchronized boolean updateTextures(final GLState pGLState) {
+	public synchronized boolean updateTextures() {
 		final HashSet<ITexture> texturesManaged = this.mTexturesManaged;
 		final ArrayList<ITexture> texturesLoaded = this.mTexturesLoaded;
 		final ArrayList<ITexture> texturesToBeLoaded = this.mTexturesToBeLoaded;
@@ -388,7 +394,7 @@ public class TextureManager {
 					if(usesPreparation) {
 						((BitmapTextureAtlas) textureToBeLoaded).usePreparedPixels(preparation);
 					}
-					textureToBeLoaded.loadToHardware(pGLState);
+					textureToBeLoaded.loadToHardware();
 				} catch (final IOException e) {
 					Debug.e(e);
 				} finally {
@@ -448,7 +454,7 @@ public class TextureManager {
 				if(usesPreparation) {
 					((BitmapTextureAtlas) textureToBeReloaded).usePreparedPixels(preparation);
 				}
-				textureToBeReloaded.reloadToHardware(pGLState);
+				textureToBeReloaded.reloadToHardware();
 			} catch (final IOException e) {
 				Debug.e(e);
 			} finally {
@@ -465,7 +471,7 @@ public class TextureManager {
 			for(int i = texturesToBeUnloadedCount - 1; i >= 0; i--) {
 				final ITexture textureToBeUnloaded = texturesToBeUnloaded.remove(i);
 				if(textureToBeUnloaded.isLoadedToHardware()) {
-					textureToBeUnloaded.unloadFromHardware(pGLState);
+					textureToBeUnloaded.unloadFromHardware();
 				}
 				texturesLoaded.remove(textureToBeUnloaded);
 				texturesManaged.remove(textureToBeUnloaded);

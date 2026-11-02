@@ -17,7 +17,7 @@ import org.andengine.graphics.text.GlyphMetrics
 import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -62,7 +62,7 @@ class UITextBatchingTest {
     private val vertexUploads = ArrayList<ByteArray>()
 
     private var nextId = 1
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private val identity = floatArrayOf(
@@ -168,12 +168,12 @@ class UITextBatchingTest {
     }
 
     private fun uploadGlyphs() {
-        font.update(null)
+        font.update()
         glCalls.clear()
         vertexUploads.clear()
     }
 
-    private fun draw(draw: (GLState, Camera) -> Unit) {
+    private fun draw(draw: (DrawContext, Camera) -> Unit) {
         glState.resetModelViewGLMatrixStack()
         glState.resetProjectionGLMatrixStack()
         draw(glState, camera)

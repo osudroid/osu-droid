@@ -6,7 +6,7 @@ import com.reco1l.framework.Color4
 import com.osudroid.utils.*
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import com.osudroid.beatmaps.constants.HitObjectType
 import kotlin.math.abs
 
@@ -107,7 +107,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
 
     //region Indicator update & draw
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
         super.onManagedDraw(pGLState, pCamera)
 
         if (activeIndicators.isEmpty()) return

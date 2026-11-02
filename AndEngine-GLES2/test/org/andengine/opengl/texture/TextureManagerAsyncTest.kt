@@ -10,7 +10,6 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.bitmap.source.IPixelTextureAtlasSource
 import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat
-import org.andengine.opengl.util.GLState
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -39,17 +38,6 @@ class TextureManagerAsyncTest {
         fun runAll() {
             while (tasks.isNotEmpty()) tasks.removeAt(0).run()
         }
-    }
-
-    private class RecordingGLState : GLState() {
-        val bitmapUploads = ArrayList<String>()
-        private var nextTextureName = 100
-
-        override fun glTexSubImage2D(pTarget: Int, pLevel: Int, pX: Int, pY: Int, pBitmap: Bitmap, pPixelFormat: PixelFormat) {
-            bitmapUploads += "bitmap($pX,$pY,${pBitmap.width},${pBitmap.height})"
-        }
-
-        override fun generateTexture() = nextTextureName++
     }
 
     /** A 2x2 pixel source; [failures] loads throw first, [nullPixels] makes it ask for the bitmap path. */
@@ -97,7 +85,6 @@ class TextureManagerAsyncTest {
     }
 
     private lateinit var gl: RecordingGL
-    private val glState = RecordingGLState()
     private val executor = ManualExecutor()
 
     @Before
@@ -117,7 +104,14 @@ class TextureManagerAsyncTest {
             sources.forEachIndexed { i, source -> atlas.addTextureAtlasSource(source, i * 4, 0) }
         }
 
-    private fun pixelUploads() = gl.calls.count { it.startsWith("glTexSubImage2D(") }
+    private fun pixelUploads() = gl.calls.count { it.startsWith("glTexSubImage2D(") && it.endsWith(",buf)") }
+
+    /** The bitmap uploads (converted by getPixels) as `bitmap(x,y,width,height)`. */
+    private fun bitmapUploads() = gl.calls.filter { it.startsWith("glTexSubImage2D(") && it.endsWith(",ints)") }.map { call ->
+        val args = call.removePrefix("glTexSubImage2D(").removeSuffix(")").split(",")
+        "bitmap(${args[2]},${args[3]},${args[4]},${args[5]})"
+    }
+
 
     @Test
     fun asyncPrepare_uploadsOnlyWhenReady() {
@@ -126,7 +120,7 @@ class TextureManagerAsyncTest {
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse("not uploaded before the pixels are prepared", texture.isLoadedToHardware)
         assertTrue(manager.isTextureLoadPending(texture))
@@ -134,7 +128,7 @@ class TextureManagerAsyncTest {
         assertEquals(1, executor.tasks.size)
 
         // Still pending: further frames neither upload nor submit again.
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertFalse(texture.isLoadedToHardware)
         assertEquals(1, executor.tasks.size)
 
@@ -142,7 +136,7 @@ class TextureManagerAsyncTest {
         assertEquals(1, source.pixelLoads)
         assertFalse("uploaded only by the GL thread", texture.isLoadedToHardware)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertFalse(manager.isTextureLoadPending(texture))
@@ -159,9 +153,9 @@ class TextureManagerAsyncTest {
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals("decoded again on the synchronous path", 2, source.pixelLoads)
@@ -177,9 +171,9 @@ class TextureManagerAsyncTest {
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals("decoded again on the synchronous path", 2, source.pixelLoads)
@@ -196,10 +190,10 @@ class TextureManagerAsyncTest {
         val pendingTexture = atlas(manager, pending)
         val readyTexture = atlas(manager, ready)
         manager.loadTexture(readyTexture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
         manager.loadTexture(pendingTexture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(1, executor.tasks.size)
 
         manager.onDestroy()
@@ -217,14 +211,14 @@ class TextureManagerAsyncTest {
         val manager = manager()
         val texture = atlas(manager, FakePixelSource())
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse("times out while pending", manager.awaitPendingTextureLoads(10))
 
         executor.runAll()
         val gl = Thread {
             Thread.sleep(50)
-            manager.updateTextures(glState)
+            manager.updateTextures()
         }
         gl.start()
         assertTrue(manager.awaitPendingTextureLoads(5000))
@@ -247,7 +241,7 @@ class TextureManagerAsyncTest {
         }
         waiter.start()
         Thread.sleep(100)
-        manager.loadTexture(glState, texture)
+        manager.loadTextureNow(texture)
         waiter.join(5000)
 
         assertTrue(result)
@@ -259,17 +253,17 @@ class TextureManagerAsyncTest {
         val manager = manager()
         manager.onDestroy()
         manager.loadTexture(atlas(manager, FakePixelSource()))
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(1, executor.tasks.size)
 
         val own = TextureManager(null, 1L shl 30, 1L shl 30)
         own.onDestroy()
         val texture = atlas(own, FakePixelSource())
         own.loadTexture(texture)
-        own.updateTextures(glState)
+        own.updateTextures()
         own.onDestroy()
         own.loadTexture(texture)
-        own.updateTextures(glState)
+        own.updateTextures()
         own.onDestroy()
     }
 
@@ -281,7 +275,7 @@ class TextureManagerAsyncTest {
         manager.loadTexture(texture)
         executor.reject = true
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals(1, source.pixelLoads)
@@ -294,11 +288,11 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource()
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
 
         manager.unloadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse(texture.isLoadedToHardware)
         assertEquals(0, pixelUploads())
@@ -307,10 +301,10 @@ class TextureManagerAsyncTest {
 
         // Loading it again prepares anew instead of using the dropped pixels.
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertFalse(texture.isLoadedToHardware)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(texture.isLoadedToHardware)
         assertEquals(2, source.pixelLoads)
     }
@@ -321,12 +315,12 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource()
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         manager.unloadTexture(texture)
         assertEquals("a cancelled preparation still counts until it ran", 1, manager.preparationsInFlight)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertEquals("cancelled before it started", 0, source.pixelLoads)
         assertFalse(texture.isLoadedToHardware)
@@ -339,18 +333,18 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource()
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(texture.isLoadedToHardware)
 
         manager.onReload()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse("waits for the new preparation", texture.isLoadedToHardware)
         assertEquals(1, source.pixelLoads)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals(2, source.pixelLoads)
@@ -364,16 +358,16 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource()
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         manager.onReload()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse(texture.isLoadedToHardware)
         assertEquals(1, executor.tasks.size)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(texture.isLoadedToHardware)
         assertEquals(1, pixelUploads())
         assertEquals(0, manager.preparationsInFlight)
@@ -389,7 +383,7 @@ class TextureManagerAsyncTest {
         manager.loadTexture(mixedAtlas)
         manager.loadTexture(premultiplied)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(bitmapAtlas.isLoadedToHardware)
         assertTrue(mixedAtlas.isLoadedToHardware)
@@ -404,13 +398,13 @@ class TextureManagerAsyncTest {
         val texture = atlas(manager, source, options = TextureOptions.BILINEAR_PREMULTIPLYALPHA)
         manager.loadTexture(texture)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertFalse(texture.isLoadedToHardware)
         assertEquals("nothing decoded on the GL thread", 0, source.pixelLoads)
         assertEquals(1, executor.tasks.size)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals(listOf(true), source.requestedVariants)
@@ -426,14 +420,14 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource(nullPixels = true)
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals("pixels not asked for again", 1, source.pixelLoads)
         assertEquals(1, source.bitmapLoads)
-        assertEquals(1, glState.bitmapUploads.size)
+        assertEquals(1, bitmapUploads().size)
     }
 
     @Test
@@ -443,11 +437,11 @@ class TextureManagerAsyncTest {
         val second = FakePixelSource(seed = 2)
         val texture = atlas(manager, first)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
 
         texture.addTextureAtlasSource(second, 8, 8)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals("stale preparation ignored, decoded on the GL thread", 2, first.pixelLoads)
@@ -461,11 +455,11 @@ class TextureManagerAsyncTest {
         val source = FakePixelSource()
         val texture = atlas(manager, source)
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
-        manager.loadTexture(glState, texture)
+        manager.loadTextureNow(texture)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertEquals(1, source.pixelLoads)
@@ -479,14 +473,14 @@ class TextureManagerAsyncTest {
         val manager = manager(uploadBytesPerFrame = 20)
         val textures = List(3) { atlas(manager, FakePixelSource(seed = it)) }
         textures.forEach { manager.loadTexture(it) }
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(listOf(true, false, false), textures.map { it.isLoadedToHardware })
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(listOf(true, true, false), textures.map { it.isLoadedToHardware })
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(listOf(true, true, true), textures.map { it.isLoadedToHardware })
     }
 
@@ -495,10 +489,10 @@ class TextureManagerAsyncTest {
         val manager = manager(uploadBytesPerFrame = 1)
         val texture = atlas(manager, FakePixelSource())
         manager.loadTexture(texture)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
     }
@@ -510,19 +504,19 @@ class TextureManagerAsyncTest {
         val textures = List(3) { atlas(manager, FakePixelSource(seed = it)) }
         textures.forEach { manager.loadTexture(it) }
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(1, executor.tasks.size)
         assertEquals(1, manager.preparationsInFlight)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("first uploaded, second submitted", 1, textures.count { it.isLoadedToHardware })
         assertEquals(1, executor.tasks.size)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(textures.all { it.isLoadedToHardware })
         assertEquals(0, manager.preparationsInFlight)
     }
@@ -531,7 +525,7 @@ class TextureManagerAsyncTest {
     private fun loadAll(manager: TextureManager, vararg textures: ITexture) {
         textures.forEach { manager.loadTexture(it) }
         while (textures.any { !it.isLoadedToHardware }) {
-            manager.updateTextures(glState)
+            manager.updateTextures()
             executor.runAll()
         }
     }
@@ -546,7 +540,7 @@ class TextureManagerAsyncTest {
         assertEquals(1, pixelUploads())
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue("the old texture stays loaded and drawn", texture.isLoadedToHardware)
         assertEquals(oldName, texture.hardwareTextureID)
@@ -559,7 +553,7 @@ class TextureManagerAsyncTest {
         assertFalse(manager.isTextureLoadPending(texture))
 
         // Still preparing: further frames neither upload nor submit again.
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(oldName, texture.hardwareTextureID)
         assertEquals(1, executor.tasks.size)
 
@@ -567,7 +561,7 @@ class TextureManagerAsyncTest {
         assertEquals(2, source.pixelLoads)
         assertEquals("uploaded only by the GL thread", oldName, texture.hardwareTextureID)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.isLoadedToHardware)
         assertTrue("uploaded into a new texture name", texture.hardwareTextureID != oldName)
@@ -588,16 +582,16 @@ class TextureManagerAsyncTest {
         val oldNames = textures.map { it.hardwareTextureID }
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(3, executor.tasks.size)
         executor.runAll()
 
         fun reloaded() = textures.mapIndexed { i, texture -> texture.hardwareTextureID != oldNames[i] }.count { it }
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(1, reloaded())
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(2, reloaded())
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(3, reloaded())
         assertTrue(textures.all { it.isLoadedToHardware && !it.isUpdateOnHardwareNeeded })
         assertEquals(0, manager.preparationsInFlight)
@@ -613,12 +607,12 @@ class TextureManagerAsyncTest {
         manager.reloadLoadedTextures()
         val loaded = atlas(manager, FakePixelSource(seed = 2))
         manager.loadTexture(loaded)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("one upload in this frame", 1, listOf(reloaded.hardwareTextureID != oldName, loaded.isLoadedToHardware).count { it })
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(reloaded.hardwareTextureID != oldName)
         assertTrue(loaded.isLoadedToHardware)
     }
@@ -631,17 +625,17 @@ class TextureManagerAsyncTest {
         loadAll(manager, *textures.toTypedArray())
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals(1, executor.tasks.size)
         assertEquals(1, manager.preparationsInFlight)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("first uploaded, second submitted", 1, textures.count { !it.isUpdateOnHardwareNeeded })
         assertEquals(1, executor.tasks.size)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(textures.none { it.isUpdateOnHardwareNeeded })
         assertEquals(0, manager.preparationsInFlight)
     }
@@ -655,10 +649,10 @@ class TextureManagerAsyncTest {
         val unloaded = atlas(manager, unloadedSource)
         loadAll(manager, unloaded)
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         manager.unloadTexture(unloaded)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertFalse(manager.hasPendingTextureReloads())
 
         assertFalse(unloaded.isLoadedToHardware)
@@ -672,19 +666,19 @@ class TextureManagerAsyncTest {
         loadAll(manager, lost)
         assertEquals(2, pixelUploads())
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
         assertEquals(2, lostSource.pixelLoads)
 
         manager.onReload()
         assertFalse(manager.hasPendingTextureReloads())
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse("waits for the new preparation", lost.isLoadedToHardware)
         assertEquals(2, pixelUploads())
         assertEquals(1, executor.tasks.size)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(lost.isLoadedToHardware)
         assertFalse(lost.isUpdateOnHardwareNeeded)
         assertEquals(3, lostSource.pixelLoads)
@@ -696,7 +690,7 @@ class TextureManagerAsyncTest {
         val destroyed = atlas(manager, destroyedSource)
         loadAll(manager, destroyed)
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         manager.onDestroy()
         assertFalse(manager.hasPendingTextureReloads())
         executor.runAll()
@@ -713,7 +707,7 @@ class TextureManagerAsyncTest {
         val oldNames = listOf(bitmapAtlas.hardwareTextureID, mixedAtlas.hardwareTextureID)
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(bitmapAtlas.hardwareTextureID != oldNames[0])
         assertTrue(mixedAtlas.hardwareTextureID != oldNames[1])
@@ -731,14 +725,14 @@ class TextureManagerAsyncTest {
         loadAll(manager, texture)
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("the first preparation is cancelled, a new one submitted", 2, executor.tasks.size)
 
         executor.runAll()
         assertEquals("only the new preparation loaded pixels", 2, source.pixelLoads)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertFalse(texture.isUpdateOnHardwareNeeded)
         assertEquals("uploaded once", 2, pixelUploads())
@@ -754,14 +748,14 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
-        manager.loadTexture(glState, texture)
+        manager.updateTextures()
+        manager.loadTextureNow(texture)
 
         assertTrue(texture.hardwareTextureID != oldName)
         assertFalse(texture.isUpdateOnHardwareNeeded)
         assertFalse(manager.hasPendingTextureReloads())
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("cancelled before it started", 2, source.pixelLoads)
         assertEquals(2, pixelUploads())
         assertEquals(0, manager.preparationsInFlight)
@@ -777,9 +771,9 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         texture.addTextureAtlasSource(second, 8, 8)
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue("the new source is on the GPU right away", texture.hardwareTextureID != oldName)
         assertFalse(texture.isUpdateOnHardwareNeeded)
@@ -797,7 +791,7 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         texture.isUpdateOnHardwareNeeded = true
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.hardwareTextureID != oldName)
         assertTrue(executor.tasks.isEmpty())
@@ -814,18 +808,18 @@ class TextureManagerAsyncTest {
         manager.reloadLoadedTextures()
         val loaded = atlas(manager, FakePixelSource(seed = 2))
         manager.loadTexture(loaded)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("only the load is prepared", 1, executor.tasks.size)
         assertEquals(1, manager.preparationsInFlight)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue("the load is uploaded first", loaded.isLoadedToHardware)
         assertEquals("the reload still shows the old texture", oldName, reloaded.hardwareTextureID)
         assertEquals("the reload is prepared next", 1, executor.tasks.size)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(reloaded.hardwareTextureID != oldName)
         assertFalse(reloaded.isUpdateOnHardwareNeeded)
         assertEquals(0, manager.preparationsInFlight)
@@ -845,18 +839,18 @@ class TextureManagerAsyncTest {
         val large = atlas(manager, FakePixelSource(seed = 3), size = 32)
         manager.loadTexture(small)
         manager.loadTexture(large)
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("the large load waits, no re-preparation starts", 1, executor.tasks.size)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(small.isLoadedToHardware)
         assertEquals(oldName, reloaded.hardwareTextureID)
 
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(large.isLoadedToHardware)
         assertTrue(reloaded.hardwareTextureID != oldName)
         assertEquals(0, manager.preparationsInFlight)
@@ -871,7 +865,7 @@ class TextureManagerAsyncTest {
 
         manager.reloadLoadedTextures()
         List(2) { atlas(manager, FakePixelSource(seed = it)) }.forEach { manager.loadTexture(it) }
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(bitmapAtlas.hardwareTextureID != oldName)
     }
@@ -885,10 +879,10 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         source.failures = 1
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.hardwareTextureID != oldName)
         assertFalse(texture.isUpdateOnHardwareNeeded)
@@ -908,7 +902,7 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         executor.runAll()
         assertEquals("ready, waiting for upload", 1, manager.preparationsInFlight)
 
@@ -916,11 +910,11 @@ class TextureManagerAsyncTest {
         assertEquals("the ready pixels are dropped and freed", 0, manager.preparationsInFlight)
         assertEquals(oldName, texture.hardwareTextureID)
 
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertEquals("prepared anew", 1, executor.tasks.size)
         assertEquals(oldName, texture.hardwareTextureID)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertTrue(texture.hardwareTextureID != oldName)
         assertEquals(3, source.pixelLoads)
@@ -937,15 +931,15 @@ class TextureManagerAsyncTest {
         val oldName = texture.hardwareTextureID
 
         manager.reloadLoadedTextures()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         manager.unloadTexture(texture)
         manager.loadTexture(texture)
         assertTrue(manager.hasPendingTextureReloads())
-        manager.updateTextures(glState)
+        manager.updateTextures()
 
         assertEquals("prepared anew, the old texture stays meanwhile", oldName, texture.hardwareTextureID)
         executor.runAll()
-        manager.updateTextures(glState)
+        manager.updateTextures()
         assertTrue(texture.hardwareTextureID != oldName)
         assertEquals("the cancelled preparation never ran", 2, source.pixelLoads)
         assertEquals(0, manager.preparationsInFlight)
@@ -956,9 +950,9 @@ class TextureManagerAsyncTest {
         val manager = manager()
         val texture = atlas(manager, FakePixelSource())
         manager.loadTexture(texture)
-        assertFalse("only submitted", manager.updateTextures(glState))
+        assertFalse("only submitted", manager.updateTextures())
         executor.runAll()
-        assertTrue("uploaded prepared pixels", manager.updateTextures(glState))
-        assertFalse(manager.updateTextures(glState))
+        assertTrue("uploaded prepared pixels", manager.updateTextures())
+        assertFalse(manager.updateTextures())
     }
 }

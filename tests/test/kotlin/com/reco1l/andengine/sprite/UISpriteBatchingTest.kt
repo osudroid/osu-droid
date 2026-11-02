@@ -23,7 +23,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -40,7 +40,7 @@ class UISpriteBatchingTest {
     private val glCalls = ArrayList<String>()
     private val uploads = ArrayList<ByteArray>()
     private var nextId = 100
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     /**
@@ -96,8 +96,8 @@ class UISpriteBatchingTest {
     private class Probe(region: TextureRegion?, private val batchable: Boolean = true) : UISprite(region) {
         val legacyCalls = ArrayList<String>()
         override val isBatchable: Boolean get() = batchable
-        override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-        override fun onDrawBuffer(pGLState: GLState) { legacyCalls += "draw" }
+        override fun beginDraw(pGLState: DrawContext) { legacyCalls += "begin" }
+        override fun onDrawBuffer(pGLState: DrawContext) { legacyCalls += "draw" }
         fun position(vertex: Int, axis: Int) = buffer!!.valueAt(vertex * 2 + axis)
         fun uv(vertex: Int, axis: Int) = uvBuffer.valueAt(vertex * 2 + axis)
     }

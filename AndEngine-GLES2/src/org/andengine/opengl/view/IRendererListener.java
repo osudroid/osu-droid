@@ -1,6 +1,6 @@
 package org.andengine.opengl.view;
 
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -14,8 +14,8 @@ public interface IRendererListener {
 	// Constants
 	// ===========================================================
 
-	public void onSurfaceCreated(final GLState pGlState);
-	public void onSurfaceChanged(final GLState pGlState, final int pWidth, final int pHeight);
+	public void onSurfaceCreated(final DrawContext pGlState);
+	public void onSurfaceChanged(final DrawContext pGlState, final int pWidth, final int pHeight);
 
 	// ===========================================================
 	// Methods

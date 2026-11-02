@@ -29,7 +29,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
@@ -170,7 +170,7 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: GLState) {
+                    override fun beginDraw(pGLState: DrawContext) {
                         GlesBackend.state.depthMask(true)
                         super.beginDraw(pGLState)
                     }
@@ -192,7 +192,7 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: GLState) {
+                    override fun beginDraw(pGLState: DrawContext) {
                         GlesBackend.state.depthMask(true)
                         super.beginDraw(pGLState)
                     }

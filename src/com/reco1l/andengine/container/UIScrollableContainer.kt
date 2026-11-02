@@ -11,7 +11,7 @@ import org.andengine.engine.camera.*
 import org.andengine.entity.*
 import org.andengine.input.touch.*
 import org.andengine.input.touch.TouchEvent.*
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 import kotlin.math.*
 
@@ -321,7 +321,7 @@ open class UIScrollableContainer : UIContainer() {
         updateIndicators(deltaTimeSec)
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
 
         firstChild?.also { child ->
             if (child.x != -scrollX || child.y != -scrollY) {
@@ -338,7 +338,7 @@ open class UIScrollableContainer : UIContainer() {
         pGLState.pushModelViewGLMatrix()
         onApplyTransformations(pGLState)
 
-        val m = pGLState.getModelViewGLMatrix()
+        val m = pGLState.modelViewGLMatrix
 
         pGLState.popModelViewGLMatrix()
 

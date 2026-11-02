@@ -9,7 +9,7 @@ import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.scene.Scene
 import org.andengine.entity.shape.IShape
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import com.rian.andengine.timing.IClockProvider
 import com.rian.andengine.timing.IClockReceiver
 import com.rian.andengine.timing.IFrameBasedClock
@@ -217,7 +217,7 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
 
     //region Drawing
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(pGLState: DrawContext, pCamera: Camera) {
         cameraWidth = pCamera.widthRaw
         cameraHeight = pCamera.heightRaw
 

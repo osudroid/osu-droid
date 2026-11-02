@@ -11,7 +11,7 @@ import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.entity.shape.Shape.*
-import org.andengine.opengl.util.*
+import org.andengine.graphics.DrawContext
 
 
 /**
@@ -118,7 +118,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      * entity and the current model-view and projection of [gl]. Transparent entities draw as well:
      * they still write depth when [depthInfo] asks for it.
      */
-    fun drawPositions(gl: GLState, primitive: PrimitiveType, positions: FloatArray, offset: Int, vertexCount: Int) {
+    fun drawPositions(gl: DrawContext, primitive: PrimitiveType, positions: FloatArray, offset: Int, vertexCount: Int) {
         MeshRenderer.draw(
             primitive, positions, offset, vertexCount,
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
@@ -209,7 +209,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         }
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         super.doDraw(pGLState, pCamera)
         onDrawBuffer(pGLState)
 
@@ -220,7 +220,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         }
     }
 
-    override fun beginDraw(pGLState: GLState) {
+    override fun beginDraw(pGLState: DrawContext) {
         super.beginDraw(pGLState)
 
         // Clearing
@@ -249,7 +249,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
      * program of their own override this and draw the buffer's data through
      * [MeshRenderer.drawProgram].
      */
-    protected open fun onDrawBuffer(gl: GLState) {
+    protected open fun onDrawBuffer(gl: DrawContext) {
         buffer?.drawMesh(gl, this)
     }
 

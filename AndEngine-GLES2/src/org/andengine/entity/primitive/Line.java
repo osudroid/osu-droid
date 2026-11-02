@@ -7,7 +7,7 @@ import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.SpriteBatching;
 import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.shape.ShapeBatching;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.algorithm.collision.LineCollisionChecker;
 import org.andengine.util.algorithm.collision.RectangularShapeCollisionChecker;
 import org.andengine.util.exception.MethodNotSupportedException;
@@ -173,7 +173,7 @@ public class Line extends Shape {
 	 * centered on the segment, with the line's color and blend function.
 	 */
 	@Override
-	protected void draw(final GLState pGLState, final Camera pCamera) {
+	protected void draw(final DrawContext pGLState, final Camera pCamera) {
 		QuadBatcher.setProjection(pGLState.getProjectionGLMatrix());
 		ShapeBatching.line(pGLState.getModelViewGLMatrix(), 0, 0, this.mX2 - this.mX, this.mY2 - this.mY, this.mLineWidth, this.getColor().getABGRPackedInt(), SpriteBatching.batchBlendOf(this));
 	}

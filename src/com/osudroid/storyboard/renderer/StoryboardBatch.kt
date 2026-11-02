@@ -10,7 +10,7 @@ import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 /**
  * Builds the quads of a storyboard and hands them to the engine's [QuadBatcher], which draws
@@ -40,9 +40,9 @@ class StoryboardBatch {
      * Begins a batch. Must be called from the draw thread before any quads are added: captures the
      * current model-view matrix and sets the projection of the [QuadBatcher].
      *
-     * @param pGLState The current [GLState].
+     * @param pGLState The current [DrawContext].
      */
-    fun begin(pGLState: GLState) {
+    fun begin(pGLState: DrawContext) {
         System.arraycopy(pGLState.modelViewGLMatrix, 0, modelView, 0, 16)
         QuadBatcher.setProjection(pGLState.projectionGLMatrix)
         resetSpace()

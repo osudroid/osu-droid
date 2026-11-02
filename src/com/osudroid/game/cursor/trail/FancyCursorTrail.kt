@@ -7,7 +7,7 @@ import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.gles.GlesPipeline
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.cos
 import kotlin.math.hypot
 
@@ -110,7 +110,7 @@ class FancyCursorTrail : UIComponent() {
 
     // Entity rendering
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         super.doDraw(pGLState, pCamera)
 
         val n = pieces.size

@@ -11,7 +11,6 @@ import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder;
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.call.Callback;
 
 /**
@@ -90,8 +89,8 @@ public class BuildableTextureAtlas<S extends ITextureAtlasSource, T extends ITex
 	}
 
 	@Override
-	public void load(final GLState pGLState) throws IOException {
-		this.mTextureAtlas.load(pGLState);
+	public void loadNow() throws IOException {
+		this.mTextureAtlas.loadNow();
 	}
 
 	@Override
@@ -100,33 +99,33 @@ public class BuildableTextureAtlas<S extends ITextureAtlasSource, T extends ITex
 	}
 
 	@Override
-	public void unload(final GLState pGLState) {
-		this.mTextureAtlas.unload(pGLState);
+	public void unloadNow() {
+		this.mTextureAtlas.unloadNow();
 	}
 
 	@Override
-	public void loadToHardware(final GLState pGLState) throws IOException {
-		this.mTextureAtlas.loadToHardware(pGLState);
+	public void loadToHardware() throws IOException {
+		this.mTextureAtlas.loadToHardware();
 	}
 
 	@Override
-	public void unloadFromHardware(final GLState pGLState) {
-		this.mTextureAtlas.unloadFromHardware(pGLState);
+	public void unloadFromHardware() {
+		this.mTextureAtlas.unloadFromHardware();
 	}
 
 	@Override
-	public void reloadToHardware(final GLState pGLState) throws IOException {
-		this.mTextureAtlas.reloadToHardware(pGLState);
+	public void reloadToHardware() throws IOException {
+		this.mTextureAtlas.reloadToHardware();
 	}
 
 	@Override
-	public void bind(final GLState pGLState) {
-		this.mTextureAtlas.bind(pGLState);
+	public void bind() {
+		this.mTextureAtlas.bind();
 	}
 
 	@Override
-	public void bind(final GLState pGLState, final int pGLActiveTexture) {
-		this.mTextureAtlas.bind(pGLState, pGLActiveTexture);
+	public void bind(final int pGLActiveTexture) {
+		this.mTextureAtlas.bind(pGLActiveTexture);
 	}
 
 	@Override

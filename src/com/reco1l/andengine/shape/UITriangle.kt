@@ -7,7 +7,7 @@ import org.andengine.opengl.font.FontManager
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
-import org.andengine.opengl.util.*
+import org.andengine.graphics.DrawContext
 
 /**
  * A rectangle shape based on [UIComponent].
@@ -39,7 +39,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         buffer?.update(this)
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
+    override fun doDraw(pGLState: DrawContext, pCamera: Camera) {
         // Invisible shapes still reach the buffer path: they serve as depth masks there.
         val blend = if (canBatchShape()) batchBlendMode() else null
         if (blend != null) {
@@ -77,7 +77,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         super.doDraw(pGLState, pCamera)
     }
 
-    override fun beginDraw(pGLState: GLState) {
+    override fun beginDraw(pGLState: DrawContext) {
         super.beginDraw(pGLState)
         pGLState.lineWidth(lineWidth)
     }

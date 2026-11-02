@@ -2,8 +2,6 @@ package org.andengine.opengl.font;
 
 import java.util.ArrayList;
 
-import org.andengine.opengl.util.GLState;
-
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -95,12 +93,12 @@ public class FontManager {
 		}
 	}
 
-	public synchronized boolean updateFonts(final GLState pGLState) {
+	public synchronized boolean updateFonts() {
 		final ArrayList<Font> fonts = this.mFontsManaged;
 		final int fontCount = fonts.size();
 		if(fontCount > 0){
 			for(int i = fontCount - 1; i >= 0; i--){
-				fonts.get(i).update(pGLState);
+				fonts.get(i).update();
 			}
 		}
 

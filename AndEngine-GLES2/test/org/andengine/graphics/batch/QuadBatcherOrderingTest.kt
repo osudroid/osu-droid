@@ -15,8 +15,9 @@ import org.andengine.graphics.gles.GlesDebugOptions
 import org.andengine.graphics.gles.GlesGraphicsDevice
 import org.andengine.graphics.gles.GlesRenderContext
 import org.andengine.graphics.gles.GlesTexture
+import org.andengine.graphics.gles.GlesTextures
 import org.andengine.graphics.gles.RecordingGL
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -32,7 +33,7 @@ class QuadBatcherOrderingTest {
 
     private lateinit var gl: RecordingGL
     private lateinit var texture: GlesTexture
-    private val glState = GLState()
+    private val glState = DrawContext()
 
     private val identity = floatArrayOf(
         1f, 0f, 0f, 0f,
@@ -125,12 +126,12 @@ class QuadBatcherOrderingTest {
     fun externalStateChange_flushes() {
         add()
 
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
 
         assertBatchDrawnBefore("glBindTexture(${GLES20.GL_TEXTURE_2D},99)")
         assertFalse(QuadBatcher.hasPending)
         // The cache knows the binding: a second bind is skipped.
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
         assertEquals(1, gl.calls.count { it == "glBindTexture(${GLES20.GL_TEXTURE_2D},99)" })
     }
 
@@ -139,7 +140,7 @@ class QuadBatcherOrderingTest {
         GlesBackend.state.activeTexture(1)
         add()
 
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
 
         val bind = indexOf("glBindTexture(${GLES20.GL_TEXTURE_2D},99)")
         assertTrue(indexOfBatchDraw() in 0 until bind)
@@ -148,10 +149,10 @@ class QuadBatcherOrderingTest {
 
     @Test
     fun dedupedStateChange_doesNotFlush() {
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
         add()
 
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
 
         assertTrue(QuadBatcher.hasPending)
         assertEquals(-1, indexOfBatchDraw())
@@ -241,7 +242,7 @@ class QuadBatcherOrderingTest {
         gl.calls.clear()
         add()
 
-        glState.bindTexture(99)
+        GlesTextures.bind(99)
 
         assertBatchDrawnBefore("glBindTexture(${GLES20.GL_TEXTURE_2D},99)")
     }

@@ -11,7 +11,7 @@ import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -101,7 +101,7 @@ class CursorTrailBatchingTest {
         val spawn = CursorTrail::class.java.getDeclaredField("partSpawnMs").apply { isAccessible = true }.get(trail) as FloatArray
         spawn.fill(0f)
 
-        val glState = GLState()
+        val glState = DrawContext()
         trail.doDraw(glState, Camera(0f, 0f, 800f, 480f))
         QuadBatcher.flush()
 

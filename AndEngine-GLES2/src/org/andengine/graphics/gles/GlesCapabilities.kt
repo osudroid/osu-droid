@@ -3,8 +3,11 @@ package org.andengine.graphics.gles
 import android.os.Build
 import org.andengine.opengl.exception.GLESVersionUnsupportedException
 
-/** What the current GL context supports, derived from `GL_VERSION` and `GL_EXTENSIONS`. */
-class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>) {
+/**
+ * What the current GL context supports, derived from `GL_VERSION` and `GL_EXTENSIONS`, plus its
+ * `GL_MAX_TEXTURE_SIZE` (0 while unknown).
+ */
+class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>, val maxTextureSize: Int = 0) {
 
     val hasGl31: Boolean get() = version >= GlesVersion.ES31
 
@@ -23,7 +26,13 @@ class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>) {
          * @throws GLESVersionUnsupportedException if the version is below ES 3.0 or unreadable.
          */
         @JvmStatic
-        fun detect(versionString: String?, extensionsString: String?, options: GlesDebugOptions): GlesCapabilities {
+        @JvmOverloads
+        fun detect(
+            versionString: String?,
+            extensionsString: String?,
+            options: GlesDebugOptions,
+            maxTextureSize: Int = 0
+        ): GlesCapabilities {
             val parsed = GlesVersion.parse(versionString)
             if (parsed == null || parsed < GlesVersion.ES30) {
                 throw GLESVersionUnsupportedException(
@@ -41,7 +50,7 @@ class GlesCapabilities(val version: GlesVersion, val extensions: Set<String>) {
                 ?.filterTo(HashSet()) { it.isNotEmpty() }
                 ?: emptySet<String>()
 
-            return GlesCapabilities(version, extensions)
+            return GlesCapabilities(version, extensions, maxTextureSize)
         }
     }
 }

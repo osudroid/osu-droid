@@ -10,7 +10,7 @@ import org.andengine.entity.scene.background.IBackground;
 import org.andengine.entity.shape.IShape;
 import org.andengine.entity.shape.Shape;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.color.Color;
@@ -236,7 +236,7 @@ public class Scene extends Entity {
 	// ===========================================================
 
 	@Override
-	protected void onManagedDraw(final GLState pGLState, final Camera pCamera) {
+	protected void onManagedDraw(final DrawContext pGLState, final Camera pCamera) {
 		final Scene childScene = this.mChildScene;
 
 		if(childScene == null || !this.mChildSceneModalDraw) {
@@ -268,7 +268,7 @@ public class Scene extends Entity {
 		}
 	}
 
-	protected void onApplyMatrix(final GLState pGLState, final Camera pCamera) {
+	protected void onApplyMatrix(final DrawContext pGLState, final Camera pCamera) {
 		pCamera.onApplySceneMatrix(pGLState);
 	}
 

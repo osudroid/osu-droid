@@ -14,7 +14,7 @@ import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
 @OptIn(UnstableApi::class)
 class UIVideoSprite(
@@ -58,7 +58,7 @@ class UIVideoSprite(
     // Drawing — OES external texture + ST-transform matrix
     // -----------------------------------------------------------------------
 
-    override fun onDrawBuffer(gl: GLState) {
+    override fun onDrawBuffer(gl: DrawContext) {
         val positions = buffer?.data ?: return
         val view = externalView
         if (!BatchTexture.isLoaded(view)) return

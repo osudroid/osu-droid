@@ -108,7 +108,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.debug.Debug;
 
 import java.io.File;
@@ -4242,7 +4242,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         @Override
-        protected void onManagedDraw(GLState pGLState, Camera pCamera) {
+        protected void onManagedDraw(DrawContext pGLState, Camera pCamera) {
             applyRawPointerFastPath(pCamera);
 
             super.onManagedDraw(pGLState, pCamera);

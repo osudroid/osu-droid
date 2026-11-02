@@ -9,7 +9,6 @@ import org.andengine.graphics.text.GlyphMetrics;
 import org.andengine.graphics.text.GlyphRasterizer;
 import org.andengine.graphics.text.GlyphSlot;
 import org.andengine.opengl.font.exception.FontException;
-import org.andengine.opengl.util.GLState;
 
 import android.util.SparseArray;
 
@@ -210,7 +209,7 @@ public class Font implements IFont {
 	/**
 	 * Rasterizes and uploads the pending glyphs. GL thread only.
 	 */
-	public synchronized void update(final GLState pGLState) {
+	public synchronized void update() {
 		final ArrayList<Letter> lettersPendingToBeDrawnToTexture = this.mLettersPendingToBeDrawnToTexture;
 		final int count = lettersPendingToBeDrawnToTexture.size();
 		if(count == 0) {

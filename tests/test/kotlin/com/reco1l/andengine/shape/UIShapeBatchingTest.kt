@@ -26,7 +26,7 @@ import org.andengine.graphics.text.GlyphMetrics
 import org.andengine.graphics.text.GlyphRasterizer
 import org.andengine.opengl.font.Font
 import org.andengine.opengl.font.FontManager
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -63,14 +63,14 @@ class UIShapeBatchingTest {
     /** Legacy box that records its draw steps instead of running them (they call GL past the fake). */
     private class LegacyBox : UIBox() {
         val legacyCalls = ArrayList<String>()
-        override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-        override fun onDrawBuffer(gl: GLState) { legacyCalls += "draw" }
+        override fun beginDraw(pGLState: DrawContext) { legacyCalls += "begin" }
+        override fun onDrawBuffer(gl: DrawContext) { legacyCalls += "draw" }
     }
 
     private val glCalls = ArrayList<String>()
     private val vertexUploads = ArrayList<ByteArray>()
     private var nextId = 1
-    private val glState = GLState()
+    private val glState = DrawContext()
     private val camera = Camera(0f, 0f, 100f, 100f)
 
     private lateinit var atlas: GlyphAtlas
@@ -353,8 +353,8 @@ class UIShapeBatchingTest {
     fun uiCircle_depthMask_usesLegacyPath() {
         val circle = object : UICircle() {
             val legacyCalls = ArrayList<String>()
-            override fun beginDraw(pGLState: GLState) { legacyCalls += "begin" }
-            override fun onDrawBuffer(gl: GLState) { legacyCalls += "draw" }
+            override fun beginDraw(pGLState: DrawContext) { legacyCalls += "begin" }
+            override fun onDrawBuffer(gl: DrawContext) { legacyCalls += "draw" }
         }
         circle.setSize(20f, 20f)
         circle.setPortion(0.5f)
@@ -540,7 +540,7 @@ class UIShapeBatchingTest {
         first.onHandleInvalidations()
         text.onHandleInvalidations()
         second.onHandleInvalidations()
-        font.update(null)
+        font.update()
         glCalls.clear()
         vertexUploads.clear()
 
