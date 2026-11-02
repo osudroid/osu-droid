@@ -114,6 +114,11 @@ public class TiledSprite extends Sprite {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			// The tile's 6 vertices are (x,y) (x,y2) (x2,y) (x2,y) (x,y2) (x2,y2): around the quad that is 0, 1, 5, 2.
+			SpriteBatching.add(this, pGLState, this.mCurrentTileIndex * TiledSprite.TILEDSPRITE_SIZE, 0, 1, 5, 2);
+			return;
+		}
 		this.mTiledSpriteVertexBufferObject.draw(GLES32.GL_TRIANGLES, this.mCurrentTileIndex * TiledSprite.VERTICES_PER_TILEDSPRITE, TiledSprite.VERTICES_PER_TILEDSPRITE);
 	}
 

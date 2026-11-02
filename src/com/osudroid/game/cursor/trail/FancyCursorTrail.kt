@@ -1,5 +1,6 @@
 package com.osudroid.game.cursor.trail
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
@@ -204,6 +205,7 @@ class FancyCursorTrail : UIComponent() {
             4, GLES32.GL_FLOAT, false, stride, buf
         )
 
+        QuadBatcher.flush()
         GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, vertCount)
         RenderStats.draw(vertCount)
 

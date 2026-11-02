@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
@@ -215,6 +216,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
         }
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
+            QuadBatcher.flush()
             GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
             RenderStats.draw(VERTICES_PER_CHARACTER)
         }

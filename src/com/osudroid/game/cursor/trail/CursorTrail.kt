@@ -1,21 +1,17 @@
 package com.osudroid.game.cursor.trail
 
-import org.andengine.graphics.gles.GlesBackend
-import org.andengine.graphics.debug.RenderStats
-import android.opengl.GLES32
+import org.andengine.graphics.BlendFactor
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.component.UIComponent
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
@@ -23,6 +19,13 @@ import kotlin.math.sin
 
 private const val MAX_PARTS = 512
 private const val DISJOINT_SPAWN_INTERVAL_MS = 1000f / 60f
+
+// The blend functions apply to color and alpha alike.
+/** "Attached" trails (the skin has cursormiddle) glow additively. */
+private val ADDITIVE_BLEND = BlendMode(BlendFactor.SrcAlpha, BlendFactor.One, BlendFactor.SrcAlpha, BlendFactor.One)
+
+/** "Disjoint" trails use normal alpha. */
+private val ALPHA_BLEND = BlendMode(BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha, BlendFactor.SrcAlpha, BlendFactor.OneMinusSrcAlpha)
 
 /**
  * Renders the skin's "cursortrail" texture behind the moving cursor, osu! legacy skin
@@ -55,11 +58,12 @@ class CursorTrail(
     private var currentX = 0f
     private var currentY = 0f
 
-    // Interleaved per-vertex: x, y, u, v
-    private val vertexBuffer: FloatBuffer = ByteBuffer
-        .allocateDirect(4 /* vertices */ * 4 /* floats */ * 4 /* bytes */)
-        .order(ByteOrder.nativeOrder())
-        .asFloatBuffer()
+    // Corners of the part being drawn, in the projection's coordinates (top-left, top-right,
+    // bottom-right, bottom-left); the texture coordinates are the same for all parts.
+    private val cornerX = FloatArray(4)
+    private val cornerY = FloatArray(4)
+    private val cornerU = FloatArray(4)
+    private val cornerV = FloatArray(4)
 
     init {
         // GameScene drives updates manually (see CursorEntity update), skip the engines automatic pass.
@@ -180,23 +184,16 @@ class CursorTrail(
         val u2 = textureRegion.u2
         val v2 = textureRegion.v2
 
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
+        cornerU[0] = u; cornerV[0] = v
+        cornerU[1] = u2; cornerV[1] = v
+        cornerU[2] = u2; cornerV[2] = v2
+        cornerU[3] = u; cornerV[3] = v2
 
-        GLES32.glUniformMatrix4fv(shader.uniformMVPMatrixLocation, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
-        GLES32.glUniform1i(shader.uniformTexture0Location, 0)
+        val texture = BatchTexture.of(textureRegion.texture)
+        val blend = if (disjointTrail) ALPHA_BLEND else ADDITIVE_BLEND
 
-        GlesBackend.state.disableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GlesBackend.state.bindArrayBuffer(0)
-
-        textureRegion.texture.bind(pGLState)
-
-        GlesBackend.state.setBlendEnabled(true)
-        // "Attached" (has cursormiddle) trails glow additively "disjoint" ones use normal alpha,
-        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, if (disjointTrail) GLES32.GL_ONE_MINUS_SRC_ALPHA else GLES32.GL_ONE)
-
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
+        val modelView = pGLState.modelViewGLMatrix
+        QuadBatcher.setProjection(pGLState.projectionGLMatrix)
 
         for (i in 0 until MAX_PARTS) {
             val spawnMs = partSpawnMs[i]
@@ -219,35 +216,15 @@ class CursorTrail(
             val cx = partX[i]
             val cy = partY[i]
 
-            putVertex(0, -halfW + offsetX, -halfH + offsetY, cx, cy, sin, cos, u, v)
-            putVertex(1, -halfW + offsetX, halfH + offsetY, cx, cy, sin, cos, u, v2)
-            putVertex(2, halfW + offsetX, -halfH + offsetY, cx, cy, sin, cos, u2, v)
-            putVertex(3, halfW + offsetX, halfH + offsetY, cx, cy, sin, cos, u2, v2)
+            for (k in 0 until 4) {
+                val dx = (if (k == 0 || k == 3) -halfW else halfW) + offsetX
+                val dy = (if (k < 2) -halfH else halfH) + offsetY
+                cornerX[k] = dx * cos - dy * sin + cx
+                cornerY[k] = dx * sin + dy * cos + cy
+            }
 
-            vertexBuffer.position(0)
-            GlesBackend.state.vertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
-            vertexBuffer.position(2)
-            GlesBackend.state.vertexAttribPointer(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION, 2, GLES32.GL_FLOAT, false, 16, vertexBuffer)
-
-            GLES32.glUniform4f(shader.uniformColorLocation, drawRed, drawGreen, drawBlue, alpha)
-
-            GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, 4)
-            RenderStats.draw(4)
+            val rgba = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, alpha)
+            QuadBatcher.addQuad(texture, blend, modelView, cornerX, cornerY, cornerU, cornerV, rgba)
         }
-
-        // Restore state expected by other renderers.
-        GlesBackend.state.blendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
-        GlesBackend.state.enableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-    }
-
-    private fun putVertex(index: Int, dx: Float, dy: Float, cx: Float, cy: Float, sin: Float, cos: Float, texU: Float, texV: Float) {
-        val x = dx * cos - dy * sin + cx
-        val y = dx * sin + dy * cos + cy
-
-        val base = index * 4
-        vertexBuffer.put(base, x)
-        vertexBuffer.put(base + 1, y)
-        vertexBuffer.put(base + 2, texU)
-        vertexBuffer.put(base + 3, texV)
     }
 }

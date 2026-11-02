@@ -2,6 +2,7 @@ package org.andengine.graphics.gles
 
 import android.opengl.GLES20
 import org.andengine.graphics.BlendFactor
+import org.andengine.graphics.BlendMode
 import org.andengine.graphics.CompareFunction
 import org.andengine.graphics.CullMode
 import org.andengine.graphics.Pipeline
@@ -74,6 +75,31 @@ object GlesPipeline {
         BlendFactor.OneMinusSrcColor -> GLES20.GL_ONE_MINUS_SRC_COLOR
         BlendFactor.DstColor -> GLES20.GL_DST_COLOR
         BlendFactor.OneMinusDstColor -> GLES20.GL_ONE_MINUS_DST_COLOR
+    }
+
+    /** The [BlendFactor] of the GL blend factor constant [glFactor]; null for one without a counterpart. */
+    fun blendFactorOf(glFactor: Int): BlendFactor? = when (glFactor) {
+        GLES20.GL_ZERO -> BlendFactor.Zero
+        GLES20.GL_ONE -> BlendFactor.One
+        GLES20.GL_SRC_ALPHA -> BlendFactor.SrcAlpha
+        GLES20.GL_ONE_MINUS_SRC_ALPHA -> BlendFactor.OneMinusSrcAlpha
+        GLES20.GL_DST_ALPHA -> BlendFactor.DstAlpha
+        GLES20.GL_ONE_MINUS_DST_ALPHA -> BlendFactor.OneMinusDstAlpha
+        GLES20.GL_SRC_COLOR -> BlendFactor.SrcColor
+        GLES20.GL_ONE_MINUS_SRC_COLOR -> BlendFactor.OneMinusSrcColor
+        GLES20.GL_DST_COLOR -> BlendFactor.DstColor
+        GLES20.GL_ONE_MINUS_DST_COLOR -> BlendFactor.OneMinusDstColor
+        else -> null
+    }
+
+    /**
+     * The blend mode that `glBlendFunc(src, dst)` sets up: the same factors for color and alpha.
+     * Null if either factor has no [BlendFactor]. Allocates; cache the result.
+     */
+    fun blendModeOf(src: Int, dst: Int): BlendMode? {
+        val source = blendFactorOf(src) ?: return null
+        val destination = blendFactorOf(dst) ?: return null
+        return BlendMode(source, destination, source, destination)
     }
 
     fun compareFunction(function: CompareFunction): Int = when (function) {

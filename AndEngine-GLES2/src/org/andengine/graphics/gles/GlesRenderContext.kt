@@ -46,6 +46,8 @@ class GlesRenderContext private constructor() : RenderContext {
     override fun beginPass(target: RenderTarget?, clearColor: FloatArray?, clearDepth: Boolean) {
         check(!isInPass) { "beginPass while a pass is active" }
         val state = GlesBackend.state
+        // Queued drawing belongs to what came before this pass.
+        state.runBeforeExternalChange()
         syncContext(state)
 
         // Code outside the render context may have changed program/blend/depth/cull between
@@ -88,10 +90,20 @@ class GlesRenderContext private constructor() : RenderContext {
         isInPass = true
     }
 
+    override fun beginInlinePass() {
+        check(!isInPass) { "beginInlinePass while a pass is active" }
+        syncContext(GlesBackend.state)
+        // Same as beginPass: state set outside may differ from the applied pipeline.
+        pipelineDirty = true
+        isInPass = true
+    }
+
     override fun endPass() {
         check(isInPass) { "endPass without beginPass" }
-        isInPass = false
         val state = GlesBackend.state
+        // Queued drawing of this pass goes to its target before the pass ends.
+        state.runBeforeExternalChange()
+        isInPass = false
         state.bindVertexArray(0)
         // Legacy code binds textures on unit 0 without setting it, and expects the texture's own
         // filter/wrap, so leave no sampler behind on the slots this pass used.
@@ -99,6 +111,14 @@ class GlesRenderContext private constructor() : RenderContext {
         highestTextureSlot = -1
         for (slot in 0..highest) state.bindSampler(slot, 0)
         state.activeTexture(0)
+    }
+
+    /**
+     * Applies the pipeline again at the next draw, for code that changed program, blend, depth or
+     * cull state behind the render context's back during a pass.
+     */
+    fun invalidatePipeline() {
+        pipelineDirty = true
     }
 
     override fun setPipeline(p: Pipeline) {
@@ -111,14 +131,26 @@ class GlesRenderContext private constructor() : RenderContext {
 
     override fun setTexture(slot: Int, texture: Texture, sampler: Sampler?) {
         require(slot >= 0) { "Texture slot must not be negative, got $slot" }
-        val t = texture as GlesTexture
-        check(!t.isDisposed) { "Texture '${t.label}' is disposed" }
+        check(!texture.isDisposed) { "Texture '${texture.label}' is disposed" }
+        val glTarget: Int
+        val textureId: Int
+        when (texture) {
+            is GlesTexture -> {
+                glTarget = texture.glTarget
+                textureId = texture.textureId
+            }
+            is GlesLegacyTextureView -> {
+                glTarget = GLES20.GL_TEXTURE_2D
+                textureId = texture.textureId
+            }
+            else -> throw IllegalArgumentException("Texture '${texture.label}' is not a GLES texture")
+        }
         val s = sampler as GlesSampler?
         if (s != null) check(!s.isDisposed) { "Sampler '${s.label}' is disposed" }
 
         val state = GlesBackend.state
         state.activeTexture(slot)
-        state.bindTexture(t.glTarget, t.textureId)
+        state.bindTexture(glTarget, textureId)
         state.bindSampler(slot, s?.samplerId ?: 0)
         if (slot > highestTextureSlot) highestTextureSlot = slot
     }
@@ -139,6 +171,17 @@ class GlesRenderContext private constructor() : RenderContext {
             indexBuffer = b
             vaoDirty = true
         }
+    }
+
+    override fun setUniformMatrix4(location: Int, matrix: FloatArray) {
+        require(matrix.size >= 16) { "A mat4 needs 16 values, got ${matrix.size}" }
+        val p = pipeline ?: throw IllegalStateException("setUniformMatrix4 without a pipeline")
+        if (location < 0) return
+        val program = p.program as GlesProgram
+        check(!program.isDisposed) { "Pipeline uses the disposed program '${program.label}'" }
+        // Uniform calls go to the program in use; the draw applies the same program again (deduped).
+        program.use()
+        GlesBackend.gl.glUniformMatrix4fv(location, 1, false, matrix, 0)
     }
 
     override fun setUniformBlock(binding: Int, buffer: GpuBuffer) {

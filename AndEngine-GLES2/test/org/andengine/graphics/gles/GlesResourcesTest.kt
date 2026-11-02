@@ -274,6 +274,24 @@ class GlesResourcesTest {
     }
 
     @Test
+    fun streamBuffer_orphanReallocatesWithoutData() {
+        val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Stream, 8, "stream")) as GlesBuffer
+        gl.bufferDataBytes.clear()
+        gl.calls.clear()
+
+        buffer.orphan()
+
+        assertTrue(gl.calls.toString(), gl.calls.contains("glBufferData(34962,8,buf,${GLES30.GL_STREAM_DRAW})"))
+        assertEquals(0, gl.bufferDataBytes.size)
+    }
+
+    @Test
+    fun staticBuffer_orphan_throws() {
+        val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Static, 8, "static"))
+        assertThrows(IllegalStateException::class.java) { buffer.orphan() }
+    }
+
+    @Test
     fun dynamicBuffer_restoreReuploadsLastData() {
         val buffer = track(device.createBuffer(BufferTarget.Vertex, BufferUsage.Dynamic, 4, "dynamic"))
         val data = pixels(4)

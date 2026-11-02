@@ -1,5 +1,6 @@
 package com.osudroid.storyboard.renderer
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
@@ -315,6 +316,7 @@ class StoryboardBatch {
         )
 
         indexBuffer.position(0)
+        QuadBatcher.flush()
         GLES32.glDrawElements(
             GLES32.GL_TRIANGLES,
             offset / FLOATS_PER_QUAD * 6,

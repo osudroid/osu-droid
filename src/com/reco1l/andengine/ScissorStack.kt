@@ -1,5 +1,6 @@
 package com.reco1l.andengine
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import android.opengl.*
 import androidx.core.util.Pools.*
@@ -34,14 +35,17 @@ object ScissorStack : Stack<Vec4>() {
 
             intersectedX = minX
             intersectedY = minY
-            intersectedWidth = (maxX - minX)
-            intersectedHeight = (maxY - minY)
+            // Disjoint rectangles intersect in nothing; GL rejects a negative size.
+            intersectedWidth = max(0f, maxX - minX)
+            intersectedHeight = max(0f, maxY - minY)
         }
 
         val vec4 = vec4Pool.acquire()
             ?.takeUnless { vec -> vec.x != intersectedX || vec.y != intersectedY || vec.z != intersectedWidth || vec.w != intersectedHeight }
             ?: Vec4(intersectedX, intersectedY, intersectedWidth, intersectedHeight)
 
+        // Queued quads were meant for the previous clip.
+        QuadBatcher.flush()
         GlesBackend.state.scissor(
             intersectedX.toInt(),
             intersectedY.toInt(),
@@ -57,6 +61,7 @@ object ScissorStack : Stack<Vec4>() {
             return null
         }
 
+        QuadBatcher.flush()
         val vec4 = super.pop()
         if (vec4 != null) {
             vec4Pool.release(vec4)

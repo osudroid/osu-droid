@@ -81,6 +81,9 @@ abstract class Buffer(
         sAllBuffers.add(java.lang.ref.WeakReference(this))
     }
 
+    /** The float at [index] of the client-side data. */
+    fun valueAt(index: Int): Float = mFloatBuffer.get(index)
+
     fun setHardwareBufferNeedsUpdate() {
         mDirty = true
     }

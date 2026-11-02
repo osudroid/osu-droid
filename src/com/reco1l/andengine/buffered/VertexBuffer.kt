@@ -1,5 +1,6 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
@@ -29,6 +30,7 @@ abstract class VertexBuffer(
     }
 
     override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
+        QuadBatcher.flush()
         GLES32.glDrawArrays(drawTopology, 0, vertexCount)
         RenderStats.draw(vertexCount)
     }

@@ -9,8 +9,21 @@ import org.andengine.graphics.debug.RenderStats
  * The single owner of GL state. Every setter forwards to [gl] only when the value really changes
  * and counts the matching [RenderStats] entry. Unknown state is `-1` (or `NaN` for floats), so
  * after [invalidate] the next call always reaches GL. GL thread only.
+ *
+ * Drawing that is queued instead of issued at once (the quad batch) hooks into
+ * [beforeExternalChange], so it is drawn before anything changes the state it depends on.
  */
 class GlesStateCache(private val gl: GL30) {
+
+    /**
+     * Runs once right before a state change that really reaches GL (a skipped duplicate does not
+     * count), before a clear, and before an object is forgotten as deleted; it is cleared before
+     * it runs, so it is never re-entered. Used to draw queued work first: the callee must leave
+     * every value this cache tracks as it found it (see [saveDrawState]), because the change that
+     * triggered it goes on with values read before. Null while nothing waits.
+     */
+    @JvmField
+    var beforeExternalChange: Runnable? = null
 
     private val scratch = IntArray(1)
     private val unitCount: Int
@@ -100,6 +113,16 @@ class GlesStateCache(private val gl: GL30) {
         invalidate()
     }
 
+    /**
+     * Runs [beforeExternalChange] now, if set: for callers about to do something the queued work
+     * must come before, but that does not go through a setter of this cache.
+     */
+    fun runBeforeExternalChange() {
+        val hook = beforeExternalChange ?: return
+        beforeExternalChange = null
+        hook.run()
+    }
+
     /** Marks everything unknown; the next call of every setter goes to GL. */
     fun invalidate() {
         program = UNKNOWN
@@ -149,6 +172,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun useProgram(id: Int) {
         if (program == id) return
+        runBeforeExternalChange()
         program = id
         gl.glUseProgram(id)
         RenderStats.programSwitch()
@@ -156,6 +180,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun bindArrayBuffer(id: Int) {
         if (arrayBuffer == id) return
+        runBeforeExternalChange()
         arrayBuffer = id
         gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, id)
         RenderStats.bufferBind()
@@ -163,6 +188,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun bindElementBuffer(id: Int) {
         if (elementBuffer == id) return
+        runBeforeExternalChange()
         elementBuffer = id
         gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, id)
         RenderStats.bufferBind()
@@ -213,6 +239,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun bindVertexArray(id: Int) {
         if (vertexArray == id) return
+        runBeforeExternalChange()
         vertexArray = id
         // The element buffer binding is part of the VAO state.
         elementBuffer = UNKNOWN
@@ -224,6 +251,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun bindFramebuffer(id: Int) {
         if (framebuffer == id) return
+        runBeforeExternalChange()
         framebuffer = id
         gl.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, id)
         RenderStats.framebufferBind()
@@ -238,6 +266,7 @@ class GlesStateCache(private val gl: GL30) {
     /** @param unit zero-based texture unit. */
     fun activeTexture(unit: Int) {
         if (activeUnit == unit) return
+        runBeforeExternalChange()
         activeUnit = unit
         gl.glActiveTexture(GLES20.GL_TEXTURE0 + unit)
     }
@@ -245,6 +274,7 @@ class GlesStateCache(private val gl: GL30) {
     fun bindTexture(target: Int, id: Int) {
         val targetIndex = textureTargetIndex(target)
         if (targetIndex < 0) {
+            runBeforeExternalChange()
             gl.glBindTexture(target, id)
             RenderStats.textureBind()
             return
@@ -252,12 +282,14 @@ class GlesStateCache(private val gl: GL30) {
         if (activeUnit == UNKNOWN) activeTexture(0)
         val unit = activeUnit
         if (unit >= unitCount) {
+            runBeforeExternalChange()
             gl.glBindTexture(target, id)
             RenderStats.textureBind()
             return
         }
         val slot = unit * TEXTURE_TARGETS + targetIndex
         if (textures[slot] == id) return
+        runBeforeExternalChange()
         textures[slot] = id
         gl.glBindTexture(target, id)
         RenderStats.textureBind()
@@ -293,15 +325,16 @@ class GlesStateCache(private val gl: GL30) {
 
     /** @param unit zero-based texture unit; 0 unbinds, so the texture's own parameters apply. */
     fun bindSampler(unit: Int, id: Int) {
-        if (unit in 0 until unitCount) {
-            if (samplers[unit] == id) return
-            samplers[unit] = id
-        }
+        val tracked = unit in 0 until unitCount
+        if (tracked && samplers[unit] == id) return
+        runBeforeExternalChange()
+        if (tracked) samplers[unit] = id
         gl.glBindSampler(unit, id)
     }
 
     /** Forgets [id] on every unit, since GL unbinds it when the sampler is deleted. */
     fun onSamplerDeleted(id: Int) {
+        runBeforeExternalChange()
         for (i in samplers.indices) {
             if (samplers[i] == id) samplers[i] = UNKNOWN
         }
@@ -309,6 +342,7 @@ class GlesStateCache(private val gl: GL30) {
 
     /** Forgets [id] as the current buffer so a reused id is bound again. */
     fun onBufferDeleted(id: Int) {
+        runBeforeExternalChange()
         for (i in uniformBindings.indices) {
             if (uniformBindings[i] == id) uniformBindings[i] = UNKNOWN
         }
@@ -321,14 +355,17 @@ class GlesStateCache(private val gl: GL30) {
     }
 
     fun onProgramDeleted(id: Int) {
+        runBeforeExternalChange()
         if (program == id) program = UNKNOWN
     }
 
     fun onFramebufferDeleted(id: Int) {
+        runBeforeExternalChange()
         if (framebuffer == id) framebuffer = UNKNOWN
     }
 
     fun onVertexArrayDeleted(id: Int) {
+        runBeforeExternalChange()
         if (vertexArray == id) {
             // GL falls back to VAO 0, so the VAO-scoped state is gone as well.
             vertexArray = UNKNOWN
@@ -344,6 +381,7 @@ class GlesStateCache(private val gl: GL30) {
 
     /** Forgets [id] on every unit and target, since GL unbinds it when the texture is deleted. */
     fun onTextureDeleted(id: Int) {
+        runBeforeExternalChange()
         for (i in textures.indices) {
             if (textures[i] == id) textures[i] = UNKNOWN
         }
@@ -352,6 +390,7 @@ class GlesStateCache(private val gl: GL30) {
     fun setBlendEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (blendEnabled == value) return
+        runBeforeExternalChange()
         blendEnabled = value
         setCap(GLES20.GL_BLEND, enabled)
     }
@@ -360,6 +399,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun blendFuncSeparate(srcRgb: Int, dstRgb: Int, srcAlpha: Int, dstAlpha: Int) {
         if (blendSrcRgb == srcRgb && blendDstRgb == dstRgb && blendSrcAlpha == srcAlpha && blendDstAlpha == dstAlpha) return
+        runBeforeExternalChange()
         blendSrcRgb = srcRgb
         blendDstRgb = dstRgb
         blendSrcAlpha = srcAlpha
@@ -375,12 +415,14 @@ class GlesStateCache(private val gl: GL30) {
     fun setDepthTestEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (depthTest == value) return
+        runBeforeExternalChange()
         depthTest = value
         setCap(GLES20.GL_DEPTH_TEST, enabled)
     }
 
     fun depthFunc(func: Int) {
         if (depthFunc == func) return
+        runBeforeExternalChange()
         depthFunc = func
         gl.glDepthFunc(func)
     }
@@ -388,6 +430,7 @@ class GlesStateCache(private val gl: GL30) {
     fun depthMask(flag: Boolean) {
         val value = if (flag) 1 else 0
         if (depthMask == value) return
+        runBeforeExternalChange()
         depthMask = value
         gl.glDepthMask(flag)
     }
@@ -401,18 +444,21 @@ class GlesStateCache(private val gl: GL30) {
     fun setCullFaceEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (cullFace == value) return
+        runBeforeExternalChange()
         cullFace = value
         setCap(GLES20.GL_CULL_FACE, enabled)
     }
 
     fun cullFace(mode: Int) {
         if (cullMode == mode) return
+        runBeforeExternalChange()
         cullMode = mode
         gl.glCullFace(mode)
     }
 
     fun frontFace(mode: Int) {
         if (frontFace == mode) return
+        runBeforeExternalChange()
         frontFace = mode
         gl.glFrontFace(mode)
     }
@@ -420,6 +466,7 @@ class GlesStateCache(private val gl: GL30) {
     fun setDitherEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (dither == value) return
+        runBeforeExternalChange()
         dither = value
         setCap(GLES20.GL_DITHER, enabled)
     }
@@ -433,12 +480,14 @@ class GlesStateCache(private val gl: GL30) {
     fun setScissorEnabled(enabled: Boolean) {
         val value = if (enabled) 1 else 0
         if (scissor == value) return
+        runBeforeExternalChange()
         scissor = value
         setCap(GLES20.GL_SCISSOR_TEST, enabled)
     }
 
     fun scissor(x: Int, y: Int, width: Int, height: Int) {
         if (scissorX == x && scissorY == y && scissorW == width && scissorH == height) return
+        runBeforeExternalChange()
         scissorX = x
         scissorY = y
         scissorW = width
@@ -448,6 +497,7 @@ class GlesStateCache(private val gl: GL30) {
 
     fun viewport(x: Int, y: Int, width: Int, height: Int) {
         if (viewportX == x && viewportY == y && viewportWidth == width && viewportHeight == height) return
+        runBeforeExternalChange()
         viewportX = x
         viewportY = y
         viewportWidth = width
@@ -458,11 +508,13 @@ class GlesStateCache(private val gl: GL30) {
     /** Attribute indices 0 until 32 are tracked; others pass through uncached. */
     fun enableVertexAttribArray(index: Int) {
         if (index !in 0 until 32) {
+            runBeforeExternalChange()
             gl.glEnableVertexAttribArray(index)
             return
         }
         val bit = 1 shl index
         if (attribKnown and bit != 0 && attribEnabled and bit != 0) return
+        runBeforeExternalChange()
         attribKnown = attribKnown or bit
         attribEnabled = attribEnabled or bit
         gl.glEnableVertexAttribArray(index)
@@ -470,11 +522,13 @@ class GlesStateCache(private val gl: GL30) {
 
     fun disableVertexAttribArray(index: Int) {
         if (index !in 0 until 32) {
+            runBeforeExternalChange()
             gl.glDisableVertexAttribArray(index)
             return
         }
         val bit = 1 shl index
         if (attribKnown and bit != 0 && attribEnabled and bit == 0) return
+        runBeforeExternalChange()
         attribKnown = attribKnown or bit
         attribEnabled = attribEnabled and bit.inv()
         gl.glDisableVertexAttribArray(index)
@@ -483,14 +537,17 @@ class GlesStateCache(private val gl: GL30) {
     // The next three are pass-through so the call stays in the backend.
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int) {
+        runBeforeExternalChange()
         gl.glVertexAttribPointer(index, size, type, normalized, stride, offset)
     }
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, buffer: java.nio.Buffer) {
+        runBeforeExternalChange()
         gl.glVertexAttribPointer(index, size, type, normalized, stride, buffer)
     }
 
     fun vertexAttrib4f(index: Int, x: Float, y: Float, z: Float, w: Float) {
+        runBeforeExternalChange()
         gl.glVertexAttrib4f(index, x, y, z, w)
     }
 
@@ -504,7 +561,78 @@ class GlesStateCache(private val gl: GL30) {
     }
 
     fun clear(mask: Int) {
+        runBeforeExternalChange()
         gl.glClear(mask)
+    }
+
+    /**
+     * Copies the state a draw of the render context may change (program, VAO with its element
+     * buffer, array buffer, active unit, the 2D texture and the sampler of unit 0, blend, depth
+     * and cull) into [out], which needs [DRAW_STATE_SIZE] values. See [restoreDrawState].
+     */
+    fun saveDrawState(out: IntArray) {
+        out[S_PROGRAM] = program
+        out[S_VERTEX_ARRAY] = vertexArray
+        out[S_ELEMENT_BUFFER] = elementBuffer
+        out[S_ARRAY_BUFFER] = arrayBuffer
+        out[S_ACTIVE_UNIT] = activeUnit
+        out[S_TEXTURE_0] = textures[0]
+        out[S_SAMPLER_0] = samplers[0]
+        out[S_BLEND] = blendEnabled
+        out[S_BLEND_SRC_RGB] = blendSrcRgb
+        out[S_BLEND_DST_RGB] = blendDstRgb
+        out[S_BLEND_SRC_ALPHA] = blendSrcAlpha
+        out[S_BLEND_DST_ALPHA] = blendDstAlpha
+        out[S_DEPTH_TEST] = depthTest
+        out[S_DEPTH_FUNC] = depthFunc
+        out[S_DEPTH_MASK] = depthMask
+        out[S_CULL] = cullFace
+        out[S_CULL_MODE] = cullMode
+    }
+
+    /**
+     * Sets the values [saveDrawState] wrote into [saved] again, those that were known, so code
+     * that set them earlier can still rely on them. Duplicates are skipped as usual.
+     */
+    fun restoreDrawState(saved: IntArray) {
+        // The element buffer belongs to the VAO, so the VAO comes first.
+        val vao = saved[S_VERTEX_ARRAY]
+        if (vao != UNKNOWN) bindVertexArray(vao)
+        val elements = saved[S_ELEMENT_BUFFER]
+        if (elements != UNKNOWN && vertexArray == vao) bindElementBuffer(elements)
+        val array = saved[S_ARRAY_BUFFER]
+        if (array != UNKNOWN) bindArrayBuffer(array)
+        val prog = saved[S_PROGRAM]
+        if (prog != UNKNOWN) useProgram(prog)
+
+        val blend = saved[S_BLEND]
+        if (blend != UNKNOWN) setBlendEnabled(blend == 1)
+        val srcRgb = saved[S_BLEND_SRC_RGB]
+        val dstRgb = saved[S_BLEND_DST_RGB]
+        val srcAlpha = saved[S_BLEND_SRC_ALPHA]
+        val dstAlpha = saved[S_BLEND_DST_ALPHA]
+        // All four are set together, so either all are known or none.
+        if (srcRgb != UNKNOWN) blendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha)
+        val depth = saved[S_DEPTH_TEST]
+        if (depth != UNKNOWN) setDepthTestEnabled(depth == 1)
+        val func = saved[S_DEPTH_FUNC]
+        if (func != UNKNOWN) depthFunc(func)
+        val mask = saved[S_DEPTH_MASK]
+        if (mask != UNKNOWN) depthMask(mask == 1)
+        val cull = saved[S_CULL]
+        if (cull != UNKNOWN) setCullFaceEnabled(cull == 1)
+        val mode = saved[S_CULL_MODE]
+        if (mode != UNKNOWN) cullFace(mode)
+
+        val texture = saved[S_TEXTURE_0]
+        val sampler = saved[S_SAMPLER_0]
+        if (texture != UNKNOWN || sampler != UNKNOWN) {
+            activeTexture(0)
+            if (texture != UNKNOWN) bindTexture(GLES20.GL_TEXTURE_2D, texture)
+            if (sampler != UNKNOWN) bindSampler(0, sampler)
+        }
+        val unit = saved[S_ACTIVE_UNIT]
+        if (unit != UNKNOWN) activeTexture(unit)
     }
 
     private fun setCap(cap: Int, enabled: Boolean) {
@@ -518,5 +646,26 @@ class GlesStateCache(private val gl: GL30) {
         private const val MAX_UNITS = 32
         private const val TEXTURE_EXTERNAL_OES = 0x8D65
         private const val UNIFORM_BINDINGS = 16
+
+        private const val S_PROGRAM = 0
+        private const val S_VERTEX_ARRAY = 1
+        private const val S_ELEMENT_BUFFER = 2
+        private const val S_ARRAY_BUFFER = 3
+        private const val S_ACTIVE_UNIT = 4
+        private const val S_TEXTURE_0 = 5
+        private const val S_SAMPLER_0 = 6
+        private const val S_BLEND = 7
+        private const val S_BLEND_SRC_RGB = 8
+        private const val S_BLEND_DST_RGB = 9
+        private const val S_BLEND_SRC_ALPHA = 10
+        private const val S_BLEND_DST_ALPHA = 11
+        private const val S_DEPTH_TEST = 12
+        private const val S_DEPTH_FUNC = 13
+        private const val S_DEPTH_MASK = 14
+        private const val S_CULL = 15
+        private const val S_CULL_MODE = 16
+
+        /** Number of values [saveDrawState] writes. */
+        const val DRAW_STATE_SIZE = 17
     }
 }

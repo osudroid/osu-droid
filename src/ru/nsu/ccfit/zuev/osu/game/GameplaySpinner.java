@@ -31,6 +31,9 @@ public class GameplaySpinner extends GameObject {
     private final UISprite approachCircle;
     private final UISprite metre;
     private final float metreRegionOriginalHeight;
+    // Where the metre image starts inside its texture (non-zero on a shared atlas page).
+    private final float metreRegionOriginX;
+    private final float metreRegionOriginY;
     private float metreY;
     private final UISprite spinText;
     private final TextureRegion metreRegion;
@@ -75,6 +78,8 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
         metreRegionOriginalHeight = metreRegion.getHeight();
+        metreRegionOriginX = metreRegion.getTextureX();
+        metreRegionOriginY = metreRegion.getTextureY();
 
         metre = new UISprite();
         metre.setScaleType(ScaleType.Stretch);
@@ -138,7 +143,7 @@ public class GameplaySpinner extends GameObject {
                 (Config.isShowFirstApproachCircle() && GameHelper.getTraceable().getFirstObject() == beatmapSpinner));
 
         metreRegion.setTextureHeight(0);
-        metreRegion.setTexturePosition(0, metreRegionOriginalHeight);
+        metreRegion.setTexturePosition(metreRegionOriginX, metreRegionOriginY + metreRegionOriginalHeight);
         metre.setHeight(0);
 
         scene.attachChild(spinText, 0);
@@ -404,7 +409,7 @@ public class GameplaySpinner extends GameObject {
             metre.setPosition(metre.getX(), metreY + background.getHeightScaled() * fillOffset);
 
             metreRegion.setTextureHeight((int) (metreRegionOriginalHeight * Math.min(1, Math.abs(percentfill))));
-            metreRegion.setTexturePosition(0, (int) (metreRegionOriginalHeight * fillOffset));
+            metreRegion.setTexturePosition(metreRegionOriginX, metreRegionOriginY + (int) (metreRegionOriginalHeight * fillOffset));
             metre.requestBufferUpdate();
 
             oldMouse.set(currMouse);

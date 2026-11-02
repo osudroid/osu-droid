@@ -1307,6 +1307,25 @@ public class Entity implements IEntity {
 	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
+	// BEGIN osu!droid modified: let subclasses skip their own draw (e.g. texture not on the GPU yet).
+	private void drawSelf(final GLState pGLState, final Camera pCamera) {
+		if(!this.isSelfDrawable()) {
+			return;
+		}
+		this.preDraw(pGLState, pCamera);
+		this.draw(pGLState, pCamera);
+		this.postDraw(pGLState, pCamera);
+	}
+
+	/**
+	 * @return <code>false</code> to skip {@link #preDraw}, {@link #draw} and {@link #postDraw} of this
+	 * entity for the current frame; its children are still drawn.
+	 */
+	protected boolean isSelfDrawable() {
+		return true;
+	}
+	// END osu!droid modified
+
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
 
 	}
@@ -1410,9 +1429,7 @@ public class Entity implements IEntity {
 			final SmartList<IEntity> children = this.mChildren;
 			if((children == null) || !this.mChildrenVisible) {
 				/* Draw only self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
+				this.drawSelf(pGLState, pCamera);
 			} else {
 				if(this.mChildrenSortPending) {
 					ZIndexSorter.getInstance().sort(this.mChildren);
@@ -1437,9 +1454,7 @@ public class Entity implements IEntity {
 				}
 
 				/* Draw self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
+				this.drawSelf(pGLState, pCamera);
 
 				{ /* Draw children in front of this Entity. */
 					for(; i < childCount; i++) {

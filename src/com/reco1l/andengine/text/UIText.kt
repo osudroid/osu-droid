@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import org.andengine.opengl.texture.ITexture
@@ -311,6 +312,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
                 }
                 val texture = run.texture ?: continue
                 texture.bind(gl)
+                QuadBatcher.flush()
                 GLES32.glDrawArrays(drawTopology, run.startVertex, min(run.vertexCount, vertexLimit - run.startVertex))
                 RenderStats.draw(min(run.vertexCount, vertexLimit - run.startVertex))
             }

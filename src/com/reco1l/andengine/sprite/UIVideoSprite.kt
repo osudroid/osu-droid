@@ -20,6 +20,9 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
 
     private val texture = VideoTexture(source)
 
+    // External (OES) texture with its own shader.
+    override val isBatchable: Boolean get() = false
+
     init {
         val w = texture.videoWidth.toFloat()
         val h = texture.videoHeight.toFloat()

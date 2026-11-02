@@ -1,5 +1,6 @@
 package org.andengine.opengl.texture.render;
 
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.gles.GlesStateCache;
 import java.io.IOException;
@@ -228,6 +229,8 @@ public class RenderTexture extends Texture {
 	 * 		{@link RenderTexture#end(GLState, boolean, boolean}}.
 	 */
 	public void begin(final GLState pGLState, final boolean pFlipX, final boolean pFlipY) {
+		// Quads queued so far belong to the previous target.
+		QuadBatcher.flush();
 		this.savePreviousViewport();
 		GlesBackend.getState().viewport(0, 0, this.mWidth, this.mHeight);
 
@@ -299,6 +302,8 @@ public class RenderTexture extends Texture {
 	 * 		{@link RenderTexture#begin(GLState, boolean, boolean, float, float, float, float)}.
 	 */
 	public void end(final GLState pGLState, final boolean pFlush, final boolean pFinish) {
+		// Quads queued since begin belong to this texture.
+		QuadBatcher.flush();
 		if(pFinish) {
 			this.finish(pGLState);
 		} else if(pFlush) {

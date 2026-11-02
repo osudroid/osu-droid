@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.graphics.debug.RenderStats
 import android.opengl.GLES32
@@ -127,6 +128,7 @@ class UIGradientBox(
         override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) { /* using beginDraw */ }
 
         override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
+            QuadBatcher.flush()
             GLES32.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
             RenderStats.draw(4)
         }

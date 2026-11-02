@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.options.RenderOptions;
+import org.andengine.graphics.atlas.TextureAtlasPages;
 import org.andengine.graphics.debug.RenderStats;
 import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.gles.GlesDebugOutput;
@@ -70,6 +71,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 			// reports one lagging frame (Engine.mIsLagging) right after startup; harmless.
 			GlesBackend.onContextCreated();
 			this.mGLState.reset(renderOptions, this.mConfigChooser, pEGLConfig);
+			TextureAtlasPages.setDeviceMaxTextureSize(this.mGLState.getMaximumTextureSize());
 			RenderStats.reset();
 
 			this.mGLState.disableDepthTest();
@@ -116,6 +118,8 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 			// Clear the depth buffer at the start of every frame so leftover depth values
 			// from the previous frame (written by slider-body triangle meshes) never bleed
 			// into the current frame and cause artifacts on sprites / circles.
+			// glClear honours the depth mask, which a batch flush may have left off.
+			GlesBackend.getState().depthMask(true);
 			GlesBackend.getState().clear(GLES32.GL_DEPTH_BUFFER_BIT);
 
 			try {

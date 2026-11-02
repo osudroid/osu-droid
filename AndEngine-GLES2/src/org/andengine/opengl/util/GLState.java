@@ -349,9 +349,10 @@ public class GLState {
 	}
 
 	private void deleteBuffer(final int pHardwareBufferID) {
+		// The cache first: queued drawing is drawn while the object still exists.
+		GlesBackend.getState().onBufferDeleted(pHardwareBufferID);
 		this.mHardwareIDContainer[0] = pHardwareBufferID;
 		GlesBackend.getGl().glDeleteBuffers(1, this.mHardwareIDContainer, 0);
-		GlesBackend.getState().onBufferDeleted(pHardwareBufferID);
 	}
 
 	public int generateFramebuffer() {
@@ -392,9 +393,9 @@ public class GLState {
 	}
 
 	public void deleteFramebuffer(final int pHardwareFramebufferID) {
+		GlesBackend.getState().onFramebufferDeleted(pHardwareFramebufferID);
 		this.mHardwareIDContainer[0] = pHardwareFramebufferID;
 		GlesBackend.getGl().glDeleteFramebuffers(1, this.mHardwareIDContainer, 0);
-		GlesBackend.getState().onFramebufferDeleted(pHardwareFramebufferID);
 	}
 
 	public void useProgram(final int pShaderProgramID) {
@@ -402,8 +403,8 @@ public class GLState {
 	}
 
 	public void deleteProgram(final int pShaderProgramID) {
-		GlesBackend.getGl().glDeleteProgram(pShaderProgramID);
 		GlesBackend.getState().onProgramDeleted(pShaderProgramID);
+		GlesBackend.getGl().glDeleteProgram(pShaderProgramID);
 	}
 
 	public int generateTexture() {
@@ -442,9 +443,9 @@ public class GLState {
 	}
 
 	public void deleteTexture(final int pHardwareTextureID) {
+		GlesBackend.getState().onTextureDeleted(pHardwareTextureID);
 		this.mHardwareIDContainer[0] = pHardwareTextureID;
 		GlesBackend.getGl().glDeleteTextures(1, this.mHardwareIDContainer, 0);
-		GlesBackend.getState().onTextureDeleted(pHardwareTextureID);
 	}
 
 	public void blendFunction(final int pSourceBlendMode, final int pDestinationBlendMode) {

@@ -116,6 +116,14 @@ class GlesBuffer(
         RenderStats.upload(byteCount)
     }
 
+    override fun orphan() {
+        check(!isDisposed) { "Buffer '$label' is disposed" }
+        // Static/Dynamic keep a CPU copy of their content, which orphaning would contradict.
+        check(usage == BufferUsage.Stream) { "Buffer '$label' is $usage; only stream buffers can be orphaned" }
+        bind()
+        GlesBackend.gl.glBufferData(glTarget, sizeBytes, null, glUsage)
+    }
+
     private fun copyToShadow(offsetBytes: Int, data: Buffer, byteCount: Int) {
         var bytes = shadow
         if (bytes == null) {

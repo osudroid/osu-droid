@@ -17,6 +17,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.debug.RenderStats;
 import org.andengine.graphics.gles.GlesLegacyRestorers;
 import org.andengine.input.sensor.SensorDelay;
@@ -656,6 +657,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 			this.onUpdateDrawHandlers(pGLState, this.mCamera);
 			this.onDrawScene(pGLState, this.mCamera);
+			// The last batched quads of the frame.
+			QuadBatcher.flushFrame();
 			RenderStats.endDraw();
 
 			engineLock.notifyCanUpdate();

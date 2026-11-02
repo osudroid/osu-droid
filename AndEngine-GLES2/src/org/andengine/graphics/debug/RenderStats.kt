@@ -178,6 +178,10 @@ object RenderStats {
         if (enabled) counters[counter] += amount
     }
 
+    /** The value of a counter in the current, unfinished frame. */
+    @JvmStatic
+    fun currentCount(counter: Int): Int = counters[counter]
+
     // endregion
 
     // region Frame timing

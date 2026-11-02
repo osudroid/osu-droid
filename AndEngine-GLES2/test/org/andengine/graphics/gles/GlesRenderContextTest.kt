@@ -436,6 +436,89 @@ class GlesRenderContextTest {
     }
 
     @Test
+    fun beginInlinePass_keepsFramebufferViewportAndScissor() {
+        val vb = buffer(BufferTarget.Vertex, "vb")
+        val p = pipeline()
+        // Legacy code drawing into its own framebuffer with a clip.
+        GlesBackend.state.bindFramebuffer(7)
+        GlesBackend.state.viewport(0, 0, 128, 64)
+        GlesBackend.state.setScissorEnabled(true)
+        GlesBackend.state.scissor(1, 2, 3, 4)
+        gl.calls.clear()
+
+        context.beginInlinePass()
+        context.setVertexBuffer(vb)
+        context.setPipeline(p)
+        context.draw(0, 3)
+        context.endPass()
+
+        assertEquals(gl.calls.toString(), 0, count("glBindFramebuffer"))
+        assertEquals(gl.calls.toString(), 0, count("glViewport"))
+        assertEquals(gl.calls.toString(), 0, count("glDisable(${GLES20.GL_SCISSOR_TEST})"))
+        assertEquals(gl.calls.toString(), 0, count("glClear"))
+        assertEquals(1, count("glDrawArrays"))
+        assertEquals(7, GlesBackend.state.currentFramebuffer)
+        assertTrue(!context.isInPass)
+    }
+
+    @Test
+    fun beginInlinePass_reappliesPipelineChangedOutside() {
+        val vb = buffer(BufferTarget.Vertex, "vb")
+        val p = pipeline(blend = BlendMode.Alpha)
+        context.beginInlinePass()
+        context.setVertexBuffer(vb)
+        context.setPipeline(p)
+        context.draw(0, 3)
+        context.endPass()
+        GlesBackend.state.setBlendEnabled(false)
+        gl.calls.clear()
+
+        context.beginInlinePass()
+        context.setPipeline(p)
+        context.draw(0, 3)
+
+        assertTrue(gl.calls.toString(), gl.calls.contains("glEnable(${GLES20.GL_BLEND})"))
+    }
+
+    @Test
+    fun beginInlinePass_whileInPass_throws() {
+        context.beginInlinePass()
+        assertThrows(IllegalStateException::class.java) { context.beginInlinePass() }
+        assertThrows(IllegalStateException::class.java) { context.beginPass(null, null, false) }
+    }
+
+    @Test
+    fun setUniformMatrix4_usesPipelineProgram() {
+        val p = pipeline()
+        val program = p.program as GlesProgram
+        val m = FloatArray(16) { it.toFloat() }
+        context.setPipeline(p)
+        gl.calls.clear()
+
+        context.setUniformMatrix4(3, m)
+
+        assertTrue(gl.calls.toString(), gl.calls.contains("glUseProgram(${program.programId})"))
+        assertTrue(gl.calls.toString(), gl.calls.contains("glUniformMatrix4fv(3,1,false,buf,0)"))
+        assertTrue(m.contentEquals(gl.uniformMatrices.last()))
+    }
+
+    @Test
+    fun setUniformMatrix4_negativeLocation_ignored() {
+        context.setPipeline(pipeline())
+        gl.calls.clear()
+
+        context.setUniformMatrix4(-1, FloatArray(16))
+
+        assertEquals(gl.calls.toString(), 0, count("glUniformMatrix4fv"))
+    }
+
+    @Test
+    fun setUniformMatrix4_shortMatrix_throws() {
+        context.setPipeline(pipeline())
+        assertThrows(IllegalArgumentException::class.java) { context.setUniformMatrix4(0, FloatArray(4)) }
+    }
+
+    @Test
     fun vertexLayout_equalsByContent() {
         val other = VertexLayout(
             20,

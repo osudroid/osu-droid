@@ -230,4 +230,77 @@ class GlesStateCacheTest {
         cache.bindUniformBufferBase(0, 6)
         assertEquals(2, gl.calls.count { it.startsWith("glBindBufferBase") })
     }
+
+    @Test
+    fun beforeExternalChange_runsOnceBeforeARealChange() {
+        cache.useProgram(3)
+        gl.calls.clear()
+        val seen = ArrayList<String>()
+        cache.beforeExternalChange = Runnable { seen += "hook after ${gl.calls.size} calls" }
+
+        cache.useProgram(3)
+        assertEquals("a skipped duplicate does not count", 0, seen.size)
+
+        cache.useProgram(4)
+        cache.useProgram(5)
+        assertEquals(listOf("hook after 0 calls"), seen)
+        assertEquals(null, cache.beforeExternalChange)
+    }
+
+    @Test
+    fun beforeExternalChange_runsBeforeDeleteAndClear() {
+        var runs = 0
+        val hook = Runnable { runs++ }
+        cache.beforeExternalChange = hook
+        cache.onTextureDeleted(9)
+        cache.beforeExternalChange = hook
+        cache.clear(GLES20.GL_COLOR_BUFFER_BIT)
+        assertEquals(2, runs)
+    }
+
+    @Test
+    fun beforeExternalChange_isNotReentered() {
+        var runs = 0
+        cache.beforeExternalChange = Runnable {
+            runs++
+            cache.useProgram(8)
+        }
+        cache.useProgram(7)
+        assertEquals(1, runs)
+        assertEquals(listOf("glUseProgram(8)", "glUseProgram(7)"), gl.calls)
+    }
+
+    @Test
+    fun drawState_restoresKnownValues() {
+        cache.useProgram(3)
+        cache.bindArrayBuffer(4)
+        cache.activeTexture(2)
+        cache.activeTexture(0)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 5)
+        cache.activeTexture(2)
+        cache.setBlendEnabled(true)
+        cache.blendFunc(GLES20.GL_ONE, GLES20.GL_ZERO)
+        val saved = IntArray(GlesStateCache.DRAW_STATE_SIZE)
+        cache.saveDrawState(saved)
+
+        cache.useProgram(30)
+        cache.bindArrayBuffer(40)
+        cache.activeTexture(0)
+        cache.bindTexture(GLES20.GL_TEXTURE_2D, 50)
+        cache.setBlendEnabled(false)
+        cache.blendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)
+        gl.calls.clear()
+
+        cache.restoreDrawState(saved)
+
+        assertEquals(3, cache.currentProgram)
+        assertEquals(4, cache.currentArrayBuffer)
+        assertEquals(2, cache.currentActiveTextureUnit)
+        assertEquals(true, cache.isBlendEnabled)
+        assertEquals(GLES20.GL_ONE, cache.currentBlendSrcRgb)
+        assertEquals(GLES20.GL_ZERO, cache.currentBlendDstRgb)
+        assertEquals(1, count("glBindTexture(3553,5)"))
+        // Unknown values (VAO, depth, cull, sampler) are left alone.
+        assertEquals(0, gl.calls.count { it.startsWith("glBindVertexArray") || it.startsWith("glBindSampler") })
+    }
 }

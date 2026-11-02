@@ -15,4 +15,12 @@ interface GpuBuffer : GpuResource {
 
     /** Writes [byteCount] bytes of [data], starting at its current position, at [offsetBytes]. */
     fun update(offsetBytes: Int, data: java.nio.Buffer, byteCount: Int)
+
+    /**
+     * Replaces the storage with new, undefined storage of the same size, so the next [update] need
+     * not wait for draws still reading the old content. Call before rewriting the whole buffer.
+     *
+     * @throws IllegalStateException unless the buffer is [BufferUsage.Stream].
+     */
+    fun orphan()
 }

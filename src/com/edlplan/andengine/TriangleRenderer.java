@@ -1,5 +1,6 @@
 package com.edlplan.andengine;
 
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.graphics.debug.RenderStats;
 import android.opengl.GLES32;
@@ -78,6 +79,7 @@ public class TriangleRenderer {
             ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
             2, GLES32.GL_FLOAT, false, 0, 0
         );
+        QuadBatcher.flush();
         GLES32.glDrawArrays(GLES32.GL_TRIANGLES, 0, floatCount / 2);
         RenderStats.draw(floatCount / 2);
 

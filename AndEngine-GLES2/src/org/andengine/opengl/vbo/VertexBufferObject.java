@@ -3,14 +3,14 @@ package org.andengine.opengl.vbo;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.debug.RenderStats;
+import org.andengine.graphics.gles.GlesBackend;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.util.BufferUtils;
 import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.util.adt.DataConstants;
-
-import android.opengl.GLES32;
 
 /**
  * TODO Extract a common base class from {@link VertexBufferObject} and {@link ZeroMemoryVertexBufferObject} (due to significant code duplication).
@@ -181,13 +181,15 @@ public abstract class VertexBufferObject implements IVertexBufferObject {
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pCount) {
-		GLES32.glDrawArrays(pPrimitiveType, 0, pCount);
+		QuadBatcher.flush();
+		GlesBackend.getGl().glDrawArrays(pPrimitiveType, 0, pCount);
 		RenderStats.draw(pCount);
 	}
 
 	@Override
 	public void draw(final int pPrimitiveType, final int pOffset, final int pCount) {
-		GLES32.glDrawArrays(pPrimitiveType, pOffset, pCount);
+		QuadBatcher.flush();
+		GlesBackend.getGl().glDrawArrays(pPrimitiveType, pOffset, pCount);
 		RenderStats.draw(pCount);
 	}
 

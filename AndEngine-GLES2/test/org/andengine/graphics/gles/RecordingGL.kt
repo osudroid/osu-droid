@@ -13,6 +13,10 @@ class RecordingGL : GL32 {
     val queryValues: MutableMap<Int, Int> = HashMap()
     /** The bytes of every non-null [glBufferData] upload, in call order. */
     val bufferDataBytes: MutableList<ByteArray> = ArrayList()
+    /** The bytes of every [glBufferSubData] upload from a ByteBuffer, in call order. */
+    val bufferSubDataBytes: MutableList<ByteArray> = ArrayList()
+    /** The 16 values of every [glUniformMatrix4fv] call, in call order. */
+    val uniformMatrices: MutableList<FloatArray> = ArrayList()
     private var nextId = 1
 
     override fun glGetString(name: Int): String? {
@@ -155,8 +159,12 @@ class RecordingGL : GL32 {
         for (i in 0 until n) ids[offset + i] = nextId++
     }
 
+    /** Makes [glGenBuffers] throw, to simulate a failing buffer creation. */
+    var failGenBuffers = false
+
     override fun glGenBuffers(n: Int, ids: IntArray, offset: Int) {
         calls += "glGenBuffers($n,buf,$offset)"
+        if (failGenBuffers) throw IllegalStateException("glGenBuffers failed")
         for (i in 0 until n) ids[offset + i] = nextId++
     }
 
@@ -253,6 +261,12 @@ class RecordingGL : GL32 {
 
     override fun glBufferSubData(target: Int, offset: Int, size: Int, data: java.nio.Buffer?) {
         calls += "glBufferSubData($target,$offset,$size,buf)"
+        if (data is java.nio.ByteBuffer) {
+            val copy = data.duplicate()
+            val bytes = ByteArray(minOf(size, copy.remaining()))
+            copy.get(bytes)
+            bufferSubDataBytes += bytes
+        }
     }
 
     override fun glCreateShader(type: Int): Int {
@@ -321,6 +335,11 @@ class RecordingGL : GL32 {
 
     override fun glUniformBlockBinding(program: Int, uniformBlockIndex: Int, uniformBlockBinding: Int) {
         calls += "glUniformBlockBinding($program,$uniformBlockIndex,$uniformBlockBinding)"
+    }
+
+    override fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, value: FloatArray, offset: Int) {
+        calls += "glUniformMatrix4fv($location,$count,$transpose,buf,$offset)"
+        uniformMatrices += value.copyOfRange(offset, offset + 16 * count)
     }
 
     override fun glFramebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int) {

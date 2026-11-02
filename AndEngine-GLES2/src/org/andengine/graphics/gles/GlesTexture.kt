@@ -159,14 +159,13 @@ class GlesTexture(
 
     override fun dispose() {
         if (isDisposed) return
+        val id = ownTextureId
+        // Before the texture counts as disposed: queued drawing that uses it is drawn here.
+        if (id != 0) GlesBackend.state.onTextureDeleted(id)
         isDisposed = true
         GlesBackend.registry.unregister(this)
-        val id = ownTextureId
         ownTextureId = 0
-        if (id != 0) {
-            GlesBackend.state.onTextureDeleted(id)
-            GlesBackend.gl.glDeleteTextures(1, intArrayOf(id), 0)
-        }
+        if (id != 0) GlesBackend.gl.glDeleteTextures(1, intArrayOf(id), 0)
     }
 
     override fun toString() = "GlesTexture($label, ${width}x$height x$layers $format)"

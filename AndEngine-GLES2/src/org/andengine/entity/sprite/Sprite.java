@@ -4,6 +4,7 @@ import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject;
 import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject;
+import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -53,6 +54,9 @@ public class Sprite extends RectangularShape {
 
 	protected boolean mFlippedVertical;
 	protected boolean mFlippedHorizontal;
+
+	/** Set by preDraw: this draw goes through the quad batch instead of the sprite's own buffer. */
+	boolean mDrawBatched;
 
 	// ===========================================================
 	// Constructors
@@ -173,8 +177,32 @@ public class Sprite extends RectangularShape {
 		this.initBlendFunction(this.getTextureRegion().getTexture());
 	}
 
+	/**
+	 * A texture that is not on the GPU yet (e.g. an atlas page still waiting for upload) would bind
+	 * the invalid id and sample whatever texture is still bound, so the sprite skips the frame.
+	 */
+	@Override
+	protected boolean isSelfDrawable() {
+		return this.getTextureRegion().getTexture().isLoadedToHardware();
+	}
+
+	/**
+	 * @return true if this sprite is drawn through the quad batch: the default shader, the engine's own
+	 * vertex buffer, and no subclass that draws itself.
+	 */
+	protected boolean isBatchable() {
+		return SpriteBatching.canBatch(this);
+	}
+
 	@Override
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
+		this.mDrawBatched = this.isBatchable();
+		if(this.mDrawBatched) {
+			return;
+		}
+		// Pending batched quads are drawn before this sprite, so the order stays the draw order.
+		QuadBatcher.flush();
+
 		super.preDraw(pGLState, pCamera);
 
 		this.getTextureRegion().getTexture().bind(pGLState);
@@ -184,11 +212,18 @@ public class Sprite extends RectangularShape {
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			SpriteBatching.add(this, pGLState, 0, 0, 1, 3, 2);
+			return;
+		}
 		this.mSpriteVertexBufferObject.draw(GLES32.GL_TRIANGLE_STRIP, Sprite.VERTICES_PER_SPRITE);
 	}
 
 	@Override
 	protected void postDraw(final GLState pGLState, final Camera pCamera) {
+		if(this.mDrawBatched) {
+			return;
+		}
 		this.mSpriteVertexBufferObject.unbind(pGLState, this.mShaderProgram);
 
 		super.postDraw(pGLState, pCamera);

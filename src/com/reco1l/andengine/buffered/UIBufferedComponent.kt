@@ -4,6 +4,8 @@ import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.entity.shape.Shape.*
 import org.andengine.opengl.shader.PositionColorShaderProgram
 import org.andengine.opengl.shader.constants.ShaderProgramConstants
@@ -58,6 +60,44 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     fun setBlendFunction(source: Int, destination: Int) {
         blendInfo = BlendInfo(source, destination)
+    }
+
+    /**
+     * The blend function this entity draws with: [blendInfo], or for [BlendInfo.Inherit] the
+     * parent's (the default blend function if the parent is not a buffered component).
+     */
+    protected val resolvedBlendInfo: BlendInfo
+        get() {
+            val info = blendInfo
+            if (info != BlendInfo.Inherit) return info
+            val parent = parent
+            val inherited = if (parent is UIBufferedComponent<*>) parent.blendInfo else DEFAULT_BLEND_INFO
+            return if (inherited != BlendInfo.Inherit) inherited else DEFAULT_BLEND_INFO
+        }
+
+    /** The GL buffer bits [clearInfo] asks to clear before drawing. */
+    protected fun clearMask(): Int {
+        var mask = 0
+        if (clearInfo.depthBuffer) mask = mask or GLES32.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) mask = mask or GLES32.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) mask = mask or GLES32.GL_STENCIL_BUFFER_BIT
+        return mask
+    }
+
+    // The batch blend mode of [batchBlendSource]; recomputed only when the blend info changes.
+    private var batchBlendSource: BlendInfo? = null
+    private var batchBlend: BlendMode? = null
+
+    /**
+     * The quad batch blend mode of [resolvedBlendInfo], or null if its factors cannot be batched.
+     */
+    protected fun batchBlendMode(): BlendMode? {
+        val info = resolvedBlendInfo
+        if (info !== batchBlendSource) {
+            batchBlendSource = info
+            batchBlend = GlesPipeline.blendModeOf(info.sourceFactor, info.destinationFactor)
+        }
+        return batchBlend
     }
 
 
@@ -136,12 +176,7 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         super.beginDraw(pGLState)
 
         // Clearing
-        var clearMask = 0
-
-        if (clearInfo.depthBuffer) clearMask = clearMask or GLES32.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) clearMask = clearMask or GLES32.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
-
+        val clearMask = clearMask()
         if (clearMask != 0) {
             GlesBackend.state.clear(clearMask)
         }
@@ -156,23 +191,10 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         }
 
         // Blending
-        var sourceFactor = BLENDFUNCTION_SOURCE_DEFAULT
-        var destinationFactor = BLENDFUNCTION_DESTINATION_DEFAULT
-
-        if (blendInfo == BlendInfo.Inherit) {
-            val parent = parent
-
-            if (parent is UIBufferedComponent<*>) {
-                sourceFactor = parent.blendInfo.sourceFactor
-                destinationFactor = parent.blendInfo.destinationFactor
-            }
-        } else {
-            sourceFactor = blendInfo.sourceFactor
-            destinationFactor = blendInfo.destinationFactor
-        }
+        val blend = resolvedBlendInfo
 
         pGLState.enableBlend()
-        pGLState.blendFunction(sourceFactor, destinationFactor)
+        pGLState.blendFunction(blend.sourceFactor, blend.destinationFactor)
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
@@ -232,6 +254,11 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
 
     override fun finalize() {
         buffer?.finalize()
+    }
+
+
+    private companion object {
+        val DEFAULT_BLEND_INFO = BlendInfo(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
     }
 
 }

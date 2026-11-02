@@ -33,6 +33,9 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
     /** Static full-quad position buffer bound at [com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader.QUAD_POS_LOCATION]. */
     private val quadPosBuffer = QuadPosBuffer()
 
+    // Draws with its own circle-clipping shader.
+    override val isBatchable: Boolean get() = false
+
     init {
         scaleType = ScaleType.Stretch
         if (frames.isNotEmpty()) textureRegion = frames[0]
