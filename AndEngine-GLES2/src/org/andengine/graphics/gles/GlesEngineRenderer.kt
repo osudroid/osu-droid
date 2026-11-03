@@ -20,7 +20,6 @@ class GlesEngineRenderer @JvmOverloads constructor(
 ) : FrameRenderer {
 
     private val drawContext: DrawContext = engine.drawContext
-    private val multiSampling: Boolean = engine.engineOptions.renderOptions.isMultiSampling
 
     override fun onContextCreated() {
         synchronized(DRAW_LOCK) {
@@ -59,7 +58,7 @@ class GlesEngineRenderer @JvmOverloads constructor(
 
     override fun onDrawFrame() {
         synchronized(DRAW_LOCK) {
-            GlesBackend.beginFrame(multiSampling && configChooser.isCoverageMultiSampling)
+            GlesBackend.beginFrame()
 
             try {
                 engine.onDrawFrame(drawContext)

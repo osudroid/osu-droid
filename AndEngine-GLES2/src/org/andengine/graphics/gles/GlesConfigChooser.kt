@@ -9,12 +9,11 @@ package org.andengine.graphics.gles
 import android.opengl.EGL14
 import android.opengl.EGLConfig
 import android.opengl.EGLDisplay
-import androidx.annotation.VisibleForTesting
 import org.andengine.engine.options.ColorDepth
 
 /**
  * Picks the [EGLConfig] the GL context and window surfaces are created with: the requested [colorDepth] with
- * D16 S0, ES2 renderable, optionally with 2x multisampling (or NVIDIA coverage sampling). Each step of
+ * D16 S0, ES2 renderable, optionally with 2x multisampling. Each step of
  * [searchOrder] is tried in turn: for each color format, an exact match wins over a config with a stencil buffer,
  * which wins over a deeper depth buffer; only when no color format fits is any config taken. When multisampling
  * is requested and the device has multisampled configs, only those are searched, so multisampling wins over the
@@ -28,10 +27,6 @@ class GlesConfigChooser @JvmOverloads constructor(
 
     var isMultiSampling = false
         private set
-
-    // Test seam: settable from tests, since choosing a config needs a real EGL display.
-    @set:VisibleForTesting
-    var isCoverageMultiSampling = false
 
     var redSize = -1
         private set
@@ -83,18 +78,12 @@ class GlesConfigChooser @JvmOverloads constructor(
     }
 
     private fun chooseConfig(display: EGLDisplay, step: SearchStep): EGLConfig {
-        // The multisampling flags are set as soon as such configs exist, even if the matcher then rejects all
-        // of them; the next matcher queries the same list again.
+        // The multisampling flag is set as soon as such configs exist, even if the step then rejects all of
+        // them; the next step queries the same list again.
         if (multiSamplingRequested) {
-            var configs = queryConfigs(display, MULTISAMPLE_ATTRIBUTES)
+            val configs = queryConfigs(display, MULTISAMPLE_ATTRIBUTES)
             if (configs.isNotEmpty()) {
                 isMultiSampling = true
-                return findConfig(display, configs, step)
-            }
-
-            configs = queryConfigs(display, COVERAGE_MULTISAMPLE_NV_ATTRIBUTES)
-            if (configs.isNotEmpty()) {
-                isCoverageMultiSampling = true
                 return findConfig(display, configs, step)
             }
         }
@@ -195,9 +184,6 @@ class GlesConfigChooser @JvmOverloads constructor(
 
         private const val MULTISAMPLE_COUNT = 2
 
-        private const val EGL_COVERAGE_BUFFERS_NV = 0x30E0
-        private const val EGL_COVERAGE_SAMPLES_NV = 0x30E1
-
         private const val INITIAL_CONFIG_CAPACITY = 64
 
         /** Stands in for a null config so it never matches; [Matcher.ANY] is never offered a null config. */
@@ -232,20 +218,6 @@ class GlesConfigChooser @JvmOverloads constructor(
             EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
             EGL14.EGL_SAMPLE_BUFFERS, 1,
             EGL14.EGL_SAMPLES, MULTISAMPLE_COUNT,
-            EGL14.EGL_NONE,
-        )
-
-        @JvmField
-        val COVERAGE_MULTISAMPLE_NV_ATTRIBUTES = intArrayOf(
-            EGL14.EGL_RED_SIZE, RED_SIZE,
-            EGL14.EGL_GREEN_SIZE, GREEN_SIZE,
-            EGL14.EGL_BLUE_SIZE, BLUE_SIZE,
-            EGL14.EGL_ALPHA_SIZE, ALPHA_SIZE,
-            EGL14.EGL_DEPTH_SIZE, DEPTH_SIZE,
-            EGL14.EGL_STENCIL_SIZE, STENCIL_SIZE,
-            EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-            EGL_COVERAGE_BUFFERS_NV, 1,
-            EGL_COVERAGE_SAMPLES_NV, MULTISAMPLE_COUNT,
             EGL14.EGL_NONE,
         )
 

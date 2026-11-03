@@ -96,7 +96,6 @@ class GlesConfigChooserTest {
     @Test
     fun attributeLists_matchToday() {
         assertArrayEquals(MULTISAMPLE, GlesConfigChooser.MULTISAMPLE_ATTRIBUTES)
-        assertArrayEquals(COVERAGE_MULTISAMPLE_NV, GlesConfigChooser.COVERAGE_MULTISAMPLE_NV_ATTRIBUTES)
         assertArrayEquals(FALLBACK, GlesConfigChooser.FALLBACK_ATTRIBUTES)
     }
 
@@ -119,8 +118,6 @@ class GlesConfigChooserTest {
         const val EGL_SAMPLE_BUFFERS = 0x3032
         const val EGL_SAMPLES = 0x3031
         const val EGL_NONE = 0x3038
-        const val EGL_COVERAGE_BUFFERS_NV = 0x30E0
-        const val EGL_COVERAGE_SAMPLES_NV = 0x30E1
         const val EGL_GLES2_BIT = 4
 
         val BASE = intArrayOf(
@@ -134,7 +131,6 @@ class GlesConfigChooserTest {
         )
 
         val MULTISAMPLE = BASE + intArrayOf(EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 2, EGL_NONE)
-        val COVERAGE_MULTISAMPLE_NV = BASE + intArrayOf(EGL_COVERAGE_BUFFERS_NV, 1, EGL_COVERAGE_SAMPLES_NV, 2, EGL_NONE)
         val FALLBACK = BASE + intArrayOf(EGL_NONE)
     }
 }

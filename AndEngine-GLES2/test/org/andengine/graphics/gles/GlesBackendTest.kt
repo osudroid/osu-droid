@@ -65,16 +65,13 @@ class GlesBackendTest {
         // Every frame clears the depth buffer with the depth mask on, which a batch flush may have
         // turned off.
         gl.calls.clear()
-        GlesBackend.beginFrame(false)
+        GlesBackend.beginFrame()
         assertEquals(listOf("glClear(${GLES20.GL_DEPTH_BUFFER_BIT})"), gl.calls)
 
         state.depthMask(false)
         gl.calls.clear()
-        GlesBackend.beginFrame(true)
-        assertEquals(
-            listOf("glClear($COVERAGE_BUFFER_BIT)", "glDepthMask(true)", "glClear(${GLES20.GL_DEPTH_BUFFER_BIT})"),
-            gl.calls
-        )
+        GlesBackend.beginFrame()
+        assertEquals(listOf("glDepthMask(true)", "glClear(${GLES20.GL_DEPTH_BUFFER_BIT})"), gl.calls)
     }
 
     @Test
@@ -84,9 +81,5 @@ class GlesBackendTest {
         assertTrue(GlesBackend.state.isDitherEnabled)
         assertEquals(1, gl.calls.count { it == "glEnable(${GLES20.GL_DITHER})" })
         assertEquals(0, gl.calls.count { it == "glDisable(${GLES20.GL_DITHER})" })
-    }
-
-    private companion object {
-        const val COVERAGE_BUFFER_BIT = 0x8000
     }
 }

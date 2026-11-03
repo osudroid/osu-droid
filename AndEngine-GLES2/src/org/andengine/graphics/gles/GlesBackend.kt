@@ -113,20 +113,16 @@ object GlesBackend {
     }
 
     /**
-     * Starts a frame: clears the coverage buffer when [clearCoverage] (coverage multisampling) and
-     * the depth buffer, so depth values left by the previous frame (slider bodies) never affect
-     * this one. `glClear` honours the depth mask, which a batch flush may have left off, so it is
-     * turned on first. GL thread only; does not allocate.
+     * Starts a frame: clears the depth buffer, so depth values left by the previous frame (slider
+     * bodies) never affect this one. `glClear` honours the depth mask, which a batch flush may have
+     * left off, so it is turned on first. GL thread only; does not allocate.
      */
     @JvmStatic
-    fun beginFrame(clearCoverage: Boolean) {
+    fun beginFrame() {
         val state = state
-        if (clearCoverage) state.clear(GL_COVERAGE_BUFFER_BIT_NV)
         state.depthMask(true)
         state.clear(GLES20.GL_DEPTH_BUFFER_BIT)
     }
-
-    private const val GL_COVERAGE_BUFFER_BIT_NV = 0x8000
 
     private const val TAG = "GlesBackend"
 }

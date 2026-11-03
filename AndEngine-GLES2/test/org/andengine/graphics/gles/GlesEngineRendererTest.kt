@@ -111,12 +111,10 @@ class GlesEngineRendererTest {
     }
 
     @Test
-    fun onDrawFrame_beginsFrameWithCoverageFlagAndPollsDebugOutput() {
+    fun onDrawFrame_clearsDepthThenDrawsThenPollsDebugOutput() {
         val options = EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, FillResolutionPolicy(), Camera(0f, 0f, 800f, 480f))
-        options.renderOptions.isMultiSampling = true
         val engine = CountingEngine(options).also { it.onDraw = { gl.calls += "engine.onDrawFrame" } }
-        val chooser = GlesConfigChooser(true).also { it.isCoverageMultiSampling = true }
-        val renderer = GlesEngineRenderer(engine, chooser, null) { gl }
+        val renderer = GlesEngineRenderer(engine, GlesConfigChooser(false), null) { gl }
         // Polling instead of the callback, so the per-frame poll shows up in the recorded calls.
         gl.debugCallbackUnsupported = true
         GlesDebugOptions.debugOutput = true
@@ -125,11 +123,10 @@ class GlesEngineRendererTest {
 
         renderer.onDrawFrame()
 
-        val coverageClear = gl.indexOfCall("glClear($COVERAGE_BUFFER_BIT)")
         val depthClear = gl.indexOfCall("glClear(${GLES20.GL_DEPTH_BUFFER_BIT})")
         val draw = gl.indexOfCall("engine.onDrawFrame")
         val poll = gl.calls.indexOfFirst { it.startsWith("glGetDebugMessageLog(") }
-        assertTrue(gl.calls.toString(), coverageClear < depthClear && depthClear < draw && draw < poll)
+        assertTrue(gl.calls.toString(), depthClear in 0 until draw && draw < poll)
     }
 
     @Test
@@ -137,9 +134,5 @@ class GlesEngineRendererTest {
         renderer.onFrameSwapped()
 
         assertEquals(1, engine.swaps)
-    }
-
-    private companion object {
-        const val COVERAGE_BUFFER_BIT = 0x8000
     }
 }
