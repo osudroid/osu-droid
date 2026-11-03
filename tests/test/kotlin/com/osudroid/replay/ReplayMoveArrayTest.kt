@@ -65,7 +65,7 @@ class ReplayMoveArrayTest {
 
         replay.reserveMovementCapacity(Float.MAX_VALUE)
 
-        Assert.assertEquals(1 shl 18, replay.cursorMoves[0].allocated)
-        Assert.assertEquals(1 shl 18, replay.cursorMoves[1].allocated)
+        Assert.assertEquals(Replay.MAX_RESERVED_MOVEMENT_CAPACITY, replay.cursorMoves[0].allocated)
+        Assert.assertEquals(Replay.MAX_RESERVED_MOVEMENT_CAPACITY, replay.cursorMoves[1].allocated)
     }
 }

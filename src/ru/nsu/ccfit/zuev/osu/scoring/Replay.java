@@ -50,7 +50,7 @@ public class Replay {
      * The maximum capacity {@link #reserveMovementCapacity(float)} reserves per cursor, so that unusually long
      * beatmaps do not reserve excessive memory upfront.
      */
-    private static final int MAX_RESERVED_MOVEMENT_CAPACITY = 1 << 18;
+    public static final int MAX_RESERVED_MOVEMENT_CAPACITY = 1 << 18;
 
     protected int pointsSkipped = 0;
     public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
