@@ -959,6 +959,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             GameHelper.setReplayVersion(replay.replayVersion);
         } else if (mods.contains(ModAutoplay.class)) {
             replay = null;
+        } else {
+            replay.reserveMovementCapacity(lastObjectEndTime);
         }
 
         if (scope != null) {

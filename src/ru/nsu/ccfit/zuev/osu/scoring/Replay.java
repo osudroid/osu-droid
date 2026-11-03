@@ -46,6 +46,12 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public class Replay {
+    /**
+     * The maximum capacity {@link #reserveMovementCapacity(float)} reserves per cursor, so that unusually long
+     * beatmaps do not reserve excessive memory upfront.
+     */
+    private static final int MAX_RESERVED_MOVEMENT_CAPACITY = 1 << 18;
+
     protected int pointsSkipped = 0;
     public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
     public int[] cursorIndex;
@@ -76,6 +82,26 @@ public class Replay {
         for (int i = 0; i < GameScene.CursorCount; i++) {
             cursorIndex[i] = 0;
             lastMoveIndex[i] = -1;
+        }
+    }
+
+    /**
+     * Pre-sizes the movement buffers of the two most used cursors for recording a play of the given duration, so that
+     * they do not need to repeatedly grow (copying an increasingly large array each time) during gameplay.
+     * <p>
+     * The buffers can still grow past the reserved capacity if needed.
+     *
+     * @param durationSeconds The expected duration of the recording, in seconds.
+     */
+    public void reserveMovementCapacity(float durationSeconds) {
+        // Rough lower bounds of recorded points per second after redundant points are skipped. The first cursor is
+        // the one that is held down and moved the most.
+        final int[] pointsPerSecond = {60, 20};
+
+        for (int i = 0; i < pointsPerSecond.length && i < cursorMoves.size(); i++) {
+            long capacity = (long) Math.ceil(Math.max(0, durationSeconds) * pointsPerSecond[i]);
+
+            cursorMoves.get(i).reallocate((int) Math.min(capacity, MAX_RESERVED_MOVEMENT_CAPACITY));
         }
     }
 
@@ -568,18 +594,19 @@ public class Replay {
         }
 
         public void pushBack(Replay replay, int time, float x, float y, TouchType touchType) {
-            int idx = size;
+            ReplayMovement movement;
             if (touchType == TouchType.MOVE && checkNewPoint(x, y)) {
-                idx = size - 1;
+                // The previous point is redundant and gets replaced. Nothing reads recorded movements during
+                // gameplay, so its instance can be overwritten instead of allocating a new one.
+                movement = movements[size - 1];
                 replay.pointsSkipped++;
             } else {
                 if (size + 1 >= allocated) {
                     reallocate((allocated * 3) / 2);
                 }
-                size++;
+                movement = new ReplayMovement();
+                movements[size++] = movement;
             }
-            ReplayMovement movement = new ReplayMovement();
-            movements[idx] = movement;
             movement.time = time;
             movement.x = x;
             movement.y = y;
