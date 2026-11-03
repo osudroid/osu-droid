@@ -818,7 +818,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects[objects.length - 1].getEndTime() / 1000;
 
-        int estimatedMaxActiveObjects = Math.max(10, estimateMaximumActiveObjects());
+        var activeObjectEstimate = estimateActiveObjects();
+        int estimatedMaxActiveObjects = Math.max(10, activeObjectEstimate.total);
 
         if (activeObjects != null) {
             activeObjects.clear();
@@ -967,7 +968,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             ensureActive(scope.getCoroutineContext());
         }
 
-        GameObjectPool.getInstance().preload();
+        // The minimums preserve the previous fixed preload sizes.
+        GameObjectPool.getInstance().preload(
+            Math.max(10, activeObjectEstimate.circles),
+            Math.max(5, activeObjectEstimate.sliders),
+            Math.max(3, activeObjectEstimate.spinners)
+        );
 
         sliderIndex = 0;
 
@@ -3506,40 +3512,78 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
     }
 
-    private int estimateMaximumActiveObjects() {
+    /**
+     * Estimates the peak numbers of simultaneously alive gameplay objects, so that lists and object pools can be
+     * sized upfront instead of growing mid-gameplay.
+     */
+    private ActiveObjectEstimate estimateActiveObjects() {
+        var estimate = new ActiveObjectEstimate();
+
         if (objects == null) {
-            return 0;
+            return estimate;
         }
 
-        // Estimate the maximum number of simultaneously active objects to pre-size the lists and minimize
-        // array reallocations.
-        var lifetimeEnds = new PriorityQueue<Double>(Math.max(1, objects.length / 4));
-        int estimatedMaxActiveObjects = 0;
+        int initialCapacity = Math.max(1, objects.length / 4);
+        var all = new PeakOverlapCounter(initialCapacity);
+        var circles = new PeakOverlapCounter(initialCapacity);
+        var sliders = new PeakOverlapCounter(initialCapacity);
+        var spinners = new PeakOverlapCounter(initialCapacity);
 
         for (var object : objects) {
             double lifetimeStart = object.startTime - object.timePreempt;
-
-            // Remove all objects that have expired by the time this object's lifetime starts.
-            while (!lifetimeEnds.isEmpty() && lifetimeEnds.peek() <= lifetimeStart) {
-                lifetimeEnds.poll();
-            }
-
             double lifetimeEnd;
 
             if (object instanceof HitCircle) {
                 var hitWindow = object.hitWindow;
                 lifetimeEnd = object.startTime + (hitWindow != null ? hitWindow.getMehWindow() : 0);
+                circles.add(lifetimeStart, lifetimeEnd);
             } else if (object instanceof Slider slider) {
                 lifetimeEnd = Math.max(object.startTime + slider.getHead().hitWindow.getMehWindow(), object.getEndTime());
+                sliders.add(lifetimeStart, lifetimeEnd);
             } else {
                 lifetimeEnd = object.getEndTime();
+                spinners.add(lifetimeStart, lifetimeEnd);
             }
 
-            lifetimeEnds.add(lifetimeEnd);
-            estimatedMaxActiveObjects = Math.max(estimatedMaxActiveObjects, lifetimeEnds.size());
+            all.add(lifetimeStart, lifetimeEnd);
         }
 
-        return estimatedMaxActiveObjects;
+        estimate.total = all.peak;
+        estimate.circles = circles.peak;
+        estimate.sliders = sliders.peak;
+        estimate.spinners = spinners.peak;
+
+        return estimate;
+    }
+
+    private static final class ActiveObjectEstimate {
+        int total;
+        int circles;
+        int sliders;
+        int spinners;
+    }
+
+    /**
+     * Tracks the peak number of overlapping intervals in a sweep where intervals are added in ascending order of their
+     * start.
+     */
+    private static final class PeakOverlapCounter {
+        private final PriorityQueue<Double> ends;
+        int peak;
+
+        PeakOverlapCounter(int initialCapacity) {
+            ends = new PriorityQueue<>(initialCapacity);
+        }
+
+        void add(double start, double end) {
+            // Remove all intervals that have ended by the time this interval starts.
+            while (!ends.isEmpty() && ends.peek() <= start) {
+                ends.poll();
+            }
+
+            ends.add(end);
+            peak = Math.max(peak, ends.size());
+        }
     }
 
     //region Seeking

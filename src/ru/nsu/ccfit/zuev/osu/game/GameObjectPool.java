@@ -95,18 +95,28 @@ public class GameObjectPool {
         objectsCreated = 0;
     }
 
-    public void preload() {
-        for (int i = 0; i < 10; i++) {
+    /**
+     * Fills the pools so that gameplay does not need to construct objects mid-play.
+     *
+     * @param circleCount  The number of {@link GameplayHitCircle}s to have available.
+     * @param sliderCount  The number of {@link GameplaySlider}s to have available.
+     * @param spinnerCount The number of {@link GameplaySpinner}s to have available.
+     */
+    public void preload(int circleCount, int sliderCount, int spinnerCount) {
+        while (circles.size() < circleCount) {
             putCircle(new GameplayHitCircle());
-        }
-        for (int i = 0; i < 5; i++) {
-            putSlider(new GameplaySlider());
-        }
-        for (int i = 0; i < 3; i++) {
-            putSpinner(createSpinner());
+            objectsCreated++;
         }
 
-        objectsCreated = circles.size() + sliders.size() + spinners.size();
+        while (sliders.size() < sliderCount) {
+            putSlider(new GameplaySlider());
+            objectsCreated++;
+        }
+
+        while (spinners.size() < spinnerCount) {
+            putSpinner(createSpinner());
+            objectsCreated++;
+        }
     }
 
     private ArrayDeque<GameEffect> getEffectPool(final String texname) {
