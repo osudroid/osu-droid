@@ -119,6 +119,24 @@ public class GameObjectPool {
         }
     }
 
+    /**
+     * Fills the pool of a {@link GameEffect} texture so that its first uses in gameplay do not construct sprites.
+     * <p>
+     * Must be called after the textures (including beatmap skin textures) have been loaded, as a {@link GameEffect}
+     * resolves its texture upon construction.
+     *
+     * @param texname The texture name of the {@link GameEffect}.
+     * @param count   The number of {@link GameEffect}s to have available.
+     */
+    public void preloadEffect(final String texname, int count) {
+        var pool = getEffectPool(texname);
+
+        while (pool.size() < count) {
+            pool.add(new GameEffect(texname));
+            objectsCreated++;
+        }
+    }
+
     private ArrayDeque<GameEffect> getEffectPool(final String texname) {
         var pool = effects.get(texname);
 

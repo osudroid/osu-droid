@@ -975,6 +975,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             Math.max(3, activeObjectEstimate.spinners)
         );
 
+        preloadEffects(activeObjectEstimate.judgements);
+
         sliderIndex = 0;
 
         if (sliderPaths == null || sliderRenderPaths == null || differentPlayableBeatmap) {
@@ -3035,16 +3037,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return paused;
     }
 
+    // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
+    private static final float JUDGEMENT_FADE_IN_LENGTH = 0.12f;
+    private static final float JUDGEMENT_FADE_OUT_LENGTH = 0.6f;
+    private static final float JUDGEMENT_FADE_OUT_DELAY = 0.5f;
+
+    /**
+     * How long a judgement effect created by {@link #createHitEffect} stays visible, in seconds.
+     */
+    private static final float JUDGEMENT_EFFECT_LIFETIME =
+        JUDGEMENT_FADE_IN_LENGTH + JUDGEMENT_FADE_OUT_DELAY + JUDGEMENT_FADE_OUT_LENGTH;
+
     private void createHitEffect(final PointF pos, final String name, Color4 color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
         var isAnimated = effect.hit instanceof UIAnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
-        // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
-
-        float fadeInLength = 0.12f;
-        float fadeOutLength = 0.6f;
-        float fadeOutDelay = 0.5f;
+        float fadeInLength = JUDGEMENT_FADE_IN_LENGTH;
+        float fadeOutLength = JUDGEMENT_FADE_OUT_LENGTH;
+        float fadeOutDelay = JUDGEMENT_FADE_OUT_DELAY;
 
         if (name.equals("hit0")) {
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
@@ -3513,8 +3524,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     /**
-     * Estimates the peak numbers of simultaneously alive gameplay objects, so that lists and object pools can be
-     * sized upfront instead of growing mid-gameplay.
+     * Estimates the peak numbers of simultaneously alive gameplay objects and judgement effects, so that lists and
+     * object pools can be sized upfront instead of growing mid-gameplay.
      */
     private ActiveObjectEstimate estimateActiveObjects() {
         var estimate = new ActiveObjectEstimate();
@@ -3528,6 +3539,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var circles = new PeakOverlapCounter(initialCapacity);
         var sliders = new PeakOverlapCounter(initialCapacity);
         var spinners = new PeakOverlapCounter(initialCapacity);
+        var judgements = new PeakOverlapCounter(initialCapacity);
 
         for (var object : objects) {
             double lifetimeStart = object.startTime - object.timePreempt;
@@ -3546,14 +3558,56 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             all.add(lifetimeStart, lifetimeEnd);
+
+            // Approximates every object as producing its judgement at its start time. This keeps the sweep ordered
+            // and is close enough for sizing purposes.
+            judgements.add(object.startTime, object.startTime + JUDGEMENT_EFFECT_LIFETIME * 1000);
         }
 
         estimate.total = all.peak;
         estimate.circles = circles.peak;
         estimate.sliders = sliders.peak;
         estimate.spinners = spinners.peak;
+        estimate.judgements = judgements.peak;
 
         return estimate;
+    }
+
+    /**
+     * Fills the {@link GameEffect} pools for the effects that gameplay creates, so that their first uses do not
+     * construct sprites mid-gameplay.
+     * <p>
+     * Mod-dependent conditions (e.g., burst effects being disabled under Hidden) are not checked, as {@link GameHelper}'s
+     * mod state is only set up in {@link #prepareScene()}. Over-preloading a few effects is harmless.
+     *
+     * @param peakJudgements The estimated peak number of simultaneously visible judgement effects.
+     */
+    private void preloadEffects(int peakJudgements) {
+        var pool = GameObjectPool.getInstance();
+
+        // Most judgements are 300s. Other judgements and effects are rarer or shorter-lived, so a fraction suffices.
+        // The pools still grow on demand if these turn out to be insufficient.
+        int primaryCount = Math.max(1, peakJudgements);
+        int secondaryCount = Math.max(1, peakJudgements / 4);
+
+        pool.preloadEffect("hit300", primaryCount);
+
+        for (var name : new String[] { "hit300k", "hit300g", "hit100", "hit100k", "hit50", "hit0", "sliderpoint10", "sliderpoint30" }) {
+            pool.preloadEffect(name, secondaryCount);
+        }
+
+        if (Config.isHitLighting() && ResourceManager.getInstance().getTexture("lighting") != null) {
+            pool.preloadEffect("lighting", primaryCount);
+        }
+
+        if (Config.isBurstEffects()) {
+            for (var name : new String[] {
+                "hitcircle", "hitcircleoverlay", "sliderstartcircle", "sliderstartcircleoverlay", "sliderendcircle",
+                "sliderendcircleoverlay", "reversearrow"
+            }) {
+                pool.preloadEffect(name, secondaryCount);
+            }
+        }
     }
 
     private static final class ActiveObjectEstimate {
@@ -3561,6 +3615,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         int circles;
         int sliders;
         int spinners;
+        int judgements;
     }
 
     /**
