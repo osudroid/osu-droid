@@ -71,6 +71,7 @@ import net.lingala.zip4j.ZipFile;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.options.ColorDepth;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
@@ -226,6 +227,10 @@ public class MainActivity extends BaseGameActivity implements
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
                 mCamera);
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
+        final boolean fullColorDepth = Config.getBoolean("fullColorDepth", true);
+        opt.getRenderOptions().setColorDepth(fullColorDepth ? ColorDepth.RGB888 : ColorDepth.RGB565);
+        // Dithering hides the banding of 16-bit color; with full color depth there is none to hide.
+        opt.getRenderOptions().setDithering(!fullColorDepth);
 
         GlobalManager.getInstance().setCamera(mCamera);
         return opt;

@@ -51,6 +51,13 @@
             android:summary="@string/opt_frame_limiter_summary"
             android:title="@string/opt_frame_limiter_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fullColorDepth"
+            android:summary="@string/opt_full_color_depth_summary"
+            android:title="@string/opt_full_color_depth_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/opt_category_cursor">

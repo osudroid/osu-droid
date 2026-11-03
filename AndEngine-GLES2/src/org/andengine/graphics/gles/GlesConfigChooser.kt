@@ -10,14 +10,21 @@ import android.opengl.EGL14
 import android.opengl.EGLConfig
 import android.opengl.EGLDisplay
 import androidx.annotation.VisibleForTesting
+import org.andengine.engine.options.ColorDepth
 
 /**
- * Picks the [EGLConfig] the GL context and window surfaces are created with: R5 G6 B5 A0 D16 S0, ES2 renderable,
- * optionally with 2x multisampling (or NVIDIA coverage sampling). Each [Matcher] in [MATCHER_ORDER] is tried in
- * turn, so an exact match wins over a config with a stencil buffer, which wins over a deeper depth buffer.
+ * Picks the [EGLConfig] the GL context and window surfaces are created with: the requested [colorDepth] with
+ * D16 S0, ES2 renderable, optionally with 2x multisampling (or NVIDIA coverage sampling). Each step of
+ * [searchOrder] is tried in turn: for each color format, an exact match wins over a config with a stencil buffer,
+ * which wins over a deeper depth buffer; only when no color format fits is any config taken. When multisampling
+ * is requested and the device has multisampled configs, only those are searched, so multisampling wins over the
+ * color depth.
  * The chosen config's sizes are exposed by the getters once [chooseConfig] succeeded.
  */
-class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
+class GlesConfigChooser @JvmOverloads constructor(
+    private val multiSamplingRequested: Boolean,
+    private val colorDepth: ColorDepth = ColorDepth.RGB565,
+) {
 
     var isMultiSampling = false
         private set
@@ -48,13 +55,14 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
 
     /** @throws IllegalArgumentException If no matcher finds a config on [display]. */
     fun chooseConfig(display: EGLDisplay): EGLConfig {
-        for (i in 0 until MATCHER_ORDER.size - 1) {
+        val steps = searchOrder(colorDepth)
+        for (i in 0 until steps.size - 1) {
             try {
-                return chooseConfig(display, MATCHER_ORDER[i])
+                return chooseConfig(display, steps[i])
             } catch (_: IllegalArgumentException) {
             }
         }
-        return chooseConfig(display, MATCHER_ORDER.last())
+        return chooseConfig(display, steps.last())
     }
 
     /**
@@ -74,26 +82,26 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
         }
     }
 
-    private fun chooseConfig(display: EGLDisplay, matcher: Matcher): EGLConfig {
+    private fun chooseConfig(display: EGLDisplay, step: SearchStep): EGLConfig {
         // The multisampling flags are set as soon as such configs exist, even if the matcher then rejects all
         // of them; the next matcher queries the same list again.
         if (multiSamplingRequested) {
             var configs = queryConfigs(display, MULTISAMPLE_ATTRIBUTES)
             if (configs.isNotEmpty()) {
                 isMultiSampling = true
-                return findConfig(display, configs, matcher)
+                return findConfig(display, configs, step)
             }
 
             configs = queryConfigs(display, COVERAGE_MULTISAMPLE_NV_ATTRIBUTES)
             if (configs.isNotEmpty()) {
                 isCoverageMultiSampling = true
-                return findConfig(display, configs, matcher)
+                return findConfig(display, configs, step)
             }
         }
 
         val configs = queryConfigs(display, FALLBACK_ATTRIBUTES)
         require(configs.isNotEmpty()) { "No EGLConfig found!" }
-        return findConfig(display, configs, matcher)
+        return findConfig(display, configs, step)
     }
 
     /**
@@ -114,7 +122,7 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
         }
     }
 
-    private fun findConfig(display: EGLDisplay, configs: Array<EGLConfig?>, matcher: Matcher): EGLConfig {
+    private fun findConfig(display: EGLDisplay, configs: Array<EGLConfig?>, step: SearchStep): EGLConfig {
         val sizes = ArrayList<IntArray>(configs.size)
         for (config in configs) {
             sizes += if (config == null) NULL_CONFIG_SIZES else intArrayOf(
@@ -127,7 +135,7 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
             )
         }
 
-        val index = chooseFrom(sizes, matcher)
+        val index = chooseFrom(sizes, step)
         require(index >= 0) { "No EGLConfig found!" }
 
         val chosen = sizes[index]
@@ -143,30 +151,41 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
     private fun configAttribute(display: EGLDisplay, config: EGLConfig, attribute: Int): Int =
         if (EGL14.eglGetConfigAttrib(display, config, attribute, count, 0)) count[0] else 0
 
+    /** How strictly a config's depth and stencil sizes have to match D16 S0. */
     enum class Matcher {
         STRICT {
-            override fun matches(red: Int, green: Int, blue: Int, alpha: Int, depth: Int, stencil: Int) =
-                depth == DEPTH_SIZE && stencil == STENCIL_SIZE && isColorExact(red, green, blue, alpha)
+            override fun matches(depth: Int, stencil: Int) = depth == DEPTH_SIZE && stencil == STENCIL_SIZE
         },
         LOOSE_STENCIL {
-            override fun matches(red: Int, green: Int, blue: Int, alpha: Int, depth: Int, stencil: Int) =
-                depth == DEPTH_SIZE && stencil >= STENCIL_SIZE && isColorExact(red, green, blue, alpha)
+            override fun matches(depth: Int, stencil: Int) = depth == DEPTH_SIZE && stencil >= STENCIL_SIZE
         },
         LOOSE_DEPTH_AND_STENCIL {
-            override fun matches(red: Int, green: Int, blue: Int, alpha: Int, depth: Int, stencil: Int) =
-                depth >= DEPTH_SIZE && stencil >= STENCIL_SIZE && isColorExact(red, green, blue, alpha)
+            override fun matches(depth: Int, stencil: Int) = depth >= DEPTH_SIZE && stencil >= STENCIL_SIZE
         },
         ANY {
-            override fun matches(red: Int, green: Int, blue: Int, alpha: Int, depth: Int, stencil: Int) = true
+            override fun matches(depth: Int, stencil: Int) = true
         };
 
-        abstract fun matches(red: Int, green: Int, blue: Int, alpha: Int, depth: Int, stencil: Int): Boolean
-
-        protected fun isColorExact(red: Int, green: Int, blue: Int, alpha: Int) =
-            red == RED_SIZE && green == GREEN_SIZE && blue == BLUE_SIZE && alpha == ALPHA_SIZE
+        abstract fun matches(depth: Int, stencil: Int): Boolean
     }
 
+    /** The exact R, G, B and A sizes a config must have. */
+    enum class ColorFormat(val red: Int, val green: Int, val blue: Int, val alpha: Int) {
+        RGB565(5, 6, 5, 0),
+        RGB888(8, 8, 8, 0),
+
+        /** Only a fallback: the window is opaque, so the alpha channel is unused. */
+        RGBA8888(8, 8, 8, 8);
+
+        fun matches(red: Int, green: Int, blue: Int, alpha: Int) =
+            red == this.red && green == this.green && blue == this.blue && alpha == this.alpha
+    }
+
+    /** One attempt of [chooseConfig]; a null [color] accepts any color sizes. */
+    data class SearchStep(val color: ColorFormat?, val matcher: Matcher)
+
     companion object {
+        // Minimum color sizes for eglChooseConfig; 888 configs meet them too, so one query serves every step.
         private const val RED_SIZE = 5
         private const val GREEN_SIZE = 6
         private const val BLUE_SIZE = 5
@@ -184,8 +203,23 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
         /** Stands in for a null config so it never matches; [Matcher.ANY] is never offered a null config. */
         private val NULL_CONFIG_SIZES = intArrayOf(-1, -1, -1, -1, -1, -1)
 
-        @JvmField
-        val MATCHER_ORDER = listOf(Matcher.STRICT, Matcher.LOOSE_STENCIL, Matcher.LOOSE_DEPTH_AND_STENCIL, Matcher.ANY)
+        private val COLOR_MATCHERS = listOf(Matcher.STRICT, Matcher.LOOSE_STENCIL, Matcher.LOOSE_DEPTH_AND_STENCIL)
+
+        private val SEARCH_ORDER_RGB565 = stepsFor(ColorFormat.RGB565, ColorFormat.RGB888, ColorFormat.RGBA8888)
+        private val SEARCH_ORDER_RGB888 = stepsFor(ColorFormat.RGB888, ColorFormat.RGBA8888, ColorFormat.RGB565)
+
+        private fun stepsFor(vararg colors: ColorFormat): List<SearchStep> =
+            colors.flatMap { color -> COLOR_MATCHERS.map { SearchStep(color, it) } } + SearchStep(null, Matcher.ANY)
+
+        /**
+         * The steps [chooseConfig] tries in turn for [colorDepth]: the requested color format first, then the
+         * other ones, each with every [Matcher] except [Matcher.ANY], which only comes last and takes any color.
+         */
+        @JvmStatic
+        fun searchOrder(colorDepth: ColorDepth): List<SearchStep> = when (colorDepth) {
+            ColorDepth.RGB565 -> SEARCH_ORDER_RGB565
+            ColorDepth.RGB888 -> SEARCH_ORDER_RGB888
+        }
 
         @JvmField
         val MULTISAMPLE_ATTRIBUTES = intArrayOf(
@@ -229,14 +263,15 @@ class GlesConfigChooser(private val multiSamplingRequested: Boolean) {
 
         /**
          * @param configs Per config its R, G, B, A, depth and stencil sizes, in the order EGL returned them.
-         * @return The index of the first config [matcher] accepts, or -1.
+         * @return The index of the first config [step] accepts, or -1.
          */
         @JvmStatic
-        fun chooseFrom(configs: List<IntArray>, matcher: Matcher): Int {
+        fun chooseFrom(configs: List<IntArray>, step: SearchStep): Int {
             for (i in configs.indices) {
                 val c = configs[i]
                 if (c === NULL_CONFIG_SIZES) continue
-                if (matcher.matches(c[0], c[1], c[2], c[3], c[4], c[5])) return i
+                if (step.color != null && !step.color.matches(c[0], c[1], c[2], c[3])) continue
+                if (step.matcher.matches(c[4], c[5])) return i
             }
             return -1
         }

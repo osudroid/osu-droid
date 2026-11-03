@@ -18,6 +18,7 @@ public class RenderOptions {
 
 	private boolean mMultiSampling = false;
 	private boolean mDithering = false;
+	private ColorDepth mColorDepth = ColorDepth.RGB565;
 
 	// ===========================================================
 	// Constructors
@@ -41,6 +42,20 @@ public class RenderOptions {
 
 	public void setDithering(final boolean pDithering) {
 		this.mDithering = pDithering;
+	}
+
+	public ColorDepth getColorDepth() {
+		return this.mColorDepth;
+	}
+
+	/**
+	 * Only read when the render surface view gets its renderer, so it has to be set before that.
+	 */
+	public void setColorDepth(final ColorDepth pColorDepth) {
+		if (pColorDepth == null) {
+			throw new IllegalArgumentException("pColorDepth must not be null.");
+		}
+		this.mColorDepth = pColorDepth;
 	}
 
 	// ===========================================================

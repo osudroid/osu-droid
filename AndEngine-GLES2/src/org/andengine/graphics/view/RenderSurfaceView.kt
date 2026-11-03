@@ -101,7 +101,10 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         check(renderer == null) { "setRenderer has already been called for this instance." }
 
         val configChooser = configChooser
-            ?: GlesConfigChooser(engine.engineOptions.renderOptions.isMultiSampling).also { this.configChooser = it }
+            ?: GlesConfigChooser(
+                engine.engineOptions.renderOptions.isMultiSampling,
+                engine.engineOptions.renderOptions.colorDepth,
+            ).also { this.configChooser = it }
 
         setOnTouchListener(engine)
         this.engine = engine

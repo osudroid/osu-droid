@@ -1,6 +1,9 @@
 package org.andengine.graphics.gles
 
+import org.andengine.engine.options.ColorDepth
+import org.andengine.graphics.gles.GlesConfigChooser.ColorFormat
 import org.andengine.graphics.gles.GlesConfigChooser.Matcher
+import org.andengine.graphics.gles.GlesConfigChooser.SearchStep
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -11,31 +14,83 @@ class GlesConfigChooserTest {
     fun strict_prefersExact565Depth16() {
         val configs = listOf(config(8, 8, 8, 8, 24, 0), config(5, 6, 5, 0, 16, 0), config(5, 6, 5, 0, 24, 0))
 
-        assertEquals(1, GlesConfigChooser.chooseFrom(configs, Matcher.STRICT))
+        assertEquals(1, GlesConfigChooser.chooseFrom(configs, step565(Matcher.STRICT)))
     }
 
     @Test
     fun looseStencil_acceptsStencil() {
         val configs = listOf(config(8, 8, 8, 8, 24, 8), config(5, 6, 5, 0, 16, 8))
 
-        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, Matcher.STRICT))
-        assertEquals(1, GlesConfigChooser.chooseFrom(configs, Matcher.LOOSE_STENCIL))
+        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, step565(Matcher.STRICT)))
+        assertEquals(1, GlesConfigChooser.chooseFrom(configs, step565(Matcher.LOOSE_STENCIL)))
     }
 
     @Test
     fun looseDepthAndStencil_acceptsAnyDepth() {
         val configs = listOf(config(5, 6, 5, 0, 24, 8))
 
-        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, Matcher.LOOSE_STENCIL))
-        assertEquals(0, GlesConfigChooser.chooseFrom(configs, Matcher.LOOSE_DEPTH_AND_STENCIL))
+        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, step565(Matcher.LOOSE_STENCIL)))
+        assertEquals(0, GlesConfigChooser.chooseFrom(configs, step565(Matcher.LOOSE_DEPTH_AND_STENCIL)))
     }
 
     @Test
     fun any_takesFirstConfig() {
         val configs = listOf(config(8, 8, 8, 8, 24, 0))
 
-        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, Matcher.LOOSE_DEPTH_AND_STENCIL))
-        assertEquals(0, GlesConfigChooser.chooseFrom(configs, Matcher.ANY))
+        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, step565(Matcher.LOOSE_DEPTH_AND_STENCIL)))
+        assertEquals(0, GlesConfigChooser.chooseFrom(configs, SearchStep(null, Matcher.ANY)))
+    }
+
+    @Test
+    fun rgb888_rejectsAlphaAnd565() {
+        val configs = listOf(config(5, 6, 5, 0, 16, 0), config(8, 8, 8, 8, 16, 0), config(8, 8, 8, 0, 24, 8))
+        val step = SearchStep(ColorFormat.RGB888, Matcher.LOOSE_DEPTH_AND_STENCIL)
+
+        assertEquals(-1, GlesConfigChooser.chooseFrom(configs, SearchStep(ColorFormat.RGB888, Matcher.STRICT)))
+        assertEquals(2, GlesConfigChooser.chooseFrom(configs, step))
+    }
+
+    @Test
+    fun searchOrder565_isTodaysOrderThen888ThenAny() {
+        assertEquals(
+            colorSteps(ColorFormat.RGB565, ColorFormat.RGB888, ColorFormat.RGBA8888) + SearchStep(null, Matcher.ANY),
+            GlesConfigChooser.searchOrder(ColorDepth.RGB565),
+        )
+    }
+
+    @Test
+    fun searchOrder888_triesAlphaThen565BeforeAny() {
+        assertEquals(
+            colorSteps(ColorFormat.RGB888, ColorFormat.RGBA8888, ColorFormat.RGB565) + SearchStep(null, Matcher.ANY),
+            GlesConfigChooser.searchOrder(ColorDepth.RGB888),
+        )
+    }
+
+    @Test
+    fun searchOrder888_fallsBackTo565OnDeviceWithout888() {
+        val configs = listOf(config(5, 6, 5, 0, 16, 0), config(4, 4, 4, 4, 16, 0))
+
+        val first = GlesConfigChooser.searchOrder(ColorDepth.RGB888)
+            .first { GlesConfigChooser.chooseFrom(configs, it) >= 0 }
+
+        assertEquals(SearchStep(ColorFormat.RGB565, Matcher.STRICT), first)
+    }
+
+    @Test
+    fun searchOrder565_fallsBackTo888OnDeviceWithout565() {
+        val configs = listOf(config(8, 8, 8, 8, 24, 8), config(8, 8, 8, 0, 16, 0))
+
+        val first = GlesConfigChooser.searchOrder(ColorDepth.RGB565)
+            .first { GlesConfigChooser.chooseFrom(configs, it) >= 0 }
+
+        assertEquals(SearchStep(ColorFormat.RGB888, Matcher.STRICT), first)
+    }
+
+    @Test
+    fun rgba8888_acceptsAlpha() {
+        val configs = listOf(config(8, 8, 8, 0, 16, 0), config(8, 8, 8, 8, 16, 0))
+
+        assertEquals(1, GlesConfigChooser.chooseFrom(configs, SearchStep(ColorFormat.RGBA8888, Matcher.STRICT)))
     }
 
     @Test
@@ -46,6 +101,12 @@ class GlesConfigChooserTest {
     }
 
     private fun config(r: Int, g: Int, b: Int, a: Int, d: Int, s: Int) = intArrayOf(r, g, b, a, d, s)
+
+    private fun step565(matcher: Matcher) = SearchStep(ColorFormat.RGB565, matcher)
+
+    private fun colorSteps(vararg colors: ColorFormat) = colors.flatMap { color ->
+        listOf(Matcher.STRICT, Matcher.LOOSE_STENCIL, Matcher.LOOSE_DEPTH_AND_STENCIL).map { SearchStep(color, it) }
+    }
 
     private companion object {
         const val EGL_RED_SIZE = 0x3024
