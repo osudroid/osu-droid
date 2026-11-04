@@ -533,9 +533,9 @@ public class MainActivity extends BaseGameActivity implements
         // displayed on the screen.
         mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-        if (BuildConfig.DEBUG) {
-            RenderStatsOverlay.attach(mainLayout);
-        }
+        //if (BuildConfig.DEBUG) {
+        //    RenderStatsOverlay.attach(mainLayout);
+        //}
 
         setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
