@@ -43,7 +43,7 @@ class FPSCounterRenderTimeTest {
         source = ManualClock().apply { isRunning = true }
         clock = ThrottledFrameClock().apply { throttling = false }
         clock.changeSource(source)
-        counter = FPSCounter({ clock }, FPSCounter.RefreshRateSource { 60f })
+        counter = FPSCounter({ clock }, FPSCounter.RefreshRateSource { 60f }, showRenderTime = true)
         counter.updateClock(clock)
     }
 
@@ -79,5 +79,17 @@ class FPSCounterRenderTimeTest {
 
         assertTrue(counter.text, counter.text.endsWith("· R 0 ms"))
         assertEquals(true, counter.text.contains(" ms | "))
+    }
+
+    @Test
+    fun renderTime_hidden_showsOnlyFrameTimeAndFps() {
+        counter = FPSCounter({ clock }, FPSCounter.RefreshRateSource { 60f }, showRenderTime = false)
+        counter.updateClock(clock)
+        RenderTiming.lastWorkNanos = 9_000_000L
+
+        runFrames(200)
+
+        assertTrue(counter.text, counter.text.endsWith(" FPS"))
+        assertTrue(counter.text, " R " !in counter.text)
     }
 }

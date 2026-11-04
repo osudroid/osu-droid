@@ -16,6 +16,7 @@ import kotlin.math.roundToInt
 import org.andengine.graphics.view.RenderTiming
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
@@ -26,7 +27,9 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
  */
 class FPSCounter @JvmOverloads constructor(
     private val clockSource: () -> ThrottledFrameClock = { UIEngine.current.clock },
-    private val refreshRateSource: RefreshRateSource = RefreshRateSource { getGlobal().mainActivity.refreshRate }
+    private val refreshRateSource: RefreshRateSource = RefreshRateSource { getGlobal().mainActivity.refreshRate },
+    /** Whether the render thread time ("R") is shown; a developer aid, so only in debug builds by default. */
+    private val showRenderTime: Boolean = BuildConfig.DEBUG
 ) : UIText() {
     private val updateClock
         get() = clockSource()
@@ -212,12 +215,16 @@ class FPSCounter @JvmOverloads constructor(
 
         stringBuilder.setLength(0)
 
-        formatter.format(
-            if (isHighPrecision) HIGH_PRECISION_FORMAT else LOW_PRECISION_FORMAT,
-            displayedMs,
-            displayedFps,
-            displayedRenderMs
-        )
+        if (showRenderTime) {
+            formatter.format(
+                if (isHighPrecision) HIGH_PRECISION_RENDER_FORMAT else LOW_PRECISION_RENDER_FORMAT,
+                displayedMs,
+                displayedFps,
+                displayedRenderMs
+            )
+        } else {
+            formatter.format(if (isHighPrecision) HIGH_PRECISION_FORMAT else LOW_PRECISION_FORMAT, displayedMs, displayedFps)
+        }
 
         text = stringBuilder.toString()
 
@@ -293,7 +300,9 @@ class FPSCounter @JvmOverloads constructor(
     }
 
     private companion object {
-        const val HIGH_PRECISION_FORMAT = "%.1f ms | %d FPS · R %d ms"
-        const val LOW_PRECISION_FORMAT = "%.0f ms | %d FPS · R %d ms"
+        const val HIGH_PRECISION_FORMAT = "%.1f ms | %d FPS"
+        const val LOW_PRECISION_FORMAT = "%.0f ms | %d FPS"
+        const val HIGH_PRECISION_RENDER_FORMAT = "$HIGH_PRECISION_FORMAT · R %d ms"
+        const val LOW_PRECISION_RENDER_FORMAT = "$LOW_PRECISION_FORMAT · R %d ms"
     }
 }
