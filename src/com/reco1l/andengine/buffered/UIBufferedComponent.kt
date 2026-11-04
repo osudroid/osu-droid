@@ -1,29 +1,35 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.gles.GlesBackend
 import android.opengl.GLES32
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.CompareFunction
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.gles.GlesPipeline
 import org.andengine.entity.shape.Shape.*
-import org.andengine.opengl.shader.PositionColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
-import org.andengine.opengl.util.*
 
 
 /**
  * An entity that uses a buffer to draw itself.
+ *
+ * Entities that cannot go through the quad batch (depth testing, clearing) draw their buffer
+ * through the [MeshRenderer] ([IBuffer.drawMesh]); entities with a program of their own override
+ * [onDrawBuffer] and draw the buffer's data through [MeshRenderer.drawProgram].
+ *
+ * @param batchesShape whether this entity is a shape that [doDraw] sends through the quad batch
+ * ([onDrawBatch]) whenever [canBatchShape] allows, building its buffer only for the other draws.
  */
-abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
+abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean = false) : UIComponent() {
 
     /**
      * The buffer itself.
      */
     open var buffer: T? = null
-        set(value) {
-            if (field != value) {
-                field?.finalize()
-                field = value
-            }
-        }
 
 
     /**
@@ -59,19 +65,131 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo(source, destination)
     }
 
+    /**
+     * The blend function this entity draws with: [blendInfo], or for [BlendInfo.Inherit] the
+     * parent's (the default blend function if the parent is not a buffered component).
+     */
+    protected val resolvedBlendInfo: BlendInfo
+        get() {
+            val info = blendInfo
+            if (info != BlendInfo.Inherit) return info
+            val parent = parent
+            val inherited = if (parent is UIBufferedComponent<*>) parent.blendInfo else DEFAULT_BLEND_INFO
+            return if (inherited != BlendInfo.Inherit) inherited else DEFAULT_BLEND_INFO
+        }
+
+    /** The GL buffer bits [clearInfo] asks to clear before drawing. */
+    protected fun clearMask(): Int {
+        var mask = 0
+        if (clearInfo.depthBuffer) mask = mask or GLES32.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) mask = mask or GLES32.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) mask = mask or GLES32.GL_STENCIL_BUFFER_BIT
+        return mask
+    }
+
+    /**
+     * Clears the buffers [clearInfo] asks for. Entities whose [doDraw] skips [beginDraw] call this
+     * themselves.
+     */
+    protected fun clearIfRequested() {
+        val clearMask = clearMask()
+        if (clearMask == 0) return
+        // Pending quads belong before the clear; and a clear ignores the depth buffer while the
+        // depth mask is off, which the mesh renderer's state restore can leave behind.
+        QuadBatcher.flush()
+        if (clearInfo.depthBuffer) GlesBackend.state.depthMask(true)
+        GlesBackend.state.clear(clearMask)
+    }
+
+    // The batch blend mode of [batchBlendSource]; recomputed only when the blend info changes.
+    private var batchBlendSource: BlendInfo? = null
+    private var batchBlend: BlendMode? = null
+
+    /**
+     * The quad batch blend mode of [resolvedBlendInfo], or null if its factors cannot be batched.
+     */
+    protected fun batchBlendMode(): BlendMode? {
+        val info = resolvedBlendInfo
+        if (info !== batchBlendSource) {
+            batchBlendSource = info
+            batchBlend = GlesPipeline.blendModeOf(info.sourceFactor, info.destinationFactor)
+        }
+        return batchBlend
+    }
+
+    /**
+     * The blend mode for draws that must happen whatever the blend factors (the mesh renderer, and
+     * text, which is always batched): the one of [resolvedBlendInfo], or straight alpha for factors
+     * without an engine equivalent (the UI uses none).
+     */
+    protected fun meshBlendMode(): BlendMode = batchBlendMode() ?: BlendMode.Alpha
+
+    /** The depth compare function of [depthInfo] for the mesh renderer; null without depth test. */
+    protected fun meshDepthTest(): CompareFunction? {
+        val depth = depthInfo
+        return if (depth.test) GlesPipeline.compareFunctionOf(depth.function) else null
+    }
+
+    /**
+     * Draws [vertexCount] positions (x, y pairs from [offset] on) of this entity's buffer as
+     * [primitive] through the [MeshRenderer], with the draw color, blend and depth settings of this
+     * entity and the current model-view and projection of [gl]. Transparent entities draw as well:
+     * they still write depth when [depthInfo] asks for it.
+     */
+    fun drawPositions(gl: DrawContext, primitive: PrimitiveType, positions: FloatArray, offset: Int, vertexCount: Int) {
+        MeshRenderer.draw(
+            primitive, positions, offset, vertexCount,
+            gl.modelViewGLMatrix, gl.projectionGLMatrix,
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            meshBlendMode(), meshDepthTest(), depthInfo.mask
+        )
+    }
+
+    /**
+     * Whether this entity's current depth, clear and blend state can be drawn through the batch: no
+     * depth test, no clearing and a blend function the batch can express. Shapes that fail this are
+     * drawn through their buffer.
+     *
+     * A batched shape does not run `beginDraw` and owns no buffer of its own, so do not assign
+     * shared buffers to shapes that can be batched. Invisible shapes still take the buffer path
+     * when they cannot be batched: they serve as depth masks there.
+     */
+    protected fun canBatchShape(): Boolean {
+        if (depthInfo.test) return false
+        val clear = clearInfo
+        if (clear.depthBuffer || clear.colorBuffer || clear.stencilBuffer) return false
+        return batchBlendMode() != null
+    }
+
 
     //region Buffer lifecycle
 
     /**
-     * Called when the buffer needs to be built.
+     * Called when the buffer needs to be built; null leaves the entity without a buffer, which
+     * entities drawn only through the batch do by default.
      */
-    protected abstract fun onCreateBuffer(): T?
+    protected open fun onCreateBuffer(): T? = null
 
     /**
      * Called when the buffer needs to be updated.
      */
-    abstract fun onUpdateBuffer()
+    open fun onUpdateBuffer() = Unit
 
+
+    /**
+     * Builds the buffer now if there is none, for entities that skip it while they are drawn through
+     * the batch ([onCreateBuffer] returning null) and meet a draw that needs it.
+     */
+    protected fun ensureBuffer() {
+        if (buffer != null) return
+        needsNewBuffer = false
+        buffer = onCreateBuffer()
+        needsBufferUpdate = false
+        val created = buffer
+        if (created != null && created.sharingMode != BufferSharingMode.Dynamic) {
+            onUpdateBuffer()
+        }
+    }
 
     fun requestNewBuffer() {
         needsNewBuffer = true
@@ -113,120 +231,63 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
             // need to update it before drawing every frame, this might be
             // CPU intensive, but the memory consumption is lower.
             if (buffer != null && buffer.sharingMode != BufferSharingMode.Dynamic) {
-                updateBuffer()
+                onUpdateBuffer()
             }
         }
     }
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
-        super.doDraw(pGLState, pCamera)
-        onDeclarePointers(pGLState)
-        onDrawBuffer(pGLState)
-        // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-        // Reset GL buffer binding through GLState to keep its internal cache in sync with the
-        // actual GL state. The new Buffer.bindAndUpload() calls GLES32.glBindBuffer() directly,
-        // bypassing GLState.mCurrentArrayBufferID. Without this reset, legacy VBO binding would
-        // skip the actual glBindBuffer call (false cache hit), causing sprites to render from the
-        // wrong VBO.
-        pGLState.bindArrayBuffer(0)
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        if (batchesShape) {
+            val blend = if (canBatchShape()) batchBlendMode() else null
+            if (blend != null) {
+                onApplyColor(drawContext)
+                if (drawAlpha != 0f) {
+                    onDrawBatch(drawContext, blend)
+                }
+                return
+            }
+            ensureBuffer()
+        }
+
+        super.doDraw(drawContext, pCamera)
+        onDrawBuffer(drawContext)
 
         // Disable depth test after drawing so subsequent entities are not accidentally
         // depth-tested against values we wrote (same fix as in UITriangleMesh).
         if (depthInfo.test) {
-            pGLState.disableDepthTest()
+            drawContext.disableDepthTest()
         }
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
-
-        // Clearing
-        var clearMask = 0
-
-        if (clearInfo.depthBuffer) clearMask = clearMask or GLES32.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) clearMask = clearMask or GLES32.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) clearMask = clearMask or GLES32.GL_STENCIL_BUFFER_BIT
-
-        if (clearMask != 0) {
-            GLES32.glClear(clearMask)
-        }
-
-        // Depth testing
-        if (depthInfo.test) {
-            GLES32.glDepthFunc(depthInfo.function)
-            GLES32.glDepthMask(depthInfo.mask)
-            pGLState.enableDepthTest()
-        } else {
-            pGLState.disableDepthTest()
-        }
-
-        // Blending
-        var sourceFactor = BLENDFUNCTION_SOURCE_DEFAULT
-        var destinationFactor = BLENDFUNCTION_DESTINATION_DEFAULT
-
-        if (blendInfo == BlendInfo.Inherit) {
-            val parent = parent
-
-            if (parent is UIBufferedComponent<*>) {
-                sourceFactor = parent.blendInfo.sourceFactor
-                destinationFactor = parent.blendInfo.destinationFactor
-            }
-        } else {
-            sourceFactor = blendInfo.sourceFactor
-            destinationFactor = blendInfo.destinationFactor
-        }
-
-        pGLState.enableBlend()
-        pGLState.blendFunction(sourceFactor, destinationFactor)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
+        clearIfRequested()
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
-            updateBuffer()
+            onUpdateBuffer()
         }
 
-        buffer?.beginDraw(pGLState)
-
-        onBindShader(pGLState)
+        // The mesh renderer takes depth and blend from the pipeline of the draw.
+        if (!depthInfo.test) {
+            drawContext.disableDepthTest()
+        }
     }
 
     /**
-     * Called during [beginDraw] after the position buffer is set up.
-     * Subclasses should bind the appropriate shader and upload uniforms.
-     * Default implementation uses [PositionColorShaderProgram] with a constant vertex color.
+     * Adds this shape to the quad batch with [blend] and the current model-view and projection of
+     * [gl]; the draw color is applied and not transparent. Called instead of the buffer draw for
+     * entities built with `batchesShape` whenever [canBatchShape] allows.
      */
-    protected open fun onBindShader(pGLState: GLState) {
-        val shader = PositionColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
+    protected open fun onDrawBatch(gl: DrawContext, blend: BlendMode) = Unit
 
-        // Upload MVP matrix
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
-        }
-
-        // Provide color as constant vertex attribute (disable per-vertex array)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glVertexAttrib4f(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION, drawRed, drawGreen, drawBlue, drawAlpha)
-
-        // Disable texture coordinates (not needed for solid-color shapes)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-    }
-
-    private fun updateBuffer() {
-        onUpdateBuffer()
-        buffer?.invalidateOnHardware()
-    }
-
-    protected open fun onDeclarePointers(gl: GLState) {
-        buffer?.declarePointers(gl, this)
-    }
-
-    protected open fun onDrawBuffer(gl: GLState) {
-        buffer?.draw(gl, this)
+    /**
+     * Draws the buffer, through the [MeshRenderer] by default ([IBuffer.drawMesh]). Entities with a
+     * program of their own override this and draw the buffer's data through
+     * [MeshRenderer.drawProgram].
+     */
+    protected open fun onDrawBuffer(gl: DrawContext) {
+        buffer?.drawMesh(gl, this)
     }
 
     //endregion
@@ -237,8 +298,12 @@ abstract class UIBufferedComponent<T: IBuffer> : UIComponent() {
         blendInfo = BlendInfo.Mixture
     }
 
-    override fun finalize() {
-        buffer?.finalize()
+    // Buffers own no GL objects: nothing to release, and the entity is not disposed from the finalizer.
+    override fun finalize() = Unit
+
+
+    private companion object {
+        val DEFAULT_BLEND_INFO = BlendInfo(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
     }
 
 }

@@ -5,7 +5,7 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
 import org.andengine.engine.camera.Camera
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import com.osudroid.beatmaps.constants.HitObjectType
 
 class HUDColorHitErrorMeter : HUDHitErrorMeter() {
@@ -52,22 +52,22 @@ class HUDColorHitErrorMeter : HUDHitErrorMeter() {
         indicators.forEach { it.alpha = 0f }
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
-        super.onManagedDraw(pGLState, pCamera)
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
+        super.onManagedDraw(drawContext, pCamera)
 
         // After super.onManagedDraw() the matrix has been popped; re-push our translation
         // so that indicatorBox draws in this element's local coordinate space.
-        pGLState.pushModelViewGLMatrix()
-        pGLState.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
+        drawContext.pushModelViewGLMatrix()
+        drawContext.translateModelViewGLMatrixf(absoluteX, absoluteY, 0f)
 
         indicators.forEach {
             indicatorBox.x = INDICATOR_SPACING + it.index * (INDICATOR_SIZE + INDICATOR_SPACING)
             indicatorBox.color = it.color
             indicatorBox.alpha = it.alpha
-            indicatorBox.onDraw(pGLState, pCamera)
+            indicatorBox.onDraw(drawContext, pCamera)
         }
 
-        pGLState.popModelViewGLMatrix()
+        drawContext.popModelViewGLMatrix()
     }
 
     private data class Indicator(val index: Int, var alpha: Float, var color: Color4)

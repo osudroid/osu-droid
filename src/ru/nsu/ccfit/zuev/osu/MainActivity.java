@@ -2,14 +2,16 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import static com.reco1l.andengine.buffered.Buffer.*;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.provider.OpenableColumns;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -44,6 +46,7 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
+import com.osudroid.FrameLimiterMode;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
@@ -69,16 +72,19 @@ import net.lingala.zip4j.ZipFile;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.options.ColorDepth;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.debug.RenderStatsOverlay;
+import org.andengine.graphics.gles.GlesDebugOptions;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.graphics.text.FontManager;
+import org.andengine.graphics.view.RenderSurfaceView;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.ui.activity.BaseGameActivity;
@@ -120,6 +126,11 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    /**
+     * Longest wait for pending texture loads before the splash screen hands over to the menu, and
+     * before the game loader starts the game once everything else is ready.
+     */
+    public static final long TEXTURE_WAIT_TIMEOUT_MS = 5000L;
     private ScheduledFuture<?> logFlushFuture;
     private Display display;
     private DisplayManager.DisplayListener displayListener;
@@ -134,6 +145,17 @@ public class MainActivity extends BaseGameActivity implements
     // Set to true by MainScene.exit() before calling finish(), so that onDestroy() kills the
     // process after the full Activity lifecycle has run (Firebase, SongService, SharedPrefs, etc.).
     public volatile boolean killOnDestroy = false;
+
+    /** Broadcast action of the GL debug receiver (debug builds only), see {@link #registerDebugGlReceiver()}. */
+    private static final String ACTION_DEBUG_GL = "ru.nsu.ccfit.zuev.osuplus.DEBUG_GL";
+
+    private BroadcastReceiver debugGlReceiver;
+
+    static {
+        // Once per process, before the engine creates its first GL context. Later changes through
+        // the debug broadcast survive an activity recreation.
+        GlesDebugOptions.debugOutput = BuildConfig.DEBUG;
+    }
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -153,6 +175,8 @@ public class MainActivity extends BaseGameActivity implements
         reportGlesVersion();
 
         Config.loadConfig(this);
+        // Fonts rasterize in physical pixels; Config measured the real display width in the same call.
+        FontManager.setRasterScale(Config.getRealDisplayWidth() / (float) Math.max(1, Config.getRES_WIDTH()));
         StringTable.setContext(this);
         ToastLogger.init(this);
         initialGameDirectory();
@@ -177,6 +201,13 @@ public class MainActivity extends BaseGameActivity implements
             public void onDisplayChanged(int displayId) {
                 if (displayId == display.getDisplayId()) {
                     currentRefreshRate = display.getRefreshRate();
+
+                    if (mRenderSurfaceView != null) {
+                        mRenderSurfaceView.setTargetFrameRate(currentRefreshRate);
+                    }
+
+                    // Refresh-rate multiples of the frame limiter depend on the current refresh rate.
+                    applyFrameLimiterSetting(Config.getFrameLimiter());
                 }
             }
         };
@@ -197,6 +228,10 @@ public class MainActivity extends BaseGameActivity implements
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
                 mCamera);
         opt.setWakeLockOptions(WakeLockOptions.SCREEN_DIM);
+        final boolean fullColorDepth = Config.getBoolean("fullColorDepth", true);
+        opt.getRenderOptions().setColorDepth(fullColorDepth ? ColorDepth.RGB888 : ColorDepth.RGB565);
+        // Dithering hides the banding of 16-bit color; with full color depth there is none to hide.
+        opt.getRenderOptions().setDithering(!fullColorDepth);
 
         GlobalManager.getInstance().setCamera(mCamera);
         return opt;
@@ -409,6 +444,16 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
+                // Skin textures prepare their pixels in the background; show the menu once they are on
+                // the GPU, but never let a stuck load keep the splash screen up.
+                try {
+                    if (!GlobalManager.getInstance().getEngine().getTextureManager().awaitPendingTextureLoads(TEXTURE_WAIT_TIMEOUT_MS)) {
+                        Debug.w("MainActivity: Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
                 // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
                 // Never enqueue a bare setScene() and a follow-up action as two separate
                 // Execution.updateThread() calls, the follow-up would run first (LIFO) and then
@@ -475,9 +520,10 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine, this);
+        this.mRenderSurfaceView.setTargetFrameRate(currentRefreshRate);
+        applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         mainLayout.setBackgroundColor(Color.BLACK);
@@ -492,6 +538,10 @@ public class MainActivity extends BaseGameActivity implements
         // in the frame layout (where fragments are attached, see ActivityOverlay) are not properly
         // displayed on the screen.
         mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+        //if (BuildConfig.DEBUG) {
+        //    RenderStatsOverlay.attach(mainLayout);
+        //}
 
         setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
@@ -719,8 +769,48 @@ public class MainActivity extends BaseGameActivity implements
                 Runtime.getRuntime().exec(new String[]{"logcat", "-f", f.getAbsolutePath()});
             } catch (IOException ignored) {
             }
+            registerDebugGlReceiver();
         }
         onBeginBindService();
+    }
+
+    /**
+     * Debug builds only: lets adb destroy and recreate the GL context and switch the GL debug options,
+     * e.g. {@code adb shell am broadcast -a ru.nsu.ccfit.zuev.osuplus.DEBUG_GL --ez recreate true -p <package>}.
+     * Extras: {@code recreate}, {@code es30} (simulate ES 3.0) and {@code debugOutput}; changing an
+     * option also recreates the context so that it takes effect.
+     */
+    private void registerDebugGlReceiver() {
+        debugGlReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                boolean recreate = intent.getBooleanExtra("recreate", false);
+
+                if (intent.hasExtra("es30")) {
+                    GlesDebugOptions.simulateEs30 = intent.getBooleanExtra("es30", false);
+                    recreate = true;
+                }
+                if (intent.hasExtra("debugOutput")) {
+                    GlesDebugOptions.debugOutput = intent.getBooleanExtra("debugOutput", false);
+                    recreate = true;
+                }
+
+                Debug.i("DEBUG_GL: recreate=" + recreate + " simulateEs30=" + GlesDebugOptions.simulateEs30
+                        + " debugOutput=" + GlesDebugOptions.debugOutput);
+
+                // Receivers run on the main thread, which is where the view must be paused and resumed.
+                if (recreate && mRenderSurfaceView != null) {
+                    mRenderSurfaceView.debugRecreateContext();
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(ACTION_DEBUG_GL);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(debugGlReceiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(debugGlReceiver, filter);
+        }
     }
 
     public void onBeginBindService() {
@@ -930,20 +1020,6 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public synchronized void onSurfaceCreated(final GLState pGLState) {
-        // Reset all VBO IDs so they are re-generated against the new EGL context.
-        // This handles the case where the system destroyed the context while the app
-        // was backgrounded (context loss recovery).
-        com.reco1l.andengine.buffered.Buffer.onContextLost();
-        // Reset the TriangleRenderer VBO so it is re-created against the new context.
-        com.edlplan.andengine.TriangleRenderer.get().resetForContextLoss();
-        // Note: the storyboard shader (StoryboardShaderProgram) and ExternalOESShaderProgram
-        // extend ShaderProgram and are reset by ShaderProgram.resetAllForContextLoss() called
-        // in EngineRenderer.onSurfaceCreated.
-        super.onSurfaceCreated(pGLState);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         activityVisible = false;
@@ -991,6 +1067,11 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (debugGlReceiver != null) {
+            unregisterReceiver(debugGlReceiver);
+            debugGlReceiver = null;
+        }
 
         // Safety net: if the Activity is destroyed while the user is still in a room (e.g.
         // swiped away from the task switcher, or system-killed), teardownSession() may never
@@ -1281,6 +1362,32 @@ public class MainActivity extends BaseGameActivity implements
 
             getWindow().setAttributes(lp);
         });
+    }
+
+    /**
+     * Applies a frame limiter setting to the render surface and the update clock.
+     *
+     * @param frameLimiter A value returned by {@link Config#getFrameLimiter()}.
+     */
+    public void applyFrameLimiterSetting(int frameLimiter) {
+        FrameLimiterMode mode = FrameLimiterMode.of(frameLimiter, currentRefreshRate);
+
+        if (mRenderSurfaceView != null) {
+            mRenderSurfaceView.setVSyncEnabled(mode.getVsync());
+            mRenderSurfaceView.setPresentationTimeEnabled(mode.getPresentationTime());
+            mRenderSurfaceView.setChoreographerPacingEnabled(mode.getChoreographerPacing());
+        }
+
+        if (mEngine != null) {
+            mEngine.setReleaseUpdateAfterSwap(mode.getReleaseUpdateAfterSwap());
+        }
+
+        if (mEngine instanceof UIEngine uiEngine) {
+            float maximumUpdateHz = mode.getMaximumUpdateHz();
+
+            // The clock is read on the update thread, so change it there.
+            uiEngine.runOnUpdateThread(() -> uiEngine.getClock().setMaximumUpdateHz(maximumUpdateHz));
+        }
     }
 
     private boolean checkPermissions() {

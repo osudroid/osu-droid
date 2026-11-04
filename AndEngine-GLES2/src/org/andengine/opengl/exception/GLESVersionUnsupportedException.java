@@ -2,7 +2,7 @@ package org.andengine.opengl.exception;
 
 /**
  * Thrown when the device's EGL driver cannot create a GL context satisfying the
- * minimum OpenGL ES version the engine requires (see {@code RenderSurfaceView.GLES32ContextFactory}).
+ * minimum OpenGL ES version the engine requires (see {@code org.andengine.graphics.gles.EglSurfaceBackend}).
  * Carries enough device diagnostics for a user facing dialog and bug reports, since the
  * generic stack trace is meaningless to players hitting a hardware limitation.
  */

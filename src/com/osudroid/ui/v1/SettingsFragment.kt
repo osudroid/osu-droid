@@ -379,6 +379,16 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleGraphicsSectionPreferences() {
+        findPreference<SelectPreference>("frameLimiter")!!.setOnPreferenceChangeListener { _, newValue ->
+            val frameLimiter = Config.parseFrameLimiter(newValue.toString())
+
+            // Stored right away: MainActivity re-applies the setting from Config whenever the display changes, and
+            // Config is otherwise only reloaded once the settings are dismissed.
+            Config.setFrameLimiter(frameLimiter)
+            (requireActivity() as MainActivity).applyFrameLimiterSetting(frameLimiter)
+            true
+        }
+
         findPreference<SelectPreference>("skinPath")!!.apply {
 
             val skinMain = File(Config.getSkinTopPath())

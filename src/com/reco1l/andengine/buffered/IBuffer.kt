@@ -1,10 +1,7 @@
 package com.reco1l.andengine.buffered
 
 import android.opengl.GLES32
-import org.andengine.opengl.util.GLState
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
+import org.andengine.graphics.DrawContext
 
 // GLES20 draw topology constants (mirrored for convenience)
 const val GL_TRIANGLES = GLES32.GL_TRIANGLES
@@ -15,11 +12,10 @@ const val GL_LINE_STRIP = GLES32.GL_LINE_STRIP
 const val GL_LINE_LOOP = GLES32.GL_LINE_LOOP
 const val GL_POINTS = GLES32.GL_POINTS
 
-// GLES20 buffer usage constants
-const val GL_STATIC_DRAW = GLES32.GL_STATIC_DRAW
-const val GL_DYNAMIC_DRAW = GLES32.GL_DYNAMIC_DRAW
-const val GL_STREAM_DRAW = GLES32.GL_STREAM_DRAW
-
+/**
+ * The geometry of a [UIBufferedComponent]: client-side data the component draws through the mesh
+ * renderer. Buffers own no GL objects.
+ */
 interface IBuffer {
 
     /**
@@ -29,120 +25,23 @@ interface IBuffer {
 
 
     /**
-     * Called before drawing the buffer.
+     * Called when the buffer should draw itself through the mesh renderer, with the color, blend
+     * and depth settings of [entity] (see [UIBufferedComponent.drawPositions]). Buffers that only
+     * hold attributes for another buffer draw nothing.
      */
-    fun beginDraw(gl: GLState)
-
-    /**
-     * Called when the buffer should declare its pointers and submit its data.
-     */
-    fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>)
-
-    /**
-     * Called when the buffer should draw itself.
-     */
-    fun draw(gl: GLState, entity: UIBufferedComponent<*>)
-
-    /**
-     * Called during disposal.
-     */
-    fun finalize() = Unit
-
-    /**
-     * Marks the buffer as needing an update in hardware buffers.
-     */
-    fun invalidateOnHardware() {
-        if (this is Buffer) {
-            setHardwareBufferNeedsUpdate()
-        }
-    }
+    fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>)
 
 }
 
-abstract class Buffer(
-    capacity: Int,
-    val bufferUsage: Int,
-    private val isManaged: Boolean = true
-) : IBuffer {
+abstract class Buffer(capacity: Int) : IBuffer {
 
     override var sharingMode = BufferSharingMode.Off
 
-    protected val mFloatBuffer: FloatBuffer = ByteBuffer
-        .allocateDirect(capacity * 4)
-        .order(ByteOrder.nativeOrder())
-        .asFloatBuffer()
-
-    private var mVboId = 0
-    private var mDirty = true
-
-    init {
-        // Register this buffer so we can reset all VBO IDs on EGL context loss.
-        sAllBuffers.add(java.lang.ref.WeakReference(this))
-    }
-
-    fun setHardwareBufferNeedsUpdate() {
-        mDirty = true
-    }
-
-    protected fun bindAndUpload() {
-        if (mVboId == 0) {
-            val ids = IntArray(1)
-            GLES32.glGenBuffers(1, ids, 0)
-            mVboId = ids[0]
-        }
-        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, mVboId)
-        if (mDirty) {
-            mFloatBuffer.position(0)
-            GLES32.glBufferData(
-                GLES32.GL_ARRAY_BUFFER,
-                mFloatBuffer.capacity() * 4,
-                mFloatBuffer,
-                bufferUsage
-            )
-            mDirty = false
-        }
-    }
-
-    fun unloadFromActiveBufferObjectManager() {
-        if (isManaged && mVboId != 0) {
-            GLES32.glDeleteBuffers(1, IntArray(1) { mVboId }, 0)
-            mVboId = 0
-        }
-    }
-
-    override fun finalize() {
-        unloadFromActiveBufferObjectManager()
-    }
-
-    override fun invalidateOnHardware() {
-        mDirty = true
-    }
-
-    companion object {
-        // Weak references so finalized Buffers don't prevent GC.
-        private val sAllBuffers = java.util.concurrent.CopyOnWriteArrayList<java.lang.ref.WeakReference<Buffer>>()
-
-        /**
-         * Called from [EngineRenderer.onSurfaceCreated] when the EGL context has been
-         * recreated (context loss recovery). Resets every live Buffer's VBO ID to 0 so
-         * that [bindAndUpload] re-generates and re-uploads the buffer on next draw.
-         */
-        @JvmStatic
-        fun onContextLost() {
-            val iter = sAllBuffers.iterator()
-            val dead = mutableListOf<java.lang.ref.WeakReference<Buffer>>()
-            for (ref in iter) {
-                val buf = ref.get()
-                if (buf == null) {
-                    dead.add(ref)
-                } else {
-                    buf.mVboId = 0
-                    buf.mDirty = true
-                }
-            }
-            sAllBuffers.removeAll(dead)
-        }
-    }
+    /**
+     * The client-side data the mesh renderer reads.
+     */
+    @JvmField
+    val data = FloatArray(capacity)
 
 }
 

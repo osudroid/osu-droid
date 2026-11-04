@@ -34,8 +34,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
 
         background = UIBox().apply {
             cornerRadius = 12f
-            // Sharing the same VBO across all toggles to reduce memory usage.
-            buffer = sharedButtonVBO
         }
 
         +ModIcon(mod).apply {
@@ -54,7 +52,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
             text {
                 text = mod.name
                 font = ResourceManager.getInstance().getFont("smallFont")
-                buffer = sharedTextCB
             }
 
             text {
@@ -63,7 +60,6 @@ class ModMenuToggle(var mod: Mod): UIButton() {
                 text = mod.description
                 clipToBounds = true
                 alpha = 0.75f
-                buffer = sharedTextCB
             }
         }
 
@@ -106,11 +102,5 @@ class ModMenuToggle(var mod: Mod): UIButton() {
         fadeTo(if (hasIncompatibility) 0.5f else 1f, 0.2f)
     }
 
-    companion object {
-
-        private val sharedButtonVBO = UIBox.BoxVBO(12f, UICircle.approximateSegments(12f, 12f, 90f), PaintStyle.Fill)
-        private val sharedTextCB = UITextCompoundBuffer(256).asSharedDynamically()
-
-    }
 
 }

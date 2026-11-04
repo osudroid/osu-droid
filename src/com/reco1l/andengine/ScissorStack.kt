@@ -1,6 +1,7 @@
 package com.reco1l.andengine
 
-import android.opengl.*
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.gles.GlesBackend
 import androidx.core.util.Pools.*
 import com.reco1l.framework.math.*
 import java.util.Stack
@@ -33,20 +34,16 @@ object ScissorStack : Stack<Vec4>() {
 
             intersectedX = minX
             intersectedY = minY
-            intersectedWidth = (maxX - minX)
-            intersectedHeight = (maxY - minY)
+            // Disjoint rectangles intersect in nothing; GL rejects a negative size.
+            intersectedWidth = max(0f, maxX - minX)
+            intersectedHeight = max(0f, maxY - minY)
         }
 
         val vec4 = vec4Pool.acquire()
             ?.takeUnless { vec -> vec.x != intersectedX || vec.y != intersectedY || vec.z != intersectedWidth || vec.w != intersectedHeight }
             ?: Vec4(intersectedX, intersectedY, intersectedWidth, intersectedHeight)
 
-        GLES32.glScissor(
-            intersectedX.toInt(),
-            intersectedY.toInt(),
-            intersectedWidth.toInt(),
-            intersectedHeight.toInt()
-        )
+        applyClip(intersectedX.toInt(), intersectedY.toInt(), intersectedWidth.toInt(), intersectedHeight.toInt())
         super.push(vec4)
     }
 
@@ -64,15 +61,19 @@ object ScissorStack : Stack<Vec4>() {
         if (!empty()) {
             val current = peek()
 
-            GLES32.glScissor(
-                current.x.toInt(),
-                current.y.toInt(),
-                current.z.toInt(),
-                current.w.toInt()
-            )
+            applyClip(current.x.toInt(), current.y.toInt(), current.z.toInt(), current.w.toInt())
+        } else {
+            QuadBatcher.clearClip()
         }
 
         return vec4
+    }
+
+
+    /** Sets the GL scissor for direct draws and reports the same rectangle to the quad batch. */
+    private fun applyClip(x: Int, y: Int, width: Int, height: Int) {
+        GlesBackend.state.scissor(x, y, width, height)
+        QuadBatcher.setClip(x, y, width, height)
     }
 
 

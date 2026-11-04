@@ -1,25 +1,16 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES32
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 
+/**
+ * Texture coordinates of another buffer's vertices, one pair per vertex in the same order.
+ */
 abstract class TextureCoordinatesBuffer(
     vertexCount: Int,
-    vertexSize: Int,
-    bufferUsage: Int
-) : VertexBuffer(0, vertexCount, vertexSize, bufferUsage) {
+    vertexSize: Int
+) : VertexBuffer(0, vertexCount, vertexSize) {
 
-    override fun beginDraw(gl: GLState) {
-        bindAndUpload()
-        // Attribute 3 = texture coordinates (ATTRIBUTE_TEXTURECOORDINATES_LOCATION = 3 in ShaderProgramConstants)
-        GLES32.glVertexAttribPointer(3, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
-        GLES32.glEnableVertexAttribArray(3)
-    }
-
-    override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
-        // Handled in beginDraw
-    }
-
-    override fun draw(gl: GLState, entity: UIBufferedComponent<*>) = Unit
+    // Nothing to draw on their own.
+    override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) = Unit
 
 }

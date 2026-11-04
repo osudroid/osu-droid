@@ -1,31 +1,47 @@
 package com.osudroid.resources
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Typeface
 import org.andengine.engine.Engine
-import org.andengine.opengl.font.Font
-import org.andengine.opengl.font.FontFactory
-import org.andengine.opengl.font.StrokeFont
-import org.andengine.opengl.texture.TextureOptions
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.graphics.text.Font
+import org.andengine.graphics.text.FontFactory
+import org.andengine.graphics.text.FontManager
+import org.andengine.graphics.text.StrokeFont
 import ru.nsu.ccfit.zuev.osu.Config
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A named cache of loaded fonts, safe to read and write from any thread. See [TextureStore]'s
  * documentation for why this matters.
+ *
+ * Fonts draw into the shared glyph atlas, which never reuses freed space, so loading a font with the
+ * parameters of the one already stored under the same name returns that font instead of a new one.
  */
 class FontStore {
 
+    /** Everything that makes two fonts of the same name interchangeable. */
+    private data class Spec(
+        val file: String?,
+        val size: Int,
+        val color: Int,
+        val strokeColor: Int,
+        val strokeWidth: Float,
+        val stroke: Boolean,
+    )
+
     // Set via init(), mirroring ResourceManager.Init() - see TextureStore's equivalent for why.
-    private lateinit var engine: Engine
-    private lateinit var context: Context
+    private lateinit var fontManager: FontManager
+    private lateinit var assets: AssetManager
 
     private val fonts = ConcurrentHashMap<String, Font>()
+    private val specs = ConcurrentHashMap<String, Spec>()
 
-    fun init(engine: Engine, context: Context) {
-        this.engine = engine
-        this.context = context
+    fun init(engine: Engine, context: Context) = init(engine.fontManager, context.assets)
+
+    fun init(fontManager: FontManager, assets: AssetManager) {
+        this.fontManager = fontManager
+        this.assets = assets
     }
 
     fun get(name: String): Font? = fonts[name]
@@ -40,49 +56,49 @@ class FontStore {
         return fonts[name]
     }
 
-    fun clear() = fonts.clear()
+    fun clear() {
+        fonts.clear()
+        specs.clear()
+    }
 
+    @Synchronized
     fun loadFont(resname: String, file: String?, size: Int, color: Int): Font {
         val scaledSize = size / Config.getTextureQuality()
-        val texture = BitmapTextureAtlas(engine.textureManager, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
+        val spec = Spec(file, scaledSize, color, 0, 0f, false)
 
-        val font = if (file == null) {
-            Font(engine.fontManager, texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), scaledSize.toFloat(), true, color)
-        } else {
-            FontFactory.createFromAsset(engine.fontManager, texture, context.assets, "fonts/$file", scaledSize.toFloat(), true, color)
-        }
+        existing(resname, spec)?.let { return it }
 
-        engine.textureManager.loadTexture(texture)
-        engine.fontManager.loadFont(font)
-        fonts[resname] = font
-        return font
+        val font =
+            if (file == null) FontFactory.create(fontManager, defaultTypeface(), scaledSize.toFloat(), true, color)
+            else FontFactory.createFromAsset(fontManager, assets, "fonts/$file", scaledSize.toFloat(), true, color)
+        return register(resname, spec, font)
     }
 
+    @Synchronized
     fun loadStrokeFont(resname: String, file: String?, size: Int, color1: Int, color2: Int): StrokeFont {
-        val scaledSize = size / Config.getTextureQuality()
-        val texture = BitmapTextureAtlas(engine.textureManager, STROKE_FONT_TEXTURE_WIDTH, STROKE_FONT_TEXTURE_HEIGHT, TextureOptions.BILINEAR_PREMULTIPLYALPHA)
+        val quality = Config.getTextureQuality()
+        val scaledSize = size / quality
+        val strokeWidth = if (file == null && quality != 1) 0.75f else 2f / quality
+        val spec = Spec(file, scaledSize, color1, color2, strokeWidth, true)
 
-        val font = if (file == null) {
-            StrokeFont(
-                engine.fontManager, texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), scaledSize.toFloat(), true, color1,
-                if (Config.getTextureQuality() == 1) 2f else 0.75f, color2,
-            )
-        } else {
-            FontFactory.createStrokeFromAsset(
-                engine.fontManager, texture, context.assets, "fonts/$file", scaledSize.toFloat(), true, color1,
-                2f / Config.getTextureQuality(), color2,
-            )
-        }
+        (existing(resname, spec) as? StrokeFont)?.let { return it }
 
-        engine.textureManager.loadTexture(texture)
-        engine.fontManager.loadFont(font)
-        fonts[resname] = font
-        return font
+        val font =
+            if (file == null) FontFactory.createStroke(fontManager, defaultTypeface(), scaledSize.toFloat(), true, color1, strokeWidth, color2, false)
+            else FontFactory.createStrokeFromAsset(fontManager, assets, "fonts/$file", scaledSize.toFloat(), true, color1, strokeWidth, color2, false)
+        return register(resname, spec, font)
     }
 
-    companion object {
-        private const val FONT_TEXTURE_SIZE = 1024
-        private const val STROKE_FONT_TEXTURE_WIDTH = 1024
-        private const val STROKE_FONT_TEXTURE_HEIGHT = 512
+    private fun existing(resname: String, spec: Spec): Font? =
+        if (specs[resname] == spec) fonts[resname] else null
+
+    private fun defaultTypeface(): Typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+
+    /** [font] comes from [FontFactory], which already loaded it into [fontManager]. */
+    private fun <T : Font> register(resname: String, spec: Spec, font: T): T {
+        val old = fonts.put(resname, font)
+        specs[resname] = spec
+        if (old != null) fontManager.unloadFont(old)
+        return font
     }
 }

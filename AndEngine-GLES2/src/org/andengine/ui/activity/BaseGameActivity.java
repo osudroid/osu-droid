@@ -7,19 +7,17 @@ import org.andengine.engine.Engine;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.sensor.location.ILocationListener;
 import org.andengine.input.sensor.location.LocationSensorOptions;
 import org.andengine.input.sensor.orientation.IOrientationListener;
 import org.andengine.input.sensor.orientation.OrientationSensorOptions;
-import org.andengine.opengl.font.FontManager;
-import org.andengine.opengl.shader.ShaderProgramManager;
+import org.andengine.graphics.text.FontManager;
 import org.andengine.opengl.texture.TextureManager;
-import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.opengl.view.IRendererListener;
-import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.graphics.view.IRendererListener;
+import org.andengine.graphics.view.RenderSurfaceView;
 import org.andengine.ui.IGameInterface;
 import org.andengine.util.ActivityUtils;
 import org.andengine.util.Constants;
@@ -59,7 +57,6 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	private boolean mGamePaused;
 	private boolean mGameCreated;
 	private boolean mCreateGameCalled;
-	private boolean mOnReloadResourcesScheduled;
 
 	// ===========================================================
 	// Constructors
@@ -93,29 +90,25 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	}
 
 	@Override
-	public synchronized void onSurfaceCreated(final GLState pGLState) {
+	public synchronized void onSurfaceCreated(final DrawContext pDrawContext) {
 		if(BuildConfig.DEBUG) {
 			Debug.d(this.getClass().getSimpleName() + ".onSurfaceCreated" + " @(Thread: '" + Thread.currentThread().getName() + "')");
 		}
 
+		/* Resources of a new GL context are restored by GlesBackend.onContextCreated (called from
+		 * GlesEngineRenderer before this listener), so this listener has nothing to reload. */
 		if(this.mGameCreated) {
-			this.onReloadResources();
-
-			if(this.mGamePaused && this.mGameCreated) {
+			if(this.mGamePaused) {
 				this.onResumeGame();
 			}
-		} else {
-			if(this.mCreateGameCalled) {
-				this.mOnReloadResourcesScheduled = true;
-			} else {
-				this.mCreateGameCalled = true;
-				this.onCreateGame();
-			}
+		} else if(!this.mCreateGameCalled) {
+			this.mCreateGameCalled = true;
+			this.onCreateGame();
 		}
 	}
 
 	@Override
-	public synchronized void onSurfaceChanged(final GLState pGLState, final int pWidth, final int pHeight) {
+	public synchronized void onSurfaceChanged(final DrawContext pDrawContext, final int pWidth, final int pHeight) {
 		if(BuildConfig.DEBUG) {
 			Debug.d(this.getClass().getSimpleName() + ".onSurfaceChanged(Width=" + pWidth + ",  Height=" + pHeight + ")" + " @(Thread: '" + Thread.currentThread().getName() + "')");
 		}
@@ -189,18 +182,6 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	public synchronized void onGameCreated() {
 		this.mGameCreated = true;
-
-		/* Since the potential asynchronous resource creation,
-		 * the surface might already be invalid
-		 * and a resource reloading might be necessary. */
-		if(this.mOnReloadResourcesScheduled) {
-			this.mOnReloadResourcesScheduled = false;
-			try {
-				this.onReloadResources();
-			} catch(final Throwable pThrowable) {
-				Debug.e(this.getClass().getSimpleName() + ".onReloadResources failed." + " @(Thread: '" + Thread.currentThread().getName() + "')", pThrowable);
-			}
-		}
 	}
 
 	@Override
@@ -336,20 +317,12 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		return this.mGameCreated;
 	}
 
-	public VertexBufferObjectManager getVertexBufferObjectManager() {
-		return this.mEngine.getVertexBufferObjectManager();
-	}
-
 	public TextureManager getTextureManager() {
 		return this.mEngine.getTextureManager();
 	}
 
 	public FontManager getFontManager() {
 		return this.mEngine.getFontManager();
-	}
-
-	public ShaderProgramManager getShaderProgramManager() {
-		return this.mEngine.getShaderProgramManager();
 	}
 
 	public SoundManager getSoundManager() {

@@ -1,31 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-import com.osudroid.BuildSettings;
-import com.reco1l.framework.Bitmaps;
+import com.osudroid.resources.StreamBitmapSource;
 
-import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.andengine.opengl.texture.atlas.source.BaseTextureAtlasSource;
-import org.andengine.util.debug.Debug;
 import org.andengine.util.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
-        IBitmapTextureAtlasSource {
+public class QualityAssetBitmapSource extends StreamBitmapSource {
 
     private final int mWidth;
     private final int mHeight;
 
     private final String mAssetPath;
     private final Context mContext;
-
-    private Bitmap bitmap = null;
 
     // ===========================================================
     // Constructors
@@ -99,41 +90,19 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         return this.mHeight;
     }
 
-    public boolean preload() {
-        bitmap = onLoadBitmap(Bitmap.Config.ARGB_8888);
-        return bitmap != null;
+    @Override
+    public InputStream openInputStream() throws IOException {
+        return this.mContext.getAssets().open(this.mAssetPath);
     }
 
+    @Override
+    protected int sampleSize() {
+        return ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
+    }
 
-    public Bitmap onLoadBitmap(final Config pBitmapConfig) {
-        if (bitmap != null) {
-            final Bitmap bmp = bitmap;
-            bitmap = null;
-            return bmp;
-        }
-        InputStream in = null;
-        try {
-            final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-            decodeOptions.inPreferredConfig = pBitmapConfig;
-            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
-            decodeOptions.inMutable = BuildSettings.NO_TEXTURES_MODE;
-
-            in = this.mContext.getAssets().open(this.mAssetPath);
-            var bitmap = BitmapFactory.decodeStream(in, null, decodeOptions);
-
-            if (BuildSettings.NO_TEXTURES_MODE) {
-                bitmap = Bitmaps.paintBitmap(bitmap);
-            }
-
-            return bitmap;
-        } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in "
-                    + this.getClass().getSimpleName() + ". AssetPath: "
-                    + this.mAssetPath, e);
-            return null;
-        } finally {
-            StreamUtils.close(in);
-        }
+    @Override
+    protected String sourceLabel() {
+        return "AssetPath: " + this.mAssetPath;
     }
 
 

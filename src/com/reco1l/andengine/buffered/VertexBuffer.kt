@@ -1,33 +1,34 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES32
+import org.andengine.graphics.gles.GlesPipeline
 import com.osudroid.math.toRadians
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 abstract class VertexBuffer(
     val drawTopology: Int,
     val vertexCount: Int,
-    val vertexSize: Int,
-    bufferUsage: Int
-) : Buffer(vertexCount * vertexSize, bufferUsage) {
+    val vertexSize: Int
+) : Buffer(vertexCount * vertexSize) {
+
+
+    // Write position of the sequential [putVertex], in floats.
+    private var cursor = 0
+
+
+    /**
+     * The GL draw mode the vertices are drawn with for [entity]; [drawTopology] unless a buffer
+     * depends on the entity's state.
+     */
+    open fun topology(entity: UIBufferedComponent<*>): Int = drawTopology
 
 
     //region Draw pipeline
 
-    override fun beginDraw(gl: GLState) {
-        bindAndUpload()
-        // Attribute 0 = position (matches standard position attribute location in shaders)
-        GLES32.glVertexAttribPointer(0, vertexSize, GLES32.GL_FLOAT, false, 0, 0)
-        GLES32.glEnableVertexAttribArray(0)
-    }
-
-    override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) {
-        // Pointers are already declared in beginDraw for GLES2
-    }
-
-    override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-        GLES32.glDrawArrays(drawTopology, 0, vertexCount)
+    override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) {
+        check(vertexSize == VERTEX_2D) { "The mesh renderer draws 2D vertices, got $vertexSize components" }
+        val primitive = GlesPipeline.primitiveTypeOf(topology(entity)) ?: return
+        entity.drawPositions(gl, primitive, data, 0, vertexCount)
     }
 
     //endregion
@@ -90,17 +91,17 @@ abstract class VertexBuffer(
     //region Utility functions
 
     fun setPosition(value: Int) {
-        mFloatBuffer.position(value)
+        cursor = value
     }
 
     fun putVertex(x: Float, y: Float) {
-        mFloatBuffer.put(x)
-        mFloatBuffer.put(y)
+        data[cursor++] = x
+        data[cursor++] = y
     }
 
     fun putVertex(index: Int, x: Float, y: Float) {
-        mFloatBuffer.put(index * vertexSize, x)
-        mFloatBuffer.put(index * vertexSize + 1, y)
+        data[index * vertexSize] = x
+        data[index * vertexSize + 1] = y
     }
 
     //endregion

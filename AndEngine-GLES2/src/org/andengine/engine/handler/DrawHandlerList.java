@@ -1,7 +1,7 @@
 package org.andengine.engine.handler;
 
 import org.andengine.engine.camera.Camera;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.adt.list.SmartList;
 
 /**
@@ -42,10 +42,10 @@ public class DrawHandlerList extends SmartList<IDrawHandler> implements IDrawHan
 	// ===========================================================
 
 	@Override
-	public void onDraw(final GLState pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
 		final int handlerCount = this.size();
 		for(int i = handlerCount - 1; i >= 0; i--) {
-			this.get(i).onDraw(pGLState, pCamera);
+			this.get(i).onDraw(pDrawContext, pCamera);
 		}
 	}
 

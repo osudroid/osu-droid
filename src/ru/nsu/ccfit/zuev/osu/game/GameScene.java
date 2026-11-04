@@ -106,9 +106,9 @@ import org.andengine.entity.scene.background.EntityBackground;
 import org.andengine.entity.shape.RectangularShape;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.debug.Debug;
 
 import java.io.File;
@@ -384,7 +384,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
         if (textureRegion == null) {
-            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), engine.getVertexBufferObjectManager());
+            Rectangle rectangle = new Rectangle(0f, 0f, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
             Color4 backgroundColor = playableBeatmap.getEvents().getBackgroundColor();
             if (backgroundColor == null) {
@@ -394,7 +394,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             beatmapBackground = rectangle;
         } else {
-            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion, engine.getVertexBufferObjectManager());
+            beatmapBackground = new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion);
         }
     }
 
@@ -542,6 +542,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return;
         }
 
+        if (!UIVideoSprite.isSupported()) {
+            Debug.i("Video background skipped: the GL context lacks GL_OES_EGL_image_external_essl3");
+            return;
+        }
+
         videoLoadingJob = Execution.async(scope -> {
             try {
                 var video = new UIVideoSprite(beatmapInfo.getAbsoluteSetDirectory() + "/" + videoFilename, engine);
@@ -621,7 +626,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (dimRectangle != null) {
             dimRectangle.detachSelf();
         } else {
-            dimRectangle = new Rectangle(0f, 0f, 0f, 0f, engine.getVertexBufferObjectManager());
+            dimRectangle = new Rectangle(0f, 0f, 0f, 0f);
         }
 
         dimRectangle.setSize(backgroundW, backgroundH);
@@ -1367,7 +1372,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (!Config.isHideReplayMarquee()) {
-                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000, engine.getVertexBufferObjectManager());
+                var replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
                 replayText.setPosition(0, 140);
@@ -4242,10 +4247,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         @Override
-        protected void onManagedDraw(GLState pGLState, Camera pCamera) {
+        protected void onManagedDraw(DrawContext pDrawContext, Camera pCamera) {
             applyRawPointerFastPath(pCamera);
 
-            super.onManagedDraw(pGLState, pCamera);
+            super.onManagedDraw(pDrawContext, pCamera);
         }
 
         @Override

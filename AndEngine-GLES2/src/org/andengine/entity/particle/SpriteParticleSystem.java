@@ -4,7 +4,6 @@ import org.andengine.entity.IEntityFactory;
 import org.andengine.entity.particle.emitter.IParticleEmitter;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.ITextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 /**
  * (c) Zynga 2011
@@ -25,15 +24,15 @@ public class SpriteParticleSystem extends ParticleSystem<Sprite> {
 	// Constructors
 	// ===========================================================
 
-	public SpriteParticleSystem(final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
-		this(0, 0, pParticleEmitter, pRateMinimum, pRateMaximum, pParticlesMaximum, pTextureRegion, pVertexBufferObjectManager);
+	public SpriteParticleSystem(final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion) {
+		this(0, 0, pParticleEmitter, pRateMinimum, pRateMaximum, pParticlesMaximum, pTextureRegion);
 	}
 
-	public SpriteParticleSystem(final float pX, final float pY, final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
+	public SpriteParticleSystem(final float pX, final float pY, final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion) {
 		super(pX, pY, new IEntityFactory<Sprite>() {
 			@Override
 			public Sprite create(final float pX, final float pY) {
-				return new Sprite(pX, pY, pTextureRegion, pVertexBufferObjectManager);
+				return new Sprite(pX, pY, pTextureRegion);
 			}
 		}, pParticleEmitter, pRateMinimum, pRateMaximum, pParticlesMaximum);
 	}

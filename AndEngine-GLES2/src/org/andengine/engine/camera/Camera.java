@@ -6,8 +6,8 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.shape.RectangularShape;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.algorithm.collision.RectangularShapeCollisionChecker;
@@ -263,9 +263,9 @@ public class Camera implements IUpdateHandler {
 	// Methods
 	// ===========================================================
 
-	public void onDrawHUD(final GLState pGLState) {
+	public void onDrawHUD(final DrawContext pDrawContext) {
 		if(this.mHUD != null) {
-			this.mHUD.onDraw(pGLState, this);
+			this.mHUD.onDraw(pDrawContext, this);
 		}
 	}
 
@@ -288,42 +288,42 @@ public class Camera implements IUpdateHandler {
 		return RectangularShapeCollisionChecker.isVisible(this, pX, pY, pWidth, pHeight, pLocalToSceneTransformation);
 	}
 
-	public void onApplySceneMatrix(final GLState pGLState) {
-		pGLState.orthoProjectionGLMatrixf(this.getXMin(), this.getXMax(), this.getYMax(), this.getYMin(), this.mZNear, this.mZFar);
+	public void onApplySceneMatrix(final DrawContext pDrawContext) {
+		pDrawContext.orthoProjectionGLMatrixf(this.getXMin(), this.getXMax(), this.getYMax(), this.getYMin(), this.mZNear, this.mZFar);
 
 		final float rotation = this.mRotation;
 		if(rotation != 0) {
-			Camera.applyRotation(pGLState, this.getCenterX(), this.getCenterY(), rotation);
+			Camera.applyRotation(pDrawContext, this.getCenterX(), this.getCenterY(), rotation);
 		}
 	}
 
-	public void onApplySceneBackgroundMatrix(final GLState pGLState) {
+	public void onApplySceneBackgroundMatrix(final DrawContext pDrawContext) {
 		final float widthRaw = this.getWidthRaw();
 		final float heightRaw = this.getHeightRaw();
 
-		pGLState.orthoProjectionGLMatrixf(0, widthRaw, heightRaw, 0, this.mZNear, this.mZFar);
+		pDrawContext.orthoProjectionGLMatrixf(0, widthRaw, heightRaw, 0, this.mZNear, this.mZFar);
 
 		final float rotation = this.mRotation;
 		if(rotation != 0) {
-			Camera.applyRotation(pGLState, widthRaw * 0.5f, heightRaw * 0.5f, rotation);
+			Camera.applyRotation(pDrawContext, widthRaw * 0.5f, heightRaw * 0.5f, rotation);
 		}
 	}
 
-	public void onApplyCameraSceneMatrix(final GLState pGLState) {
+	public void onApplyCameraSceneMatrix(final DrawContext pDrawContext) {
 		final float widthRaw = this.getWidthRaw();
 		final float heightRaw = this.getHeightRaw();
-		pGLState.orthoProjectionGLMatrixf(0, widthRaw, heightRaw, 0, this.mZNear, this.mZFar);
+		pDrawContext.orthoProjectionGLMatrixf(0, widthRaw, heightRaw, 0, this.mZNear, this.mZFar);
 
 		final float cameraSceneRotation = this.mCameraSceneRotation;
 		if(cameraSceneRotation != 0) {
-			Camera.applyRotation(pGLState, widthRaw * 0.5f, heightRaw * 0.5f, cameraSceneRotation);
+			Camera.applyRotation(pDrawContext, widthRaw * 0.5f, heightRaw * 0.5f, cameraSceneRotation);
 		}
 	}
 
-	private static void applyRotation(final GLState pGLState, final float pRotationCenterX, final float pRotationCenterY, final float pAngle) {
-		pGLState.translateProjectionGLMatrixf(pRotationCenterX, pRotationCenterY, 0);
-		pGLState.rotateProjectionGLMatrixf(pAngle, 0, 0, 1);
-		pGLState.translateProjectionGLMatrixf(-pRotationCenterX, -pRotationCenterY, 0);
+	private static void applyRotation(final DrawContext pDrawContext, final float pRotationCenterX, final float pRotationCenterY, final float pAngle) {
+		pDrawContext.translateProjectionGLMatrixf(pRotationCenterX, pRotationCenterY, 0);
+		pDrawContext.rotateProjectionGLMatrixf(pAngle, 0, 0, 1);
+		pDrawContext.translateProjectionGLMatrixf(-pRotationCenterX, -pRotationCenterY, 0);
 	}
 
 	public void convertSceneToCameraSceneTouchEvent(final TouchEvent pSceneTouchEvent) {

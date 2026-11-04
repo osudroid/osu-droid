@@ -4,7 +4,7 @@ import com.osudroid.math.toDegrees
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIWedge.*
 import com.reco1l.andengine.theme.srem
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import kotlin.math.*
 
 /**
@@ -91,11 +91,11 @@ open class UIWedge : UIBufferedComponent<WedgeVBO>() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
 
         if (paintStyle == PaintStyle.Outline) {
-            pGLState.lineWidth(lineWidth)
+            drawContext.lineWidth(lineWidth)
         }
     }
 
@@ -108,7 +108,6 @@ open class UIWedge : UIBufferedComponent<WedgeVBO>() {
     ) : VertexBuffer(
         vertexCount = max(1, segments) + 3,
         vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW,
         drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_LOOP,
     ) {
         fun update(entity: UIWedge) {

@@ -1,6 +1,5 @@
 package com.reco1l.andengine.sprite
 
-import android.opengl.GLES32
 import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.PlaybackParameters
@@ -8,22 +7,36 @@ import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
 import com.osudroid.utils.updateThread
 import com.reco1l.andengine.texture.*
-import com.acivev.andengine.opengl.ExternalOESShaderProgram
 import org.andengine.engine.Engine
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.batch.SharedMeshProgram
+import org.andengine.graphics.gles.GlesBackend
+import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLState
 
+// Tests pass a fake texture and texture manager.
 @OptIn(UnstableApi::class)
-class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
+class UIVideoSprite(
+    private val texture: VideoTexture,
+    private val textureManager: TextureManager
+) : UISprite() {
 
-    private val texture = VideoTexture(source)
+    constructor(source: String, engine: Engine) : this(VideoTexture(source), engine.textureManager)
+
+    // External (OES) texture drawn through its own program, never through the quad batch.
+    override val isBatchable: Boolean get() = false
+
+    // The external view of the texture; the same instance for as long as the texture lives.
+    private val externalView = BatchTexture.externalOf(texture)
 
     init {
         val w = texture.videoWidth.toFloat()
         val h = texture.videoHeight.toFloat()
         textureRegion = TextureRegion(texture, 0f, 0f, w.coerceAtLeast(1f), h.coerceAtLeast(1f))
-        engine.textureManager.loadTexture(texture)
+        textureManager.loadTexture(texture)
 
         // Some hardware decoders report 0×0 from prepare() and only provide dimensions
         // on the first decoded frame. Register a listener to fix the TextureRegion then.
@@ -44,49 +57,38 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
     }
 
     // -----------------------------------------------------------------------
-    // Custom shader binding — OES external texture + ST-transform matrix
+    // Drawing — OES external texture + ST-transform matrix
     // -----------------------------------------------------------------------
 
-    override fun beginDraw(pGLState: GLState) {
-        // Latch the latest video frame and update the ST matrix BEFORE onBindShader reads it.
+    override fun onDrawBuffer(gl: DrawContext) {
+        // The context can be recreated without the extension the program needs.
+        if (!isSupported()) return
+        val positions = buffer?.data ?: return
+        val view = externalView
+        if (!BatchTexture.isLoaded(view)) return
+
+        // Latch the latest video frame and update the ST matrix before the draw reads it.
         texture.latch()
-        super.beginDraw(pGLState)
-    }
+        val st = texture.getTransformMatrix()
+        val uvs = uvBuffer.data
 
-    override fun onBindShader(pGLState: GLState) {
-        val shader = ExternalOESShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
+        // The ST transform corrects Y-flip and any other orientation from the hardware decoder:
+        // (st * vec4(u, v, 0, 1)).xy with the column-major matrix of the SurfaceTexture.
+        val transformed = uvScratch
+        for (i in 0 until QUAD_VERTICES) {
+            val u = uvs[i * 2]
+            val v = uvs[i * 2 + 1]
+            transformed[i * 2] = st[0] * u + st[4] * v + st[12]
+            transformed[i * 2 + 1] = st[1] * u + st[5] * v + st[13]
         }
 
-        // ST-transform: corrects Y-flip and any other orientation from the hardware decoder.
-        if (shader.uniformSTMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformSTMatrixLocation,
-                1, false, texture.getTransformMatrix(), 0
-            )
-        }
-
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
-
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(
-                shader.uniformColorLocation,
-                drawRed, drawGreen, drawBlue, drawAlpha
-            )
-        }
-
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-
-        // UV attribute (attribute location 3).
-        uvBuffer.beginDraw(pGLState)
+        MeshRenderer.drawProgramQuad(
+            program.get(), positions, transformed,
+            gl.modelViewGLMatrix, gl.projectionGLMatrix,
+            view,
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            meshBlendMode()
+        )
     }
 
     // -----------------------------------------------------------------------
@@ -119,7 +121,7 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
     fun release() {
         // Unloading the texture triggers unloadFromHardware, which posts a single ordered block
         // to the main handler: setVideoSurface(null) --> surface teardown --> player.release().
-        engine.textureManager.unloadTexture(texture)
+        textureManager.unloadTexture(texture)
     }
 
     fun play() {
@@ -150,5 +152,37 @@ class UIVideoSprite(source: String, private val engine: Engine) : UISprite() {
 
     companion object {
         private val mainHandler = Handler(Looper.getMainLooper())
+
+        private const val QUAD_VERTICES = 4
+
+        // The transformed u, v pairs in sprite buffer order; GL thread only, shared by all video sprites.
+        private val uvScratch = FloatArray(QUAD_VERTICES * 2)
+
+        // The frame tinted by the draw color, straight alpha (blended as the texture options ask).
+        private const val FRAGMENT_SHADER = """#version 300 es
+#extension GL_OES_EGL_image_external_essl3 : require
+precision mediump float;
+uniform samplerExternalOES uTexture;
+in vec2 vTexCoord;
+in vec4 vColor;
+out vec4 fragColor;
+void main() {
+    fragColor = vColor * texture(uTexture, vTexCoord);
+}
+"""
+
+        // Shared by all video sprites.
+        private val program = SharedMeshProgram("video", FRAGMENT_SHADER, external = true)
+
+        /**
+         * Whether the current GL context can draw video frames: the fragment shader samples the
+         * frame through `GL_OES_EGL_image_external_essl3`. False while there is no context yet.
+         */
+        @JvmStatic
+        fun isSupported(): Boolean = GlesBackend.hasCaps && GlesBackend.caps.hasExternalTextureEssl3
+
+        /** Disposes the shared GL program; the next draw creates it again. Tests call it to reset between cases. */
+        @JvmStatic
+        fun releaseProgram() = program.release()
     }
 }

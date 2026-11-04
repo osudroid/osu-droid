@@ -1,13 +1,14 @@
 package com.osudroid.ui.v2.songselect
 
-import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.ISkinnable
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.min
 
@@ -57,6 +58,9 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
 
     private val uvBuffer = StarsUVBuffer()
 
+    // Positions and texture coordinates interleaved as x, y, u, v for the mesh renderer.
+    private val texturedScratch = FloatArray(VERTICES_PER_STAR * MAX_STARS * 4)
+
     /**
      * Number of stars drawn, including the fractional one.
      */
@@ -100,44 +104,37 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
         uvBuffer.update(texture)
     }
 
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(shader.uniformMVPMatrixLocation, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
-        }
-
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
-
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(shader.uniformColorLocation, drawRed, drawGreen, drawBlue, drawAlpha)
-        }
-
-        // This shader uses a uniform color.
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-
-        uvBuffer.beginDraw(pGLState)
-    }
-
-    override fun onDrawBuffer(gl: GLState) {
+    override fun onDrawBuffer(gl: DrawContext) {
         val texture = texture ?: return
+        val positions = buffer?.data ?: return
         if (visibleStars == 0) {
             return
         }
 
-        texture.texture.bind(gl)
-        super.onDrawBuffer(gl)
+        val vertexCount = VERTICES_PER_STAR * visibleStars
+        val uvs = uvBuffer.data
+        val vertices = texturedScratch
+        for (i in 0 until vertexCount) {
+            vertices[i * 4] = positions[i * 2]
+            vertices[i * 4 + 1] = positions[i * 2 + 1]
+            vertices[i * 4 + 2] = uvs[i * 2]
+            vertices[i * 4 + 3] = uvs[i * 2 + 1]
+        }
+
+        MeshRenderer.drawTextured(
+            PrimitiveType.Triangles, vertices, 0, vertexCount,
+            gl.modelViewGLMatrix, gl.projectionGLMatrix,
+            BatchTexture.of(texture.texture),
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            meshBlendMode(), meshDepthTest(), depthInfo.mask
+        )
     }
 
 
     class StarsVertexBuffer : VertexBuffer(
         drawTopology = GL_TRIANGLES,
         vertexCount = VERTICES_PER_STAR * MAX_STARS,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        vertexSize = VERTEX_2D
     ) {
         fun update(entity: DifficultyStars) {
             val capped = min(entity.rating, MAX_STARS.toFloat())
@@ -159,16 +156,11 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
                 putVertex(index++, x, y)
             }
         }
-
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_STAR * (entity as DifficultyStars).visibleStars)
-        }
     }
 
     class StarsUVBuffer : TextureCoordinatesBuffer(
         vertexCount = VERTICES_PER_STAR * MAX_STARS,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
+        vertexSize = VERTEX_2D
     ) {
         fun update(texture: TextureRegion?) {
             val u = texture?.u ?: 0f
@@ -186,7 +178,6 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
                 putVertex(index++, u2, v)
                 putVertex(index++, u, v)
             }
-            invalidateOnHardware()
         }
     }
 

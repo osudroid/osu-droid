@@ -1,21 +1,22 @@
 package com.osudroid.ui.v2.menu.main
 
-import android.opengl.GLES32
-import com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader
-import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.sprite.ScaleType
 import com.reco1l.andengine.sprite.UISprite
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.MeshProgram
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.batch.SharedMeshProgram
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
 
 /**
  * A sprite that renders a catjam animation frame clipped to a circle.
  *
- * Uses [com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader] which discards fragments outside a circular radius in
- * normalized quad-UV space (0→1). No mask texture is needed — the circle is computed
- * mathematically in the fragment shader.
+ * Draws through a [MeshProgram] whose fragment shader fades out fragments outside a circular
+ * radius in normalized quad space (0 to 1, the `vLocal` coordinate). No mask texture is needed:
+ * the circle is computed mathematically in the fragment shader.
  *
  * The sprite should be sized to match the logo exactly (same width/height) so that
  * the UV-space circle radius of 0.5 coincides with the logo's circle boundary.
@@ -29,8 +30,8 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
      */
     var clipRadius: Float = 0.5f
 
-    /** Static full-quad position buffer bound at [com.osudroid.ui.v2.menu.main.shader.CatJamCircleShader.QUAD_POS_LOCATION]. */
-    private val quadPosBuffer = QuadPosBuffer()
+    // Draws with its own circle-clipping program, never through the quad batch.
+    override val isBatchable: Boolean get() = false
 
     init {
         scaleType = ScaleType.Stretch
@@ -40,7 +41,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
 
     override fun onTextureRegionChanged() {
         textureRegion ?: return
-        // CatJamCircleShader always outputs premultiplied alpha (rgb * a, a),
+        // The program always outputs premultiplied alpha (rgb * a, a),
         // so PreMultiply blending must be used unconditionally regardless of
         // whether the underlying texture was uploaded as premultiplied.
         blendInfo = BlendInfo.PreMultiply
@@ -48,68 +49,54 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
         requestBufferUpdate()
     }
 
+    override fun onDrawBuffer(gl: DrawContext) {
+        val texture = textureRegion?.texture ?: return
+        val positions = buffer?.data ?: return
 
-    override fun onBindShader(pGLState: GLState) {
-        val shader = CatJamCircleShader.INSTANCE
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVP >= 0)
-            GLES32.glUniformMatrix4fv(shader.uniformMVP, 1, false, pGLState.modelViewProjectionGLMatrix, 0)
-        if (shader.uniformCatjam >= 0)
-            GLES32.glUniform1i(shader.uniformCatjam, 0)
-        if (shader.uniformColor >= 0)
-            GLES32.glUniform4f(shader.uniformColor, drawRed, drawGreen, drawBlue, drawAlpha)
-        if (shader.uniformRadius >= 0)
-            GLES32.glUniform1f(shader.uniformRadius, clipRadius)
-
-        // This shader does not use per-vertex color
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-
-        // Catjam atlas UVs at attribute 3
-        uvBuffer.beginDraw(pGLState)
-
-        // Normalised quad-position (0→1) at attribute 4
-        quadPosBuffer.bindAsQuadPosAttribute()
-    }
-
-    override fun onDrawBuffer(pGLState: GLState) {
-        textureRegion?.texture?.bind(pGLState)
-        super.onDrawBuffer(pGLState)
-        GLES32.glDisableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
-    }
-
-
-    /**
-     * Static 2D position buffer that maps (0,0)→(1,1) over the quad, bound at
-     * [CatJamCircleShader.Companion.QUAD_POS_LOCATION].
-     * Vertex order matches [SpriteVBO]: top-left, bottom-left, top-right, bottom-right.
-     */
-    private class QuadPosBuffer : VertexBuffer(
-        drawTopology = GLES32.GL_TRIANGLE_STRIP,
-        vertexCount = 4,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GLES32.GL_STATIC_DRAW
-    ) {
-        init {
-            putVertex(0, 0f, 0f) // top-left
-            putVertex(1, 0f, 1f) // bottom-left
-            putVertex(2, 1f, 0f) // top-right
-            putVertex(3, 1f, 1f) // bottom-right
-            invalidateOnHardware()
-        }
-
-        fun bindAsQuadPosAttribute() {
-            bindAndUpload()
-            GLES32.glVertexAttribPointer(
-                CatJamCircleShader.QUAD_POS_LOCATION,
-                VERTEX_2D, GLES32.GL_FLOAT, false, 0, 0)
-            GLES32.glEnableVertexAttribArray(CatJamCircleShader.QUAD_POS_LOCATION)
-        }
+        val clipProgram = program.get()
+        clipProgram.set(RADIUS, clipRadius)
+        MeshRenderer.drawProgramQuad(
+            clipProgram, positions, uvBuffer.data,
+            gl.modelViewGLMatrix, gl.projectionGLMatrix,
+            BatchTexture.of(texture),
+            QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+            meshBlendMode()
+        )
     }
 
     companion object {
         const val GRID_COLS = 13
         const val FRAME_SIZE = 112
         const val TOTAL_FRAMES = 143
+
+        private const val RADIUS = "uRadius"
+
+        // uRadius: circle radius in quad space (0.5 fills the whole quad). A small smooth edge
+        // avoids aliasing at the circle rim. The atlas is uploaded with premultiplied alpha, so the
+        // sampled rgb already includes its alpha; only the clip and the sprite alpha are applied to
+        // rgb, while alpha tracks the full coverage and opacity product.
+        private const val FRAGMENT_SHADER = """#version 300 es
+precision mediump float;
+uniform sampler2D uTexture;
+uniform float uRadius;
+in vec2 vTexCoord;
+in vec2 vLocal;
+in vec4 vColor;
+out vec4 fragColor;
+void main() {
+    float dist = length(vLocal - vec2(0.5, 0.5));
+    float clip = 1.0 - smoothstep(uRadius - 0.02, uRadius, dist);
+    if (clip <= 0.0) discard;
+    vec4 cat = texture(uTexture, vTexCoord);
+    float colorScale = clip * vColor.a;
+    fragColor = vec4(cat.rgb * vColor.rgb * colorScale, cat.a * colorScale);
+}
+"""
+
+        // Shared by all cat sprites.
+        private val program = SharedMeshProgram("kiai-cat", FRAGMENT_SHADER, listOf(RADIUS))
+
+        /** Disposes the shared GL program; the next draw creates it again. Tests call it to reset between cases. */
+        fun releaseProgram() = program.release()
     }
 }

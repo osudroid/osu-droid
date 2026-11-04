@@ -2,8 +2,8 @@ package org.andengine.opengl.texture;
 
 import java.io.IOException;
 
+import org.andengine.graphics.gles.GlesTextures;
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
-import org.andengine.opengl.util.GLState;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -110,7 +110,7 @@ public abstract class Texture implements ITexture {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
-	protected abstract void writeTextureToHardware(final GLState pGLState) throws IOException;
+	protected abstract void writeTextureToHardware() throws IOException;
 
 	@Override
 	public void load() {
@@ -118,8 +118,8 @@ public abstract class Texture implements ITexture {
 	}
 
 	@Override
-	public void load(final GLState pGLState) throws IOException {
-		this.mTextureManager.loadTexture(pGLState, this);
+	public void loadNow() throws IOException {
+		this.mTextureManager.loadTextureNow(this);
 	}
 
 	@Override
@@ -128,17 +128,17 @@ public abstract class Texture implements ITexture {
 	}
 
 	@Override
-	public void unload(final GLState pGLState) {
-		this.mTextureManager.unloadTexture(pGLState, this);
+	public void unloadNow() {
+		this.mTextureManager.unloadTextureNow(this);
 	}
 
 	@Override
-	public void loadToHardware(final GLState pGLState) throws IOException {
-		this.mHardwareTextureID = pGLState.generateTexture();
+	public void loadToHardware() throws IOException {
+		this.mHardwareTextureID = GlesTextures.generate();
 
-		pGLState.bindTexture(this.mHardwareTextureID);
+		GlesTextures.bind(this.mHardwareTextureID);
 
-		this.writeTextureToHardware(pGLState);
+		this.writeTextureToHardware();
 
 		this.mTextureOptions.apply();
 
@@ -150,8 +150,8 @@ public abstract class Texture implements ITexture {
 	}
 
 	@Override
-	public void unloadFromHardware(final GLState pGLState) {
-		pGLState.deleteTexture(this.mHardwareTextureID);
+	public void unloadFromHardware() {
+		GlesTextures.delete(this.mHardwareTextureID);
 
 		this.mHardwareTextureID = Texture.HARDWARE_TEXTURE_ID_INVALID;
 
@@ -161,20 +161,19 @@ public abstract class Texture implements ITexture {
 	}
 
 	@Override
-	public void reloadToHardware(final GLState pGLState) throws IOException {
-		this.unloadFromHardware(pGLState);
-		this.loadToHardware(pGLState);
+	public void reloadToHardware() throws IOException {
+		this.unloadFromHardware();
+		this.loadToHardware();
 	}
 
 	@Override
-	public void bind(final GLState pGLState) {
-		pGLState.bindTexture(this.mHardwareTextureID);
+	public void bind() {
+		GlesTextures.bind(this.mHardwareTextureID);
 	}
 
 	@Override
-	public void bind(final GLState pGLState, final int pGLActiveTexture) {
-		pGLState.activeTexture(pGLActiveTexture);
-		pGLState.bindTexture(this.mHardwareTextureID);
+	public void bind(final int pGLActiveTexture) {
+		GlesTextures.bind(this.mHardwareTextureID, pGLActiveTexture);
 	}
 
 	// ===========================================================

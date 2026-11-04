@@ -9,7 +9,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.entity.modifier.EntityModifierList;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
@@ -134,6 +134,7 @@ public class Entity implements IEntity {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+	/** Shapes read their color when they are drawn, so there is nothing to update. */
 	protected void onUpdateColor() {
 
 	}
@@ -1213,9 +1214,9 @@ public class Entity implements IEntity {
 	 * otherwise hidden or culled entities will still be drawn.
 	 */
 	@Override
-	public void onDraw(final GLState pGLState, final Camera pCamera) {
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
 		if(this.mVisible && !(this.mCullingEnabled && this.isCulled(pCamera))) {
-			this.onManagedDraw(pGLState, pCamera);
+			this.onManagedDraw(pDrawContext, pCamera);
 		}
 	}
 	// END osu!droid modified
@@ -1303,27 +1304,46 @@ public class Entity implements IEntity {
 	// Methods
 	// ===========================================================
 
+	// BEGIN osu!droid modified: let subclasses skip their own draw (e.g. texture not on the GPU yet).
+	private void drawSelf(final DrawContext pDrawContext, final Camera pCamera) {
+		if(!this.isSelfDrawable()) {
+			return;
+		}
+		this.preDraw(pDrawContext, pCamera);
+		this.draw(pDrawContext, pCamera);
+		this.postDraw(pDrawContext, pCamera);
+	}
+
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @return <code>false</code> to skip {@link #preDraw}, {@link #draw} and {@link #postDraw} of this
+	 * entity for the current frame; its children are still drawn.
+	 */
+	protected boolean isSelfDrawable() {
+		return true;
+	}
+	// END osu!droid modified
+
+	/**
+	 * @param pDrawContext the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
-	protected void preDraw(final GLState pGLState, final Camera pCamera) {
+	protected void preDraw(final DrawContext pDrawContext, final Camera pCamera) {
 
 	}
 
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @param pDrawContext the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
-	protected void draw(final GLState pGLState, final Camera pCamera) {
+	protected void draw(final DrawContext pDrawContext, final Camera pCamera) {
 
 	}
 
 	/**
-	 * @param pGLState the currently active {@link GLState} i.e. to apply transformations to.
+	 * @param pDrawContext the currently active {@link DrawContext} i.e. to apply transformations to.
 	 * @param pCamera the currently active {@link Camera} i.e. to be used for culling.
 	 */
-	protected void postDraw(final GLState pGLState, final Camera pCamera) {
+	protected void postDraw(final DrawContext pDrawContext, final Camera pCamera) {
 
 	}
 
@@ -1339,34 +1359,34 @@ public class Entity implements IEntity {
 		this.mUpdateHandlers = new UpdateHandlerList(Entity.UPDATEHANDLERS_CAPACITY_DEFAULT);
 	}
 
-	protected void onApplyTransformations(final GLState pGLState) {
+	protected void onApplyTransformations(final DrawContext pDrawContext) {
 		/* Translation. */
-		this.applyTranslation(pGLState);
+		this.applyTranslation(pDrawContext);
 
 		/* Rotation. */
-		this.applyRotation(pGLState);
+		this.applyRotation(pDrawContext);
 
 		/* Skew. */
-		this.applySkew(pGLState);
+		this.applySkew(pDrawContext);
 
 		/* Scale. */
-		this.applyScale(pGLState);
+		this.applyScale(pDrawContext);
 	}
 
-	protected void applyTranslation(final GLState pGLState) {
-		pGLState.translateModelViewGLMatrixf(this.mX, this.mY, 0);
+	protected void applyTranslation(final DrawContext pDrawContext) {
+		pDrawContext.translateModelViewGLMatrixf(this.mX, this.mY, 0);
 	}
 
-	protected void applyRotation(final GLState pGLState) {
+	protected void applyRotation(final DrawContext pDrawContext) {
 		final float rotation = this.mRotation;
 
 		if(rotation != 0) {
 			final float rotationCenterX = this.mRotationCenterX;
 			final float rotationCenterY = this.mRotationCenterY;
 
-			pGLState.translateModelViewGLMatrixf(rotationCenterX, rotationCenterY, 0);
-			pGLState.rotateModelViewGLMatrixf(rotation, 0, 0, 1);
-			pGLState.translateModelViewGLMatrixf(-rotationCenterX, -rotationCenterY, 0);
+			pDrawContext.translateModelViewGLMatrixf(rotationCenterX, rotationCenterY, 0);
+			pDrawContext.rotateModelViewGLMatrixf(rotation, 0, 0, 1);
+			pDrawContext.translateModelViewGLMatrixf(-rotationCenterX, -rotationCenterY, 0);
 
 			/* TODO There is a special, but very likely case when mRotationCenter and mScaleCenter are the same.
 			 * In that case the last glTranslatef of the rotation and the first glTranslatef of the scale is superfluous.
@@ -1374,7 +1394,7 @@ public class Entity implements IEntity {
 		}
 	}
 
-	protected void applySkew(final GLState pGLState) {
+	protected void applySkew(final DrawContext pDrawContext) {
 		final float skewX = this.mSkewX;
 		final float skewY = this.mSkewY;
 
@@ -1382,13 +1402,13 @@ public class Entity implements IEntity {
 			final float skewCenterX = this.mSkewCenterX;
 			final float skewCenterY = this.mSkewCenterY;
 
-			pGLState.translateModelViewGLMatrixf(skewCenterX, skewCenterY, 0);
-			pGLState.skewModelViewGLMatrixf(skewX, skewY);
-			pGLState.translateModelViewGLMatrixf(-skewCenterX, -skewCenterY, 0);
+			pDrawContext.translateModelViewGLMatrixf(skewCenterX, skewCenterY, 0);
+			pDrawContext.skewModelViewGLMatrixf(skewX, skewY);
+			pDrawContext.translateModelViewGLMatrixf(-skewCenterX, -skewCenterY, 0);
 		}
 	}
 
-	protected void applyScale(final GLState pGLState) {
+	protected void applyScale(final DrawContext pDrawContext) {
 		final float scaleX = this.mScaleX;
 		final float scaleY = this.mScaleY;
 
@@ -1396,23 +1416,21 @@ public class Entity implements IEntity {
 			final float scaleCenterX = this.mScaleCenterX;
 			final float scaleCenterY = this.mScaleCenterY;
 
-			pGLState.translateModelViewGLMatrixf(scaleCenterX, scaleCenterY, 0);
-			pGLState.scaleModelViewGLMatrixf(scaleX, scaleY, 1);
-			pGLState.translateModelViewGLMatrixf(-scaleCenterX, -scaleCenterY, 0);
+			pDrawContext.translateModelViewGLMatrixf(scaleCenterX, scaleCenterY, 0);
+			pDrawContext.scaleModelViewGLMatrixf(scaleX, scaleY, 1);
+			pDrawContext.translateModelViewGLMatrixf(-scaleCenterX, -scaleCenterY, 0);
 		}
 	}
 
-	protected void onManagedDraw(final GLState pGLState, final Camera pCamera) {
-		pGLState.pushModelViewGLMatrix();
+	protected void onManagedDraw(final DrawContext pDrawContext, final Camera pCamera) {
+		pDrawContext.pushModelViewGLMatrix();
 		{
-			this.onApplyTransformations(pGLState);
+			this.onApplyTransformations(pDrawContext);
 
 			final SmartList<IEntity> children = this.mChildren;
 			if((children == null) || !this.mChildrenVisible) {
 				/* Draw only self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
+				this.drawSelf(pDrawContext, pCamera);
 			} else {
 				if(this.mChildrenSortPending) {
 					ZIndexSorter.getInstance().sort(this.mChildren);
@@ -1429,7 +1447,7 @@ public class Entity implements IEntity {
 						if(i >= children.size()) break;
 						final IEntity child = children.get(i);
 						if(child.getZIndex() < 0) {
-							child.onDraw(pGLState, pCamera);
+							child.onDraw(pDrawContext, pCamera);
 						} else {
 							break;
 						}
@@ -1437,20 +1455,18 @@ public class Entity implements IEntity {
 				}
 
 				/* Draw self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
+				this.drawSelf(pDrawContext, pCamera);
 
 				{ /* Draw children in front of this Entity. */
 					for(; i < childCount; i++) {
 						// Defensive: see note above; child list may shrink mid-iteration.
 						if(i >= children.size()) break;
-						children.get(i).onDraw(pGLState, pCamera);
+						children.get(i).onDraw(pDrawContext, pCamera);
 					}
 				}
 			}
 		}
-		pGLState.popModelViewGLMatrix();
+		pDrawContext.popModelViewGLMatrix();
 	}
 
 	protected void onManagedUpdate(final float pSecondsElapsed) {

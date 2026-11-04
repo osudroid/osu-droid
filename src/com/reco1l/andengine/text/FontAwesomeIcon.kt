@@ -1,22 +1,23 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES32
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.theme.IconVariant
 import org.andengine.engine.camera.*
-import org.andengine.opengl.font.*
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
-import org.andengine.opengl.util.GLState
+import org.andengine.entity.text.TextBatching
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.text.*
 import kotlin.math.*
 
 /**
- * A text entity that can be displayed on the screen.
+ * An icon of the icon font that can be displayed on the screen.
+ *
+ * The glyph is drawn as a quad of the engine's [QuadBatcher]. [depthInfo] is not applied: batched
+ * quads are drawn without a depth test.
  */
-open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
+open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
 
     /**
      * The text to be displayed
@@ -55,15 +56,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
      * Called when the font settings (font size or family) change.
      */
     var onFontSettingsChange: () -> Unit = {
-        val oldFont = font
-
-        if (oldFont != null) {
-            UIEngine.current.resources.unsubscribeFromFont(oldFont, this)
-        }
-
-        val newFont = UIEngine.current.resources.getOrStoreFont(iconSize, iconVariant)
-        font = newFont
-        UIEngine.current.resources.subscribeToFont(newFont, this)
+        font = UIEngine.current.resources.getOrStoreFont(iconSize, iconVariant)
 
         invalidate(InvalidationFlag.Content)
     }
@@ -86,175 +79,69 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<CompoundBuffer>() {
     }
 
 
+    /** The glyph of [icon] in [font], resolved when the content changes. */
+    private var letter: Letter? = null
+
     override fun onContentChanged() {
-        val text = icon.toChar()
         val font = font
 
         if (font == null) {
+            letter = null
             contentWidth = 0f
             contentHeight = 0f
             return
         }
 
-        contentWidth = font.getLetter(text).mAdvance
+        val letter = font.getLetter(icon.toChar())
+
+        this.letter = letter
+        contentWidth = letter.mAdvance
         contentHeight = font.lineHeight
-
-        requestBufferUpdate()
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        return buffer ?: CompoundBuffer(IconTextureBuffer(), IconVertexBuffer())
-    }
+        clearIfRequested()
 
-    override fun onUpdateBuffer() {
-        val font = font
-        val letter = font?.getLetter(icon.toChar())
+        val font = font ?: return
+        val letter = letter ?: return
 
-        buffer?.getFirstOf<IconTextureBuffer>()?.update(letter)
-        buffer?.getFirstOf<IconVertexBuffer>()?.update(this, font, letter)
-    }
-
-    override fun onDeclarePointers(gl: GLState) {
-        super.onDeclarePointers(gl)
-        // The glyph may live on any atlas page of the font, bind the one it was placed on.
-        val font = font
-        (font?.getLetter(icon.toChar())?.mTexture ?: font?.texture)?.bind(gl)
-    }
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
+        if (contentWidth <= 0f || contentHeight <= 0f) {
+            return
         }
 
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
+        val scale = min(width / contentWidth, height / contentHeight)
 
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(
-                shader.uniformColorLocation,
-                drawRed, drawGreen, drawBlue, drawAlpha
-            )
-        }
+        // The glyph keeps its own proportions, scaled like the line, and is centered in the icon.
+        val x0 = width * 0.5f - letter.mWidth * scale * 0.5f
+        val y0 = height * 0.5f - letter.mHeight * scale * 0.5f
 
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
+
+        TextBatching.addLetter(
+            font, letter, meshBlendMode(), drawContext.modelViewGLMatrix,
+            x0, y0, x0 + letter.mWidth * scale, y0 + letter.mHeight * scale,
+            TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha),
+            TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
+        )
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
         if (fontSettingsChanged) {
             fontSettingsChanged = false
             onFontSettingsChange()
         }
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
 
     override fun onDetached() {
         super.onDetached()
 
-        val font = font ?: return
-        UIEngine.current.resources.unsubscribeFromFont(font, this)
-
-        this.font = null
-        fontSettingsChanged = true
-    }
-
-
-
-    //region Buffers
-
-    class IconVertexBuffer : VertexBuffer(
-        drawTopology = GL_TRIANGLES,
-        vertexCount = VERTICES_PER_CHARACTER,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-
-        fun update(component: FontAwesomeIcon, font: Font?, letter: Letter?) {
-
-            if (font == null || letter == null) {
-                mFloatBuffer.clear()
-                return
-            }
-
-            val lineHeight = font.lineHeight
-            var i = 0
-
-            val scale = min(component.width / component.contentWidth, component.height / component.contentHeight)
-
-            val lineX = component.width * 0.5f - component.contentWidth * scale * 0.5f
-            val lineY = component.height * 0.5f - lineHeight * scale * 0.5f
-
-            val letterX = lineX + letter.mWidth * scale
-            val letterY = lineY + font.lineHeight * scale
-
-            setPosition(0)
-
-            putVertex(i++, lineX, lineY)
-            putVertex(i++, lineX, letterY)
-            putVertex(i++, letterX, letterY)
-            putVertex(i++, letterX, letterY)
-            putVertex(i++, letterX, lineY)
-            putVertex(i, lineX, lineY)
-
-
-            setPosition(0)
-        }
-
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            GLES32.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER)
+        if (font != null) {
+            font = null
+            fontSettingsChanged = true
         }
     }
-
-
-    class IconTextureBuffer : TextureCoordinatesBuffer(
-        vertexCount = VERTICES_PER_CHARACTER,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-
-        fun update(letter: Letter?) {
-
-            if (letter == null) {
-                mFloatBuffer.clear()
-                return
-            }
-
-            setPosition(0)
-
-            val u = letter.mU
-            val v = letter.mV
-            val u2 = letter.mU2
-            val v2 = letter.mV2
-
-            putVertex(u, v)
-            putVertex(u, v2)
-            putVertex(u2, v2)
-            putVertex(u2, v2)
-            putVertex(u2, v)
-            putVertex(u, v)
-
-            setPosition(0)
-        }
-
-    }
-
-    //endregion
-
-
-    companion object {
-        private const val VERTICES_PER_CHARACTER = 6
-    }
-
 }

@@ -28,8 +28,7 @@ fun addSnowfall(scene: Scene, context: Context) {
     val snowParticleSystem = SpriteParticleSystem(
         PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),
         10f, 15f, maxParticles,
-        snowflakeTextures,
-        engine.vertexBufferObjectManager
+        snowflakeTextures
     ).also { particleSystem ->
 
         // Random horizontal position across the screen
@@ -87,8 +86,7 @@ fun addFireworks(scene: Scene, context: Context) {
         val trailSystem = SpriteParticleSystem(
             PointParticleEmitter(launchX, launchY),
             2f, 5f, 10,
-            rocketTexture,
-            engine.vertexBufferObjectManager
+            rocketTexture
         ).apply {
             addParticleInitializer(VelocityParticleInitializer(-20f, 20f, -800f, -600f))
             addParticleModifier(ScaleParticleModifier(0.8f, 0.3f, 0f, 0.5f))
@@ -109,8 +107,7 @@ fun addFireworks(scene: Scene, context: Context) {
             val explosionSystem = SpriteParticleSystem(
                 PointParticleEmitter(launchX, explosionY),
                 maxParticles.toFloat(), maxParticles.toFloat(), maxParticles,
-                randomExplosionTexture,
-                engine.vertexBufferObjectManager
+                randomExplosionTexture
             ).apply {
                 addParticleInitializer(VelocityParticleInitializer(-400f, 400f, -400f, 400f))
                 addParticleInitializer(AccelerationParticleInitializer(-50f, 50f))

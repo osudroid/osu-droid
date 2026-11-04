@@ -1,6 +1,5 @@
 package com.osudroid.ui.v2.songselect
 
-import android.opengl.GLES32
 import com.osudroid.BuildSettings
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
@@ -22,7 +21,6 @@ import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 import com.rian.andengine.modifier.ModifierType
 import kotlinx.coroutines.*
-import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
@@ -392,18 +390,9 @@ class SongSelectLeaderboard : UILinearContainer() {
                             x = cursorX
                             clipToBounds = true
 
-                            shape = object : UIBox() {
-                                init {
-                                    cornerRadius = 8f
-                                    color = Color4.Transparent
-                                }
-
-                                override fun beginDraw(pGLState: GLState) {
-                                    // The shape clears the depth buffer before drawing the mask, but glClear only clears it
-                                    // while depth writes are enabled, and a previously drawn entity may have disabled them.
-                                    GLES32.glDepthMask(true)
-                                    super.beginDraw(pGLState)
-                                }
+                            shape = UIBox().apply {
+                                cornerRadius = 8f
+                                color = Color4.Transparent
                             }
                         }
                         cursorX += AVATAR_SIZE + GAP

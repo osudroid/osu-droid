@@ -1,26 +1,27 @@
 package com.reco1l.andengine.text
 
-import org.andengine.opengl.texture.ITexture
-import android.opengl.GLES32
 import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
-import org.andengine.opengl.font.*
-import org.andengine.opengl.font.exception.FontException
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
-import org.andengine.opengl.util.GLState
+import org.andengine.engine.camera.Camera
+import org.andengine.entity.text.TextBatching
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.text.*
+import org.andengine.graphics.text.exception.FontException
 import ru.nsu.ccfit.zuev.osu.*
-import com.reco1l.andengine.buffered.GL_STATIC_DRAW
 import kotlin.math.*
 
 /**
  * A text entity that can be displayed on the screen.
+ *
+ * The glyphs are drawn as quads of the engine's [QuadBatcher], so consecutive texts of the same
+ * glyph atlas and blend share one draw. [depthInfo] is not applied: batched quads are drawn without
+ * a depth test.
  */
-open class UIText : UIBufferedComponent<CompoundBuffer>() {
+open class UIText : UIBufferedComponent<IBuffer>() {
 
     /**
      * The text to be displayed
@@ -29,14 +30,6 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         set(value) {
             if (field != value) {
                 field = value
-
-                val previousLength = currentLength
-                currentLength = value.length
-
-                if (currentLength > previousLength) {
-                    requestNewBuffer()
-                }
-
                 invalidate(InvalidationFlag.Content)
             }
         }
@@ -57,12 +50,6 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
      * The alignment of the text.
      */
     var alignment = Anchor.TopLeft
-        set(value) {
-            if (field != value) {
-                field = value
-                requestBufferUpdate()
-            }
-        }
 
     /**
      * Which axes to scroll the text automatically when it overflows.
@@ -80,16 +67,16 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
     var autoScrollTimeout = 3f
 
 
-    private var currentLength = 0
-
     private var scrollX = 0f
     private var scrollY = 0f
     private var scrollXTimeoutElapsed = 0f
     private var scrollYTimeoutElapsed = 0f
 
 
-    private var lines: List<String>? = null
-    private var linesWidth: FloatArray? = null
+    private var linesWidth = FloatArray(0)
+
+    /** The letters of every line, resolved when the content changes so drawing does not look them up. */
+    private var lineLetters: Array<Array<Letter>> = emptyArray()
 
 
     init {
@@ -104,96 +91,82 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
         val font = font
 
         if (font == null) {
-            lines = emptyList()
             linesWidth = FloatArray(0)
+            lineLetters = emptyArray()
             contentWidth = 0f
             contentHeight = 0f
             return
         }
 
-        lines = text.split('\n')
-        linesWidth = FloatArray(lines!!.size) { i -> lines!![i].fold(0f) { acc, char -> acc + font.safeGetLetter(char).mAdvance } }
+        val lines = text.split('\n')
+        val lineLetters = Array(lines.size) { i -> Array(lines[i].length) { c -> font.safeGetLetter(lines[i][c]) } }
 
-        contentWidth = linesWidth!!.max()
-        contentHeight = lines!!.size.toFloat() * font.lineHeight
+        this.lineLetters = lineLetters
+        linesWidth = FloatArray(lines.size) { i -> lineLetters[i].fold(0f) { acc, letter -> acc + letter.mAdvance } }
 
-        requestBufferUpdate()
+        contentWidth = linesWidth.max()
+        contentHeight = lines.size.toFloat() * font.lineHeight
     }
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-        requestBufferUpdate()
-    }
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
-    override fun onCreateBuffer(): CompoundBuffer {
-        val currentLength = currentLength
-        val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
+        clearIfRequested()
 
-        if (currentBuffer == null || currentLength > currentBuffer.length) {
-            return CompoundBuffer(
-                TextTextureBuffer(currentLength),
-                TextVertexBuffer(currentLength)
-            )
-        }
-        return buffer!!
-    }
+        val font = font ?: return
+        val linesWidth = linesWidth
+        val lineLetters = lineLetters
 
-    /**
-     * Consecutive characters sharing the same font atlas page, drawn with one call each.
-     * Built together with the texture coordinates, see [TextTextureBuffer.update].
-     */
-    internal var pageRuns: List<PageRun> = emptyList()
-
-    override fun onUpdateBuffer() {
-        pageRuns = buffer?.getFirstOf<TextTextureBuffer>()?.update(font, lines) ?: emptyList()
-        buffer?.getFirstOf<TextVertexBuffer>()?.update(this, font, lines, linesWidth)
-    }
-
-    override fun onDeclarePointers(gl: GLState) {
-        super.onDeclarePointers(gl)
-        font?.texture?.bind(gl)
-    }
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        // Upload MVP matrix
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
+        if (lineLetters.isEmpty()) {
+            return
         }
 
-        // Upload texture unit sampler
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
+        val blend = meshBlendMode()
+        val fillColor = TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
+        val strokeColor = TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
 
-        // Upload color uniform
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(
-                shader.uniformColorLocation,
-                drawRed, drawGreen, drawBlue, drawAlpha
-            )
-        }
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
+        val modelView = drawContext.modelViewGLMatrix
 
-        // Disable color vertex attribute (this shader uses uniform color)
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        // UV (attr 3) is already set up by TextTextureBuffer inside the CompoundBuffer.beginDraw()
+        val lineHeight = font.lineHeight
+        val alignment = alignment
+
+        for (lineIndex in lineLetters.indices) {
+
+            val letters = lineLetters[lineIndex]
+
+            var lineX = width * alignment.x - linesWidth[lineIndex] * alignment.x
+            val lineY = height * alignment.y - lineLetters.size * lineHeight * alignment.y + lineIndex * lineHeight
+
+            for (i in letters.indices) {
+                val letter = letters[i]
+
+                // Use the glyph's actual offset and height so glyphs are not
+                // vertically stretched to fill the full line height.
+                val glyphX = lineX + letter.mOffsetX
+                val glyphY = lineY + letter.mOffsetY
+
+                TextBatching.addLetter(
+                    font, letter, blend, modelView,
+                    glyphX, glyphY, glyphX + letter.mWidth, glyphY + letter.mHeight,
+                    fillColor, strokeColor
+                )
+
+                lineX += letter.mAdvance
+            }
+        }
     }
 
-    override fun onApplyTransformations(pGLState: GLState) {
+    override fun onApplyTransformations(drawContext: DrawContext) {
 
         val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
         val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f
 
         if (scrollTranslationX != 0f || scrollTranslationY != 0f) {
-            pGLState.translateModelViewGLMatrixf(-scrollTranslationX, -scrollTranslationY, 0f)
+            drawContext.translateModelViewGLMatrixf(-scrollTranslationX, -scrollTranslationY, 0f)
         }
 
-        super.onApplyTransformations(pGLState)
+        super.onApplyTransformations(drawContext)
     }
 
 
@@ -248,146 +221,7 @@ open class UIText : UIBufferedComponent<CompoundBuffer>() {
     }
 
 
-    //region Buffers
-
-    class TextVertexBuffer(val length: Int) : VertexBuffer(
-        drawTopology = GL_TRIANGLES,
-        vertexCount = VERTICES_PER_CHARACTER * length,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-
-        fun update(entity: UIText, font: Font?, lines: List<String>?, linesWidth: FloatArray?) {
-
-            if (font == null || lines == null || linesWidth == null) {
-                mFloatBuffer.clear()
-                return
-            }
-
-            val lineHeight = font.lineHeight
-            var i = 0
-
-            lines.forEachIndexed { lineIndex, line ->
-
-                var lineX = entity.width * entity.alignment.x - linesWidth[lineIndex] * entity.alignment.x
-                val lineY = entity.height * entity.alignment.y - lines.size * lineHeight * entity.alignment.y + lineIndex * lineHeight
-
-                line.forEach { character ->
-                    val letter = font.safeGetLetter(character)
-
-                    // Use the glyph's actual offset and height so glyphs are not
-                    // vertically stretched to fill the full line height.
-                    val glyphX = lineX + letter.mOffsetX
-                    val glyphY = lineY + letter.mOffsetY
-                    val letterX = glyphX + letter.mWidth
-                    val letterY = glyphY + letter.mHeight
-
-                    setPosition(0)
-
-                    putVertex(i++, glyphX, glyphY)
-                    putVertex(i++, glyphX, letterY)
-                    putVertex(i++, letterX, letterY)
-                    putVertex(i++, letterX, letterY)
-                    putVertex(i++, letterX, glyphY)
-                    putVertex(i++, glyphX, glyphY)
-
-                    setPosition(0)
-
-                    lineX += letter.mAdvance
-                }
-            }
-        }
-
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            entity as UIText
-            val vertexLimit = VERTICES_PER_CHARACTER * min(entity.currentLength, length)
-
-            // One draw call per run of characters on the same atlas page.
-            for (run in entity.pageRuns) {
-                if (run.startVertex >= vertexLimit) {
-                    break
-                }
-                val texture = run.texture ?: continue
-                texture.bind(gl)
-                GLES32.glDrawArrays(drawTopology, run.startVertex, min(run.vertexCount, vertexLimit - run.startVertex))
-            }
-        }
-    }
-
-
-    class TextTextureBuffer(length: Int) : TextureCoordinatesBuffer(
-        vertexCount = VERTICES_PER_CHARACTER * length,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-
-        fun update(font: Font?, lines: List<String>?): List<PageRun> {
-
-            if (font == null || lines == null) {
-                mFloatBuffer.clear()
-                return emptyList()
-            }
-
-            setPosition(0)
-
-            val runs = ArrayList<PageRun>()
-            var vertex = 0
-
-            lines.forEach { line ->
-                line.forEach { character ->
-
-                    val letter = font.safeGetLetter(character)
-
-                    appendToPageRuns(runs, letter.mTexture, vertex)
-                    vertex += VERTICES_PER_CHARACTER
-
-                    val u = letter.mU
-                    val v = letter.mV
-                    val u2 = letter.mU2
-                    val v2 = letter.mV2
-
-                    putVertex(u, v)
-                    putVertex(u, v2)
-                    putVertex(u2, v2)
-                    putVertex(u2, v2)
-                    putVertex(u2, v)
-                    putVertex(u, v)
-                }
-            }
-
-            setPosition(0)
-            return runs
-        }
-
-        /**
-         * Extends the last run or starts a new one. Whitespace has no page and joins any run, as its quad is empty.
-         */
-        private fun appendToPageRuns(runs: MutableList<PageRun>, texture: ITexture?, startVertex: Int) {
-            val last = runs.lastOrNull()
-
-            when {
-                last == null -> runs.add(PageRun(texture, startVertex, VERTICES_PER_CHARACTER))
-                texture == null || last.texture == texture -> last.vertexCount += VERTICES_PER_CHARACTER
-                last.texture == null -> {
-                    last.texture = texture
-                    last.vertexCount += VERTICES_PER_CHARACTER
-                }
-                else -> runs.add(PageRun(texture, startVertex, VERTICES_PER_CHARACTER))
-            }
-        }
-
-    }
-
-    //endregion
-
-
-    /**
-     * A contiguous range of vertices whose characters all live on the same font atlas page.
-     */
-    class PageRun(var texture: ITexture?, val startVertex: Int, var vertexCount: Int)
-
     companion object {
-        private const val VERTICES_PER_CHARACTER = 6
 
         /**
          * Safely retrieve a [Letter] for [character] from [font], returning the letter for '?'
@@ -535,12 +369,4 @@ open class CompoundText : UIContainer() {
 
         super.onManagedUpdate(deltaTimeSec)
     }
-}
-
-
-fun UITextCompoundBuffer(capacity: Int): CompoundBuffer {
-    return CompoundBuffer(
-        UIText.TextTextureBuffer(capacity),
-        UIText.TextVertexBuffer(capacity)
-    )
 }

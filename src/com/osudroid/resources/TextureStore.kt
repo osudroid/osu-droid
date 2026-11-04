@@ -3,8 +3,11 @@ package com.osudroid.resources
 import android.content.Context
 import com.reco1l.andengine.texture.BlankTextureRegion
 import org.andengine.engine.Engine
+import org.andengine.graphics.atlas.TextureAtlasPages
+import org.andengine.opengl.texture.TextureManager
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.texture.region.TextureRegionFactory
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource
@@ -28,15 +31,25 @@ class TextureStore {
     // Set via init(), mirroring ResourceManager.Init() - not constructor parameters, so that
     // bookkeeping-only tests can construct a store without needing a real Engine/Context (those
     // fields are only touched by the GL-touching load methods below).
-    private lateinit var engine: Engine
+    private lateinit var textureManager: TextureManager
     private lateinit var context: Context
+    private var atlasPages: TextureAtlasPages? = null
 
     private val textures = ConcurrentHashMap<String, TextureRegion>()
     private val frameCounts = ConcurrentHashMap<String, Int>()
 
-    fun init(engine: Engine, context: Context) {
-        this.engine = engine
+    /** [atlasPages], if given, receives small images loaded while one of its sessions is open. */
+    @JvmOverloads
+    fun init(engine: Engine, context: Context, atlasPages: TextureAtlasPages? = null) {
+        this.textureManager = engine.textureManager
         this.context = context
+        this.atlasPages = atlasPages
+    }
+
+    /** Sets up everything except the asset-backed loads, which need a [Context]. Tests use this. */
+    fun init(textureManager: TextureManager, atlasPages: TextureAtlasPages?) {
+        this.textureManager = textureManager
+        this.atlasPages = atlasPages
     }
 
     /**
@@ -92,10 +105,23 @@ class TextureStore {
 
     fun clearFrameCounts() = frameCounts.clear()
 
+    /**
+     * Forgets every entry. Atlas regions give back their page reference; textures of their own are
+     * left loaded.
+     */
     fun clear() {
+        val pages = atlasPages
+        if (pages != null) {
+            for (region in textures.values) {
+                if (region !== absentTexture) pages.release(region)
+            }
+        }
         textures.clear()
         frameCounts.clear()
     }
+
+    /** Whether [region] shares an atlas page with other images, so its texture must not be unloaded directly. */
+    fun isAtlasRegion(region: TextureRegion): Boolean = atlasPages?.isAtlasRegion(region) == true
 
     //endregion
 
@@ -126,13 +152,11 @@ class TextureStore {
             }
 
             val source = QualityFileBitmapSource(texFile, if (isHDTexture) 2 else 1)
-            if (source.width == 0 || source.height == 0 || !source.preload()) {
+            if (source.width == 0 || source.height == 0 || !source.preload(opt.mPreMultiplyAlpha)) {
                 return null
             }
 
-            val tex = BitmapTextureAtlas(engine.textureManager, source.width, source.height, opt)
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false)
-            engine.textureManager.loadTexture(tex)
+            region = createRegion(source, source.width, source.height, opt)
         } else {
             val source = try {
                 QualityAssetBitmapSource(context, file)
@@ -140,16 +164,14 @@ class TextureStore {
                 return BlankTextureRegion()
             }
 
-            if (source.width == 0 || source.height == 0 || !source.preload()) {
+            if (source.width == 0 || source.height == 0 || !source.preload(opt.mPreMultiplyAlpha)) {
                 return null
             }
 
-            val tex = BitmapTextureAtlas(engine.textureManager, source.width, source.height, opt)
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false)
-            engine.textureManager.loadTexture(tex)
+            region = createRegion(source, source.width, source.height, opt)
         }
 
-        textures[resname] = region
+        replace(resname, region)
         return region
     }
 
@@ -159,11 +181,9 @@ class TextureStore {
             return null
         }
 
-        val tex = BitmapTextureAtlas(engine.textureManager, source.width, source.height, TextureOptions.BILINEAR)
-        val region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false)
-        engine.textureManager.loadTexture(tex)
+        val region = createRegion(source, source.width, source.height, TextureOptions.BILINEAR)
 
-        textures[resname] = region
+        replace(resname, region)
         return region
     }
 
@@ -173,23 +193,54 @@ class TextureStore {
             return null
         }
 
-        val tex = BitmapTextureAtlas(engine.textureManager, source.width, source.height, TextureOptions.BILINEAR)
-        val region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false)
-        engine.textureManager.loadTexture(tex)
+        val region = createRegion(source, source.width, source.height, TextureOptions.BILINEAR)
 
-        textures[resname] = region
+        replace(resname, region)
         return region
+    }
+
+    /**
+     * Returns a region for [source] ([width]x[height]): on an atlas page while a session of the
+     * configured [TextureAtlasPages] is open and the image qualifies, otherwise on a texture of its own
+     * that is queued for upload right away.
+     */
+    fun createRegion(source: IBitmapTextureAtlasSource, width: Int, height: Int, opt: TextureOptions): TextureRegion {
+        atlasPages?.add(source, opt)?.let { return it }
+
+        val tex = BitmapTextureAtlas(textureManager, width, height, opt)
+        val region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false)
+        textureManager.loadTexture(tex)
+        return region
+    }
+
+    /**
+     * Stores [region] under [name] like a load does. The region previously stored there is released
+     * (its texture unloaded, or its atlas page reference dropped) unless another name still maps to it -
+     * otherwise every reload under the same name, e.g. on a skin change, would keep the old texture
+     * or atlas page alive forever.
+     */
+    fun replace(name: String, region: TextureRegion) {
+        val previous = textures.put(name, region) ?: return
+        if (previous === absentTexture || previous === region || textures.containsValue(previous)) return
+        releaseTexture(previous)
     }
 
     fun unload(name: String) {
         val region = get(name) ?: return
-        engine.textureManager.unloadTexture(region.texture)
+        releaseTexture(region)
         textures.remove(name)
     }
 
     fun unload(region: TextureRegion) {
-        engine.textureManager.unloadTexture(region.texture)
+        releaseTexture(region)
         textures.entries.removeAll { it.value === region }
+    }
+
+    /** Unloads [region]'s texture unless it lies on an atlas page, which is released by reference instead. */
+    fun releaseTexture(region: TextureRegion) {
+        if (atlasPages?.release(region) != true) {
+            textureManager.unloadTexture(region.texture)
+        }
     }
 
     //endregion

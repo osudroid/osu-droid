@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.multi
 
-import android.opengl.GLES32
+import org.andengine.graphics.gles.GlesBackend
 import com.edlplan.ui.fragment.WebViewFragment
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.RoomAPI
@@ -29,7 +29,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
@@ -170,9 +170,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: GLState) {
-                        GLES32.glDepthMask(true)
-                        super.beginDraw(pGLState)
+                    override fun beginDraw(drawContext: DrawContext) {
+                        GlesBackend.state.depthMask(true)
+                        super.beginDraw(drawContext)
                     }
                 }
 
@@ -192,9 +192,9 @@ class RoomPlayerCard : UILinearContainer() {
                         color = Color4.Transparent
                     }
 
-                    override fun beginDraw(pGLState: GLState) {
-                        GLES32.glDepthMask(true)
-                        super.beginDraw(pGLState)
+                    override fun beginDraw(drawContext: DrawContext) {
+                        GlesBackend.state.depthMask(true)
+                        super.beginDraw(drawContext)
                     }
                 }
 

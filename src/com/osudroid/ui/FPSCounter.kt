@@ -8,20 +8,31 @@ import com.reco1l.andengine.UIEngine
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.text.UIText
 import com.reco1l.framework.math.Vec4
+import com.rian.andengine.timing.ThrottledFrameClock
 import java.util.Formatter
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.andengine.graphics.view.RenderTiming
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
  * Represents an FPS counter.
+ *
+ * @param clockSource Provides the update clock.
+ * @param refreshRateSource Provides the display refresh rate.
  */
-class FPSCounter : UIText() {
+class FPSCounter @JvmOverloads constructor(
+    private val clockSource: () -> ThrottledFrameClock = { UIEngine.current.clock },
+    private val refreshRateSource: RefreshRateSource = RefreshRateSource { getGlobal().mainActivity.refreshRate },
+    /** Whether the render thread time ("R") is shown; a developer aid, so only in debug builds by default. */
+    private val showRenderTime: Boolean = BuildConfig.DEBUG
+) : UIText() {
     private val updateClock
-        get() = UIEngine.current.clock
+        get() = clockSource()
 
     //region Counting logic
 
@@ -35,6 +46,12 @@ class FPSCounter : UIText() {
      * The average frame time in seconds.
      */
     var displayedFrameTime = 0f
+        private set
+
+    /**
+     * The smoothed CPU time the render thread spends per frame, in seconds.
+     */
+    var displayedRenderTime = 0f
         private set
 
     private var aimFPS = 0f
@@ -51,6 +68,7 @@ class FPSCounter : UIText() {
 
     private var lastDisplayedFps = 0
     private var lastDisplayedFrameTime = 0f
+    private var lastDisplayedRenderMs = 0
 
     private var timeSinceLastUpdate = 0f
     private val updateInterval = 0.1f
@@ -137,6 +155,13 @@ class FPSCounter : UIText() {
             elapsedUpdateFrameTime
         )
 
+        displayedRenderTime = Interpolation.dampContinuously(
+            displayedRenderTime,
+            RenderTiming.lastWorkNanos / 1e9f,
+            dampTime,
+            elapsedUpdateFrameTime
+        )
+
         displayedFpsCount = if (hasUpdateSpike) {
             // Show spike time using raw elapsed value, to account for `framesPerSecond` being so averaged spike frames
             // do not show.
@@ -173,21 +198,33 @@ class FPSCounter : UIText() {
             displayedMs.roundToInt().toFloat()
         }
 
-        if (!hasSignificantChanges && displayedFps == lastDisplayedFps && roundedFrameTime == lastDisplayedFrameTime) {
+        val displayedRenderMs = (displayedRenderTime * 1000).roundToInt()
+
+        if (!hasSignificantChanges &&
+            displayedFps == lastDisplayedFps &&
+            roundedFrameTime == lastDisplayedFrameTime &&
+            displayedRenderMs == lastDisplayedRenderMs
+        ) {
             return
         }
 
         timeSinceLastUpdate = 0f
         lastDisplayedFps = displayedFps
         lastDisplayedFrameTime = roundedFrameTime
+        lastDisplayedRenderMs = displayedRenderMs
 
         stringBuilder.setLength(0)
 
-        formatter.format(
-            "%.${if (isHighPrecision) "1" else "0"}f ms | %d FPS",
-            displayedMs,
-            displayedFps
-        )
+        if (showRenderTime) {
+            formatter.format(
+                if (isHighPrecision) HIGH_PRECISION_RENDER_FORMAT else LOW_PRECISION_RENDER_FORMAT,
+                displayedMs,
+                displayedFps,
+                displayedRenderMs
+            )
+        } else {
+            formatter.format(if (isHighPrecision) HIGH_PRECISION_FORMAT else LOW_PRECISION_FORMAT, displayedMs, displayedFps)
+        }
 
         text = stringBuilder.toString()
 
@@ -195,7 +232,7 @@ class FPSCounter : UIText() {
     }
 
     private fun updateAimFPS(): Boolean {
-        val refreshRate = getGlobal().mainActivity.refreshRate
+        val refreshRate = refreshRateSource.get()
 
         val newAimFPS = if (updateClock.throttling && updateClock.maximumUpdateHz > 0) {
             min(updateClock.maximumUpdateHz, refreshRate)
@@ -243,8 +280,10 @@ class FPSCounter : UIText() {
 
         displayedFpsCount = 0f
         displayedFrameTime = 0f
+        displayedRenderTime = 0f
         lastDisplayedFps = 0
         lastDisplayedFrameTime = 0f
+        lastDisplayedRenderMs = 0
         timeSinceLastUpdate = 0f
         isDisplayed = false
         timeSinceLastSignificantChange = 0f
@@ -252,4 +291,18 @@ class FPSCounter : UIText() {
     }
 
     //endregion
+
+    /**
+     * Supplies the display refresh rate in Hz.
+     */
+    fun interface RefreshRateSource {
+        fun get(): Float
+    }
+
+    private companion object {
+        const val HIGH_PRECISION_FORMAT = "%.1f ms | %d FPS"
+        const val LOW_PRECISION_FORMAT = "%.0f ms | %d FPS"
+        const val HIGH_PRECISION_RENDER_FORMAT = "$HIGH_PRECISION_FORMAT · R %d ms"
+        const val LOW_PRECISION_RENDER_FORMAT = "$LOW_PRECISION_FORMAT · R %d ms"
+    }
 }

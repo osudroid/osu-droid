@@ -9,7 +9,7 @@ import com.reco1l.framework.math.*
 import org.andengine.engine.camera.Camera
 import org.andengine.input.touch.TouchEvent
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.*
 
@@ -238,7 +238,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
         return ARC_DEPTH * (1f - cos(distanceFromCenter * PI.toFloat() / 2f))
     }
 
-    override fun onDrawComponent(pGLState: GLState, camera: Camera, component: BeatmapSetPanel) {
+    override fun onDrawComponent(drawContext: DrawContext, camera: Camera, component: BeatmapSetPanel) {
 
         val buttonAbsoluteY = component.absoluteY + component.button.absoluteY
         val mainPanelYPercentage = getPositionPercentage(buttonAbsoluteY, component.button.height, scrollY, height)
@@ -261,7 +261,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
             }
         }
 
-        super.onDrawComponent(pGLState, camera, component)
+        super.onDrawComponent(drawContext, camera, component)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

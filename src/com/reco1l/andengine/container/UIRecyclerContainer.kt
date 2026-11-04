@@ -6,7 +6,7 @@ import com.reco1l.andengine.container.Orientation.*
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.IEntity
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.DrawContext
 import java.util.LinkedList
 import kotlin.math.max
 
@@ -166,9 +166,9 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
     }
 
 
-    protected open fun onDrawComponent(pGLState: GLState, camera: Camera, component: C) {
+    protected open fun onDrawComponent(drawContext: DrawContext, camera: Camera, component: C) {
         // Override this method to customize how components are drawn.
-        component.onDraw(pGLState, camera)
+        component.onDraw(drawContext, camera)
     }
 
     override fun onScrollChanged() {
@@ -266,9 +266,9 @@ open class UIRecyclerContainer<T : Any, C : RecyclableComponent<T>>(private val 
         }
 
 
-        override fun onDrawChildren(pGLState: GLState, camera: Camera) {
+        override fun onDrawChildren(drawContext: DrawContext, camera: Camera) {
             for (component in boundComponents.values) {
-                onDrawComponent(pGLState, camera, component)
+                onDrawComponent(drawContext, camera, component)
             }
         }
 

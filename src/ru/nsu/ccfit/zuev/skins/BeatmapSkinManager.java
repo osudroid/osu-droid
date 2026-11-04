@@ -49,6 +49,15 @@ public class BeatmapSkinManager {
         final File folderFile = new File(beatmapFolder);
         File[] folderFiles = FileUtils.listFiles(folderFile, new String[]{
             ".wav", ".mp3", ".ogg", ".png", ".jpg"});
+        ResourceManager.getInstance().beginTextureSession();
+        try {
+            loadBeatmapSkinFiles(folderFiles);
+        } finally {
+            ResourceManager.getInstance().endTextureSession();
+        }
+    }
+
+    private void loadBeatmapSkinFiles(final File[] folderFiles) {
         for (final File f : folderFiles) {
             if (!f.isFile()) {
                 continue;

@@ -13,8 +13,8 @@ import org.andengine.engine.Engine
 import org.andengine.engine.options.EngineOptions
 import org.andengine.entity.IEntity
 import org.andengine.entity.scene.*
+import org.andengine.graphics.DrawContext
 import org.andengine.input.touch.*
-import org.andengine.opengl.util.GLState
 import kotlin.math.*
 import org.andengine.engine.camera.Camera
 
@@ -66,7 +66,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     }
 
 
-    override fun onDrawScene(pGLState: GLState, pCamera: Camera) {
+    override fun onDrawScene(drawContext: DrawContext, pCamera: Camera) {
         UIComponent.invalidateSizeCache()
         val focusedEntity = focusedEntity
 
@@ -96,7 +96,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
             overlay.setPosition(0f, 0f)
         }
 
-        super.onDrawScene(pGLState, pCamera)
+        super.onDrawScene(drawContext, pCamera)
     }
 
 

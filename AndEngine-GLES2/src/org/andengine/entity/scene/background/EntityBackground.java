@@ -2,7 +2,7 @@ package org.andengine.entity.scene.background;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.IEntity;
-import org.andengine.opengl.util.GLState;
+import org.andengine.graphics.DrawContext;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -44,10 +44,10 @@ public class EntityBackground extends Background {
 	// ===========================================================
 
 	@Override
-	public void onDraw(final GLState pGLState, final Camera pCamera) {
-		super.onDraw(pGLState, pCamera);
+	public void onDraw(final DrawContext pDrawContext, final Camera pCamera) {
+		super.onDraw(pDrawContext, pCamera);
 
-		this.mEntity.onDraw(pGLState, pCamera);
+		this.mEntity.onDraw(pDrawContext, pCamera);
 	}
 
 	// ===========================================================

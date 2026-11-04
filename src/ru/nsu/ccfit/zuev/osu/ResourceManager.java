@@ -19,8 +19,9 @@ import com.osudroid.ui.skinning.IniReader;
 import com.osudroid.ui.skinning.SkinConverter;
 import com.reco1l.andengine.UIEngine;
 import org.andengine.engine.Engine;
-import org.andengine.opengl.font.Font;
-import org.andengine.opengl.font.StrokeFont;
+import org.andengine.graphics.atlas.TextureAtlasPages;
+import org.andengine.graphics.text.Font;
+import org.andengine.graphics.text.StrokeFont;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.region.TextureRegion;
@@ -67,6 +68,10 @@ public class ResourceManager {
     private final TextureStore textureStore = new TextureStore();
     private final TextureStore customTextureStore = new TextureStore();
 
+    // Small skin images (default, user and beatmap skin) are packed into shared pages while a
+    // texture session is open, see beginTextureSession().
+    private TextureAtlasPages atlasPages;
+
     private Engine engine;
     private Context context;
 
@@ -84,12 +89,13 @@ public class ResourceManager {
     public void Init(final Engine engine, final Context context) {
         this.engine = engine;
         this.context = context;
+        atlasPages = new TextureAtlasPages(engine.getTextureManager());
 
         fontStore.init(engine, context);
         soundStore.init(context);
         customSoundStore.init(context);
-        textureStore.init(engine, context);
-        customTextureStore.init(engine, context);
+        textureStore.init(engine, context, atlasPages);
+        customTextureStore.init(engine, context, atlasPages);
 
         fontStore.clear();
         textureStore.clear();
@@ -112,17 +118,37 @@ public class ResourceManager {
         if (!folder.endsWith("/"))
             folder = folder + "/";
 
-        loadCustomSkin(folder);
+        beginTextureSession();
+        try {
+            loadCustomSkin(folder);
 
-        loadTexture("defaultapproachcircle", "gfx/approachcircle.png", false);
-        loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
-        loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
-        loadTexture("ranking_disabled", "ranking_disabled.png", false);
-        loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+            loadTexture("defaultapproachcircle", "gfx/approachcircle.png", false);
+            loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
+            loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
+            loadTexture("ranking_disabled", "ranking_disabled.png", false);
+            loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-        textureStore.markAbsent("lighting");
+            textureStore.markAbsent("lighting");
+        } finally {
+            // Queues the filled atlas pages for upload, so they are on their way before the UI
+            // picks up the new skin below.
+            endTextureSession();
+        }
 
         UIEngine.getCurrent().onSkinChange();
+    }
+
+    /**
+     * Opens a texture session: small textures loaded until the matching {@link #endTextureSession()}
+     * are packed into shared atlas pages, which reach the GPU only when the outermost session ends.
+     * Sessions may nest. Always pair with {@link #endTextureSession()} in a {@code finally} block.
+     */
+    public void beginTextureSession() {
+        atlasPages.beginSession();
+    }
+
+    public void endTextureSession() {
+        atlasPages.endSession();
     }
 
     public void loadCustomSkin(String folder) {
@@ -360,7 +386,11 @@ public class ResourceManager {
             // getTextureIfLoaded("::background") is read externally (GameScene, ScoringScene,
             // GameLoaderScene, RoomScene, LobbyScene) and must keep seeing *something* until this
             // method's own textureStore.put(...) calls below replace it.
-            engine.getTextureManager().unloadTexture(Objects.requireNonNull(textureStore.get("::background")).getTexture());
+            TextureRegion previous = Objects.requireNonNull(textureStore.get("::background"));
+            // The fallback may be an atlas region (small menu-background) whose page other images share.
+            if (!textureStore.isAtlasRegion(previous)) {
+                engine.getTextureManager().unloadTexture(previous.getTexture());
+            }
         }
         if (file == null) {
             return textureStore.get("menu-background");
@@ -546,9 +576,7 @@ public class ResourceManager {
         if (!source.preload()) {
             return;
         }
-        BitmapTextureAtlas tex = new BitmapTextureAtlas(engine.getTextureManager(), source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
-        TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
-        engine.getTextureManager().loadTexture(tex);
+        TextureRegion region = customTextureStore.createRegion(source, source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
         if (multiframe) {
             int i = 0;
             while (textureStore.containsKey(resname + delimiter + i)) {
@@ -598,7 +626,9 @@ public class ResourceManager {
         }
         for (final String s : customTextureStore.getKeys()) {
             TextureRegion tex = customTextureStore.get(s);
-            if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
+            // Atlas regions are released by customTextureStore.clear() below instead.
+            // Queued textures are unloaded too: unloading cancels a pending load.
+            if (tex != null && !customTextureStore.isAtlasRegion(tex) && tex.getTexture() != null) {
                 engine.getTextureManager().unloadTexture(tex.getTexture());
             }
         }
@@ -617,12 +647,18 @@ public class ResourceManager {
         return textureStore.getFrameCount(texname);
     }
 
+    /** A texture that is neither on the GPU nor queued for loading (a queued one may still be preparing its pixels). */
+    private boolean isTextureLost(final TextureRegion tex) {
+        return tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()
+                && !engine.getTextureManager().isTextureLoadPending(tex.getTexture());
+    }
+
     public void checkSpinnerTextures() {
         final String[] names = {"spinner-background", "spinner-circle",
                 "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
             TextureRegion tex = textureStore.get(s);
-            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
+            if (isTextureLost(tex)) {
                 engine.getTextureManager().onReload();
                 break;
             }
@@ -641,7 +677,7 @@ public class ResourceManager {
         };
         for (final String s : names) {
             TextureRegion tex = textureStore.get(s);
-            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
+            if (isTextureLost(tex)) {
                 engine.getTextureManager().onReload();
                 break;
             }
