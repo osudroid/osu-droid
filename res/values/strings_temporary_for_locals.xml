@@ -13,7 +13,7 @@
         <item>2x refresh rate</item>
         <item>4x refresh rate</item>
         <item>8x refresh rate</item>
-        <item>Unlimited</item>
+        <item>Basically unlimited</item>
     </string-array>
 
     <string-array name="frame_limiter_values" translatable="false">
