@@ -20,11 +20,11 @@ class SendingPanel(
     private val score: Long,
     private val accuracy: Float,
     private val pp: Float
-) : Rectangle(0f, -200f, 800f, 200f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
+) : Rectangle(0f, -200f, 800f, 200f) {
     val dismissTouchArea: ITouchArea
         get() = dismissButton
 
-    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking", GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+    private val overallCaptionText = Text(0f, 0f, getResources().getFont("CaptionFont"), "Overall Ranking").also {
         it.setPosition((width - it.width) / 2, height / 5)
         attachChild(it)
     }
@@ -60,7 +60,7 @@ class SendingPanel(
         it.setText("Sending...")
     }
 
-    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+    private val rowContainer = Rectangle(0f, 0f, width, height * 0.8f).also {
         it.setColor(0f, 0f, 0f, 0f)
         attachChild(it)
     }
@@ -202,10 +202,10 @@ class SendingPanel(
         // Reverse back to maintain original order
         .reversed()
 
-    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button"), GlobalManager.getInstance().engine.vertexBufferObjectManager) {
+    private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button")) {
         var canBeDismissed = false
 
-        private val text = Text(0f, 0f, getResources().getFont("font"), "", 10, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        private val text = Text(0f, 0f, getResources().getFont("font"), "", 10).also {
             attachChild(it)
         }
 
@@ -225,20 +225,20 @@ class SendingPanel(
         }
     }
 
-    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f, GlobalManager.getInstance().engine.vertexBufferObjectManager) {
+    private class Column(caption: String) : Rectangle(0f, 0f, 100f, 80f) {
         private val minWidth = width
         private val minHeight = height
 
-        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        private val captionText = Text(0f, 0f, getResources().getFont("font"), caption).also {
             attachChild(it)
         }
 
-        private val valueRect = Rectangle(0f, 80f, width, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        private val valueRect = Rectangle(0f, 80f, width, 0f).also {
             it.setColor(0.4f, 0.4f, 0.4f, 0.8f)
             attachChild(it)
         }
 
-        private val valueText = Text(0f, 0f, getResources().getFont("font"), "", 100, TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        private val valueText = Text(0f, 0f, getResources().getFont("font"), "", 100, TextOptions(HorizontalAlign.CENTER)).also {
             valueRect.attachChild(it)
         }
 

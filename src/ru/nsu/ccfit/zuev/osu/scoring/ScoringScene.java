@@ -90,7 +90,6 @@ public class ScoringScene {
                      final SongService player, final String replayPath, final String mapMD5,
                      final BeatmapInfo beatmapToReplay) {
         scene = new UIScene();
-        final var vbo = engine.getVertexBufferObjectManager();
         songService = player;
         currentStatistic = stat;
         if (replayPath != null && beatmap == null) {
@@ -104,10 +103,10 @@ public class ScoringScene {
         float height = tex.getHeight();
         height *= Config.getRES_WIDTH() / (float) tex.getWidth();
         final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex, vbo);
+                Config.getRES_WIDTH(), height, tex);
         scene.setBackground(new SpriteBackground(bg));
 
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(100), vbo);
+        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(100));
         bgTopRect.setColor(0, 0, 0, 0.8f);
         scene.attachChild(bgTopRect);
 
@@ -131,47 +130,47 @@ public class ScoringScene {
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
         final Sprite panel = new Sprite(x, y, Utils.toRes(panelr.getWidth() * 0.9f),
-                Utils.toRes(panelr.getHeight() * 0.9f), panelr, vbo);
+                Utils.toRes(panelr.getHeight() * 0.9f), panelr);
         scaledContainer.attachChild(panel);
 
         final TextureRegion hit300sr = ResourceManager.getInstance().getTexture("hit300");
         final Sprite hit300s = new Sprite(Utils.toRes(10), Utils.toRes(130),
-                Utils.toRes(hit300sr.getWidth()), Utils.toRes(hit300sr.getHeight()), hit300sr, vbo);
+                Utils.toRes(hit300sr.getWidth()), Utils.toRes(hit300sr.getHeight()), hit300sr);
         hit300s.setPosition(Utils.toRes(70 - hit300s.getWidth() / 2 + x), Utils.toRes(130 - hit300s.getHeight() / 2 + y));
         scaledContainer.attachChild(hit300s);
 
         final TextureRegion hit100sr = ResourceManager.getInstance().getTexture("hit100");
         final Sprite hit100s = new Sprite(Utils.toRes(10), Utils.toRes(130 + 92),
-                Utils.toRes(hit100sr.getWidth()), Utils.toRes(hit100sr.getHeight()), hit100sr, vbo);
+                Utils.toRes(hit100sr.getWidth()), Utils.toRes(hit100sr.getHeight()), hit100sr);
         hit100s.setPosition(Utils.toRes(70 - hit100s.getWidth() / 2 + x), Utils.toRes(130 + 92 - hit100s.getHeight() / 2 + y));
         scaledContainer.attachChild(hit100s);
 
         final TextureRegion hit50sr = ResourceManager.getInstance().getTexture("hit50");
         final Sprite hit50s = new Sprite(0, Utils.toRes(120 + 92 * 2),
-                Utils.toRes(hit50sr.getWidth()), Utils.toRes(hit50sr.getHeight()), hit50sr, vbo);
+                Utils.toRes(hit50sr.getWidth()), Utils.toRes(hit50sr.getHeight()), hit50sr);
         hit50s.setPosition(Utils.toRes(70 - hit50s.getWidth() / 2 + x), Utils.toRes(130 + 92 * 2 - hit50s.getHeight() / 2 + y));
         scaledContainer.attachChild(hit50s);
 
         final TextureRegion hit300ksr = ResourceManager.getInstance().getTexture("hit300g");
         final Sprite hit300ks = new Sprite(Utils.toRes(300), Utils.toRes(100),
-                Utils.toRes(hit300ksr.getWidth()), Utils.toRes(hit300ksr.getHeight()), hit300ksr, vbo);
+                Utils.toRes(hit300ksr.getWidth()), Utils.toRes(hit300ksr.getHeight()), hit300ksr);
         hit300ks.setPosition(Utils.toRes(340 - hit300ks.getWidth() / 2 + x), Utils.toRes(130 - hit300ks.getHeight() / 2 + y));
         scaledContainer.attachChild(hit300ks);
 
         final TextureRegion hit100ksr = ResourceManager.getInstance().getTexture("hit100k");
         final Sprite hit100ks = new Sprite(Utils.toRes(300), Utils.toRes(120 + 92),
-                Utils.toRes(hit100ksr.getWidth()), Utils.toRes(hit100ksr.getHeight()), hit100ksr, vbo);
+                Utils.toRes(hit100ksr.getWidth()), Utils.toRes(hit100ksr.getHeight()), hit100ksr);
         hit100ks.setPosition(Utils.toRes(340 - hit100ks.getWidth() / 2 + x), Utils.toRes(130 + 92 - hit100ks.getHeight() / 2 + y));
         scaledContainer.attachChild(hit100ks);
 
         final TextureRegion hit0sr = ResourceManager.getInstance().getTexture("hit0");
         final Sprite hit0s = new Sprite(Utils.toRes(300), Utils.toRes(120 + 92 * 2),
-                Utils.toRes(hit0sr.getWidth()), Utils.toRes(hit0sr.getHeight()), hit0sr, vbo);
+                Utils.toRes(hit0sr.getWidth()), Utils.toRes(hit0sr.getHeight()), hit0sr);
         hit0s.setPosition(Utils.toRes(340 - hit0s.getWidth() / 2 + x), Utils.toRes(130 + 92 * 2 - hit0s.getHeight() / 2 + y));
         scaledContainer.attachChild(hit0s);
 
         final Sprite rankingText = new Sprite(Utils.toRes(580), 0,
-                ResourceManager.getInstance().getTexture("ranking-title"), vbo);
+                ResourceManager.getInstance().getTexture("ranking-title"));
         rankingText.setPosition((float) (Config.getRES_WIDTH() * 5) / 6 - rankingText.getWidth() / 2, 0);
         scene.attachChild(rankingText);
 
@@ -211,10 +210,10 @@ public class ScoringScene {
 
         final Sprite maxComboText = new Sprite(Utils.toRes(20 + x),
                 Utils.toRes(332 + y), ResourceManager.getInstance().getTexture(
-                "ranking-maxcombo"), vbo);
+                "ranking-maxcombo"));
         scaledContainer.attachChild(maxComboText);
         final Sprite accText = new Sprite(Utils.toRes(260 + x), Utils.toRes(332 + y),
-                ResourceManager.getInstance().getTexture("ranking-accuracy"), vbo);
+                ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scaledContainer.attachChild(accText);
         final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x),
                 Utils.toRes(maxComboText.getY() + 38), stat.getScoreMaxCombo() + "x", 1,
@@ -227,7 +226,7 @@ public class ScoringScene {
         accuracy.attachToScene(scaledContainer);
 
         final Sprite mark = new Sprite(Utils.toRes(610), 0, ResourceManager
-                .getInstance().getTexture("ranking-" + stat.getMark()), vbo);
+                .getInstance().getTexture("ranking-" + stat.getMark()));
         if (beatmap != null) {
             mark.setAlpha(0);
             mark.setScale(1.5f);
@@ -238,7 +237,7 @@ public class ScoringScene {
         scene.attachChild(mark);
 
         final Sprite backBtn = new Sprite(Utils.toRes(580), Utils.toRes(490),
-                ResourceManager.getInstance().getTexture("ranking-back"), vbo) {
+                ResourceManager.getInstance().getTexture("ranking-back")) {
 
 
             @Override
@@ -264,7 +263,7 @@ public class ScoringScene {
 
         if (!Multiplayer.isMultiplayer)
         {
-            retryBtn = new Sprite(Utils.toRes(580), Utils.toRes(400), ResourceManager.getInstance().getTexture("ranking-retry"), vbo) {
+            retryBtn = new Sprite(Utils.toRes(580), Utils.toRes(400), ResourceManager.getInstance().getTexture("ranking-retry")) {
 
                 @Override
                 public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -294,7 +293,7 @@ public class ScoringScene {
         if (!Multiplayer.isMultiplayer && replayPath != null)
         {
             replayBtn = new Sprite(Utils.toRes(580), Utils.toRes(400),
-                                                ResourceManager.getInstance().getTexture("ranking-replay"), vbo) {
+                                                ResourceManager.getInstance().getTexture("ranking-replay")) {
 
                 @Override
                 public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -321,7 +320,7 @@ public class ScoringScene {
         }
 
         if (stat.isPerfect()) {
-            final Sprite perfect = new Sprite(0, 0, ResourceManager.getInstance().getTexture("ranking-perfect"), vbo);
+            final Sprite perfect = new Sprite(0, 0, ResourceManager.getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scaledContainer.attachChild(perfect);
         }
@@ -411,11 +410,11 @@ public class ScoringScene {
         }
         Debug.i("playedtime " + stat.getTime());
         final Text beatmapInfoText = new Text(Utils.toRes(4), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), infoStr, vbo);
+                ResourceManager.getInstance().getFont("font"), infoStr);
         final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfoText.getY() + beatmapInfoText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), mapperStr, vbo);
+                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
         final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), playerStr, vbo);
+                ResourceManager.getInstance().getFont("smallFont"), playerStr);
 
         if (Config.isDisplayScoreStatistics() && !currentStatistic.isTeamStatistic()) {
 
@@ -536,9 +535,9 @@ public class ScoringScene {
             }
 
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
-                    ResourceManager.getInstance().getFont("smallFont"), ppinfo.toString(), vbo);
+                    ResourceManager.getInstance().getFont("smallFont"), ppinfo.toString());
             ppInfo.setPosition(Utils.toRes(244), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2) - paddingButtom);
-            final Rectangle statisticRectangle = new Rectangle(Utils.toRes(240), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4) - paddingButtom, ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4), vbo);
+            final Rectangle statisticRectangle = new Rectangle(Utils.toRes(240), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4) - paddingButtom, ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
             statisticRectangle.setColor(0, 0, 0, 0.5f);
             scene.attachChild(statisticRectangle);
             scene.attachChild(ppInfo);

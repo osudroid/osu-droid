@@ -54,7 +54,7 @@ public class Countdown extends GameObject {
         ready.setVisible(false);
         ready.setIgnoreUpdate(true);
 
-        count3 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count3"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        count3 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count3"));
         count3.setPosition(0, center.y - count3.getHeight() / 2);
         count3.setVisible(false);
         count3.setIgnoreUpdate(true);
@@ -63,7 +63,7 @@ public class Countdown extends GameObject {
                 new DelayModifier(COUNTDOWN_LENGTH * speed * 8 / 18),
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
-        count2 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count2"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        count2 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count2"));
         count2.setPosition(Config.getRES_WIDTH() - count2.getWidth(), center.y
                 - count2.getHeight() / 2);
         count2.setVisible(false);
@@ -73,7 +73,7 @@ public class Countdown extends GameObject {
                 new DelayModifier(COUNTDOWN_LENGTH * speed * 5 / 18),
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
-        count1 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count1"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        count1 = new Sprite(0, 0, ResourceManager.getInstance().getTexture("count1"));
         count1.setPosition(center.x - count1.getWidth() / 2,
                 center.y - count1.getHeight() / 2);
         count1.setVisible(false);

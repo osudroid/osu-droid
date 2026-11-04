@@ -11,8 +11,8 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
 import org.andengine.engine.camera.*
+import org.andengine.graphics.DrawContext
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLState
 import com.osudroid.mods.*
 import com.osudroid.utils.allModsInstances
 import ru.nsu.ccfit.zuev.osu.*
@@ -75,7 +75,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
         super.onAttached()
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
 
         val acronymText = get<UIComponent>(0)
         if (acronymText is UIText) {
@@ -84,7 +84,7 @@ class ModIcon(val mod: Mod) : UIContainer(), ISkinnable {
 
         (background as? UIBox)?.cornerRadius = height * 0.2f
 
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

@@ -45,7 +45,7 @@ public class ComboBurst {
 
         TextureRegion globalTex = ResourceManager.getInstance().getTexture("comboburst");
         if (globalTex != null) {
-            Sprite sprite = new Sprite(0, 0, globalTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            Sprite sprite = new Sprite(0, 0, globalTex);
             sprite.setAlpha(0f);
             sprite.setIgnoreUpdate(true);
             comboBursts.add(sprite);
@@ -57,7 +57,7 @@ public class ComboBurst {
         for (int i = 0; i < 10; i++) {
             TextureRegion tex = ResourceManager.getInstance().getTexture("comboburst-" + i);
             if (tex != null) {
-                Sprite sprite = new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                Sprite sprite = new Sprite(0, 0, tex);
                 sprite.setAlpha(0f);
                 sprite.setIgnoreUpdate(true);
                 comboBursts.add(sprite);

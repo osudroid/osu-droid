@@ -39,7 +39,7 @@ public class BreakAnimator extends GameObject {
         this.hud = hud;
 
         for (int i = 0; i < 4; i++) {
-            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-warningarrow").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            arrows[i] = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-warningarrow").deepCopy());
             arrows[i]
                     .registerEntityModifier(new LoopEntityModifier(
                             new SequenceEntityModifier(

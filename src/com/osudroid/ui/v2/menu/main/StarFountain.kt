@@ -11,7 +11,6 @@ import org.andengine.entity.particle.modifier.ExpireParticleInitializer
 import org.andengine.entity.particle.modifier.ScaleParticleModifier
 import org.andengine.entity.sprite.Sprite
 import org.andengine.opengl.texture.region.TextureRegion
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -49,11 +48,10 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
 
     init {
         val starRegion: TextureRegion? = ResourceManager.getInstance().getTexture("star2")
-        val vbo: VertexBufferObjectManager = GlobalManager.getInstance().engine.vertexBufferObjectManager
 
         val emitY = screenHeight
-        systemLeft  = starRegion?.let { buildSystem(screenWidth * 0.25f, emitY, it, vbo, velLeft)  }
-        systemRight = starRegion?.let { buildSystem(screenWidth * 0.75f, emitY, it, vbo, velRight) }
+        systemLeft  = starRegion?.let { buildSystem(screenWidth * 0.25f, emitY, it, velLeft)  }
+        systemRight = starRegion?.let { buildSystem(screenWidth * 0.75f, emitY, it, velRight) }
     }
 
 
@@ -133,10 +131,9 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
     private fun buildSystem(
         x: Float, y: Float,
         texture: TextureRegion,
-        vbo: VertexBufferObjectManager,
         velInit: VelocityParticleInitializer<Sprite>
     ): ParticleSystem<Sprite> = ParticleSystem(
-        { px, py -> Sprite(px, py, texture, vbo) },
+        { px, py -> Sprite(px, py, texture) },
         PointParticleEmitter(x, y),
         32f, 48f, 128
     ).also {

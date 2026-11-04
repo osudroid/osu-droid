@@ -11,7 +11,6 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -39,9 +38,6 @@ public class PauseMenu implements IOnAreaTouchListener {
     public PauseMenu(final Engine engine, final GameScene game, final boolean fail) {
         this.game = game;
         this.fail = fail;
-
-        final VertexBufferObjectManager vbo =
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
 
         final TextureRegion texReplay   = ResourceManager.getInstance().getTexture("pause-save-replay");
         final TextureRegion texContinue = ResourceManager.getInstance().getTexture("pause-continue");
@@ -96,8 +92,7 @@ public class PauseMenu implements IOnAreaTouchListener {
                             (Config.getRES_HEIGHT() - bgH) / 2f,
                             Config.getRES_WIDTH(),
                             bgH,
-                            bgTex,
-                            vbo
+                            bgTex
                     )
             );
         }
@@ -108,23 +103,23 @@ public class PauseMenu implements IOnAreaTouchListener {
         float y = (Config.getRES_HEIGHT() - displayTotalH) / 2f;
 
         if (showSaveReplay) {
-            btnSaveReplay = addButton(texReplay, cx, y, scale, vbo);
+            btnSaveReplay = addButton(texReplay, cx, y, scale);
             y += texReplay.getHeight() * scale + scale;
         }
         if (showContinue) {
-            btnContinue = addButton(texContinue, cx, y, scale, vbo);
+            btnContinue = addButton(texContinue, cx, y, scale);
             y += texContinue.getHeight() * scale + scale;
         }
-        btnRetry = addButton(texRetry, cx, y, scale, vbo);
+        btnRetry = addButton(texRetry, cx, y, scale);
         y += texRetry.getHeight() * scale + scale;
-        btnBack  = addButton(texBack, cx, y, scale, vbo);
+        btnBack  = addButton(texBack, cx, y, scale);
     }
 
     private Sprite addButton(TextureRegion tex, float cx, float y,
-                             float scale, VertexBufferObjectManager vbo) {
+                             float scale) {
         final float w = tex.getWidth()  * scale;
         final float h = tex.getHeight() * scale;
-        final Sprite btn = new Sprite(cx - w / 2f, y, w, h, tex, vbo);
+        final Sprite btn = new Sprite(cx - w / 2f, y, w, h, tex);
         btn.setAlpha(0f);
         btn.registerEntityModifier(new AlphaModifier(0.4f, 0f, 1f));
         scene.attachChild(btn);

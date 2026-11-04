@@ -1,19 +1,22 @@
 package com.reco1l.andengine.text
 
-import android.opengl.GLES32
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.text.UITextureText.*
 import org.andengine.engine.camera.*
-import org.andengine.opengl.shader.PositionTextureCoordinatesUniformColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.BatchTexture
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.opengl.texture.region.*
-import org.andengine.opengl.util.GLState
 import kotlin.math.*
 
 /**
  * A text component that uses textures for each character.
+ *
+ * The glyphs are drawn as quads of the engine's [QuadBatcher], so a text whose glyphs share one
+ * texture (for example one atlas page) costs a single draw, and consecutive texts of the same
+ * texture and blend share it too. [depthInfo] is not applied: batched quads are drawn without a
+ * depth test.
  */
-open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBufferedComponent<TextureTextVertexBuffer>() {
+open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBufferedComponent<IBuffer>() {
 
     /**
      * The spacing between glyphs.
@@ -99,12 +102,6 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     private val textureRegions = mutableListOf<Pair<Char, TextureRegion>>()
     private var textContentWidth = 0f
 
-    /**
-     * VBO holding full-range UV coordinates: (0,0), (0,1), (1,0), (1,1).
-     * Each glyph texture is its own atlas page, so full-range UVs are always correct.
-     */
-    private val fullUVBuffer = FullUVBuffer()
-
 
     init {
         width = MatchContent
@@ -150,12 +147,20 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
         super.contentHeight = contentHeight
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
-    }
+    override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
+        onApplyColor(drawContext)
 
-    override fun doDraw(pGLState: GLState, pCamera: Camera) {
-        beginDraw(pGLState)
+        clearIfRequested()
+
+        if (textureRegions.isEmpty()) {
+            return
+        }
+
+        val blend = meshBlendMode()
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+
+        QuadBatcher.setProjection(drawContext.projectionGLMatrix)
+        val modelView = drawContext.modelViewGLMatrix
 
         var offsetX = when (textAlign) {
             TextAlign.Left -> 0f
@@ -163,113 +168,26 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
             TextAlign.Right -> 1f
         } * (contentWidth - textContentWidth)
 
+        val fixedCharWidths = fixedCharWidths
+
         for (i in textureRegions.indices) {
 
-            val (char, texture) = textureRegions[i]
-            val textureWidth = texture.width * textureScaleX
-            val textureHeight = texture.height * textureScaleY
-            val cellWidth = (fixedCharWidths?.get(char) ?: texture.width.toFloat()) * textureScaleX
+            val (char, region) = textureRegions[i]
+            val textureWidth = region.width * textureScaleX
+            val textureHeight = region.height * textureScaleY
+            val cellWidth = (fixedCharWidths?.get(char) ?: region.width) * textureScaleX
+            val x = offsetX + (cellWidth - textureWidth) / 2f
 
-            pGLState.pushModelViewGLMatrix()
-            pGLState.translateModelViewGLMatrixf(offsetX + (cellWidth - textureWidth) / 2f, 0f, 0f)
-
-            // Update position quad for this character and re-upload to GPU.
-            buffer?.update(textureWidth, textureHeight)
-            buffer?.invalidateOnHardware()
-            buffer?.beginDraw(pGLState)
-
-            texture.texture.bind(pGLState)
-
-            onDeclarePointers(pGLState)
-            onDrawBuffer(pGLState)
-
-            pGLState.popModelViewGLMatrix()
+            QuadBatcher.add(
+                BatchTexture.of(region.texture),
+                blend,
+                modelView,
+                x, 0f, x + textureWidth, textureHeight,
+                region.u, region.v, region.u2, region.v2,
+                color
+            )
 
             offsetX += cellWidth + spacing
-        }
-
-        // Restore vertex attribute array state so old AndEngine Sprite rendering is not broken.
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
-
-        // Reset GL buffer binding so legacy VBO binding is not tricked by a stale
-        // cache entry left over from Buffer.bindAndUpload(), which calls glBindBuffer
-        // directly without going through GLState.  Without this, the first legacy sprite
-        // drawn after any UITextureText will silently skip its own bind call and render
-        // from the wrong buffer (causing corrupted geometry / wrong draw order).
-        pGLState.bindArrayBuffer(0)
-    }
-
-    override fun onCreateBuffer(): TextureTextVertexBuffer {
-        return TextureTextVertexBuffer()
-    }
-
-    override fun onUpdateBuffer() {
-        // Nothing to do here, buffer is updated in `doDraw`.
-    }
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        // Upload texture unit
-        if (shader.uniformTexture0Location >= 0) {
-            GLES32.glUniform1i(shader.uniformTexture0Location, 0)
-        }
-
-        // Upload color
-        if (shader.uniformColorLocation >= 0) {
-            GLES32.glUniform4f(
-                shader.uniformColorLocation,
-                drawRed, drawGreen, drawBlue, drawAlpha
-            )
-        }
-
-        // Disable per-vertex color array
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-
-        // Set up full-range UV VBO at attribute 3
-        fullUVBuffer.beginDraw(pGLState)
-    }
-
-    override fun onDeclarePointers(gl: GLState) {
-        super.onDeclarePointers(gl)
-        // Re-upload MVP matrix per character since each character is translated differently.
-        val shader = PositionTextureCoordinatesUniformColorShaderProgram.getInstance()
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, gl.modelViewProjectionGLMatrix, 0
-            )
-        }
-    }
-
-    inner class TextureTextVertexBuffer : VertexBuffer(
-        drawTopology = GL_TRIANGLE_STRIP,
-        vertexCount = 4,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_DYNAMIC_DRAW
-    ) {
-        fun update(textureWidth: Float, textureHeight: Float) {
-            addQuad(0, 0f, 0f, textureWidth, textureHeight)
-        }
-    }
-
-    /**
-     * UV buffer covering the full texture (0,0)→(1,1).
-     * Vertex order: top-left, bottom-left, top-right, bottom-right (GL_TRIANGLE_STRIP).
-     */
-    inner class FullUVBuffer : TextureCoordinatesBuffer(
-        vertexCount = 4,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-        init {
-            putVertex(0, 0f, 0f)  // top-left
-            putVertex(1, 0f, 1f)  // bottom-left
-            putVertex(2, 1f, 0f)  // top-right
-            putVertex(3, 1f, 1f)  // bottom-right
-            invalidateOnHardware()
         }
     }
 }

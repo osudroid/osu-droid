@@ -1,22 +1,20 @@
 package com.reco1l.andengine.ui
 
-import android.opengl.GLES32
+import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.batch.MeshRenderer
+import org.andengine.graphics.batch.QuadBatcher
 import com.reco1l.andengine.buffered.Buffer
 import com.reco1l.andengine.buffered.BufferSharingMode
-import com.reco1l.andengine.buffered.GL_DYNAMIC_DRAW
-import com.reco1l.andengine.buffered.GL_TRIANGLE_STRIP
 import com.reco1l.andengine.buffered.UIBufferedComponent
-import org.andengine.opengl.shader.PositionColorShaderProgram
-import org.andengine.opengl.shader.constants.ShaderProgramConstants
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.shape.ShapeBatching
 
 /**
  * A rectangle that renders a smooth horizontal alpha gradient using per-vertex colors.
  *
- * The [org.andengine.opengl.shader.PositionColorShaderProgram] already supports per-vertex RGBA,  normally
- * [com.reco1l.andengine.buffered.UIBufferedComponent] disables the color attribute array and uses a constant *color.
- * This class overrides [onBindShader] to keep the array enabled so GLES can read the
- * gradient alpha values out of the interleaved VBO.
+ * Batched as a quad with a color per corner; with depth testing or clearing, the per-vertex colors
+ * of [GradientVBO] are drawn through the [MeshRenderer].
  *
  * @param fromAlpha  Alpha weight at the LEFT  edge (0–1).
  * @param toAlpha    Alpha weight at the RIGHT edge (0–1).
@@ -24,12 +22,28 @@ import org.andengine.opengl.util.GLState
 class UIGradientBox(
     private val fromAlpha: Float = 1f,
     private val toAlpha: Float = 0f,
-) : UIBufferedComponent<UIGradientBox.GradientVBO>() {
+) : UIBufferedComponent<UIGradientBox.GradientVBO>(batchesShape = true) {
 
     // Buffer lifecycle
 
-    override fun onCreateBuffer() = GradientVBO().also {
-        it.sharingMode = BufferSharingMode.Dynamic // update() called every frame
+    // The batch needs no buffer; it is only built when the box cannot be batched (see canBatchShape()).
+    override fun onCreateBuffer(): GradientVBO? {
+        if (canBatchShape()) {
+            return null
+        }
+
+        return GradientVBO().also {
+            it.sharingMode = BufferSharingMode.Dynamic // update() called every frame
+        }
+    }
+
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        // Same corner colors as GradientVBO: the left edge fades with fromAlpha, the right with toAlpha.
+        val left = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, fromAlpha * drawAlpha)
+        val right = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, toAlpha * drawAlpha)
+
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        ShapeBatching.gradientRect(gl.modelViewGLMatrix, 0f, 0f, width, height, left, right, left, right, blend)
     }
 
     override fun onUpdateBuffer() {
@@ -39,23 +53,6 @@ class UIGradientBox(
     override fun onSizeChanged() {
         super.onSizeChanged()
         requestBufferUpdate()
-    }
-
-    // Shader binding
-
-    override fun onBindShader(pGLState: GLState) {
-        val shader = PositionColorShaderProgram.getInstance()
-        shader.bindProgram(pGLState)
-
-        if (shader.uniformMVPMatrixLocation >= 0) {
-            GLES32.glUniformMatrix4fv(
-                shader.uniformMVPMatrixLocation,
-                1, false, pGLState.modelViewProjectionGLMatrix, 0
-            )
-        }
-
-        // Texture coordinates are unused, keep them disabled.
-        GLES32.glDisableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_TEXTURECOORDINATES_LOCATION)
     }
 
     /**
@@ -71,8 +68,7 @@ class UIGradientBox(
      *   offset 20 : A  (float, gradient weight × drawAlpha)
      */
     inner class GradientVBO : Buffer(
-        capacity = 4 * VERTEX_FLOATS,
-        bufferUsage = GL_DYNAMIC_DRAW,
+        capacity = 4 * VERTEX_FLOATS
     ) {
 
         /** Re-fills the buffer with the current entity size, color, and composed alpha. */
@@ -93,44 +89,26 @@ class UIGradientBox(
             putVert(3, w,  h,  r, g, b, ta)
         }
 
+        override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) {
+            MeshRenderer.drawColored(
+                PrimitiveType.TriangleStrip, data, 0, 4,
+                gl.modelViewGLMatrix, gl.projectionGLMatrix,
+                meshBlendMode(), meshDepthTest(), depthInfo.mask
+            )
+        }
+
         private fun putVert(idx: Int, x: Float, y: Float, r: Float, g: Float, b: Float, a: Float) {
             val base = idx * VERTEX_FLOATS
-            mFloatBuffer.put(base, x)
-            mFloatBuffer.put(base + 1, y)
-            mFloatBuffer.put(base + 2, r)
-            mFloatBuffer.put(base + 3, g)
-            mFloatBuffer.put(base + 4, b)
-            mFloatBuffer.put(base + 5, a)
-        }
-
-        // Called once per frame before drawing (Dynamic sharing mode).
-        override fun beginDraw(gl: GLState) {
-            bindAndUpload()
-
-            // Position attribute: 2 floats, stride=24, byte-offset 0
-            GLES32.glVertexAttribPointer(
-                ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION,
-                2, GLES32.GL_FLOAT, false, STRIDE_BYTES, 0
-            )
-            GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION)
-
-            // Color attribute: 4 floats, stride=24, byte-offset 8 (skip x,y)
-            GLES32.glVertexAttribPointer(
-                ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION,
-                4, GLES32.GL_FLOAT, false, STRIDE_BYTES, 8
-            )
-            GLES32.glEnableVertexAttribArray(ShaderProgramConstants.ATTRIBUTE_COLOR_LOCATION)
-        }
-
-        override fun declarePointers(gl: GLState, entity: UIBufferedComponent<*>) { /* using beginDraw */ }
-
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            GLES32.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+            data[base] = x
+            data[base + 1] = y
+            data[base + 2] = r
+            data[base + 3] = g
+            data[base + 4] = b
+            data[base + 5] = a
         }
     }
 
     companion object {
         private const val VERTEX_FLOATS = 6 // x, y, r, g, b, a
-        private const val STRIDE_BYTES = VERTEX_FLOATS * 4 // 24
     }
 }

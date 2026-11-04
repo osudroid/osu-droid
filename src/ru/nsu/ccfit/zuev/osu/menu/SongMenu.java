@@ -48,7 +48,7 @@ import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.font.Font;
+import org.andengine.graphics.text.Font;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.HorizontalAlign;
@@ -195,7 +195,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public synchronized void load() {
         scene = new UIScene();
-        final var vbo = engine.getVertexBufferObjectManager();
         // This is needed for UIScene to behave on par with regular Scene, otherwise we would have weird scenarios such
         // as entities in the back layer having touch priority despite being rendered behind the front layer.
         scene.setOnAreaTouchTraversalBackToFront();
@@ -217,13 +216,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH() / (float) tex.getWidth();
             final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                    Config.getRES_WIDTH(), height, tex, vbo);
+                    Config.getRES_WIDTH(), height, tex);
             scene.setBackground(new SpriteBackground(bg));
         } else {
             scene.setBackground(new Background(70 / 255f, 129 / 255f, 252 / 255f));
         }
 
-        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), vbo);
+        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
@@ -242,7 +241,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (items.size() == 0) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
                     .getFont("CaptionFont"), "There are no songs in library, try using the beatmap downloader.",
-                    new org.andengine.entity.text.TextOptions(HorizontalAlign.CENTER), vbo);
+                    new org.andengine.entity.text.TextOptions(HorizontalAlign.CENTER));
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
                     Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
@@ -313,30 +312,30 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scrollbar = new ScrollBar(scene);
 
         final TextureRegion songSelectTopTexture = ResourceManager.getInstance().getTexture("songselect-top");
-        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture, vbo);
+        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture);
         songSelectTop.setSize(songSelectTopTexture.getWidth() * songSelectTopTexture.getHeight() / 184f, 184);
         songSelectTop.setPosition(-1640, songSelectTop.getY());
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
         beatmapMetadataText = new Text(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024, vbo);
+                ResourceManager.getInstance().getFont("font"), "title", 1024);
         frontLayer.attachChild(beatmapMetadataText);
 
         beatmapCreatorText = new Text(Utils.toRes(70), beatmapMetadataText.getY() + beatmapMetadataText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024, vbo);
+                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
         frontLayer.attachChild(beatmapCreatorText);
 
         beatmapLengthText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024, vbo);
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
         frontLayer.attachChild(beatmapLengthText);
 
         beatmapHitObjectsText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapLengthText.getY() + beatmapLengthText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024, vbo);
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
         frontLayer.attachChild(beatmapHitObjectsText);
 
         beatmapDifficultyText = new BeatmapStatisticToggleText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024, vbo);
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(beatmapDifficultyText);
 
         var clickShortSound = ResourceManager.getInstance().getSound("click-short");
@@ -1151,7 +1150,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         / (float) tex.getWidth();
                 bg = new Sprite(0,
                         (Config.getRES_HEIGHT() - height) / 2, Config
-                        .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                        .getRES_WIDTH(), height, tex);
                 bg.setColor(0, 0, 0);
             }
 
@@ -1166,7 +1165,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 bg = new Sprite(
                         0,
                         (Config.getRES_HEIGHT() - height) / 2,
-                        Config.getRES_WIDTH(), height, tex1, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                        Config.getRES_WIDTH(), height, tex1);
                 backgroundPath = "";
             }
 
@@ -1758,8 +1757,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     private class BeatmapStatisticToggleText extends Text {
-        public BeatmapStatisticToggleText(float pX, float pY, Font pFont, String pText, int pCharactersMaximum, org.andengine.opengl.vbo.VertexBufferObjectManager pVBO) {
-            super(pX, pY, pFont, pText, pCharactersMaximum, pVBO);
+        public BeatmapStatisticToggleText(float pX, float pY, Font pFont, String pText, int pCharactersMaximum) {
+            super(pX, pY, pFont, pText, pCharactersMaximum);
         }
 
         private boolean moved = false;

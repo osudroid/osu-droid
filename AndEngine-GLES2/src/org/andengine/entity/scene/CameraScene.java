@@ -2,8 +2,8 @@ package org.andengine.entity.scene;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.shape.IAreaShape;
+import org.andengine.graphics.DrawContext;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -86,8 +86,8 @@ public class CameraScene extends Scene {
 	}
 
 	@Override
-	protected void onApplyMatrix(final GLState pGLState, final Camera pCamera) {
-		this.mCamera.onApplyCameraSceneMatrix(pGLState);
+	protected void onApplyMatrix(final DrawContext pDrawContext, final Camera pCamera) {
+		this.mCamera.onApplyCameraSceneMatrix(pDrawContext);
 	}
 
 	// ===========================================================

@@ -1,15 +1,17 @@
 package com.reco1l.andengine.shape
 
-import android.opengl.GLES32
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.shape.UITriangle.*
-import org.andengine.opengl.util.*
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
 
 /**
  * A rectangle shape based on [UIComponent].
  */
-open class UITriangle : UIBufferedComponent<TriangleVBO>() {
+open class UITriangle : UIBufferedComponent<TriangleVBO>(batchesShape = true) {
 
     /**
      * The style of painting for the triangle.
@@ -27,21 +29,46 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
         requestBufferUpdate()
     }
 
-    override fun onCreateBuffer(): TriangleVBO {
-        return TriangleVBO()
+    // The batch needs no buffer; it is only built when the triangle cannot be batched (see canBatchShape()).
+    override fun onCreateBuffer(): TriangleVBO? {
+        return if (canBatchShape()) null else TriangleVBO()
     }
 
     override fun onUpdateBuffer() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
-        pGLState.lineWidth(lineWidth)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        val cx = width / 2f
+        val cy = height / 2f
+        val halfWidth = innerWidth / 2f
+        val halfHeight = innerHeight / 2f
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+        val matrix = gl.modelViewGLMatrix
+
+        // Same corners as the buffer: apex on top, base at the bottom.
+        val ax = cx
+        val ay = cy - halfHeight
+        val bx = cx - halfWidth
+        val by = cy + halfHeight
+        val ex = cx + halfWidth
+
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        if (paintStyle == PaintStyle.Fill) {
+            ShapeBatching.triangle(matrix, ax, ay, bx, by, ex, by, color, blend)
+        } else {
+            val w = ShapeBatching.lineWidthFromPixels(lineWidth)
+            ShapeBatching.triangleOutline(matrix, ax, ay, bx, by, ex, by, w, color, blend)
+        }
+    }
+
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
+        drawContext.lineWidth(lineWidth)
     }
 
 
-    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D, GL_STATIC_DRAW) {
+    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D) {
 
         fun update(entity: UITriangle) {
             addTriangle(
@@ -53,9 +80,8 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>() {
             )
         }
 
-        override fun draw(gl: GLState, entity: UIBufferedComponent<*>) {
-            entity as UITriangle
-            GLES32.glDrawArrays(if (entity.paintStyle == PaintStyle.Fill) GLES32.GL_TRIANGLES else GLES32.GL_LINE_LOOP, 0, vertexCount)
+        override fun topology(entity: UIBufferedComponent<*>): Int {
+            return if ((entity as UITriangle).paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP
         }
 
     }

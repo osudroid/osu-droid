@@ -69,8 +69,9 @@ object FollowPointConnection {
 
         if (width != newWidth || height != newHeight) {
 
-            // Crop the texture from the center.
-            setTexturePosition(width / 2 - newWidth / 2, height / 2 - newHeight / 2)
+            // Crop the texture from the center (relative to where the region starts, which may be
+            // inside a shared atlas page).
+            setTexturePosition(textureX + width / 2 - newWidth / 2, textureY + height / 2 - newHeight / 2)
 
             setTextureWidth(newWidth)
             setTextureHeight(newHeight)

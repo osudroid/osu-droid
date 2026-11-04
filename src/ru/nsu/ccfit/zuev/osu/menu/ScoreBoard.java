@@ -68,7 +68,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mainScene = scene;
         layer.attachChild(this);
 
-        this.loadingText = new Text(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        this.loadingText = new Text(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50);
         this.attachChild(this.loadingText);
 
         this.listener = listener;
@@ -585,7 +585,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 String avaURL,
                 String username,
                 boolean isPersonalBest) {
-            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
 
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
@@ -606,8 +606,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         getWidth() / 2f,
                         0f,
                         ResourceManager.getInstance().getFont("strokeFont"),
-                        "Personal Best",
-                        GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                        "Personal Best");
 
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
@@ -645,7 +644,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         onDetached();
                         return;
                     }
-                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
+                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
 
                     if (currentAvatarTask == this)
                         currentAvatarTask = null;
@@ -653,9 +652,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             } : null;
 
 
-            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
+            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
+            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
 
             text.setScale(1.2f);
             mark.setScale(1.5f);

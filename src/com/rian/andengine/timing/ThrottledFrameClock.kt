@@ -1,11 +1,33 @@
 package com.rian.andengine.timing
 
 import kotlin.math.max
+import kotlin.math.roundToLong
 
 /**
  * A [FramedClock] which will limit the number of frames processed by adding [Thread.sleep] calls on each [processFrame].
+ *
+ * @param source The backing time source, see [FramedClock].
+ * @param sleeper Performs the sleeps. Defaults to [Thread.sleep].
  */
-class ThrottledFrameClock : FramedClock() {
+class ThrottledFrameClock @JvmOverloads constructor(
+    source: IClock? = null,
+    private val sleeper: Sleeper = Sleeper.THREAD
+) : FramedClock(source) {
+
+    /**
+     * Blocks the calling thread for the given time.
+     */
+    fun interface Sleeper {
+        @Throws(InterruptedException::class)
+        fun sleep(milliseconds: Long, nanoseconds: Int)
+
+        companion object {
+            /** Sleeps with [Thread.sleep]. */
+            @JvmField
+            val THREAD = Sleeper { milliseconds, nanoseconds -> Thread.sleep(milliseconds, nanoseconds) }
+        }
+    }
+
     /**
      * The target number of updates per second. Only used when [throttling] is true.
      *
@@ -59,7 +81,12 @@ class ThrottledFrameClock : FramedClock() {
         val before = currentTime
 
         try {
-            Thread.sleep((seconds * 1e3).toLong())
+            // Pass the sub-millisecond remainder as well. Truncating to whole milliseconds is a large relative
+            // error once the frame budget itself is only a few milliseconds. Rounded, since a float budget like
+            // 0.4 ms is stored just below its value and would otherwise lose a nanosecond.
+            val nanoseconds = (seconds * 1e9).roundToLong()
+
+            sleeper.sleep(nanoseconds / 1_000_000, (nanoseconds % 1_000_000).toInt())
         } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
         }

@@ -27,14 +27,13 @@ public class MenuItemBackground extends Sprite {
 
     public MenuItemBackground() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                "menu-button-background"));
 
-        final var vbo = GlobalManager.getInstance().getEngine().getVertexBufferObjectManager();
         setAlpha(0.8f);
         title = new Text(Utils.toRes(32), Utils.toRes(25),
-                ResourceManager.getInstance().getFont("font"), "", 255, vbo);
+                ResourceManager.getInstance().getFont("font"), "", 255);
         author = new Text(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100, vbo);
+                .getFont("font"), "", 100);
         author.setPosition(Utils.toRes(150), Utils.toRes(60));
 
         ComponentsKt.setColor4(this, defColor);

@@ -83,7 +83,7 @@ class HUDPieSongProgress : HUDSongProgress() {
         // Reference: https://github.com/ppy/osu/blob/6455c0583b5e607baeca7f584410bc63515aa619/osu.Game/Skinning/LegacySongProgress.cs
 
         // Draw a white ring outline. Using PaintStyle.Outline avoids relying on the
-        // depth buffer, which may not be available (DEPTH_SIZE = 0 in ConfigChooser).
+        // depth buffer, which may not be available (GlesConfigChooser falls back to any config).
         UICircle().also { ring ->
 
             ring.setSize(33f, 33f)

@@ -17,6 +17,10 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.DrawContext;
+import org.andengine.graphics.batch.QuadBatcher;
+import org.andengine.graphics.debug.RenderStats;
+import org.andengine.graphics.gles.GlesLegacyRestorers;
 import org.andengine.input.sensor.SensorDelay;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
@@ -32,13 +36,10 @@ import org.andengine.input.touch.controller.ITouchController;
 import org.andengine.input.touch.controller.ITouchEventCallback;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.input.touch.controller.SingleTouchController;
-import org.andengine.opengl.font.FontFactory;
-import org.andengine.opengl.font.FontManager;
-import org.andengine.opengl.shader.ShaderProgramManager;
+import org.andengine.graphics.text.FontFactory;
+import org.andengine.graphics.text.FontManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.util.GLState;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
@@ -99,6 +100,18 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private final EngineLock mEngineLock;
 
+	/**
+	 * Whether the update is released once the frame was swapped instead of right after drawing.
+	 * Read once per frame.
+	 */
+	private volatile boolean mReleaseUpdateAfterSwap;
+	/**
+	 * Whether the last drawn frame still owes the update its release. Only accessed on the render thread,
+	 * which calls both {@link #onDrawFrame(DrawContext)} and {@link #onFrameSwapped()}; the release itself
+	 * happens under {@link #mEngineLock}.
+	 */
+	private boolean mUpdateReleasePending;
+
 	private final UpdateThread mUpdateThread;
 	private final RunnableHandler mUpdateThreadRunnableHandler = new RunnableHandler();
 
@@ -107,10 +120,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private ITouchController mTouchController;
 
-	private final VertexBufferObjectManager mVertexBufferObjectManager = new VertexBufferObjectManager();
 	private final TextureManager mTextureManager = new TextureManager();
 	private final FontManager mFontManager = new FontManager();
-	private final ShaderProgramManager mShaderProgramManager = new ShaderProgramManager();
+	private final DrawContext mDrawContext = new DrawContext();
 
 	private final SoundManager mSoundManager;
 	private final MusicManager mMusicManager;
@@ -133,6 +145,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	protected int mSurfaceWidth = 1; // 1 to prevent accidental DIV/0
 	private volatile boolean mIsLagging;
+	// Written by the update thread, read by the render thread for its performance hints.
+	private volatile long mLastUpdateNanos;
 	protected int mSurfaceHeight = 1; // 1 to prevent accidental DIV/0
 
 	// ===========================================================
@@ -145,10 +159,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		SoundFactory.onCreate();
 		MusicFactory.onCreate();
 		FontFactory.onCreate();
-		this.mVertexBufferObjectManager.onCreate();
 		this.mTextureManager.onCreate();
 		this.mFontManager.onCreate();
-		this.mShaderProgramManager.onCreate();
+		GlesLegacyRestorers.registerEngine(this);
 
 		/* Apply EngineOptions. */
 		this.mEngineOptions = pEngineOptions;
@@ -185,6 +198,16 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mUpdateThread = new UpdateThread();
 		}
 		this.mUpdateThread.setEngine(this);
+	}
+
+	/** @return The kernel thread id of the update thread, or 0 while it has not started. */
+	public int getUpdateThreadId() {
+		return this.mUpdateThread.getThreadId();
+	}
+
+	/** @return The wall time of the last update tick, in nanoseconds, or 0 before the first tick. */
+	public long getLastUpdateNanos() {
+		return this.mLastUpdateNanos;
 	}
 
 	public void startUpdateThread() throws IllegalThreadStateException {
@@ -276,10 +299,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mOrientationData;
 	}
 
-	public VertexBufferObjectManager getVertexBufferObjectManager() {
-		return this.mVertexBufferObjectManager;
-	}
-
 	public TextureManager getTextureManager() {
 		return this.mTextureManager;
 	}
@@ -288,8 +307,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mFontManager;
 	}
 
-	public ShaderProgramManager getShaderProgramManager() {
-		return this.mShaderProgramManager;
+	/** The draw context the renderer passes to every frame. GL thread only. */
+	public DrawContext getDrawContext() {
+		return this.mDrawContext;
 	}
 
 	public SoundManager getSoundManager() throws IllegalStateException {
@@ -530,17 +550,17 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mUpdateThread.interrupt();
 		}
 
-		this.mVertexBufferObjectManager.onDestroy();
 		this.mTextureManager.onDestroy();
 		this.mFontManager.onDestroy();
-		this.mShaderProgramManager.onDestroy();
 	}
 
+	/**
+	 * Explicitly reloads the textures while the GL context stays alive (e.g. after a skin change); the
+	 * old texture names are deleted first. Buffers, shaders and the glyph atlas (not managed by the
+	 * TextureManager) stay valid in a live context and are left alone.
+	 */
 	public void onReloadResources() {
-		this.mVertexBufferObjectManager.onReload();
-		this.mTextureManager.onReload();
-		this.mFontManager.onReload();
-		this.mShaderProgramManager.onReload();
+		this.mTextureManager.reloadLoadedTextures();
 	}
 
 	protected Camera getCameraFromSurfaceTouchEvent(final TouchEvent pTouchEvent) {
@@ -567,7 +587,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			try {
 				this.throwOnDestroyed();
 
+				final long updateStart = System.nanoTime();
 				this.onUpdate(secondsElapsed);
+				final long updateNanos = System.nanoTime() - updateStart;
+				this.mLastUpdateNanos = updateNanos;
+				RenderStats.onUpdate(updateNanos);
 
 				this.throwOnDestroyed();
 
@@ -624,37 +648,76 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		this.getCamera().onUpdate(pSecondsElapsed);
 	}
 
-	protected void onUpdateDrawHandlers(final GLState pGLState, final Camera pCamera) {
-		this.mDrawHandlers.onDraw(pGLState, pCamera);
+	protected void onUpdateDrawHandlers(final DrawContext pDrawContext, final Camera pCamera) {
+		this.mDrawHandlers.onDraw(pDrawContext, pCamera);
 	}
 
-	public void onDrawFrame(final GLState pGLState) throws InterruptedException {
+	public void onDrawFrame(final DrawContext pDrawContext) throws InterruptedException {
 		final EngineLock engineLock = this.mEngineLock;
 
 		engineLock.lock();
 		try {
 			engineLock.waitUntilCanDraw();
+			this.mUpdateReleasePending = false;
+			final boolean releaseAfterSwap = this.mReleaseUpdateAfterSwap;
+			RenderStats.beginDraw();
 
 			this.mIsLagging = false;
-			this.mIsLagging |= this.mVertexBufferObjectManager.updateVertexBufferObjects(pGLState);
-			this.mIsLagging |= this.mTextureManager.updateTextures(pGLState);
-			this.mIsLagging |= this.mFontManager.updateFonts(pGLState);
+			this.mIsLagging |= this.mTextureManager.updateTextures();
+			this.mIsLagging |= this.mFontManager.updateFonts();
 
-			this.onUpdateDrawHandlers(pGLState, this.mCamera);
-			this.onDrawScene(pGLState, this.mCamera);
+			this.onUpdateDrawHandlers(pDrawContext, this.mCamera);
+			this.onDrawScene(pDrawContext, this.mCamera);
+			QuadBatcher.flushFrame();
+			RenderStats.endDraw();
 
+			if(releaseAfterSwap) {
+				this.mUpdateReleasePending = true;
+			} else {
+				engineLock.notifyCanUpdate();
+			}
+		} finally {
+			engineLock.unlock();
+		}
+	}
+
+	/**
+	 * Tells the {@link Engine} that the frame it just drew was swapped. Releases the update if
+	 * {@link #onDrawFrame(DrawContext)} deferred it. A frame whose swap is never reported keeps the update
+	 * parked until the next drawn frame. Must be called on the thread that calls
+	 * {@link #onDrawFrame(DrawContext)}.
+	 */
+	public void onFrameSwapped() {
+		if(!this.mUpdateReleasePending) {
+			return;
+		}
+
+		final EngineLock engineLock = this.mEngineLock;
+
+		engineLock.lock();
+		try {
+			this.mUpdateReleasePending = false;
 			engineLock.notifyCanUpdate();
 		} finally {
 			engineLock.unlock();
 		}
 	}
 
-	protected void onDrawScene(final GLState pGLState, final Camera pCamera) {
+	/**
+	 * With <code>true</code> the update only runs after {@link #onFrameSwapped()}, so it cannot race the
+	 * buffer swap. The value is read once at the start of each frame. A frame whose swap is never reported
+	 * keeps the update parked until the next drawn frame.
+	 */
+	public void setReleaseUpdateAfterSwap(final boolean pReleaseUpdateAfterSwap) {
+		this.mReleaseUpdateAfterSwap = pReleaseUpdateAfterSwap;
+	}
+
+	protected void onDrawScene(final DrawContext pDrawContext, final Camera pCamera) {
 		if(this.mScene != null) {
-			this.mScene.onDraw(pGLState, pCamera);
+			this.mScene.onDraw(pDrawContext, pCamera);
 		}
 
-		pCamera.onDrawHUD(pGLState);
+		pCamera.onDrawHUD(pDrawContext);
 	}
 
 	private long getNanosecondsElapsed() {
@@ -817,6 +880,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 		private Engine mEngine;
 		private final RunnableHandler mRunnableHandler = new RunnableHandler();
+		private volatile int mThreadId;
 
 		// ===========================================================
 		// Constructors
@@ -834,12 +898,18 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mEngine = pEngine;
 		}
 
+		/** @return The kernel thread id of this thread, or 0 while it has not started. */
+		public int getThreadId() {
+			return this.mThreadId;
+		}
+
 		// ===========================================================
 		// Methods for/from SuperClass/Interfaces
 		// ===========================================================
 
 		@Override
 		public void run() {
+			this.mThreadId = android.os.Process.myTid();
 			android.os.Process.setThreadPriority(this.mEngine.getEngineOptions().getUpdateThreadPriority());
 			try {
 				while(true) {

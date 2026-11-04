@@ -8,8 +8,8 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
 import org.andengine.engine.camera.*
+import org.andengine.graphics.DrawContext
 import org.andengine.input.touch.*
-import org.andengine.opengl.util.GLState
 import com.rian.andengine.modifier.ModifierType
 import org.andengine.entity.scene.Scene
 import kotlin.math.*
@@ -88,7 +88,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
         super.onManagedUpdate(deltaTimeSec)
     }
 
-    override fun onManagedDraw(pGLState: GLState, pCamera: Camera) {
+    override fun onManagedDraw(drawContext: DrawContext, pCamera: Camera) {
 
         if (isExpanded) {
             val (sceneSpaceX, sceneSpaceY) = trigger.convertLocalToSceneCoordinates(0f, trigger.height)
@@ -98,7 +98,7 @@ class UIDropdown(var trigger: UIComponent) : UIScrollableContainer() {
             maxHeight = min(optionsContainer.height, parent.getHeight() - sceneSpaceY)
         }
 
-        super.onManagedDraw(pGLState, pCamera)
+        super.onManagedDraw(drawContext, pCamera)
     }
 
 

@@ -4,13 +4,16 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
 import com.reco1l.andengine.shape.PaintStyle.*
-import org.andengine.opengl.util.GLState
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.DrawContext
+import org.andengine.graphics.batch.QuadBatcher
+import org.andengine.graphics.shape.ShapeBatching
 import kotlin.math.*
 
 /**
  * A rectangle shape based on [UIComponent].
  */
-open class UIBox : UIBufferedComponent<BoxVBO>() {
+open class UIBox : UIBufferedComponent<BoxVBO>(batchesShape = true) {
 
     /**
      * The style of painting for the box.
@@ -49,7 +52,12 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         requestNewBuffer()
     }
 
-    override fun onCreateBuffer(): BoxVBO {
+    // The batch needs no buffer; it is only built when the box cannot be batched (see canBatchShape()).
+    override fun onCreateBuffer(): BoxVBO? {
+
+        if (canBatchShape()) {
+            return null
+        }
 
         val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) UICircle.approximateSegments(radius, radius, 90f) else 0
@@ -66,11 +74,26 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         buffer?.update(this)
     }
 
-    override fun beginDraw(pGLState: GLState) {
-        super.beginDraw(pGLState)
+    override fun onDrawBatch(gl: DrawContext, blend: BlendMode) {
+        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
+        val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
+
+        QuadBatcher.setProjection(gl.projectionGLMatrix)
+        if (paintStyle == Fill) {
+            ShapeBatching.roundedRect(gl.modelViewGLMatrix, 0f, 0f, width, height, radius, color, blend)
+        } else {
+            ShapeBatching.roundedOutline(
+                gl.modelViewGLMatrix, 0f, 0f, width, height, radius,
+                ShapeBatching.lineWidthFromPixels(lineWidth), color, blend
+            )
+        }
+    }
+
+    override fun beginDraw(drawContext: DrawContext) {
+        super.beginDraw(drawContext)
 
         if (paintStyle == Outline) {
-            pGLState.lineWidth(lineWidth)
+            drawContext.lineWidth(lineWidth)
         }
     }
 
@@ -85,7 +108,6 @@ open class UIBox : UIBufferedComponent<BoxVBO>() {
         vertexCount = max(1, segments) * 4 + if (paintStyle == Fill) 2 else 1,
 
         vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW,
         drawTopology = when (paintStyle) {
             Fill -> GL_TRIANGLE_FAN
             Outline -> GL_LINE_STRIP

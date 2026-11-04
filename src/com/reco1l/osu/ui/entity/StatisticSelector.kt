@@ -73,16 +73,16 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
     }
 
 
-    inner class BoardItem(val index: Int, private val stats: StatisticV2) : Sprite(570f, 0f, ResourceManager.getInstance().getTexture("menu-button-background"), getGlobal().engine.vertexBufferObjectManager) {
+    inner class BoardItem(val index: Int, private val stats: StatisticV2) : Sprite(570f, 0f, ResourceManager.getInstance().getTexture("menu-button-background")) {
 
         private var moved = false
         private var dx = 0f
         private var dy = 0f
 
 
-        val text = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100, getGlobal().engine.vertexBufferObjectManager)
+        val text = Text(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100)
 
-        val rank = Text(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5, getGlobal().engine.vertexBufferObjectManager)
+        val rank = Text(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5)
 
 
         init {
