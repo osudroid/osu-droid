@@ -355,8 +355,6 @@ class RenderThread(
 
         when (backend.present()) {
             PresentResult.OK -> {
-                renderer.onFrameSwapped()
-
                 if (frameSizeGeneration != acknowledgedSizeGeneration) {
                     acknowledgedSizeGeneration = frameSizeGeneration
                     lock.withLock {
@@ -390,6 +388,10 @@ class RenderThread(
         if (pacing.choreographerPacingEnabled) {
             (vsyncWaiter ?: vsyncWaiterFactory().also { vsyncWaiter = it }).waitForVsync()
         }
+
+        // After the vsync wait, so that an update released by the swap starts on the vsync and samples input as
+        // late as possible.
+        renderer.onFrameSwapped()
 
         return true
     }

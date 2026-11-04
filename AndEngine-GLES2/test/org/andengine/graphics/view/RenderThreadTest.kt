@@ -314,6 +314,28 @@ class RenderThreadTest {
         assertPresentationTimeIsNow(3)
     }
 
+    @Test
+    fun choreographerPacing_reportsSwapAfterVsyncWait() {
+        thread = RenderThread(backend, renderer, pacing) { VsyncWaiter(LoggingVsyncSource(log), timeoutMillis = 100) }
+        showWindow()
+        pacing.choreographerPacingEnabled = true
+        runFrame()
+
+        val frame = runFrame()
+
+        assertTrue(frame.toString(), frame.indexOf("vsync") in 0 until frame.indexOf("onFrameSwapped"))
+        assertTrue(frame.toString(), frame.indexOf("present") < frame.indexOf("vsync"))
+    }
+
+    private class LoggingVsyncSource(private val log: CallLog) : VsyncSource {
+        override fun requestNextVsync(callback: VsyncSource.Callback, request: Long) {
+            log.add("vsync")
+            callback.onVsync(request, System.nanoTime())
+        }
+
+        override fun quit() {}
+    }
+
     private fun assertPresentationTimeIsNow(frame: Int) {
         val before = System.nanoTime()
         runFrame()
@@ -496,7 +518,7 @@ class RenderThreadTest {
         thread.requestRedraw(Runnable { log.add("drawingFinished") })
         assertEquals(emptyList<String>(), log.take())
 
-        assertEquals(listOf("makeCurrent", "onDrawFrame", "present", "onFrameSwapped", "drawingFinished"), runFrame())
+        assertEquals(listOf("makeCurrent", "onDrawFrame", "present", "drawingFinished", "onFrameSwapped"), runFrame())
         assertFalse("drawingFinished" in runFrame())
     }
 
