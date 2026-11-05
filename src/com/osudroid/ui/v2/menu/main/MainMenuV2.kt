@@ -35,7 +35,6 @@ import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
-import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -47,6 +46,8 @@ import java.io.IOException
 import java.util.LinkedList
 import android.os.Handler
 import android.os.Looper
+import com.acivev.ui.addFireworksWithPeriod
+import com.acivev.ui.addSnowfallWithPeriod
 
 class MainMenuV2 : UIScene() {
 
@@ -164,6 +165,10 @@ class MainMenuV2 : UIScene() {
 
         // Kiai side flashes
         sideFlashes = SideFlashes(w).also { it.attachTo(this) }
+
+        val context = GlobalManager.getInstance().mainActivity
+        addSnowfallWithPeriod(this, context)
+        addFireworksWithPeriod(this, context)
 
         // Clip container: its left edge = logo's right edge, so anything to the left
         // of the logo is scissored clipped and never rendered no animation tricks needed.

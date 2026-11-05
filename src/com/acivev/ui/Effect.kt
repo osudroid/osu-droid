@@ -23,8 +23,6 @@ fun addSnowfall(scene: Scene, context: Context) {
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 15 else 75
 
-    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
-
     val snowParticleSystem = SpriteParticleSystem(
         PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),
         10f, 15f, maxParticles,
@@ -48,10 +46,10 @@ fun addSnowfall(scene: Scene, context: Context) {
         particleSystem.addParticleInitializer(RotationParticleInitializer(0.0f, 360.0f))
 
         // Random size from .2 to .8
-        particleSystem.addParticleModifier(ScaleParticleModifier(0.2f, .8f, 0.0f, 1.0f))
+        particleSystem.addParticleModifier(ScaleParticleModifier(0.0f, 1.0f, 0.2f, 0.8f))
 
         // Fade out
-        particleSystem.addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0.0f, 4.0f))
+        particleSystem.addParticleModifier(AlphaParticleModifier(0.0f, 4.0f, 1.0f, 0.0f))
 
         // Random lifetime between 1 to 7 seconds
         particleSystem.addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(1.0f, 7.0f))
@@ -76,8 +74,6 @@ fun addFireworks(scene: Scene, context: Context) {
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 10 else 25
 
-    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
-
     fun launchSingleFirework() {
         val launchX = (Math.random().toFloat() * Config.getRES_WIDTH() * 0.9f) + (Config.getRES_WIDTH() * 0.05f)
         val launchY = Config.getRES_HEIGHT() * 0.9f
@@ -89,8 +85,8 @@ fun addFireworks(scene: Scene, context: Context) {
             rocketTexture
         ).apply {
             addParticleInitializer(VelocityParticleInitializer(-20f, 20f, -800f, -600f))
-            addParticleModifier(ScaleParticleModifier(0.8f, 0.3f, 0f, 0.5f))
-            addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0f, 0.5f))
+            addParticleModifier(ScaleParticleModifier(0f, 0.5f, 0.8f, 0.3f))
+            addParticleModifier(AlphaParticleModifier(0f, 0.5f, 1.0f, 0.0f))
             addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.3f, 0.6f))
             addParticleInitializer { particle ->
                 particle.entity.setBlendingEnabled(true)
@@ -126,8 +122,8 @@ fun addFireworks(scene: Scene, context: Context) {
                     particle.entity.setColor(randomColor.first, randomColor.second, randomColor.third)
                 }
 
-                addParticleModifier(ScaleParticleModifier(0.6f, 0.1f, 0f, 1.2f))
-                addParticleModifier(AlphaParticleModifier(1.0f, 0.0f, 0.3f, 1.2f))
+                addParticleModifier(ScaleParticleModifier(0f, 1.2f, 0.6f, 0.1f))
+                addParticleModifier(AlphaParticleModifier(0.3f, 1.2f, 1.0f, 0.0f))
                 addParticleInitializer(ExpireParticleInitializer<org.andengine.entity.sprite.Sprite>(0.8f, 1.5f))
                 addParticleInitializer { particle ->
                     particle.entity.setBlendingEnabled(true)
