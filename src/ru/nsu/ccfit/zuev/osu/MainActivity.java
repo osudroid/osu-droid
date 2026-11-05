@@ -111,6 +111,8 @@ public class MainActivity extends BaseGameActivity implements
     private SaveServiceObject saveServiceObject;
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
+    /** Held while an activity instance loads the game, see onLoadComplete. */
+    private static final Object LOAD_LOCK = new Object();
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -328,50 +330,63 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onLoadComplete() {
         Execution.async(() -> {
-            GlobalManager.getInstance().init();
-            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
-            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-            GlobalManager.getInstance().setLoadingProgress(50);
-            checkNewSkins();
-            Config.loadSkins();
-            DifficultyCalculationManager.checkForOutdatedStarRatings();
-            loadBeatmapLibrary();
-
-            SplashScene.INSTANCE.playWelcomeAnimation();
-
-            Execution.delayed(2500, () -> {
-
-                UpdateManager.onActivityStart();
-                DatabaseManager.notifyIfResetDueToDowngrade();
-                GlobalManager.getInstance().setInfo("");
-                GlobalManager.getInstance().setLoadingProgress(100);
-                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-
-                if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+            // The loads of two activity instances (e.g. one recreated while the other still loads) would run on
+            // the same singletons at once, so they run one after the other. One whose activity is already gone is
+            // skipped, the newer instance loads anyway.
+            synchronized (LOAD_LOCK) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
                 }
 
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
-                initPreferences();
-                availableInternalMemory();
-                applyRefreshRateSetting(Config.isForceMaxRefreshRate());
+                GlobalManager.getInstance().init();
+                Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
+                analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+                GlobalManager.getInstance().setLoadingProgress(50);
+                checkNewSkins();
+                Config.loadSkins();
+                DifficultyCalculationManager.checkForOutdatedStarRatings();
+                loadBeatmapLibrary();
 
-                AccessibilityDetector.register(MainActivity.this);
+                SplashScene.INSTANCE.playWelcomeAnimation();
 
-                logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+                Execution.delayed(2500, () -> {
+                    // Replaced by a newer activity instance in the meantime, which shows the menu itself.
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
 
-                if (roomInviteLink != null) {
-                    final Uri inviteLink = roomInviteLink;
-                    roomInviteLink = null;
-                    Multiplayer.connectFromLink(inviteLink);
-                } else if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
-                    fileToAdd = null;
-                    willReplay = false;
-                }
+                    UpdateManager.onActivityStart();
+                    DatabaseManager.notifyIfResetDueToDowngrade();
+                    GlobalManager.getInstance().setInfo("");
+                    GlobalManager.getInstance().setLoadingProgress(100);
+                    ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
 
-                GlobalManager.getInstance().getMainScene().loadBannerSprite();
-            });
+                    if (!BuildSettings.DEBUG_PLAYGROUND) {
+                        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                    }
+
+                    GlobalManager.getInstance().getMainScene().loadBeatmap();
+                    initPreferences();
+                    availableInternalMemory();
+                    applyRefreshRateSetting(Config.isForceMaxRefreshRate());
+
+                    AccessibilityDetector.register(MainActivity.this);
+
+                    logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+
+                    if (roomInviteLink != null) {
+                        final Uri inviteLink = roomInviteLink;
+                        roomInviteLink = null;
+                        Multiplayer.connectFromLink(inviteLink);
+                    } else if (willReplay) {
+                        GlobalManager.getInstance().getMainScene().watchReplay(fileToAdd);
+                        fileToAdd = null;
+                        willReplay = false;
+                    }
+
+                    GlobalManager.getInstance().getMainScene().loadBannerSprite();
+                });
+            }
         });
     }
 
