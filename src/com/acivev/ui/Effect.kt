@@ -23,8 +23,6 @@ fun addSnowfall(scene: Scene, context: Context) {
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 15 else 75
 
-    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
-
     val snowParticleSystem = SpriteParticleSystem(
         PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),
         10f, 15f, maxParticles,
@@ -75,8 +73,6 @@ fun addFireworks(scene: Scene, context: Context) {
 
     val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
     val maxParticles = if (isLowEndDevice) 10 else 25
-
-    val engine = ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().engine
 
     fun launchSingleFirework() {
         val launchX = (Math.random().toFloat() * Config.getRES_WIDTH() * 0.9f) + (Config.getRES_WIDTH() * 0.05f)
