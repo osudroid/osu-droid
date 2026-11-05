@@ -149,6 +149,8 @@ public class MainActivity extends BaseGameActivity implements
     private static final String ACTION_DEBUG_GL = "ru.nsu.ccfit.zuev.osuplus.DEBUG_GL";
 
     private BroadcastReceiver debugGlReceiver;
+    /** Held while an activity instance loads the game, see onLoadComplete. */
+    private static final Object LOAD_LOCK = new Object();
 
     static {
         // Once per process, before the engine creates its first GL context. Later changes through
@@ -419,74 +421,87 @@ public class MainActivity extends BaseGameActivity implements
 
     private void onLoadComplete() {
         Execution.async(() -> {
-            GlobalManager.getInstance().init();
-            com.acivev.VibratorManager.INSTANCE.init(this);
-            Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
-            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-            GlobalManager.getInstance().setLoadingProgress(50);
-            checkNewSkins();
-            Config.loadSkins();
-            DifficultyCalculationManager.checkForOutdatedStarRatings();
-            loadBeatmapLibrary();
+            // The loads of two activity instances (e.g. one recreated while the other still loads) would run on
+            // the same singletons at once, so they run one after the other. One whose activity is already gone is
+            // skipped, the newer instance loads anyway.
+            synchronized (LOAD_LOCK) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
 
-            SplashScene.INSTANCE.playWelcomeAnimation();
+                GlobalManager.getInstance().init();
+                com.acivev.VibratorManager.INSTANCE.init(this);
+                Execution.updateThread(() -> UIEngine.getCurrent().getOverlay().attachChild(new FPSCounter()));
+                analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+                GlobalManager.getInstance().setLoadingProgress(50);
+                checkNewSkins();
+                Config.loadSkins();
+                DifficultyCalculationManager.checkForOutdatedStarRatings();
+                loadBeatmapLibrary();
 
-            Execution.delayed(2500, () -> {
+                SplashScene.INSTANCE.playWelcomeAnimation();
 
-                UpdateManager.onActivityStart();
-                DatabaseManager.notifyIfResetDueToDowngrade();
-                GlobalManager.getInstance().setInfo("");
-                GlobalManager.getInstance().setLoadingProgress(100);
-                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-
-                // Skin textures prepare their pixels in the background; show the menu once they are on
-                // the GPU, but never let a stuck load keep the splash screen up.
-                try {
-                    if (!GlobalManager.getInstance().getEngine().getTextureManager().awaitPendingTextureLoads(TEXTURE_WAIT_TIMEOUT_MS)) {
-                        Debug.w("MainActivity: Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
+                Execution.delayed(2500, () -> {
+                    // Replaced by a newer activity instance in the meantime, which shows the menu itself.
+                    if (isFinishing() || isDestroyed()) {
+                        return;
                     }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
 
-                // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
-                // Never enqueue a bare setScene() and a follow-up action as two separate
-                // Execution.updateThread() calls, the follow-up would run first (LIFO) and then
-                // setScene would overwrite whatever scene the follow-up set.
-                if (!BuildSettings.DEBUG_PLAYGROUND) {
-                    if (willReplay) {
-                        final String replayFile = fileToAdd;
-                        fileToAdd = null;
-                        willReplay = false;
-                        Execution.updateThread(() -> {
-                            GlobalManager.getInstance().getEngine().setScene(
-                                    GlobalManager.getInstance().getMainMenuV2());
-                            GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile);
-                        });
-                    } else {
-                        Execution.updateThread(() -> {
-                            GlobalManager.getInstance().getEngine().setScene(
-                                    GlobalManager.getInstance().getMainMenuV2());
-                            GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
-                        });
+                    UpdateManager.onActivityStart();
+                    DatabaseManager.notifyIfResetDueToDowngrade();
+                    GlobalManager.getInstance().setInfo("");
+                    GlobalManager.getInstance().setLoadingProgress(100);
+                    ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+
+                    // Skin textures prepare their pixels in the background; show the menu once they are on
+                    // the GPU, but never let a stuck load keep the splash screen up.
+                    try {
+                        if (!GlobalManager.getInstance().getEngine().getTextureManager().awaitPendingTextureLoads(TEXTURE_WAIT_TIMEOUT_MS)) {
+                            Debug.w("MainActivity: Texture loads still pending after " + TEXTURE_WAIT_TIMEOUT_MS + " ms, showing the menu anyway");
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
-                }
-                initPreferences();
-                availableInternalMemory();
-                applyRefreshRateSetting(Config.isForceMaxRefreshRate());
 
-                AccessibilityDetector.register(MainActivity.this);
+                    // IMPORTANT: RunnableHandler processes queued runnable's in REVERSE (LIFO) order.
+                    // Never enqueue a bare setScene() and a follow-up action as two separate
+                    // Execution.updateThread() calls, the follow-up would run first (LIFO) and then
+                    // setScene would overwrite whatever scene the follow-up set.
+                    if (!BuildSettings.DEBUG_PLAYGROUND) {
+                        if (willReplay) {
+                            final String replayFile = fileToAdd;
+                            fileToAdd = null;
+                            willReplay = false;
+                            Execution.updateThread(() -> {
+                                GlobalManager.getInstance().getEngine().setScene(
+                                        GlobalManager.getInstance().getMainMenuV2());
+                                GlobalManager.getInstance().getMainMenuV2().watchReplay(replayFile);
+                            });
+                        } else {
+                            Execution.updateThread(() -> {
+                                GlobalManager.getInstance().getEngine().setScene(
+                                        GlobalManager.getInstance().getMainMenuV2());
+                                GlobalManager.getInstance().getMainMenuV2().loadBeatmap();
+                            });
+                        }
+                    }
+                    initPreferences();
+                    availableInternalMemory();
+                    applyRefreshRateSetting(Config.isForceMaxRefreshRate());
 
-                logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
+                    AccessibilityDetector.register(MainActivity.this);
 
-                if (roomInviteLink != null) {
-                    final Uri inviteLink = roomInviteLink;
-                    roomInviteLink = null;
-                    Multiplayer.connectFromLink(inviteLink);
-                }
+                    logFlushFuture = scheduledExecutor.scheduleAtFixedRate(Multiplayer::flushLog, 0, 5, TimeUnit.SECONDS);
 
-                Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
-            });
+                    if (roomInviteLink != null) {
+                        final Uri inviteLink = roomInviteLink;
+                        roomInviteLink = null;
+                        Multiplayer.connectFromLink(inviteLink);
+                    }
+
+                    Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
+                });
+            }
         });
     }
 

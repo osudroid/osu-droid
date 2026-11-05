@@ -30,12 +30,8 @@ public class LibraryManager {
 
     private static int currentIndex = 0;
 
-    private static boolean isCaching = true;
-
-
     private static final ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
 
-    private static final Object mutex = new Object();
 
 
     private LibraryManager() {
@@ -87,7 +83,7 @@ public class LibraryManager {
      * @param forceUpdateDirectories The directories to force update, even if they are already in the database.
      *                               Can be {@code null}.
      */
-    public static void scanDirectory(@Nullable Collection<String> forceUpdateDirectories) {
+    public static synchronized void scanDirectory(@Nullable Collection<String> forceUpdateDirectories) {
 
         if (!checkDirectory(Config.getBeatmapPath())) {
             return;
@@ -99,20 +95,9 @@ public class LibraryManager {
             return;
         }
 
+        // Runs the whole scan on this thread. Synchronized, so two scans (e.g. of two activity instances) never
+        // run on the shared pending list at once.
         new LibraryDatabaseManager(directories, forceUpdateDirectories).start();
-
-        // Wait for all threads to finish
-        while (isCaching) {
-            synchronized (mutex) {
-                try {
-                    mutex.wait();
-                } catch (InterruptedException e) {
-                    Log.e("LibraryManager", "Failed to wait for thread termination", e);
-                }
-            }
-        }
-
-        isCaching = true;
     }
 
 
@@ -302,18 +287,9 @@ public class LibraryManager {
             executors.shutdown();
 
             try {
-                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
-
-                    isCaching = false;
-
-                    synchronized (mutex) {
-                        mutex.notify();
-                    }
-
-                } else {
+                if (!executors.awaitTermination(1, TimeUnit.HOURS)) {
                     Log.e("LibraryManager", "Timeout while waiting for executor termination.");
                 }
-
             } catch (InterruptedException e) {
                 Log.e("LibraryManager", "Failed while waiting for executor termination.", e);
             }
