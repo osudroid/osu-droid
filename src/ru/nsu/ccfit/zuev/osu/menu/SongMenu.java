@@ -12,6 +12,8 @@ import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.osudroid.beatmaps.BeatmapCache;
+import com.osudroid.discord.DiscordPresenceManager;
+import com.osudroid.discord.UserActivity;
 import com.osudroid.ui.v1.BeatmapAttributeDisplay;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
@@ -736,6 +738,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void show() {
         engine.setScene(scene);
+        DiscordPresenceManager.setActivity(UserActivity.ChoosingBeatmap.INSTANCE);
     }
 
     public void setFilter(final String filter, final SortOrder order,
