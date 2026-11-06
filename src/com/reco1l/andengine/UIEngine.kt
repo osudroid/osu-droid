@@ -49,7 +49,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
                     value.onFocus()
 
                     val (_, sceneY) = value.convertLocalToSceneCoordinates(0f, value.height)
-                    val (_, surfaceY) = camera.convertSceneToSurfaceCoordinates(0f, sceneY, invertYAxis = false)
+                    val (_, surfaceY) = camera.convertSceneToSurfaceCoordinates(0f, sceneY, false)
 
                     focusedEntitySurfacePositionY = surfaceY
                 }
