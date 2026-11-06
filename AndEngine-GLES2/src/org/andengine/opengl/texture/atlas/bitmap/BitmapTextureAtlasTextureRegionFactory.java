@@ -7,10 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.andengine.graphics.atlas.TextureAtlasPages;
+import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.atlas.bitmap.source.ResourceBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.bitmap.source.SolidColorBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TextureRegionFactory;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
@@ -118,6 +120,20 @@ public class BitmapTextureAtlasTextureRegionFactory {
 
 	public static TextureRegion createFromSource(final BitmapTextureAtlas pBitmapTextureAtlas, final IBitmapTextureAtlasSource pBitmapTextureAtlasSource, final int pTextureX, final int pTextureY) {
 		return TextureRegionFactory.createFromSource(pBitmapTextureAtlas, pBitmapTextureAtlasSource, pTextureX, pTextureY);
+	}
+
+	/**
+	 * A region of one color in a small texture of its own, loaded with pTextureManager. Drawn stretched, it fills any
+	 * area with that color.
+	 *
+	 * @param pColor ARGB, as {@link android.graphics.Color} packs it.
+	 */
+	public static TextureRegion createSolidColor(final TextureManager pTextureManager, final int pColor) {
+		final int size = 4;
+		final BitmapTextureAtlas bitmapTextureAtlas = new BitmapTextureAtlas(pTextureManager, size, size, TextureOptions.BILINEAR);
+		final TextureRegion textureRegion = BitmapTextureAtlasTextureRegionFactory.createFromSource(bitmapTextureAtlas, new SolidColorBitmapTextureAtlasSource(size, size, pColor), 0, 0);
+		pTextureManager.loadTexture(bitmapTextureAtlas);
+		return textureRegion;
 	}
 
 	public static TiledTextureRegion createTiledFromSource(final BitmapTextureAtlas pBitmapTextureAtlas, final IBitmapTextureAtlasSource pBitmapTextureAtlasSource, final int pTextureX, final int pTextureY, final int pTileColumns, final int pTileRows) {
