@@ -10,6 +10,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.osudroid.BuildSettings;
 import com.osudroid.data.BeatmapInfo;
+import com.osudroid.online.AttestationDiagnostics;
 import com.osudroid.online.AttestationState;
 import com.osudroid.online.HardwareAttestationManager;
 
@@ -162,10 +163,7 @@ public class OnlineManager {
                 return false;
             }
 
-            PostBuilder post = new URLEncodedPostBuilder();
-            post.addParam("username", username);
-            post.addParam("password", MD5Calculator.getStringMD5(password.trim() + "taikotaiko"));
-            post.addParam("version", onlineVersion);
+            PostBuilder post = createLoginPost();
             post.addParam("attestationChain", chain);
 
             var token = AttestationState.getPendingToken();
@@ -219,6 +217,33 @@ public class OnlineManager {
             AttestationState.setSessionAttestationReady(true);
 
             return true;
+        }
+    }
+
+    private PostBuilder createLoginPost() {
+        PostBuilder post = new URLEncodedPostBuilder();
+        post.addParam("username", username);
+        post.addParam("password", MD5Calculator.getStringMD5(password.trim() + "taikotaiko"));
+        post.addParam("version", onlineVersion);
+        AttestationDiagnostics.addDeviceParams(post);
+
+        return post;
+    }
+
+    /**
+     * Reports attestation failure to the server.
+     * <p>
+     * The login has already failed at this point, so this must not affect its outcome.
+     *
+     * @param error The description of the failure.
+     */
+    private void reportAttestationFailure(String error) {
+        try {
+            PostBuilder post = createLoginPost();
+            post.addParam("attestationError", error);
+            post.requestWithAttempts(endpoint + "login.php", 1);
+        } catch (Exception e) {
+            Debug.e("reportAttestationFailure " + e.getMessage(), e);
         }
     }
 
@@ -506,12 +531,16 @@ public class OnlineManager {
         // cached key's attestation chain. A freshly fetched challenge cannot be paired with that
         // chain, so the key must always be regenerated alongside a new challenge.
         AttestationState.clearSession();
-        fetchAttestationChallenge();
-
+        var challengeError = fetchAttestationChallenge();
         var challenge = AttestationState.getPendingChallenge();
 
         if (challenge == null || challenge.length == 0) {
             failMessage = "Cannot obtain attestation challenge";
+
+            if (challengeError != null) {
+                reportAttestationFailure(AttestationDiagnostics.describeFailure("challenge", challengeError));
+            }
+
             return false;
         }
 
@@ -521,6 +550,7 @@ public class OnlineManager {
 
             if (chain == null || chain.isEmpty()) {
                 failMessage = "Cannot create attestation chain";
+                reportAttestationFailure(AttestationDiagnostics.describeFailure("chain", "empty"));
                 return false;
             }
 
@@ -534,17 +564,24 @@ public class OnlineManager {
             // fail attestation key generation.
             FirebaseCrashlytics.getInstance().recordException(e);
 
+            reportAttestationFailure(AttestationDiagnostics.describeFailure("keygen", e));
+
             throw new OnlineManagerException(failMessage, e);
         }
     }
 
-    private void fetchAttestationChallenge() {
+    /**
+     * Requests an attestation challenge from the server.
+     *
+     * @return Why the server did not provide a usable challenge. This is {@code null} if it did, and also if it could
+     * not be reached, since a report of that would not reach it either.
+     */
+    private String fetchAttestationChallenge() {
         var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
 
         try (var response = client.newCall(request).execute()) {
             if (!response.isSuccessful() || response.body() == null) {
-                failMessage = "Failed to fetch attestation challenge";
-                return;
+                return "HTTP " + response.code();
             }
 
             var body = response.body().string();
@@ -554,14 +591,21 @@ public class OnlineManager {
             var token = json.optString("token");
 
             if (challengeBase64.isEmpty() || token.isEmpty()) {
-                failMessage = "Invalid attestation challenge response";
-                return;
+                return "Invalid attestation challenge response";
             }
 
             AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
             AttestationState.setPendingToken(token);
+
+            return null;
+        } catch (IOException e) {
+            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+            return null;
         } catch (Exception e) {
             Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+            return e.toString();
         }
     }
 

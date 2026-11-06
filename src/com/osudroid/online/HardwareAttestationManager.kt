@@ -1,6 +1,7 @@
 package com.osudroid.online
 
 import android.os.Build
+import android.os.SystemClock
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.security.keystore.StrongBoxUnavailableException
@@ -31,6 +32,16 @@ object HardwareAttestationManager {
     fun generateKeyPair(challenge: ByteArray) {
         deleteKey()
 
+        val startTime = SystemClock.elapsedRealtime()
+
+        try {
+            generateKeyPairInternal(challenge)
+        } finally {
+            AttestationState.keygenDurationMs = SystemClock.elapsedRealtime() - startTime
+        }
+    }
+
+    private fun generateKeyPairInternal(challenge: ByteArray) {
         val generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
 
         val specBuilder = KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)

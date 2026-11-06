@@ -45,6 +45,14 @@ object AttestationState {
     var keyGeneratedAt: Long? = null
 
     /**
+     * How long the last key generation took in milliseconds, whether it succeeded or not.
+     * `null` if no key generation has been attempted.
+     */
+    @Volatile
+    @JvmStatic
+    var keygenDurationMs: Long? = null
+
+    /**
      * Determines whether the currently generated key is within the time-to-live window.
      */
     @JvmStatic
@@ -64,6 +72,7 @@ object AttestationState {
         attestationChain = null
         sessionAttestationReady = false
         keyGeneratedAt = null
+        keygenDurationMs = null
 
         HardwareAttestationManager.deleteKey()
     }
