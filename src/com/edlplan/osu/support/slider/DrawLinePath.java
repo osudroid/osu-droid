@@ -136,29 +136,11 @@ public class DrawLinePath {
      * Adds the quads of the segment whose corners were last computed by {@link #computeQuadCorners}.
      */
     private void addLineQuads() {
-        triangles.add(
-                start,
-                end,
-                endL
-        );
-
-        triangles.add(
-                start,
-                endL,
-                startL
-        );
-
-        triangles.add(
-                start,
-                endR,
-                end
-        );
-
-        triangles.add(
-                start,
-                startR,
-                endR
-        );
+        // start and end lie on the center line, the corners on the outline.
+        triangles.add(start, 1, end, 1, endL, 0);
+        triangles.add(start, 1, endL, 0, startL, 0);
+        triangles.add(start, 1, endR, 0, end, 1);
+        triangles.add(start, 1, startR, 0, endR, 0);
     }
 
     private void ensureThetaCache() {

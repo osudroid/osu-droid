@@ -114,6 +114,43 @@ class MeshRendererTest {
         assertEquals(1f, bytes.getFloat(12), 0f)
     }
 
+    private fun drawGradient(vertices: FloatArray) = MeshRenderer.drawGradient(
+        PrimitiveType.Triangles, vertices, 0, vertices.size / MeshRenderer.GRADIENT_FLOATS, IDENTITY, IDENTITY,
+        floatArrayOf(1f, 0f, 0f, 1f), floatArrayOf(0f, 1f, 0f, 0.5f), 0f, 0.25f, -0.5f, -0.9f,
+        BlendMode.Alpha, CompareFunction.Less, true
+    )
+
+    @Test
+    fun drawGradient_mixesDepthByClampedWeight() {
+        drawGradient(floatArrayOf(0f, 0f, 0f, 1f, 0f, 1f, 0f, 1f, 0.5f, 2f, 2f, -3f))
+        val bytes = gl.lastVertices()
+        val size = MeshRenderer.GRADIENT_VERTEX_SIZE_BYTES
+        fun depth(v: Int) = bytes.getFloat(v * size + 8)
+        assertEquals(-0.5f, depth(0), 1e-6f)
+        assertEquals(-0.9f, depth(1), 1e-6f)
+        assertEquals(-0.7f, depth(2), 1e-6f)
+        assertEquals(-0.5f, depth(3), 1e-6f)
+        assertEquals(2f, bytes.getFloat(3 * size + 4), 0f)
+    }
+
+    @Test
+    fun drawGradient_passesWeightUnclamped() {
+        drawGradient(floatArrayOf(0f, 0f, 0.5f, 1f, 0f, -3f, 0f, 1f, 2f))
+        val bytes = gl.lastVertices()
+        val size = MeshRenderer.GRADIENT_VERTEX_SIZE_BYTES
+        assertEquals(0.5f, bytes.getFloat(12), 0f)
+        assertEquals(-3f, bytes.getFloat(size + 12), 0f)
+        assertEquals(2f, bytes.getFloat(2 * size + 12), 0f)
+    }
+
+    @Test
+    fun drawGradient_sendsColorsAndRange() {
+        drawGradient(floatArrayOf(0f, 0f, 0f, 1f, 0f, 1f, 0f, 1f, 0f))
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform4f(") && it.endsWith(",1.0,0.0,0.0,1.0)") })
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform4f(") && it.endsWith(",0.0,1.0,0.0,0.5)") })
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform2f(") && it.endsWith(",0.0,0.25)") })
+    }
+
     @Test
     fun meshDraw_flushesBatchFirst() {
         QuadBatcher.add(texture, BlendMode.Alpha, IDENTITY, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, -1)

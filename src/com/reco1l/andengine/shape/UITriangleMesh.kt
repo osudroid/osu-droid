@@ -37,6 +37,25 @@ class UITriangleMesh : UIComponent() {
      */
     var blendMode: BlendMode? = UIBufferedComponent.DEFAULT_BLEND
 
+    /**
+     * Whether [vertices] hold (x, y, weight) per vertex instead of (x, y). The weight selects the
+     * color between the two of [setGradient], ramping over the range of [setGradientRange].
+     */
+    var hasVertexWeights = false
+
+    private val gradientFrom = floatArrayOf(1f, 1f, 1f, 1f)
+    private val gradientTo = floatArrayOf(1f, 1f, 1f, 1f)
+    private var gradientStart = 0f
+    private var gradientEnd = 1f
+
+    private var depthFrom = 0f
+    private var depthTo = 0f
+
+    // The gradient colors times the draw color, for the draw.
+    private val drawFrom = FloatArray(4)
+    private val drawTo = FloatArray(4)
+
+
     init {
         vertices.ary = FloatArray(0)
     }
@@ -48,6 +67,46 @@ class UITriangleMesh : UIComponent() {
     fun setContentSize(width: Float, height: Float) {
         contentWidth = width
         contentHeight = height
+    }
+
+
+    /**
+     * Sets the colors (RGBA) of a mesh with [hasVertexWeights], at the start and at the end of the
+     * gradient range (see [setGradientRange]). Both are multiplied with the color of the mesh (and
+     * of its ancestors); white for both draws the mesh in its color alone.
+     */
+    fun setGradient(
+        fromRed: Float, fromGreen: Float, fromBlue: Float, fromAlpha: Float,
+        toRed: Float, toGreen: Float, toBlue: Float, toAlpha: Float
+    ) {
+        gradientFrom[0] = fromRed
+        gradientFrom[1] = fromGreen
+        gradientFrom[2] = fromBlue
+        gradientFrom[3] = fromAlpha
+        gradientTo[0] = toRed
+        gradientTo[1] = toGreen
+        gradientTo[2] = toBlue
+        gradientTo[3] = toAlpha
+    }
+
+    /**
+     * Sets the weights over which the gradient goes from its first to its second color, 0 to 1 by
+     * default; outside of them the nearer color is kept.
+     */
+    fun setGradientRange(start: Float, end: Float) {
+        gradientStart = start
+        gradientEnd = end
+    }
+
+
+    /**
+     * Sets the depth of a mesh with [hasVertexWeights] at weight 0 and at weight 1, in normalized
+     * device coordinates (-1 nearest, 1 farthest); between them it is mixed by the weight. With a
+     * depth test, the parts nearer to weight [to] then win where the mesh overlaps itself.
+     */
+    fun setDepthRange(from: Float, to: Float) {
+        depthFrom = from
+        depthTo = to
     }
 
 
@@ -72,13 +131,25 @@ class UITriangleMesh : UIComponent() {
         super.doDraw(drawContext, pCamera)
 
         if (vertices.length > 0) {
-            MeshRenderer.draw(
-                PrimitiveType.Triangles,
-                vertices.ary, vertices.offset, vertices.length / 2,
-                drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
-                QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-                resolvedBlendMode, depthState.test, depthState.write
-            )
+            if (hasVertexWeights) {
+                MeshRenderer.drawGradient(
+                    PrimitiveType.Triangles,
+                    vertices.ary, vertices.offset, vertices.length / MeshRenderer.GRADIENT_FLOATS,
+                    drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
+                    tinted(gradientFrom, drawFrom), tinted(gradientTo, drawTo),
+                    gradientStart, gradientEnd,
+                    depthFrom, depthTo,
+                    resolvedBlendMode, depthState.test, depthState.write
+                )
+            } else {
+                MeshRenderer.draw(
+                    PrimitiveType.Triangles,
+                    vertices.ary, vertices.offset, vertices.length / 2,
+                    drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
+                    QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
+                    resolvedBlendMode, depthState.test, depthState.write
+                )
+            }
         }
 
         // The mesh renderer restores the state it found; disable the depth test after drawing so
@@ -86,6 +157,14 @@ class UITriangleMesh : UIComponent() {
         if (depthState.test != null) {
             drawContext.disableDepthTest()
         }
+    }
+
+    private fun tinted(color: FloatArray, out: FloatArray): FloatArray {
+        out[0] = (drawRed * color[0]).coerceIn(0f, 1f)
+        out[1] = (drawGreen * color[1]).coerceIn(0f, 1f)
+        out[2] = (drawBlue * color[2]).coerceIn(0f, 1f)
+        out[3] = (drawAlpha * color[3]).coerceIn(0f, 1f)
+        return out
     }
 
 }

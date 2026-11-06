@@ -22,6 +22,7 @@ import org.andengine.graphics.DrawContext;
 import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.debug.RenderStats;
 import org.andengine.graphics.gles.GlesLegacyRestorers;
+import org.andengine.graphics.offscreen.OffscreenRenderer;
 import org.andengine.input.sensor.SensorDelay;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.AccelerationSensorOptions;
@@ -669,6 +670,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 			// A clip left over by a frame that failed half way must not cut this one.
 			ClipStack.clear();
+			// Offscreen content first, so the screen pass is not interrupted (see OffscreenRenderer).
+			OffscreenRenderer.runPending(pDrawContext, this.mCamera);
 			this.onUpdateDrawHandlers(pDrawContext, this.mCamera);
 			this.onDrawScene(pDrawContext, this.mCamera);
 			QuadBatcher.flushFrame();

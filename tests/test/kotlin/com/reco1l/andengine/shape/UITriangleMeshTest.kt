@@ -71,6 +71,29 @@ class UITriangleMeshTest {
     }
 
     @Test
+    fun weightedMesh_tintsGradientWithMeshColor() {
+        drawMesh(mesh(0f, 0f, 1f, 10f, 0f, 0f, 0f, 10f, 0f) {
+            hasVertexWeights = true
+            setColor(1f, 0.5f, 1f, 0.5f)
+            setGradient(1f, 1f, 0f, 1f, 0f, 1f, 1f, 0.5f)
+            setGradientRange(0f, 0.25f)
+            setDepthRange(-0.5f, -0.9f)
+        })
+
+        assertEquals(1, gl.count("glDrawArrays"))
+        val upload = gl.lastUpload()
+        val size = MeshRenderer.GRADIENT_VERTEX_SIZE_BYTES
+        assertEquals(3 * size, upload.capacity())
+        assertEquals(10f, upload.getFloat(size), 0f)
+        assertEquals(-0.9f, upload.getFloat(8), 1e-6f)
+        assertEquals(-0.5f, upload.getFloat(size + 8), 1e-6f)
+        // The gradient colors times the mesh color, and the range the color ramps over.
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform4f(") && it.endsWith(",1.0,0.5,0.0,0.5)") })
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform4f(") && it.endsWith(",0.0,0.5,1.0,0.25)") })
+        assertTrue(gl.calls.toString(), gl.calls.any { it.startsWith("glUniform2f(") && it.endsWith(",0.0,0.25)") })
+    }
+
+    @Test
     fun mesh_depthStateMapsToPipeline() {
         drawMesh(mesh(*triangle) { depthState = DepthState.Less })
 
