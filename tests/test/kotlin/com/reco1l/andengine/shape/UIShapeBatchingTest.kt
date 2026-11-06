@@ -1,9 +1,9 @@
 package com.reco1l.andengine.shape
 
-import com.reco1l.andengine.component.ClearInfo
-import com.reco1l.andengine.component.DepthInfo
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import com.osudroid.ui.v2.menu.main.Spectrum
-import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.ui.UIGradientBox
 import com.reco1l.andengine.text.UIText
@@ -172,8 +172,8 @@ class UIShapeBatchingTest {
     @Test
     fun depthOrClear_usesBufferPath() {
         val cases = listOf<UIBox.() -> Unit>(
-            { depthInfo = DepthInfo.Default },
-            { clearInfo = ClearInfo.ClearDepthBuffer },
+            { depthState = DepthState.Less },
+            { clearBuffers = ClearBuffers.Depth },
         )
         for (configure in cases) {
             val box = BufferPathBox().apply { setSize(20f, 10f) }
@@ -203,8 +203,8 @@ class UIShapeBatchingTest {
     @Test
     fun zeroAlpha_depthMask_stillUsesBufferPath() {
         val cases = listOf<BufferPathBox.() -> Unit>(
-            { clearInfo = ClearInfo.ClearDepthBuffer },
-            { depthInfo = DepthInfo.Default },
+            { clearBuffers = ClearBuffers.Depth },
+            { depthState = DepthState.Less },
         )
         for (configure in cases) {
             val box = BufferPathBox().apply {
@@ -248,7 +248,7 @@ class UIShapeBatchingTest {
         }
         circle.setSize(20f, 20f)
         circle.setPortion(0.5f)
-        circle.depthInfo = DepthInfo.Default
+        circle.depthState = DepthState.Less
         circle.onHandleInvalidations()
 
         circle.doDraw(drawContext, camera)
@@ -403,7 +403,7 @@ class UIShapeBatchingTest {
         // Two live bars in each of the three rounds.
         assertEquals(6, gl.lastQuads().size)
         assertNull(spectrum.buffer)
-        assertEquals(BlendInfo.Additive, spectrum.blendInfo)
+        assertEquals(BlendMode.AdditiveAllChannels, spectrum.blendMode)
     }
 
     @Test

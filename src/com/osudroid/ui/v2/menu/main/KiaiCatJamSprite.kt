@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.menu.main
 
-import com.reco1l.andengine.component.BlendInfo
+import org.andengine.graphics.BlendMode
 import com.reco1l.andengine.sprite.ScaleType
 import com.reco1l.andengine.sprite.UISprite
 import org.andengine.graphics.DrawContext
@@ -44,7 +44,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
         // The program always outputs premultiplied alpha (rgb * a, a),
         // so PreMultiply blending must be used unconditionally regardless of
         // whether the underlying texture was uploaded as premultiplied.
-        blendInfo = BlendInfo.PreMultiply
+        blendMode = BlendMode.Premultiplied
         uvBuffer.update(this)
         requestBufferUpdate()
     }
@@ -60,7 +60,7 @@ class KiaiCatJamSprite(val frames: Array<TextureRegion>) : UISprite() {
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
             BatchTexture.of(texture),
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-            meshBlendMode()
+            resolvedBlendMode
         )
     }
 

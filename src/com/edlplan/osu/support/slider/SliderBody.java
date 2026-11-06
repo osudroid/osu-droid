@@ -5,13 +5,13 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.AbstractPath;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.andengine.component.ClearInfo;
-import com.reco1l.andengine.component.DepthInfo;
 import com.reco1l.andengine.shape.UITriangleMesh;
 import com.reco1l.andengine.container.UIContainer;
 import com.reco1l.framework.Color4;
 import com.osudroid.math.Vector2;
 
+import org.andengine.graphics.ClearBuffers;
+import org.andengine.graphics.DepthState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -67,18 +67,18 @@ public class SliderBody extends UIContainer {
         if (allowHint) {
             hint = new UITriangleMesh();
             hint.setVisible(false);
-            hint.setClearInfo(ClearInfo.ClearDepthBuffer);
-            hint.setDepthInfo(DepthInfo.Less);
+            hint.setClearBuffers(ClearBuffers.Depth);
+            hint.setDepthState(DepthState.Less);
         } else {
             hint = null;
         }
 
         border = new UITriangleMesh();
-        border.setDepthInfo(DepthInfo.Default);
+        border.setDepthState(DepthState.Less);
         attachChild(border, 0);
 
         background = new UITriangleMesh();
-        background.setDepthInfo(DepthInfo.Default);
+        background.setDepthState(DepthState.Less);
         attachChild(background, 0);
 
         if (hint != null) {
@@ -143,11 +143,11 @@ public class SliderBody extends UIContainer {
     public void setHintVisible(boolean visible) {
         if (hint != null) {
             hint.setVisible(visible);
-            background.setClearInfo(visible ? ClearInfo.None : ClearInfo.ClearDepthBuffer);
-            background.setDepthInfo(visible ? DepthInfo.Default : DepthInfo.Less);
+            background.setClearBuffers(visible ? ClearBuffers.None : ClearBuffers.Depth);
+            background.setDepthState(visible ? DepthState.Less : DepthState.Less);
         } else {
-            background.setClearInfo(ClearInfo.ClearDepthBuffer);
-            background.setDepthInfo(DepthInfo.Less);
+            background.setClearBuffers(ClearBuffers.Depth);
+            background.setDepthState(DepthState.Less);
         }
     }
 

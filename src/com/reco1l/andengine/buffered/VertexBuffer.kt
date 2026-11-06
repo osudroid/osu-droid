@@ -1,12 +1,12 @@
 package com.reco1l.andengine.buffered
 
-import org.andengine.graphics.gles.GlesPipeline
 import com.osudroid.math.toRadians
 import org.andengine.graphics.DrawContext
+import org.andengine.graphics.PrimitiveType
 import kotlin.math.*
 
 abstract class VertexBuffer(
-    val drawTopology: Int,
+    val drawTopology: PrimitiveType,
     val vertexCount: Int,
     val vertexSize: Int
 ) : Buffer(vertexCount * vertexSize) {
@@ -17,18 +17,17 @@ abstract class VertexBuffer(
 
 
     /**
-     * The GL draw mode the vertices are drawn with for [entity]; [drawTopology] unless a buffer
-     * depends on the entity's state.
+     * The primitive the vertices are drawn as for [entity]; [drawTopology] unless a buffer depends
+     * on the entity's state.
      */
-    open fun topology(entity: UIBufferedComponent<*>): Int = drawTopology
+    open fun topology(entity: UIBufferedComponent<*>): PrimitiveType = drawTopology
 
 
     //region Draw pipeline
 
     override fun drawMesh(gl: DrawContext, entity: UIBufferedComponent<*>) {
         check(vertexSize == VERTEX_2D) { "The mesh renderer draws 2D vertices, got $vertexSize components" }
-        val primitive = GlesPipeline.primitiveTypeOf(topology(entity)) ?: return
-        entity.drawPositions(gl, primitive, data, 0, vertexCount)
+        entity.drawPositions(gl, topology(entity), data, 0, vertexCount)
     }
 
     //endregion

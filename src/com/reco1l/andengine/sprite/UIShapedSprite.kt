@@ -1,6 +1,8 @@
 package com.reco1l.andengine.sprite
 
-import android.opengl.*
+import org.andengine.graphics.CompareFunction
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.component.*
 
@@ -20,15 +22,15 @@ class UIShapedSprite : UISprite() {
 
 
     init {
-        depthInfo = DepthInfo.None
+        depthState = DepthState.Disabled
         scaleType = ScaleType.Crop
     }
 
 
     private fun onShapeChanged() {
         shape?.apply {
-            clearInfo = if (textureRegion == null) ClearInfo.None else ClearInfo.ClearDepthBuffer
-            depthInfo = if (textureRegion == null) DepthInfo.None else SHAPE_DEPTH_INFO
+            clearBuffers = if (textureRegion == null) ClearBuffers.None else ClearBuffers.Depth
+            depthState = if (textureRegion == null) DepthState.Disabled else SHAPE_DEPTH
         }
     }
 
@@ -36,15 +38,15 @@ class UIShapedSprite : UISprite() {
     override fun onTextureRegionChanged() {
         super.onTextureRegionChanged()
 
-        depthInfo = if (textureRegion == null) DepthInfo.None else SPRITE_DEPTH_INFO
+        depthState = if (textureRegion == null) DepthState.Disabled else SPRITE_DEPTH
         onShapeChanged()
     }
 
 
     companion object {
 
-        private val SHAPE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES32.GL_ALWAYS)
-        private val SPRITE_DEPTH_INFO = DepthInfo(test = true, mask = true, function = GLES32.GL_EQUAL)
+        private val SHAPE_DEPTH = DepthState(CompareFunction.Always, true)
+        private val SPRITE_DEPTH = DepthState(CompareFunction.Equal, true)
 
     }
 }

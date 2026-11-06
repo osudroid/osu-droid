@@ -3,6 +3,7 @@ package org.andengine.graphics.gles
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.GLES30
+import org.andengine.graphics.ClearBuffers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -349,5 +350,33 @@ class GlesStateCacheTest {
         assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},") })
         cache.bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 9)
         assertEquals(gl.calls.toString(), 0, gl.calls.count { it.startsWith("glBindTexture(${GLES11Ext.GL_TEXTURE_EXTERNAL_OES},") })
+    }
+
+    @Test
+    fun clearBuffers_turnsTheDepthMaskOnFirst() {
+        cache.depthMask(false)
+        gl.calls.clear()
+
+        cache.clear(ClearBuffers.All)
+
+        val bits = GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT or GLES20.GL_STENCIL_BUFFER_BIT
+        assertEquals(listOf("glDepthMask(true)", "glClear($bits)"), gl.calls)
+    }
+
+    @Test
+    fun clearBuffers_colorOnlyKeepsTheDepthMask() {
+        cache.depthMask(false)
+        gl.calls.clear()
+
+        cache.clear(ClearBuffers.Color)
+
+        assertEquals(listOf("glClear(${GLES20.GL_COLOR_BUFFER_BIT})"), gl.calls)
+    }
+
+    @Test
+    fun clearBuffers_noneClearsNothing() {
+        cache.clear(ClearBuffers.None)
+
+        assertTrue(gl.calls.isEmpty())
     }
 }

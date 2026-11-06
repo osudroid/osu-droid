@@ -1,6 +1,6 @@
 package com.reco1l.andengine
 
-import com.reco1l.andengine.component.DepthInfo
+import org.andengine.graphics.DepthState
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.UIBox
@@ -160,7 +160,7 @@ class ScissorStackBatchTest {
             override fun onDrawBuffer(gl: DrawContext) { seen += this@ScissorStackBatchTest.gl.scissors.lastOrNull() }
         }.apply {
             setSize(20f, 10f)
-            depthInfo = DepthInfo.Default
+            depthState = DepthState.Less
             onHandleInvalidations()
         }
         val container = clipped(10f, 10f, 40f, 40f)

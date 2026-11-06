@@ -93,7 +93,7 @@ class UIGradientBox(
             MeshRenderer.drawColored(
                 PrimitiveType.TriangleStrip, data, 0, 4,
                 gl.modelViewGLMatrix, gl.projectionGLMatrix,
-                meshBlendMode(), meshDepthTest(), depthInfo.mask
+                resolvedBlendMode, depthState.test, depthState.write
             )
         }
 

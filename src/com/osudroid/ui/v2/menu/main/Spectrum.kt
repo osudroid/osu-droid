@@ -1,6 +1,5 @@
 package com.osudroid.ui.v2.menu.main
 
-import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.buffered.*
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.BlendMode
@@ -70,7 +69,7 @@ class Spectrum : UIBufferedComponent<IBuffer>(batchesShape = true) {
         y = 0f
         width = logoRadius * 2f + MAX_EXTRA * 2f
         height = logoRadius * 2f + MAX_EXTRA * 2f
-        blendInfo = BlendInfo.Additive
+        blendMode = BlendMode.AdditiveAllChannels
         alpha = BAR_ALPHA
     }
 

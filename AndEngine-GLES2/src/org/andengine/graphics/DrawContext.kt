@@ -7,6 +7,7 @@
  */
 package org.andengine.graphics
 
+import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
 import org.andengine.opengl.util.GLMatrixStack
 
@@ -98,4 +99,13 @@ class DrawContext {
     }
 
     fun lineWidth(width: Float) = GlesBackend.state.lineWidth(width)
+
+    /**
+     * Clears [buffers] of the current target, after the pending batched quads are drawn.
+     */
+    fun clear(buffers: ClearBuffers) {
+        if (buffers.isNone) return
+        QuadBatcher.flush()
+        GlesBackend.state.clear(buffers)
+    }
 }

@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.shape.ShapeBatching
 import com.reco1l.andengine.buffered.*
@@ -68,7 +69,7 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>(batchesShape = true) {
     }
 
 
-    class TriangleVBO : VertexBuffer(GL_TRIANGLES, 3, VERTEX_2D) {
+    class TriangleVBO : VertexBuffer(PrimitiveType.Triangles, 3, VERTEX_2D) {
 
         fun update(entity: UITriangle) {
             addTriangle(
@@ -80,8 +81,8 @@ open class UITriangle : UIBufferedComponent<TriangleVBO>(batchesShape = true) {
             )
         }
 
-        override fun topology(entity: UIBufferedComponent<*>): Int {
-            return if ((entity as UITriangle).paintStyle == PaintStyle.Fill) GL_TRIANGLES else GL_LINE_LOOP
+        override fun topology(entity: UIBufferedComponent<*>): PrimitiveType {
+            return if ((entity as UITriangle).paintStyle == PaintStyle.Fill) PrimitiveType.Triangles else PrimitiveType.LineLoop
         }
 
     }

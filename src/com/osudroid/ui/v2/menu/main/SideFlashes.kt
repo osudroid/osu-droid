@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2.menu.main
 
+import org.andengine.graphics.BlendMode
 import com.edlplan.framework.easing.Easing
-import com.reco1l.andengine.component.BlendInfo
 import com.reco1l.andengine.UIScene
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.ui.UIGradientBox
@@ -34,7 +34,7 @@ class SideFlashes(screenWidth: Float) {
             x = 0f
             alpha = 0f
             color = DEFAULT_COLOR
-            blendInfo = BlendInfo.Additive
+            blendMode = BlendMode.AdditiveAllChannels
         }
         flashRight.apply {
             width = flashW
@@ -42,7 +42,7 @@ class SideFlashes(screenWidth: Float) {
             x = screenWidth - flashW
             alpha = 0f
             color = DEFAULT_COLOR
-            blendInfo = BlendInfo.Additive
+            blendMode = BlendMode.AdditiveAllChannels
         }
     }
 

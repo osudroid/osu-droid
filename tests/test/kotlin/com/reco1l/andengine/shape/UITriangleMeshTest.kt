@@ -1,9 +1,9 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import android.opengl.GLES20
-import com.reco1l.andengine.component.BlendInfo
-import com.reco1l.andengine.component.ClearInfo
-import com.reco1l.andengine.component.DepthInfo
 import com.osudroid.testing.RecordingGl
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.MeshRenderer
@@ -71,8 +71,8 @@ class UITriangleMeshTest {
     }
 
     @Test
-    fun mesh_depthInfoMapsToPipeline() {
-        drawMesh(mesh(*triangle) { depthInfo = DepthInfo.Less })
+    fun mesh_depthStateMapsToPipeline() {
+        drawMesh(mesh(*triangle) { depthState = DepthState.Less })
 
         assertTrue(gl.calls.toString(), gl.calls.contains("glEnable(${GLES20.GL_DEPTH_TEST})"))
         assertTrue(gl.calls.toString(), gl.calls.contains("glDepthFunc(${GLES20.GL_LESS})"))
@@ -82,10 +82,10 @@ class UITriangleMeshTest {
     }
 
     @Test
-    fun mesh_clearInfoClearsFirst() {
+    fun mesh_clearBuffersClearFirst() {
         drawMesh(mesh(*triangle) {
-            clearInfo = ClearInfo(depthBuffer = true, colorBuffer = false, stencilBuffer = false)
-            depthInfo = DepthInfo.Less
+            clearBuffers = ClearBuffers.Depth
+            depthState = DepthState.Less
         })
 
         val clear = gl.calls.indexOf("glClear(${GLES20.GL_DEPTH_BUFFER_BIT})")
@@ -97,7 +97,7 @@ class UITriangleMeshTest {
 
     @Test
     fun emptyMesh_drawsNothing() {
-        drawMesh(mesh { blendInfo = BlendInfo.Additive })
+        drawMesh(mesh { blendMode = BlendMode.AdditiveAllChannels })
 
         assertEquals(0, gl.count("glDrawArrays"))
         assertTrue(gl.vertexUploads.isEmpty())

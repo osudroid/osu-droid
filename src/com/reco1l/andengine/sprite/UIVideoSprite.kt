@@ -87,7 +87,7 @@ class UIVideoSprite(
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
             view,
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-            meshBlendMode()
+            resolvedBlendMode
         )
     }
 

@@ -1,16 +1,6 @@
 package com.reco1l.andengine.buffered
 
-import android.opengl.GLES32
 import org.andengine.graphics.DrawContext
-
-// GLES20 draw topology constants (mirrored for convenience)
-const val GL_TRIANGLES = GLES32.GL_TRIANGLES
-const val GL_TRIANGLE_STRIP = GLES32.GL_TRIANGLE_STRIP
-const val GL_TRIANGLE_FAN = GLES32.GL_TRIANGLE_FAN
-const val GL_LINES = GLES32.GL_LINES
-const val GL_LINE_STRIP = GLES32.GL_LINE_STRIP
-const val GL_LINE_LOOP = GLES32.GL_LINE_LOOP
-const val GL_POINTS = GLES32.GL_POINTS
 
 /**
  * The geometry of a [UIBufferedComponent]: client-side data the component draws through the mesh

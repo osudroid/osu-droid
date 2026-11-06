@@ -14,7 +14,7 @@ import kotlin.math.*
 /**
  * An icon of the icon font that can be displayed on the screen.
  *
- * The glyph is drawn as a quad of the engine's [QuadBatcher]. [depthInfo] is not applied: batched
+ * The glyph is drawn as a quad of the engine's [QuadBatcher]. [depthState] is not applied: batched
  * quads are drawn without a depth test.
  */
 open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
@@ -102,7 +102,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
     override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         onApplyColor(drawContext)
 
-        clearIfRequested()
+        clearIfRequested(drawContext)
 
         val font = font ?: return
         val letter = letter ?: return
@@ -120,7 +120,7 @@ open class FontAwesomeIcon(icon: Int) : UIBufferedComponent<IBuffer>() {
         QuadBatcher.setProjection(drawContext.projectionGLMatrix)
 
         TextBatching.addLetter(
-            font, letter, meshBlendMode(), drawContext.modelViewGLMatrix,
+            font, letter, resolvedBlendMode, drawContext.modelViewGLMatrix,
             x0, y0, x0 + letter.mWidth * scale, y0 + letter.mHeight * scale,
             TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha),
             TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
