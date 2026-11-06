@@ -17,6 +17,7 @@ import org.andengine.engine.handler.UpdateHandlerList;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.entity.scene.Scene;
+import org.andengine.graphics.ClipStack;
 import org.andengine.graphics.DrawContext;
 import org.andengine.graphics.batch.QuadBatcher;
 import org.andengine.graphics.debug.RenderStats;
@@ -666,6 +667,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mIsLagging |= this.mTextureManager.updateTextures();
 			this.mIsLagging |= this.mFontManager.updateFonts();
 
+			// A clip left over by a frame that failed half way must not cut this one.
+			ClipStack.clear();
 			this.onUpdateDrawHandlers(pDrawContext, this.mCamera);
 			this.onDrawScene(pDrawContext, this.mCamera);
 			QuadBatcher.flushFrame();

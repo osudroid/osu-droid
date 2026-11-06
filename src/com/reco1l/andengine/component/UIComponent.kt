@@ -1,5 +1,6 @@
 package com.reco1l.andengine.component
 
+import org.andengine.graphics.ClipStack
 import android.util.*
 import android.view.*
 import com.edlplan.framework.easing.Easing
@@ -676,8 +677,6 @@ abstract class UIComponent : Entity(0f, 0f),
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = drawContext.isScissorTestEnabled
-
             // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
             val (topRightX, topRightY) = camera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
@@ -689,14 +688,9 @@ abstract class UIComponent : Entity(0f, 0f),
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            drawContext.enableScissorTest()
-            ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+            ClipStack.push(minX, minY, maxX - minX, maxY - minY)
             doManagedDraw(drawContext, camera)
-            ScissorStack.pop()
-
-            if (!wasScissorTestEnabled) {
-                drawContext.disableScissorTest()
-            }
+            ClipStack.pop()
         } else {
             doManagedDraw(drawContext, camera)
         }
