@@ -52,6 +52,7 @@ public class GameplayHitCircle extends GameObject {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
+        resetNotelockState();
 
         var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -197,6 +198,18 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void update(final float dt) {
+        preUpdateShake();
+        updateInternal(dt);
+        postUpdateShake(dt, beatmapCircle, scene != null && !startHit);
+    }
+
+    @Override
+    protected void shiftShake(float dx) {
+        approachCircle.setPosition(approachCircle.getX() + dx, approachCircle.getY());
+        circlePiece.setPosition(circlePiece.getX() + dx, circlePiece.getY());
+    }
+
+    private void updateInternal(final float dt) {
         if (beatmapCircle.hitWindow == null) {
             // Circle somehow does not have a judgement window - abandon.
             return;
@@ -240,7 +253,13 @@ public class GameplayHitCircle extends GameObject {
                 }
                 removeFromScene();
                 return;
+            } else if (consumeEarlyPress()) {
+                // Pressed circle before hitwindow allows it
+                startShake();
             }
+        } else if (!autoPlay && pollNotelockedPress(listener, beatmapCircle)) {
+            // Pressed circle while it's notelocked
+            startShake();
         }
 
         if (circlePiece.isVisible()) {
@@ -291,6 +310,7 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void onExpire() {
+        resetShake();
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
 

@@ -152,6 +152,15 @@ public abstract class GameObject {
                 var downEvent = downEvents.get(cursor.latestProcessedDownEventIndex++);
 
                 if (!canHit(downEvent, hitObject.hitWindow)) {
+                    // The press is too early for this object. It is dropped, but osu! shakes the object for it, so
+                    // remember that it landed on the object (read via consumeEarlyPress by the owner).
+                    // The press is also claimed: only this object (the earliest one under the cursor) may shake for
+                    // it, not the overlapping objects locked behind it (see pollNotelockedPress).
+                    if (!isPressClaimed(downEvent) && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                        claimPress(downEvent);
+                        earlyPressOnObject = true;
+                    }
+
                     continue;
                 }
 
@@ -159,7 +168,7 @@ public abstract class GameObject {
                     if (i == j) {
                         // For the cursor that generated the down event, check if the event position is on the object.
                         if (isHit(hitObject, downEvent)) {
-                            return downEvent;
+                            return claimPress(downEvent);
                         }
                     } else {
                         // For the other case, we need to check the event closest to the down event and check if it is
@@ -172,7 +181,7 @@ public abstract class GameObject {
                         }
 
                         if (isHit(hitObject, closestEvent)) {
-                            return downEvent;
+                            return claimPress(downEvent);
                         }
                     }
                 }
@@ -216,6 +225,176 @@ public abstract class GameObject {
 
         return Utils.squaredDistance(position, cursorEvent.position) <= Utils.sqr((float) hitObject.getScreenSpaceGameplayRadius());
     }
+
+    //region Notelock shake
+
+    // A press ("claimed" through CursorEvent.isClaimed) belongs to
+    // the earliest object under cursor, which either gets hit or shakes.
+    // Later overlapping objects must not shake for an already claimed press.
+    // Objects are updated in start time order, so the earliest object claims the press first.
+    // The flag lives on the event itself (and is reset when the event is obtained from the pool), because
+    // CursorEvents are pooled and recycled: remembering them by identity elsewhere would go stale.
+    private boolean notelockFirstPollSkipped;
+    private boolean earlyPressOnObject;
+    private float shakeElapsed = -1f;
+    private float appliedShakeOffset;
+
+    private static CursorEvent claimPress(CursorEvent event) {
+        event.isClaimed = true;
+        return event;
+    }
+
+    private static boolean isPressClaimed(CursorEvent event) {
+        return event.isClaimed;
+    }
+
+    /**
+     * Must be called from {@code init} of pooled objects so the notelock state of a previous use does not leak
+     * into the next one.
+     */
+    protected final void resetNotelockState() {
+        notelockFirstPollSkipped = false;
+        earlyPressOnObject = false;
+    }
+
+    /**
+     * Returns whether the last {@link #getHittingCursor} calls dropped a press that landed on this object but was too
+     * early to hit it, and clears that state. Call it right after {@link #getHittingCursor} returned {@code null}
+     * to shake the object like osu! does.
+     */
+    protected final boolean consumeEarlyPress() {
+        boolean result = earlyPressOnObject;
+        earlyPressOnObject = false;
+        return result;
+    }
+
+    /**
+     * Checks, WITHOUT consuming anything, whether a new press landed on this object while it is displayed and
+     * locked behind an earlier object (regardless of whether the press is already inside its hit window). It never
+     * touches the shared (consuming) indices owned by {@link #getHittingCursor}.
+     * <p>
+     * Only call this while the object is not hittable (see {@link GameObjectListener#isObjectHittable}).
+     */
+    protected final boolean pollNotelockedPress(GameObjectListener listener, HitObject hitObject) {
+        if (autoPlay || GameHelper.isAutopilot() || GameHelper.isRelax() || hitObject.hitWindow == null) {
+            return false;
+        }
+
+        if (!notelockFirstPollSkipped) {
+            // The first call happens right when the object spawns, before the earlier objects have processed this
+            // frame's presses, so it must not react to anything yet.
+            notelockFirstPollSkipped = true;
+            return false;
+        }
+
+        int cursorCount = listener.getCursorsCount();
+        boolean pressed = false;
+
+        for (int i = 0; i < cursorCount; i++) {
+            // Cursor.downEvents is cleared every frame (Cursor.reset), so the whole list is new for this frame. Presses
+            // that were already handled are skipped through the claim flag.
+            var downEvents = listener.getCursor(i).downEvents;
+
+            for (int index = 0, size = downEvents.size(); index < size; index++) {
+                var downEvent = downEvents.get(index);
+
+                // A locked object shakes for any tap on it while it is displayed (no hit window check).
+                // The tap is claimed so the objects locked behind this one, which update later, skip it,
+                // and only the earliest object under the tap shakes.
+                if (!isPressClaimed(downEvent) && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                    claimPress(downEvent);
+                    pressed = true;
+                }
+            }
+        }
+
+        return pressed;
+    }
+
+    // Mirrors the position checks of the regular gameplay branch in getHittingCursor.
+    private boolean isPressOnObject(GameObjectListener listener, HitObject hitObject, int cursorIndex,
+                                    CursorEvent downEvent, int cursorCount) {
+        for (int j = 0; j < cursorCount; j++) {
+            if (cursorIndex == j) {
+                if (isHit(hitObject, downEvent)) {
+                    return true;
+                }
+            } else {
+                var closestEvent = listener.getCursor(j).getClosestEventBefore(downEvent.systemTime);
+
+                if (closestEvent != null && !closestEvent.isActionUp() && isHit(hitObject, closestEvent)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Starts (or restarts) the notelock shake of this object.
+     */
+    protected final void startShake() {
+        shakeElapsed = 0f;
+    }
+
+    /**
+     * Subclasses move every entity that should shake by {@code dx} pixels on the x axis.
+     * Hit testing never reads entity positions (it uses {@link #position}), so this does not move the hitbox.
+     */
+    protected void shiftShake(float dx) {}
+
+    /**
+     * Call at the very beginning of {@code update}: removes last frame's offset so that the object's regular
+     * logic, which may reposition entities absolutely, always works on canonical positions.
+     */
+    protected final void preUpdateShake() {
+        if (appliedShakeOffset != 0f) {
+            shiftShake(-appliedShakeOffset);
+            appliedShakeOffset = 0f;
+        }
+    }
+
+    /**
+     * Call at the very end of {@code update}: advances the shake and applies the current offset.
+     *
+     * @param canShake Whether the object may still shake (false once it is hit or removed).
+     */
+    protected final void postUpdateShake(float dt, HitObject hitObject, boolean canShake) {
+        if (!canShake) {
+            shakeElapsed = -1f;
+            return;
+        }
+
+        if (shakeElapsed < 0f) {
+            return;
+        }
+
+        shakeElapsed += dt;
+
+        if (ShakeAnimation.isFinished(shakeElapsed)) {
+            shakeElapsed = -1f;
+            return;
+        }
+
+        float magnitude = (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * ShakeAnimation.MAGNITUDE_RATIO;
+        float offset = ShakeAnimation.offset(shakeElapsed, magnitude);
+
+        if (offset != 0f) {
+            shiftShake(offset);
+            appliedShakeOffset = offset;
+        }
+    }
+
+    /**
+     * Stops the shake and puts every entity back. Call from {@code onExpire}.
+     */
+    protected final void resetShake() {
+        preUpdateShake();
+        shakeElapsed = -1f;
+    }
+
+    //endregion
 
     //region Lifetime management
 

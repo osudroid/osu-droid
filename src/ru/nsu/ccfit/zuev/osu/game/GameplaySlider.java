@@ -191,6 +191,7 @@ public class GameplaySlider extends GameObject {
         this.scene = scene;
         this.stat = stat;
         this.beatmapSlider = beatmapSlider;
+        resetNotelockState();
         this.controlPoints = controlPoints;
 
         var stackedPosition = beatmapSlider.getScreenSpaceGameplayStackedPosition();
@@ -582,6 +583,7 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void onExpire() {
+        resetShake();
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
         startArrow.clearEntityModifiers();
@@ -861,6 +863,30 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void update(final float dt) {
+        preUpdateShake();
+        updateInternal(dt);
+        postUpdateShake(dt, beatmapSlider, scene != null && !startHit);
+    }
+
+    /**
+     * Shake the entire slider during notelock.
+     */
+    @Override
+    protected void shiftShake(float dx) {
+        approachCircle.setPosition(approachCircle.getX() + dx, approachCircle.getY());
+        shiftX(headCirclePiece, dx);
+        shiftX(tailCirclePiece, dx);
+        shiftX(startArrow, dx);
+        shiftX(endArrow, dx);
+        shiftX(sliderBody, dx);
+        shiftX(tickContainer, dx);
+    }
+
+    private static void shiftX(org.anddev.andengine.entity.IEntity entity, float dx) {
+        entity.setPosition(entity.getX() + dx, entity.getY());
+    }
+
+    private void updateInternal(final float dt) {
 
         if (scene == null) {
             return;
@@ -879,7 +905,13 @@ public class GameplaySlider extends GameObject {
 
                             if (hittingCursor != null) {
                                 onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
+                            } else if (consumeEarlyPress()) {
+                                // Pressed on the slider head before it can be hit: shake the whole slider.
+                                startShake();
                             }
+                        } else if (pollNotelockedPress(listener, beatmapSlider.getHead())) {
+                            // Pressed slider while it's notelocked
+                            startShake();
                         }
                     } else {
                         // If it's too late, mark this hit missing.
