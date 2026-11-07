@@ -1,8 +1,8 @@
 package com.osudroid.ui.v2.songselect
 
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.ISkinnable
+import org.andengine.graphics.BlendMode
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.BatchTexture
@@ -79,7 +79,7 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
 
         val texture = texture
         if (texture != null) {
-            blendInfo = if (texture.texture.textureOptions.mPreMultiplyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+            blendMode = if (texture.texture.textureOptions.mPreMultiplyAlpha) BlendMode.Premultiplied else DEFAULT_BLEND
         }
         requestBufferUpdate()
     }
@@ -126,13 +126,13 @@ class DifficultyStars : UIBufferedComponent<DifficultyStars.StarsVertexBuffer>()
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
             BatchTexture.of(texture.texture),
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-            meshBlendMode(), meshDepthTest(), depthInfo.mask
+            resolvedBlendMode, depthState.test, depthState.write
         )
     }
 
 
     class StarsVertexBuffer : VertexBuffer(
-        drawTopology = GL_TRIANGLES,
+        drawTopology = PrimitiveType.Triangles,
         vertexCount = VERTICES_PER_STAR * MAX_STARS,
         vertexSize = VERTEX_2D
     ) {

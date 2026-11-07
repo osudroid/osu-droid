@@ -5,6 +5,7 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIWedge.*
 import com.reco1l.andengine.theme.srem
 import org.andengine.graphics.DrawContext
+import org.andengine.graphics.PrimitiveType
 import kotlin.math.*
 
 /**
@@ -108,7 +109,7 @@ open class UIWedge : UIBufferedComponent<WedgeVBO>() {
     ) : VertexBuffer(
         vertexCount = max(1, segments) + 3,
         vertexSize = VERTEX_2D,
-        drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_LOOP,
+        drawTopology = if (paintStyle == PaintStyle.Fill) PrimitiveType.TriangleFan else PrimitiveType.LineLoop,
     ) {
         fun update(entity: UIWedge) {
 
