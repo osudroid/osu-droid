@@ -12,7 +12,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.math.min
 
 
 /** Recursively fills [target] with keys from [source] it's missing, without overwriting existing ones. */
@@ -83,21 +82,9 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
 
         ini.get<IntArray?>("Colours", "SliderTrackOverride")?.also { trackColor ->
 
-            val hintColor = IntArray(trackColor.size) { min(255, trackColor[it] + 15) }
-
-            convertToHex(hintColor)?.also {
-
-                put("sliderHintColor", it)
-                put("sliderHintAlpha", 1f)
-                put("sliderHintWidth", 25f)
-                put("sliderHintEnable", true)
-                put("sliderHintShowMinLength", 1f)
-            }
-
             convertToHex(trackColor)?.also {
 
                 put("sliderBodyColor", it)
-                put("sliderBodyBaseAlpha", 1f)
                 put("sliderFollowComboColor", false)
             }
         }

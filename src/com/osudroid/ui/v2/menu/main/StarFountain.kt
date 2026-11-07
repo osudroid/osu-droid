@@ -1,6 +1,9 @@
 package com.osudroid.ui.v2.menu.main
 
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.UIScene
+import com.reco1l.andengine.ui.ISkinnable
+import org.andengine.entity.Entity
 import org.andengine.entity.particle.ParticleSystem
 import org.andengine.entity.particle.emitter.PointParticleEmitter
 import org.andengine.entity.particle.initializer.AccelerationParticleInitializer
@@ -19,10 +22,15 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  * Lazer-style star fountain, two particle emitters (left + right) that fire a sweeping arc
  * of stars on kiai onset.
  */
-class StarFountain(screenWidth: Float, screenHeight: Float) {
+class StarFountain(private val screenWidth: Float, private val screenHeight: Float) {
 
-    private val systemLeft:  ParticleSystem<Sprite>?
-    private val systemRight: ParticleSystem<Sprite>?
+    // Rebuilds the particle systems whenever the skin changes, see rebuildSystems().
+    private val layer = object : Entity(), ISkinnable {
+        override fun onSkinChanged() = updateThread { rebuildSystems() }
+    }
+
+    private var systemLeft:  ParticleSystem<Sprite>? = null
+    private var systemRight: ParticleSystem<Sprite>? = null
 
     private val velLeft = VelocityParticleInitializer<Sprite>(0f, 0f, -480f, -520f)
     private val velRight = VelocityParticleInitializer<Sprite>(0f, 0f, -480f, -520f)
@@ -47,18 +55,27 @@ class StarFountain(screenWidth: Float, screenHeight: Float) {
     private var lastShootMs = -1
 
     init {
-        val starRegion: TextureRegion? = ResourceManager.getInstance().getTexture("star2")
-
-        val emitY = screenHeight
-        systemLeft  = starRegion?.let { buildSystem(screenWidth * 0.25f, emitY, it, velLeft)  }
-        systemRight = starRegion?.let { buildSystem(screenWidth * 0.75f, emitY, it, velRight) }
+        rebuildSystems()
     }
 
 
     /** Attach the particle systems to [scene] so they are rendered and updated. */
     fun attachTo(scene: UIScene) {
-        systemLeft?.let { scene.attachChild(it) }
-        systemRight?.let { scene.attachChild(it) }
+        scene.attachChild(layer)
+    }
+
+    /**
+     * Builds the particle systems with the current "fountain-star", which a skin can replace. Loading a skin
+     * unloads the previous texture, which the particles could no longer draw.
+     */
+    private fun rebuildSystems() {
+        val starRegion = ResourceManager.getInstance().getTexture("fountain-star")
+
+        layer.detachChildren()
+        systemLeft  = starRegion?.let { buildSystem(screenWidth * 0.25f, screenHeight, it, velLeft)  }
+        systemRight = starRegion?.let { buildSystem(screenWidth * 0.75f, screenHeight, it, velRight) }
+        systemLeft?.let { layer.attachChild(it) }
+        systemRight?.let { layer.attachChild(it) }
     }
 
     /**

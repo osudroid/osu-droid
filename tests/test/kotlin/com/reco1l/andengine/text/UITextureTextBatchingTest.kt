@@ -1,11 +1,11 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.BlendMode
 import com.osudroid.testing.IDENTITY
 import com.osudroid.testing.Page
 import com.osudroid.testing.RecordingGl
 import com.osudroid.testing.quadVerticesOf
 import com.osudroid.testing.vertexLayersOf
-import com.reco1l.andengine.component.BlendInfo
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesBackend
@@ -167,7 +167,7 @@ class UITextureTextBatchingTest {
         val page = Page(7, 64)
         val characters = mutableMapOf<Char, TextureRegion>('1' to TextureRegion(page, 0f, 0f, 8f, 8f))
         val first = UITextureText(characters).apply { text = "11" }
-        val second = UITextureText(characters).apply { text = "11"; blendInfo = BlendInfo.Additive }
+        val second = UITextureText(characters).apply { text = "11"; blendMode = BlendMode.AdditiveAllChannels }
         val third = UITextureText(characters).apply { text = "11" }
 
         drawContext.resetModelViewGLMatrixStack()

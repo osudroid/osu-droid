@@ -1,6 +1,7 @@
 package com.reco1l.andengine
 
-import com.reco1l.andengine.component.DepthInfo
+import org.andengine.graphics.DepthState
+import org.andengine.graphics.ClipStack
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.shape.UIBox
@@ -24,7 +25,7 @@ import com.osudroid.testing.disposeTestFontAndMasks
 import com.osudroid.testing.installTestFontAndMasks
 
 @RunWith(RobolectricTestRunner::class)
-class ScissorStackBatchTest {
+class ClipStackBatchTest {
 
     private lateinit var gl: RecordingGl
     private val drawContext = DrawContext()
@@ -47,7 +48,7 @@ class ScissorStackBatchTest {
 
     @After
     fun tearDown() {
-        while (!ScissorStack.empty()) ScissorStack.pop()
+        ClipStack.clear()
         QuadBatcher.releaseResources()
         endOpenPass()
         disposeTestFontAndMasks(font, masks)
@@ -80,8 +81,8 @@ class ScissorStackBatchTest {
     @Test
     fun nestedClips_intersect() {
         beginFrame()
-        ScissorStack.pushScissor(10f, 20f, 50f, 50f)
-        ScissorStack.pushScissor(30f, 10f, 50f, 50f)
+        ClipStack.push(10f, 20f, 50f, 50f)
+        ClipStack.push(30f, 10f, 50f, 50f)
 
         assertEquals(listOf(30, 20, 30, 40), gl.scissors.last())
 
@@ -98,9 +99,9 @@ class ScissorStackBatchTest {
     @Test
     fun pop_restoresOuterClip() {
         beginFrame()
-        ScissorStack.pushScissor(0f, 0f, 50f, 50f)
-        ScissorStack.pushScissor(0f, 0f, 20f, 20f)
-        ScissorStack.pop()
+        ClipStack.push(0f, 0f, 50f, 50f)
+        ClipStack.push(0f, 0f, 20f, 20f)
+        ClipStack.pop()
         assertEquals(listOf(0, 0, 50, 50), gl.scissors.last())
 
         drawFullSurfaceBox()
@@ -108,7 +109,7 @@ class ScissorStackBatchTest {
         assertEquals(50f, maxOf(quad[0], quad[2]), 1e-3f)
         assertEquals(50f, maxOf(quad[1], quad[3]) - minOf(quad[1], quad[3]), 1e-3f)
 
-        ScissorStack.pop()
+        ClipStack.pop()
         // With no clip left, quads are not cut anymore.
         gl.vertexUploads.clear()
         drawFullSurfaceBox()
@@ -119,10 +120,10 @@ class ScissorStackBatchTest {
     fun twoClippedContainers_oneDraw() {
         val first = clipped(0f, 0f, 30f, 30f)
         first.attachChild(box(20f, 0f, 30f, 10f))
-        first.attachChild(UIText().apply { font = this@ScissorStackBatchTest.font; text = "A"; setPosition(5f, 5f) })
+        first.attachChild(UIText().apply { font = this@ClipStackBatchTest.font; text = "A"; setPosition(5f, 5f) })
         val second = clipped(60f, 0f, 30f, 30f)
         second.attachChild(box(-10f, 0f, 30f, 10f))
-        second.attachChild(UIText().apply { font = this@ScissorStackBatchTest.font; text = "A"; setPosition(5f, 5f) })
+        second.attachChild(UIText().apply { font = this@ClipStackBatchTest.font; text = "A"; setPosition(5f, 5f) })
         for (container in listOf(first, second)) {
             container.onHandleInvalidations()
             for (i in 0 until container.childCount) (container.getChildByIndex(i) as? UIComponent)?.onHandleInvalidations()
@@ -157,10 +158,10 @@ class ScissorStackBatchTest {
         val seen = ArrayList<List<Int>?>()
         val buffered = object : UIBox() {
             override fun beginDraw(drawContext: DrawContext) {}
-            override fun onDrawBuffer(gl: DrawContext) { seen += this@ScissorStackBatchTest.gl.scissors.lastOrNull() }
+            override fun onDrawBuffer(gl: DrawContext) { seen += this@ClipStackBatchTest.gl.scissors.lastOrNull() }
         }.apply {
             setSize(20f, 10f)
-            depthInfo = DepthInfo.Default
+            depthState = DepthState.Less
             onHandleInvalidations()
         }
         val container = clipped(10f, 10f, 40f, 40f)

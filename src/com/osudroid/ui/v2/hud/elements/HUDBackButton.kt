@@ -1,5 +1,7 @@
 package com.osudroid.ui.v2.hud.elements
 
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UICircle
@@ -33,7 +35,7 @@ class HUDBackButton : HUDElement() {
         anchor = Anchor.Center
         origin = Anchor.Center
         color = Color4.White
-        depthInfo = DepthInfo.Default
+        depthState = DepthState.Less
 
         relativeSizeAxes = Axes.Both
         setSize(1f, 1f)
@@ -43,8 +45,8 @@ class HUDBackButton : HUDElement() {
         anchor = Anchor.Center
         origin = Anchor.Center
         color = Color4(0xFF002626)
-        clearInfo = ClearInfo.ClearDepthBuffer
-        depthInfo = DepthInfo.Less
+        clearBuffers = ClearBuffers.Depth
+        depthState = DepthState.Less
 
         relativeSizeAxes = Axes.Both
         setSize(0.95f, 0.95f)

@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import org.andengine.graphics.BlendMode
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.BatchTexture
 import org.andengine.graphics.batch.MeshRenderer
@@ -147,7 +148,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         if (textureX != 0 || textureY != 0) {
             textureRegion.setTexturePosition(regionOriginX + textureX, regionOriginY + textureY)
         }
-        blendInfo = if (textureRegion.texture.textureOptions.mPreMultiplyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+        blendMode = if (textureRegion.texture.textureOptions.mPreMultiplyAlpha) BlendMode.Premultiplied else UIBufferedComponent.DEFAULT_BLEND
         uvBuffer.update(this)
         requestBufferUpdate()
     }
@@ -192,7 +193,7 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
         if (!isBatchable || !canBatchShape()) {
             return false
         }
-        val blend = batchBlendMode() ?: return false
+        val blend = resolvedBlendMode
 
         onApplyColor(gl)
         val q = quad
@@ -281,13 +282,13 @@ open class UISprite(textureRegion: TextureRegion? = null) : UIBufferedComponent<
             drawContext.modelViewGLMatrix, drawContext.projectionGLMatrix,
             BatchTexture.of(texture),
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-            meshBlendMode(), meshDepthTest(), depthInfo.mask
+            resolvedBlendMode, depthState.test, depthState.write
         )
     }
 
 
     class SpriteVBO : VertexBuffer(
-        drawTopology = GL_TRIANGLE_STRIP,
+        drawTopology = PrimitiveType.TriangleStrip,
         vertexCount = SPRITE_VERTICES,
         vertexSize = VERTEX_2D
     ) {

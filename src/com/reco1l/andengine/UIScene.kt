@@ -1,5 +1,6 @@
 package com.reco1l.andengine
 
+import org.andengine.graphics.ClipStack
 import android.util.Log
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
@@ -226,8 +227,6 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
         }
 
         if (clipToBounds) {
-            val wasScissorTestEnabled = drawContext.isScissorTestEnabled
-
             // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
             val (topRightX, topRightY) = pCamera.convertSceneToSurfaceCoordinates(convertLocalToSceneCoordinates(cameraWidth, 0f))
@@ -239,14 +238,9 @@ open class UIScene : Scene(), IShape, IClockProvider<IFrameBasedClock?>, IClockR
             val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
             val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            drawContext.enableScissorTest()
-            ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+            ClipStack.push(minX, minY, maxX - minX, maxY - minY)
             super.onManagedDraw(drawContext, pCamera)
-            ScissorStack.pop()
-
-            if (!wasScissorTestEnabled) {
-                drawContext.disableScissorTest()
-            }
+            ClipStack.pop()
         } else {
             super.onManagedDraw(drawContext, pCamera)
         }

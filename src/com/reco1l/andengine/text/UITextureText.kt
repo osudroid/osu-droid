@@ -13,7 +13,7 @@ import kotlin.math.*
  *
  * The glyphs are drawn as quads of the engine's [QuadBatcher], so a text whose glyphs share one
  * texture (for example one atlas page) costs a single draw, and consecutive texts of the same
- * texture and blend share it too. [depthInfo] is not applied: batched quads are drawn without a
+ * texture and blend share it too. [depthState] is not applied: batched quads are drawn without a
  * depth test.
  */
 open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBufferedComponent<IBuffer>() {
@@ -150,13 +150,13 @@ open class UITextureText(val characters: MutableMap<Char, TextureRegion>) : UIBu
     override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         onApplyColor(drawContext)
 
-        clearIfRequested()
+        clearIfRequested(drawContext)
 
         if (textureRegions.isEmpty()) {
             return
         }
 
-        val blend = meshBlendMode()
+        val blend = resolvedBlendMode
         val color = QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha)
 
         QuadBatcher.setProjection(drawContext.projectionGLMatrix)

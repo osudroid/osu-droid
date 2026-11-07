@@ -334,6 +334,107 @@ public class Camera implements IUpdateHandler {
 		this.applyCameraSceneRotation(pSceneTouchEvent);
 	}
 
+	/**
+	 * Converts scene coordinates to surface pixels with the y axis pointing up, as GL window coordinates do.
+	 *
+	 * @return a shared array, valid until the next conversion.
+	 */
+	public float[] convertSceneToSurfaceCoordinates(final float pSceneX, final float pSceneY) {
+		return this.convertSceneToSurfaceCoordinates(pSceneX, pSceneY, true);
+	}
+
+	/**
+	 * @param pInvertYAxis true for the y axis pointing up, as GL window coordinates do, false for pointing down.
+	 * @return a shared array, valid until the next conversion.
+	 */
+	public float[] convertSceneToSurfaceCoordinates(final float pSceneX, final float pSceneY, final boolean pInvertYAxis) {
+		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_X] = pSceneX;
+		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_Y] = pSceneY;
+
+		return this.convertSceneToSurfaceCoordinates(Camera.VERTICES_TMP, pInvertYAxis);
+	}
+
+	/**
+	 * Converts the scene coordinates in pCoordinates to surface pixels in place, with the y axis pointing up.
+	 */
+	public float[] convertSceneToSurfaceCoordinates(final float[] pCoordinates) {
+		return this.convertSceneToSurfaceCoordinates(pCoordinates, true);
+	}
+
+	/**
+	 * Converts the scene coordinates in pCoordinates to surface pixels in place.
+	 *
+	 * @param pInvertYAxis true for the y axis pointing up, as GL window coordinates do, false for pointing down.
+	 */
+	public float[] convertSceneToSurfaceCoordinates(final float[] pCoordinates, final boolean pInvertYAxis) {
+		final float x = pCoordinates[Constants.VERTEX_INDEX_X];
+		final float y = pCoordinates[Constants.VERTEX_INDEX_Y];
+		final float surfaceWidth = this.mSurfaceWidth;
+		final float surfaceHeight = this.mSurfaceHeight;
+
+		final float relativeY = (y - this.getYMin()) / (this.getYMax() - this.getYMin());
+		float surfaceX = (x - this.getXMin()) / (this.getXMax() - this.getXMin()) * surfaceWidth;
+		float surfaceY = (pInvertYAxis ? 1 - relativeY : relativeY) * surfaceHeight;
+
+		final float rotation = this.mRotation;
+		if(rotation == 180) {
+			surfaceX = surfaceWidth - surfaceX;
+			surfaceY = surfaceHeight - surfaceY;
+		} else if(rotation != 0) {
+			pCoordinates[Constants.VERTEX_INDEX_X] = surfaceX;
+			pCoordinates[Constants.VERTEX_INDEX_Y] = surfaceY;
+
+			MathUtils.revertRotateAroundCenter(pCoordinates, rotation, surfaceWidth / 2f, surfaceHeight / 2f);
+
+			surfaceX = pCoordinates[Constants.VERTEX_INDEX_X];
+			surfaceY = pCoordinates[Constants.VERTEX_INDEX_Y];
+		}
+
+		pCoordinates[Constants.VERTEX_INDEX_X] = surfaceX;
+		pCoordinates[Constants.VERTEX_INDEX_Y] = surfaceY;
+		return pCoordinates;
+	}
+
+	/**
+	 * Converts surface pixels (y axis pointing down, as touch events have it) to scene coordinates.
+	 *
+	 * @return a shared array, valid until the next conversion.
+	 */
+	public float[] convertSurfaceToSceneCoordinates(final float pSurfaceX, final float pSurfaceY) {
+		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_X] = pSurfaceX;
+		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_Y] = pSurfaceY;
+
+		return this.convertSurfaceToSceneCoordinates(Camera.VERTICES_TMP);
+	}
+
+	/**
+	 * Converts the surface pixels in pCoordinates (y axis pointing down) to scene coordinates in place.
+	 */
+	public float[] convertSurfaceToSceneCoordinates(final float[] pCoordinates) {
+		final float surfaceWidth = this.mSurfaceWidth;
+		final float surfaceHeight = this.mSurfaceHeight;
+		final float relativeX;
+		final float relativeY;
+
+		final float rotation = this.mRotation;
+		if(rotation == 0) {
+			relativeX = pCoordinates[Constants.VERTEX_INDEX_X] / surfaceWidth;
+			relativeY = pCoordinates[Constants.VERTEX_INDEX_Y] / surfaceHeight;
+		} else if(rotation == 180) {
+			relativeX = 1 - pCoordinates[Constants.VERTEX_INDEX_X] / surfaceWidth;
+			relativeY = 1 - pCoordinates[Constants.VERTEX_INDEX_Y] / surfaceHeight;
+		} else {
+			MathUtils.rotateAroundCenter(pCoordinates, rotation, surfaceWidth / 2f, surfaceHeight / 2f);
+
+			relativeX = pCoordinates[Constants.VERTEX_INDEX_X] / surfaceWidth;
+			relativeY = pCoordinates[Constants.VERTEX_INDEX_Y] / surfaceHeight;
+		}
+
+		pCoordinates[Constants.VERTEX_INDEX_X] = this.getXMin() + relativeX * (this.getXMax() - this.getXMin());
+		pCoordinates[Constants.VERTEX_INDEX_Y] = this.getYMin() + relativeY * (this.getYMax() - this.getYMin());
+		return pCoordinates;
+	}
+
 	public float[] getCameraSceneCoordinatesFromSceneCoordinates(final float pSceneX, final float pSceneY) {
 		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_X] = pSceneX;
 		Camera.VERTICES_TMP[Constants.VERTEX_INDEX_Y] = pSceneY;

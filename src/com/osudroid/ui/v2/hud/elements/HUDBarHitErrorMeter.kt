@@ -1,5 +1,7 @@
 package com.osudroid.ui.v2.hud.elements
 
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.framework.Color4
@@ -36,7 +38,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
 
-            depthInfo = DepthInfo.Default
+            depthState = DepthState.Less
         }
 
         val okWindow = UIBox().apply {
@@ -45,7 +47,7 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
             color = okColor
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
 
-            depthInfo = DepthInfo.Default
+            depthState = DepthState.Less
         }
 
         val greatWindow = UIBox().apply {
@@ -54,8 +56,8 @@ class HUDBarHitErrorMeter : HUDHitErrorMeter() {
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow).toFloat(), BAR_HEIGHT)
             color = greatColor
 
-            clearInfo = ClearInfo.ClearDepthBuffer
-            depthInfo = DepthInfo.Less
+            clearBuffers = ClearBuffers.Depth
+            depthState = DepthState.Less
         }
 
         attachChild(mehWindow)

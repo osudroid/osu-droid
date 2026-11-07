@@ -2,7 +2,6 @@ package com.osudroid.storyboard.renderer
 
 import android.graphics.Color
 import org.andengine.graphics.debug.RenderStats
-import com.edlplan.andengine.TextureHelper
 import com.osudroid.beatmaps.hitobjects.BankHitSampleInfo
 import com.osudroid.game.GameplayHitSampleInfo
 import com.osudroid.storyboard.model.Storyboard
@@ -18,9 +17,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.DrawContext
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory
 import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 
@@ -383,7 +384,7 @@ class StoryboardComponent : UIComponent() {
         )
 
         private val blackRegion: TextureRegion by lazy {
-            TextureHelper.create1xRegion(Color.argb(255, 0, 0, 0))
+            BitmapTextureAtlasTextureRegionFactory.createSolidColor(GlobalManager.getInstance().engine.textureManager, Color.BLACK)
         }
     }
 }

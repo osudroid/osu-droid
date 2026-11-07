@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.PrimitiveType
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UILine.*
 import com.reco1l.framework.math.Vec2
@@ -67,7 +68,7 @@ class UILine : UIBufferedComponent<LineVertexBuffer>(batchesShape = true) {
 
 
     class LineVertexBuffer : VertexBuffer(
-        drawTopology = GL_LINES,
+        drawTopology = PrimitiveType.Lines,
         vertexCount = 2,
         vertexSize = VERTEX_2D
     ) {

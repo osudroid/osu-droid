@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.PrimitiveType
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.UIBox.*
@@ -109,8 +110,8 @@ open class UIBox : UIBufferedComponent<BoxVBO>(batchesShape = true) {
 
         vertexSize = VERTEX_2D,
         drawTopology = when (paintStyle) {
-            Fill -> GL_TRIANGLE_FAN
-            Outline -> GL_LINE_STRIP
+            Fill -> PrimitiveType.TriangleFan
+            Outline -> PrimitiveType.LineStrip
         }
     ) {
 

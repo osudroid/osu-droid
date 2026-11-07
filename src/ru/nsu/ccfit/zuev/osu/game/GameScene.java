@@ -38,7 +38,6 @@ import com.osudroid.ui.v2.game.SliderTickSprite;
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
-import com.reco1l.andengine.Cameras;
 import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.component.ComponentsKt;
 import com.reco1l.andengine.shape.PaintStyle;
@@ -4323,9 +4322,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     continue;
                 }
 
-                // Per underlying implementation, this is thread-safe since the camera is never rotated (thus the
-                // shared array is never used). When this is not the case, this must be revisited.
-                float[] sceneCoords = Cameras.convertSurfaceToSceneCoordinates(camera, fastPathSurfaceCoords);
+                // Converts the array in place without shared state, so this is safe as long as the camera is not
+                // changed at the same time.
+                float[] sceneCoords = camera.convertSurfaceToSceneCoordinates(fastPathSurfaceCoords);
 
                 sprite.setPosition(sceneCoords[0], sceneCoords[1]);
             }

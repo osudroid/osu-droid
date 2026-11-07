@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import org.andengine.graphics.PrimitiveType
 import androidx.annotation.*
 import com.osudroid.math.toRadians
 import com.reco1l.andengine.buffered.*
@@ -138,7 +139,7 @@ open class UICircle : UIBufferedComponent<CircleVertexBuffer>(batchesShape = tru
         vertexCount = segments + if (paintStyle == PaintStyle.Fill) 1 else 0,
 
         vertexSize = VERTEX_2D,
-        drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_STRIP
+        drawTopology = if (paintStyle == PaintStyle.Fill) PrimitiveType.TriangleFan else PrimitiveType.LineStrip
     ) {
 
         fun update(entity: UICircle) {

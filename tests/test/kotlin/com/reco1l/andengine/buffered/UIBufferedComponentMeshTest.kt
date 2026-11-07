@@ -1,8 +1,9 @@
 package com.reco1l.andengine.buffered
 
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.CompareFunction
+import org.andengine.graphics.DepthState
 import android.opengl.GLES20
-import com.reco1l.andengine.component.ClearInfo
-import com.reco1l.andengine.component.DepthInfo
 import com.reco1l.andengine.shape.PaintStyle
 import com.reco1l.andengine.shape.UIBox
 import com.reco1l.andengine.sprite.UISprite
@@ -56,7 +57,7 @@ class UIBufferedComponentMeshTest {
 
     private fun depthMaskedBox(configure: UIBox.() -> Unit = {}) = UIBox().apply {
         setSize(20f, 10f)
-        depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_ALWAYS)
+        depthState = DepthState(CompareFunction.Always, true)
         configure()
         onHandleInvalidations()
     }
@@ -87,7 +88,7 @@ class UIBufferedComponentMeshTest {
     fun invisibleDepthMask_stillWritesDepth() {
         val box = depthMaskedBox {
             alpha = 0f
-            clearInfo = ClearInfo.ClearDepthBuffer
+            clearBuffers = ClearBuffers.Depth
         }
         gl.calls.clear()
 
@@ -104,7 +105,7 @@ class UIBufferedComponentMeshTest {
     fun clearDepth_setsDepthMaskFirst() {
         // The depth mask is off, as a mesh draw without depth writes leaves it.
         GlesBackend.state.depthMask(false)
-        val box = depthMaskedBox { clearInfo = ClearInfo.ClearDepthBuffer }
+        val box = depthMaskedBox { clearBuffers = ClearBuffers.Depth }
         // A batched box is pending; the clear must not overtake it.
         val batched = UIBox().apply { setSize(5f, 5f); onHandleInvalidations() }
         batched.doDraw(drawContext, camera)
@@ -141,7 +142,7 @@ class UIBufferedComponentMeshTest {
         val region = TextureRegion(Page(7), 2f, 2f, 8f, 8f)
         val sprite = UISprite(region).apply {
             setSize(8f, 8f)
-            depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_EQUAL)
+            depthState = DepthState(CompareFunction.Equal, true)
             onHandleInvalidations()
         }
         gl.calls.clear()
@@ -166,7 +167,7 @@ class UIBufferedComponentMeshTest {
     fun gradientWithDepth_drawsColored() {
         val gradient = UIGradientBox(fromAlpha = 1f, toAlpha = 0f).apply {
             setSize(20f, 10f)
-            depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_ALWAYS)
+            depthState = DepthState(CompareFunction.Always, true)
             onHandleInvalidations()
         }
         gl.calls.clear()
@@ -198,7 +199,7 @@ class UIBufferedComponentMeshTest {
     fun bufferedComponent_drawsBufferThroughMesh() {
         val component = RecordingComponent().apply {
             setSize(10f, 10f)
-            depthInfo = DepthInfo(test = true, mask = true, function = GLES20.GL_EQUAL)
+            depthState = DepthState(CompareFunction.Equal, true)
             onHandleInvalidations()
         }
         gl.calls.clear()

@@ -1,17 +1,15 @@
 package com.reco1l.andengine.buffered
 
-import org.andengine.graphics.gles.GlesBackend
-import android.opengl.GLES32
 import com.reco1l.andengine.component.*
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.BlendMode
-import org.andengine.graphics.CompareFunction
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import org.andengine.graphics.DrawContext
 import org.andengine.graphics.PrimitiveType
 import org.andengine.graphics.batch.MeshRenderer
 import org.andengine.graphics.batch.QuadBatcher
 import org.andengine.graphics.gles.GlesPipeline
-import org.andengine.entity.shape.Shape.*
 
 
 /**
@@ -33,19 +31,20 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
 
 
     /**
-     * The blend information of the entity.
+     * The blend mode of the entity; null draws with the one of the parent buffered component, or
+     * [DEFAULT_BLEND] if there is none.
      */
-    var blendInfo = BlendInfo.Mixture
+    var blendMode: BlendMode? = DEFAULT_BLEND
 
     /**
-     * The depth information of the entity.
+     * How the entity uses the depth buffer.
      */
-    var depthInfo = DepthInfo.None
+    var depthState = DepthState.Disabled
 
     /**
-     * The clear information of the entity.
+     * The buffers cleared before the entity draws.
      */
-    var clearInfo = ClearInfo.None
+    var clearBuffers = ClearBuffers.None
 
 
     /**
@@ -61,105 +60,52 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
         private set
 
 
-    fun setBlendFunction(source: Int, destination: Int) {
-        blendInfo = BlendInfo(source, destination)
-    }
-
     /**
-     * The blend function this entity draws with: [blendInfo], or for [BlendInfo.Inherit] the
-     * parent's (the default blend function if the parent is not a buffered component).
+     * Sets [blendMode] from GL blend factors, for code written against them; factors without an
+     * engine equivalent draw with [DEFAULT_BLEND].
      */
-    protected val resolvedBlendInfo: BlendInfo
-        get() {
-            val info = blendInfo
-            if (info != BlendInfo.Inherit) return info
-            val parent = parent
-            val inherited = if (parent is UIBufferedComponent<*>) parent.blendInfo else DEFAULT_BLEND_INFO
-            return if (inherited != BlendInfo.Inherit) inherited else DEFAULT_BLEND_INFO
-        }
-
-    /** The GL buffer bits [clearInfo] asks to clear before drawing. */
-    protected fun clearMask(): Int {
-        var mask = 0
-        if (clearInfo.depthBuffer) mask = mask or GLES32.GL_DEPTH_BUFFER_BIT
-        if (clearInfo.colorBuffer) mask = mask or GLES32.GL_COLOR_BUFFER_BIT
-        if (clearInfo.stencilBuffer) mask = mask or GLES32.GL_STENCIL_BUFFER_BIT
-        return mask
+    fun setBlendFunction(source: Int, destination: Int) {
+        blendMode = GlesPipeline.blendModeOf(source, destination) ?: DEFAULT_BLEND
     }
 
     /**
-     * Clears the buffers [clearInfo] asks for. Entities whose [doDraw] skips [beginDraw] call this
+     * The blend mode this entity draws with: [blendMode], or the parent's if it is null.
+     */
+    protected val resolvedBlendMode: BlendMode
+        get() = blendMode ?: (parent as? UIBufferedComponent<*>)?.blendMode ?: DEFAULT_BLEND
+
+    /**
+     * Clears the buffers of [clearBuffers]. Entities whose [doDraw] skips [beginDraw] call this
      * themselves.
      */
-    protected fun clearIfRequested() {
-        val clearMask = clearMask()
-        if (clearMask == 0) return
-        // Pending quads belong before the clear; and a clear ignores the depth buffer while the
-        // depth mask is off, which the mesh renderer's state restore can leave behind.
-        QuadBatcher.flush()
-        if (clearInfo.depthBuffer) GlesBackend.state.depthMask(true)
-        GlesBackend.state.clear(clearMask)
-    }
-
-    // The batch blend mode of [batchBlendSource]; recomputed only when the blend info changes.
-    private var batchBlendSource: BlendInfo? = null
-    private var batchBlend: BlendMode? = null
-
-    /**
-     * The quad batch blend mode of [resolvedBlendInfo], or null if its factors cannot be batched.
-     */
-    protected fun batchBlendMode(): BlendMode? {
-        val info = resolvedBlendInfo
-        if (info !== batchBlendSource) {
-            batchBlendSource = info
-            batchBlend = GlesPipeline.blendModeOf(info.sourceFactor, info.destinationFactor)
-        }
-        return batchBlend
-    }
-
-    /**
-     * The blend mode for draws that must happen whatever the blend factors (the mesh renderer, and
-     * text, which is always batched): the one of [resolvedBlendInfo], or straight alpha for factors
-     * without an engine equivalent (the UI uses none).
-     */
-    protected fun meshBlendMode(): BlendMode = batchBlendMode() ?: BlendMode.Alpha
-
-    /** The depth compare function of [depthInfo] for the mesh renderer; null without depth test. */
-    protected fun meshDepthTest(): CompareFunction? {
-        val depth = depthInfo
-        return if (depth.test) GlesPipeline.compareFunctionOf(depth.function) else null
+    protected fun clearIfRequested(gl: DrawContext) {
+        gl.clear(clearBuffers)
     }
 
     /**
      * Draws [vertexCount] positions (x, y pairs from [offset] on) of this entity's buffer as
      * [primitive] through the [MeshRenderer], with the draw color, blend and depth settings of this
      * entity and the current model-view and projection of [gl]. Transparent entities draw as well:
-     * they still write depth when [depthInfo] asks for it.
+     * they still write depth when [depthState] asks for it.
      */
     fun drawPositions(gl: DrawContext, primitive: PrimitiveType, positions: FloatArray, offset: Int, vertexCount: Int) {
         MeshRenderer.draw(
             primitive, positions, offset, vertexCount,
             gl.modelViewGLMatrix, gl.projectionGLMatrix,
             QuadBatcher.packColor(drawRed, drawGreen, drawBlue, drawAlpha),
-            meshBlendMode(), meshDepthTest(), depthInfo.mask
+            resolvedBlendMode, depthState.test, depthState.write
         )
     }
 
     /**
-     * Whether this entity's current depth, clear and blend state can be drawn through the batch: no
-     * depth test, no clearing and a blend function the batch can express. Shapes that fail this are
-     * drawn through their buffer.
+     * Whether this entity's current depth and clear state can be drawn through the batch: no depth
+     * test and no clearing. Shapes that fail this are drawn through their buffer.
      *
      * A batched shape does not run `beginDraw` and owns no buffer of its own, so do not assign
      * shared buffers to shapes that can be batched. Invisible shapes still take the buffer path
      * when they cannot be batched: they serve as depth masks there.
      */
-    protected fun canBatchShape(): Boolean {
-        if (depthInfo.test) return false
-        val clear = clearInfo
-        if (clear.depthBuffer || clear.colorBuffer || clear.stencilBuffer) return false
-        return batchBlendMode() != null
-    }
+    protected fun canBatchShape(): Boolean = depthState.test == null && clearBuffers.isNone
 
 
     //region Buffer lifecycle
@@ -238,11 +184,10 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
 
     override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         if (batchesShape) {
-            val blend = if (canBatchShape()) batchBlendMode() else null
-            if (blend != null) {
+            if (canBatchShape()) {
                 onApplyColor(drawContext)
                 if (drawAlpha != 0f) {
-                    onDrawBatch(drawContext, blend)
+                    onDrawBatch(drawContext, resolvedBlendMode)
                 }
                 return
             }
@@ -254,14 +199,14 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
 
         // Disable depth test after drawing so subsequent entities are not accidentally
         // depth-tested against values we wrote (same fix as in UITriangleMesh).
-        if (depthInfo.test) {
+        if (depthState.test != null) {
             drawContext.disableDepthTest()
         }
     }
 
     override fun beginDraw(drawContext: DrawContext) {
         super.beginDraw(drawContext)
-        clearIfRequested()
+        clearIfRequested(drawContext)
 
         // If it's a shared buffer, we might need to update it before drawing.
         if (buffer?.sharingMode == BufferSharingMode.Dynamic) {
@@ -269,7 +214,7 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
         }
 
         // The mesh renderer takes depth and blend from the pipeline of the draw.
-        if (!depthInfo.test) {
+        if (depthState.test == null) {
             drawContext.disableDepthTest()
         }
     }
@@ -295,15 +240,18 @@ abstract class UIBufferedComponent<T: IBuffer>(private val batchesShape: Boolean
 
     override fun reset() {
         super.reset()
-        blendInfo = BlendInfo.Mixture
+        blendMode = DEFAULT_BLEND
     }
 
     // Buffers own no GL objects: nothing to release, and the entity is not disposed from the finalizer.
     override fun finalize() = Unit
 
 
-    private companion object {
-        val DEFAULT_BLEND_INFO = BlendInfo(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
+    companion object {
+
+        /** The blend mode of entities that set none: straight alpha, as legacy entities blend. */
+        @JvmField
+        val DEFAULT_BLEND: BlendMode = BlendMode.AlphaAllChannels
     }
 
 }

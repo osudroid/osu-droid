@@ -1,5 +1,6 @@
 package com.reco1l.andengine.container
 
+import org.andengine.graphics.ClipStack
 import androidx.annotation.*
 import com.osudroid.math.Precision
 import com.reco1l.andengine.*
@@ -407,9 +408,7 @@ open class UIScrollableContainer : UIContainer() {
         val maxX = maxOf(tlX, trX, brX, blX)
         val maxY = maxOf(tlY, trY, brY, blY)
 
-        val wasScissorTestEnabled = drawContext.isScissorTestEnabled
-        drawContext.enableScissorTest()
-        ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+        ClipStack.push(minX, minY, maxX - minX, maxY - minY)
 
         // Suppress UIComponent's own clipToBounds scissor to avoid double-scissoring.
         val savedClipToBounds = clipToBounds
@@ -427,10 +426,7 @@ open class UIScrollableContainer : UIContainer() {
             drawContext.popModelViewGLMatrix()
         }
 
-        ScissorStack.pop()
-        if (!wasScissorTestEnabled) {
-            drawContext.disableScissorTest()
-        }
+        ClipStack.pop()
     }
     /**
      * Called when the scroll position has changed.

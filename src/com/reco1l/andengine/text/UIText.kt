@@ -18,7 +18,7 @@ import kotlin.math.*
  * A text entity that can be displayed on the screen.
  *
  * The glyphs are drawn as quads of the engine's [QuadBatcher], so consecutive texts of the same
- * glyph atlas and blend share one draw. [depthInfo] is not applied: batched quads are drawn without
+ * glyph atlas and blend share one draw. [depthState] is not applied: batched quads are drawn without
  * a depth test.
  */
 open class UIText : UIBufferedComponent<IBuffer>() {
@@ -111,7 +111,7 @@ open class UIText : UIBufferedComponent<IBuffer>() {
     override fun doDraw(drawContext: DrawContext, pCamera: Camera) {
         onApplyColor(drawContext)
 
-        clearIfRequested()
+        clearIfRequested(drawContext)
 
         val font = font ?: return
         val linesWidth = linesWidth
@@ -121,7 +121,7 @@ open class UIText : UIBufferedComponent<IBuffer>() {
             return
         }
 
-        val blend = meshBlendMode()
+        val blend = resolvedBlendMode
         val fillColor = TextBatching.fillColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
         val strokeColor = TextBatching.strokeColor(font, drawRed, drawGreen, drawBlue, drawAlpha)
 

@@ -1,5 +1,8 @@
 package com.osudroid.ui.v2.hud.elements
 
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
+import org.andengine.graphics.BlendMode
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.shape.*
@@ -45,24 +48,24 @@ class HUDHealthBar : HUDElement() {
 
         fillClear = UIBox()
         fillClear.origin = Anchor.TopRight
-        fillClear.clearInfo = ClearInfo.ClearDepthBuffer
-        fillClear.depthInfo = DepthInfo.Less
+        fillClear.clearBuffers = ClearBuffers.Depth
+        fillClear.depthState = DepthState.Less
         fillClear.alpha = 0f
         attachChild(fillClear)
 
         fill = UIAnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
-        fill.depthInfo = DepthInfo.Default
+        fill.depthState = DepthState.Less
         fill.width = fill.width // Preserve the first frame width.
         attachChild(fill)
 
         marker = UISprite()
         marker.origin = Anchor.Center
-        marker.blendInfo = BlendInfo.Additive
+        marker.blendMode = BlendMode.AdditiveAllChannels
         attachChild(marker)
 
         explode = UISprite()
         explode.origin = Anchor.Center
-        explode.blendInfo = BlendInfo.Additive
+        explode.blendMode = BlendMode.AdditiveAllChannels
         explode.alpha = 0f
         attachChild(explode)
 
@@ -113,7 +116,7 @@ class HUDHealthBar : HUDElement() {
         if (isNewStyle) {
 
             applyFillColor(hp)
-            marker.blendInfo = if (hp < EPIC_CUTOFF) BlendInfo.Inherit else BlendInfo.Additive
+            marker.blendMode = if (hp < EPIC_CUTOFF) null else BlendMode.AdditiveAllChannels
 
         } else {
 
@@ -142,7 +145,7 @@ class HUDHealthBar : HUDElement() {
         bulge()
 
         explode.clearEntityModifiers()
-        explode.blendInfo = if (isEpic) BlendInfo.Additive else BlendInfo.Inherit
+        explode.blendMode = if (isEpic) BlendMode.AdditiveAllChannels else null
         explode.alpha = 1f
         explode.setScale(1f)
 

@@ -1,5 +1,7 @@
 package com.reco1l.andengine.ui
 
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -90,8 +92,8 @@ open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
         origin = Anchor.Center
         cornerRadius = 12f
         inheritAncestorsColor = false
-        depthInfo = DepthInfo.Less
-        clearInfo = ClearInfo.ClearDepthBuffer
+        depthState = DepthState.Less
+        clearBuffers = ClearBuffers.Depth
     }
 
     private val progressBar = UIBox().apply {
@@ -100,7 +102,7 @@ open class UISlider(initialValue: Float = 0f) : UIControl<Float>(initialValue) {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         cornerRadius = 12f
-        depthInfo = DepthInfo.Default
+        depthState = DepthState.Less
     }
 
 

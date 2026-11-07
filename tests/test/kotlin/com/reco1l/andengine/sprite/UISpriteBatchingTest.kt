@@ -1,5 +1,8 @@
 package com.reco1l.andengine.sprite
 
+import org.andengine.graphics.BlendMode
+import org.andengine.graphics.ClearBuffers
+import org.andengine.graphics.DepthState
 import android.opengl.GLES20
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -8,9 +11,6 @@ import com.osudroid.testing.RecordingGl
 import com.osudroid.testing.silentPlayer
 import com.osudroid.ui.v2.menu.main.KiaiCatJamSprite
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.component.BlendInfo
-import com.reco1l.andengine.component.ClearInfo
-import com.reco1l.andengine.component.DepthInfo
 import com.reco1l.andengine.container.UIContainer
 import com.reco1l.andengine.texture.VideoTexture
 import java.nio.ByteBuffer
@@ -121,12 +121,10 @@ class UISpriteBatchingTest {
     }
 
     @Test
-    fun depthClearAndUnmappedBlend_useBufferPath() {
+    fun depthAndClear_useBufferPath() {
         val cases = listOf<Probe.() -> Unit>(
-            { depthInfo = DepthInfo.Default },
-            { clearInfo = ClearInfo.ClearDepthBuffer },
-            // Not a GL blend factor: nothing to map it to.
-            { blendInfo = BlendInfo(GLES20.GL_ONE, 0x7FFF) },
+            { depthState = DepthState.Less },
+            { clearBuffers = ClearBuffers.Depth },
         )
         for (configure in cases) {
             val sprite = Probe(region()).apply { setSize(8f, 8f); onHandleInvalidations() }
@@ -244,34 +242,43 @@ class UISpriteBatchingTest {
     }
 
     @Test
-    fun blendInfo_mapsToTheSameGlBlendFunction() {
+    fun blendMode_setsItsGlBlendFunction() {
         val cases = listOf(
-            BlendInfo.Mixture,
-            BlendInfo.Additive,
-            BlendInfo.PreMultiply,
-            BlendInfo(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA)
+            BlendMode.AlphaAllChannels to (GLES20.GL_SRC_ALPHA to GLES20.GL_ONE_MINUS_SRC_ALPHA),
+            BlendMode.AdditiveAllChannels to (GLES20.GL_SRC_ALPHA to GLES20.GL_ONE),
+            BlendMode.Premultiplied to (GLES20.GL_ONE to GLES20.GL_ONE_MINUS_SRC_ALPHA)
         )
-        for (info in cases) {
+        for ((mode, factors) in cases) {
             val sprite = Probe(region()).apply { setSize(8f, 8f); onHandleInvalidations() }
-            sprite.blendInfo = info
+            sprite.blendMode = mode
             gl.calls.clear()
 
             sprite.doDraw(drawContext, camera)
             QuadBatcher.flush()
 
-            val src = info.sourceFactor
-            val dst = info.destinationFactor
-            assertTrue("$info: ${gl.calls}", gl.setsBlend(src, dst))
+            assertTrue("$mode: ${gl.calls}", gl.setsBlend(factors.first, factors.second))
         }
     }
 
     @Test
+    fun setBlendFunction_mapsGlFactors() {
+        val sprite = Probe(region()).apply { setSize(8f, 8f); onHandleInvalidations() }
+        sprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA)
+        gl.calls.clear()
+
+        sprite.doDraw(drawContext, camera)
+        QuadBatcher.flush()
+
+        assertTrue(gl.calls.toString(), gl.setsBlend(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA))
+    }
+
+    @Test
     fun inheritedBlend_usesParentBlend() {
-        val parent = UISprite(region()).apply { blendInfo = BlendInfo.Additive }
+        val parent = UISprite(region()).apply { blendMode = BlendMode.AdditiveAllChannels }
         val sprite = Probe(region()).apply { setSize(8f, 8f) }
         parent.attachChild(sprite)
         sprite.onHandleInvalidations()
-        sprite.blendInfo = BlendInfo.Inherit
+        sprite.blendMode = null
         gl.calls.clear()
 
         sprite.doDraw(drawContext, camera)

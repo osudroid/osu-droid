@@ -11,6 +11,7 @@ import org.andengine.graphics.GpuBuffer
 import org.andengine.graphics.GpuProgram
 import org.andengine.graphics.Pipeline
 import org.andengine.graphics.PrimitiveType
+import org.andengine.graphics.RenderContext
 import org.andengine.graphics.Texture
 import org.andengine.graphics.VertexAttribute
 import org.andengine.graphics.VertexFormat
@@ -25,9 +26,10 @@ import org.andengine.graphics.gles.GlesStateCache
 /**
  * Draws colored triangle/line meshes, untextured or with one texture (slider bodies, trails,
  * storyboard shapes), or with a [MeshProgram] of the caller (see [drawProgram]), in one draw call
- * each. A mesh is given as 2D positions (or positions with a color per vertex), is transformed on
- * the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn with its own program; the
- * vertex shader only applies the projection passed to [draw].
+ * each. A mesh is given as 2D positions (or positions with a color or a gradient weight per
+ * vertex), is transformed on the CPU by a 2D matrix, uploaded with [GpuBuffer.replace] and drawn
+ * with its own program; the vertex shader only applies the projection passed to [draw]. Gradient
+ * meshes (see [drawGradient]) also get their depth from the vertex.
  *
  * Every draw first flushes the [QuadBatcher], so the order on screen stays the order of the calls.
  * The depth test, depth function and depth mask come from the pipeline (see the `depthTest` and
@@ -120,6 +122,51 @@ void main() {
 }
 """
 
+    /** Floats per vertex of [drawGradient]: x, y and the weight t. */
+    const val GRADIENT_FLOATS = 3
+
+    /** float3 position (x, y, normalized device depth) + float weight, for [drawGradient]. */
+    const val GRADIENT_VERTEX_SIZE_BYTES = 16
+
+    @JvmField
+    val gradientLayout = VertexLayout(
+        GRADIENT_VERTEX_SIZE_BYTES,
+        listOf(
+            VertexAttribute(0, VertexFormat.Float3, 0),
+            VertexAttribute(1, VertexFormat.Float1, 12)
+        )
+    )
+
+    // The depth replaces the one of the projection, so it does not depend on the camera's clip planes.
+    private const val GRADIENT_VERTEX_SHADER = """#version 300 es
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in float aWeight;
+uniform mat4 uProjection;
+out float vWeight;
+void main() {
+    vWeight = aWeight;
+    gl_Position = uProjection * vec4(aPosition.xy, 0.0, 1.0);
+    gl_Position.z = aPosition.z * gl_Position.w;
+}
+"""
+
+    // The color is mixed per pixel, so it can ramp over only a part of the weights.
+    private const val GRADIENT_FRAGMENT_SHADER = """#version 300 es
+precision mediump float;
+uniform vec4 uFromColor;
+uniform vec4 uToColor;
+uniform vec2 uColorRange;
+in float vWeight;
+out vec4 fragColor;
+void main() {
+    float t = clamp((vWeight - uColorRange.x) / (uColorRange.y - uColorRange.x), 0.0, 1.0);
+    fragColor = mix(uFromColor, uToColor, t);
+}
+"""
+
+    // The uniforms of the next drawGradient submit: from color, to color, color range.
+    private val gradientUniforms = FloatArray(10)
+
     /** float2 position + float2 uv + float2 local coordinate + 4 normalized bytes color. */
     const val PROGRAM_VERTEX_SIZE_BYTES = 28
 
@@ -168,7 +215,9 @@ void main() {
         val layout: VertexLayout,
         val name: String,
         /** Null for the kit of [drawProgram], whose program comes from the [MeshProgram]. */
-        val shaders: Shaders?
+        val shaders: Shaders?,
+        /** Sends the kit's own uniforms after its pipeline is set; null if it has none. */
+        val applyUniforms: ((RenderContext, GpuProgram) -> Unit)? = null
     ) {
         var program: GpuProgram? = null
         var vertexBuffer: GpuBuffer? = null
@@ -188,6 +237,15 @@ void main() {
         TEXTURED_VERTEX_SIZE_BYTES, texturedLayout, "mesh-textured",
         Shaders(TEXTURED_VERTEX_SHADER, TEXTURED_FRAGMENT_SHADER, mapOf("uTexture" to TEXTURE_UNIT))
     )
+    private val gradient = Kit(
+        GRADIENT_VERTEX_SIZE_BYTES, gradientLayout, "mesh-gradient",
+        Shaders(GRADIENT_VERTEX_SHADER, GRADIENT_FRAGMENT_SHADER, emptyMap())
+    ) { context, program ->
+        val u = gradientUniforms
+        context.setUniformFloat(program.uniformLocation("uFromColor"), 4, u, 0)
+        context.setUniformFloat(program.uniformLocation("uToColor"), 4, u, 4)
+        context.setUniformFloat(program.uniformLocation("uColorRange"), 2, u, 8)
+    }
     private val custom = Kit(PROGRAM_VERTEX_SIZE_BYTES, programLayout, "mesh-program", null)
 
     private val savedState = IntArray(GlesStateCache.DRAW_STATE_SIZE)
@@ -196,7 +254,7 @@ void main() {
     @JvmStatic
     val capacityVertices: Int get() = plain.capacityVertices
 
-    private val kits = arrayOf(plain, textured, custom)
+    private val kits = arrayOf(plain, textured, gradient, custom)
 
     /** Number of cached pipelines, textured meshes included; those of [MeshProgram]s are counted there. */
     val pipelineCount: Int get() = kits.sumOf { it.pipelineTotal }
@@ -297,6 +355,71 @@ void main() {
             dst += VERTEX_SIZE_BYTES
         }
         submit(plain, pipelineFor(plain, blend, depthTest, depthWrite, primitive), vertexCount, projection, null, null)
+    }
+
+    /**
+     * Like [draw], but [vertices] holds (x, y, t) floats per vertex from [offset] on, a weight t
+     * per vertex. The weight is interpolated across the triangles and every pixel gets the color
+     * mixed from [fromColor] to [toColor] (straight-alpha RGBA, 4 values each) as the weight goes
+     * from [colorStart] to [colorEnd]; outside that range the nearer color is kept. The mix is
+     * linear, as given, without a color space conversion. A range smaller than the weights of the
+     * vertices lets the color ramp over only a part of the mesh.
+     *
+     * The depth of a vertex is mixed from [fromDepth] (at t = 0) to [toDepth] (at t = 1, t clamped
+     * to 0..1), in normalized device coordinates (-1 nearest, 1 farthest), instead of coming from
+     * the projection. With a depth test, the parts of the mesh nearer to t = 1 win where it overlaps
+     * itself; drawn with [BlendMode.Opaque] every pixel then holds the nearest fragment.
+     */
+    @JvmStatic
+    fun drawGradient(
+        primitive: PrimitiveType,
+        vertices: FloatArray,
+        offset: Int,
+        vertexCount: Int,
+        matrix: FloatArray,
+        projection: FloatArray,
+        fromColor: FloatArray,
+        toColor: FloatArray,
+        colorStart: Float,
+        colorEnd: Float,
+        fromDepth: Float,
+        toDepth: Float,
+        blend: BlendMode,
+        depthTest: CompareFunction?,
+        depthWrite: Boolean
+    ) {
+        if (vertexCount <= 0) return
+        require(offset >= 0 && offset + vertexCount * GRADIENT_FLOATS <= vertices.size) {
+            "Vertices of $vertexCount vertices from $offset exceed ${vertices.size} values"
+        }
+        require(fromColor.size >= 4 && toColor.size >= 4) { "A color needs 4 values" }
+        require(colorEnd != colorStart) { "An empty color range at $colorStart" }
+        val bytes = reserve(gradient, vertexCount)
+        val a = matrix[0]
+        val b = matrix[1]
+        val c = matrix[4]
+        val d = matrix[5]
+        val tx = matrix[12]
+        val ty = matrix[13]
+        var src = offset
+        var dst = 0
+        for (i in 0 until vertexCount) {
+            val x = vertices[src]
+            val y = vertices[src + 1]
+            val t = vertices[src + 2]
+            bytes.putFloat(dst, a * x + c * y + tx)
+            bytes.putFloat(dst + 4, b * x + d * y + ty)
+            bytes.putFloat(dst + 8, fromDepth + (toDepth - fromDepth) * t.coerceIn(0f, 1f))
+            bytes.putFloat(dst + 12, t)
+            src += GRADIENT_FLOATS
+            dst += GRADIENT_VERTEX_SIZE_BYTES
+        }
+        val u = gradientUniforms
+        System.arraycopy(fromColor, 0, u, 0, 4)
+        System.arraycopy(toColor, 0, u, 4, 4)
+        u[8] = colorStart
+        u[9] = colorEnd
+        submit(gradient, pipelineFor(gradient, blend, depthTest, depthWrite, primitive), vertexCount, projection, null, null)
     }
 
     /**
@@ -474,6 +597,7 @@ void main() {
         try {
             context.setPipeline(pipeline)
             context.setUniformMatrix4(pipeline.program.uniformLocation("uProjection"), projection)
+            kit.applyUniforms?.invoke(context, pipeline.program)
             program?.applyUniforms(context)
             if (texture != null) context.setTexture(TEXTURE_UNIT, texture, null)
             context.setVertexBuffer(vb)

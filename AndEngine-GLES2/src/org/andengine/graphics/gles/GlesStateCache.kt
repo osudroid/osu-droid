@@ -4,6 +4,7 @@ import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLES31
 import java.nio.Buffer
+import org.andengine.graphics.ClearBuffers
 import org.andengine.graphics.debug.RenderStats
 
 /**
@@ -579,6 +580,20 @@ class GlesStateCache(private val gl: GL30) {
     fun clear(mask: Int) {
         runBeforeExternalChange()
         gl.glClear(mask)
+    }
+
+    /**
+     * Clears [buffers]; the depth mask is turned on for a depth clear, which a depth mask left off
+     * would ignore.
+     */
+    fun clear(buffers: ClearBuffers) {
+        if (buffers.isNone) return
+        var mask = 0
+        if (buffers.color) mask = mask or GLES20.GL_COLOR_BUFFER_BIT
+        if (buffers.depth) mask = mask or GLES20.GL_DEPTH_BUFFER_BIT
+        if (buffers.stencil) mask = mask or GLES20.GL_STENCIL_BUFFER_BIT
+        if (buffers.depth) depthMask(true)
+        clear(mask)
     }
 
     /**

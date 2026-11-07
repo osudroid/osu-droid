@@ -1,10 +1,10 @@
 package com.reco1l.andengine.text
 
+import org.andengine.graphics.ClearBuffers
 import com.osudroid.testing.IDENTITY
 import com.osudroid.testing.RecordingGl
 import android.opengl.GLES20
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.component.ClearInfo
 import com.reco1l.andengine.component.InvalidationFlag
 import org.andengine.engine.camera.Camera
 import org.andengine.graphics.batch.QuadBatcher
@@ -152,7 +152,7 @@ class UITextBatchingTest {
         // The depth mask is off, as a mesh draw without depth writes leaves it.
         GlesBackend.state.depthMask(false)
         val pending = text("AB")
-        val clearing = text("A").apply { clearInfo = ClearInfo.ClearDepthBuffer }
+        val clearing = text("A").apply { clearBuffers = ClearBuffers.Depth }
         drawContext.resetModelViewGLMatrixStack()
         drawContext.resetProjectionGLMatrixStack()
         pending.doDraw(drawContext, camera)
