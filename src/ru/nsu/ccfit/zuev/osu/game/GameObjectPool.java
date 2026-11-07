@@ -1,17 +1,18 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public class GameObjectPool {
     public static GameObjectPool instance = new GameObjectPool();
-    public LinkedList<GameplayHitCircle> circles = new LinkedList<>();
-    public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
-    public LinkedList<GameplaySlider> sliders = new LinkedList<>();
-    public LinkedList<GameplaySpinner> spinners = new LinkedList<>();
+
+    private final ArrayDeque<GameplayHitCircle> circles = new ArrayDeque<>();
+    private final Map<String, ArrayDeque<GameEffect>> effects = new HashMap<>();
+    private final ArrayDeque<GameplaySlider> sliders = new ArrayDeque<>();
+    private final ArrayDeque<GameplaySpinner> spinners = new ArrayDeque<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -21,8 +22,10 @@ public class GameObjectPool {
     }
 
     public GameplayHitCircle getCircle() {
-        if (!circles.isEmpty()) {
-            return circles.poll();
+        var circle = circles.poll();
+
+        if (circle != null) {
+            return circle;
         }
 
         objectsCreated++;
@@ -34,13 +37,14 @@ public class GameObjectPool {
     }
 
     public GameplaySpinner getSpinner() {
-        if (!spinners.isEmpty()) {
-            return spinners.poll();
+        var spinner = spinners.poll();
+
+        if (spinner != null) {
+            return spinner;
         }
 
         objectsCreated++;
-
-        return Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner();
+        return createSpinner();
     }
 
     public void putSpinner(final GameplaySpinner spinner) {
@@ -48,8 +52,11 @@ public class GameObjectPool {
     }
 
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname) && !effects.get(texname).isEmpty()) {
-            return effects.get(texname).poll();
+        var pooled = effects.get(texname);
+        var effect = pooled != null ? pooled.poll() : null;
+
+        if (effect != null) {
+            return effect;
         }
 
         objectsCreated++;
@@ -57,16 +64,14 @@ public class GameObjectPool {
     }
 
     public void putEffect(final GameEffect effect) {
-        if (!effects.containsKey(effect.getTexname())) {
-            effects.put(effect.getTexname(), new LinkedList<>());
-        }
-
-        effects.get(effect.getTexname()).add(effect);
+        getEffectPool(effect.getTexname()).add(effect);
     }
 
     public GameplaySlider getSlider() {
-        if (!sliders.isEmpty()) {
-            return sliders.poll();
+        var slider = sliders.poll();
+
+        if (slider != null) {
+            return slider;
         }
 
         objectsCreated++;
@@ -90,17 +95,60 @@ public class GameObjectPool {
         objectsCreated = 0;
     }
 
-    public void preload() {
-        for (int i = 0; i < 10; i++) {
+    /**
+     * Fills the pools so that gameplay does not need to construct objects mid-play.
+     *
+     * @param circleCount  The number of {@link GameplayHitCircle}s to have available.
+     * @param sliderCount  The number of {@link GameplaySlider}s to have available.
+     * @param spinnerCount The number of {@link GameplaySpinner}s to have available.
+     */
+    public void preload(int circleCount, int sliderCount, int spinnerCount) {
+        while (circles.size() < circleCount) {
             putCircle(new GameplayHitCircle());
-        }
-        for (int i = 0; i < 5; i++) {
-            putSlider(new GameplaySlider());
-        }
-        for (int i = 0; i < 3; i++) {
-            putSpinner(Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner());
+            objectsCreated++;
         }
 
-        objectsCreated = circles.size() + sliders.size() + spinners.size();
+        while (sliders.size() < sliderCount) {
+            putSlider(new GameplaySlider());
+            objectsCreated++;
+        }
+
+        while (spinners.size() < spinnerCount) {
+            putSpinner(createSpinner());
+            objectsCreated++;
+        }
+    }
+
+    /**
+     * Fills the pool of a {@link GameEffect} texture so that its first uses in gameplay do not construct sprites.
+     * <p>
+     * Must be called after the textures (including beatmap skin textures) have been loaded, as a {@link GameEffect}
+     * resolves its texture upon construction.
+     *
+     * @param texname The texture name of the {@link GameEffect}.
+     * @param count   The number of {@link GameEffect}s to have available.
+     */
+    public void preloadEffect(final String texname, int count) {
+        var pool = getEffectPool(texname);
+
+        while (pool.size() < count) {
+            pool.add(new GameEffect(texname));
+            objectsCreated++;
+        }
+    }
+
+    private ArrayDeque<GameEffect> getEffectPool(final String texname) {
+        var pool = effects.get(texname);
+
+        if (pool == null) {
+            pool = new ArrayDeque<>();
+            effects.put(texname, pool);
+        }
+
+        return pool;
+    }
+
+    private static GameplaySpinner createSpinner() {
+        return Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner();
     }
 }

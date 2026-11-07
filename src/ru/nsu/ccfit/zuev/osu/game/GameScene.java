@@ -28,6 +28,8 @@ import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
 import com.osudroid.game.replay.ReplaySettingsPanel;
+import com.osudroid.game.replay.analysis.ReplayAnalysisData;
+import com.osudroid.game.replay.analysis.ReplayAnalysisOverlay;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
@@ -122,6 +124,7 @@ import javax.annotation.Nullable;
 
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -228,6 +231,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private Job ppCalculationJob;
 
     private ReplaySettingsPanel replaySettingsPanel;
+    private ReplayAnalysisOverlay replayAnalysisOverlay;
+    private boolean hideReplayCursor;
 
     // Game
 
@@ -861,7 +866,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects[objects.length - 1].getEndTime() / 1000;
 
-        int estimatedMaxActiveObjects = Math.max(10, estimateMaximumActiveObjects());
+        var activeObjectEstimate = estimateActiveObjects();
+        int estimatedMaxActiveObjects = Math.max(10, activeObjectEstimate.total);
 
         if (activeObjects != null) {
             activeObjects.clear();
@@ -1002,13 +1008,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             GameHelper.setReplayVersion(replay.replayVersion);
         } else if (mods.contains(ModAutoplay.class)) {
             replay = null;
+        } else {
+            replay.reserveMovementCapacity(lastObjectEndTime);
         }
 
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }
 
-        GameObjectPool.getInstance().preload();
+        // The minimums preserve the previous fixed preload sizes.
+        GameObjectPool.getInstance().preload(
+            Math.max(10, activeObjectEstimate.circles),
+            Math.max(5, activeObjectEstimate.sliders),
+            Math.max(3, activeObjectEstimate.spinners)
+        );
+
+        preloadEffects(activeObjectEstimate.judgements);
 
         sliderIndex = 0;
 
@@ -1241,6 +1256,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         distToNextObject = 0;
 
+        hideReplayCursor = false;
+
+        if (replaying && replay != null) {
+            replayAnalysisOverlay = new ReplayAnalysisOverlay(
+                ReplayAnalysisData.fromMoveArrays(replay.cursorMoves),
+                Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH
+            );
+
+            fgScene.attachChild(replayAnalysisOverlay);
+        } else {
+            replayAnalysisOverlay = null;
+        }
+
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             cursorSprites = new CursorEntity[cursorCount];
@@ -1387,7 +1415,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         breakAnimator = new BreakAnimator(fgScene, stat, hud);
 
         if (!startedFromHUDEditor && (GameHelper.isAutoplay() || replaying)) {
-            hud.attachChild(replaySettingsPanel = new ReplaySettingsPanel());
+            hud.attachChild(replaySettingsPanel = new ReplaySettingsPanel(replaying));
 
             var seekControl = replaySettingsPanel.getPlaybackControl().getSeekControl();
 
@@ -1424,6 +1452,36 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 return Unit.INSTANCE;
             });
+
+            var analysisControl = replaySettingsPanel.getAnalysisSettingsControl();
+            final var overlay = replayAnalysisOverlay;
+
+            if (analysisControl != null && overlay != null) {
+                analysisControl.setOnShowTapMarkersChanged(show -> {
+                    overlay.setShowTapMarkers(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnShowFrameMarkersChanged(show -> {
+                    overlay.setShowFrameMarkers(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnShowCursorPathChanged(show -> {
+                    overlay.setShowCursorPath(show);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnDisplayLengthChanged(lengthMs -> {
+                    overlay.setDisplayLengthMs(lengthMs);
+                    return Unit.INSTANCE;
+                });
+
+                analysisControl.setOnHideGameplayCursorChanged(hide -> {
+                    hideReplayCursor = hide;
+                    return Unit.INSTANCE;
+                });
+            }
 
             seekControl.updateSeekPosition(
                 gameplayClock.getCurrentTime(),
@@ -1717,6 +1775,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     cursors[i].addEvent(event);
                 }
             }
+
+            if (replayAnalysisOverlay != null) {
+                replayAnalysisOverlay.setTime(replayTimeMs);
+            }
         }
 
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
@@ -1731,7 +1793,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 if (replaying && latestEvent != null) {
                     sprite.setPosition(latestEvent.position.x, latestEvent.position.y);
-                    sprite.setShowing(!latestEvent.isActionUp());
+                    sprite.setShowing(!hideReplayCursor && !latestEvent.isActionUp());
                 }
 
                 if (cursor.getLatestDownEvent() != null) {
@@ -2073,6 +2135,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             activeObjects.clear();
             expiredObjects.clear();
             replaySettingsPanel = null;
+            replayAnalysisOverlay = null;
             breakPeriods = null;
             cursorSprites = null;
             this.playableBeatmap = null;
@@ -2276,6 +2339,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         breakPeriods = null;
         replaySettingsPanel = null;
+        replayAnalysisOverlay = null;
         objects = null;
         timingControlPoints = null;
         effectControlPoints = null;
@@ -3129,16 +3193,25 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return paused;
     }
 
+    // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
+    private static final float JUDGEMENT_FADE_IN_LENGTH = 0.12f;
+    private static final float JUDGEMENT_FADE_OUT_LENGTH = 0.6f;
+    private static final float JUDGEMENT_FADE_OUT_DELAY = 0.5f;
+
+    /**
+     * How long a judgement effect created by {@link #createHitEffect} stays visible, in seconds.
+     */
+    private static final float JUDGEMENT_EFFECT_LIFETIME =
+        JUDGEMENT_FADE_IN_LENGTH + JUDGEMENT_FADE_OUT_DELAY + JUDGEMENT_FADE_OUT_LENGTH;
+
     private void createHitEffect(final PointF pos, final String name, Color4 color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
         var isAnimated = effect.hit instanceof UIAnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
-        // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
-
-        float fadeInLength = 0.12f;
-        float fadeOutLength = 0.6f;
-        float fadeOutDelay = 0.5f;
+        float fadeInLength = JUDGEMENT_FADE_IN_LENGTH;
+        float fadeOutLength = JUDGEMENT_FADE_OUT_LENGTH;
+        float fadeOutDelay = JUDGEMENT_FADE_OUT_DELAY;
 
         if (name.equals("hit0")) {
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
@@ -3606,40 +3679,122 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         camera.setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
     }
 
-    private int estimateMaximumActiveObjects() {
+    /**
+     * Estimates the peak numbers of simultaneously alive gameplay objects and judgement effects, so that lists and
+     * object pools can be sized upfront instead of growing mid-gameplay.
+     */
+    private ActiveObjectEstimate estimateActiveObjects() {
+        var estimate = new ActiveObjectEstimate();
+
         if (objects == null) {
-            return 0;
+            return estimate;
         }
 
-        // Estimate the maximum number of simultaneously active objects to pre-size the lists and minimize
-        // array reallocations.
-        var lifetimeEnds = new PriorityQueue<Double>(Math.max(1, objects.length / 4));
-        int estimatedMaxActiveObjects = 0;
+        int initialCapacity = Math.max(1, objects.length / 4);
+        var all = new PeakOverlapCounter(initialCapacity);
+        var circles = new PeakOverlapCounter(initialCapacity);
+        var sliders = new PeakOverlapCounter(initialCapacity);
+        var spinners = new PeakOverlapCounter(initialCapacity);
+        var judgements = new PeakOverlapCounter(initialCapacity);
 
         for (var object : objects) {
             double lifetimeStart = object.startTime - object.timePreempt;
-
-            // Remove all objects that have expired by the time this object's lifetime starts.
-            while (!lifetimeEnds.isEmpty() && lifetimeEnds.peek() <= lifetimeStart) {
-                lifetimeEnds.poll();
-            }
-
             double lifetimeEnd;
 
             if (object instanceof HitCircle) {
                 var hitWindow = object.hitWindow;
                 lifetimeEnd = object.startTime + (hitWindow != null ? hitWindow.getMehWindow() : 0);
+                circles.add(lifetimeStart, lifetimeEnd);
             } else if (object instanceof Slider slider) {
                 lifetimeEnd = Math.max(object.startTime + slider.getHead().hitWindow.getMehWindow(), object.getEndTime());
+                sliders.add(lifetimeStart, lifetimeEnd);
             } else {
                 lifetimeEnd = object.getEndTime();
+                spinners.add(lifetimeStart, lifetimeEnd);
             }
 
-            lifetimeEnds.add(lifetimeEnd);
-            estimatedMaxActiveObjects = Math.max(estimatedMaxActiveObjects, lifetimeEnds.size());
+            all.add(lifetimeStart, lifetimeEnd);
+
+            // Approximates every object as producing its judgement at its start time. This keeps the sweep ordered
+            // and is close enough for sizing purposes.
+            judgements.add(object.startTime, object.startTime + JUDGEMENT_EFFECT_LIFETIME * 1000);
         }
 
-        return estimatedMaxActiveObjects;
+        estimate.total = all.peak;
+        estimate.circles = circles.peak;
+        estimate.sliders = sliders.peak;
+        estimate.spinners = spinners.peak;
+        estimate.judgements = judgements.peak;
+
+        return estimate;
+    }
+
+    /**
+     * Fills the {@link GameEffect} pools for the effects that gameplay creates, so that their first uses do not
+     * construct sprites mid-gameplay.
+     * <p>
+     * Mod-dependent conditions (e.g., burst effects being disabled under Hidden) are not checked, as {@link GameHelper}'s
+     * mod state is only set up in {@link #prepareScene()}. Over-preloading a few effects is harmless.
+     *
+     * @param peakJudgements The estimated peak number of simultaneously visible judgement effects.
+     */
+    private void preloadEffects(int peakJudgements) {
+        var pool = GameObjectPool.getInstance();
+
+        // Most judgements are 300s. Other judgements and effects are rarer or shorter-lived, so a fraction suffices.
+        // The pools still grow on demand if these turn out to be insufficient.
+        int primaryCount = Math.max(1, peakJudgements);
+        int secondaryCount = Math.max(1, peakJudgements / 4);
+
+        pool.preloadEffect("hit300", primaryCount);
+
+        for (var name : new String[] { "hit300k", "hit300g", "hit100", "hit100k", "hit50", "hit0", "sliderpoint10", "sliderpoint30" }) {
+            pool.preloadEffect(name, secondaryCount);
+        }
+
+        if (Config.isHitLighting() && ResourceManager.getInstance().getTexture("lighting") != null) {
+            pool.preloadEffect("lighting", primaryCount);
+        }
+
+        if (Config.isBurstEffects()) {
+            for (var name : new String[] {
+                "hitcircle", "hitcircleoverlay", "sliderstartcircle", "sliderstartcircleoverlay", "sliderendcircle",
+                "sliderendcircleoverlay", "reversearrow"
+            }) {
+                pool.preloadEffect(name, secondaryCount);
+            }
+        }
+    }
+
+    private static final class ActiveObjectEstimate {
+        int total;
+        int circles;
+        int sliders;
+        int spinners;
+        int judgements;
+    }
+
+    /**
+     * Tracks the peak number of overlapping intervals in a sweep where intervals are added in ascending order of their
+     * start.
+     */
+    private static final class PeakOverlapCounter {
+        private final PriorityQueue<Double> ends;
+        int peak;
+
+        PeakOverlapCounter(int initialCapacity) {
+            ends = new PriorityQueue<>(initialCapacity);
+        }
+
+        void add(double start, double end) {
+            // Remove all intervals that have ended by the time this interval starts.
+            while (!ends.isEmpty() && ends.peek() <= start) {
+                ends.poll();
+            }
+
+            ends.add(end);
+            peak = Math.max(peak, ends.size());
+        }
     }
 
     //region Seeking
