@@ -3,4 +3,11 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="replay_analysis_title">Analysis</string>
+    <string name="replay_analysis_show_tap_markers">Show tap markers</string>
+    <string name="replay_analysis_show_frame_markers">Show frame markers</string>
+    <string name="replay_analysis_show_cursor_path">Show cursor path</string>
+    <string name="replay_analysis_hide_gameplay_cursor">Hide gameplay cursor</string>
+    <string name="replay_analysis_display_length">Display length</string>
+
 </resources>
