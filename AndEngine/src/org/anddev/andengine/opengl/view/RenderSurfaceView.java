@@ -166,6 +166,13 @@ public class RenderSurfaceView extends GLSurfaceView {
 			}
 		}
 
+		// BEGIN osu!droid modified: notify the engine of buffer swaps
+		@Override
+		public void onFrameSwapped(final GL10 pGL) {
+			this.mEngine.onFrameSwapped(pGL);
+		}
+		// END osu!droid modified
+
 		// ===========================================================
 		// Methods
 		// ===========================================================
