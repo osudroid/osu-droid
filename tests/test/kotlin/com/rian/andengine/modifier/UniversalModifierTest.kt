@@ -279,4 +279,234 @@ class UniversalModifierTest {
     }
 
     //endregion
+
+    //region Abort callbacks
+
+    @Test
+    fun `Modifier aborted at add time invokes onAborted only`() {
+        var finished = false
+        var aborted = false
+
+        component.alpha = 1f
+        component.fadeOut(1f).after { finished = true }.aborted { aborted = true }
+
+        advanceTo(0.1f)
+        component.fadeIn(0.5f)
+
+        assertTrue(aborted)
+
+        advanceTo(2f)
+        assertFalse(finished)
+    }
+
+    @Test
+    fun `Modifier aborted when the aborting modifier starts invokes onAborted`() {
+        var aborted = false
+
+        component.alpha = 1f
+        component.fadeOut(1f).aborted { aborted = true }
+        component.beginDelayedSequence(0.5f) { fadeIn(0.5f) }
+
+        advanceTo(0.4f)
+        assertFalse(aborted)
+
+        advanceTo(0.6f)
+        assertTrue(aborted)
+    }
+
+    @Test
+    fun `Later-scheduled modifier dropped on add invokes onAborted`() {
+        var aborted = false
+
+        component.beginDelayedSequence(1f) { fadeOut(0.1f).aborted { aborted = true } }
+        component.fadeIn(0.1f)
+
+        assertTrue(aborted)
+    }
+
+    @Test
+    fun `Removing a modifier invokes onAborted`() {
+        var aborted = false
+
+        val modifier = component.fadeOut(1f).aborted { aborted = true }
+
+        assertTrue(component.removeModifier(modifier))
+        assertTrue(aborted)
+    }
+
+    @Test
+    fun `Clearing all modifiers invokes onAborted for each modifier`() {
+        var abortCount = 0
+
+        component.fadeOut(1f).aborted { abortCount++ }
+        component.scaleTo(2f, 1f).aborted { abortCount++ }
+
+        component.clearEntityModifiers()
+
+        assertEquals(2, abortCount)
+    }
+
+    @Test
+    fun `Clearing a type invokes onAborted only for that type`() {
+        var alphaAborted = false
+        var scaleAborted = false
+
+        component.fadeOut(1f).aborted { alphaAborted = true }
+        component.scaleTo(2f, 1f).aborted { scaleAborted = true }
+
+        component.clearModifiers(ModifierType.Alpha)
+
+        assertTrue(alphaAborted)
+        assertFalse(scaleAborted)
+    }
+
+    @Test
+    fun `Clearing after a time invokes onAborted only for removed modifiers`() {
+        var earlyAborted = false
+        var lateAborted = false
+
+        component.fadeOut(1f).aborted { earlyAborted = true }
+        component.beginDelayedSequence(2f) { scaleTo(2f, 1f).aborted { lateAborted = true } }
+
+        component.clearModifiersAfter(1f)
+
+        assertFalse(earlyAborted)
+        assertTrue(lateAborted)
+    }
+
+    @Test
+    fun `Completed modifier does not invoke onAborted`() {
+        var finished = false
+        var aborted = false
+
+        component.fadeOut(0.5f).after { finished = true }.aborted { aborted = true }
+
+        advanceTo(1f)
+        component.clearEntityModifiers()
+
+        assertTrue(finished)
+        assertFalse(aborted)
+    }
+
+    @Test
+    fun `Finishing modifiers does not invoke onAborted`() {
+        var finished = false
+        var aborted = false
+
+        component.fadeOut(1f).after { finished = true }.aborted { aborted = true }
+
+        component.finishModifiers()
+
+        assertTrue(finished)
+        assertFalse(aborted)
+    }
+
+    @Test
+    fun `Modifier that reached its end but was cleared before completing invokes onAborted`() {
+        var yFinished = false
+        var yAborted = false
+
+        component.scaleToX(2f, 0.5f).after { it.clearEntityModifiers() }
+        component.scaleToY(3f, 0.6f).after { yFinished = true }.aborted { yAborted = true }
+
+        // Both modifiers reach their end in this update. X completes first, and its callback clears Y before Y
+        // completes.
+        advanceTo(1f)
+
+        assertTrue(yAborted)
+        assertFalse(yFinished)
+    }
+
+    @Test
+    fun `Modifier added by onAborted during a clear is kept`() {
+        component.alpha = 1f
+        component.fadeOut(1f).aborted { it.fadeIn(1f) }
+
+        component.clearEntityModifiers()
+
+        assertTrue(component.isAnimating)
+    }
+
+    @Test
+    fun `onAborted adding a modifier of a new grouping during a type clear does not throw`() {
+        component.fadeOut(1f).aborted { it.scaleTo(2f, 1f) }
+
+        component.clearModifiers(ModifierType.Alpha)
+
+        advanceTo(0.5f)
+        assertEquals(1.5f, component.scaleX, 1e-4f)
+    }
+
+    @Test
+    fun `onAborted detaching a child during a propagated clear does not throw`() {
+        // At least three children are needed.
+        // Removing during iteration over two elements ends the iteration early instead of throwing.
+        val children = List(3) { UIDummyComponent() }
+        var abortCount = 0
+
+        children.forEach {
+            component.attachChild(it)
+
+            it.fadeOut(1f).aborted { child ->
+                abortCount++
+                child.detachSelf()
+            }
+        }
+
+        component.clearModifiers(ModifierType.Alpha, propagateChildren = true)
+
+        assertEquals(3, abortCount)
+        assertEquals(0, component.childCount)
+    }
+
+    @Test
+    fun `Cleared modifier is released immediately`() {
+        val modifier = component.fadeOut(1f)
+
+        component.clearEntityModifiers()
+
+        // Components are commonly cleared and then detached, after which they are not updated anymore.
+        assertNull(modifier.target)
+    }
+
+    @Test
+    fun `Removed modifier is released immediately`() {
+        val modifier = component.fadeOut(1f)
+
+        component.removeModifier(modifier)
+
+        assertNull(modifier.target)
+    }
+
+    @Test
+    fun `Modifier aborted by an override is released on the next update`() {
+        val modifier = component.fadeOut(1f)
+
+        component.fadeIn(1f)
+
+        // A sequence that is still being built may still reference the aborted modifier.
+        assertNotNull(modifier.target)
+
+        advanceTo(0.1f)
+        assertNull(modifier.target)
+    }
+
+    @Test
+    fun `Sequence onAborted attaches to the last active modifier`() {
+        var aborted = false
+
+        component.beginModifierSequence {
+            fadeIn(0.1f)
+            scaleTo(2f, 1f)
+            aborted { aborted = true }
+        }
+
+        component.clearModifiers(ModifierType.Alpha)
+        assertFalse(aborted)
+
+        component.clearModifiers(ModifierType.ScaleXY)
+        assertTrue(aborted)
+    }
+
+    //endregion
 }
