@@ -3,7 +3,16 @@ package com.rian.andengine.modifier
 import com.reco1l.andengine.component.UIComponent
 
 /**
- * Tracks the lifetime of [UniversalModifier]s for one specified target member of a [UIComponent].
+ * Tracks the lifetime of [UniversalModifier]s for one target grouping of a [UIComponent].
+ *
+ * Within a target grouping, a [UniversalModifier] overrides other [UniversalModifier]s of the same [ModifierType]:
+ *
+ * - When a [UniversalModifier] starts, earlier [UniversalModifier]s of the same [ModifierType] that are still running
+ * are aborted.
+ * - When a [UniversalModifier] is added, [UniversalModifier]s of the same [ModifierType] that are scheduled to start
+ * after it are aborted.
+ *
+ * Aborted [UniversalModifier]s do not invoke their [UniversalModifier.onFinished] callback.
  */
 class UniversalModifierTargetTracker(
     /**
@@ -20,7 +29,16 @@ class UniversalModifierTargetTracker(
     private val _modifiers = mutableListOf<UniversalModifier>()
 
     /**
-     * The [UniversalModifier]s that are currently active on this [targetMember]. This list is ordered by the time at
+     * [UniversalModifier]s that have been aborted but not yet released back to their pool.
+     *
+     * Releasing is deferred until the next [update] because pools are LIFO. Releasing immediately would hand the
+     * aborted instance to the next [UniversalModifier] acquisition, while a [UniversalModifierSequence] (or a caller holding
+     * the returned [UniversalModifier]) may still reference it (e.g. to attach an [UniversalModifier.after] callback).
+     */
+    private val abortedModifiers = mutableListOf<UniversalModifier>()
+
+    /**
+     * The [UniversalModifier]s that are currently active on this [targetGrouping]. This list is ordered by the time at
      * which the [UniversalModifier]s are applied.
      */
     val modifiers: List<UniversalModifier>
@@ -28,6 +46,8 @@ class UniversalModifierTargetTracker(
 
     /**
      * Adds a [UniversalModifier] to this [UniversalModifierTargetTracker].
+     *
+     * [UniversalModifier]s of the same [ModifierType] that are scheduled to start after [modifier] are aborted.
      *
      * @param modifier The [UniversalModifier] to add.
      * @param customModifierId When not `null`, the [UniversalModifier.id] to assign for ordering.
@@ -54,18 +74,22 @@ class UniversalModifierTargetTracker(
 
         _modifiers.add(index, modifier)
 
+        // Abort all following modifiers of the same type, as this modifier overrides them.
+        var i = index + 1
+
+        while (i < _modifiers.size) {
+            if (_modifiers[i].type == modifier.type) {
+                abortAt(i)
+            } else {
+                i++
+            }
+        }
+
         // If the new modifier could have an immediate effect, make the effect happen immediately.
         val time = component.time
 
         if (time != null && modifier.startTime <= time.current) {
-            if (index > 0) {
-                val prevModifier = modifiers[index - 1]
-
-                if (!prevModifier.appliedToEnd) {
-                    prevModifier.apply(modifier.startTime)
-                }
-            }
-
+            abortBefore(index)
             modifier.apply(time.current)
         }
     }
@@ -164,6 +188,7 @@ class UniversalModifierTargetTracker(
         }
 
         _modifiers.clear()
+        releaseAborted()
     }
 
     /**
@@ -243,39 +268,37 @@ class UniversalModifierTargetTracker(
      * @param time The time.
      */
     fun update(time: Float) {
-        val modifiers = _modifiers
-        val modifierCount = modifiers.size
+        releaseAborted()
 
-        // First pass: Apply modifiers and handle state hand-offs.
-        // We use a fixed count to avoid processing modifiers added during this frame.
-        for (i in 0 until modifierCount) {
-            val modifier = modifiers[i]
+        val modifiers = _modifiers
+
+        // First pass: Apply modifiers and abort the ones they override.
+        var i = 0
+
+        while (i < modifiers.size) {
+            var modifier = modifiers[i]
 
             if (time < modifier.startTime) {
                 break
             }
 
-            if (!modifier.applied && i > 0) {
-                // This is the first time we are applying the current modifier.
-                // To avoid conflicts with the previously active modifier, we mark that modifier as removable.
-                val prevModifier = modifiers[i - 1]
-
-                if (!prevModifier.appliedToEnd) {
-                    // We may have applied the previous modifier too far into the future. To avoid the current modifier
-                    // from reading into potentially incorrect initial values, we reapply the previous modifier using
-                    // the current modifier's start time as a basis.
-                    prevModifier.apply(modifier.startTime)
-                }
+            if (!modifier.applied) {
+                // This is the first time we are applying the current modifier, which aborts earlier modifiers of
+                // the same type.
+                i = abortBefore(i)
+                modifier = modifiers[i]
             }
 
             if (!modifier.appliedToEnd) {
                 modifier.apply(time)
             }
+
+            i++
         }
 
         // Second pass: Remove finished modifiers and invoke callbacks.
         // We iterate forward using a while loop to safely handle removals and ensure chronological callbacks.
-        var i = 0
+        i = 0
 
         while (i < modifiers.size) {
             val modifier = modifiers[i]
@@ -295,5 +318,56 @@ class UniversalModifierTargetTracker(
                 i++
             }
         }
+    }
+
+    /**
+     * Aborts still-running [UniversalModifier]s of the same [ModifierType] that precede the
+     * [UniversalModifier] at [index], which is about to be applied for the first time.
+     *
+     * @param index The index of the [UniversalModifier] that is about to be applied for the first time.
+     * @return The new index of that [UniversalModifier].
+     */
+    private fun abortBefore(index: Int): Int {
+        val modifier = modifiers[index]
+        var newIndex = index
+        var i = 0
+
+        while (i < newIndex) {
+            val prevModifier = modifiers[i]
+
+            if (prevModifier.type != modifier.type || prevModifier.appliedToEnd) {
+                i++
+                continue
+            }
+
+            // We may have applied the previous modifier too far into the future. To avoid the current modifier from
+            // reading into potentially incorrect initial values, we reapply the previous modifier using the current
+            // modifier's start time as a basis.
+            prevModifier.apply(modifier.startTime)
+
+            if (prevModifier.appliedToEnd) {
+                // The previous modifier ends before the current one starts, so it completed rather than being
+                // aborted. Leave it for its callback to be invoked.
+                i++
+                continue
+            }
+
+            abortAt(i)
+            newIndex--
+        }
+
+        return newIndex
+    }
+
+    private fun abortAt(index: Int) {
+        abortedModifiers.add(_modifiers.removeAt(index))
+    }
+
+    private fun releaseAborted() {
+        for (i in abortedModifiers.indices) {
+            abortedModifiers[i].release()
+        }
+
+        abortedModifiers.clear()
     }
 }
