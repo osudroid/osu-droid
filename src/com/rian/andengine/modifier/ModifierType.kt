@@ -5,18 +5,23 @@ import com.reco1l.andengine.component.*
 /**
  * The type of the [UniversalModifier].
  *
+ * This denotes the target member of a [UniversalModifier]. When a [UniversalModifier] starts, it overrides
+ * (aborts) earlier [UniversalModifier]s of the same [ModifierType] that are still running.
+ *
  * @author Reco1I, Rian8337
  */
 enum class ModifierType(
     /**
-     * The target member of this [ModifierType].
+     * The target grouping of this [ModifierType]. This is used to group [ModifierType]s that operate on the same property
+     * (or properties) of a [UIComponent].
      *
-     * This is used to group [ModifierType]s that operate on the same property (or properties) of a [UIComponent]. It is
-     * assumed that [UniversalModifier]s with different [targetMember]s are independent of each other in that they
+     * It is assumed that [UniversalModifier]s with different [targetGrouping]s are independent of each other in that they
      * affect different properties, and therefore they can be applied independently in any order without affecting the
      * end result.
+     *
+     * [UniversalModifier]s with different [ModifierType]s in the same [targetGrouping] do not override each other.
      */
-    val targetMember: String?
+    val targetGrouping: String?
 ) {
     None(null),
 

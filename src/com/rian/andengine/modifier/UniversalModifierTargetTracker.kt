@@ -7,9 +7,9 @@ import com.reco1l.andengine.component.UIComponent
  */
 class UniversalModifierTargetTracker(
     /**
-     * The target member.
+     * The target grouping.
      */
-    val targetMember: String?,
+    val targetGrouping: String?,
 
     /**
      * The [UIComponent] whose [UniversalModifier]s are being tracked.
@@ -38,9 +38,9 @@ class UniversalModifierTargetTracker(
             throw IllegalArgumentException("customModifierId cannot be 0.")
         }
 
-        if (modifier.type.targetMember != targetMember) {
+        if (modifier.type.targetGrouping != targetGrouping) {
             throw IllegalArgumentException(
-                "Target member ${modifier.type.targetMember} does not match tracker target member $targetMember."
+                "Target grouping ${modifier.type.targetGrouping} does not match tracker target grouping $targetGrouping."
             )
         }
 

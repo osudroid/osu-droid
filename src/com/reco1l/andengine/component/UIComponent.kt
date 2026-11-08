@@ -1062,7 +1062,7 @@ abstract class UIComponent : Entity(0f, 0f),
         for (i in universalModifierTrackers.indices) {
             val tracker = universalModifierTrackers[i]
 
-            if (tracker.targetMember == type.targetMember) {
+            if (tracker.targetGrouping == type.targetGrouping) {
                 return tracker
             }
         }
@@ -1071,7 +1071,7 @@ abstract class UIComponent : Entity(0f, 0f),
             return null
         }
 
-        val tracker = UniversalModifierTargetTracker(type.targetMember, this)
+        val tracker = UniversalModifierTargetTracker(type.targetGrouping, this)
         universalModifierTrackers += tracker
 
         return tracker
