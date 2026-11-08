@@ -92,8 +92,20 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Invoked when this [UniversalModifier] has finished and is about to be removed from a
      * [UniversalModifierTargetTracker].
+     *
+     * Every [UniversalModifier] that is added to a [UniversalModifierTargetTracker] invokes exactly one of [onFinished]
+     * and [onAborted].
      */
     var onFinished: OnModifierFinished? = null
+
+    /**
+     * Invoked when this [UniversalModifier] is removed from a [UniversalModifierTargetTracker] before it completes,
+     * e.g. because it was aborted by another [UniversalModifier] of the same [ModifierType] or cleared.
+     *
+     * Every [UniversalModifier] that is added to a [UniversalModifierTargetTracker] invokes exactly one of [onFinished]
+     * and [onAborted].
+     */
+    var onAborted: OnModifierAborted? = null
 
     /**
      * The [Easing] function applied to this [UniversalModifier].
@@ -106,6 +118,18 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun after(onFinished: OnModifierFinished?): UniversalModifier {
         this.onFinished = onFinished
+
+        return this
+    }
+
+    /**
+     * Sets the callback to be invoked when this [UniversalModifier] is removed from a [UniversalModifierTargetTracker]
+     * before it completes.
+     *
+     * @see onAborted
+     */
+    fun aborted(onAborted: OnModifierAborted?): UniversalModifier {
+        this.onAborted = onAborted
 
         return this
     }
@@ -160,6 +184,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         applied = false
         appliedToEnd = false
         onFinished = null
+        onAborted = null
 
         pool?.release(this)
     }

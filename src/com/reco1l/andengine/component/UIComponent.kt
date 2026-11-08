@@ -1111,10 +1111,12 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clear(type) }
+        // Clearing invokes onAborted callbacks, which may add trackers (by adding a modifier of a new grouping) or
+        // detach children, so the tolerant variants are used here and in the other clear functions.
+        universalModifierTrackers.forEachTolerant { it.clear(type) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(type, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiers(type, true) }
         }
     }
 
@@ -1126,10 +1128,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.forEach { it.clear(*types) }
+        universalModifierTrackers.forEachTolerant { it.clear(*types) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiers(true, *types) }
         }
     }
 
@@ -1141,10 +1143,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clearAfter(time) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, true) }
         }
     }
 
@@ -1157,10 +1159,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clearAfter(time, type) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time, type) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
         }
     }
 
@@ -1173,10 +1175,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.forEach { it.clearAfter(time, *types) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time, *types) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
         }
     }
 

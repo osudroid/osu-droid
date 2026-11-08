@@ -12,7 +12,9 @@ import com.reco1l.andengine.component.UIComponent
  * - When a [UniversalModifier] is added, [UniversalModifier]s of the same [ModifierType] that are scheduled to start
  * after it are aborted.
  *
- * Aborted [UniversalModifier]s do not invoke their [UniversalModifier.onFinished] callback.
+ * Any [UniversalModifier] that is removed before it completes (overridden, removed, or cleared) is aborted. It invokes
+ * its [UniversalModifier.onAborted] callback instead of [UniversalModifier.onFinished]. A [UniversalModifier] only
+ * counts as completed once its [UniversalModifier.onFinished] callback has been invoked.
  */
 class UniversalModifierTargetTracker(
     /**
@@ -31,9 +33,11 @@ class UniversalModifierTargetTracker(
     /**
      * [UniversalModifier]s that have been aborted but not yet released back to their pool.
      *
-     * Releasing is deferred until the next [update] because pools are LIFO. Releasing immediately would hand the
-     * aborted instance to the next [UniversalModifier] acquisition, while a [UniversalModifierSequence] (or a caller holding
-     * the returned [UniversalModifier]) may still reference it (e.g. to attach an [UniversalModifier.after] callback).
+     * When a [UniversalModifier] is aborted by an override, releasing is deferred until the next [update] because pools
+     * are LIFO. Releasing immediately would hand the aborted instance to the next [UniversalModifier] acquisition, while
+     * a [UniversalModifierSequence] (or a caller holding the returned [UniversalModifier]) may still reference it (e.g.
+     * to attach an [UniversalModifier.after] callback). Explicit removals release right away (see [releaseAborted]),
+     * including any override-aborted [UniversalModifier]s that are still pending.
      */
     private val abortedModifiers = mutableListOf<UniversalModifier>()
 
@@ -92,46 +96,42 @@ class UniversalModifierTargetTracker(
             abortBefore(index)
             modifier.apply(time.current)
         }
+
+        dispatchAborted()
     }
 
     /**
      * Removes a [UniversalModifier] from this [UniversalModifierTargetTracker].
      *
-     * If the [UniversalModifier] is successfully removed, [UniversalModifier.release] will be called to release the
-     * [UniversalModifier] back to its pool.
+     * If the [UniversalModifier] is successfully removed, its [UniversalModifier.onAborted]
+     * callback is invoked, and it is then released back to its pool.
      *
      * @param modifier The [UniversalModifier] to remove.
      * @return Whether [modifier] was removed successfully.
      */
     fun remove(modifier: UniversalModifier): Boolean {
-        val removed = _modifiers.remove(modifier)
+        val index = _modifiers.indexOf(modifier)
 
-        if (removed) {
-            modifier.release()
+        if (index < 0) {
+            return false
         }
 
-        return removed
+        abortAt(index)
+        releaseAborted()
+
+        return true
     }
 
     /**
      * Removes all [UniversalModifier]s that start at or after the specified time from this
      * [UniversalModifierTargetTracker].
      *
+     * Removed [UniversalModifier]s are aborted (see [remove]).
+     *
      * @param time The time after which to remove [UniversalModifier]s, in seconds relative to [component]'s
      * [UIComponent.time].
      */
-    fun clearAfter(time: Float) {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            if (modifier.startTime < time) {
-                break
-            }
-
-            modifier.release()
-            _modifiers.removeAt(i)
-        }
-    }
+    fun clearAfter(time: Float) = abortWhere(firstIndexStartingAtOrAfter(time)) { true }
 
     /**
      * Removes all [UniversalModifier]s with the given [ModifierType] that start at or after the specified time from
@@ -141,20 +141,8 @@ class UniversalModifierTargetTracker(
      * [UIComponent.time].
      * @param type The [ModifierType] to remove.
      */
-    fun clearAfter(time: Float, type: ModifierType) {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            if (modifier.startTime < time) {
-                break
-            }
-
-            if (modifier.type == type) {
-                modifier.release()
-                _modifiers.removeAt(i)
-            }
-        }
-    }
+    fun clearAfter(time: Float, type: ModifierType) =
+        abortWhere(firstIndexStartingAtOrAfter(time)) { it.type == type }
 
     /**
      * Removes all [UniversalModifier]s with the given [ModifierType]s that start at or after the specified time from
@@ -164,27 +152,18 @@ class UniversalModifierTargetTracker(
      * [UIComponent.time].
      * @param types The types of [ModifierType] to remove.
      */
-    fun clearAfter(time: Float, vararg types: ModifierType) {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            if (modifier.startTime < time) {
-                break
-            }
-
-            if (modifier.type in types) {
-                modifier.release()
-                _modifiers.removeAt(i)
-            }
-        }
-    }
+    fun clearAfter(time: Float, vararg types: ModifierType) =
+        abortWhere(firstIndexStartingAtOrAfter(time)) { it.type in types }
 
     /**
      * Removes all [UniversalModifier]s from this [UniversalModifierTargetTracker].
+     *
+     * Removed [UniversalModifier]s are aborted (see [remove]).
      */
     fun clear() {
-        for (i in modifiers.indices) {
-            modifiers[i].release()
+        // Move everything at once rather than removing one by one from the front of the list.
+        for (i in _modifiers.indices) {
+            abortedModifiers.add(_modifiers[i])
         }
 
         _modifiers.clear()
@@ -197,34 +176,20 @@ class UniversalModifierTargetTracker(
      * Unlike the vararg variant, this method avoids array allocation in cases where there is only one [ModifierType] to
      * remove.
      *
+     * Removed [UniversalModifier]s are aborted (see [remove]).
+     *
      * @param type The [ModifierType] to remove.
      */
-    fun clear(type: ModifierType) {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            if (modifier.type == type) {
-                modifier.release()
-                _modifiers.removeAt(i)
-            }
-        }
-    }
+    fun clear(type: ModifierType) = abortWhere { it.type == type }
 
     /**
      * Removes all [UniversalModifier]s with the specified [ModifierType]s from this [UniversalModifierTargetTracker].
      *
+     * Removed [UniversalModifier]s are aborted (see [remove]).
+     *
      * @param types The types of [ModifierType] to remove.
      */
-    fun clear(vararg types: ModifierType) {
-        for (i in modifiers.size - 1 downTo 0) {
-            val modifier = modifiers[i]
-
-            if (modifier.type in types) {
-                modifier.release()
-                _modifiers.removeAt(i)
-            }
-        }
-    }
+    fun clear(vararg types: ModifierType) = abortWhere { it.type in types }
 
     /**
      * Finishes [UniversalModifier]s in this [UniversalModifierTargetTracker], applying them
@@ -296,6 +261,9 @@ class UniversalModifierTargetTracker(
             i++
         }
 
+        // Invoke abort callbacks only after the first pass, as they may mutate the modifier list.
+        dispatchAborted()
+
         // Second pass: Remove finished modifiers and invoke callbacks.
         // We iterate forward using a while loop to safely handle removals and ensure chronological callbacks.
         i = 0
@@ -359,11 +327,79 @@ class UniversalModifierTargetTracker(
         return newIndex
     }
 
+    /**
+     * Aborts [UniversalModifier]s from [fromIndex] onwards that match [predicate], invokes their
+     * [UniversalModifier.onAborted] callbacks in chronological order, and then releases them back to their pool.
+     */
+    private inline fun abortWhere(fromIndex: Int = 0, predicate: (UniversalModifier) -> Boolean) {
+        var i = fromIndex
+
+        while (i < _modifiers.size) {
+            if (predicate(_modifiers[i])) {
+                abortAt(i)
+            } else {
+                i++
+            }
+        }
+
+        releaseAborted()
+    }
+
+    /**
+     * Finds the index of the first [UniversalModifier] that starts at or after [time].
+     */
+    private fun firstIndexStartingAtOrAfter(time: Float): Int {
+        var i = _modifiers.size
+
+        while (i > 0 && _modifiers[i - 1].startTime >= time) {
+            i--
+        }
+
+        return i
+    }
+
+    /**
+     * Moves the [UniversalModifier] at [index] to [abortedModifiers]. Its [UniversalModifier.onAborted] callback is
+     * invoked by the next [dispatchAborted] call, which every aborting operation makes once it is done mutating
+     * [_modifiers].
+     */
     private fun abortAt(index: Int) {
         abortedModifiers.add(_modifiers.removeAt(index))
     }
 
+    /**
+     * Invokes the [UniversalModifier.onAborted] callbacks of [abortedModifiers] that have not been invoked yet.
+     *
+     * Callbacks may re-enter this [UniversalModifierTargetTracker], including aborting more [UniversalModifier]s and
+     * calling this method again. Each callback is cleared before it is invoked so that it is invoked at most once.
+     */
+    private fun dispatchAborted() {
+        var i = 0
+
+        // abortedModifiers may grow while iterating if a callback aborts more modifiers.
+        while (i < abortedModifiers.size) {
+            val modifier = abortedModifiers[i++]
+            val onAborted = modifier.onAborted ?: continue
+
+            modifier.onAborted = null
+            onAborted(component)
+        }
+    }
+
+    /**
+     * Invokes any pending [UniversalModifier.onAborted] callbacks, then releases all [abortedModifiers] back to their
+     * pool.
+     *
+     * This is called at the start of [update] for [UniversalModifier]s aborted by an override, and right away by
+     * explicit removals ([remove], [clear], [clearAfter]).
+     *
+     * Explicit removals do not need to defer and must not do so. A [UIComponent] is commonly cleared and then detached,
+     * after which it is no longer updated, so deferred releases would keep its [UniversalModifier]s out of the pool until
+     * it is updated again.
+     */
     private fun releaseAborted() {
+        dispatchAborted()
+
         for (i in abortedModifiers.indices) {
             abortedModifiers[i].release()
         }

@@ -387,6 +387,29 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
     }
 
     /**
+     * Sets an abort callback to the [lastActiveModifier] of this [UniversalModifierSequence]. If no
+     * [UniversalModifier]s have been applied to this [UniversalModifierSequence], a [UniversalModifier] that does
+     * nothing and starts at [currentTime] will be applied to [origin].
+     *
+     * This callback will be called when the current [lastActiveModifier] (as of the call of this method) is removed
+     * before it completes.
+     *
+     * @param onAborted The callback to call.
+     * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
+     * @see UniversalModifier.onAborted
+     */
+    @JvmOverloads
+    fun aborted(onAborted: OnModifierAborted? = null): UniversalModifierSequence {
+        if (lastActiveModifier == null) {
+            append(ModifierType.None, 0f, Easing.None) {}
+        }
+
+        lastActiveModifier?.aborted(onAborted)
+
+        return this
+    }
+
+    /**
      * Advances the start time of future [UniversalModifier]s added to this [UniversalModifierSequence] by a certain
      * delay.
      *
