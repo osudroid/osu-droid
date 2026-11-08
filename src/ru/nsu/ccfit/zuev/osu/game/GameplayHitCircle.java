@@ -12,6 +12,7 @@ import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.game.ShakeKt;
 import com.osudroid.mods.ModHidden;
 
 import java.util.ArrayList;
@@ -53,6 +54,10 @@ public class GameplayHitCircle extends GameObject {
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
         resetNotelockState();
+
+        // Entities are pooled, so make sure a shake interrupted by expiration does not leave them shifted.
+        circlePiece.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
 
         var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -181,6 +186,8 @@ public class GameplayHitCircle extends GameObject {
         hitSamples.clear();
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
+        circlePiece.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
         approachCircle.detachSelf();
 
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
@@ -197,19 +204,15 @@ public class GameplayHitCircle extends GameObject {
     }
 
     @Override
-    public void update(final float dt) {
-        preUpdateShake();
-        updateInternal(dt);
-        postUpdateShake(dt, beatmapCircle, scene != null && !startHit);
+    protected void startShake() {
+        float magnitude = getShakeMagnitude(beatmapCircle);
+
+        ShakeKt.shake(circlePiece, magnitude);
+        ShakeKt.shake(approachCircle, magnitude);
     }
 
     @Override
-    protected void shiftShake(float dx) {
-        approachCircle.setPosition(approachCircle.getX() + dx, approachCircle.getY());
-        circlePiece.setPosition(circlePiece.getX() + dx, circlePiece.getY());
-    }
-
-    private void updateInternal(final float dt) {
+    public void update(final float dt) {
         if (beatmapCircle.hitWindow == null) {
             // Circle somehow does not have a judgement window - abandon.
             return;
@@ -310,7 +313,6 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void onExpire() {
-        resetShake();
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
 

@@ -7,6 +7,7 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.game.CursorEvent;
+import com.osudroid.game.ShakeKt;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.component.UIComponent;
@@ -192,6 +193,15 @@ public class GameplaySlider extends GameObject {
         this.stat = stat;
         this.beatmapSlider = beatmapSlider;
         resetNotelockState();
+
+        // Entities are pooled, so make sure a shake interrupted by expiration does not leave them shifted.
+        headCirclePiece.setTranslationX(0f);
+        tailCirclePiece.setTranslationX(0f);
+        startArrow.setTranslationX(0f);
+        endArrow.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
+        sliderBody.setTranslationX(0f);
+        tickContainer.setTranslationX(0f);
         this.controlPoints = controlPoints;
 
         var stackedPosition = beatmapSlider.getScreenSpaceGameplayStackedPosition();
@@ -583,7 +593,6 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void onExpire() {
-        resetShake();
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
         startArrow.clearEntityModifiers();
@@ -861,32 +870,24 @@ public class GameplaySlider extends GameObject {
         isInRadius = isTracking;
     }
 
-    @Override
-    public void update(final float dt) {
-        preUpdateShake();
-        updateInternal(dt);
-        postUpdateShake(dt, beatmapSlider, scene != null && !startHit);
-    }
-
     /**
-     * Shake the entire slider during notelock.
+     * Shakes the entire slider during notelock.
      */
     @Override
-    protected void shiftShake(float dx) {
-        approachCircle.setPosition(approachCircle.getX() + dx, approachCircle.getY());
-        shiftX(headCirclePiece, dx);
-        shiftX(tailCirclePiece, dx);
-        shiftX(startArrow, dx);
-        shiftX(endArrow, dx);
-        shiftX(sliderBody, dx);
-        shiftX(tickContainer, dx);
+    protected void startShake() {
+        float magnitude = getShakeMagnitude(beatmapSlider);
+
+        ShakeKt.shake(approachCircle, magnitude);
+        ShakeKt.shake(headCirclePiece, magnitude);
+        ShakeKt.shake(tailCirclePiece, magnitude);
+        ShakeKt.shake(startArrow, magnitude);
+        ShakeKt.shake(endArrow, magnitude);
+        ShakeKt.shake(sliderBody, magnitude);
+        ShakeKt.shake(tickContainer, magnitude);
     }
 
-    private static void shiftX(org.anddev.andengine.entity.IEntity entity, float dx) {
-        entity.setPosition(entity.getX() + dx, entity.getY());
-    }
-
-    private void updateInternal(final float dt) {
+    @Override
+    public void update(final float dt) {
 
         if (scene == null) {
             return;
@@ -1233,6 +1234,7 @@ public class GameplaySlider extends GameObject {
             startArrow.setAlpha(1);
         } else if (headCirclePiece.isVisible()) {
             headCirclePiece.clearEntityModifiers();
+            headCirclePiece.setTranslationX(0f);
 
             if (hitOffset >= -mehWindow || headCirclePiece.getAlpha() == 0) {
                 headCirclePiece.detachSelf();
