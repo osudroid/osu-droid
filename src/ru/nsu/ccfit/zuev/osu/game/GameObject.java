@@ -156,8 +156,8 @@ public abstract class GameObject {
                     // remember that it landed on the object (read via consumeEarlyPress by the owner).
                     // The press is also claimed: only this object (the earliest one under the cursor) may shake for
                     // it, not the overlapping objects locked behind it (see pollNotelockedPress).
-                    if (!isPressClaimed(downEvent) && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
-                        claimPress(downEvent);
+                    if (!downEvent.isClaimed && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                        downEvent.isClaimed = true;
                         earlyPressOnObject = true;
                     }
 
@@ -168,7 +168,8 @@ public abstract class GameObject {
                     if (i == j) {
                         // For the cursor that generated the down event, check if the event position is on the object.
                         if (isHit(hitObject, downEvent)) {
-                            return claimPress(downEvent);
+                            downEvent.isClaimed = true;
+                            return downEvent;
                         }
                     } else {
                         // For the other case, we need to check the event closest to the down event and check if it is
@@ -181,7 +182,8 @@ public abstract class GameObject {
                         }
 
                         if (isHit(hitObject, closestEvent)) {
-                            return claimPress(downEvent);
+                            downEvent.isClaimed = true;
+                            return downEvent;
                         }
                     }
                 }
@@ -236,17 +238,6 @@ public abstract class GameObject {
     // CursorEvents are pooled and recycled: remembering them by identity elsewhere would go stale.
     private boolean notelockFirstPollSkipped;
     private boolean earlyPressOnObject;
-    private float shakeElapsed = -1f;
-    private float appliedShakeOffset;
-
-    private static CursorEvent claimPress(CursorEvent event) {
-        event.isClaimed = true;
-        return event;
-    }
-
-    private static boolean isPressClaimed(CursorEvent event) {
-        return event.isClaimed;
-    }
 
     /**
      * Must be called from {@code init} of pooled objects so the notelock state of a previous use does not leak
@@ -301,8 +292,8 @@ public abstract class GameObject {
                 // A locked object shakes for any tap on it while it is displayed (no hit window check).
                 // The tap is claimed so the objects locked behind this one, which update later, skip it,
                 // and only the earliest object under the tap shakes.
-                if (!isPressClaimed(downEvent) && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
-                    claimPress(downEvent);
+                if (!downEvent.isClaimed && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                    downEvent.isClaimed = true;
                     pressed = true;
                 }
             }
@@ -332,66 +323,23 @@ public abstract class GameObject {
     }
 
     /**
-     * Starts (or restarts) the notelock shake of this object.
+     * Shake circle by 8 units inside the circle's local space, in which the circle is 128 units wide.
      */
-    protected final void startShake() {
-        shakeElapsed = 0f;
-    }
+    private static final float SHAKE_MAGNITUDE_RATIO = 8f / 128f;
 
     /**
-     * Subclasses move every entity that should shake by {@code dx} pixels on the x axis.
-     * Hit testing never reads entity positions (it uses {@link #position}), so this does not move the hitbox.
+     * Called when this object should shake, either because it is notelocked or because it was pressed too early.
+     * Subclasses shake their entities with {@code ShakeKt.shake}.
      */
-    protected void shiftShake(float dx) {}
+    protected void startShake() {}
 
     /**
-     * Call at the very beginning of {@code update}: removes last frame's offset so that the object's regular
-     * logic, which may reposition entities absolutely, always works on canonical positions.
-     */
-    protected final void preUpdateShake() {
-        if (appliedShakeOffset != 0f) {
-            shiftShake(-appliedShakeOffset);
-            appliedShakeOffset = 0f;
-        }
-    }
-
-    /**
-     * Call at the very end of {@code update}: advances the shake and applies the current offset.
+     * Obtains the shake magnitude for a {@link HitObject}, in screen pixels.
      *
-     * @param canShake Whether the object may still shake (false once it is hit or removed).
+     * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
      */
-    protected final void postUpdateShake(float dt, HitObject hitObject, boolean canShake) {
-        if (!canShake) {
-            shakeElapsed = -1f;
-            return;
-        }
-
-        if (shakeElapsed < 0f) {
-            return;
-        }
-
-        shakeElapsed += dt;
-
-        if (ShakeAnimation.isFinished(shakeElapsed)) {
-            shakeElapsed = -1f;
-            return;
-        }
-
-        float magnitude = (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * ShakeAnimation.MAGNITUDE_RATIO;
-        float offset = ShakeAnimation.offset(shakeElapsed, magnitude);
-
-        if (offset != 0f) {
-            shiftShake(offset);
-            appliedShakeOffset = offset;
-        }
-    }
-
-    /**
-     * Stops the shake and puts every entity back. Call from {@code onExpire}.
-     */
-    protected final void resetShake() {
-        preUpdateShake();
-        shakeElapsed = -1f;
+    protected final float getShakeMagnitude(HitObject hitObject) {
+        return (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * SHAKE_MAGNITUDE_RATIO;
     }
 
     //endregion
