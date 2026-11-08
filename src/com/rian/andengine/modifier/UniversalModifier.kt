@@ -136,9 +136,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         val isEnding = time >= endTime
 
+        // Only the progress is clamped. The eased value is intentionally left unclamped so that easings that overshoot
+        // (e.g. OutBack, OutElastic) can go past the final value while the modifier is still active.
         val percentage =
             if (isEnding || duration <= 0f) 1f
-            else easing.interpolate((time - startTime) / duration).coerceIn(0f, 1f)
+            else easing.interpolate(((time - startTime) / duration).coerceIn(0f, 1f))
 
         type.setValues(target, initialValues, finalValues, percentage)
 

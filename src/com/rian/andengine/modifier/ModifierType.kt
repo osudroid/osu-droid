@@ -219,9 +219,11 @@ enum class ModifierType(
     }
 
     fun setValues(entity: UIComponent, initialValues: FloatArray, finalValues: FloatArray, percentage: Float) {
-        fun valueAt(index: Int) = when {
-            percentage >= 1f -> finalValues[index]
-            percentage <= 0f -> initialValues[index]
+        // The exact bounds are returned as-is to avoid floating-point error. Anything else (including values outside
+        // [0, 1] produced by overshooting easings) is linearly interpolated.
+        fun valueAt(index: Int) = when (percentage) {
+            1f -> finalValues[index]
+            0f -> initialValues[index]
             else -> initialValues[index] + percentage * (finalValues[index] - initialValues[index])
         }
 
