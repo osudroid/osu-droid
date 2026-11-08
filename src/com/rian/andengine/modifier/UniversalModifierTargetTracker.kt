@@ -202,15 +202,34 @@ class UniversalModifierTargetTracker(
     }
 
     /**
-     * Finishes all [UniversalModifier]s in this [UniversalModifierTargetTracker], applying them until the end and then
-     * removing them.
+     * Finishes [UniversalModifier]s in this [UniversalModifierTargetTracker], applying them
+     * until the end and then removing them.
+     *
+     * Only [UniversalModifier]s that are present when this method is called are finished. If a
+     * [UniversalModifier.onFinished] callback adds one or more [UniversalModifier]s, they are
+     * kept and played normally.
+     *
+     * @param type The [ModifierType] to finish, or `null` to finish all [UniversalModifier]s.
      */
-    fun finish() {
-        while (modifiers.isNotEmpty()) {
-            // We remove at 0 to process the elements in chronological order.
-            // If a callback adds a new modifier, it will be placed according to its startTime.
-            // This ensures the entire chain is finished until the tracker is truly empty.
-            val modifier = _modifiers.removeAt(0)
+    @JvmOverloads
+    fun finish(type: ModifierType? = null) {
+        if (modifiers.isEmpty()) {
+            return
+        }
+
+        val toFinish = mutableListOf<UniversalModifier>()
+
+        // Iterate in reverse so that removals do not shift the indices that are yet to be visited.
+        for (i in _modifiers.size - 1 downTo 0) {
+            if (type == null || _modifiers[i].type == type) {
+                toFinish.add(_modifiers.removeAt(i))
+            }
+        }
+
+        // Process in chronological order. If an onFinished callback adds a new modifier, it will be
+        // placed according to its startTime and played normally.
+        for (i in toFinish.size - 1 downTo 0) {
+            val modifier = toFinish[i]
 
             modifier.apply(modifier.endTime)
             modifier.onFinished?.invoke(component)

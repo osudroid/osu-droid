@@ -1190,7 +1190,7 @@ abstract class UIComponent : Entity(0f, 0f),
     @JvmOverloads
     fun finishModifiers(propagateChildren: Boolean = false, type: ModifierType? = null) {
         if (type != null) {
-            getTrackerFor(type)?.finish()
+            getTrackerFor(type)?.finish(type)
         } else {
             // a modifier's `onFinished` callback may append a new modifier of another type (e.g. chaining),
             // which would mutate this same list, preventing the use of the regular `forEach`.
