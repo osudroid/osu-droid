@@ -5,6 +5,7 @@ import com.osudroid.utils.IPoolable
 import com.osudroid.utils.SynchronizedPool
 import com.reco1l.andengine.component.UIComponent
 import com.reco1l.framework.Color4
+import kotlin.math.max
 
 /**
  * A sequence of [UniversalModifier]s all operating upon the same [UIComponent]. Can be used to group and chain
@@ -403,12 +404,14 @@ class UniversalModifierSequence : IPoolable, AutoCloseable {
      * Advances the start time of future [UniversalModifier]s added to this [UniversalModifierSequence] to the latest
      * end time of all [UniversalModifier]s in this [UniversalModifierSequence] plus a certain delay.
      *
+     * If a pending [delay] already advanced the start time past that end time, the start time is kept.
+     *
      * @param delay The delay to apply, in seconds. Defaults to 0.
      * @return A [UniversalModifierSequence] to which further [UniversalModifier]s can be added.
      */
     @JvmOverloads
     fun then(delay: Float = 0f): UniversalModifierSequence {
-        currentTime = endTime
+        currentTime = max(currentTime, endTime)
 
         return delay(delay)
     }
