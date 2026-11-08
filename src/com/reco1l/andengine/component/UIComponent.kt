@@ -1278,7 +1278,7 @@ abstract class UIComponent : Entity(0f, 0f),
         try {
             beginModifierSequence(block)
         } finally {
-            restoreAbsoluteSequenceTime(prevModifierStartTime, propagateChildren)
+            restoreAbsoluteSequenceTime(prevModifierStartTime, newModifierStartTime, propagateChildren)
         }
     }
 
@@ -1319,22 +1319,36 @@ abstract class UIComponent : Entity(0f, 0f),
      * Restores [modifierStartTime] to its previous absolute time value. **This is used internally for
      * [beginAbsoluteSequence] but is made public for inlining, and should not be used externally**.
      *
-     * @param prevModifierStartTime The previous [modifierStartTime].
+     * @param prevModifierStartTime The previous [modifierStartTime], before [adjustAbsoluteSequenceTime] was called.
+     * @param newModifierStartTime The [modifierStartTime] that was set by [adjustAbsoluteSequenceTime].
      * @param propagateChildren Whether to propagate [prevModifierStartTime]. Defaults to `true`.
+     * @throws IllegalStateException If [modifierStartTime] was not [newModifierStartTime] at the end of the absolute
+     * sequence (i.e., a delay applied inside the sequence was not undone). [modifierStartTime] is still restored.
      */
-    fun restoreAbsoluteSequenceTime(prevModifierStartTime: Float, propagateChildren: Boolean = true) {
-        modifierDelay += prevModifierStartTime - modifierStartTime
+    fun restoreAbsoluteSequenceTime(
+        prevModifierStartTime: Float,
+        newModifierStartTime: Float,
+        propagateChildren: Boolean = true
+    ) {
+        // This must be checked before restoring, as restoring always yields prevModifierStartTime.
+        val endModifierStartTime = modifierStartTime
 
-        if (!Precision.almostEquals(prevModifierStartTime, modifierStartTime)) {
+        resetAbsoluteSequenceTime(prevModifierStartTime, propagateChildren)
+
+        if (!Precision.almostEquals(newModifierStartTime, endModifierStartTime)) {
             throw IllegalStateException(
                 "${this::class.simpleName}'s modifierStartTime at the end of absolute sequence is " +
-                        "not the same as at the beginning (begin=$prevModifierStartTime end=$modifierStartTime)"
+                        "not the same as at the beginning (begin=$newModifierStartTime end=$endModifierStartTime)"
             )
         }
+    }
+
+    private fun resetAbsoluteSequenceTime(prevModifierStartTime: Float, propagateChildren: Boolean) {
+        modifierDelay += prevModifierStartTime - modifierStartTime
 
         if (propagateChildren) {
             mChildren?.forEach { child ->
-                (child as? UIComponent)?.restoreAbsoluteSequenceTime(prevModifierStartTime)
+                (child as? UIComponent)?.resetAbsoluteSequenceTime(prevModifierStartTime, true)
             }
         }
     }
