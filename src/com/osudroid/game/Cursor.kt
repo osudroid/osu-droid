@@ -1,6 +1,7 @@
 package com.osudroid.game
 
 import android.os.SystemClock
+import java.util.BitSet
 
 import org.anddev.andengine.input.touch.TouchEvent
 
@@ -34,6 +35,13 @@ class Cursor {
     var latestProcessedDownEventIndex = 0
 
     /**
+     * The indices of [downEvents] that were claimed by a gameplay object.
+     *
+     * Without a claim, every object locked behind the claiming object would also react to the same press.
+     */
+    private val claimedDownEvents = BitSet()
+
+    /**
      * [CursorEvent]s of this [Cursor] that have not been processed yet.
      */
     @JvmField
@@ -50,6 +58,21 @@ class Cursor {
      */
     var latestEvent: CursorEvent? = null
         private set
+
+    /**
+     * Whether the [CursorEvent] at the given index of [downEvents] was claimed by a gameplay object.
+     *
+     * @param index The index of the [CursorEvent] in [downEvents].
+     */
+    fun isDownEventClaimed(index: Int) = claimedDownEvents[index]
+
+    /**
+     * Claims the [CursorEvent] at the given index of [downEvents] for a gameplay object, so that other gameplay
+     * objects do not react to it.
+     *
+     * @param index The index of the [CursorEvent] in [downEvents].
+     */
+    fun claimDownEvent(index: Int) = claimedDownEvents.set(index)
 
     /**
      * Adds a [CursorEvent] to this [Cursor].
@@ -161,6 +184,7 @@ class Cursor {
         }
 
         downEvents.clear()
+        claimedDownEvents.clear()
         events.clear()
         latestProcessedDownEventIndex = 0
         latestProcessedEventIndex = 0

@@ -12,6 +12,8 @@ import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.game.PressResult;
+import com.osudroid.game.ShakeKt;
 import com.osudroid.mods.ModHidden;
 
 import java.util.ArrayList;
@@ -180,6 +182,8 @@ public class GameplayHitCircle extends GameObject {
         hitSamples.clear();
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
+        circlePiece.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
         approachCircle.detachSelf();
 
         if (successfulHit || !circlePiece.isVisible() || circlePiece.getAlpha() == 0) {
@@ -193,6 +197,13 @@ public class GameplayHitCircle extends GameObject {
 
     private void playHitSamples() {
         listener.playHitSamples(hitSamples);
+    }
+
+    private void startShake() {
+        float magnitude = getShakeMagnitude(beatmapCircle);
+
+        ShakeKt.shake(circlePiece, magnitude);
+        ShakeKt.shake(approachCircle, magnitude);
     }
 
     @Override
@@ -225,11 +236,11 @@ public class GameplayHitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (!autoPlay && listener.isObjectHittable(this)) {
-            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime);
+        } else if (!autoPlay) {
+            var press = checkPresses(listener, beatmapCircle, passedTime);
 
-            if (hittingCursor != null) {
-                hitOffset = (float) (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
+            if (press instanceof PressResult.Hit hit) {
+                hitOffset = (float) (hit.getEvent().getHitTime() - beatmapCircle.startTime) / 1000;
                 listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
@@ -240,6 +251,8 @@ public class GameplayHitCircle extends GameObject {
                 }
                 removeFromScene();
                 return;
+            } else if (press == PressResult.Shake.INSTANCE) {
+                startShake();
             }
         }
 
@@ -293,6 +306,10 @@ public class GameplayHitCircle extends GameObject {
     public void onExpire() {
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
+
+        // Clearing modifiers may interrupt a shake. Reset its translation so it does not leak into the next use.
+        circlePiece.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
 
         circlePiece.detachSelf();
         approachCircle.detachSelf();

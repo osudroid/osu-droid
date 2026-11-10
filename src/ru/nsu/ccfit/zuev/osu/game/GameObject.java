@@ -2,12 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.edlplan.framework.math.FMath;
 import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.hitobjects.HitObject;
+import com.osudroid.game.Cursor;
 import com.osudroid.game.CursorEvent;
+import com.osudroid.game.PressResult;
 import com.osudroid.mods.ModRelax;
 import com.rian.andengine.modifier.UniversalModifier;
 import com.rian.andengine.modifier.UniversalModifierSequence;
@@ -64,16 +66,31 @@ public abstract class GameObject {
     public void stopLoopingSamples() {}
 
     /**
-     * Obtains the {@link CursorEvent} that hits this {@link GameObject}, if any.
+     * The {@link PressResult.Hit} returned by {@link #checkPresses}, reused to avoid allocations.
+     */
+    private final PressResult.Hit hitResult = new PressResult.Hit();
+
+    /**
+     * Checks the presses of the current frame against this {@link GameObject}.
+     * <p>
+     * While this {@link GameObject} is hittable (see {@link GameObjectListener#isObjectHittable}), unprocessed presses
+     * are consumed, even those that do not hit, which enforces the start time ordered hit policy (aka "notelock").
+     * Otherwise, nothing is consumed, and only presses that landed on this {@link GameObject} are considered.
+     * <p>
+     * A press that hits this {@link GameObject} or makes it shake is claimed (see {@link Cursor#claimDownEvent}), so
+     * that the overlapping {@link GameObject}s locked behind this one, which are updated later, do not shake for it.
      *
      * @param listener The {@link GameObjectListener} to get cursors from.
      * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
      * @param objectElapsedTime The elapsed time since the start of this {@link GameObject}, in seconds.
-     * @return The {@link CursorEvent} that hits this {@link GameObject}, or {@code null} if none.
+     * @return The {@link PressResult}. A {@link PressResult.Hit} is only valid until the next call.
      */
-    @Nullable
-    protected final CursorEvent getHittingCursor(GameObjectListener listener, HitObject hitObject,
-                                                 double objectElapsedTime) {
+    @NonNull
+    protected final PressResult checkPresses(GameObjectListener listener, HitObject hitObject, double objectElapsedTime) {
+        if (!listener.isObjectHittable(this)) {
+            return checkNotelockedPresses(listener, hitObject);
+        }
+
         int cursorCount = listener.getCursorsCount();
 
         // For Autopilot, we only need to check if a cursor is pressed.
@@ -87,12 +104,12 @@ public abstract class GameObject {
                     var event = events.get(cursor.latestProcessedDownEventIndex++);
 
                     if (canHit(event, hitObject.hitWindow)) {
-                        return event;
+                        return hitResult.withEvent(event);
                     }
                 }
             }
 
-            return null;
+            return PressResult.Ignore.INSTANCE;
         }
 
         // For Relax, we need to check two cases:
@@ -116,12 +133,12 @@ public abstract class GameObject {
 
                         // Case 1
                         if (event.isActionDown() && isHit && canHit(event, hitObject.hitWindow)) {
-                            return event;
+                            return hitResult.withEvent(event);
                         }
 
                         // Case 2
                         if (objectElapsedTime >= -ModRelax.RELAX_LENIENCY / 1000 && isHit) {
-                            return event;
+                            return hitResult.withEvent(event);
                         }
                     }
                 } else {
@@ -131,16 +148,18 @@ public abstract class GameObject {
                     // Only consider case 2 in this scenario, as the event should logically be marked as a move event
                     // even if it's a down event (no new events mean the user keeps pressing on the same spot).
                     if (event != null && !event.isActionUp() && objectElapsedTime >= -ModRelax.RELAX_LENIENCY / 1000 && isHit(hitObject, event)) {
-                        return event;
+                        return hitResult.withEvent(event);
                     }
                 }
             }
 
-            return null;
+            return PressResult.Ignore.INSTANCE;
         }
 
         // In regular gameplay, we need to iteratively check whether one or more cursors is on the object while a cursor
         // is being pressed.
+        boolean pressedEarly = false;
+
         for (int i = 0; i < cursorCount; i++) {
             var cursor = listener.getCursor(i);
             var downEvents = cursor.downEvents;
@@ -149,37 +168,27 @@ public abstract class GameObject {
             // Consume down events that have not been processed yet, even those that are already past the hit threshold.
             // This ensures that start time ordered hit policy (aka "notelock") is enforced correctly.
             while (cursor.latestProcessedDownEventIndex < downEventsSize) {
-                var downEvent = downEvents.get(cursor.latestProcessedDownEventIndex++);
+                int index = cursor.latestProcessedDownEventIndex++;
+                var downEvent = downEvents.get(index);
 
                 if (!canHit(downEvent, hitObject.hitWindow)) {
+                    // The press is too early to hit this object, but it still shakes the object if it landed on it.
+                    if (!cursor.isDownEventClaimed(index) && isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                        cursor.claimDownEvent(index);
+                        pressedEarly = true;
+                    }
+
                     continue;
                 }
 
-                for (int j = 0; j < cursorCount; j++) {
-                    if (i == j) {
-                        // For the cursor that generated the down event, check if the event position is on the object.
-                        if (isHit(hitObject, downEvent)) {
-                            return downEvent;
-                        }
-                    } else {
-                        // For the other case, we need to check the event closest to the down event and check if it is
-                        // on the object.
-                        var otherCursor = listener.getCursor(j);
-                        var closestEvent = otherCursor.getClosestEventBefore(downEvent.systemTime);
-
-                        if (closestEvent == null || closestEvent.isActionUp()) {
-                            continue;
-                        }
-
-                        if (isHit(hitObject, closestEvent)) {
-                            return downEvent;
-                        }
-                    }
+                if (isPressOnObject(listener, hitObject, i, downEvent, cursorCount)) {
+                    cursor.claimDownEvent(index);
+                    return hitResult.withEvent(downEvent);
                 }
             }
         }
 
-        return null;
+        return pressedEarly ? PressResult.Shake.INSTANCE : PressResult.Ignore.INSTANCE;
     }
 
     /**
@@ -216,6 +225,87 @@ public abstract class GameObject {
 
         return Utils.squaredDistance(position, cursorEvent.position) <= Utils.sqr((float) hitObject.getScreenSpaceGameplayRadius());
     }
+
+    //region Notelock shake
+
+    /**
+     * Checks whether a press of the current frame landed on this {@link GameObject} while it is locked behind an
+     * earlier {@link GameObject}, regardless of whether the press is inside its hit window.
+     * <p>
+     * This does not consume presses ({@link Cursor#latestProcessedDownEventIndex} is left untouched), but it still
+     * claims the presses that landed on this {@link GameObject}.
+     */
+    @NonNull
+    private PressResult checkNotelockedPresses(GameObjectListener listener, HitObject hitObject) {
+        if (autoPlay || GameHelper.isAutopilot() || GameHelper.isRelax() || hitObject.hitWindow == null) {
+            return PressResult.Ignore.INSTANCE;
+        }
+
+        int cursorCount = listener.getCursorsCount();
+        boolean pressed = false;
+
+        for (int i = 0; i < cursorCount; i++) {
+            // Cursor.downEvents is cleared every frame (Cursor.reset), so the whole list is new for this frame.
+            var cursor = listener.getCursor(i);
+            var downEvents = cursor.downEvents;
+
+            for (int index = 0, size = downEvents.size(); index < size; index++) {
+                if (!cursor.isDownEventClaimed(index) &&
+                    isPressOnObject(listener, hitObject, i, downEvents.get(index), cursorCount)) {
+                    cursor.claimDownEvent(index);
+                    pressed = true;
+                }
+            }
+        }
+
+        return pressed ? PressResult.Shake.INSTANCE : PressResult.Ignore.INSTANCE;
+    }
+
+    /**
+     * Determines whether a down {@link CursorEvent} landed on this {@link GameObject}, either by the {@link Cursor} that
+     * generated it or by any other {@link Cursor} that was held down at the time of the press.
+     *
+     * @param listener The {@link GameObjectListener} to get {@link Cursor}s from.
+     * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
+     * @param cursorIndex The index of the {@link Cursor} that generated {@code downEvent}.
+     * @param downEvent The down {@link CursorEvent}.
+     * @param cursorCount The number of {@link Cursor}s.
+     * @return {@code true} if {@code downEvent} landed on this {@link GameObject}, {@code false} otherwise.
+     */
+    private boolean isPressOnObject(GameObjectListener listener, HitObject hitObject, int cursorIndex,
+                                    CursorEvent downEvent, int cursorCount) {
+        for (int j = 0; j < cursorCount; j++) {
+            if (cursorIndex == j) {
+                if (isHit(hitObject, downEvent)) {
+                    return true;
+                }
+            } else {
+                var closestEvent = listener.getCursor(j).getClosestEventBefore(downEvent.systemTime);
+
+                if (closestEvent != null && !closestEvent.isActionUp() && isHit(hitObject, closestEvent)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Shake circle by 8 units inside the circle's local space, in which the circle is 128 units wide.
+     */
+    private static final float SHAKE_MAGNITUDE_RATIO = 8f / 128f;
+
+    /**
+     * Obtains the shake magnitude for a {@link HitObject}, in screen pixels.
+     *
+     * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
+     */
+    protected static float getShakeMagnitude(HitObject hitObject) {
+        return (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * SHAKE_MAGNITUDE_RATIO;
+    }
+
+    //endregion
 
     //region Lifetime management
 
