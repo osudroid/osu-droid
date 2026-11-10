@@ -1875,13 +1875,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             expiredObjects.clear();
         }
 
-        updatePassiveObjects(dt);
-        updateActiveObjects(dt);
-
-        if (judgeableObject != null && (GameHelper.isAutoplay() || GameHelper.isAutopilot())) {
-            autoCursor.moveToObject(judgeableObject, gameplayClock.getCurrentTime(), this);
-        }
-
         if (videoEnabled && video != null && gameplayClock.getCurrentTime() >= videoOffset)
         {
             if (!videoStarted) {
@@ -1936,8 +1929,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             final Color4 comboColor = getComboColor(obj);
 
-            GameObject gameObject = null;
-
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
@@ -1953,8 +1944,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (replaying) {
                     gameplayCircle.setReplayData(replay.objectData[gameplayCircle.getId()]);
                 }
-
-                gameObject = gameplayCircle;
             } else if (obj instanceof Spinner parsedSpinner) {
                 final float rps = 2 + 2 * playableBeatmap.getDifficulty().od / 10f;
                 final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
@@ -1970,8 +1959,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (replaying) {
                     gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
-
-                gameObject = gameplaySpinner;
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
@@ -1991,17 +1978,18 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     if (gameplaySlider.getReplayData().tickSet == null)
                         gameplaySlider.getReplayData().tickSet = new BitSet();
                 }
-
-                gameObject = gameplaySlider;
-            }
-
-            if (gameObject != null) {
-                gameObject.update(lifetimeDt);
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
                 FollowPointConnection.addConnection(bgScene, obj, nextObj);
             }
+        }
+
+        updatePassiveObjects(dt);
+        updateActiveObjects(dt);
+
+        if (judgeableObject != null && (GameHelper.isAutoplay() || GameHelper.isAutopilot())) {
+            autoCursor.moveToObject(judgeableObject, gameplayClock.getCurrentTime(), this);
         }
 
         if (GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0) {
@@ -3909,9 +3897,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         // Suppress hitsounds for slider objects (head, ticks, repeats) that have already passed the seek target.
-        // Objects are spawned in the same frame as seekTo runs, but updated in the next frame,
-        // so the flag must survive 2 update frames.
-        postSeekFrameCount = 2;
+        // seekTo runs on the update thread before the scene update, so objects are spawned and updated in the same
+        // frame, and the flag only needs to survive that update frame.
+        postSeekFrameCount = 1;
     }
 
     private void reconstructStatAtTime(float targetMs) {

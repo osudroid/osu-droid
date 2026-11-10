@@ -39,6 +39,14 @@ public abstract class GameObject {
         autoPlay = true;
     }
 
+    /**
+     * Updates this {@link GameObject}. Called once per frame for every active {@link GameObject}, including the frame
+     * it spawns in.
+     * <p>
+     * All timing should be derived from the gameplay clock ({@link GameObjectListener#getElapsedTime}).
+     *
+     * @param dt The time elapsed since the previous frame, in seconds.
+     */
     public abstract void update(float dt);
 
     public float getHitTime() {
