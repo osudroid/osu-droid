@@ -297,11 +297,6 @@ public abstract class GameObject {
     private static final float SHAKE_MAGNITUDE_RATIO = 8f / 128f;
 
     /**
-     * Called when this object should shake, either because it is notelocked or because it was pressed too early.
-     */
-    protected void startShake() {}
-
-    /**
      * Obtains the shake magnitude for a {@link HitObject}, in screen pixels.
      *
      * @param hitObject The {@link HitObject} associated with this {@link GameObject}.

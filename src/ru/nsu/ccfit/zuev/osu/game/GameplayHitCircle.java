@@ -199,8 +199,7 @@ public class GameplayHitCircle extends GameObject {
         listener.playHitSamples(hitSamples);
     }
 
-    @Override
-    protected void startShake() {
+    private void startShake() {
         float magnitude = getShakeMagnitude(beatmapCircle);
 
         ShakeKt.shake(circlePiece, magnitude);

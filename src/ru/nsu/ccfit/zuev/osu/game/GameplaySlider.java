@@ -870,11 +870,7 @@ public class GameplaySlider extends GameObject {
         isInRadius = isTracking;
     }
 
-    /**
-     * Shakes the entire slider during notelock.
-     */
-    @Override
-    protected void startShake() {
+    private void startShake() {
         float magnitude = getShakeMagnitude(beatmapSlider);
 
         ShakeKt.shake(approachCircle, magnitude);
