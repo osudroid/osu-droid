@@ -192,16 +192,6 @@ public class GameplaySlider extends GameObject {
         this.scene = scene;
         this.stat = stat;
         this.beatmapSlider = beatmapSlider;
-        resetNotelockState();
-
-        // Entities are pooled, so make sure a shake interrupted by expiration does not leave them shifted.
-        headCirclePiece.setTranslationX(0f);
-        tailCirclePiece.setTranslationX(0f);
-        startArrow.setTranslationX(0f);
-        endArrow.setTranslationX(0f);
-        approachCircle.setTranslationX(0f);
-        sliderBody.setTranslationX(0f);
-        tickContainer.setTranslationX(0f);
         this.controlPoints = controlPoints;
 
         var stackedPosition = beatmapSlider.getScreenSpaceGameplayStackedPosition();
@@ -602,6 +592,15 @@ public class GameplaySlider extends GameObject {
         ball.clearEntityModifiers();
         sliderBody.clearEntityModifiers();
         tickContainer.clearEntityModifiers();
+
+        // Clearing modifiers may interrupt a shake. Reset its translation so it does not leak into the next use.
+        headCirclePiece.setTranslationX(0f);
+        tailCirclePiece.setTranslationX(0f);
+        startArrow.setTranslationX(0f);
+        endArrow.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
+        sliderBody.setTranslationX(0f);
+        tickContainer.setTranslationX(0f);
 
         headCirclePiece.detachSelf();
         tailCirclePiece.detachSelf();

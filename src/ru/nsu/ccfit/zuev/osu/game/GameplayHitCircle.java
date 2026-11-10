@@ -53,11 +53,6 @@ public class GameplayHitCircle extends GameObject {
         // Storing parameters into fields
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
-        resetNotelockState();
-
-        // Entities are pooled, so make sure a shake interrupted by expiration does not leave them shifted.
-        circlePiece.setTranslationX(0f);
-        approachCircle.setTranslationX(0f);
 
         var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -315,6 +310,10 @@ public class GameplayHitCircle extends GameObject {
     public void onExpire() {
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
+
+        // Clearing modifiers may interrupt a shake. Reset its translation so it does not leak into the next use.
+        circlePiece.setTranslationX(0f);
+        approachCircle.setTranslationX(0f);
 
         circlePiece.detachSelf();
         approachCircle.detachSelf();
