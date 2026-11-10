@@ -301,7 +301,7 @@ public abstract class GameObject {
      *
      * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
      */
-    protected final float getShakeMagnitude(HitObject hitObject) {
+    protected static float getShakeMagnitude(HitObject hitObject) {
         return (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * SHAKE_MAGNITUDE_RATIO;
     }
 
