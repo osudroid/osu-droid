@@ -4,7 +4,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameObject
 import org.anddev.andengine.input.touch.TouchEvent
 
 /**
- * The outcome of checking a [GameObject]s against pressing [CursorEvent]s (those with [TouchEvent.ACTION_DOWN]) of the current frame.
+ * The outcome of checking [GameObject]s against pressing [CursorEvent]s (those with [TouchEvent.ACTION_DOWN]) of the current frame.
  */
 sealed interface PressResult {
     /**
