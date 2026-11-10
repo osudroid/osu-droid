@@ -92,8 +92,20 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Invoked when this [UniversalModifier] has finished and is about to be removed from a
      * [UniversalModifierTargetTracker].
+     *
+     * Every [UniversalModifier] that is added to a [UniversalModifierTargetTracker] invokes exactly one of [onFinished]
+     * and [onAborted].
      */
     var onFinished: OnModifierFinished? = null
+
+    /**
+     * Invoked when this [UniversalModifier] is removed from a [UniversalModifierTargetTracker] before it completes,
+     * e.g. because it was aborted by another [UniversalModifier] of the same [ModifierType] or cleared.
+     *
+     * Every [UniversalModifier] that is added to a [UniversalModifierTargetTracker] invokes exactly one of [onFinished]
+     * and [onAborted].
+     */
+    var onAborted: OnModifierAborted? = null
 
     /**
      * The [Easing] function applied to this [UniversalModifier].
@@ -106,6 +118,18 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun after(onFinished: OnModifierFinished?): UniversalModifier {
         this.onFinished = onFinished
+
+        return this
+    }
+
+    /**
+     * Sets the callback to be invoked when this [UniversalModifier] is removed from a [UniversalModifierTargetTracker]
+     * before it completes.
+     *
+     * @see onAborted
+     */
+    fun aborted(onAborted: OnModifierAborted?): UniversalModifier {
+        this.onAborted = onAborted
 
         return this
     }
@@ -136,9 +160,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         val isEnding = time >= endTime
 
+        // Only the progress is clamped. The eased value is intentionally left unclamped so that easings that overshoot
+        // (e.g. OutBack, OutElastic) can go past the final value while the modifier is still active.
         val percentage =
             if (isEnding || duration <= 0f) 1f
-            else easing.interpolate((time - startTime) / duration).coerceIn(0f, 1f)
+            else easing.interpolate(((time - startTime) / duration).coerceIn(0f, 1f))
 
         type.setValues(target, initialValues, finalValues, percentage)
 
@@ -158,6 +184,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         applied = false
         appliedToEnd = false
         onFinished = null
+        onAborted = null
 
         pool?.release(this)
     }

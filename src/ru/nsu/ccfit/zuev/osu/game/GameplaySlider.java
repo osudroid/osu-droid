@@ -356,6 +356,7 @@ public class GameplaySlider extends GameObject {
                     sequence -> sliderHeadLateMissFadeModifier = sequence
                             .fadeOut(mehWindow - okWindow)
                             .after(e -> sliderHeadLateMissFadeModifier = null)
+                            .aborted(e -> sliderHeadLateMissFadeModifier = null)
                             .getLastActiveModifier());
 
             tailCirclePiece.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
@@ -612,8 +613,6 @@ public class GameplaySlider extends GameObject {
         ball.detachSelf();
         sliderBody.detachSelf();
         tickContainer.detachSelf();
-
-        sliderHeadLateMissFadeModifier = null;
 
         // removeFromScene() stops looping sounds and releases hit samples, but during a seek, onExpire() fires without
         // removeFromScene(). This causes looping sounds to continuously play after a seek, and nested hit samples
@@ -1213,7 +1212,6 @@ public class GameplaySlider extends GameObject {
         if (beatmapSlider.getSpanCount() - completedSpanCount > 1) {
             if (sliderHeadLateMissFadeModifier != null) {
                 headCirclePiece.removeModifier(sliderHeadLateMissFadeModifier);
-                sliderHeadLateMissFadeModifier = null;
             }
 
             // Change the head circle to the end circle piece.

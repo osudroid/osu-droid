@@ -1062,7 +1062,7 @@ abstract class UIComponent : Entity(0f, 0f),
         for (i in universalModifierTrackers.indices) {
             val tracker = universalModifierTrackers[i]
 
-            if (tracker.targetMember == type.targetMember) {
+            if (tracker.targetGrouping == type.targetGrouping) {
                 return tracker
             }
         }
@@ -1071,7 +1071,7 @@ abstract class UIComponent : Entity(0f, 0f),
             return null
         }
 
-        val tracker = UniversalModifierTargetTracker(type.targetMember, this)
+        val tracker = UniversalModifierTargetTracker(type.targetGrouping, this)
         universalModifierTrackers += tracker
 
         return tracker
@@ -1111,10 +1111,12 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clear(type) }
+        // Clearing invokes onAborted callbacks, which may add trackers (by adding a modifier of a new grouping) or
+        // detach children, so the tolerant variants are used here and in the other clear functions.
+        universalModifierTrackers.forEachTolerant { it.clear(type) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(type, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiers(type, true) }
         }
     }
 
@@ -1126,10 +1128,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiers(propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.forEach { it.clear(*types) }
+        universalModifierTrackers.forEachTolerant { it.clear(*types) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiers(true, *types) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiers(true, *types) }
         }
     }
 
@@ -1141,10 +1143,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clearAfter(time) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, true) }
         }
     }
 
@@ -1157,10 +1159,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, type: ModifierType, propagateChildren: Boolean = false) {
-        universalModifierTrackers.forEach { it.clearAfter(time, type) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time, type) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, type, true) }
         }
     }
 
@@ -1173,10 +1175,10 @@ abstract class UIComponent : Entity(0f, 0f),
      */
     @JvmOverloads
     fun clearModifiersAfter(time: Float, propagateChildren: Boolean = false, vararg types: ModifierType) {
-        universalModifierTrackers.forEach { it.clearAfter(time, *types) }
+        universalModifierTrackers.forEachTolerant { it.clearAfter(time, *types) }
 
         if (propagateChildren) {
-            mChildren?.forEach { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
+            mChildren?.forEachTolerant { (it as? UIComponent)?.clearModifiersAfter(time, true, *types) }
         }
     }
 
@@ -1190,7 +1192,7 @@ abstract class UIComponent : Entity(0f, 0f),
     @JvmOverloads
     fun finishModifiers(propagateChildren: Boolean = false, type: ModifierType? = null) {
         if (type != null) {
-            getTrackerFor(type)?.finish()
+            getTrackerFor(type)?.finish(type)
         } else {
             // a modifier's `onFinished` callback may append a new modifier of another type (e.g. chaining),
             // which would mutate this same list, preventing the use of the regular `forEach`.
@@ -1278,7 +1280,7 @@ abstract class UIComponent : Entity(0f, 0f),
         try {
             beginModifierSequence(block)
         } finally {
-            restoreAbsoluteSequenceTime(prevModifierStartTime, propagateChildren)
+            restoreAbsoluteSequenceTime(prevModifierStartTime, newModifierStartTime, propagateChildren)
         }
     }
 
@@ -1319,22 +1321,36 @@ abstract class UIComponent : Entity(0f, 0f),
      * Restores [modifierStartTime] to its previous absolute time value. **This is used internally for
      * [beginAbsoluteSequence] but is made public for inlining, and should not be used externally**.
      *
-     * @param prevModifierStartTime The previous [modifierStartTime].
+     * @param prevModifierStartTime The previous [modifierStartTime], before [adjustAbsoluteSequenceTime] was called.
+     * @param newModifierStartTime The [modifierStartTime] that was set by [adjustAbsoluteSequenceTime].
      * @param propagateChildren Whether to propagate [prevModifierStartTime]. Defaults to `true`.
+     * @throws IllegalStateException If [modifierStartTime] was not [newModifierStartTime] at the end of the absolute
+     * sequence (i.e., a delay applied inside the sequence was not undone). [modifierStartTime] is still restored.
      */
-    fun restoreAbsoluteSequenceTime(prevModifierStartTime: Float, propagateChildren: Boolean = true) {
-        modifierDelay += prevModifierStartTime - modifierStartTime
+    fun restoreAbsoluteSequenceTime(
+        prevModifierStartTime: Float,
+        newModifierStartTime: Float,
+        propagateChildren: Boolean = true
+    ) {
+        // This must be checked before restoring, as restoring always yields prevModifierStartTime.
+        val endModifierStartTime = modifierStartTime
 
-        if (!Precision.almostEquals(prevModifierStartTime, modifierStartTime)) {
+        resetAbsoluteSequenceTime(prevModifierStartTime, propagateChildren)
+
+        if (!Precision.almostEquals(newModifierStartTime, endModifierStartTime)) {
             throw IllegalStateException(
                 "${this::class.simpleName}'s modifierStartTime at the end of absolute sequence is " +
-                        "not the same as at the beginning (begin=$prevModifierStartTime end=$modifierStartTime)"
+                        "not the same as at the beginning (begin=$newModifierStartTime end=$endModifierStartTime)"
             )
         }
+    }
+
+    private fun resetAbsoluteSequenceTime(prevModifierStartTime: Float, propagateChildren: Boolean) {
+        modifierDelay += prevModifierStartTime - modifierStartTime
 
         if (propagateChildren) {
             mChildren?.forEach { child ->
-                (child as? UIComponent)?.restoreAbsoluteSequenceTime(prevModifierStartTime)
+                (child as? UIComponent)?.resetAbsoluteSequenceTime(prevModifierStartTime, true)
             }
         }
     }

@@ -26,13 +26,14 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     private void changeArea(float fromScale, float toScale) {
-        if (modifier != null && modifier.getTarget() == this && !modifier.isAppliedToEnd()) {
+        if (modifier != null) {
             removeModifier(modifier);
-            modifier = null;
         }
 
         setScale(fromScale * sizeMultiplier);
-        modifier = scaleTo(toScale * sizeMultiplier, AREA_CHANGE_FADE_DURATION).after(e -> modifier = null);
+        modifier = scaleTo(toScale * sizeMultiplier, AREA_CHANGE_FADE_DURATION)
+                .after(e -> modifier = null)
+                .aborted(e -> modifier = null);
     }
 
     public void onUpdate(int combo) {
