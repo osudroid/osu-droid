@@ -1357,12 +1357,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         String playname = Config.getOnlineUsername();
 
         if (GameHelper.isAutoplay() || replaying) {
-            var metadata = playableBeatmap.getMetadata();
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (!Config.isHideReplayMarquee()) {
                 var replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-                replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
+                replayText.setText("Watching " + playname + " play " + lastBeatmapInfo.getArtistText() + " - " + lastBeatmapInfo.getTitleText() + " [" + lastBeatmapInfo.getVersion() + "]");
                 replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
                 replayText.setPosition(0, 140);
                 replayText.setAlpha(0.7f);
