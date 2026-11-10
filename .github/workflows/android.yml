@@ -11,38 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  assemble-debug:
-    name: Assemble Debug APK
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-
-    - name: Setup JDK 17 and Gradle
-      uses: ./.github/actions/setup-java-gradle
-
-    - name: Assemble debug APK
-      run: ./gradlew assembleDebug
-
-  assemble-pre-release:
-    name: Assemble Pre-Release APK
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-
-    - name: Setup JDK 17 and Gradle
-      uses: ./.github/actions/setup-java-gradle
-
-    - name: Assemble pre-release APK
-      run: ./gradlew assemblePre_release
-
   assemble-release:
     name: Assemble Release APK
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17 and Gradle
       uses: ./.github/actions/setup-java-gradle
@@ -55,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17 and Gradle
       uses: ./.github/actions/setup-java-gradle

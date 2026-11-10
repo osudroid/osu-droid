@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import android.graphics.Color;
-import com.rian.andengine.modifier.UniversalModifier;
 
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 
@@ -13,7 +12,6 @@ public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
     // The dim layer covers this many flashlight textures in each direction around the cursor.
     private static final float AREA_SCALE = 8f;
     private boolean isTrackingSliders;
-    private UniversalModifier modifier;
 
     public FlashLightDimLayerSprite() {
         super(BitmapTextureAtlasTextureRegionFactory.createSolidColor(GlobalManager.getInstance().getEngine().getTextureManager(), Color.BLACK));
@@ -29,12 +27,7 @@ public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
 
         this.isTrackingSliders = isTrackingSliders;
 
-        if (modifier != null) {
-            removeModifier(modifier);
-            modifier = null;
-        }
-
         clearEntityModifiers();
-        modifier = fadeTo(isTrackingSliders ? BASE_SLIDER_DIM_ALPHA : 0, 0.05f).after(e -> modifier = null);
+        fadeTo(isTrackingSliders ? BASE_SLIDER_DIM_ALPHA : 0, 0.05f);
     }
 }
