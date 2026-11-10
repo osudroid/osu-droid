@@ -7,6 +7,7 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.osudroid.game.CursorEvent;
+import com.osudroid.game.PressResult;
 import com.osudroid.game.ShakeKt;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIScene;
@@ -900,17 +901,11 @@ public class GameplaySlider extends GameObject {
             if (replayObjectData == null) {
                 if (!autoPlay) {
                     if (elapsedTime <= getLateHitThreshold()) {
-                        if (listener.isObjectHittable(this)) {
-                            var hittingCursor = getHittingCursor(listener, beatmapSlider.getHead(), elapsedTime);
+                        var press = checkPresses(listener, beatmapSlider.getHead(), elapsedTime);
 
-                            if (hittingCursor != null) {
-                                onSliderHeadHit((hittingCursor.getHitTime() - beatmapSlider.startTime) / 1000);
-                            } else if (consumeEarlyPress()) {
-                                // Pressed on the slider head before it can be hit: shake the whole slider.
-                                startShake();
-                            }
-                        } else if (pollNotelockedPress(listener, beatmapSlider.getHead())) {
-                            // Pressed slider while it's notelocked
+                        if (press instanceof PressResult.Hit hit) {
+                            onSliderHeadHit((hit.getEvent().getHitTime() - beatmapSlider.startTime) / 1000);
+                        } else if (press == PressResult.Shake.INSTANCE) {
                             startShake();
                         }
                     } else {

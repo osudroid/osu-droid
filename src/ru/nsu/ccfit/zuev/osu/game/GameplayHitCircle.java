@@ -12,6 +12,7 @@ import com.osudroid.beatmaps.HitWindow;
 import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.beatmaps.hitobjects.HitCircle;
 import com.osudroid.game.GameplayHitSampleInfo;
+import com.osudroid.game.PressResult;
 import com.osudroid.game.ShakeKt;
 import com.osudroid.mods.ModHidden;
 
@@ -236,11 +237,11 @@ public class GameplayHitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (!autoPlay && listener.isObjectHittable(this)) {
-            var hittingCursor = getHittingCursor(listener, beatmapCircle, passedTime);
+        } else if (!autoPlay) {
+            var press = checkPresses(listener, beatmapCircle, passedTime);
 
-            if (hittingCursor != null) {
-                hitOffset = (float) (hittingCursor.getHitTime() - beatmapCircle.startTime) / 1000;
+            if (press instanceof PressResult.Hit hit) {
+                hitOffset = (float) (hit.getEvent().getHitTime() - beatmapCircle.startTime) / 1000;
                 listener.registerAccuracy(HitObjectType.Normal, hitOffset);
                 startHit = true;
                 successfulHit = Math.abs(hitOffset) <= mehWindow;
@@ -251,13 +252,9 @@ public class GameplayHitCircle extends GameObject {
                 }
                 removeFromScene();
                 return;
-            } else if (consumeEarlyPress()) {
-                // Pressed circle before hitwindow allows it
+            } else if (press == PressResult.Shake.INSTANCE) {
                 startShake();
             }
-        } else if (!autoPlay && pollNotelockedPress(listener, beatmapCircle)) {
-            // Pressed circle while it's notelocked
-            startShake();
         }
 
         if (circlePiece.isVisible()) {

@@ -89,7 +89,7 @@ class ReplayAnalysisData(
                 taps += Tap(time, track.xs[k], track.ys[k], true)
 
                 // A pointer going down also hits at the position of every other held pointer. This mirrors
-                // GameObject.getHittingCursor, which checks each other cursor's latest event at or before the
+                // GameObject.checkPresses, which checks each other cursor's latest event at or before the
                 // down event's time and skips it if that event is an UP.
                 for (j in tracks.indices) {
                     if (i == j) {

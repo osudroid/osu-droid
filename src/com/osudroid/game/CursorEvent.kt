@@ -67,13 +67,6 @@ class CursorEvent : IPoolable {
         get() = trackTime + if (Config.isFixFrameOffset()) offset else 0.0
 
     /**
-     * Whether this event was already taken by a gameplay object (it hit the object or made it shake because of
-     * notelock). Reset every time the event is obtained from the pool.
-     */
-    @JvmField
-    var isClaimed = false
-
-    /**
      * The position of the cursor in screen space.
      */
     @JvmField
@@ -141,7 +134,7 @@ class CursorEvent : IPoolable {
          * @return An instance of [CursorEvent].
          */
         @JvmStatic
-        fun obtain() = (pool.acquire() ?: CursorEvent()).also { it.isClaimed = false }
+        fun obtain() = pool.acquire() ?: CursorEvent()
 
         /**
          * Obtains an instance of [CursorEvent] from the pool or creates a new one if the pool is empty.
