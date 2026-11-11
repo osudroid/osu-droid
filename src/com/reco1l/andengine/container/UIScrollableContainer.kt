@@ -518,11 +518,9 @@ open class UIScrollableContainer : UIContainer() {
     }
 
     /**
-     * The time at which this [TouchEvent] was sampled by the input device, in [SystemClock.uptimeMillis] time base.
+     * The time at which this [TouchEvent] was sampled, in [SystemClock.uptimeMillis] time base.
      *
-     * Touch events are queued and processed in batches on the update thread, so the time at which an event is
-     * processed does not reflect when it happened. Falls back to the current time for synthesized events, which
-     * carry no timestamp.
+     * Falls back to [SystemClock.uptimeMillis] for synthesized [TouchEvent]s.
      */
     private val TouchEvent.sampleTimeMillis: Long
         get() = motionEvent?.eventTime?.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
