@@ -1,5 +1,6 @@
 package com.reco1l.andengine.container
 
+import android.os.SystemClock
 import androidx.annotation.*
 import com.osudroid.math.Precision
 import com.reco1l.andengine.*
@@ -229,7 +230,7 @@ open class UIScrollableContainer : UIContainer() {
     private var deltaX = 0f
     private var deltaY = 0f
 
-    private var dragStartTimeMillis = 0L
+    private val velocityTracker = PointerVelocityTracker()
 
 
     /**
@@ -399,7 +400,6 @@ open class UIScrollableContainer : UIContainer() {
 
     private fun handleUserScroll() {
 
-        val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000f
         val length = hypot(deltaX, deltaY)
 
         fun decreaseInBoundary(current: Float, delta: Float, max: Float): Float {
@@ -410,7 +410,6 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
-            velocityX = if (dragTimeSeconds > 0.3f) 0f else deltaX / dragTimeSeconds
             scrollX -= decreaseInBoundary(scrollX, deltaX, maxScrollX)
 
             if (!overflowAxes.isHorizontal) {
@@ -419,7 +418,6 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
-            velocityY = if (dragTimeSeconds > 0.3f) 0f else deltaY / dragTimeSeconds
             scrollY -= decreaseInBoundary(scrollY, deltaY, maxScrollY)
 
             if (!overflowAxes.isVertical) {
@@ -445,7 +443,9 @@ open class UIScrollableContainer : UIContainer() {
 
                 velocityX = 0f
                 velocityY = 0f
-                dragStartTimeMillis = System.currentTimeMillis()
+
+                velocityTracker.clear()
+                velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
             }
 
             ACTION_MOVE -> {
@@ -455,6 +455,8 @@ open class UIScrollableContainer : UIContainer() {
                 val isScrollingHorizontal = scrollAxes.isHorizontal && abs(moveDeltaX) > minimumTravel.x
                 val isScrollingVertical = scrollAxes.isVertical && abs(moveDeltaY) > minimumTravel.y
 
+                velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
+
                 if (isScrolling || isScrollingHorizontal || isScrollingVertical) {
 
                     // If it was already scrolling we don't need to subtract the minimum travel.
@@ -462,18 +464,32 @@ open class UIScrollableContainer : UIContainer() {
                         deltaX = moveDeltaX
                         deltaY = moveDeltaY
                     } else {
-                        deltaX = moveDeltaX - minimumTravel.x
-                        deltaY = moveDeltaY - minimumTravel.y
+                        // Only the axes that crossed the threshold start moving, and only by the distance
+                        // traveled past it (in the direction of travel).
+                        deltaX = if (isScrollingHorizontal) moveDeltaX - sign(moveDeltaX) * minimumTravel.x else 0f
+                        deltaY = if (isScrollingVertical) moveDeltaY - sign(moveDeltaY) * minimumTravel.y else 0f
                     }
                     handleUserScroll()
+                    updateVelocityFromTracker()
 
                     initialX = localX
                     initialY = localY
                     isUserScrolling = true
-                    dragStartTimeMillis = System.currentTimeMillis()
                 } else {
                     isUserScrolling = false
                 }
+            }
+
+            ACTION_UP -> {
+                // Only a drag can leave a non-zero velocity here, since ACTION_DOWN resets it. Recompute it including
+                // the release sample so that a finger which stopped before lifting does not fling with a stale velocity.
+                if (velocityX != 0f || velocityY != 0f) {
+                    velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
+                    updateVelocityFromTracker()
+                }
+
+                velocityTracker.clear()
+                isUserScrolling = false
             }
 
             else -> {
@@ -487,6 +503,29 @@ open class UIScrollableContainer : UIContainer() {
 
         return true
     }
+
+    private fun updateVelocityFromTracker() {
+        // Velocity is measured over a time window rather than between consecutive samples. Consecutive samples can
+        // be very close (or identical) in time, which would turn a tiny movement into a huge velocity. A window also
+        // naturally decays to zero when the pointer stops moving for longer than the window.
+        if (scrollAxes.isHorizontal) {
+            velocityX = velocityTracker.computeVelocityX()
+        }
+
+        if (scrollAxes.isVertical) {
+            velocityY = velocityTracker.computeVelocityY()
+        }
+    }
+
+    /**
+     * The time at which this [TouchEvent] was sampled by the input device, in [SystemClock.uptimeMillis] time base.
+     *
+     * Touch events are queued and processed in batches on the update thread, so the time at which an event is
+     * processed does not reflect when it happened. Falls back to the current time for synthesized events, which
+     * carry no timestamp.
+     */
+    private val TouchEvent.sampleTimeMillis: Long
+        get() = motionEvent?.eventTime?.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
 
     //endregion
 
