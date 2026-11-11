@@ -515,6 +515,80 @@ open class UIScrollableContainer : UIContainer() {
 }
 
 /**
+ * Estimates pointer velocity from the samples within a short trailing time window.
+ */
+private class PointerVelocityTracker {
+
+    private val times = LongArray(CAPACITY)
+    private val xs = FloatArray(CAPACITY)
+    private val ys = FloatArray(CAPACITY)
+
+    private var start = 0
+    private var count = 0
+
+    fun clear() {
+        start = 0
+        count = 0
+    }
+
+    fun addSample(timeMillis: Long, x: Float, y: Float) {
+        // Drop samples that fell out of the window, or all of them if time went backwards.
+        while (count > 0) {
+            val oldestTime = times[start]
+
+            if (timeMillis - oldestTime > HORIZON_MILLIS || timeMillis < oldestTime) {
+                start = (start + 1) % CAPACITY
+                count--
+            } else {
+                break
+            }
+        }
+
+        if (count == CAPACITY) {
+            start = (start + 1) % CAPACITY
+            count--
+        }
+
+        val index = (start + count) % CAPACITY
+
+        times[index] = timeMillis
+        xs[index] = x
+        ys[index] = y
+        count++
+    }
+
+    /**
+     * Computes the velocity on the x-axis in px/s, or 0 if there is not enough data.
+     */
+    fun computeVelocityX() = computeVelocity(xs)
+
+    /**
+     * Computes the velocity on the y-axis in px/s, or 0 if there is not enough data.
+     */
+    fun computeVelocityY() = computeVelocity(ys)
+
+    private fun computeVelocity(values: FloatArray): Float {
+        if (count < 2) {
+            return 0f
+        }
+
+        val newest = (start + count - 1) % CAPACITY
+        val elapsedMillis = times[newest] - times[start]
+
+        if (elapsedMillis <= 0) {
+            return 0f
+        }
+
+        return (values[newest] - values[start]) * 1000f / elapsedMillis
+    }
+
+    companion object {
+        private const val HORIZON_MILLIS = 100L
+        private const val CAPACITY = 64
+    }
+}
+
+/**
  * Sets the [UIScrollableContainer.preventScrolling] property for all scrollable containers
  * in the hierarchy of this entity.
  */
