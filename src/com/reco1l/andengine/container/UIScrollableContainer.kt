@@ -450,8 +450,7 @@ open class UIScrollableContainer : UIContainer() {
 
             if (verticalIndicator.isVisible) {
                 verticalIndicator.x = width - verticalIndicator.width
-                // Map the scroll range onto the free track so the indicator also works with its minimum size.
-                verticalIndicator.y = if (maxScrollY > 0f) (scrollY / maxScrollY).coerceIn(0f, 1f) * (height - verticalIndicator.height) else 0f
+                verticalIndicator.y = indicatorPosition(scrollY, maxScrollY, height, scrollableContentHeight, verticalIndicator.height)
 
                 verticalIndicator.onUpdate(deltaTimeSec)
             }
@@ -467,7 +466,7 @@ open class UIScrollableContainer : UIContainer() {
             }
 
             if (horizontalIndicator.isVisible) {
-                horizontalIndicator.x = if (maxScrollX > 0f) (scrollX / maxScrollX).coerceIn(0f, 1f) * (width - horizontalIndicator.width) else 0f
+                horizontalIndicator.x = indicatorPosition(scrollX, maxScrollX, width, scrollableContentWidth, horizontalIndicator.width)
                 horizontalIndicator.y = height - horizontalIndicator.height
 
                 horizontalIndicator.onUpdate(deltaTimeSec)
@@ -476,6 +475,19 @@ open class UIScrollableContainer : UIContainer() {
     }
 
     //endregion
+
+    /**
+     * Computes the position of an indicator along one axis. The scroll range is mapped onto the free track so the
+     * indicator also works with its minimum size, and overscroll moves the indicator past the track proportionally
+     * so it follows the bounce. Without a minimum size this equals `scroll * (viewport / contentSize)`.
+     */
+    private fun indicatorPosition(scroll: Float, maxScroll: Float, viewport: Float, contentSize: Float, indicatorSize: Float): Float {
+        val clampedScroll = scroll.coerceIn(0f, maxScroll)
+        val trackPosition = if (maxScroll > 0f) clampedScroll / maxScroll * (viewport - indicatorSize) else 0f
+        val overscroll = scroll - clampedScroll
+
+        return trackPosition + if (contentSize > 0f) overscroll * (viewport / contentSize) else 0f
+    }
 
     override fun onContentChanged() {
         super.onContentChanged()
