@@ -1991,7 +1991,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             autoCursor.moveToObject(judgeableObject, gameplayClock.getCurrentTime(), this);
         }
 
-        if (GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0) {
+        if (isPerfectFailConditionMet()) {
             gameover();
 
             if (!Multiplayer.isMultiplayer) {
@@ -2917,6 +2917,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
     }
 
+    private boolean isPerfectFailConditionMet() {
+        return GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0;
+    }
+
     public void gameover() {
 
         if (isGameOver) {
@@ -2940,7 +2944,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stopLoopingSamples();
         SongService songService = GlobalManager.getInstance().getSongService();
 
-        if (GameHelper.isPerfect()) {
+        if (isPerfectFailConditionMet()) {
             if (video != null) {
                 video.pause();
             }
