@@ -1,5 +1,6 @@
 package com.reco1l.andengine.container
 
+import android.os.SystemClock
 import org.andengine.graphics.ClipStack
 import androidx.annotation.*
 import com.osudroid.math.Precision
@@ -231,7 +232,7 @@ open class UIScrollableContainer : UIContainer() {
     private var deltaX = 0f
     private var deltaY = 0f
 
-    private var dragStartTimeMillis = 0L
+    private val velocityTracker = PointerVelocityTracker()
 
 
     /**
@@ -438,7 +439,6 @@ open class UIScrollableContainer : UIContainer() {
 
     private fun handleUserScroll() {
 
-        val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000f
         val length = hypot(deltaX, deltaY)
 
         fun decreaseInBoundary(current: Float, delta: Float, max: Float): Float {
@@ -449,7 +449,6 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
-            velocityX = if (dragTimeSeconds > 0.3f) 0f else deltaX / dragTimeSeconds
             scrollX -= decreaseInBoundary(scrollX, deltaX, maxScrollX)
 
             if (!overflowAxes.isHorizontal) {
@@ -458,7 +457,6 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
-            velocityY = if (dragTimeSeconds > 0.3f) 0f else deltaY / dragTimeSeconds
             scrollY -= decreaseInBoundary(scrollY, deltaY, maxScrollY)
 
             if (!overflowAxes.isVertical) {
@@ -484,7 +482,9 @@ open class UIScrollableContainer : UIContainer() {
 
                 velocityX = 0f
                 velocityY = 0f
-                dragStartTimeMillis = System.currentTimeMillis()
+
+                velocityTracker.clear()
+                velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
             }
 
             ACTION_MOVE -> {
@@ -494,6 +494,8 @@ open class UIScrollableContainer : UIContainer() {
                 val isScrollingHorizontal = scrollAxes.isHorizontal && abs(moveDeltaX) > minimumTravel.x
                 val isScrollingVertical = scrollAxes.isVertical && abs(moveDeltaY) > minimumTravel.y
 
+                velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
+
                 if (isScrolling || isScrollingHorizontal || isScrollingVertical) {
 
                     // If it was already scrolling we don't need to subtract the minimum travel.
@@ -501,18 +503,32 @@ open class UIScrollableContainer : UIContainer() {
                         deltaX = moveDeltaX
                         deltaY = moveDeltaY
                     } else {
-                        deltaX = moveDeltaX - minimumTravel.x
-                        deltaY = moveDeltaY - minimumTravel.y
+                        // Only the axes that crossed the threshold start moving, and only by the distance
+                        // traveled past it (in the direction of travel).
+                        deltaX = if (isScrollingHorizontal) moveDeltaX - sign(moveDeltaX) * minimumTravel.x else 0f
+                        deltaY = if (isScrollingVertical) moveDeltaY - sign(moveDeltaY) * minimumTravel.y else 0f
                     }
                     handleUserScroll()
+                    updateVelocityFromTracker()
 
                     initialX = localX
                     initialY = localY
                     isUserScrolling = true
-                    dragStartTimeMillis = System.currentTimeMillis()
                 } else {
                     isUserScrolling = false
                 }
+            }
+
+            ACTION_UP -> {
+                // Only a drag can leave a non-zero velocity here, since ACTION_DOWN resets it. Recompute it including
+                // the release sample so that a finger which stopped before lifting does not fling with a stale velocity.
+                if (velocityX != 0f || velocityY != 0f) {
+                    velocityTracker.addSample(event.sampleTimeMillis, localX, localY)
+                    updateVelocityFromTracker()
+                }
+
+                velocityTracker.clear()
+                isUserScrolling = false
             }
 
             else -> {
@@ -526,6 +542,27 @@ open class UIScrollableContainer : UIContainer() {
 
         return true
     }
+
+    private fun updateVelocityFromTracker() {
+        // Velocity is measured over a time window rather than between consecutive samples. Consecutive samples can
+        // be very close (or identical) in time, which would turn a tiny movement into a huge velocity. A window also
+        // naturally decays to zero when the pointer stops moving for longer than the window.
+        if (scrollAxes.isHorizontal) {
+            velocityX = velocityTracker.computeVelocityX()
+        }
+
+        if (scrollAxes.isVertical) {
+            velocityY = velocityTracker.computeVelocityY()
+        }
+    }
+
+    /**
+     * The time at which this [TouchEvent] was sampled, in [SystemClock.uptimeMillis] time base.
+     *
+     * Falls back to [SystemClock.uptimeMillis] for synthesized [TouchEvent]s.
+     */
+    private val TouchEvent.sampleTimeMillis: Long
+        get() = motionEvent?.eventTime?.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
 
     //endregion
 
@@ -550,6 +587,80 @@ open class UIScrollableContainer : UIContainer() {
         const val DEFAULT_MINIMUM_TRAVEL = 20f
         const val DEFAULT_MAX_VELOCITY = 3000f
 
+    }
+}
+
+/**
+ * Estimates pointer velocity from the samples within a short trailing time window.
+ */
+private class PointerVelocityTracker {
+
+    private val times = LongArray(CAPACITY)
+    private val xs = FloatArray(CAPACITY)
+    private val ys = FloatArray(CAPACITY)
+
+    private var start = 0
+    private var count = 0
+
+    fun clear() {
+        start = 0
+        count = 0
+    }
+
+    fun addSample(timeMillis: Long, x: Float, y: Float) {
+        // Drop samples that fell out of the window, or all of them if time went backwards.
+        while (count > 0) {
+            val oldestTime = times[start]
+
+            if (timeMillis - oldestTime > HORIZON_MILLIS || timeMillis < oldestTime) {
+                start = (start + 1) % CAPACITY
+                count--
+            } else {
+                break
+            }
+        }
+
+        if (count == CAPACITY) {
+            start = (start + 1) % CAPACITY
+            count--
+        }
+
+        val index = (start + count) % CAPACITY
+
+        times[index] = timeMillis
+        xs[index] = x
+        ys[index] = y
+        count++
+    }
+
+    /**
+     * Computes the velocity on the x-axis in px/s, or 0 if there is not enough data.
+     */
+    fun computeVelocityX() = computeVelocity(xs)
+
+    /**
+     * Computes the velocity on the y-axis in px/s, or 0 if there is not enough data.
+     */
+    fun computeVelocityY() = computeVelocity(ys)
+
+    private fun computeVelocity(values: FloatArray): Float {
+        if (count < 2) {
+            return 0f
+        }
+
+        val newest = (start + count - 1) % CAPACITY
+        val elapsedMillis = times[newest] - times[start]
+
+        if (elapsedMillis <= 0) {
+            return 0f
+        }
+
+        return (values[newest] - values[start]) * 1000f / elapsedMillis
+    }
+
+    companion object {
+        private const val HORIZON_MILLIS = 100L
+        private const val CAPACITY = 64
     }
 }
 

@@ -23,6 +23,16 @@ object BuildSettings {
      * Whether to use the debug playground scene or not.
      */
     const val DEBUG_PLAYGROUND = false
+
+    /**
+     * The signature to use when skipping hardware attestation.
+     */
+    @JvmStatic
+    val DEBUG_ATTESTATION_SIGN = ""
+
+    /**
+     * Whether to skip hardware attestation.
+     */
+    @JvmStatic
+    val DEBUG_SKIP_ATTESTATION = BuildConfig.DEBUG && DEBUG_ATTESTATION_SIGN.isNotEmpty()
 }
-
-

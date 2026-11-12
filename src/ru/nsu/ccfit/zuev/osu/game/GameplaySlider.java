@@ -10,6 +10,7 @@ import com.osudroid.game.CursorEvent;
 import com.osudroid.game.PressResult;
 import com.osudroid.game.ShakeKt;
 import com.osudroid.utils.Execution;
+import com.reco1l.framework.EasingKt;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.component.UIComponent;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
@@ -56,8 +57,16 @@ public class GameplaySlider extends GameObject {
     // Avoid rebuilding slider body mesh for tiny length deltas every frame.
     private static final float snakeLengthUpdateThreshold = 0.75f;
 
+    private static final double reverseArrowPulsePeriod = 0.3;
+    private static final double reverseArrowPulseOutDuration = 0.035;
+    private static final double reverseArrowPulseInDuration = 0.25;
+    private static final float reverseArrowPulseScale = 1.3f;
+    private static final float reverseArrowFadeIn = 0.15f;
+
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
+    private float endArrowBaseScale = 1f;
+    private boolean reverseArrowAnimationEnabled;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private UIScene scene;
@@ -303,11 +312,13 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
         float headFadeIn = (float) beatmapSlider.getHead().timeFadeIn / 1000;
+        reverseArrowAnimationEnabled = Config.isSnakingInSliders() || Config.isSnakingOutSliders();
 
         // Repeat arrow at end
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
+            endArrowBaseScale = scale;
 
             if (Config.isSnakingInSliders()) {
                 getPositionAt(0, false, true);
@@ -323,10 +334,9 @@ public class GameplaySlider extends GameObject {
 
             scene.attachChild(endArrow, 0);
 
-            // We can use headFadeIn here since the tail's fade in time is the same as the head.
             endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
                     .delay(fadeInDelay)
-                    .fadeIn(headFadeIn));
+                    .fadeIn(reverseArrowFadeIn));
         }
 
         scene.attachChild(tailCirclePiece, 0);
@@ -966,6 +976,8 @@ public class GameplaySlider extends GameObject {
                     endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
                 }
             }
+
+            animateEndArrow();
             return;
         }
 
@@ -1040,6 +1052,8 @@ public class GameplaySlider extends GameObject {
         ball.setPosition(ballPos.x, ballPos.y);
         ball.setRotation(ballAngle);
 
+        animateEndArrow();
+
         if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             listener.updateAutoBasedPos(ballPos.x, ballPos.y);
         }
@@ -1048,6 +1062,31 @@ public class GameplaySlider extends GameObject {
         if (percentage >= 1) {
             onSpanFinish();
         }
+    }
+
+    private void animateEndArrow() {
+        if (!reverseArrowAnimationEnabled || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
+            return;
+        }
+
+        double t = elapsedSpanTime + (completedSpanCount == 0 ? timePreempt : spanDuration);
+
+        if (t < 0) {
+            return;
+        }
+
+        double loopTime = t % reverseArrowPulsePeriod;
+        float pulse;
+
+        if (loopTime < reverseArrowPulseOutDuration) {
+            float progress = (float) (loopTime / reverseArrowPulseOutDuration);
+            pulse = 1f + (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
+        } else {
+            float progress = (float) ((loopTime - reverseArrowPulseOutDuration) / reverseArrowPulseInDuration);
+            pulse = reverseArrowPulseScale - (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
+        }
+
+        endArrow.setScale(endArrowBaseScale * pulse);
     }
 
     @Override
