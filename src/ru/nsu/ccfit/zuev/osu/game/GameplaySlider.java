@@ -10,6 +10,7 @@ import com.osudroid.game.CursorEvent;
 import com.osudroid.game.PressResult;
 import com.osudroid.game.ShakeKt;
 import com.osudroid.utils.Execution;
+import com.reco1l.framework.EasingKt;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.component.UIComponent;
 import com.reco1l.andengine.sprite.UIAnimatedSprite;
@@ -1078,18 +1079,14 @@ public class GameplaySlider extends GameObject {
         float pulse;
 
         if (loopTime < reverseArrowPulseOutDuration) {
-            pulse = 1f + (reverseArrowPulseScale - 1f) * easeOut((float) (loopTime / reverseArrowPulseOutDuration));
+            float progress = (float) (loopTime / reverseArrowPulseOutDuration);
+            pulse = 1f + (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
         } else {
             float progress = (float) ((loopTime - reverseArrowPulseOutDuration) / reverseArrowPulseInDuration);
-            pulse = reverseArrowPulseScale - (reverseArrowPulseScale - 1f) * easeOut(progress);
+            pulse = reverseArrowPulseScale - (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
         }
 
         endArrow.setScale(endArrowBaseScale * pulse);
-    }
-
-    private float easeOut(float t) {
-        float p = Math.min(Math.max(t, 0f), 1f);
-        return 1f - (1f - p) * (1f - p);
     }
 
     @Override
