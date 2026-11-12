@@ -66,7 +66,6 @@ public class GameplaySlider extends GameObject {
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
     private float endArrowBaseScale = 1f;
-    private boolean reverseArrowAnimationEnabled;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private UIScene scene;
@@ -1065,7 +1064,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private void animateEndArrow() {
-        if (!reverseArrowAnimationEnabled || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
+        if ((!Config.isSnakingInSliders() && !Config.isSnakingOutSliders()) || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
             return;
         }
 
