@@ -335,7 +335,7 @@ public class GameplaySlider extends GameObject {
 
             endArrow.beginAbsoluteSequence(initialModifierTime, sequence -> sequence
                     .delay(fadeInDelay)
-                    .fadeIn(reverseArrowAnimationEnabled ? reverseArrowFadeIn : headFadeIn));
+                    .fadeIn(reverseArrowFadeIn));
         }
 
         scene.attachChild(tailCirclePiece, 0);
