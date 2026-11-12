@@ -295,6 +295,9 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
+        var tailCirclePosition = Config.isSnakingInSliders() ? position : pathEndPosition;
+        tailCirclePiece.setPosition(tailCirclePosition.x, tailCirclePosition.y);
+
         // Repeat arrow at start
         int spanCount = beatmapSlider.getSpanCount();
         if (spanCount > 2) {
@@ -311,7 +314,6 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
         float headFadeIn = (float) beatmapSlider.getHead().timeFadeIn / 1000;
-        reverseArrowAnimationEnabled = Config.isSnakingInSliders() || Config.isSnakingOutSliders();
 
         // Repeat arrow at end
         if (spanCount > 1) {
@@ -321,13 +323,9 @@ public class GameplaySlider extends GameObject {
 
             if (Config.isSnakingInSliders()) {
                 getPositionAt(0, false, true);
-
-                tailCirclePiece.setPosition(position.x, position.y);
                 endArrow.setPosition(position.x, position.y);
             } else {
                 getPositionAt(1, false, true);
-
-                tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
                 endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
             }
 
