@@ -65,8 +65,6 @@ public class GameplaySlider extends GameObject {
 
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
-    private float endArrowBaseScale = 1f;
-    private boolean reverseArrowAnimationEnabled;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private UIScene scene;
@@ -296,6 +294,9 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(applyIncreasedVisibilityToCirclePiece);
 
+        var tailCirclePosition = Config.isSnakingInSliders() ? position : pathEndPosition;
+        tailCirclePiece.setPosition(tailCirclePosition.x, tailCirclePosition.y);
+
         // Repeat arrow at start
         int spanCount = beatmapSlider.getSpanCount();
         if (spanCount > 2) {
@@ -312,23 +313,17 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
         float headFadeIn = (float) beatmapSlider.getHead().timeFadeIn / 1000;
-        reverseArrowAnimationEnabled = Config.isSnakingInSliders() || Config.isSnakingOutSliders();
 
         // Repeat arrow at end
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
-            endArrowBaseScale = scale;
 
             if (Config.isSnakingInSliders()) {
                 getPositionAt(0, false, true);
-
-                tailCirclePiece.setPosition(position.x, position.y);
                 endArrow.setPosition(position.x, position.y);
             } else {
                 getPositionAt(1, false, true);
-
-                tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
                 endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
             }
 
@@ -1065,7 +1060,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private void animateEndArrow() {
-        if (!reverseArrowAnimationEnabled || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
+        if ((!Config.isSnakingInSliders() && !Config.isSnakingOutSliders()) || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
             return;
         }
 
@@ -1086,7 +1081,7 @@ public class GameplaySlider extends GameObject {
             pulse = reverseArrowPulseScale - (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
         }
 
-        endArrow.setScale(endArrowBaseScale * pulse);
+        endArrow.setScale(beatmapSlider.getScreenSpaceGameplayScale() * pulse);
     }
 
     @Override
