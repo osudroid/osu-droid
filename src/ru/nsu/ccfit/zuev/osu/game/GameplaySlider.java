@@ -65,7 +65,6 @@ public class GameplaySlider extends GameObject {
 
     private final UISprite approachCircle;
     private final UISprite startArrow, endArrow;
-    private float endArrowBaseScale = 1f;
     private Slider beatmapSlider;
     private BeatmapControlPoints controlPoints;
     private UIScene scene;
@@ -319,7 +318,6 @@ public class GameplaySlider extends GameObject {
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
-            endArrowBaseScale = scale;
 
             if (Config.isSnakingInSliders()) {
                 getPositionAt(0, false, true);
@@ -1083,7 +1081,7 @@ public class GameplaySlider extends GameObject {
             pulse = reverseArrowPulseScale - (reverseArrowPulseScale - 1f) * EasingKt.interpolate(Easing.Out, progress);
         }
 
-        endArrow.setScale(endArrowBaseScale * pulse);
+        endArrow.setScale(beatmapSlider.getScreenSpaceGameplayScale() * pulse);
     }
 
     @Override
