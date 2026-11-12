@@ -16,7 +16,6 @@ import com.osudroid.audio.SongServiceClock;
 import com.osudroid.beatmaps.constants.HitObjectType;
 import com.osudroid.game.FramedBeatmapClock;
 import com.osudroid.game.GameplayFrameStabilityClock;
-import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
@@ -670,11 +669,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final ModHashMap mods, @Nullable CoroutineScope scope) {
-        if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
-            ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
-            return false;
-        }
-
         if (scope != null) {
             ensureActive(scope.getCoroutineContext());
         }
@@ -2076,7 +2070,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             autoCursor.moveToObject(judgeableObject, gameplayClock.getCurrentTime(), this);
         }
 
-        if (GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0) {
+        if (isPerfectFailConditionMet()) {
             gameover();
 
             if (!Multiplayer.isMultiplayer) {
@@ -3019,6 +3013,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         UIEngine.getCurrent().getOverlay().setChildScene(menu.getScene(), false, false, true);
     }
 
+    private boolean isPerfectFailConditionMet() {
+        return GameHelper.isPerfect() && stat.getHit100() + stat.getHit50() + stat.getMisses() > 0;
+    }
+
     public void gameover() {
 
         if (isGameOver) {
@@ -3042,7 +3040,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stopLoopingSamples();
         SongService songService = GlobalManager.getInstance().getSongService();
 
-        if (GameHelper.isPerfect()) {
+        if (isPerfectFailConditionMet()) {
             if (video != null) {
                 video.pause();
             }

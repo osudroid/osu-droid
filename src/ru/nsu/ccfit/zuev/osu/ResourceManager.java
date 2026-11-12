@@ -103,8 +103,6 @@ public class ResourceManager {
 
         customSoundStore.clear();
         customTextureStore.clear();
-
-        initSecurityUtils();
     }
 
     public void loadSkin(String folder) {
@@ -614,10 +612,6 @@ public class ResourceManager {
 
     public void unloadTexture(TextureRegion texture) {
         textureStore.unload(texture);
-    }
-
-    public void initSecurityUtils() {
-        SecurityUtils.getAppSignature(context, context.getPackageName());
     }
 
     public void clearCustomResources() {
