@@ -24,6 +24,11 @@ class BeatmapSetModel(
     var isCoverUnavailable = false
 
     /**
+     * Whether the set is marked as favorite, shown as a heart on its panel.
+     */
+    var isFavorite = false
+
+    /**
      * The name of the cover texture, duplicate imports of a set share the same cover.
      */
     val coverTextureName: String?

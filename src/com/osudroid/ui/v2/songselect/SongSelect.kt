@@ -5,6 +5,7 @@ import android.view.RoundedCorner
 import com.osudroid.GameMode
 import com.osudroid.beatmaps.BeatmapCache
 import com.osudroid.data.BeatmapInfo
+import com.osudroid.data.BeatmapSetInfo
 import com.osudroid.data.DatabaseManager
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
@@ -30,11 +31,17 @@ import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sqrt
 
+
+/**
+ * The app's accent red, `colorAccent` in colors.xml.
+ */
+internal val ACCENT_RED = Color4(243, 115, 115)
 
 /**
  * The song selection scene. Replaces the legacy [ru.nsu.ccfit.zuev.osu.menu.SongMenu] for singleplayer for now.
@@ -47,11 +54,6 @@ object SongSelect : UIScene() {
     var selectedBeatmap: BeatmapInfo? = null
         private set
 
-
-    /**
-     * The app's accent red, `colorAccent` in colors.xml. Declared before the views, which use it while being created.
-     */
-    private val BACK_BUTTON_COLOR = Color4(243, 115, 115)
 
     private val beatmapLoadingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -161,7 +163,7 @@ object SongSelect : UIScene() {
                     height = 28f
                 }
                 applyTheme = {
-                    background?.color = BACK_BUTTON_COLOR
+                    background?.color = ACCENT_RED
                     color = Colors.White
                 }
 
@@ -222,7 +224,11 @@ object SongSelect : UIScene() {
 
             if (allBeatmapSets.isEmpty()) {
                 ensureActive()
-                allBeatmapSets = DatabaseManager.beatmapInfoTable.getBeatmapSetList().map { BeatmapSetModel(it) }
+                val favorites = DatabaseManager.beatmapOptionsTable.getFavorites().toHashSet()
+
+                allBeatmapSets = DatabaseManager.beatmapInfoTable.getBeatmapSetList().map {
+                    BeatmapSetModel(it).apply { isFavorite = it.directory in favorites }
+                }
             }
 
             // Every word of the query must match at least one field of at least one beatmap of the set.
@@ -252,6 +258,22 @@ object SongSelect : UIScene() {
      */
     fun invalidateLibrary() {
         allBeatmapSets = emptyList()
+    }
+
+    /**
+     * Deletes a beatmap set from the storage and the library.
+     */
+    fun deleteBeatmapSet(beatmapSetInfo: BeatmapSetInfo) {
+        if (selectedBeatmap?.setDirectory == beatmapSetInfo.directory) {
+            beatmapCarrousel.selectedPanel = null
+            onBeatmapSelected(null)
+        }
+
+        beatmapLoadingScope.launch {
+            LibraryManager.deleteBeatmapSet(beatmapSetInfo)
+            invalidateLibrary()
+            loadBeatmaps()
+        }
     }
 
 

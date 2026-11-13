@@ -95,6 +95,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
     private lateinit var cover: UIShapedSprite
     private lateinit var selectionIndicator: UIContainer
+    private lateinit var favoriteIcon: FontAwesomeIcon
     private lateinit var titleText: UIText
     private lateinit var artistText: UIText
 
@@ -140,6 +141,10 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     if (!isTransitioning) {
                         select()
                     }
+                }
+
+                onActionLongPress = {
+                    boundData?.let { BeatmapOptionsDialog(it).show() }
                 }
 
                 // Accent fill, uncovered as a strip on the left edge when selected.
@@ -192,6 +197,20 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                         font = ResourceManager.getInstance().getFont("torusBold")
                         applyTheme = { color = it.accentColor * 0.8f }
                     }
+                }
+
+                // Marks favorite sets.
+                container {
+                    anchor = Anchor.TopRight
+                    origin = Anchor.TopRight
+                    padding = Vec4(0f, 3f.srem, 6f.srem, 0f)
+
+                    favoriteIcon = FontAwesomeIcon(Icon.Heart).apply {
+                        iconSize = 16f
+                        color = ACCENT_RED
+                        isVisible = false
+                    }
+                    +favoriteIcon
                 }
             }
 
@@ -280,6 +299,8 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         if (cover.textureRegion !== coverTexture) {
             cover.textureRegion = coverTexture
         }
+
+        favoriteIcon.isVisible = boundData?.isFavorite == true
 
         val accentColor = Theme.current.accentColor
         val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width

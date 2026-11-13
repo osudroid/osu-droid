@@ -35,6 +35,9 @@ data class BeatmapOptions(
     @Query("SELECT * FROM BeatmapOptions WHERE setDirectory = :setDirectory")
     fun getOptions(setDirectory: String): BeatmapOptions?
 
+    @Query("SELECT setDirectory FROM BeatmapOptions WHERE isFavorite = 1")
+    fun getFavorites(): List<String>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(options: BeatmapOptions)
 

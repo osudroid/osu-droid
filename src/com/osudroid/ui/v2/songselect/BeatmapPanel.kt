@@ -12,7 +12,6 @@ import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
-import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
@@ -22,7 +21,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  * Panels are pooled by the [BeatmapCarrousel] and rebound with [bind] whenever a set expands.
  */
 @Suppress("LeakingThis")
-open class BeatmapPanel : UIContainer() {
+open class BeatmapPanel : UIClickableContainer() {
 
     /**
      * The set panel this panel is currently listed under.
@@ -93,6 +92,23 @@ open class BeatmapPanel : UIContainer() {
         origin = Anchor.TopRight
         cullingMode = CullingMode.CameraBounds
         foreground = borderBox
+
+        onActionUp = {
+            if (SongSelect.selectedBeatmap == beatmapInfo && beatmapSetPanel.selectedPanel == this) {
+                ResourceManager.getInstance().getSound("menuhit")?.play()
+
+                GlobalManager.getInstance().gameScene.setOldScene(SongSelect)
+                GlobalManager.getInstance().gameScene.startGame(beatmapInfo, null, ModMenu.enabledMods)
+            } else {
+                ResourceManager.getInstance().getSound("menuclick")?.play()
+            }
+
+            beatmapSetPanel.selectedPanel = this
+        }
+
+        onActionLongPress = {
+            beatmapSetPanel.boundData?.let { BeatmapOptionsDialog(it).show() }
+        }
 
         // Accent fill, uncovered as a strip on the left edge when selected.
         selectionIndicator = container {
@@ -254,26 +270,6 @@ open class BeatmapPanel : UIContainer() {
 
     fun collapse() {
         isExpanded = false
-    }
-
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        if (event.isActionUp) {
-
-            if (SongSelect.selectedBeatmap == beatmapInfo && beatmapSetPanel.selectedPanel == this) {
-                ResourceManager.getInstance().getSound("menuhit")?.play()
-
-                GlobalManager.getInstance().gameScene.setOldScene(SongSelect)
-                GlobalManager.getInstance().gameScene.startGame(beatmapInfo, null, ModMenu.enabledMods)
-            } else {
-                ResourceManager.getInstance().getSound("menuclick")?.play()
-            }
-
-            beatmapSetPanel.selectedPanel = this
-        }
-
-        return true
     }
 
 
