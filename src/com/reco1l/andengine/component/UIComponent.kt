@@ -1732,14 +1732,14 @@ abstract class UIComponent : Entity(0f, 0f),
     //region Input
 
     /**
-     * Propagates a touch event to the entity.
+     * Propagates a touch event to the entity, or to another [target].
      */
-    protected fun propagateTouchEvent(action: Int, pointerIndex: Int = 0, localX: Float = 0f, localY: Float = 0f): Boolean {
+    protected fun propagateTouchEvent(action: Int, pointerIndex: Int = 0, localX: Float = 0f, localY: Float = 0f, target: ITouchArea = this): Boolean {
 
         val motionEvent = MotionEvent.obtain(0, 0, action, 0f, 0f, 0)
         val touchEvent = TouchEvent.obtain(0f, 0f, action, pointerIndex, motionEvent)
 
-        val result = onAreaTouched(touchEvent, localX, localY)
+        val result = target.onAreaTouched(touchEvent, localX, localY)
 
         touchEvent.recycle()
         motionEvent.recycle()

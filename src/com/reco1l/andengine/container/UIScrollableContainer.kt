@@ -513,6 +513,10 @@ open class UIScrollableContainer : UIContainer() {
 
                     initialX = localX
                     initialY = localY
+
+                    if (!isUserScrolling) {
+                        cancelChildPresses(event)
+                    }
                     isUserScrolling = true
                 } else {
                     isUserScrolling = false
@@ -541,6 +545,17 @@ open class UIScrollableContainer : UIContainer() {
         }
 
         return true
+    }
+
+    /**
+     * Tells the child pressed by the pointer of [event] that its press is over. Children no longer receive events
+     * once scrolling starts, they would otherwise stay pressed and e.g. still report a long press.
+     */
+    private fun cancelChildPresses(event: TouchEvent) {
+        val binding = inputBindings.getOrNull(event.pointerID) ?: return
+        inputBindings[event.pointerID] = null
+
+        propagateTouchEvent(ACTION_CANCEL, event.pointerID, target = binding)
     }
 
     private fun updateVelocityFromTracker() {
