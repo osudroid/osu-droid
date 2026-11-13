@@ -47,6 +47,9 @@ data class BeatmapOptions(
     @Upsert
     fun upsert(options: BeatmapOptions)
 
+    @Query("DELETE FROM BeatmapOptions WHERE setDirectory = :setDirectory")
+    fun delete(setDirectory: String)
+
     @Query("DELETE FROM BeatmapOptions")
     fun deleteAll()
 

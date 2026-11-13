@@ -110,6 +110,10 @@ public class LibraryManager {
     public static void deleteBeatmapSet(BeatmapSetInfo beatmapSet) {
         FilesKt.deleteRecursively(new File(beatmapSet.getPath()));
         DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(beatmapSet.getDirectory());
+        // Otherwise a set imported into the same directory later would still have the favorite mark, offset and
+        // collections of the deleted one.
+        DatabaseManager.getBeatmapOptionsTable().delete(beatmapSet.getDirectory());
+        DatabaseManager.getBeatmapCollectionsTable().removeBeatmapFromAll(beatmapSet.getDirectory());
         BeatmapCache.invalidate(beatmapSet);
         loadLibrary();
     }

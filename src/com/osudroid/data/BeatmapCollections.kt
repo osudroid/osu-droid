@@ -51,6 +51,9 @@ interface IBeatmapCollectionsDAO {
     @Query("DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = :collectionName AND setDirectory = :setDirectory")
     fun removeBeatmap(collectionName: String, setDirectory: String)
 
+    @Query("DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE setDirectory = :setDirectory")
+    fun removeBeatmapFromAll(setDirectory: String)
+
     @Query("SELECT EXISTS(SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = :collectionName AND setDirectory = :setDirectory)")
     fun inCollection(collectionName: String, setDirectory: String): Boolean
 }
