@@ -1793,7 +1793,11 @@ abstract class UIComponent : Entity(0f, 0f),
                 val child = getChildByIndex(i)
                 if (child is ITouchArea && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
-                        inputBindings[event.pointerID] = child
+                        // A release ends the gesture. Binding it would route the next press to this child,
+                        // wherever it happens, e.g. after the press was consumed by an overlay that is gone by now.
+                        if (!event.isActionUp && !event.isActionCancel) {
+                            inputBindings[event.pointerID] = child
+                        }
                         return true
                     }
                 }
