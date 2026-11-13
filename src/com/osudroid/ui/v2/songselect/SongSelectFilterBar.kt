@@ -18,7 +18,8 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  */
 class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContainer() {
 
-    private val filterButton: UIIconButton
+    private lateinit var filterButton: UIIconButton
+    private val sortTab = FilterBarTab()
     private val switchButton = LeaderboardSwitchButton(leaderboard)
     private val searchBox: UIContainer
     private val searchInput: UITextInput
@@ -46,10 +47,21 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
 
         +switchButton
 
-        // Square, the other buttons of the bar take its size.
-        filterButton = iconButton {
-            icon = ResourceManager.getInstance().getTexture("filters")
-            padding = Vec4(16f)
+        // Like the leaderboard switch, a tab below the button shows the current state, here the sort order.
+        linearContainer {
+            orientation = Orientation.Vertical
+            spacing = FilterBarTab.SPACING
+
+            val showPopup = { SongSelectFilterPopup(this).show() }
+
+            // Square, the other buttons of the bar take its size.
+            filterButton = iconButton {
+                icon = ResourceManager.getInstance().getTexture("filters")
+                padding = Vec4(16f)
+                onActionUp = showPopup
+            }
+
+            +sortTab.apply { onActionUp = showPopup }
         }
 
         searchInput = object : UITextInput("") {
@@ -124,6 +136,9 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         val hasText = searchInput.value.isNotEmpty()
         searchIcon.isVisible = !hasText
         clearIcon.isVisible = hasText
+        filterButton.isSelected = SongSelect.isFilterActive
+        sortTab.width = filterButton.width
+        sortTab.text = SongSelect.sortOrder.label
 
         switchButton.setButtonSize(filterButton.width, filterButton.height)
         // The switch button grows below the bar when its mode tab is shown, the search box keeps the button height.

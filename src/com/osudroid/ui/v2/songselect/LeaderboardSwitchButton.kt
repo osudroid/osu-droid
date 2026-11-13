@@ -2,12 +2,10 @@ package com.osudroid.ui.v2.songselect
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode
 
 /**
@@ -26,26 +24,12 @@ class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : 
         +switchIcon
     }
 
-    private val modeText = UIText().apply {
-        font = ResourceManager.getInstance().getFont("xs")
-        anchor = Anchor.Center
-        origin = Anchor.Center
-        applyTheme = { color = it.accentColor }
-    }
-
-    private val modeTab = UIClickableContainer().apply {
-        height = MODE_TAB_HEIGHT
-        background = UIBox().apply {
-            cornerRadius = 0.5f.srem
-            applyTheme = { color = it.accentColor * 0.1f }
-        }
-        +modeText
-    }
+    private val modeTab = FilterBarTab()
 
 
     init {
         orientation = Orientation.Vertical
-        spacing = MODE_TAB_SPACING
+        spacing = FilterBarTab.SPACING
 
         +switchButton.apply {
             onActionUp = {
@@ -85,12 +69,7 @@ class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : 
 
         switchIcon.icon = if (isGlobal) Icon.Globe else Icon.Mobile
         modeTab.isVisible = isGlobal
-        modeText.text = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) "PP" else "Score"
-    }
-
-    companion object {
-        private const val MODE_TAB_HEIGHT = 32f
-        private const val MODE_TAB_SPACING = 6f
+        modeTab.text = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) "PP" else "Score"
     }
 
 }

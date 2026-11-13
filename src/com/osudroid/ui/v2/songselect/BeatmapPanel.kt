@@ -189,9 +189,8 @@ open class BeatmapPanel : UIClickableContainer() {
 
         versionText.text = beatmapInfo.version
         creatorText.text = beatmapInfo.creator.takeUnless { it.isEmpty() } ?: "Unknown"
-        starRatingBadge.rating = beatmapInfo.getStarRating().toDouble()
+        updateStarRating()
         starRatingBadge.applyColorsInstantly()
-        difficultyStars.rating = beatmapInfo.getStarRating()
 
         isExpanded = false
         isOnScreen = true
@@ -202,6 +201,14 @@ open class BeatmapPanel : UIClickableContainer() {
         selectionIndicator.isVisible = false
         borderBox.color = Theme.current.accentColor.copy(alpha = 0.3f)
         borderBox.lineWidth = BeatmapSetPanel.BORDER_WIDTH
+    }
+
+    /**
+     * Shows the star rating of the current difficulty algorithm.
+     */
+    fun updateStarRating() {
+        starRatingBadge.rating = beatmapInfo.getStarRating().toDouble()
+        difficultyStars.rating = beatmapInfo.getStarRating()
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {

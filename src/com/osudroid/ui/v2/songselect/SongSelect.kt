@@ -90,6 +90,36 @@ object SongSelect : UIScene() {
      */
     private var allBeatmapSets: List<BeatmapSetModel> = emptyList()
 
+    /**
+     * The text of the search input, kept so that changing the other filters does not reset it.
+     */
+    private var searchQuery = ""
+
+    /**
+     * The order of the beatmap sets, applied on the next [loadBeatmaps].
+     */
+    var sortOrder = BeatmapSortOrder.entries[Config.getInt(SORT_ORDER_PREFERENCE, 0).mod(BeatmapSortOrder.entries.size)]
+        set(value) {
+            field = value
+            Config.setInt(SORT_ORDER_PREFERENCE, value.ordinal)
+        }
+
+    /**
+     * Whether only favorite beatmap sets are listed, applied on the next [loadBeatmaps].
+     */
+    var isFavoritesOnly = false
+
+    /**
+     * The collection whose beatmap sets are listed, `null` for all. Applied on the next [loadBeatmaps].
+     */
+    var collection: String? = null
+
+    /**
+     * Whether beatmap sets are hidden by something other than the search text.
+     */
+    val isFilterActive
+        get() = isFavoritesOnly || collection != null
+
     private var currentSongPath: String? = null
     private var currentBackgroundPath: String? = null
     private var currentBeatmapLoadingJob: Job? = null
@@ -215,10 +245,18 @@ object SongSelect : UIScene() {
 
 
     /**
-     * (Re)loads the beatmap sets from the database and applies the optional [query] filter to the carrousel.
+     * (Re)loads the beatmap sets from the database and lists the ones matching the search [query] and the
+     * other filters in the carrousel, in the current [sortOrder].
      */
     @JvmOverloads
-    fun loadBeatmaps(query: String? = null) {
+    fun loadBeatmaps(query: String = searchQuery) {
+        searchQuery = query
+
+        // Read here, they may change while the library loads.
+        val sortOrder = sortOrder
+        val isFavoritesOnly = isFavoritesOnly
+        val collection = collection
+
         currentLibraryLoadingJob?.cancel(CancellationException("Library loading cancelled due to a new request."))
         currentLibraryLoadingJob = beatmapLoadingScope.launch {
 
@@ -232,22 +270,28 @@ object SongSelect : UIScene() {
             }
 
             // Every word of the query must match at least one field of at least one beatmap of the set.
-            val queryWords = query?.lowercase()?.split(' ')?.filter { it.isNotBlank() }.orEmpty()
+            val queryWords = query.lowercase().split(' ').filter { it.isNotBlank() }
 
-            val filtered = if (queryWords.isEmpty()) allBeatmapSets else allBeatmapSets.filter { model ->
-                queryWords.all { word ->
-                    model.beatmapSetInfo.beatmaps.any { beatmap ->
-                        beatmap.titleText.lowercase().contains(word)
-                            || beatmap.artistText.lowercase().contains(word)
-                            || beatmap.creator.lowercase().contains(word)
-                            || beatmap.version.lowercase().contains(word)
+            val collectionSets = collection?.let { DatabaseManager.beatmapCollectionsTable.getBeatmaps(it)?.toHashSet() }
+
+            val filtered = allBeatmapSets.filter { model ->
+                (!isFavoritesOnly || model.isFavorite)
+                    && (collectionSets == null || model.beatmapSetInfo.directory in collectionSets)
+                    && queryWords.all { word ->
+                        model.beatmapSetInfo.beatmaps.any { beatmap ->
+                            beatmap.titleText.lowercase().contains(word)
+                                || beatmap.artistText.lowercase().contains(word)
+                                || beatmap.creator.lowercase().contains(word)
+                                || beatmap.version.lowercase().contains(word)
+                        }
                     }
-                }
             }
+
+            val sorted = filtered.sortedWith(sortOrder.comparator)
 
             ensureActive()
             updateThread {
-                beatmapCarrousel.data = filtered
+                beatmapCarrousel.data = sorted
                 selectCurrentBeatmap()
             }
         }
@@ -258,6 +302,15 @@ object SongSelect : UIScene() {
      */
     fun invalidateLibrary() {
         allBeatmapSets = emptyList()
+    }
+
+    /**
+     * Shows the star ratings of the current difficulty algorithm.
+     */
+    fun onDifficultyAlgorithmChanged() {
+        beatmapCarrousel.selectedPanel?.updateStarRatings()
+        onBeatmapSelected(selectedBeatmap)
+        loadBeatmaps()
     }
 
     /**
@@ -547,6 +600,11 @@ object SongSelect : UIScene() {
         return maxOf(4f.srem, (radius - cardRadius) * (1f - 1f / sqrt(2f)))
     }
 
+
+    /**
+     * Shared with the legacy song menu.
+     */
+    private const val SORT_ORDER_PREFERENCE = "sortorder"
 
     private const val PREVIOUS_SELECTION_LIMIT = 10
     private const val PREVIOUS_SELECTION_INTERVAL = 1f

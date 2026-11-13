@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.songselect
 
+import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.CollectionsManagerFragment
 import com.osudroid.data.BeatmapOptions
 import com.osudroid.data.DatabaseManager
@@ -26,6 +27,8 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
 
     private val options = DatabaseManager.beatmapOptionsTable.getOptions(beatmapSetInfo.directory)
         ?: BeatmapOptions(beatmapSetInfo.directory)
+
+    private val wasFavorite = options.isFavorite
 
     private val favoriteIcon = optionIcon(Icon.Heart)
 
@@ -55,7 +58,16 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
             +optionRow(optionButton(optionIcon(Icon.Folder)) {
                 text = "Add to collection"
                 onActionUp = {
-                    mainThread { CollectionsManagerFragment().showToAddToFolder(beatmapSetInfo.directory) }
+                    mainThread {
+                        CollectionsManagerFragment().apply {
+                            // The set may no longer belong to the list.
+                            onDismissListener = BaseFragment.OnDismissListener {
+                                if (SongSelect.collection != null) {
+                                    SongSelect.loadBeatmaps()
+                                }
+                            }
+                        }.showToAddToFolder(beatmapSetInfo.directory)
+                    }
                 }
             })
 
@@ -125,6 +137,16 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
             onConfirm = { SongSelect.deleteBeatmapSet(beatmapSetInfo) }
         }.show()
     }
+
+    override fun onHidden() {
+        super.onHidden()
+
+        // The set may no longer belong to the list.
+        if (SongSelect.isFavoritesOnly && options.isFavorite != wasFavorite) {
+            SongSelect.loadBeatmaps()
+        }
+    }
+
 
     /**
      * The offset input with a button on each side to change it by one millisecond.

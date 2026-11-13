@@ -400,6 +400,13 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     }
 
     /**
+     * Shows the star ratings of the current difficulty algorithm on the difficulty panels.
+     */
+    fun updateStarRatings() {
+        panelsContainer.forEach { (it as BeatmapPanel).updateStarRating() }
+    }
+
+    /**
      * Detaches all difficulty panels and returns them to the carousel's pool.
      */
     private fun releasePanels() {
