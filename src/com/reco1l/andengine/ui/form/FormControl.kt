@@ -72,7 +72,8 @@ abstract class FormControl<V : Any, C: UIControl<V>>(initialValue: V): UILinearC
         isSelected = true
 
         onActionUp = {
-            if (this@FormControl.isVisible) {
+            // The hidden button still receives touches, it must not reset anything then.
+            if (this@FormControl.isVisible && showResetButton && !isDefault) {
                 value = defaultValue
             }
         }
