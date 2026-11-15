@@ -63,7 +63,9 @@ class OsuDirectSearchResponseModel : BeatmapMirrorSearchResponseModel {
     override fun invoke(response: Any): MutableList<BeatmapSetModel> {
         response as JSONArray
 
-        return MutableList(response.length()) { parseOsuDirectBeatmapSet(response.getJSONObject(it)) }
+        return MutableList(response.length()) {
+            parseOsuDirectBeatmapSet(response.getJSONObject(it))
+        }.filter { it.beatmaps.isNotEmpty() }.toMutableList()
     }
 }
 
@@ -101,9 +103,7 @@ private fun parseOsuDirectBeatmapSet(json: JSONObject): BeatmapSetModel {
         hasVideo = json.getBoolean("video"),
         beatmaps = json.getJSONArray("beatmaps").let {
 
-            MutableList(it.length()) { i ->
-
-                val obj = it.getJSONObject(i)
+            (0 until it.length()).map(it::getJSONObject).filter { obj -> obj.getInt("mode_int") == 0 }.map { obj ->
 
                 BeatmapModel(
                     id = obj.getLong("id"),

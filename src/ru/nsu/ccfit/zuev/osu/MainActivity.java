@@ -780,6 +780,9 @@ public class MainActivity extends BaseGameActivity implements
         super.onNewIntent(intent);
         setIntent(intent);
 
+        // Determined before parsing, as parsing consumes the intent.
+        boolean isBeatmapLink = isBeatmapLinkIntent(intent);
+
         if (parseIntent(intent)) {
             var globalManager = GlobalManager.getInstance();
 
@@ -803,7 +806,7 @@ public class MainActivity extends BaseGameActivity implements
                 return;
             }
 
-            if (pendingBeatmapLink.get() != null) {
+            if (isBeatmapLink) {
                 // Before startup has finished, the link stays pending for the startup operation to consume.
                 if (startupFinished) {
                     openPendingBeatmapLink();
@@ -1245,7 +1248,8 @@ public class MainActivity extends BaseGameActivity implements
                 var scene = mEngine.getScene();
                 var gameScene = GlobalManager.getInstance().getGameScene();
 
-                if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                if (scene instanceof GameLoaderScene
+                        || (scene != null && gameScene != null && scene == gameScene.getScene())) {
                     ToastLogger.showText("Beatmap links cannot be opened during gameplay.", true);
                     return;
                 }
@@ -1255,6 +1259,22 @@ public class MainActivity extends BaseGameActivity implements
         });
     }
 
+    private boolean isBeatmapLinkIntent(Intent intent) {
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction())) {
+            return false;
+        }
+
+        Uri data = intent.getData();
+        return data != null && BeatmapLink.parse(data.toString()) != null;
+    }
+
+    /**
+     * Parses an incoming intent and stores whatever it carries (invite link,
+     * beatmap link or file to import).
+     *
+     * @return Whether the intent carried something to handle. Malformed
+     * {@code osu://} links carry nothing and are ignored.
+     */
     private boolean parseIntent(Intent intent) {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri data = intent.getData();
@@ -1266,6 +1286,11 @@ public class MainActivity extends BaseGameActivity implements
                     pendingBeatmapLink.set(beatmapLink);
                 } else if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
                     roomInviteLink = data;
+                } else if ("osu".equalsIgnoreCase(data.getScheme())) {
+                    // Malformed beatmap link
+                    // Ignore it, but consume the action so it isn't handled again.
+                    intent.setAction(Intent.ACTION_MAIN);
+                    return false;
                 } else {
                     String scheme = data.getScheme();
                     if (ContentResolver.SCHEME_FILE.equals(scheme)) {

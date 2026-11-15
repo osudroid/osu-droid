@@ -6,6 +6,7 @@ import okhttp3.HttpUrl
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -63,6 +64,50 @@ class CatboyTest {
         val fromLink = CatboyBeatmapsetLinkHandler(fake())(1004248)
 
         assertEquals(fromLink, CatboySearchResponseModel()(JSONArray().put(set)).single())
+    }
+
+    @Test
+    fun `Beatmapset link keeps only osu!standard difficulties`() {
+        val json = fixture("catboy-beatmapset-1004248")
+        val beatmaps = json.getJSONArray("beatmaps")
+        val standard = beatmaps.getJSONObject(0)
+
+        for ((index, mode) in listOf(1, 2, 3).withIndex()) {
+            beatmaps.put(JSONObject(standard.toString()).put("id", 9000L + index).put("mode_int", mode))
+        }
+
+        val set = CatboyBeatmapsetLinkHandler(fake(json))(1004248)
+
+        assertEquals(listOf(2101856L), set.beatmaps.map { it.id })
+    }
+
+    @Test
+    fun `Beatmapset link yields no beatmaps when set has no osu!standard difficulties`() {
+        val json = fixture("catboy-beatmapset-1004248")
+        val beatmaps = json.getJSONArray("beatmaps")
+
+        for (i in 0 until beatmaps.length()) {
+            beatmaps.getJSONObject(i).put("mode_int", 1)
+        }
+
+        val set = CatboyBeatmapsetLinkHandler(fake(json))(1004248)
+
+        assertTrue(set.beatmaps.isEmpty())
+    }
+
+    @Test
+    fun `Search response drops sets without osu!standard difficulties`() {
+        val mixed = fixture("catboy-beatmapset-1004248")
+        val taikoOnly = fixture("catboy-beatmapset-1004248").put("id", 555L)
+        val taikoBeatmaps = taikoOnly.getJSONArray("beatmaps")
+
+        for (i in 0 until taikoBeatmaps.length()) {
+            taikoBeatmaps.getJSONObject(i).put("mode_int", 1)
+        }
+
+        val result = CatboySearchResponseModel()(JSONArray().put(taikoOnly).put(mixed))
+
+        assertEquals(listOf(1004248L), result.map { it.id })
     }
 
     private fun BeatmapSetModel.assertProperties() {

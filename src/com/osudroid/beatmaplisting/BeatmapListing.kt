@@ -103,6 +103,12 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
     private var offset = 0
 
     /**
+     * Incremented on the main thread whenever a new [search] or [lookup] starts. Results of requests that started
+     * before the latest one are discarded.
+     */
+    private var requestGeneration = 0
+
+    /**
      * The link currently being looked up. Non-null means the listing is in lookup mode.
      */
     private var lookupLink: BeatmapLink? = null
@@ -226,6 +232,8 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
         lookupLink = link
         adapter.pendingAutoOpen = null
 
+        val generation = ++requestGeneration
+
         mainThread {
             indicator.visibility = VISIBLE
             retryButton.visibility = GONE
@@ -235,20 +243,27 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
 
             if (throwable is UnsuccessfulResponseException && throwable.code == 404) {
-                ToastLogger.showText("Beatmap not found on ${mirror.description}.", true)
-
                 mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
+
+                    ToastLogger.showText("Beatmap not found on ${mirror.description}.", true)
                     indicator.visibility = GONE
                 }
 
                 return@CoroutineExceptionHandler
             }
 
-            ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
-
-            Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
-
             mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+
+                Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+
                 indicator.visibility = GONE
                 retryButton.visibility = VISIBLE
             }
@@ -256,6 +271,10 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
             offset = 0
 
             mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
                 val itemCount = adapter.data.size
                 adapter.data.clear()
                 adapter.notifyItemRangeRemoved(0, itemCount)
@@ -271,6 +290,16 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
             ensureActive()
 
             mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                if (beatmapSet.beatmaps.isEmpty()) {
+                    ToastLogger.showText("This beatmap set has no osu!standard difficulties.", true)
+                    indicator.visibility = GONE
+                    return@mainThread
+                }
+
                 if (!adapter.hasAutoOpened) {
                     adapter.pendingAutoOpen = beatmapSet.id to (link as? BeatmapLink.Beatmap)?.beatmapId
                 }
@@ -288,6 +317,8 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
         lookupLink = null
         adapter.pendingAutoOpen = null
 
+        val generation = ++requestGeneration
+
         mainThread {
             indicator.visibility = VISIBLE
             retryButton.visibility = GONE
@@ -296,11 +327,15 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
 
-            ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
-
-            Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
-
             mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+
+                Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+
                 indicator.visibility = GONE
                 retryButton.visibility = VISIBLE
             }
@@ -310,6 +345,10 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
                 offset = 0
 
                 mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
+
                     val itemCount = adapter.data.size
                     adapter.data.clear()
                     adapter.notifyItemRangeRemoved(0, itemCount)
@@ -336,8 +375,15 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
                 ensureActive()
 
                 mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
+
+                    // Insert at the current size rather than the mirror's paging offset, since filtering can make pages
+                    // shorter than the page size.
+                    val start = adapter.data.size
                     adapter.data.addAll(beatmapSets)
-                    adapter.notifyItemRangeInserted(offset, beatmapSets.size)
+                    adapter.notifyItemRangeInserted(start, beatmapSets.size)
                     indicator.visibility = GONE
                 }
             }

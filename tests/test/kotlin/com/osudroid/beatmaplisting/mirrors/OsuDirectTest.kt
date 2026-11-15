@@ -46,6 +46,62 @@ class OsuDirectTest {
         assertEquals(fromLink, OsuDirectSearchResponseModel()(JSONArray().put(set)).single())
     }
 
+    @Test
+    fun `Beatmapset link keeps only osu!standard difficulties`() {
+        val json = fixture("osudirect-beatmapset-1004248")
+        val beatmaps = json.getJSONArray("beatmaps")
+        val standard = beatmaps.getJSONObject(0)
+
+        for ((index, mode) in listOf(1, 2, 3).withIndex()) {
+            beatmaps.put(JSONObject(standard.toString()).put("id", 9000L + index).put("mode_int", mode))
+        }
+
+        val set = OsuDirectBeatmapsetLinkHandler(FakeFetch(mapOf("https://osu.direct/api/v2/s/1004248" to json)))(1004248)
+
+        assertEquals(listOf(2101856L), set.beatmaps.map { it.id })
+    }
+
+    @Test
+    fun `Beatmapset link yields no beatmaps when set has no osu!standard difficulties`() {
+        val json = fixture("osudirect-beatmapset-1004248")
+        val beatmaps = json.getJSONArray("beatmaps")
+
+        for (i in 0 until beatmaps.length()) {
+            beatmaps.getJSONObject(i).put("mode_int", 1)
+        }
+
+        val set = OsuDirectBeatmapsetLinkHandler(FakeFetch(mapOf("https://osu.direct/api/v2/s/1004248" to json)))(1004248)
+
+        assertTrue(set.beatmaps.isEmpty())
+    }
+
+    @Test
+    fun `Search response drops sets without osu!standard difficulties`() {
+        val mixed = fixture("osudirect-beatmapset-1004248")
+        val taikoOnly = fixture("osudirect-beatmapset-1004248").put("id", 555L)
+        val taikoBeatmaps = taikoOnly.getJSONArray("beatmaps")
+
+        for (i in 0 until taikoBeatmaps.length()) {
+            taikoBeatmaps.getJSONObject(i).put("mode_int", 1)
+        }
+
+        val result = OsuDirectSearchResponseModel()(JSONArray().put(taikoOnly).put(mixed))
+
+        assertEquals(listOf(1004248L), result.map { it.id })
+    }
+
+    @Test
+    fun `Beatmapset link falls back when unicode fields are JSON null`() {
+        val json = fixture("osudirect-beatmapset-1004248")
+            .put("title_unicode", JSONObject.NULL)
+            .put("artist_unicode", JSONObject.NULL)
+
+        val set = OsuDirectBeatmapsetLinkHandler(FakeFetch(mapOf("https://osu.direct/api/v2/s/1004248" to json)))(1004248)
+
+        assertEquals("RESISTANCE", set.titleUnicode)
+        assertEquals("FELT", set.artistUnicode)
+    }
+
     private fun BeatmapSetModel.assertProperties() {
         assertEquals(1004248L, id)
         assertEquals("RESISTANCE", title)
