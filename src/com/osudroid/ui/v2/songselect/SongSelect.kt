@@ -26,8 +26,10 @@ import com.reco1l.andengine.theme.Colors
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Color4
+import com.reco1l.framework.interpolate
 import com.reco1l.framework.math.Vec4
 import kotlinx.coroutines.*
+import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -137,6 +139,18 @@ object SongSelect : UIScene() {
     private var currentBeatmapLoadingJob: Job? = null
     private var currentCalculationJob: Job? = null
     private var currentLibraryLoadingJob: Job? = null
+
+    /**
+     * The seconds since the music started to fade in, negative when it does not.
+     */
+    @Volatile
+    private var musicFadeTime = -1f
+
+    /**
+     * Whether the music is started again when it ended. Not while it is being loaded.
+     */
+    @Volatile
+    private var isMusicRestartAllowed = false
 
 
     init {
@@ -460,7 +474,14 @@ object SongSelect : UIScene() {
 
 
     private fun playMusic(beatmapInfo: BeatmapInfo) {
+        if (!Config.isPlayMusicPreview()) {
+            return
+        }
+
         val songService = GlobalManager.getInstance().songService ?: return
+
+        isMusicRestartAllowed = false
+        musicFadeTime = -1f
 
         songService.preLoad(beatmapInfo.audioPath)
         updateMusicEffects()
@@ -471,7 +492,37 @@ object SongSelect : UIScene() {
             (songService.length * 0.4f).toInt()
 
         songService.play()
+        songService.setVolume(0f)
         songService.seekTo(previewTime)
+
+        musicFadeTime = 0f
+        isMusicRestartAllowed = true
+    }
+
+    /**
+     * Fades the music in after it started, and starts it again once it ended.
+     */
+    private fun updateMusic(deltaTimeSec: Float) {
+        val songService = GlobalManager.getInstance().songService ?: return
+
+        if (musicFadeTime >= 0f) {
+            musicFadeTime += deltaTimeSec
+
+            val progress = (musicFadeTime / MUSIC_FADE_DURATION).coerceAtMost(1f)
+            songService.setVolume(Easing.Out.interpolate(progress) * Config.getBgmVolume())
+
+            if (progress >= 1f || songService.status == Status.STOPPED) {
+                musicFadeTime = -1f
+            }
+        }
+
+        // The length of a stream that finished playing is 0.
+        if (isMusicRestartAllowed && Config.isPlayMusicPreview() && songService.length == 0) {
+            val beatmapInfo = selectedBeatmap ?: return
+
+            isMusicRestartAllowed = false
+            beatmapLoadingScope.launch { playMusic(beatmapInfo) }
+        }
     }
 
     /**
@@ -577,7 +628,19 @@ object SongSelect : UIScene() {
             }
         }
 
+        updateMusic(pSecondsElapsed)
+
         super.onManagedUpdate(pSecondsElapsed)
+    }
+
+    override fun onDetached() {
+        super.onDetached()
+
+        // The fade is not continued while the scene is not shown.
+        if (musicFadeTime >= 0f) {
+            musicFadeTime = -1f
+            GlobalManager.getInstance().songService?.setVolume(Config.getBgmVolume())
+        }
     }
 
     /**
@@ -647,5 +710,10 @@ object SongSelect : UIScene() {
      * Duration of the background fade-in in seconds.
      */
     private const val BACKGROUND_FADE_DURATION = 0.4f
+
+    /**
+     * Duration of the music fade-in in seconds.
+     */
+    private const val MUSIC_FADE_DURATION = 0.8f
 
 }
