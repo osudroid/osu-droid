@@ -61,6 +61,12 @@ class TextureStore {
      */
     private val absentTexture: TextureRegion = BlankTextureRegion()
 
+    /**
+     * The asset file each name was loaded from by [loadHighQualityAsset], as long as nothing else was stored
+     * under the name since.
+     */
+    private val highQualityAssetFiles = HashMap<String, String>()
+
     //region Bookkeeping
 
     /** Returns the cached region for [name], or `null` if absent or explicitly marked absent via [markAbsent]. */
@@ -176,6 +182,12 @@ class TextureStore {
     }
 
     fun loadHighQualityAsset(resname: String, file: String): TextureRegion? {
+        // Scenes load their icons whenever they are created. An asset does not change, and replacing the region
+        // would unload the texture that the scenes created before still show.
+        if (highQualityAssetFiles[resname] == file) {
+            get(resname)?.let { return it }
+        }
+
         val source = QualityAssetBitmapSource(context, file)
         if (source.width == 0 || source.height == 0) {
             return null
@@ -184,6 +196,7 @@ class TextureStore {
         val region = createRegion(source, source.width, source.height, TextureOptions.BILINEAR)
 
         replace(resname, region)
+        highQualityAssetFiles[resname] = file
         return region
     }
 
@@ -220,6 +233,8 @@ class TextureStore {
      * or atlas page alive forever.
      */
     fun replace(name: String, region: TextureRegion) {
+        highQualityAssetFiles.remove(name)
+
         val previous = textures.put(name, region) ?: return
         if (previous === absentTexture || previous === region || textures.containsValue(previous)) return
         releaseTexture(previous)
