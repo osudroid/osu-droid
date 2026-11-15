@@ -9,8 +9,8 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode
 
 /**
- * Switches the leaderboard between local and global scores. For the global leaderboard a tab below the
- * button shows and switches the ranking (PP or score).
+ * Switches the leaderboard from the local scores to the global ones ranked by PP, to the global ones ranked by
+ * score and back to the local ones. Its [modeTab] names the current one.
  */
 class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : UILinearContainer() {
 
@@ -24,30 +24,34 @@ class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : 
         +switchIcon
     }
 
-    private val modeTab = FilterBarTab()
+    /**
+     * Placed by the [SongSelectFilterBar] in the row below its buttons.
+     */
+    val modeTab = FilterBarTab()
+
+    private val isGlobal
+        get() = leaderboard.leaderboardType == LeaderboardType.Global
 
 
     init {
-        orientation = Orientation.Vertical
-        spacing = FilterBarTab.SPACING
-
         +switchButton.apply {
             onActionUp = {
-                leaderboard.leaderboardType = if (leaderboard.leaderboardType == LeaderboardType.Local) LeaderboardType.Global else LeaderboardType.Local
-                updateState()
-            }
-        }
+                when {
+                    !isGlobal -> {
+                        Config.setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode.PP)
+                        leaderboard.leaderboardType = LeaderboardType.Global
+                    }
 
-        +modeTab.apply {
-            onActionUp = {
-                val mode = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP)
-                    BeatmapLeaderboardScoringMode.SCORE
-                else
-                    BeatmapLeaderboardScoringMode.PP
+                    Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP -> {
+                        Config.setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode.SCORE)
+                        // The type stays the same, so the scores are not loaded again on their own.
+                        leaderboard.onBeatmapSelected(SongSelect.selectedBeatmap)
+                    }
 
-                Config.setBeatmapLeaderboardScoringMode(mode)
+                    else -> leaderboard.leaderboardType = LeaderboardType.Local
+                }
+
                 updateState()
-                leaderboard.onBeatmapSelected(SongSelect.selectedBeatmap)
             }
         }
 
@@ -56,7 +60,7 @@ class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : 
 
 
     /**
-     * Sets the size of the button itself, the mode tab below it has the same width.
+     * Sets the size of the button itself, the mode tab has the same width for all of its texts.
      */
     fun setButtonSize(width: Float, height: Float) {
         switchButton.width = width
@@ -65,11 +69,12 @@ class LeaderboardSwitchButton(private val leaderboard: SongSelectLeaderboard) : 
     }
 
     private fun updateState() {
-        val isGlobal = leaderboard.leaderboardType == LeaderboardType.Global
-
         switchIcon.icon = if (isGlobal) Icon.Globe else Icon.Mobile
-        modeTab.isVisible = isGlobal
-        modeTab.text = if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) "PP" else "Score"
+        modeTab.text = when {
+            !isGlobal -> "Local"
+            Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP -> "PP"
+            else -> "Score"
+        }
     }
 
 }

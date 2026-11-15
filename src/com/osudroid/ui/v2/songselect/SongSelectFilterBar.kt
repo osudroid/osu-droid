@@ -12,14 +12,25 @@ import com.reco1l.framework.math.Vec4
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 /**
- * The bar above the [BeatmapCarrousel] holding the leaderboard switch button, the filter button and the search input.
+ * The bar above the [BeatmapCarrousel] holding the leaderboard switch button, the filter button and the search
+ * input. Below them a line names the leaderboard and tells how many beatmap sets are listed.
  *
  * The search box is collapsed to the filter button's size when unused, and spans the rest of the bar when in use.
  */
 class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContainer() {
 
     private lateinit var filterButton: UIIconButton
-    private val sortTab = FilterBarTab()
+
+    /**
+     * Tells how many beatmap sets are listed, and by which filters if not all of them are.
+     */
+    private val statusText = UIText().apply {
+        font = ResourceManager.getInstance().getFont("xs")
+        height = FilterBarTab.HEIGHT
+        alignment = Anchor.CenterLeft
+        applyTheme = { color = it.accentColor }
+    }
+
     private val switchButton = LeaderboardSwitchButton(leaderboard)
     private val searchBox: UIContainer
     private val searchInput: UITextInput
@@ -32,6 +43,11 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
      */
     private var searchBoxWidth = -1f
 
+    private var statusCollection: String? = null
+    private var statusFavoritesOnly = false
+    private var statusListed = -1
+    private var statusTotal = -1
+
 
     init {
         ResourceManager.getInstance().loadHighQualityAsset("filters", "filters.png")
@@ -40,29 +56,9 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         width = FillParent
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
-        padding = Vec4(16f, 16f, 32f, 16f)
-        // A linear container, the flex container would lock the search box to its content width.
-        orientation = Orientation.Horizontal
-        spacing = 14f
-
-        +switchButton
-
-        // Like the leaderboard switch, a tab below the button shows the current state, here the sort order.
-        linearContainer {
-            orientation = Orientation.Vertical
-            spacing = FilterBarTab.SPACING
-
-            val showPopup = { SongSelectFilterPopup(this).show() }
-
-            // Square, the other buttons of the bar take its size.
-            filterButton = iconButton {
-                icon = ResourceManager.getInstance().getTexture("filters")
-                padding = Vec4(16f)
-                onActionUp = showPopup
-            }
-
-            +sortTab.apply { onActionUp = showPopup }
-        }
+        padding = Vec4(4f.srem, 4f.srem, 8f.srem, 4f.srem)
+        orientation = Orientation.Vertical
+        spacing = FilterBarTab.SPACING
 
         searchInput = object : UITextInput("") {
 
@@ -92,7 +88,7 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
             }
         }
 
-        searchBox = container {
+        searchBox = UIContainer().apply {
             // No clipping, it would cut off the input's outline.
 
             +searchInput
@@ -129,6 +125,32 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
                 +clearIcon
             }
         }
+
+        // A linear container, the flex container would lock the search box to its content width.
+        linearContainer {
+            orientation = Orientation.Horizontal
+            width = FillParent
+            spacing = BUTTON_SPACING
+
+            +switchButton
+
+            // Square, the other buttons of the bar take its size.
+            filterButton = iconButton {
+                icon = ResourceManager.getInstance().getTexture("filters")
+                padding = Vec4(16f)
+                onActionUp = { SongSelectFilterPopup(this@linearContainer).show() }
+            }
+
+            +searchBox
+        }
+
+        linearContainer {
+            orientation = Orientation.Horizontal
+            spacing = 2f.srem
+
+            +switchButton.modeTab
+            +statusText
+        }
     }
 
 
@@ -137,16 +159,18 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         searchIcon.isVisible = !hasText
         clearIcon.isVisible = hasText
         filterButton.isSelected = SongSelect.isFilterActive
-        sortTab.width = filterButton.width
-        sortTab.text = SongSelect.sortOrder.label
+
+        // Not before the library is loaded.
+        statusText.isVisible = SongSelect.setCount > 0
+        statusText.text = statusOf(SongSelect.collection, SongSelect.isFavoritesOnly, SongSelect.listedSetCount, SongSelect.setCount)
 
         switchButton.setButtonSize(filterButton.width, filterButton.height)
-        // The switch button grows below the bar when its mode tab is shown, the search box keeps the button height.
         searchBox.height = filterButton.height
         searchIconButton.width = filterButton.width
 
         val collapsedWidth = filterButton.width
-        val fullWidth = innerWidth - filterButton.width - switchButton.width - spacing * 2f
+        val buttonsWidth = filterButton.width + switchButton.width + BUTTON_SPACING * 2f
+        val fullWidth = innerWidth - buttonsWidth
         val isInUse = searchInput.isFocused || searchInput.value.isNotEmpty()
         val targetWidth = if (isInUse) maxOf(collapsedWidth, fullWidth) else collapsedWidth
 
@@ -158,5 +182,36 @@ class SongSelectFilterBar(leaderboard: SongSelectLeaderboard) : UILinearContaine
         super.onManagedUpdate(deltaTimeSec)
     }
 
+    private fun statusOf(collection: String?, isFavoritesOnly: Boolean, listed: Int, total: Int): String {
+        // Called every frame, the text is only built again when something changed.
+        if (collection == statusCollection && isFavoritesOnly == statusFavoritesOnly && listed == statusListed && total == statusTotal) {
+            return statusText.text
+        }
+
+        statusCollection = collection
+        statusFavoritesOnly = isFavoritesOnly
+        statusListed = listed
+        statusTotal = total
+
+        return buildString {
+            if (listed != total) {
+                append(listed).append(" of ")
+            }
+            append(total).append(if (total == 1) " map" else " maps")
+
+            if (collection != null) {
+                append(SEPARATOR).append(collection)
+            }
+            if (isFavoritesOnly) {
+                append(SEPARATOR).append("Favorites")
+            }
+        }
+    }
+
+
+    companion object {
+        private const val SEPARATOR = " · "
+        private const val BUTTON_SPACING = 14f
+    }
 
 }

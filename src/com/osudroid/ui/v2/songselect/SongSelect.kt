@@ -115,6 +115,18 @@ object SongSelect : UIScene() {
     var collection: String? = null
 
     /**
+     * The number of beatmap sets in the library.
+     */
+    val setCount
+        get() = allBeatmapSets.size
+
+    /**
+     * The number of beatmap sets the carrousel lists, less than [setCount] while the search or a filter hides some.
+     */
+    val listedSetCount
+        get() = beatmapCarrousel.data.size
+
+    /**
      * Whether beatmap sets are hidden by something other than the search text.
      */
     val isFilterActive
