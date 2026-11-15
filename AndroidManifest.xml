@@ -121,6 +121,18 @@
                 <data android:scheme="https" android:host="odmp"/>
             </intent-filter>
 
+            <!-- osu! beatmap links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="osu" android:host="b" />
+                <data android:scheme="osu" android:host="s" />
+                <data android:scheme="osu" android:host="dl" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -42,6 +42,8 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
+import com.osudroid.beatmaplisting.BeatmapLink;
+import com.osudroid.beatmaplisting.BeatmapListing;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
@@ -88,6 +90,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okio.Okio;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -131,6 +134,9 @@ public class MainActivity extends BaseGameActivity implements
 
     // Multiplayer
     private Uri roomInviteLink;
+
+    private final AtomicReference<BeatmapLink> pendingBeatmapLink = new AtomicReference<>();
+    private volatile boolean startupFinished;
 
     @Override
     public Engine onLoadEngine() {
@@ -391,6 +397,9 @@ public class MainActivity extends BaseGameActivity implements
                         fileToAdd = null;
                         willReplay = false;
                     }
+
+                    startupFinished = true;
+                    openPendingBeatmapLink();
 
                     GlobalManager.getInstance().getMainScene().loadBannerSprite();
                 });
@@ -790,6 +799,15 @@ public class MainActivity extends BaseGameActivity implements
                     Multiplayer.connectFromLink(roomInviteLink);
                     roomInviteLink = null;
                 });
+
+                return;
+            }
+
+            if (pendingBeatmapLink.get() != null) {
+                // Before startup has finished, the link stays pending for the startup operation to consume.
+                if (startupFinished) {
+                    openPendingBeatmapLink();
+                }
 
                 return;
             }
@@ -1215,12 +1233,38 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    private void openPendingBeatmapLink() {
+        Execution.updateThread(() -> {
+            var link = pendingBeatmapLink.getAndSet(null);
+
+            if (link == null) {
+                return;
+            }
+
+            if (mEngine != null) {
+                var scene = mEngine.getScene();
+                var gameScene = GlobalManager.getInstance().getGameScene();
+
+                if (scene != null && gameScene != null && scene == gameScene.getScene()) {
+                    ToastLogger.showText("Beatmap links cannot be opened during gameplay.", true);
+                    return;
+                }
+            }
+
+            new BeatmapListing(link).show();
+        });
+    }
+
     private boolean parseIntent(Intent intent) {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri data = intent.getData();
 
             if (data != null) {
-                if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
+                var beatmapLink = BeatmapLink.parse(data.toString());
+
+                if (beatmapLink != null) {
+                    pendingBeatmapLink.set(beatmapLink);
+                } else if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
                     roomInviteLink = data;
                 } else {
                     String scheme = data.getScheme();
