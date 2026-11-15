@@ -337,7 +337,12 @@ object SongSelect : UIScene() {
             updateThread {
                 beatmapCarrousel.data = sorted
                 listedSetCount = listedSets
-                selectCurrentBeatmap()
+
+                // Selecting loads the background and the music, which must not happen behind another scene, e.g.
+                // when the library is loaded at startup. The beatmap is selected when the scene is shown.
+                if (GlobalManager.getInstance().engine.scene === this@SongSelect) {
+                    selectCurrentBeatmap()
+                }
             }
         }
     }
