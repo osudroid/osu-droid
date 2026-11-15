@@ -209,9 +209,7 @@ object SongSelect : UIScene() {
                     color = Colors.White
                 }
 
-                onActionUp = {
-                    GlobalManager.getInstance().mainMenuV2.show()
-                }
+                onActionUp = { onBackPressed() }
             }
 
             modsButton = textButton {
@@ -323,6 +321,17 @@ object SongSelect : UIScene() {
         beatmapCarrousel.selectedPanel?.updateStarRatings()
         onBeatmapSelected(selectedBeatmap)
         loadBeatmaps()
+    }
+
+    /**
+     * Leaves the mod menu if it is shown, the song select otherwise.
+     */
+    fun onBackPressed() {
+        if (childScene === ModMenu) {
+            ModMenu.back()
+        } else {
+            GlobalManager.getInstance().mainMenuV2.show()
+        }
     }
 
     /**

@@ -1257,6 +1257,11 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
+        if (keyCode == KeyEvent.KEYCODE_BACK && currentScene == SongSelect.INSTANCE) {
+            Execution.updateThread(SongSelect.INSTANCE::onBackPressed);
+            return true;
+        }
+
         var songMenu = GlobalManager.getInstance().getSongMenu();
 
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
