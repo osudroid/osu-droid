@@ -70,6 +70,10 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
             if (field != value) {
                 field = value
 
+                if (value != null) {
+                    selectedModel = value.boundData
+                }
+
                 boundComponents.values.forEach { panel ->
                     if (panel != value) {
                         panel.collapse()
@@ -78,6 +82,28 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
                     }
                 }
             }
+        }
+
+    /**
+     * The entry that was selected last. Unlike the [selectedPanel] it is kept when its panel is recycled.
+     */
+    private var selectedModel: BeatmapSetModel? = null
+
+    /**
+     * Whether the selected entry is in the visible part of the list, also `true` if it is not listed at all.
+     */
+    val isSelectedEntryInSight: Boolean
+        get() {
+            val model = selectedModel ?: return true
+
+            if (model !in dataIndices) {
+                return true
+            }
+
+            // Not bound, so it is beyond the panels that are.
+            val panel = boundComponents[model] ?: return false
+
+            return panel.absoluteY + panel.height >= scrollY && panel.absoluteY <= scrollY + height
         }
 
     /**

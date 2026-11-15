@@ -22,7 +22,9 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.component.UIComponent.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.FontAwesomeIcon
 import com.reco1l.andengine.theme.Colors
+import com.reco1l.andengine.theme.Icon
 import com.reco1l.andengine.theme.srem
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Color4
@@ -67,6 +69,25 @@ object SongSelect : UIScene() {
 
     private lateinit var modsButton: UITextButton
     private lateinit var randomButton: UITextButton
+
+    /**
+     * Scrolls back to the selected beatmap, only shown while it is out of sight.
+     */
+    private val jumpButton = UIButton().apply {
+        anchor = Anchor.BottomRight
+        origin = Anchor.BottomRight
+        x = -8f.srem
+        y = -8f.srem
+        padding = Vec4(16f)
+        isVisible = false
+        onActionUp = { selectCurrentBeatmap() }
+
+        +FontAwesomeIcon(Icon.LocationCrosshairs).apply {
+            anchor = Anchor.Center
+            origin = Anchor.Center
+            iconSize = 22f
+        }
+    }
 
     /**
      * The previously selected beatmaps, one per beatmap set change, newest last. Holding the random button
@@ -197,6 +218,7 @@ object SongSelect : UIScene() {
 
                 +beatmapCarrousel
                 +filterBar
+                +jumpButton
             }
         }
 
@@ -629,6 +651,8 @@ object SongSelect : UIScene() {
         }
 
         updateMusic(pSecondsElapsed)
+
+        jumpButton.isVisible = !beatmapCarrousel.isSelectedEntryInSight
 
         super.onManagedUpdate(pSecondsElapsed)
     }
