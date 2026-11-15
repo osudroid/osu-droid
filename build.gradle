@@ -213,7 +213,7 @@ dependencies {
     // Multiplayer
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation ('io.socket:socket.io-client:2.1.1') {
+    implementation ('io.socket:socket.io-client:2.1.2') {
         exclude group: 'org.json', module: 'json'
     }
 
