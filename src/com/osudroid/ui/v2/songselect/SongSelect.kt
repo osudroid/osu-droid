@@ -123,8 +123,8 @@ object SongSelect : UIScene() {
     /**
      * The number of beatmap sets the carrousel lists, less than [setCount] while the search or a filter hides some.
      */
-    val listedSetCount
-        get() = beatmapCarrousel.data.size
+    var listedSetCount = 0
+        private set
 
     /**
      * Whether beatmap sets are hidden by something other than the search text.
@@ -280,20 +280,27 @@ object SongSelect : UIScene() {
             }
 
             val search = BeatmapSearchQuery(query)
+            val entries = if (sortOrder.isPerDifficulty) allBeatmapSets.flatMap { it.difficulties } else allBeatmapSets
 
             val collectionSets = collection?.let { DatabaseManager.beatmapCollectionsTable.getBeatmaps(it)?.toHashSet() }
 
-            val filtered = allBeatmapSets.filter { model ->
+            val filtered = entries.filter { model ->
                 (!isFavoritesOnly || model.isFavorite)
                     && (collectionSets == null || model.beatmapSetInfo.directory in collectionSets)
-                    && search.matches(model.beatmapSetInfo.beatmaps)
+                    && search.matches(model.beatmaps)
             }
 
             val sorted = filtered.sortedWith(sortOrder.comparator)
+            // Sets can share a directory.
+            val listedSets = if (sortOrder.isPerDifficulty)
+                filtered.distinctBy { it.beatmapSetInfo.directory to it.beatmapSetInfo.id }.size
+            else
+                filtered.size
 
             ensureActive()
             updateThread {
                 beatmapCarrousel.data = sorted
+                listedSetCount = listedSets
                 selectCurrentBeatmap()
             }
         }
@@ -531,7 +538,7 @@ object SongSelect : UIScene() {
     private fun selectPreviousBeatmap(): Boolean {
         while (previousSelections.isNotEmpty()) {
             val beatmapInfo = previousSelections.removeLast()
-            val model = beatmapCarrousel.data.find { it.beatmapSetInfo.directory == beatmapInfo.setDirectory } ?: continue
+            val model = findModel(beatmapInfo) ?: continue
 
             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
 
@@ -574,11 +581,20 @@ object SongSelect : UIScene() {
     }
 
     /**
+     * The entry of the carrousel that lists a beatmap, or another one of its set if the beatmap itself is hidden.
+     */
+    private fun findModel(beatmapInfo: BeatmapInfo): BeatmapSetModel? {
+        val models = beatmapCarrousel.data.filter { it.beatmapSetInfo.directory == beatmapInfo.setDirectory }
+
+        return models.find { model -> model.beatmaps.any { it.path == beatmapInfo.path } } ?: models.firstOrNull()
+    }
+
+    /**
      * Selects the panel of the globally selected beatmap, if it is part of the carrousel data.
      */
     private fun selectCurrentBeatmap() {
         val currentBeatmapInfo = GlobalManager.getInstance().selectedBeatmap ?: return
-        val model = beatmapCarrousel.data.find { it.beatmapSetInfo.directory == currentBeatmapInfo.setDirectory } ?: return
+        val model = findModel(currentBeatmapInfo) ?: return
 
         beatmapCarrousel.applyComponent(model) {
             select(currentBeatmapInfo)

@@ -17,6 +17,16 @@ class BeatmapSetModel(
     val beatmapSetInfo: BeatmapSetInfo,
     var coverTexture: TextureRegion? = null,
     var isLoadingCover: Boolean = false,
+
+    /**
+     * The difficulties of the set this entry lists, all of them unless it is one of the [difficulties] of a set.
+     */
+    val beatmaps: List<BeatmapInfo> = beatmapSetInfo.beatmaps,
+
+    /**
+     * The entry of the whole set, if this one lists a single difficulty of it.
+     */
+    private val setModel: BeatmapSetModel? = null,
 ) {
     /**
      * Whether the set has no cover to show, e.g. because it has no background. It is not loaded again then.
@@ -27,6 +37,17 @@ class BeatmapSetModel(
      * Whether the set is marked as favorite, shown as a heart on its panel.
      */
     var isFavorite = false
+        get() = setModel?.isFavorite ?: field
+        set(value) {
+            if (setModel != null) setModel.isFavorite = value else field = value
+        }
+
+    /**
+     * One entry per difficulty of the set, for the sort orders that list the difficulties on their own.
+     */
+    val difficulties by lazy {
+        beatmapSetInfo.beatmaps.map { BeatmapSetModel(beatmapSetInfo, beatmaps = listOf(it), setModel = this) }
+    }
 
     /**
      * The name of the cover texture, duplicate imports of a set share the same cover.
@@ -194,7 +215,7 @@ class BeatmapCarrousel : UIRecyclerContainer<BeatmapSetModel, BeatmapSetPanel>()
 
                 val model = data.getOrNull(index) ?: continue
 
-                if (index < from || index > to || model.coverTexture != null || model.isLoadingCover || model.isCoverUnavailable || model.beatmapSetInfo.beatmaps.isEmpty()) {
+                if (index < from || index > to || model.coverTexture != null || model.isLoadingCover || model.isCoverUnavailable || model.beatmaps.isEmpty()) {
                     continue
                 }
 

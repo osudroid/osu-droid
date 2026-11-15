@@ -226,7 +226,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     override fun onBind(data: BeatmapSetModel) {
-        val firstBeatmap = data.beatmapSetInfo.beatmaps.getOrNull(0)
+        val firstBeatmap = data.beatmaps.getOrNull(0)
 
         titleText.text = firstBeatmap?.titleText ?: "Unknown"
         artistText.text = firstBeatmap?.artistText ?: "Unknown"
@@ -393,7 +393,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
             // Releases panels left over from a collapse that is still animating.
             releasePanels()
 
-            data.beatmapSetInfo.beatmaps.sortedBy { it.getStarRating() }.forEach {
+            data.beatmaps.sortedBy { it.getStarRating() }.forEach {
                 panelsContainer.attachChild(beatmapCarrousel.obtainBeatmapPanel(this, it))
             }
         }

@@ -7,7 +7,16 @@ import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
  *
  * Stored by ordinal in the same preference as the order of the legacy song menu, the entries must keep their order.
  */
-enum class BeatmapSortOrder(val label: String, val comparator: Comparator<BeatmapSetModel>) {
+enum class BeatmapSortOrder(
+    val label: String,
+    val comparator: Comparator<BeatmapSetModel>,
+
+    /**
+     * Whether the order is about a value that differs between the difficulties of a set, which are listed on
+     * their own then.
+     */
+    val isPerDifficulty: Boolean = false,
+) {
 
     Title("Title", compareBy(String.CASE_INSENSITIVE_ORDER) { it.firstBeatmap?.titleText.orEmpty() }),
     Artist("Artist", compareBy(String.CASE_INSENSITIVE_ORDER) { it.firstBeatmap?.artistText.orEmpty() }),
@@ -15,18 +24,13 @@ enum class BeatmapSortOrder(val label: String, val comparator: Comparator<Beatma
     Date("Date", compareByDescending { it.firstBeatmap?.dateImported ?: 0L }),
     Bpm("BPM", compareByDescending { it.firstBeatmap?.bpmMax ?: 0f }),
 
-    // By the hardest difficulty of the set. Both are listed as one order, which of them applies depends on the
-    // difficulty algorithm.
-    DroidStars("Stars", compareByDescending { model ->
-        model.beatmapSetInfo.beatmaps.maxOfOrNull { it.getStarRating(DifficultyAlgorithm.droid) } ?: 0f
-    }),
-    StandardStars("Stars", compareByDescending { model ->
-        model.beatmapSetInfo.beatmaps.maxOfOrNull { it.getStarRating(DifficultyAlgorithm.standard) } ?: 0f
-    }),
+    // Both are listed as one order, which of them applies depends on the difficulty algorithm.
+    DroidStars("Stars", compareByDescending { it.firstBeatmap?.getStarRating(DifficultyAlgorithm.droid) ?: 0f }, true),
+    StandardStars("Stars", compareByDescending { it.firstBeatmap?.getStarRating(DifficultyAlgorithm.standard) ?: 0f }, true),
 
-    Length("Length", compareByDescending { it.firstBeatmap?.length ?: 0L })
+    Length("Length", compareByDescending { it.firstBeatmap?.length ?: 0L }, true)
 
 }
 
 private val BeatmapSetModel.firstBeatmap
-    get() = beatmapSetInfo.beatmaps.getOrNull(0)
+    get() = beatmaps.getOrNull(0)
