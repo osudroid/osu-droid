@@ -1,8 +1,11 @@
 package com.osudroid.ui.v2.songselect
 
+import android.util.Log
 import com.osudroid.BuildSettings
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
+import com.osudroid.mods.LegacyModConverter
+import com.osudroid.mods.ModReplayV6
 import com.osudroid.online.IBanchoAPI
 import com.osudroid.online.model.BeatmapScore
 import com.osudroid.online.model.BeatmapScoreModel
@@ -22,10 +25,16 @@ import com.reco1l.framework.math.Vec4
 import com.rian.andengine.modifier.ModifierType
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator
+import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import java.io.File
+import java.io.IOException
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
@@ -58,7 +67,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
     private lateinit var personalBestContainer: UILinearContainer
     private val personalBestHeader = UIText()
-    private val personalBestItem = LeaderboardItem(true)
+    private val personalBestItem = LeaderboardItem(true, ::openScore, ::showScoreOptions)
 
 
     private var currentLoadingJob: Job? = null
@@ -104,7 +113,7 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                 // One pool for both leaderboard types, recreating it on every tab switch caused a visible hitch.
                 // Local scores have no avatar URL and show the offline avatar.
-                onCreateComponent = { LeaderboardItem(true) }
+                onCreateComponent = { LeaderboardItem(true, ::openScore, ::showScoreOptions) }
             }
 
             // Docked at the bottom of the list area, on top of the scrolling scores.
@@ -325,7 +334,114 @@ class SongSelectLeaderboard : UILinearContainer() {
     }
 
 
-    class LeaderboardItem(withAvatars: Boolean) : RecyclableComponent<BeatmapScoreModel>() {
+    /**
+     * Opens the result screen of a score of the selected beatmap, from where its replay can be watched.
+     */
+    private fun openScore(score: BeatmapScoreModel) {
+        val beatmapInfo = SongSelect.selectedBeatmap ?: return
+        val scoreId = score.scoreId.toInt()
+
+        if (leaderboardType == Global) {
+            openOnlineScore(beatmapInfo, scoreId, score.playerName)
+            return
+        }
+
+        val difficulty = beatmapInfo.getBeatmapDifficulty()
+        val scoreInfo = DatabaseManager.scoreInfoTable.getScore(scoreId)
+
+        if (scoreInfo == null) {
+            ToastLogger.showText("Could not open score", true)
+            return
+        }
+
+        val stat = try {
+            scoreInfo.toStatisticV2(difficulty)
+        } catch (_: IllegalArgumentException) {
+            // The mods are likely in the old format that somehow was not converted during migration.
+            val convertedMods = LegacyModConverter.convert(scoreInfo.mods)
+
+            // Scores that are using the legacy mods format are guaranteed to use these mods.
+            convertedMods.put(ModReplayV6())
+
+            scoreInfo.mods = convertedMods.serializeMods()
+            DatabaseManager.scoreInfoTable.updateScore(scoreInfo)
+
+            try {
+                scoreInfo.toStatisticV2(difficulty)
+            } catch (e: IllegalArgumentException) {
+                Log.e("SongSelectLeaderboard", "Cannot open score after mod conversion", e)
+                ToastLogger.showText("Could not open score", true)
+                return
+            }
+        }
+
+        // The result screen parses the replay and completes the statistics of old scores, which are saved then.
+        val needsUpdate = stat.sliderHeadHits == -1 || stat.sliderTickHits == -1 || stat.sliderRepeatHits == -1 || stat.sliderEndHits == -1
+        val replayFile = File(scoreInfo.replayPath)
+
+        showScore(stat, if (replayFile.exists()) replayFile.absolutePath else null, beatmapInfo)
+
+        if (needsUpdate) {
+            scoreInfo.sliderHeadHits = stat.sliderHeadHits.takeUnless { it == -1 }
+            scoreInfo.sliderTickHits = stat.sliderTickHits.takeUnless { it == -1 }
+            scoreInfo.sliderRepeatHits = stat.sliderRepeatHits.takeUnless { it == -1 }
+            scoreInfo.sliderEndHits = stat.sliderEndHits.takeUnless { it == -1 }
+
+            DatabaseManager.scoreInfoTable.updateScore(scoreInfo)
+        }
+    }
+
+    private fun openOnlineScore(beatmapInfo: BeatmapInfo, scoreId: Int, playerName: String) {
+        GlobalManager.getInstance().engine.scene = LoadingScreen().scene
+        ToastLogger.showText(com.osudroid.resources.R.string.online_loadrecord, false)
+
+        scoreLoadingScope.launch {
+            try {
+                val params = OnlineManager.getInstance().getScorePack(scoreId).split("\\s+".toRegex()).toTypedArray()
+
+                if (params.size < 11) {
+                    throw IOException("Incomplete score data")
+                }
+
+                val stat = StatisticV2(params, beatmapInfo.getBeatmapDifficulty())
+                stat.playerName = playerName
+
+                showScore(stat, if (params[10] == "1") OnlineManager.getReplayURL(scoreId) else null, beatmapInfo)
+            } catch (e: Exception) {
+                Log.e("SongSelectLeaderboard", "Cannot load score", e)
+                ToastLogger.showText("Could not open score", true)
+                updateThread { SongSelect.show() }
+            }
+        }
+    }
+
+    private fun showScore(stat: StatisticV2, replayPath: String?, beatmapInfo: BeatmapInfo) {
+        val scoringScene = GlobalManager.getInstance().scoring
+
+        // Where the game returns to when the replay is watched and left.
+        GlobalManager.getInstance().gameScene.setOldScene(SongSelect)
+
+        scoringScene.load(stat, null, null, replayPath, null, beatmapInfo)
+        GlobalManager.getInstance().engine.scene = scoringScene.scene
+    }
+
+    /**
+     * Shows the options of a score. Only local scores have options.
+     */
+    private fun showScoreOptions(score: BeatmapScoreModel) {
+        val beatmapInfo = SongSelect.selectedBeatmap ?: return
+
+        if (leaderboardType == Local) {
+            ScoreOptionsDialog(beatmapInfo, score, onDeleted = { onBeatmapSelected(SongSelect.selectedBeatmap) }).show()
+        }
+    }
+
+
+    class LeaderboardItem(
+        withAvatars: Boolean,
+        onOpen: (BeatmapScoreModel) -> Unit,
+        onShowOptions: (BeatmapScoreModel) -> Unit,
+    ) : RecyclableComponent<BeatmapScoreModel>() {
 
         override val isRecyclable: Boolean
             get() = !button.isPressed
@@ -349,6 +465,8 @@ class SongSelectLeaderboard : UILinearContainer() {
             button = UIButton().apply {
                 width = FillParent
                 padding = Vec4(2f.srem, 1f.srem)
+                onActionUp = { boundData?.let(onOpen) }
+                onActionLongPress = { boundData?.let(onShowOptions) }
 
                 foreground = UIBox().apply {
                     cornerRadius = 12f

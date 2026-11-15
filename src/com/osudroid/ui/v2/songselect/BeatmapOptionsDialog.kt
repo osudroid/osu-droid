@@ -12,16 +12,12 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
-import com.reco1l.framework.Color4
 import com.reco1l.framework.math.Vec4
 
 /**
  * The options of a beatmap set, shown when one of its panels in the [BeatmapCarrousel] is held.
  */
-class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILinearContainer>(innerContent = UILinearContainer().apply {
-    orientation = Orientation.Vertical
-    width = FillParent
-}) {
+class BeatmapOptionsDialog(private val model: BeatmapSetModel) : OptionsDialog() {
 
     private val beatmapSetInfo = model.beatmapSetInfo
 
@@ -71,12 +67,8 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
                 }
             })
 
-            +optionRow(optionButton(optionIcon(Icon.Trash)) {
+            +optionRow(deleteOptionButton {
                 text = "Delete beatmap"
-                applyTheme = { theme ->
-                    background?.color = theme.accentColor * 0.175f
-                    color = DELETE_COLOR
-                }
                 onActionUp = {
                     hide()
                     showDeleteConfirmation()
@@ -93,27 +85,6 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
         }
     }
 
-
-    private fun optionIcon(icon: Int) = FontAwesomeIcon(icon).apply { iconSize = ICON_SIZE }
-
-    /**
-     * A full width button with an icon in front of its text.
-     */
-    private fun optionButton(icon: FontAwesomeIcon, block: UITextButton.() -> Unit) = UITextButton().apply {
-        width = FillParent
-        alignment = Anchor.CenterLeft
-        leadingIcon = icon
-        block()
-    }
-
-    /**
-     * Wraps a button in the horizontal margin of the dialog's other content.
-     */
-    private fun optionRow(button: UITextButton) = UIContainer().apply {
-        width = FillParent
-        padding = Vec4(24f, 6f)
-        +button
-    }
 
     /**
      * A filled heart for favorites, an outlined one otherwise.
@@ -199,9 +170,6 @@ class BeatmapOptionsDialog(private val model: BeatmapSetModel) : UIDialog<UILine
 
     companion object {
         private const val MAX_OFFSET = 250
-        private const val ICON_SIZE = 20f
-
-        private val DELETE_COLOR = Color4(255, 191, 191)
     }
 
 }

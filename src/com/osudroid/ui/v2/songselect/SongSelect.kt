@@ -591,6 +591,9 @@ object SongSelect : UIScene() {
     override fun onAttached() {
         super.onAttached()
 
+        // A score may have been set while the scene was not shown, e.g. when coming back from gameplay.
+        leaderboard.onBeatmapSelected(selectedBeatmap)
+
         updateThread {
             currentSongPath = GlobalManager.getInstance().selectedBeatmap?.audioPath
             currentBackgroundPath = null
