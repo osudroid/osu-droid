@@ -1,5 +1,6 @@
 package com.reco1l.andengine.ui
 
+import android.view.KeyEvent
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -70,6 +71,18 @@ open class UIModal(
 
 
     //region Input
+
+    override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        if (isVisible && keyCode == KeyEvent.KEYCODE_BACK) {
+            // Like a touch outside of the content.
+            if (!staticBackdrop) {
+                hide()
+            }
+            return true
+        }
+
+        return super.onKeyPress(keyCode, event)
+    }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
