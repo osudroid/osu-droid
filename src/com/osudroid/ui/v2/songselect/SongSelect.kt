@@ -279,22 +279,14 @@ object SongSelect : UIScene() {
                 }
             }
 
-            // Every word of the query must match at least one field of at least one beatmap of the set.
-            val queryWords = query.lowercase().split(' ').filter { it.isNotBlank() }
+            val search = BeatmapSearchQuery(query)
 
             val collectionSets = collection?.let { DatabaseManager.beatmapCollectionsTable.getBeatmaps(it)?.toHashSet() }
 
             val filtered = allBeatmapSets.filter { model ->
                 (!isFavoritesOnly || model.isFavorite)
                     && (collectionSets == null || model.beatmapSetInfo.directory in collectionSets)
-                    && queryWords.all { word ->
-                        model.beatmapSetInfo.beatmaps.any { beatmap ->
-                            beatmap.titleText.lowercase().contains(word)
-                                || beatmap.artistText.lowercase().contains(word)
-                                || beatmap.creator.lowercase().contains(word)
-                                || beatmap.version.lowercase().contains(word)
-                        }
-                    }
+                    && search.matches(model.beatmapSetInfo.beatmaps)
             }
 
             val sorted = filtered.sortedWith(sortOrder.comparator)
