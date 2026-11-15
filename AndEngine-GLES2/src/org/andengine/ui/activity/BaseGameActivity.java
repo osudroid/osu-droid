@@ -194,6 +194,11 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		this.acquireWakeLock();
 		this.mRenderSurfaceView.onResume();
+
+		// After a pause that neither destroyed the surface nor took the window focus, nothing else resumes the game.
+		if(this.mGameCreated && this.mGamePaused && this.hasWindowFocus()) {
+			this.onResumeGame();
+		}
 	}
 
 	@Override
