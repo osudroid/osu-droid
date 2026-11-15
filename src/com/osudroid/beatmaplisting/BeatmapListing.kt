@@ -271,7 +271,10 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
             ensureActive()
 
             mainThread {
-                adapter.pendingAutoOpen = beatmapSet.id to (link as? BeatmapLink.Beatmap)?.beatmapId
+                if (!adapter.hasAutoOpened) {
+                    adapter.pendingAutoOpen = beatmapSet.id to (link as? BeatmapLink.Beatmap)?.beatmapId
+                }
+
                 adapter.data.add(beatmapSet)
                 adapter.notifyItemInserted(0)
                 indicator.visibility = GONE
@@ -616,6 +619,13 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
      */
     var pendingAutoOpen: Pair<Long, Long?>? = null
 
+    /**
+     * Whether [pendingAutoOpen] has already opened details. Once it has, re-running the lookup (mirror switch, retry)
+     * must not reopen details the user has closed.
+     */
+    var hasAutoOpened = false
+        private set
+
 
     private val mediaScope = CoroutineScope(Dispatchers.IO)
 
@@ -648,6 +658,7 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
         pendingAutoOpen?.let {
             if (it.first == beatmapSet.id) {
                 pendingAutoOpen = null
+                hasAutoOpened = true
                 BeatmapSetDetails(beatmapSet, holder, it.second).show()
             }
         }
