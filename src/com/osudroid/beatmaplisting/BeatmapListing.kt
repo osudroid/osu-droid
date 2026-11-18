@@ -1,5 +1,6 @@
 package com.osudroid.beatmaplisting
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
@@ -35,6 +36,7 @@ import com.osudroid.BuildSettings
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
+import com.reco1l.framework.net.UnsuccessfulResponseException
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.osudroid.ui.OsuColors
@@ -65,7 +67,7 @@ import kotlinx.coroutines.CancellationException
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
-class BeatmapListing : BaseFragment(),
+class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragment(),
     IFileRequestObserver,
     OnEditorActionListener,
     OnKeyListener,
@@ -86,7 +88,7 @@ class BeatmapListing : BaseFragment(),
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 
             // When the end is reach, load more.
-            if (!recyclerView.canScrollVertically(1) && dy > 0) {
+            if (lookupLink == null && !recyclerView.canScrollVertically(1) && dy > 0) {
                 offset += 50
                 search(true)
             }
@@ -99,6 +101,17 @@ class BeatmapListing : BaseFragment(),
     private var pendingRequest: Job? = null
 
     private var offset = 0
+
+    /**
+     * Incremented on the main thread whenever a new [search] or [lookup] starts. Results of requests that started
+     * before the latest one are discarded.
+     */
+    private var requestGeneration = 0
+
+    /**
+     * The link currently being looked up. Non-null means the listing is in lookup mode.
+     */
+    private var lookupLink: BeatmapLink? = null
 
 
     private lateinit var indicator: CircularProgressIndicator
@@ -134,7 +147,7 @@ class BeatmapListing : BaseFragment(),
         recyclerView.adapter = adapter
 
         retryButton = findViewById(R.id.refresh)!!
-        retryButton.setOnClickListener { search(true) }
+        retryButton.setOnClickListener { lookupLink?.let(::lookup) ?: search(true) }
 
         searchBox = findViewById(R.id.search)!!
         searchBox.setOnEditorActionListener(this)
@@ -167,7 +180,7 @@ class BeatmapListing : BaseFragment(),
                         logoView.text = mirror.description
                         logoView.drawableLeft = requireContext().getDrawable(mirror.logoResource)
 
-                        search(false)
+                        lookupLink?.let(::lookup) ?: search(false)
                     }
                 }
                 .setTitle("Select a beatmap mirror")
@@ -195,7 +208,7 @@ class BeatmapListing : BaseFragment(),
         }
 
 
-        search(false)
+        initialLink?.let(::lookup) ?: search(false)
 
         previewPlayCount = 0
         Choreographer.getInstance().postFrameCallback(this)
@@ -215,7 +228,11 @@ class BeatmapListing : BaseFragment(),
     }
 
 
-    fun search(keepData: Boolean) {
+    private fun lookup(link: BeatmapLink) {
+        lookupLink = link
+        adapter.pendingAutoOpen = null
+
+        val generation = ++requestGeneration
 
         mainThread {
             indicator.visibility = VISIBLE
@@ -225,11 +242,100 @@ class BeatmapListing : BaseFragment(),
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
 
-            ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+            if (throwable is UnsuccessfulResponseException && throwable.code == 404) {
+                mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
 
-            Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+                    ToastLogger.showText("Beatmap not found on ${mirror.description}.", true)
+                    indicator.visibility = GONE
+                }
+
+                return@CoroutineExceptionHandler
+            }
 
             mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+
+                Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+
+                indicator.visibility = GONE
+                retryButton.visibility = VISIBLE
+            }
+        }) {
+            offset = 0
+
+            mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                val itemCount = adapter.data.size
+                adapter.data.clear()
+                adapter.notifyItemRangeRemoved(0, itemCount)
+            }
+
+            ensureActive()
+
+            val beatmapSet = when (link) {
+                is BeatmapLink.Beatmap -> mirror.handleBeatmapLink(link.beatmapId)
+                is BeatmapLink.BeatmapSet -> mirror.handleBeatmapsetLink(link.beatmapSetId)
+            }
+
+            ensureActive()
+
+            mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                if (beatmapSet.beatmaps.isEmpty()) {
+                    ToastLogger.showText("This beatmap set has no osu!standard difficulties.", true)
+                    indicator.visibility = GONE
+                    return@mainThread
+                }
+
+                if (!adapter.hasAutoOpened) {
+                    adapter.pendingAutoOpen = beatmapSet.id to (link as? BeatmapLink.Beatmap)?.beatmapId
+                }
+
+                adapter.data.add(beatmapSet)
+                adapter.notifyItemInserted(0)
+                indicator.visibility = GONE
+            }
+
+            pendingRequest = null
+        }
+    }
+
+    fun search(keepData: Boolean) {
+        lookupLink = null
+        adapter.pendingAutoOpen = null
+
+        val generation = ++requestGeneration
+
+        mainThread {
+            indicator.visibility = VISIBLE
+            retryButton.visibility = GONE
+        }
+
+        pendingRequest?.cancel()
+        pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
+
+            mainThread {
+                if (generation != requestGeneration) {
+                    return@mainThread
+                }
+
+                ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+
+                Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+
                 indicator.visibility = GONE
                 retryButton.visibility = VISIBLE
             }
@@ -239,6 +345,10 @@ class BeatmapListing : BaseFragment(),
                 offset = 0
 
                 mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
+
                     val itemCount = adapter.data.size
                     adapter.data.clear()
                     adapter.notifyItemRangeRemoved(0, itemCount)
@@ -265,8 +375,15 @@ class BeatmapListing : BaseFragment(),
                 ensureActive()
 
                 mainThread {
+                    if (generation != requestGeneration) {
+                        return@mainThread
+                    }
+
+                    // Insert at the current size rather than the mirror's paging offset, since filtering can make pages
+                    // shorter than the page size.
+                    val start = adapter.data.size
                     adapter.data.addAll(beatmapSets)
-                    adapter.notifyItemRangeInserted(offset, beatmapSets.size)
+                    adapter.notifyItemRangeInserted(start, beatmapSets.size)
                     indicator.visibility = GONE
                 }
             }
@@ -367,7 +484,11 @@ class BeatmapListing : BaseFragment(),
 
 // Information
 
-class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetViewHolder) : BaseFragment() {
+class BeatmapSetDetails(
+    val beatmapSet: BeatmapSetModel,
+    val holder: BeatmapSetViewHolder,
+    private val initialBeatmapId: Long? = null
+) : BaseFragment() {
 
 
     override val layoutID = R.layout.beatmap_downloader_details
@@ -421,18 +542,18 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 
 
         val beatmaps = beatmapSet.beatmaps
-        for (i in beatmaps.indices) {
 
+        for (i in beatmaps.indices) {
             val beatmap = beatmaps[i]
             val button = TextView(ContextThemeWrapper(context, R.style.beatmap_difficulty_icon))
             difficulty.addView(button)
 
             button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating).toInt())
             button.setOnClickListener { selectDifficulty(button, beatmap) }
-
         }
-        selectDifficulty(difficulty[0] as TextView, beatmaps[0])
 
+        val initialIndex = beatmaps.indexOfFirst { it.id == initialBeatmapId }.coerceAtLeast(0)
+        selectDifficulty(difficulty[initialIndex] as TextView, beatmaps[initialIndex])
 
         // If it's already playing when shown.
         if (holder.previewStream != null) {
@@ -475,6 +596,13 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 
         cover.setImageDrawable(holder.cover.drawable)
         root!!.setOnClickListener { dismiss() }
+    }
+
+
+    fun setCover(bitmap: Bitmap?) {
+        if (::cover.isInitialized) {
+            cover.setImageBitmap(bitmap)
+        }
     }
 
 
@@ -532,6 +660,18 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
 
     var data = mutableListOf<BeatmapSetModel>()
 
+    /**
+     * The beatmap set ID and the optional beatmap ID whose details should be opened once the set is bound.
+     */
+    var pendingAutoOpen: Pair<Long, Long?>? = null
+
+    /**
+     * Whether [pendingAutoOpen] has already opened details. Once it has, re-running the lookup (mirror switch, retry)
+     * must not reopen details the user has closed.
+     */
+    var hasAutoOpened = false
+        private set
+
 
     private val mediaScope = CoroutineScope(Dispatchers.IO)
 
@@ -558,7 +698,16 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
 
 
     override fun onBindViewHolder(holder: BeatmapSetViewHolder, position: Int) {
-        holder.bind(data[position])
+        val beatmapSet = data[position]
+        holder.bind(beatmapSet)
+
+        pendingAutoOpen?.let {
+            if (it.first == beatmapSet.id) {
+                pendingAutoOpen = null
+                hasAutoOpened = true
+                BeatmapSetDetails(beatmapSet, holder, it.second).show()
+            }
+        }
     }
 
 }
@@ -644,7 +793,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
                         val bitmap = BitmapFactory.decodeStream(it)
 
-                        mainThread { cover.setImageBitmap(bitmap) }
+                        mainThread {
+                            cover.setImageBitmap(bitmap)
+                            detailsFragment?.setCover(bitmap)
+                        }
                     }
 
                 } catch (e: Exception) {

@@ -1,10 +1,14 @@
 package com.osudroid.beatmaplisting
 
 import androidx.annotation.DrawableRes
+import com.osudroid.beatmaplisting.mirrors.CatboyBeatmapLinkHandler
+import com.osudroid.beatmaplisting.mirrors.CatboyBeatmapsetLinkHandler
 import com.osudroid.beatmaplisting.mirrors.CatboyDownloadRequestModel
 import com.osudroid.beatmaplisting.mirrors.CatboyPreviewRequestModel
 import com.osudroid.beatmaplisting.mirrors.CatboySearchRequestModel
 import com.osudroid.beatmaplisting.mirrors.CatboySearchResponseModel
+import com.osudroid.beatmaplisting.mirrors.OsuDirectBeatmapLinkHandler
+import com.osudroid.beatmaplisting.mirrors.OsuDirectBeatmapsetLinkHandler
 import com.osudroid.beatmaplisting.mirrors.OsuDirectDownloadRequestModel
 import com.osudroid.beatmaplisting.mirrors.OsuDirectPreviewRequestModel
 import com.osudroid.beatmaplisting.mirrors.OsuDirectSearchRequestModel
@@ -56,6 +60,16 @@ enum class BeatmapMirror(
      */
     val preview: BeatmapMirrorAction<BeatmapMirrorPreviewRequestModel>,
 
+    /**
+     * Fetches the beatmap set containing a given beatmap.
+     */
+    val handleBeatmapLink: BeatmapMirrorBeatmapLinkHandler,
+
+    /**
+     * Fetches a beatmap set by its ID.
+     */
+    val handleBeatmapsetLink: BeatmapMirrorBeatmapsetLinkHandler,
+
 ) {
 
     /**
@@ -75,6 +89,8 @@ enum class BeatmapMirror(
         ),
         download = BeatmapMirrorAction(OsuDirectDownloadRequestModel()),
         preview = BeatmapMirrorAction(OsuDirectPreviewRequestModel()),
+        handleBeatmapLink = OsuDirectBeatmapLinkHandler(),
+        handleBeatmapsetLink = OsuDirectBeatmapsetLinkHandler(),
     ),
 
     /**
@@ -94,6 +110,8 @@ enum class BeatmapMirror(
         ),
         download = BeatmapMirrorAction(CatboyDownloadRequestModel()),
         preview = BeatmapMirrorAction(CatboyPreviewRequestModel()),
+        handleBeatmapLink = CatboyBeatmapLinkHandler(),
+        handleBeatmapsetLink = CatboyBeatmapsetLinkHandler(),
     )
 
 }
