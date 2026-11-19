@@ -25,11 +25,11 @@ data class MultiplayerRoundProgress(
  * @property roundId The ID of the current round.
  * @property round The progress of the current round. This is non-null if and only if the room is playing.
  * @property lastResultsRoundId The ID of the last round whose results are available, if any.
- * @property ownStatus The server-side status of this client, if known.
+ * @property clientStatus The server-side status of this client.
  */
 data class MultiplayerRecoverySnapshot(
     val roundId: Int,
     val round: MultiplayerRoundProgress?,
     val lastResultsRoundId: Int?,
-    val ownStatus: PlayerStatus?
+    val clientStatus: PlayerStatus
 )

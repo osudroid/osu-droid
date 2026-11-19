@@ -149,13 +149,13 @@ class MultiplayerReconciliationTest {
     fun playingNewRound_ownNotPlaying_room_invalidatesStatus() {
         assertEquals(
             listOf(InvalidateStatus),
-            reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, ownStatus = PlayerStatus.Ready), true)
+            reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, clientStatus = PlayerStatus.Ready), true)
         )
     }
 
     @Test
     fun playingNewRound_ownNotPlaying_other_releasesStatusLock() {
-        val snapshot = playing(5, ownStatus = PlayerStatus.Ready, lastResultsRoundId = 4)
+        val snapshot = playing(5, clientStatus = PlayerStatus.Ready, lastResultsRoundId = 4)
 
         assertEquals(listOf(ReleaseStatusLock), reconcile(MultiplayerMatchPhase.Results(4, true), snapshot, true))
         assertEquals(listOf(ReleaseStatusLock), reconcile(MultiplayerMatchPhase.Loading(4), snapshot, true))
@@ -177,13 +177,13 @@ class MultiplayerReconciliationTest {
     private fun notPlaying(
         roundId: Int = 4,
         lastResultsRoundId: Int? = null,
-        ownStatus: PlayerStatus? = PlayerStatus.NotReady
-    ) = MultiplayerRecoverySnapshot(roundId, null, lastResultsRoundId, ownStatus)
+        clientStatus: PlayerStatus = PlayerStatus.NotReady
+    ) = MultiplayerRecoverySnapshot(roundId, null, lastResultsRoundId, clientStatus)
 
     private fun playing(
         roundId: Int,
         round: MultiplayerRoundProgress = progress(),
         lastResultsRoundId: Int? = null,
-        ownStatus: PlayerStatus? = PlayerStatus.Playing
-    ) = MultiplayerRecoverySnapshot(roundId, round, lastResultsRoundId, ownStatus)
+        clientStatus: PlayerStatus = PlayerStatus.Playing
+    ) = MultiplayerRecoverySnapshot(roundId, round, lastResultsRoundId, clientStatus)
 }

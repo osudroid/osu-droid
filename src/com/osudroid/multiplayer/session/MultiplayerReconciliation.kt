@@ -85,7 +85,7 @@ internal fun reconcile(phase: MultiplayerMatchPhase, snapshot: MultiplayerRecove
         }
     }
 
-    if (snapshot.ownStatus == PlayerStatus.Playing) {
+    if (snapshot.clientStatus == PlayerStatus.Playing) {
         return when (phase) {
             is MultiplayerMatchPhase.InRoom, is MultiplayerMatchPhase.Results ->
                 if (!round.allLoaded && hasBeatmap) withLastResults(MultiplayerReconcileAction.JoinRound(snapshot.roundId))
