@@ -5,6 +5,8 @@ import android.util.Log
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomPlayer
+import com.osudroid.multiplayer.session.MultiplayerMatchSession
+import com.osudroid.multiplayer.session.MultiplayerOutbox
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.osudroid.ui.v2.multi.*
 import com.osudroid.utils.async
@@ -58,6 +60,12 @@ object Multiplayer {
     @JvmField
     @Volatile
     var isReconnecting = false
+
+    /**
+     * The state of the multiplayer match the client is in and the events waiting to be delivered to the server.
+     */
+    @JvmField
+    val session = MultiplayerMatchSession(MultiplayerOutbox(RoomAPI.transport))
 
     /**
      * Array containing final leaderboard
@@ -368,7 +376,8 @@ object Multiplayer {
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
                         roomPassword = RoomAPI.lastRoomPassword,
-                        multiplayerSessionID = room.sessionID
+                        multiplayerSessionID = room.sessionID,
+                        lastChatId = session.lastChatId,
                     )
 
                     isWaitingAttemptResponse = true

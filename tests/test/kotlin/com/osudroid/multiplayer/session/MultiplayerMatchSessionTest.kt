@@ -93,11 +93,10 @@ class MultiplayerMatchSessionTest {
     }
 
     @Test
-    fun `acceptsFinalLeaderboard accepts own round and unspecified round right after results`() {
+    fun `acceptsFinalLeaderboard accepts own round right after results`() {
         playRoundToResults(2)
 
         assertTrue(session.acceptsFinalLeaderboard(2))
-        assertTrue(session.acceptsFinalLeaderboard(null))
     }
 
     @Test
@@ -113,12 +112,11 @@ class MultiplayerMatchSessionTest {
         session.markLeaderboardShown()
 
         assertFalse(session.acceptsFinalLeaderboard(2))
-        assertFalse(session.acceptsFinalLeaderboard(null))
     }
 
     @Test
     fun `acceptsFinalLeaderboard rejects outside results`() {
-        assertFalse(session.acceptsFinalLeaderboard(null))
+        assertFalse(session.acceptsFinalLeaderboard(2))
 
         session.enterLoading(2)
         assertFalse(session.acceptsFinalLeaderboard(2))
@@ -319,7 +317,7 @@ class MultiplayerMatchSessionTest {
         override var isReady = true
         val emissions = mutableListOf<Emission>()
 
-        override fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: (MultiplayerAckResult?) -> Unit) {
+        override fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: OnMultiplayerEventAck) {
             emissions.add(Emission(event, args))
         }
     }

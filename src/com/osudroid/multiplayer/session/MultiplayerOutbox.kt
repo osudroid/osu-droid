@@ -33,7 +33,20 @@ interface MultiplayerOutboxTransport {
      * @param onAck Called with the server's response, or with `null` if no response arrived within [timeoutMs]. May be
      * called from any thread.
      */
-    fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: (MultiplayerAckResult?) -> Unit)
+    fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: OnMultiplayerEventAck)
+}
+
+/**
+ * Callback for the server's acknowledgement of a [MultiplayerClientEvent] sent by the client.
+ */
+fun interface OnMultiplayerEventAck {
+    /**
+     * Called with the server's acknowledgement of a [MultiplayerClientEvent], or with `null` if none arrived.
+     *
+     * @param result The acknowledgement, or `null` if the [MultiplayerClientEvent] was not sent or the server did not
+     * respond in time.
+     */
+    operator fun invoke(result: MultiplayerAckResult?)
 }
 
 /**
@@ -83,7 +96,9 @@ class MultiplayerOutbox(
      * Sends a [MultiplayerClientEvent] that must be acknowledged by the server. It is resent until the server
      * acknowledges it, including after a reconnection, unless [pruneStale] drops it.
      *
-     * If the session is not established, the [MultiplayerClientEvent] is held until [flush] is called.
+     * The [MultiplayerClientEvent] is held until [flush] is called if the session is not established or earlier
+     * [MultiplayerClientEvent]s are still waiting to be sent, so that [MultiplayerClientEvent]s always go out in the
+     * order they were queued.
      *
      * @param event The [MultiplayerClientEvent] to send.
      * @param roundId The ID of the round [event] belongs to. Appended to [args] if [event] is
@@ -95,9 +110,11 @@ class MultiplayerOutbox(
 
         synchronized(lock) {
             val item = RetriedItem(event, roundId, args)
+            val canEmit = transport.isReady && retried.none { !it.inFlight }
+
             retried.add(item)
 
-            if (transport.isReady) {
+            if (canEmit) {
                 emission = beginAttempt(item)
             }
         }
@@ -110,7 +127,8 @@ class MultiplayerOutbox(
      *
      * @param event The [MultiplayerClientEvent] to send.
      * @param args The arguments of [event].
-     * @param onNotDelivered The callback that is called at most once if the server did not acknowledge [event].
+     * @param onNotDelivered The callback that is called at most once if the server did not acknowledge [event]. Its
+     * argument tells whether the session was still established when that was found out.
      */
     fun sendOnce(event: MultiplayerClientEvent, args: Array<Any?>, onNotDelivered: OnEventNotDelivered) {
         val item = OnceItem(onNotDelivered)
@@ -134,10 +152,12 @@ class MultiplayerOutbox(
         transport.emit(event, args, ackTimeoutMs) { result ->
             val failed = synchronized(lock) { onceItems.remove(item) }
 
-            // A null result means the acknowledgement timed out. Any other result is a response from the server, and
+            // A null result means no acknowledgement arrived. Any other result is a response from the server, and
             // whether the server accepted the event is up to the caller to learn through other means.
             if (failed && result == null) {
-                item.onNotDelivered(true)
+                // Not delivered while connected only if the transport still looks healthy, as opposed to an emission
+                // that was refused or abandoned by a socket that is going away.
+                item.onNotDelivered(transport.isReady)
             }
         }
     }
@@ -265,8 +285,9 @@ class MultiplayerOutbox(
      */
     fun interface OnEventNotDelivered {
         /**
-         * @param whileConnected `true` if the acknowledgement timed out while connected and `false` if the socket
-         * was not connected. This callback may call back into this [MultiplayerOutbox].
+         * @param whileConnected `true` if the acknowledgement did not arrive while the session was established and
+         * `false` if the session was not established when the event was sent or when the missing acknowledgement was
+         * noticed. This callback may call back into this [MultiplayerOutbox].
          */
         operator fun invoke(whileConnected: Boolean)
     }

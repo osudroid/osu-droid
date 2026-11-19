@@ -88,14 +88,12 @@ class MultiplayerMatchSession(val outbox: MultiplayerOutbox) {
     /**
      * Whether the room leaderboard sent by the server should be shown on the results.
      *
-     * @param roundId The ID of the round the leaderboard belongs to, or `null` if it is not known.
+     * @param roundId The ID of the round the leaderboard belongs to.
      */
-    fun acceptsFinalLeaderboard(roundId: Int?): Boolean {
+    fun acceptsFinalLeaderboard(roundId: Int): Boolean {
         val current = phase
 
-        return current is MultiplayerMatchPhase.Results &&
-            !current.hasLeaderboard &&
-            (roundId == null || roundId == current.roundId)
+        return current is MultiplayerMatchPhase.Results && !current.hasLeaderboard && roundId == current.roundId
     }
 
     /**

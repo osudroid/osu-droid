@@ -8,6 +8,8 @@ import com.osudroid.multiplayer.api.data.RoomStatus
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.multiplayer.api.MultiplayerClientEvent
+import com.osudroid.multiplayer.api.MultiplayerServerEvent
 import io.socket.client.*
 import io.socket.emitter.*
 import org.json.*
@@ -34,34 +36,67 @@ fun MockRoom() = Room(
  * Creates a mock multiplayer socket.
  */
 class MockSocket(private val uid: Long) : Socket(null, null, null) {
+    private var isConnected = false
+
+    // Continue from the session so that a mock reconnection does not restart numbering,
+    // which the session would drop as duplicates.
+    private var currentRoundId = Multiplayer.session.activeRoundId ?: 0
+    private var currentChatId = Multiplayer.session.lastChatId ?: 0
+
+    override fun connected() = isConnected
 
     override fun emit(event: String?, vararg args: Any?): Emitter {
+        dispatch(event, arrayOf(*args))
 
-        // Emulating the server response to the client's events.
+        return this
+    }
+
+    override fun emit(event: String?, args: Array<Any?>?, ack: Ack?): Emitter {
+        dispatch(event, args ?: arrayOf())
+
+        // The server acknowledges every event it accepts.
+        ack?.call(JSONObject().put("ok", true))
+
+        return this
+    }
+
+    /**
+     * Emulates the server's response to a [MultiplayerClientEvent].
+     */
+    private fun dispatch(event: String?, args: Array<Any?>) {
+
         val responseEvent = when (event) {
 
             // In these events the client expects a JSONArray as a response.
-            "scoreSubmission" -> "allPlayersScoreSubmitted" to arrayOf(JSONArray().apply { put(args[0]) })
-            "liveScoreData" -> "liveScoreData" to arrayOf(JSONArray().apply {
+            MultiplayerClientEvent.ScoreSubmission.eventName ->
+                MultiplayerServerEvent.AllPlayersScoreSubmitted.eventName to arrayOf(JSONArray().apply { put(args[0]) }, currentRoundId)
+
+            MultiplayerClientEvent.LiveScoreData.eventName -> MultiplayerServerEvent.LiveScoreData.eventName to arrayOf(JSONArray().apply {
                 // The username is expected to be added by the server.
                 put((args[0] as JSONObject).put("username", Config.getOnlineUsername()))
             })
 
+            // The server starts a new round.
+            MultiplayerClientEvent.PlayBeatmap.eventName -> MultiplayerServerEvent.PlayBeatmap.eventName to arrayOf(++currentRoundId)
+
             // Simulating the server response when all players emit these events.
-            "beatmapLoadComplete" -> "allPlayersBeatmapLoadComplete" to arrayOf()
-            "skipRequested" -> "allPlayersSkipRequested" to arrayOf()
+            MultiplayerClientEvent.BeatmapLoadComplete.eventName -> MultiplayerServerEvent.AllPlayersBeatmapLoadComplete.eventName to arrayOf()
+            MultiplayerClientEvent.SkipRequested.eventName -> MultiplayerServerEvent.AllPlayersSkipRequested.eventName to arrayOf()
+
+            // The server gives every public chat message an increasing ID.
+            MultiplayerClientEvent.ChatMessage.eventName ->
+                MultiplayerServerEvent.ChatMessage.eventName to arrayOf(uid.toString(), args[0], ++currentChatId)
 
             // In these events the client expects to receive the uid of the player as the first argument.
-            "chatMessage" -> "chatMessage" to arrayOf(uid.toString(), args[0])
-            "teamChanged" -> "teamChanged" to arrayOf(uid.toString(), args[0])
-            "playerModsChanged" -> "playerModsChanged" to arrayOf(uid.toString(), args[0])
-            "playerStatusChanged" -> "playerStatusChanged" to arrayOf(uid.toString(), args[0])
+            MultiplayerClientEvent.TeamChanged.eventName -> MultiplayerServerEvent.TeamChanged.eventName to arrayOf(uid.toString(), args[0])
+            MultiplayerClientEvent.PlayerModsChanged.eventName -> MultiplayerServerEvent.PlayerModsChanged.eventName to arrayOf(uid.toString(), args[0])
+            MultiplayerClientEvent.PlayerStatusChanged.eventName -> MultiplayerServerEvent.PlayerStatusChanged.eventName to arrayOf(uid.toString(), args[0])
 
             // In these events, the client expects to receive an integer as the first argument.
-            "maxPlayersChanged" -> "maxPlayersChanged" to arrayOf(args[0].toString())
+            MultiplayerClientEvent.MaxPlayersChanged.eventName -> MultiplayerServerEvent.MaxPlayersChanged.eventName to arrayOf(args[0].toString())
 
             // These events require special handling
-            "roomGameplaySettingsChanged" -> "roomGameplaySettingsChanged" to arrayOf((args[0] as JSONObject).apply {
+            MultiplayerClientEvent.RoomGameplaySettingsChanged.eventName -> MultiplayerServerEvent.RoomGameplaySettingsChanged.eventName to arrayOf((args[0] as JSONObject).apply {
                 Multiplayer.room!!.gameplaySettings.also {
                     if (!has("isFreeMod")) put("isFreeMod", it.isFreeMod)
                     if (!has("isRemoveSliderLock")) put("isRemoveSliderLock", it.isRemoveSliderLock)
@@ -77,16 +112,16 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
         listeners(key).forEach {
             it.call(*arguments)
         }
-
-        return this
     }
 
 
     override fun connect(): Socket {
+        isConnected = true
+
         emit(EVENT_CONNECT)
 
         // This event is emitted by the server when the client connects.
-        emit("initialConnection", JSONObject().apply {
+        emit(MultiplayerServerEvent.InitialConnection.eventName, JSONObject().apply {
 
             put("id", 1)
             put("name", "Test room")
@@ -99,6 +134,9 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
             put("sessionId", "")
             put("status", RoomStatus.Idle.ordinal)
             put("beatmap", null)
+
+            put("roundId", currentRoundId)
+            put("latestChatId", currentChatId)
 
             put("host", JSONObject().apply {
                 put("id", uid)
@@ -128,6 +166,8 @@ class MockSocket(private val uid: Long) : Socket(null, null, null) {
     }
 
     override fun disconnect(): Socket {
+        isConnected = false
+
         emit(EVENT_DISCONNECT, "io server disconnect")
         return this
     }

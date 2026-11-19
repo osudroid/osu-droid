@@ -99,6 +99,21 @@ class MultiplayerOutboxTest {
     }
 
     @Test
+    fun `sendUntilAcknowledged queues behind held events while ready`() {
+        transport.isReady = false
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
+
+        transport.isReady = true
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ChatMessage, null, arrayOf("hi"))
+
+        assertTrue(transport.emissions.isEmpty())
+
+        outbox.flush()
+
+        assertEquals(listOf(MultiplayerClientEvent.ScoreSubmission, MultiplayerClientEvent.ChatMessage), transport.emissions.map { it.event })
+    }
+
+    @Test
     fun `flush does nothing while not ready`() {
         transport.isReady = false
         outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
@@ -205,6 +220,18 @@ class MultiplayerOutboxTest {
     }
 
     @Test
+    fun `sendOnce reports a missing acknowledgement as not connected if the transport is not ready`() {
+        val reports = mutableListOf<Boolean>()
+
+        outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
+
+        transport.isReady = false
+        transport.emissions.single().onAck(null)
+
+        assertEquals(listOf(false), reports)
+    }
+
+    @Test
     fun `sendOnce does not report acknowledged event`() {
         val reports = mutableListOf<Boolean>()
 
@@ -273,14 +300,14 @@ class MultiplayerOutboxTest {
         val event: MultiplayerClientEvent,
         val args: Array<Any?>,
         val timeoutMs: Long,
-        val onAck: (MultiplayerAckResult?) -> Unit
+        val onAck: OnMultiplayerEventAck
     )
 
     private val transport = object : MultiplayerOutboxTransport {
         override var isReady = true
         val emissions = mutableListOf<Emission>()
 
-        override fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: (MultiplayerAckResult?) -> Unit) {
+        override fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: OnMultiplayerEventAck) {
             emissions.add(Emission(event, args, timeoutMs, onAck))
         }
     }

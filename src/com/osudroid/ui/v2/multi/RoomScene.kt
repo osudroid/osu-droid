@@ -7,6 +7,7 @@ import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.IPlayerEventListener
 import com.osudroid.multiplayer.api.IRoomEventListener
+import com.osudroid.multiplayer.api.MultiplayerClientEvent
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.multiplayer.api.data.Room
@@ -17,6 +18,7 @@ import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.multiplayer.api.data.RoomTeam
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.BeatmapInfoLayout
 import com.osudroid.ui.v2.GameLoaderScene
@@ -810,7 +812,7 @@ class RoomScene(
 
     // Connection
 
-    override fun onRoomConnect(newRoom: Room) {
+    override fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload) {
 
         if (Multiplayer.room != newRoom) {
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
@@ -835,7 +837,7 @@ class RoomScene(
 
             // If the server reports Playing, the match started while the player was disconnected.
             if (player.status == PlayerStatus.Playing && GlobalManager.getInstance().selectedBeatmap != null) {
-                onRoomMatchPlay()
+                onRoomMatchPlay(recovery.snapshot.roundId)
             } else {
                 // Always re-sync status after reconnection so that the isWaitingForStatusChange lock
                 // (set in onRoomDisconnect) is cleared and the player can toggle ready again.
@@ -876,6 +878,10 @@ class RoomScene(
         }
 
         updateThread { back() }
+    }
+
+    override fun onEventNotDelivered(event: MultiplayerClientEvent, whileConnected: Boolean) {
+        Multiplayer.log("WARNING: Event ${event.eventName} was not delivered (whileConnected = $whileConnected)")
     }
 
     override fun onRoomConnectFail(error: String?) {
@@ -1065,7 +1071,7 @@ class RoomScene(
 
     // Match
 
-    override fun onRoomMatchPlay() {
+    override fun onRoomMatchPlay(roundId: Int) {
 
         val player = Multiplayer.player ?: return
 
@@ -1128,7 +1134,7 @@ class RoomScene(
         Multiplayer.onLiveLeaderboard(leaderboard)
     }
 
-    override fun onRoomFinalLeaderboard(leaderboard: JSONArray) {
+    override fun onRoomFinalLeaderboard(leaderboard: JSONArray, roundId: Int) {
         Multiplayer.onFinalLeaderboard(leaderboard)
     }
 
