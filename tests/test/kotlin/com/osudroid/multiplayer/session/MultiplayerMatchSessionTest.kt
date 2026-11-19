@@ -2,15 +2,18 @@ package com.osudroid.multiplayer.session
 
 import com.osudroid.multiplayer.api.MultiplayerClientEvent
 import com.osudroid.multiplayer.api.data.PlayerStatus
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 class MultiplayerMatchSessionTest {
     @Test
@@ -135,31 +138,51 @@ class MultiplayerMatchSessionTest {
 
     @Test
     fun `tryEnterLoading lets only one of many threads enter the same round`() {
-        val threads = 16
-        val start = CountDownLatch(1)
-        val entered = AtomicInteger()
-        val pool = Executors.newFixedThreadPool(threads)
-
-        try {
-            val done = (1..threads).map {
-                pool.submit {
-                    start.await()
-
-                    if (session.tryEnterLoading(5)) {
-                        entered.incrementAndGet()
-                    }
-                }
-            }
-
-            start.countDown()
-            done.forEach { it.get(5, TimeUnit.SECONDS) }
-        } finally {
-            pool.shutdownNow()
-        }
-
-        assertEquals(1, entered.get())
+        assertEquals(1, countConcurrentSuccesses { session.tryEnterLoading(5) })
         assertEquals(MultiplayerMatchPhase.Loading(5), session.phase)
     }
+
+    @Test
+    fun `leaveRound while playing reports the round and returns to the room`() {
+        session.tryEnterLoading(2)
+        session.enterPlaying()
+
+        assertTrue(session.leaveRound())
+        assertEquals(MultiplayerMatchPhase.InRoom(2), session.phase)
+    }
+
+    @Test
+    fun `leaveRound reports the round only once`() {
+        session.tryEnterLoading(2)
+        session.enterPlaying()
+        session.leaveRound()
+
+        assertFalse(session.leaveRound())
+        assertEquals(MultiplayerMatchPhase.InRoom(2), session.phase)
+    }
+
+    @Test
+    fun `leaveRound while loading or on results does not report a played round`() {
+        session.tryEnterLoading(2)
+
+        assertFalse(session.leaveRound())
+        assertEquals(MultiplayerMatchPhase.InRoom(2), session.phase)
+
+        playRoundToResults(3)
+
+        assertFalse(session.leaveRound())
+        assertEquals(MultiplayerMatchPhase.InRoom(3), session.phase)
+    }
+
+    @Test
+    fun `leaveRound reports the round to only one of many threads`() {
+        session.tryEnterLoading(5)
+        session.enterPlaying()
+
+        assertEquals(1, countConcurrentSuccesses { session.leaveRound() })
+        assertEquals(MultiplayerMatchPhase.InRoom(5), session.phase)
+    }
+
     @Test
     fun `acceptsFinalLeaderboard accepts own round right after results`() {
         playRoundToResults(2)
@@ -371,6 +394,22 @@ class MultiplayerMatchSessionTest {
         assertEquals(MultiplayerMatchPhase.InRoom(null), session.phase)
         assertNull(session.lastChatId)
         assertTrue(session.outbox.unacknowledged.isEmpty())
+    }
+
+    /**
+     * Runs [block] on many coroutines at once and counts how many of them returned `true`.
+     *
+     * Every coroutine waits behind a gate that opens only once all of them were started, and they run on
+     * [Dispatchers.Default], so the calls overlap across threads as much as possible.
+     */
+    private fun countConcurrentSuccesses(times: Int = 16, block: () -> Boolean) = runBlocking {
+        withTimeout(5_000.milliseconds) {
+            val gate = CompletableDeferred<Unit>()
+            val results = List(times) { async(Dispatchers.Default) { gate.await(); block() } }
+
+            gate.complete(Unit)
+            results.awaitAll().count { it }
+        }
     }
 
     private fun playRoundToResults(roundId: Int) {

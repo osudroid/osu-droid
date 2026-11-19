@@ -2279,6 +2279,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    /**
+     * Leaves the multiplayer round this player is in, returning them to the room. If the round was being played,
+     * its score is submitted as it stands, since the round is over for this player.
+     * <p>
+     * The score is submitted at most once per round, so this can be called more than once and from any thread.
+     */
+    public void leaveMultiplayerRound() {
+        // A room is kept while reconnecting, so the score is queued until the connection is back.
+        if (Multiplayer.session.leaveRound() && Multiplayer.isConnected()) {
+            Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
+        }
+    }
+
     public void quit() {
         // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
         // not that relevant outside gameplay.
@@ -2307,7 +2320,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene = new GameUIScene();
 
         if (Multiplayer.isMultiplayer) {
-            Multiplayer.session.enterRoom();
+            leaveMultiplayerRound();
 
             releaseVideo();
 
@@ -2874,10 +2887,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Setting a delay of 300ms minimum for the player to tap back button again.
             if (lastBackPressTime > 0 && realTimeElapsed - lastBackPressTime > Math.max(300, Config.getBackButtonPressTime() * 1.5f))
             {
-                // Room being null can happen when the player disconnects from socket while playing
-                if (Multiplayer.isConnected())
-                    Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
-
                 Multiplayer.log("Player left the match.");
                 quit();
                 return;
@@ -2930,10 +2939,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (Multiplayer.isMultiplayer) {
-            if (Multiplayer.isConnected()) {
-                Multiplayer.log("Player has lost, moving to room scene.");
-                Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
-            }
+            Multiplayer.log("Player has lost, moving to room scene.");
             quit();
             return;
         }

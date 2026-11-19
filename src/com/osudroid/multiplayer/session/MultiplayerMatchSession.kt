@@ -88,6 +88,22 @@ class MultiplayerMatchSession(val outbox: MultiplayerOutbox) {
     }
 
     /**
+     * Returns to the room lobby, leaving the round that is being played, if any.
+     *
+     * This method is thread-safe.
+     *
+     * @return `true` if a round was being played, so its score should be submitted.
+     */
+    fun leaveRound(): Boolean {
+        synchronized(lock) {
+            val wasPlaying = phase is MultiplayerMatchPhase.Playing
+            phase = MultiplayerMatchPhase.InRoom(phase.roundId)
+
+            return wasPlaying
+        }
+    }
+
+    /**
      * Whether the room leaderboard sent by the server should be shown on the results.
      *
      * @param roundId The ID of the round the leaderboard belongs to.
