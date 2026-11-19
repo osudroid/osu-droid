@@ -816,7 +816,7 @@ class RoomScene(
 
     // Connection
 
-    override fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload) {
+    override fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload, isReconnection: Boolean) {
 
         if (Multiplayer.room != newRoom) {
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
@@ -832,7 +832,9 @@ class RoomScene(
         updateInformation()
         updatePlayerList()
 
-        if (Multiplayer.isReconnecting) {
+        // Not Multiplayer.isReconnecting, as the reconnection may have been given up on since the session was restored.
+        // Skipping the reconciliation would leave events held during the disconnection unsent.
+        if (isReconnection) {
             onRoomBeatmapChange(room.beatmap)
 
             // Ends the reconnection, which the status changes made by the actions below wait for.

@@ -379,7 +379,7 @@ object RoomAPI {
 
             // onRoomConnect triggers UI mutations (updateInformation, updatePlayerList, show, etc.), so we move its
             // operations to the update thread.
-            updateThread { scene.onRoomConnect(room, recovery) }
+            updateThread { scene.onRoomConnect(room, recovery, isReconnecting) }
         } catch (e: Exception) {
             Multiplayer.log("ERROR: initialConnection handler threw an exception: ${e.javaClass.simpleName} — ${e.message}")
             Multiplayer.log(e)

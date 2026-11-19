@@ -19,8 +19,10 @@ interface IRoomEventListener {
      * @param newRoom The room info the server sent.
      * @param recovery What the server reported about the match in progress and the chat the client may have
      * missed due to reconnection.
+     * @param isReconnection Whether this connection restores a dropped one, as decided when the connection was
+     * established.
      */
-    fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload)
+    fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload, isReconnection: Boolean)
 
     /**
      * Called when the player disconnects from room socket, keep in mind this is also called when the user manually

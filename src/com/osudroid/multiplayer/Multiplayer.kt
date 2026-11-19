@@ -291,6 +291,11 @@ object Multiplayer {
             reconnectionJob?.cancel()
             reconnectionJob = null
 
+            // Drop the last attempt's socket, so that a connection it completes after giving
+            // up is not taken for a new join of the room, which would discard the events still
+            // waiting to be delivered.
+            RoomAPI.disconnect()
+
             // Release UI await-locks so the room scene is interactive after the error toast,
             // even when navigation is deferred because a game session is still active.
             roomScene?.apply {
