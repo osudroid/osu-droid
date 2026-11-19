@@ -7,6 +7,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class MultiplayerMatchSessionTest {
     @Test
@@ -17,7 +21,7 @@ class MultiplayerMatchSessionTest {
 
     @Test
     fun `phase transitions through a full round`() {
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         assertEquals(MultiplayerMatchPhase.Loading(2), session.phase)
         assertEquals(2, session.activeRoundId)
 
@@ -36,7 +40,7 @@ class MultiplayerMatchSessionTest {
         session.enterPlaying()
         assertEquals(MultiplayerMatchPhase.InRoom(null), session.phase)
 
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         session.enterPlaying()
         session.enterPlaying()
         assertEquals(MultiplayerMatchPhase.Playing(2), session.phase)
@@ -47,7 +51,7 @@ class MultiplayerMatchSessionTest {
         session.enterResults()
         assertEquals(MultiplayerMatchPhase.InRoom(null), session.phase)
 
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         session.enterResults()
         assertEquals(MultiplayerMatchPhase.Loading(2), session.phase)
     }
@@ -57,7 +61,7 @@ class MultiplayerMatchSessionTest {
         session.markLeaderboardShown()
         assertEquals(MultiplayerMatchPhase.InRoom(null), session.phase)
 
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         session.enterPlaying()
         session.markLeaderboardShown()
         assertEquals(MultiplayerMatchPhase.Playing(2), session.phase)
@@ -71,27 +75,91 @@ class MultiplayerMatchSessionTest {
     }
 
     @Test
-    fun `shouldStartRound is false for the current round`() {
-        session.enterLoading(2)
-        assertFalse(session.shouldStartRound(2))
-        assertTrue(session.shouldStartRound(3))
-
-        session.enterPlaying()
-        assertFalse(session.shouldStartRound(2))
-
-        session.enterResults()
-        assertFalse(session.shouldStartRound(2))
-
-        session.enterRoom()
-        assertFalse(session.shouldStartRound(2))
-        assertTrue(session.shouldStartRound(3))
+    fun `tryEnterLoading enters loading from a room without round`() {
+        assertTrue(session.tryEnterLoading(1))
+        assertEquals(MultiplayerMatchPhase.Loading(1), session.phase)
     }
 
     @Test
-    fun `shouldStartRound is true without any round`() {
-        assertTrue(session.shouldStartRound(1))
+    fun `tryEnterLoading enters loading for a new round after a sat out round`() {
+        session.tryEnterLoading(1)
+        session.enterRoom()
+        assertEquals(MultiplayerMatchPhase.InRoom(1), session.phase)
+
+        assertTrue(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.Loading(2), session.phase)
     }
 
+    @Test
+    fun `tryEnterLoading enters loading for a new round after results`() {
+        playRoundToResults(1)
+        assertEquals(MultiplayerMatchPhase.Results(1, false), session.phase)
+
+        assertTrue(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.Loading(2), session.phase)
+    }
+
+    @Test
+    fun `tryEnterLoading refuses the round that is loading`() {
+        session.tryEnterLoading(2)
+
+        assertFalse(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.Loading(2), session.phase)
+    }
+
+    @Test
+    fun `tryEnterLoading refuses the round that is playing`() {
+        session.tryEnterLoading(2)
+        session.enterPlaying()
+
+        assertFalse(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.Playing(2), session.phase)
+    }
+
+    @Test
+    fun `tryEnterLoading refuses the round that has results`() {
+        playRoundToResults(2)
+
+        assertFalse(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.Results(2, false), session.phase)
+    }
+
+    @Test
+    fun `tryEnterLoading refuses the round already sat out in the room`() {
+        session.tryEnterLoading(2)
+        session.enterRoom()
+
+        assertFalse(session.tryEnterLoading(2))
+        assertEquals(MultiplayerMatchPhase.InRoom(2), session.phase)
+    }
+
+    @Test
+    fun `tryEnterLoading lets only one of many threads enter the same round`() {
+        val threads = 16
+        val start = CountDownLatch(1)
+        val entered = AtomicInteger()
+        val pool = Executors.newFixedThreadPool(threads)
+
+        try {
+            val done = (1..threads).map {
+                pool.submit {
+                    start.await()
+
+                    if (session.tryEnterLoading(5)) {
+                        entered.incrementAndGet()
+                    }
+                }
+            }
+
+            start.countDown()
+            done.forEach { it.get(5, TimeUnit.SECONDS) }
+        } finally {
+            pool.shutdownNow()
+        }
+
+        assertEquals(1, entered.get())
+        assertEquals(MultiplayerMatchPhase.Loading(5), session.phase)
+    }
     @Test
     fun `acceptsFinalLeaderboard accepts own round right after results`() {
         playRoundToResults(2)
@@ -118,7 +186,7 @@ class MultiplayerMatchSessionTest {
     fun `acceptsFinalLeaderboard rejects outside results`() {
         assertFalse(session.acceptsFinalLeaderboard(2))
 
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         assertFalse(session.acceptsFinalLeaderboard(2))
 
         session.enterPlaying()
@@ -158,7 +226,7 @@ class MultiplayerMatchSessionTest {
     fun `recover flushes before returning`() {
         transport.isReady = false
         session.enterRoom()
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         session.enterPlaying()
         session.enterResults()
         session.enterRoom()
@@ -191,7 +259,7 @@ class MultiplayerMatchSessionTest {
 
     @Test
     fun `recover does not change phase`() {
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
 
         session.recover(MultiplayerRecoverySnapshot(3, null, null, PlayerStatus.NotReady), hasBeatmap = true)
 
@@ -222,7 +290,7 @@ class MultiplayerMatchSessionTest {
     @Test
     fun `recover drops events the server already received`() {
         transport.isReady = false
-        session.enterLoading(2)
+        session.tryEnterLoading(2)
         session.enterPlaying()
 
         session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.BeatmapLoadComplete, 2, emptyArray())
@@ -254,7 +322,7 @@ class MultiplayerMatchSessionTest {
     @Test
     fun `recover drops round-scoped events of another round`() {
         transport.isReady = false
-        session.enterLoading(1)
+        session.tryEnterLoading(1)
         session.enterPlaying()
 
         session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 1, arrayOf("json"))
@@ -306,7 +374,7 @@ class MultiplayerMatchSessionTest {
     }
 
     private fun playRoundToResults(roundId: Int) {
-        session.enterLoading(roundId)
+        session.tryEnterLoading(roundId)
         session.enterPlaying()
         session.enterResults()
     }

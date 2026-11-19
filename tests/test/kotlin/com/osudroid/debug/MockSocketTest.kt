@@ -87,7 +87,7 @@ class MockSocketTest {
     @Test
     fun `a new socket continues numbering from the session`() {
         Multiplayer.session.seedChat(5)
-        Multiplayer.session.enterLoading(3)
+        Multiplayer.session.tryEnterLoading(3)
 
         val reconnected = MockSocket(1)
         val chat = mutableListOf<List<Any?>>()

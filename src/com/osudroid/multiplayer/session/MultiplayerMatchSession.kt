@@ -33,20 +33,22 @@ class MultiplayerMatchSession(val outbox: MultiplayerOutbox) {
         private set
 
     /**
-     * Whether a round with the given ID is not the round this session is already in.
+     * Enters the loading phase of the given round, unless that round was already started or already sat out.
+     *
+     * This method is thread-safe.
      *
      * @param roundId The ID of the round.
+     * @return `true` if the session is now loading the round, `false` if the round was already started or
+     * sat out and nothing changed.
      */
-    fun shouldStartRound(roundId: Int) = roundId != phase.roundId
-
-    /**
-     * Enters the loading phase of the given round.
-     *
-     * @param roundId The ID of the round.
-     */
-    fun enterLoading(roundId: Int) {
+    fun tryEnterLoading(roundId: Int): Boolean {
         synchronized(lock) {
+            if (roundId == phase.roundId) {
+                return false
+            }
+
             phase = MultiplayerMatchPhase.Loading(roundId)
+            return true
         }
     }
 

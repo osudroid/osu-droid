@@ -1075,6 +1075,12 @@ class RoomScene(
 
         val player = Multiplayer.player ?: return
 
+        // Checked before entering the round, so that the phase is never left loading a round that is not played.
+        if (!Multiplayer.session.tryEnterLoading(roundId)) {
+            Multiplayer.log("INFO: playBeatmap for round $roundId ignored, already started")
+            return
+        }
+
         if (player.status == PlayerStatus.MissingBeatmap) {
             // This client does not have the beatmap and will never call startGame(), so
             // GameScene.onGameLoad() will never fire and notifyBeatmapLoaded() would never be
@@ -1083,7 +1089,10 @@ class RoomScene(
             // match for everyone (EH-5).  Send the ACK immediately so the server can proceed
             // once all other players have loaded.
             Multiplayer.log("INFO: MissingBeatmap — sending immediate beatmapLoadComplete ACK (EH-5)")
-            RoomAPI.notifyBeatmapLoaded()
+            RoomAPI.notifyBeatmapLoaded(roundId)
+
+            // This client sits the round out.
+            Multiplayer.session.enterRoom()
         }
 
         updateThread {
@@ -1093,6 +1102,7 @@ class RoomScene(
 
                 if (global.selectedBeatmap == null) {
                     Multiplayer.log("WARNING: Attempt to start match with null track.")
+                    Multiplayer.session.enterRoom()
                     return@updateThread
                 }
 
@@ -1107,6 +1117,8 @@ class RoomScene(
     }
 
     override fun onRoomMatchStart() {
+        Multiplayer.session.enterPlaying()
+
         updateThread {
             if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
                 GlobalManager.getInstance().gameScene.isReadyToStart = true

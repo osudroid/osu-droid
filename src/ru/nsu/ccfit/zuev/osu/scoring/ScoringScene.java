@@ -626,6 +626,8 @@ public class ScoringScene {
 
         if (Multiplayer.isMultiplayer)
         {
+            Multiplayer.session.enterRoom();
+
             // Preventing NPEs when player gets disconnected while playing
             if (!Multiplayer.isConnected()) {
                 UIEngine.getCurrent().setScene(new LobbyScene());

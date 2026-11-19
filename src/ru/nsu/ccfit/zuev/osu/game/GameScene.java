@@ -2068,7 +2068,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         Multiplayer.log("Match ended, moving to results scene.");
                         Multiplayer.roomScene.getChat().show();
 
-                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
+                        Multiplayer.session.enterResults();
+                        Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
@@ -2306,6 +2307,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene = new GameUIScene();
 
         if (Multiplayer.isMultiplayer) {
+            Multiplayer.session.enterRoom();
+
             releaseVideo();
 
             var songService = GlobalManager.getInstance().getSongService();
@@ -2873,7 +2876,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected())
-                    Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
+                    Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                 Multiplayer.log("Player left the match.");
                 quit();
@@ -2929,7 +2932,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (Multiplayer.isMultiplayer) {
             if (Multiplayer.isConnected()) {
                 Multiplayer.log("Player has lost, moving to room scene.");
-                Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
+                Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
             }
             quit();
             return;
