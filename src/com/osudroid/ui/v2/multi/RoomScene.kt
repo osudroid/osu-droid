@@ -1147,7 +1147,7 @@ class RoomScene(
     }
 
     override fun onRoomFinalLeaderboard(leaderboard: JSONArray, roundId: Int) {
-        Multiplayer.onFinalLeaderboard(leaderboard)
+        Multiplayer.onFinalLeaderboard(leaderboard, roundId)
     }
 
     // Player related events
