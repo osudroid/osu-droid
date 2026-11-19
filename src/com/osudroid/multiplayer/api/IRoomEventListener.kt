@@ -7,6 +7,7 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
+import com.osudroid.multiplayer.session.MultiplayerUndeliveredReason
 import org.json.JSONArray
 
 interface IRoomEventListener {
@@ -40,11 +41,9 @@ interface IRoomEventListener {
      * did not happen.
      *
      * @param event The [MultiplayerClientEvent] that was not delivered.
-     * @param whileConnected Whether the socket was connected and the server did not acknowledge the event in time, as
-     * opposed to the socket being disconnected when the [MultiplayerClientEvent] was sent or while it was waiting for
-     * an acknowledgement.
+     * @param reason Why the [MultiplayerClientEvent] was not delivered.
      */
-    fun onEventNotDelivered(event: MultiplayerClientEvent, whileConnected: Boolean)
+    fun onEventNotDelivered(event: MultiplayerClientEvent, reason: MultiplayerUndeliveredReason)
 
     /**
      * Emitted when the server encounters an error in processing info (maybe this can be displayed in a toast message).

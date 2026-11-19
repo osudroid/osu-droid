@@ -4,6 +4,7 @@ import com.osudroid.multiplayer.api.MultiplayerClientEvent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.concurrent.thread
 
 class MultiplayerOutboxTest {
     @Test
@@ -202,8 +203,8 @@ class MultiplayerOutboxTest {
     }
 
     @Test
-    fun `sendOnce reports timeout while connected as not delivered`() {
-        val reports = mutableListOf<Boolean>()
+    fun `sendOnce reports timeout while ready as no response`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, arrayOf("x")) { reports.add(it) }
 
@@ -214,26 +215,26 @@ class MultiplayerOutboxTest {
         emission.onAck(null)
         emission.onAck(null)
 
-        assertEquals(listOf(true), reports)
+        assertEquals(listOf(MultiplayerUndeliveredReason.NoResponse), reports)
         // Never resent.
         assertEquals(1, transport.emissions.size)
     }
 
     @Test
-    fun `sendOnce reports a missing acknowledgement as not connected if the transport is not ready`() {
-        val reports = mutableListOf<Boolean>()
+    fun `sendOnce reports a missing acknowledgement as connection lost if the transport is not ready`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
 
         transport.isReady = false
         transport.emissions.single().onAck(null)
 
-        assertEquals(listOf(false), reports)
+        assertEquals(listOf(MultiplayerUndeliveredReason.ConnectionLost), reports)
     }
 
     @Test
     fun `sendOnce does not report acknowledged event`() {
-        val reports = mutableListOf<Boolean>()
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
         transport.emissions.single().onAck(okAckResult)
@@ -243,31 +244,66 @@ class MultiplayerOutboxTest {
     }
 
     @Test
-    fun `sendOnce reports disconnection as not delivered while not connected`() {
-        val reports = mutableListOf<Boolean>()
+    fun `sendOnce reports disconnection as connection lost`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
 
         outbox.onDisconnected()
         transport.emissions.single().onAck(null)
 
-        assertEquals(listOf(false), reports)
+        assertEquals(listOf(MultiplayerUndeliveredReason.ConnectionLost), reports)
     }
 
     @Test
-    fun `sendOnce while not ready reports not delivered without emitting`() {
+    fun `sendOnce while not ready reports not sent without emitting`() {
         transport.isReady = false
-        val reports = mutableListOf<Boolean>()
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
 
-        assertEquals(listOf(false), reports)
+        assertEquals(listOf(MultiplayerUndeliveredReason.NotSent), reports)
         assertTrue(transport.emissions.isEmpty())
     }
 
     @Test
+    fun `sendOnce reports a refusal inside emit as not sent exactly once`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
+
+        // The transport refuses the event synchronously while still reporting itself as ready.
+        transport.onEmit = { it(null) }
+
+        outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
+
+        assertEquals(listOf(MultiplayerUndeliveredReason.NotSent), reports)
+
+        // Nothing is left pending.
+        // A later disconnection or a repeated acknowledgement reports nothing more.
+        transport.emissions.single().onAck(null)
+        outbox.onDisconnected()
+
+        assertEquals(listOf(MultiplayerUndeliveredReason.NotSent), reports)
+    }
+
+    @Test
+    fun `sendOnce reports a missing acknowledgement from another thread during emit as connection lost`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
+
+        // The event goes out, then the socket closes and clears its pending
+        // acknowledgements on its own thread while emit has not returned yet.
+        transport.onEmit = { onAck ->
+            transport.isReady = false
+            thread { onAck(null) }.join()
+        }
+
+        outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
+
+        assertEquals(listOf(MultiplayerUndeliveredReason.ConnectionLost), reports)
+    }
+
+    @Test
     fun `clear drops every event without reporting`() {
-        val reports = mutableListOf<Boolean>()
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
 
         outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
         outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
@@ -307,8 +343,14 @@ class MultiplayerOutboxTest {
         override var isReady = true
         val emissions = mutableListOf<Emission>()
 
+        /**
+         * Runs while a [MultiplayerClientEvent] is being emitted, after it was recorded.
+         */
+        var onEmit: ((OnMultiplayerEventAck) -> Unit)? = null
+
         override fun emit(event: MultiplayerClientEvent, args: Array<Any?>, timeoutMs: Long, onAck: OnMultiplayerEventAck) {
             emissions.add(Emission(event, args, timeoutMs, onAck))
+            onEmit?.invoke(onAck)
         }
     }
 

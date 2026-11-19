@@ -20,6 +20,7 @@ import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.session.MultiplayerReconcileAction
 import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
+import com.osudroid.multiplayer.session.MultiplayerUndeliveredReason
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.BeatmapInfoLayout
 import com.osudroid.ui.v2.GameLoaderScene
@@ -928,28 +929,36 @@ class RoomScene(
         updateThread { back() }
     }
 
-    override fun onEventNotDelivered(event: MultiplayerClientEvent, whileConnected: Boolean) {
-        Multiplayer.log("WARNING: Event ${event.eventName} was not delivered (whileConnected = $whileConnected)")
+    override fun onEventNotDelivered(event: MultiplayerClientEvent, reason: MultiplayerUndeliveredReason) {
+        Multiplayer.log("WARNING: Event ${event.eventName} was not delivered (reason = $reason)")
 
-        // While disconnected, the reconnection owns the wait locks and resynchronizes the room once it succeeds,
-        // so there is nothing to undo here and a message per lost event would only be noise.
-        if (!whileConnected) {
-            return
+        when (reason) {
+            MultiplayerUndeliveredReason.NoResponse -> {
+                val lock = when (event) {
+                    MultiplayerClientEvent.PlayerStatusChanged -> isWaitingForStatusChange
+                    MultiplayerClientEvent.PlayerModsChanged, MultiplayerClientEvent.RoomModsChanged -> isWaitingForModsChange
+                    MultiplayerClientEvent.BeatmapChanged -> isWaitingForBeatmapChange
+                    else -> null
+                }
+
+                lock?.set(false)
+
+                chat.onSystemChatMessage(
+                    "Your last action may not have been delivered. Please try again if nothing changed.",
+                    "#FFBFBF"
+                )
+            }
+
+            // The action was refused while the session was down. The reconnection owns the wait locks and
+            // resynchronizes the room once it succeeds, so only tell the user to try again.
+            MultiplayerUndeliveredReason.NotSent -> chat.onSystemChatMessage(
+                "Your last action was not sent because the connection is being restored. Please try again once it is back.",
+                "#FFBFBF"
+            )
+
+            // Same as above, but a message per lost event would only be noise.
+            MultiplayerUndeliveredReason.ConnectionLost -> Unit
         }
-
-        val lock = when (event) {
-            MultiplayerClientEvent.PlayerStatusChanged -> isWaitingForStatusChange
-            MultiplayerClientEvent.PlayerModsChanged, MultiplayerClientEvent.RoomModsChanged -> isWaitingForModsChange
-            MultiplayerClientEvent.BeatmapChanged -> isWaitingForBeatmapChange
-            else -> null
-        }
-
-        lock?.set(false)
-
-        chat.onSystemChatMessage(
-            "Your last action may not have been delivered. Please try again if nothing changed.",
-            "#FFBFBF"
-        )
     }
 
     override fun onRoomConnectFail(error: String?) {

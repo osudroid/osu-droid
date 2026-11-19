@@ -816,8 +816,8 @@ object RoomAPI {
      * [IRoomEventListener.onEventNotDelivered] is called if the server does not acknowledge it.
      */
     private fun sendOnce(event: MultiplayerClientEvent, vararg args: Any?) {
-        Multiplayer.session.outbox.sendOnce(event, arrayOf(*args)) { whileConnected ->
-            roomEventListener?.onEventNotDelivered(event, whileConnected)
+        Multiplayer.session.outbox.sendOnce(event, arrayOf(*args)) { reason ->
+            roomEventListener?.onEventNotDelivered(event, reason)
         }
     }
 }

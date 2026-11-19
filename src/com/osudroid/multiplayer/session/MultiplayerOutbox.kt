@@ -1,11 +1,33 @@
 package com.osudroid.multiplayer.session
 
 import com.osudroid.multiplayer.api.MultiplayerClientEvent
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The amount of time, in milliseconds, to wait for the server to acknowledge an event before giving up on it.
  */
 const val ACK_TIMEOUT_MS = 5_000L
+
+/**
+ * The reason a [MultiplayerClientEvent] sent with [MultiplayerOutbox.sendOnce] was not delivered.
+ */
+enum class MultiplayerUndeliveredReason {
+    /**
+     * The session was not established when the event was sent, so it was never put on the wire. This includes the
+     * transport refusing the event synchronously while it was being sent.
+     */
+    NotSent,
+
+    /**
+     * The event was sent, but the connection dropped before an acknowledgement arrived.
+     */
+    ConnectionLost,
+
+    /**
+     * The event was sent and the connection stayed up, but no acknowledgement arrived in time.
+     */
+    NoResponse
+}
 
 /**
  * The server's response to an event.
@@ -128,7 +150,7 @@ class MultiplayerOutbox(
      * @param event The [MultiplayerClientEvent] to send.
      * @param args The arguments of [event].
      * @param onNotDelivered The callback that is called at most once if the server did not acknowledge [event]. Its
-     * argument tells whether the session was still established when that was found out.
+     * argument tells why.
      */
     fun sendOnce(event: MultiplayerClientEvent, args: Array<Any?>, onNotDelivered: OnEventNotDelivered) {
         val item = OnceItem(onNotDelivered)
@@ -145,20 +167,36 @@ class MultiplayerOutbox(
         if (!ready) {
             // Emitting now could make the socket buffer the event and deliver it after a reconnection, long after the
             // user's action stopped being relevant.
-            onNotDelivered(false)
+            onNotDelivered(MultiplayerUndeliveredReason.NotSent)
             return
         }
 
-        transport.emit(event, args, ackTimeoutMs) { result ->
-            val failed = synchronized(lock) { onceItems.remove(item) }
+        // A refusal is reported synchronously, on this thread, before emit returns. A missing acknowledgement can also
+        // arrive on another thread while emit is still running (e.g. a closing socket clearing its pending
+        // acknowledgements), and that event was sent, so both the thread and the timing are checked.
+        val emittingThread = Thread.currentThread()
+        val emitting = AtomicBoolean(true)
 
-            // A null result means no acknowledgement arrived. Any other result is a response from the server, and
-            // whether the server accepted the event is up to the caller to learn through other means.
-            if (failed && result == null) {
-                // Not delivered while connected only if the transport still looks healthy, as opposed to an emission
-                // that was refused or abandoned by a socket that is going away.
-                item.onNotDelivered(transport.isReady)
+        try {
+            transport.emit(event, args, ackTimeoutMs) { result ->
+                val failed = synchronized(lock) { onceItems.remove(item) }
+
+                // A null result means no acknowledgement arrived. Any other result is a response from the server, and
+                // whether the server accepted the event is up to the caller to learn through other means.
+                if (failed && result == null) {
+                    val reason = when {
+                        // The transport refused the event before it went out.
+                        emitting.get() && Thread.currentThread() === emittingThread -> MultiplayerUndeliveredReason.NotSent
+                        transport.isReady -> MultiplayerUndeliveredReason.NoResponse
+                        // A socket that is going away abandoned the emission.
+                        else -> MultiplayerUndeliveredReason.ConnectionLost
+                    }
+
+                    item.onNotDelivered(reason)
+                }
             }
+        } finally {
+            emitting.set(false)
         }
     }
 
@@ -182,7 +220,7 @@ class MultiplayerOutbox(
         }
 
         for (item in undelivered) {
-            item.onNotDelivered(false)
+            item.onNotDelivered(MultiplayerUndeliveredReason.ConnectionLost)
         }
     }
 
@@ -285,10 +323,10 @@ class MultiplayerOutbox(
      */
     fun interface OnEventNotDelivered {
         /**
-         * @param whileConnected `true` if the acknowledgement did not arrive while the session was established and
-         * `false` if the session was not established when the event was sent or when the missing acknowledgement was
-         * noticed. This callback may call back into this [MultiplayerOutbox].
+         * Called when the event was not delivered. This callback may call back into this [MultiplayerOutbox].
+         *
+         * @param reason Why the event was not delivered.
          */
-        operator fun invoke(whileConnected: Boolean)
+        operator fun invoke(reason: MultiplayerUndeliveredReason)
     }
 }
