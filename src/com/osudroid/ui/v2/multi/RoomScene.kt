@@ -18,6 +18,7 @@ import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.multiplayer.api.data.RoomTeam
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.multiplayer.session.MultiplayerReconcileAction
 import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.BeatmapInfoLayout
@@ -728,6 +729,9 @@ class RoomScene(
 
         runSafe { RoomAPI.disconnect() }
 
+        // Leaving the room ends the match, including any event that was still waiting to be delivered.
+        Multiplayer.session.reset()
+
         Multiplayer.room = null
         Multiplayer.roomScene = null
         Multiplayer.player = null
@@ -831,17 +835,18 @@ class RoomScene(
         if (Multiplayer.isReconnecting) {
             onRoomBeatmapChange(room.beatmap)
 
+            // Ends the reconnection, which the status changes made by the actions below wait for.
             Multiplayer.onReconnectAttempt(true)
 
-            val player = Multiplayer.player ?: return
+            // Events that are still relevant are resent before this returns, so they reach the server ahead of anything
+            // the actions send.
+            val actions = Multiplayer.session.recover(
+                recovery.snapshot,
+                hasBeatmap = GlobalManager.getInstance().selectedBeatmap != null
+            )
 
-            // If the server reports Playing, the match started while the player was disconnected.
-            if (player.status == PlayerStatus.Playing && GlobalManager.getInstance().selectedBeatmap != null) {
-                onRoomMatchPlay(recovery.snapshot.roundId)
-            } else {
-                // Always re-sync status after reconnection so that the isWaitingForStatusChange lock
-                // (set in onRoomDisconnect) is cleared and the player can toggle ready again.
-                invalidateStatus()
+            for (action in actions) {
+                applyReconcileAction(action, recovery)
             }
 
             return
@@ -854,6 +859,47 @@ class RoomScene(
         updateBeatmap(newRoom.beatmap)
 
         show()
+    }
+
+    /**
+     * Applies an action decided after a reconnection to converge with the server.
+     *
+     * @param action The action to apply.
+     * @param recovery What the server reported on reconnection.
+     */
+    private fun applyReconcileAction(action: MultiplayerReconcileAction, recovery: MultiplayerRecoveryPayload) {
+        Multiplayer.log("Reconnection: applying $action")
+
+        when (action) {
+            MultiplayerReconcileAction.InvalidateStatus -> invalidateStatus()
+            MultiplayerReconcileAction.ReleaseStatusLock -> isWaitingForStatusChange.set(false)
+
+            MultiplayerReconcileAction.ShowLastResults -> {
+                // Both are present whenever the server reports last results.
+                val scores = recovery.lastResultsScores
+                val roundId = recovery.snapshot.lastResultsRoundId
+
+                if (scores != null && roundId != null) {
+                    Multiplayer.onFinalLeaderboard(scores, roundId)
+                }
+            }
+
+            MultiplayerReconcileAction.StartImmediately -> onRoomMatchStart()
+            MultiplayerReconcileAction.ApplySkip -> onRoomMatchSkip()
+
+            is MultiplayerReconcileAction.JoinRound -> {
+                onRoomMatchPlay(action.roundId)
+
+                // The server already has this client as playing, so no status change will arrive to release the lock
+                // taken when the connection dropped.
+                isWaitingForStatusChange.set(false)
+            }
+
+            MultiplayerReconcileAction.SitOut -> {
+                invalidateStatus()
+                chat.onSystemChatMessage("A match started while you were reconnecting. You'll join the next one.", "#FFBFBF")
+            }
+        }
     }
 
     override fun onRoomDisconnect(reason: String?, byUser: Boolean) {
@@ -882,6 +928,26 @@ class RoomScene(
 
     override fun onEventNotDelivered(event: MultiplayerClientEvent, whileConnected: Boolean) {
         Multiplayer.log("WARNING: Event ${event.eventName} was not delivered (whileConnected = $whileConnected)")
+
+        // While disconnected, the reconnection owns the wait locks and resynchronizes the room once it succeeds,
+        // so there is nothing to undo here and a message per lost event would only be noise.
+        if (!whileConnected) {
+            return
+        }
+
+        val lock = when (event) {
+            MultiplayerClientEvent.PlayerStatusChanged -> isWaitingForStatusChange
+            MultiplayerClientEvent.PlayerModsChanged, MultiplayerClientEvent.RoomModsChanged -> isWaitingForModsChange
+            MultiplayerClientEvent.BeatmapChanged -> isWaitingForBeatmapChange
+            else -> null
+        }
+
+        lock?.set(false)
+
+        chat.onSystemChatMessage(
+            "Your last action may not have been delivered. Please try again if nothing changed.",
+            "#FFBFBF"
+        )
     }
 
     override fun onRoomConnectFail(error: String?) {
