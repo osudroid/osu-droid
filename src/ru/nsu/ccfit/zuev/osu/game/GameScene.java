@@ -2745,7 +2745,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float offset = previousFrameTime > 0
                 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        int eventTime = (int) (gameplayClock.getCurrentTime() * 1000 + offset);
+        int eventTime = Math.round(gameplayClock.getCurrentTime() * 1000 + offset);
 
         if (replaying || isGameOver) {
             return false;
@@ -2861,7 +2861,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 cursor.addEvent(upEvent);
 
                 if (replay != null) {
-                    replay.addUp((int) time, i);
+                    replay.addUp(Math.round(time), i);
                 }
             }
 
