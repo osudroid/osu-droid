@@ -1,6 +1,7 @@
 package com.osudroid.multiplayer.session
 
 import com.osudroid.multiplayer.api.MultiplayerClientEvent
+import com.osudroid.multiplayer.api.data.MultiplayerMessage
 
 /**
  * Tracks the state of the multiplayer match the client is in, and decides how to recover after a reconnection.
@@ -155,6 +156,32 @@ class MultiplayerMatchSession(val outbox: MultiplayerOutbox) {
             lastChatId = id
             return true
         }
+    }
+
+    /**
+     * Prepares the session for a newly established connection to the room.
+     *
+     * On a fresh connection, everything about the previous match is forgotten, as [reset] does, and every chat
+     * message that already exists in the room is marked as seen, so none of them is returned.
+     *
+     * On a reconnection, [phase] and [outbox] are left untouched, and the chat messages that were missed while
+     * disconnected are recorded as seen and returned. Messages that were already seen, including duplicates within
+     * the recent chat, are dropped.
+     *
+     * @param recovery The recovery data reported by the server.
+     * @param isReconnection Whether the connection continues a connection to the room the client was already in, as
+     * opposed to joining the room anew.
+     * @return The missed chat messages to show, oldest first. This is always empty on a fresh connection.
+     */
+    fun connect(recovery: MultiplayerRecoveryPayload, isReconnection: Boolean): List<MultiplayerMessage> {
+        if (!isReconnection) {
+            reset()
+            seedChat(recovery.latestChatId)
+
+            return emptyList()
+        }
+
+        return recovery.recentChat.filter { acceptChat(it.id) }
     }
 
     /**

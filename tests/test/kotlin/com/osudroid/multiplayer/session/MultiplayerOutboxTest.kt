@@ -147,6 +147,70 @@ class MultiplayerOutboxTest {
     }
 
     @Test
+    fun `late acknowledgement of a superseded attempt is ignored`() {
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
+        val first = transport.emissions.single()
+
+        // The first attempt times out while the transport is ready, so the event is resent.
+        first.onAck(null)
+
+        assertEquals(2, transport.emissions.size)
+        val second = transport.emissions[1]
+
+        first.onAck(okAckResult)
+        assertEquals(listOf(MultiplayerClientEvent.ScoreSubmission), outbox.unacknowledged)
+
+        second.onAck(okAckResult)
+        assertTrue(outbox.unacknowledged.isEmpty())
+    }
+
+    @Test
+    fun `sendUntilAcknowledged stops tracking an event acknowledged inside emit`() {
+        transport.onEmit = { it(okAckResult) }
+
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
+
+        assertEquals(1, transport.emissions.size)
+        assertTrue(outbox.unacknowledged.isEmpty())
+    }
+
+    @Test
+    fun `flush sends held events once in order when each is acknowledged inside emit`() {
+        transport.isReady = false
+
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.SkipRequested, 3, emptyArray())
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ChatMessage, null, arrayOf("hi"))
+
+        transport.isReady = true
+        transport.onEmit = { it(okAckResult) }
+        outbox.flush()
+
+        assertEquals(
+            listOf(
+                MultiplayerClientEvent.ScoreSubmission,
+                MultiplayerClientEvent.SkipRequested,
+                MultiplayerClientEvent.ChatMessage
+            ),
+            transport.emissions.map { it.event }
+        )
+        assertTrue(outbox.unacknowledged.isEmpty())
+    }
+
+    @Test
+    fun `sendOnce reports nothing for an event acknowledged inside emit`() {
+        val reports = mutableListOf<MultiplayerUndeliveredReason>()
+
+        transport.onEmit = { it(okAckResult) }
+
+        outbox.sendOnce(MultiplayerClientEvent.PlayerStatusChanged, emptyArray()) { reports.add(it) }
+        outbox.onDisconnected()
+
+        assertEquals(1, transport.emissions.size)
+        assertTrue(reports.isEmpty())
+    }
+
+    @Test
     fun `timeout from before disconnection does not resend`() {
         outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 3, arrayOf("json"))
         val first = transport.emissions.single()
@@ -187,6 +251,15 @@ class MultiplayerOutboxTest {
         outbox.sendUntilAcknowledged(MultiplayerClientEvent.ChatMessage, null, arrayOf("hi"))
 
         outbox.pruneStale(null, emptySet())
+
+        assertEquals(listOf(MultiplayerClientEvent.ChatMessage), outbox.unacknowledged)
+    }
+
+    @Test
+    fun `pruneStale keeps an event that is not round-scoped even if listed as already received`() {
+        outbox.sendUntilAcknowledged(MultiplayerClientEvent.ChatMessage, null, arrayOf("hi"))
+
+        outbox.pruneStale(4, setOf(MultiplayerClientEvent.ChatMessage))
 
         assertEquals(listOf(MultiplayerClientEvent.ChatMessage), outbox.unacknowledged)
     }

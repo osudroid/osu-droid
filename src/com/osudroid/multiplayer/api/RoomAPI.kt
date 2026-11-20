@@ -309,13 +309,6 @@ object RoomAPI {
             val recovery = json.toMultiplayerRecoveryPayload(localPlayer.status)
             val isReconnecting = Multiplayer.isReconnecting
 
-            // This handler runs on the socket's event thread, so no chat message can be received between resetting the
-            // session and seeding it.
-            if (!isReconnecting) {
-                Multiplayer.session.reset()
-                Multiplayer.session.seedChat(recovery.latestChatId)
-            }
-
             expectedSocket.apply {
                 on(MultiplayerServerEvent.BeatmapChanged.eventName, beatmapChanged)
                 on(MultiplayerServerEvent.HostChanged.eventName, hostChanged)
@@ -362,17 +355,17 @@ object RoomAPI {
             Multiplayer.player = localPlayer
             Multiplayer.roomScene = scene
 
-            if (isReconnecting) {
-                // Replay the messages missed while disconnected through the same path as live messages. They are
-                // dropped if they were already seen.
-                for (message in recovery.recentChat) {
-                    if (Multiplayer.session.acceptChat(message.id)) {
-                        scene.onRoomChatMessage(
-                            if (message is MultiplayerMessage.Player) message.uid else null,
-                            message.message
-                        )
-                    }
-                }
+            // This handler runs on the socket's event thread, so no live chat message can arrive while the session is
+            // prepared. It is prepared only after everything above succeeded, so that a failed attempt does not mark
+            // missed messages as seen without showing them.
+            val missedChat = Multiplayer.session.connect(recovery, isReconnecting)
+
+            // Replay the messages missed while disconnected through the same path as live messages.
+            for (message in missedChat) {
+                scene.onRoomChatMessage(
+                    if (message is MultiplayerMessage.Player) message.uid else null,
+                    message.message
+                )
             }
 
             transport.establishedSocket = expectedSocket

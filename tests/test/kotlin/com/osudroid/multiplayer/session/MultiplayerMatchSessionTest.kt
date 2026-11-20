@@ -1,6 +1,7 @@
 package com.osudroid.multiplayer.session
 
 import com.osudroid.multiplayer.api.MultiplayerClientEvent
+import com.osudroid.multiplayer.api.data.MultiplayerMessage
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CompletableDeferred
@@ -396,6 +397,94 @@ class MultiplayerMatchSessionTest {
         assertTrue(session.outbox.unacknowledged.isEmpty())
     }
 
+    @Test
+    fun `connect on a fresh connection resets the match and seeds chat without returning messages`() {
+        transport.isReady = false
+        playRoundToResults(2)
+        session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 2, arrayOf("json"))
+
+        val recovery = recoveryPayload(
+            recentChat = listOf(
+                MultiplayerMessage.Player(8, 100L, "hi"),
+                MultiplayerMessage.System(9, "welcome")
+            ),
+            latestChatId = 9
+        )
+
+        val missed = session.connect(recovery, isReconnection = false)
+
+        assertTrue(missed.isEmpty())
+        assertEquals(MultiplayerMatchPhase.InRoom(null), session.phase)
+        assertTrue(session.outbox.unacknowledged.isEmpty())
+        assertFalse(session.acceptChat(9))
+        assertTrue(session.acceptChat(10))
+    }
+
+    @Test
+    fun `connect on a reconnection returns only the messages after the last seen one in order`() {
+        transport.isReady = false
+        session.tryEnterLoading(2)
+        session.enterPlaying()
+        session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, 2, arrayOf("json"))
+        session.seedChat(5)
+
+        val newer = MultiplayerMessage.Player(7, 100L, "second")
+        val newest = MultiplayerMessage.System(8, "third")
+
+        val missed = session.connect(
+            recoveryPayload(
+                recentChat = listOf(
+                    MultiplayerMessage.Player(4, 100L, "old"),
+                    MultiplayerMessage.System(5, "seen"),
+                    MultiplayerMessage.Player(6, 101L, "first"),
+                    newer,
+                    newest
+                ),
+                latestChatId = 8
+            ),
+            isReconnection = true
+        )
+
+        assertEquals(listOf(MultiplayerMessage.Player(6, 101L, "first"), newer, newest), missed)
+        assertEquals(MultiplayerMatchPhase.Playing(2), session.phase)
+        assertEquals(listOf(MultiplayerClientEvent.ScoreSubmission), session.outbox.unacknowledged)
+        assertEquals(8, session.lastChatId)
+    }
+
+    @Test
+    fun `connect on a reconnection drops duplicate messages within the recent chat`() {
+        session.seedChat(5)
+
+        val missed = session.connect(
+            recoveryPayload(
+                recentChat = listOf(
+                    MultiplayerMessage.Player(6, 100L, "once"),
+                    MultiplayerMessage.Player(6, 100L, "once"),
+                    MultiplayerMessage.System(7, "next"),
+                    MultiplayerMessage.System(7, "next")
+                ),
+                latestChatId = 7
+            ),
+            isReconnection = true
+        )
+
+        assertEquals(listOf(MultiplayerMessage.Player(6, 100L, "once"), MultiplayerMessage.System(7, "next")), missed)
+    }
+
+    @Test
+    fun `connect on a reconnection of a session that saw no message returns the whole recent chat`() {
+        val recentChat = listOf(
+            MultiplayerMessage.Player(1, 100L, "a"),
+            MultiplayerMessage.System(2, "b"),
+            MultiplayerMessage.Player(3, 101L, "c")
+        )
+
+        val missed = session.connect(recoveryPayload(recentChat = recentChat, latestChatId = 3), isReconnection = true)
+
+        assertEquals(recentChat, missed)
+        assertEquals(3, session.lastChatId)
+    }
+
     /**
      * Runs [block] on many coroutines at once and counts how many of them returned `true`.
      *
@@ -411,6 +500,13 @@ class MultiplayerMatchSessionTest {
             results.awaitAll().count { it }
         }
     }
+
+    private fun recoveryPayload(recentChat: List<MultiplayerMessage>, latestChatId: Int) = MultiplayerRecoveryPayload(
+        snapshot = MultiplayerRecoverySnapshot(2, null, null, PlayerStatus.NotReady),
+        lastResultsScores = null,
+        recentChat = recentChat,
+        latestChatId = latestChatId
+    )
 
     private fun playRoundToResults(roundId: Int) {
         session.tryEnterLoading(roundId)

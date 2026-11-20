@@ -138,6 +138,42 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
+    fun playingNewRound_resultsWithMismatchedLastResults_joinsWithoutShowingThem() {
+        assertEquals(
+            listOf(JoinRound(5)),
+            reconcile(
+                MultiplayerMatchPhase.Results(4, false),
+                playing(5, progress(), lastResultsRoundId = 3),
+                true
+            )
+        )
+    }
+
+    @Test
+    fun playingNewRound_resultsWithLeaderboard_alreadyLoaded_sitsOut() {
+        assertEquals(
+            listOf(SitOut),
+            reconcile(
+                MultiplayerMatchPhase.Results(4, true),
+                playing(5, progress(allLoaded = true), lastResultsRoundId = 4),
+                true
+            )
+        )
+    }
+
+    @Test
+    fun playingNewRound_results_missingBeatmap_showsPreviousResultsThenSitsOut() {
+        assertEquals(
+            listOf(ShowLastResults, SitOut),
+            reconcile(
+                MultiplayerMatchPhase.Results(4, false),
+                playing(5, progress(), lastResultsRoundId = 4),
+                false
+            )
+        )
+    }
+
+    @Test
     fun playingNewRound_loadingOrPlaying_sitsOut() {
         val snapshot = playing(5, progress())
 
