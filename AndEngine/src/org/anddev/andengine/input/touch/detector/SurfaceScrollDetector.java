@@ -38,15 +38,18 @@ public class SurfaceScrollDetector extends ScrollDetector {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+	// BEGIN osu!droid modified - read surface coordinates from the TouchEvent,
+	// which may not retain its MotionEvent
 	@Override
 	protected float getX(final TouchEvent pTouchEvent) {
-		return pTouchEvent.getMotionEvent().getX();
+		return pTouchEvent.getSurfaceX();
 	}
 
 	@Override
 	protected float getY(final TouchEvent pTouchEvent) {
-		return pTouchEvent.getMotionEvent().getY();
+		return pTouchEvent.getSurfaceY();
 	}
+	// END osu!droid modified
 
 	// ===========================================================
 	// Methods

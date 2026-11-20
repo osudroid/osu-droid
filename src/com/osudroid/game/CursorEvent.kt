@@ -98,7 +98,7 @@ class CursorEvent : IPoolable {
     }
 
     private fun apply(event: TouchEvent) {
-        systemTime = event.motionEvent.eventTime
+        systemTime = event.eventTime
         trackTime = 0f
         action = event.action
         offset = 0.0

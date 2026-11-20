@@ -1510,6 +1510,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
             touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
+            // Gameplay only needs each touch event's time, which is carried without retaining a MotionEvent copy.
+            touchOptions.setRetainMotionEvent(false);
 
             var touchController = engine.getTouchController();
             touchController.applyTouchOptions(touchOptions);
@@ -2090,6 +2092,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(false);
             touchOptions.setUseRawPointer(false);
+            touchOptions.setRetainMotionEvent(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
@@ -2299,6 +2302,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         touchOptions.setRunOnUpdateThread(true);
         touchOptions.setProcessHistoricalEvents(false);
         touchOptions.setUseRawPointer(false);
+        touchOptions.setRetainMotionEvent(true);
 
         var touchController = engine.getTouchController();
         touchController.applyTouchOptions(touchOptions);
@@ -2743,7 +2747,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
         float offset = previousFrameTime > 0
-                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                ? (event.getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
         int eventTime = Math.round(gameplayClock.getCurrentTime() * 1000 + offset);
 
