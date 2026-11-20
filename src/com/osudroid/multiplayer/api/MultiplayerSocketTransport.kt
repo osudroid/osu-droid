@@ -42,17 +42,30 @@ internal class MultiplayerSocketTransport(private val socketProvider: Multiplaye
         // The outbox treats a null acknowledgement as "not sent" and re-reads isReady, so this must refuse exactly when
         // isReady is false. Refusing in any other case would make the outbox resend into the refusal without end.
         if (socket == null || !isReady(socket)) {
+            Multiplayer.log("NOT EMITTED: ${event.eventName} (session not established)")
             onAck(null)
             return
         }
 
+        // Only log event name. Arguments may contain sensitive information (e.g. chat content).
+        Multiplayer.log("EMITTED: ${event.eventName}")
+
         socket.emit(event.eventName, args, object : AckWithTimeout(timeoutMs) {
-            override fun onSuccess(vararg args: Any?) = onAck(parseMultiplayerAckResult(args))
+            override fun onSuccess(vararg args: Any?) {
+                val result = parseMultiplayerAckResult(args)
+
+                if (!result.ok) {
+                    Multiplayer.log("REJECTED: ${event.eventName} -> ${result.reason}")
+                }
+
+                onAck(result)
+            }
 
             override fun onTimeout() {
                 // The socket also calls this when it clears its pending acknowledgements, without cancelling the timer,
                 // which would otherwise fire again later.
                 cancelTimer()
+                Multiplayer.log("NO ACKNOWLEDGEMENT: ${event.eventName}")
                 onAck(null)
             }
         })

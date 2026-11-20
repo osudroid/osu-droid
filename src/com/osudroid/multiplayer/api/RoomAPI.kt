@@ -614,7 +614,7 @@ object RoomAPI {
         }
 
         sendOnce(MultiplayerClientEvent.BeatmapChanged, json)
-        Multiplayer.log("EMITTED: beatmapChanged -> $md5, $title, $artist, $version, $creator")
+        Multiplayer.log("REQUESTED: beatmapChanged -> $md5, $title, $artist, $version, $creator")
     }
 
     /**
@@ -622,7 +622,7 @@ object RoomAPI {
      */
     fun kickPlayer(uid: Long) {
         sendOnce(MultiplayerClientEvent.PlayerKicked, uid.toString())
-        Multiplayer.log("EMITTED: playerKicked -> $uid")
+        Multiplayer.log("REQUESTED: playerKicked -> $uid")
     }
 
     /**
@@ -630,7 +630,7 @@ object RoomAPI {
      */
     fun notifyMatchPlay() {
         sendOnce(MultiplayerClientEvent.PlayBeatmap)
-        Multiplayer.log("EMITTED: playBeatmap")
+        Multiplayer.log("REQUESTED: playBeatmap")
     }
 
     /**
@@ -638,7 +638,7 @@ object RoomAPI {
      */
     fun setRoomHost(uid: Long) {
         sendOnce(MultiplayerClientEvent.HostChanged, uid.toString())
-        Multiplayer.log("EMITTED: hostChanged -> $uid")
+        Multiplayer.log("REQUESTED: hostChanged -> $uid")
     }
 
     /**
@@ -647,7 +647,7 @@ object RoomAPI {
     @JvmStatic
     fun setRoomMods(mods: String) {
         sendOnce(MultiplayerClientEvent.RoomModsChanged, JSONArray(mods))
-        Multiplayer.log("EMITTED: roomModsChanged -> $mods")
+        Multiplayer.log("REQUESTED: roomModsChanged -> $mods")
     }
 
     /**
@@ -659,7 +659,7 @@ object RoomAPI {
         }
 
         sendOnce(MultiplayerClientEvent.RoomGameplaySettingsChanged, json)
-        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
+        Multiplayer.log("REQUESTED: roomGameplaySettingsChanged -> $json")
     }
 
     /**
@@ -671,7 +671,7 @@ object RoomAPI {
         }
 
         sendOnce(MultiplayerClientEvent.RoomGameplaySettingsChanged, json)
-        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
+        Multiplayer.log("REQUESTED: roomGameplaySettingsChanged -> $json")
     }
 
     /**
@@ -679,7 +679,7 @@ object RoomAPI {
      */
     fun setRoomTeamMode(mode: TeamMode) {
         sendOnce(MultiplayerClientEvent.TeamModeChanged, mode.name)
-        Multiplayer.log("EMITTED: teamModeChanged -> $mode")
+        Multiplayer.log("REQUESTED: teamModeChanged -> $mode")
     }
 
     /**
@@ -687,7 +687,7 @@ object RoomAPI {
      */
     fun setRoomWinCondition(condition: WinCondition) {
         sendOnce(MultiplayerClientEvent.WinConditionChanged, condition.name)
-        Multiplayer.log("EMITTED: winConditionChanged -> $condition")
+        Multiplayer.log("REQUESTED: winConditionChanged -> $condition")
     }
 
     /**
@@ -695,7 +695,7 @@ object RoomAPI {
      */
     fun setRoomName(name: String) {
         sendOnce(MultiplayerClientEvent.RoomNameChanged, name)
-        Multiplayer.log("EMITTED: roomNameChanged -> $name")
+        Multiplayer.log("REQUESTED: roomNameChanged -> $name")
     }
 
     /**
@@ -703,7 +703,7 @@ object RoomAPI {
      */
     fun setRoomMaxPlayers(maxPlayers: Int) {
         sendOnce(MultiplayerClientEvent.MaxPlayersChanged, maxPlayers)
-        Multiplayer.log("EMITTED: maxPlayersChanged -> $maxPlayers")
+        Multiplayer.log("REQUESTED: maxPlayersChanged -> $maxPlayers")
     }
 
     /**
@@ -711,7 +711,7 @@ object RoomAPI {
      */
     fun setRoomPassword(password: String) {
         sendOnce(MultiplayerClientEvent.RoomPasswordChanged, password)
-        //Multiplayer.log("EMITTED: roomPasswordChanged -> $password")
+        //Multiplayer.log("REQUESTED: roomPasswordChanged -> $password")
     }
 
     // All players
@@ -725,7 +725,7 @@ object RoomAPI {
         val session = Multiplayer.session
 
         session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.ScoreSubmission, session.activeRoundId, arrayOf(json))
-        Multiplayer.log("EMITTED: scoreSubmission\n${json?.toString(2)}")
+        Multiplayer.log("REQUESTED: scoreSubmission\n${json?.toString(2)}")
     }
 
     /**
@@ -751,7 +751,7 @@ object RoomAPI {
     @JvmOverloads
     fun notifyBeatmapLoaded(roundId: Int? = Multiplayer.session.activeRoundId) {
         Multiplayer.session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.BeatmapLoadComplete, roundId, arrayOf())
-        Multiplayer.log("EMITTED: beatmapLoadComplete")
+        Multiplayer.log("REQUESTED: beatmapLoadComplete")
     }
 
     /**
@@ -762,7 +762,7 @@ object RoomAPI {
         val session = Multiplayer.session
 
         session.outbox.sendUntilAcknowledged(MultiplayerClientEvent.SkipRequested, session.activeRoundId, arrayOf())
-        Multiplayer.log("EMITTED: skipRequested")
+        Multiplayer.log("REQUESTED: skipRequested")
     }
 
     /**
@@ -781,7 +781,7 @@ object RoomAPI {
         Multiplayer.session.outbox.sendUntilAcknowledged(
             MultiplayerClientEvent.ChatMessage, null, arrayOf(message, UUID.randomUUID().toString())
         )
-        //Multiplayer.log("EMITTED: chatMessage -> $message")
+        //Multiplayer.log("REQUESTED: chatMessage -> $message")
     }
 
     /**
@@ -790,7 +790,7 @@ object RoomAPI {
     @JvmStatic
     fun setPlayerStatus(status: PlayerStatus) {
         sendOnce(MultiplayerClientEvent.PlayerStatusChanged, status.name)
-        Multiplayer.log("EMITTED: playerStatusChanged -> $status")
+        Multiplayer.log("REQUESTED: playerStatusChanged -> $status")
     }
 
     /**
@@ -799,7 +799,7 @@ object RoomAPI {
     @JvmStatic
     fun setPlayerMods(mods: String) {
         sendOnce(MultiplayerClientEvent.PlayerModsChanged, JSONArray(mods))
-        Multiplayer.log("EMITTED: playerModsChanged -> $mods")
+        Multiplayer.log("REQUESTED: playerModsChanged -> $mods")
     }
 
     /**
@@ -807,7 +807,7 @@ object RoomAPI {
      */
     fun setPlayerTeam(team: RoomTeam) {
         sendOnce(MultiplayerClientEvent.TeamChanged, team.name)
-        Multiplayer.log("EMITTED: teamChanged -> $team")
+        Multiplayer.log("REQUESTED: teamChanged -> $team")
     }
 
     /**
