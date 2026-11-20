@@ -82,6 +82,12 @@ public class MultiTouchController extends BaseTouchController {
         // See: https://developer.android.com/reference/android/view/MotionEvent#batching
         final int pointerCount = pMotionEvent.getPointerCount();
 
+        // Publish the latest coordinates first, so that readers of the raw pointer state do not wait for the
+		// historical coordinates to be dispatched.
+        for (int i = 0; i < pointerCount; i++) {
+            updateRawPointer(pMotionEvent.getPointerId(i), pMotionEvent.getX(i), pMotionEvent.getY(i), true, pMotionEvent.getEventTime());
+        }
+
         if (this.mProcessHistoricalEvents) {
             final int historySize = pMotionEvent.getHistorySize();
             for (int h = 0; h < historySize; h++) {
@@ -98,7 +104,6 @@ public class MultiTouchController extends BaseTouchController {
 //        for(int i = pMotionEvent.getPointerCount() - 1; i >= 0; i--) {
         for (int i = pointerCount - 1; i >= 0; i--) {
             final int pointerID = pMotionEvent.getPointerId(i);
-			updateRawPointer(pointerID, pMotionEvent.getX(i), pMotionEvent.getY(i), true, pMotionEvent.getEventTime());
 			final boolean handledInner = this.fireTouchEvent(pMotionEvent.getX(i), pMotionEvent.getY(i), MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
 			handled = handled || handledInner;
 		}
