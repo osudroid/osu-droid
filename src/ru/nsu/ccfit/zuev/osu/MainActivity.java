@@ -880,6 +880,11 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
+
+                // The engine is stopped by now, so the quit below only runs once
+                // the app is back in the foreground. Leave the round right away
+                // so that the server is not left waiting for this player's score.
+                gameScene.leaveMultiplayerRound();
                 Execution.updateThread(gameScene::quit);
                 Multiplayer.log("Player left the match.");
             } else {

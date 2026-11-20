@@ -6,9 +6,9 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.ui.v2.multi.LobbyScene;
-import com.osudroid.utils.Execution;
 import com.reco1l.andengine.UIEngine;
 import com.reco1l.andengine.UIScene;
 import com.reco1l.andengine.container.UIContainer;
@@ -599,19 +599,24 @@ public class ScoringScene {
         }
     }
 
+    /**
+     * Shows {@link Multiplayer#finalData} on the results screen, replacing the leaderboard shown before, if any.
+     * <p>
+     * Must be called on the update thread.
+     */
     public void updateLeaderboard() {
 
         if (Multiplayer.finalData != null) {
 
             if (selector != null) {
-                var oldSelector = selector;
-                Execution.updateThread(() -> {
-                    oldSelector.detachSelf();
-                    oldSelector.detachChildren();
-                });
+                selector.detachSelf();
+                selector.detachChildren();
             }
 
-            selector = new StatisticSelector(Multiplayer.finalData);
+            // The room is gone if the player was disconnected while on the results screen.
+            var winCondition = Multiplayer.room != null ? Multiplayer.room.getWinCondition() : WinCondition.ScoreV1;
+
+            selector = new StatisticSelector(Multiplayer.finalData, winCondition);
 
             if (scene != null) {
                 scene.attachChild(selector);
@@ -626,6 +631,8 @@ public class ScoringScene {
 
         if (Multiplayer.isMultiplayer)
         {
+            Multiplayer.session.enterRoom();
+
             // Preventing NPEs when player gets disconnected while playing
             if (!Multiplayer.isConnected()) {
                 UIEngine.getCurrent().setScene(new LobbyScene());
