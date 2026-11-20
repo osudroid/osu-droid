@@ -8,7 +8,7 @@ import org.junit.Test
 
 class MultiplayerReconciliationTest {
     @Test
-    fun notPlaying_room_invalidatesStatus() {
+    fun `room without an active round invalidates status`() {
         assertEquals(
             listOf(InvalidateStatus),
             reconcile(MultiplayerMatchPhase.InRoom(3), notPlaying(), true)
@@ -16,7 +16,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun notPlaying_resultsWithoutLeaderboard_showsLastResultsOnlyIfMatching() {
+    fun `results without leaderboard and without an active round show last results only if they match`() {
         assertEquals(
             listOf(ShowLastResults, ReleaseStatusLock),
             reconcile(MultiplayerMatchPhase.Results(4, false), notPlaying(lastResultsRoundId = 4), true)
@@ -32,7 +32,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun notPlaying_resultsWithLeaderboardLoadingPlaying_releasesStatusLock() {
+    fun `results with leaderboard or loading or playing without an active round release status lock`() {
         val snapshot = notPlaying(lastResultsRoundId = 4)
 
         assertEquals(listOf(ReleaseStatusLock), reconcile(MultiplayerMatchPhase.Results(4, true), snapshot, true))
@@ -41,7 +41,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingSameRound_room_invalidatesStatus() {
+    fun `room that sat out the active round invalidates status`() {
         assertEquals(
             listOf(InvalidateStatus),
             reconcile(MultiplayerMatchPhase.InRoom(4), playing(4), true)
@@ -49,7 +49,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingSameRound_results_doesNotStartGame() {
+    fun `results of the active round release status lock without joining it`() {
         val actions = reconcile(MultiplayerMatchPhase.Results(4, false), playing(4, progress()), true)
 
         assertEquals(listOf(ReleaseStatusLock), actions)
@@ -62,7 +62,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingSameRound_loading_startsImmediatelyOnlyIfAllLoaded() {
+    fun `loading the active round starts immediately only if every player loaded`() {
         assertEquals(
             listOf(StartImmediately, ReleaseStatusLock),
             reconcile(MultiplayerMatchPhase.Loading(4), playing(4, progress(allLoaded = true)), true)
@@ -74,7 +74,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingSameRound_playing_appliesSkipOnlyIfAllSkipped() {
+    fun `playing the active round applies skip only if every player skipped`() {
         assertEquals(
             listOf(ApplySkip, ReleaseStatusLock),
             reconcile(MultiplayerMatchPhase.Playing(4), playing(4, progress(allSkipped = true)), true)
@@ -86,7 +86,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_room_stillLoading_joins() {
+    fun `room joins a new round that is still loading`() {
         assertEquals(
             listOf(JoinRound(5)),
             reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, progress()), true)
@@ -94,7 +94,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_room_alreadyLoaded_sitsOut() {
+    fun `room sits out a new round every player already loaded`() {
         assertEquals(
             listOf(SitOut),
             reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, progress(allLoaded = true)), true)
@@ -102,7 +102,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_room_missingBeatmap_sitsOut() {
+    fun `room sits out a new round without the beatmap`() {
         assertEquals(
             listOf(SitOut),
             reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, progress()), false)
@@ -110,7 +110,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_results_showsPreviousResultsThenJoins() {
+    fun `results show last results only without leaderboard before joining or sitting out a new round`() {
         assertEquals(
             listOf(ShowLastResults, JoinRound(5)),
             reconcile(
@@ -138,7 +138,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_resultsWithMismatchedLastResults_joinsWithoutShowingThem() {
+    fun `results join a new round without showing last results of another round`() {
         assertEquals(
             listOf(JoinRound(5)),
             reconcile(
@@ -150,7 +150,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_resultsWithLeaderboard_alreadyLoaded_sitsOut() {
+    fun `results with leaderboard sit out a new round every player already loaded`() {
         assertEquals(
             listOf(SitOut),
             reconcile(
@@ -162,7 +162,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_results_missingBeatmap_showsPreviousResultsThenSitsOut() {
+    fun `results without leaderboard show last results and sit out a new round without the beatmap`() {
         assertEquals(
             listOf(ShowLastResults, SitOut),
             reconcile(
@@ -174,7 +174,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_loadingOrPlaying_sitsOut() {
+    fun `loading or playing sits out a new round`() {
         val snapshot = playing(5, progress())
 
         assertEquals(listOf(SitOut), reconcile(MultiplayerMatchPhase.Loading(4), snapshot, true))
@@ -182,7 +182,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_ownNotPlaying_room_invalidatesStatus() {
+    fun `room invalidates status if not playing the new round`() {
         assertEquals(
             listOf(InvalidateStatus),
             reconcile(MultiplayerMatchPhase.InRoom(4), playing(5, clientStatus = PlayerStatus.Ready), true)
@@ -190,7 +190,7 @@ class MultiplayerReconciliationTest {
     }
 
     @Test
-    fun playingNewRound_ownNotPlaying_other_releasesStatusLock() {
+    fun `results or loading or playing release status lock if not playing the new round`() {
         val snapshot = playing(5, clientStatus = PlayerStatus.Ready, lastResultsRoundId = 4)
 
         assertEquals(listOf(ReleaseStatusLock), reconcile(MultiplayerMatchPhase.Results(4, true), snapshot, true))
