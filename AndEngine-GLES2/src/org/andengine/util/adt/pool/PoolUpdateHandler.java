@@ -1,9 +1,8 @@
 package org.andengine.util.adt.pool;
 
+import java.util.ArrayList;
+
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.util.adt.list.ShiftList;
-import org.andengine.util.adt.queue.IQueue;
-import org.andengine.util.adt.queue.concurrent.SynchronizedQueue;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -24,7 +23,11 @@ public abstract class PoolUpdateHandler<T extends PoolItem> implements IUpdateHa
 	// ===========================================================
 
 	private final Pool<T> mPool;
-	private final IQueue<T> mScheduledPoolItemQueue = new SynchronizedQueue<T>(new ShiftList<T>());
+	// BEGIN osu!droid modified - handle items outside the lock that posting waits for
+	private final Object mScheduledPoolItemsLock = new Object();
+	private ArrayList<T> mScheduledPoolItems = new ArrayList<>();
+	private ArrayList<T> mHandledPoolItems = new ArrayList<>();
+	// END osu!droid modified
 
 	// ===========================================================
 	// Constructors
@@ -78,28 +81,58 @@ public abstract class PoolUpdateHandler<T extends PoolItem> implements IUpdateHa
 
 	protected abstract void onHandlePoolItem(final T pPoolItem);
 
+	// BEGIN osu!droid modified - handle items outside the lock that posting waits for
+	// The scheduled items are swapped out under the lock and handled outside of it, so posting never
+	// waits for items being handled. Items posted while handling are handled on the next update, so an
+	// item that posts another one cannot keep the update thread busy indefinitely.
 	@Override
 	public void onUpdate(final float pSecondsElapsed) {
-		final IQueue<T> scheduledPoolItemQueue = this.mScheduledPoolItemQueue;
-		final Pool<T> pool = this.mPool;
+		final ArrayList<T> handledPoolItems;
 
-		T item;
-		while((item = scheduledPoolItemQueue.poll()) != null) {
-			this.onHandlePoolItem(item);
-			pool.recyclePoolItem(item);
+		synchronized (this.mScheduledPoolItemsLock) {
+			if(this.mScheduledPoolItems.isEmpty()) {
+				return;
+			}
+
+			handledPoolItems = this.mScheduledPoolItems;
+			this.mScheduledPoolItems = this.mHandledPoolItems;
+			this.mHandledPoolItems = handledPoolItems;
+		}
+
+		final Pool<T> pool = this.mPool;
+		final int count = handledPoolItems.size();
+		int i = 0;
+
+		try {
+			for(; i < count; i++) {
+				final T item = handledPoolItems.get(i);
+				this.onHandlePoolItem(item);
+				pool.recyclePoolItem(item);
+			}
+		} finally {
+			// If an item threw, recycle it and the items after it instead of handling them on a later update.
+			for(; i < count; i++) {
+				pool.recyclePoolItem(handledPoolItems.get(i));
+			}
+
+			handledPoolItems.clear();
 		}
 	}
 
 	@Override
 	public void reset() {
-		final IQueue<T> scheduledPoolItemQueue = this.mScheduledPoolItemQueue;
-		final Pool<T> pool = this.mPool;
+		synchronized (this.mScheduledPoolItemsLock) {
+			final ArrayList<T> scheduledPoolItems = this.mScheduledPoolItems;
+			final Pool<T> pool = this.mPool;
 
-		T item;
-		while((item = scheduledPoolItemQueue.poll()) != null) {
-			pool.recyclePoolItem(item);
+			for(int i = scheduledPoolItems.size() - 1; i >= 0; i--) {
+				pool.recyclePoolItem(scheduledPoolItems.get(i));
+			}
+
+			scheduledPoolItems.clear();
 		}
 	}
+	// END osu!droid modified
 
 	// ===========================================================
 	// Methods
@@ -116,7 +149,11 @@ public abstract class PoolUpdateHandler<T extends PoolItem> implements IUpdateHa
 			throw new IllegalArgumentException("PoolItem from another pool!");
 		}
 
-		this.mScheduledPoolItemQueue.enter(pPoolItem);
+		// BEGIN osu!droid modified - handle items outside the lock that posting waits for
+		synchronized (this.mScheduledPoolItemsLock) {
+			this.mScheduledPoolItems.add(pPoolItem);
+		}
+		// END osu!droid modified
 	}
 
 	// ===========================================================

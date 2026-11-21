@@ -39,23 +39,42 @@ public class TouchEvent {
 
 	protected MotionEvent mMotionEvent;
 
+	// BEGIN osu!droid modified - carry the event time and surface coordinates
+	// without needing a MotionEvent
+	protected long mEventTime;
+
+	protected float mSurfaceX;
+	protected float mSurfaceY;
+	// END osu!droid modified
+
 	// ===========================================================
 	// Constructors
 	// ===========================================================
 
 	public static TouchEvent obtain(final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
+		// BEGIN osu!droid modified - carry the event time without needing a MotionEvent
+		return obtain(pX, pY, pAction, pPointerID, pMotionEvent != null ? pMotionEvent.getEventTime() : 0, pMotionEvent);
+		// END osu!droid modified
+	}
+
+	// BEGIN osu!droid modified - carry the event time without needing a MotionEvent
+	public static TouchEvent obtain(final float pX, final float pY, final int pAction, final int pPointerID, final long pEventTime, final MotionEvent pMotionEvent) {
 		final TouchEvent touchEvent = TOUCHEVENT_POOL.obtainPoolItem();
-		touchEvent.set(pX, pY, pAction, pPointerID, pMotionEvent);
+		touchEvent.set(pX, pY, pAction, pPointerID, pEventTime, pMotionEvent);
 		return touchEvent;
 	}
 
-	private void set(final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
+	private void set(final float pX, final float pY, final int pAction, final int pPointerID, final long pEventTime, final MotionEvent pMotionEvent) {
 		this.mX = pX;
 		this.mY = pY;
+		this.mSurfaceX = pX;
+		this.mSurfaceY = pY;
 		this.mAction = pAction;
 		this.mPointerID = pPointerID;
+		this.mEventTime = pEventTime;
 		this.mMotionEvent = pMotionEvent;
 	}
+	// END osu!droid modified
 
 	public void recycle() {
 		TOUCHEVENT_POOL.recyclePoolItem(this);
@@ -86,6 +105,33 @@ public class TouchEvent {
 		this.mX += pDeltaX;
 		this.mY += pDeltaY;
 	}
+
+	// BEGIN osu!droid modified - carry the event time without needing a MotionEvent
+	/**
+	 * The time at which this {@link TouchEvent} occurred, in the {@link android.os.SystemClock#uptimeMillis()} time base.
+	 * <p>
+	 * Unlike {@link #getMotionEvent()}, this is always available.
+	 */
+	public long getEventTime() {
+		return this.mEventTime;
+	}
+
+	/**
+	 * The X coordinate this {@link TouchEvent} was obtained with, in surface coordinates, before any conversion such as
+	 * {@link #set(float, float)} or {@link #offset(float, float)}.
+	 */
+	public float getSurfaceX() {
+		return this.mSurfaceX;
+	}
+
+	/**
+	 * The Y coordinate this {@link TouchEvent} was obtained with, in surface coordinates, before any conversion such as
+	 * {@link #set(float, float)} or {@link #offset(float, float)}.
+	 */
+	public float getSurfaceY() {
+		return this.mSurfaceY;
+	}
+	// END osu!droid modified
 
 	public int getPointerID() {
 		return this.mPointerID;
@@ -118,6 +164,11 @@ public class TouchEvent {
 	/**
 	 * Provides the raw {@link MotionEvent} that originally caused this {@link TouchEvent}.
 	 * The coordinates of this {@link MotionEvent} are in surface-coordinates!
+	 * <p>
+	 * BEGIN osu!droid modified - MotionEvent may not be retained
+	 * This is <code>null</code> for {@link TouchEvent}s handled on the update thread when
+	 * {@link org.andengine.engine.options.TouchOptions#isRetainMotionEvent()} is disabled.
+	 * END osu!droid modified
 	 * @return
 	 */
 	public MotionEvent getMotionEvent() {

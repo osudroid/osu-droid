@@ -32,10 +32,18 @@ public interface ITouchController extends IUpdateHandler {
 	/** Apply touch options (useRawPointer, processHistoricalEvents) to this controller. */
 	default void applyTouchOptions(TouchOptions pTouchOptions) { }
 
-	default int getRawPointerVersion(int pointerId) { return -1; }
 	default boolean isRawPointerDown(int pointerId) { return false; }
-	default float getRawPointerSurfaceX(int pointerId) { return 0f; }
-	default float getRawPointerSurfaceY(int pointerId) { return 0f; }
+
+	/**
+	 * Reads the latest surface coordinates of a pointer. This method is thread-safe.
+	 *
+	 * @param pointerId The ID of the pointer.
+	 * @param out An array of at least two elements receiving the X and Y coordinates, in that order.
+	 * @return <code>false</code> if the pointer is outside of {@link #getRawPointerCapacity()}, in which case
+	 * <code>out</code> is left untouched.
+	 */
+	default boolean getRawPointerSurfacePosition(int pointerId, float[] out) { return false; }
+
 	default long getRawPointerEventTime(int pointerId) { return 0L; }
 	default int getRawPointerCapacity() { return 0; }
 	default void clearRawPointers() { }

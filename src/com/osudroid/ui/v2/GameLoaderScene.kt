@@ -200,6 +200,8 @@ class GameLoaderScene(private val gameScene: GameScene, private val beatmapInfo:
         gameScene.cancelLoading()
 
         if (Multiplayer.isMultiplayer) {
+            Multiplayer.session.enterRoom()
+
             // Inform that the player has canceled loading.
             RoomAPI.setPlayerStatus(PlayerStatus.NotReady)
             Multiplayer.roomScene?.show()

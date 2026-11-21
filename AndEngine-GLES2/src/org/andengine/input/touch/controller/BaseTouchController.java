@@ -35,14 +35,16 @@ public abstract class BaseTouchController implements ITouchController  {
 	private volatile boolean mUseRawPointer;
 	private volatile boolean mProcessHistoricalEvents;
 
-	// Atomic arrays give each element volatile store/load semantics, providing the
-	// store-store / load-load ordering the seqlock requires on ARM without needing
-	// platform-specific fences.  Floats are stored as their raw int bits.
-	private final AtomicIntegerArray mRawPointerX    = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
-	private final AtomicIntegerArray mRawPointerY    = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	// The surface X and Y coordinates of each pointer, packed into one long (X in the high 32 bits,
+	// Y in the low 32 bits) so that both are always read together.
+	private final AtomicLongArray    mRawPointerSurfacePosition = new AtomicLongArray(RAW_POINTER_CAPACITY);
 	private final AtomicIntegerArray mRawPointerDown = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
 	private final AtomicLongArray    mRawPointerEventTime = new AtomicLongArray(RAW_POINTER_CAPACITY);
-	private final AtomicIntegerArray mRawPointerVersion  = new AtomicIntegerArray(RAW_POINTER_CAPACITY);
+	// END osu!droid modified
+
+	// BEGIN osu!droid modified - MotionEvent may not be retained
+	// Volatile since this is read on the UI thread, but applied from other threads.
+	private volatile boolean mRetainMotionEvent = true;
 	// END osu!droid modified
 
 	private ITouchEventCallback mTouchEventCallback;
@@ -86,7 +88,10 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	protected void fireTouchEvent(final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
-		final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, MotionEvent.obtain(pMotionEvent));
+		// BEGIN osu!droid modified - MotionEvent may not be retained
+		final MotionEvent motionEvent = this.mRetainMotionEvent ? MotionEvent.obtain(pMotionEvent) : null;
+		final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, pMotionEvent.getEventTime(), motionEvent);
+		// END osu!droid modified
 
 		final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
 		touchEventRunnablePoolItem.set(touchEvent);
@@ -95,10 +100,10 @@ public abstract class BaseTouchController implements ITouchController  {
 
 	// BEGIN osu!droid modified - fire touch event with a custom event time (used for historical positions)
 	protected void fireTouchEvent(final long pEventTime, final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
-		final MotionEvent syntheticEvent = MotionEvent.obtain(
-				pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(),
-				pX, pY, pMotionEvent.getMetaState());
-		final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, syntheticEvent);
+		final MotionEvent syntheticEvent = this.mRetainMotionEvent
+				? MotionEvent.obtain(pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(), pX, pY, pMotionEvent.getMetaState())
+				: null;
+		final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, pEventTime, syntheticEvent);
 
 		final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
 		touchEventRunnablePoolItem.set(touchEvent);
@@ -111,49 +116,30 @@ public abstract class BaseTouchController implements ITouchController  {
 	// ===========================================================
 
 	// BEGIN osu!droid modified - raw pointer getters and setters
-	/**
+	/*
 	 * Concurrency note for raw pointer reads:
-	 * <p>
-	 * Writes happen on the UI thread (in {@link #updateRawPointer}); reads happen
-	 * on the engine update thread. The per-field getters below ({@link #getRawPointerSurfaceX},
-	 * {@link #getRawPointerSurfaceY}, {@link #getRawPointerEventTime}, etc.) return the
-	 * latest value of a single field but provide <b>no cross-field coherence</b> &mdash; a
-	 * reader may observe X from one event and Y from the next.
-	 * <p>
-	 * For a coherent snapshot of multiple fields, callers should perform a seqlock-style
-	 * read using {@link #getRawPointerVersion}:
-	 * <pre>
-	 * int v1, v2;
-	 * float x, y;
-	 * do {
-	 *     v1 = controller.getRawPointerVersion(id);
-	 *     if ((v1 &amp; 1) != 0) continue;        // writer in progress (odd version)
-	 *     x = controller.getRawPointerSurfaceX(id);
-	 *     y = controller.getRawPointerSurfaceY(id);
-	 *     v2 = controller.getRawPointerVersion(id);
-	 * } while (v1 != v2);
-	 * </pre>
-	 * For rhythm-game gameplay where a one-frame torn read is harmless, the per-field
-	 * getters are fine to use directly.
+	 *
+	 * Writes happen on the UI thread (in updateRawPointer); reads happen on the engine update thread.
+	 * The X and Y coordinates are packed into one atomic long, so getRawPointerSurfacePosition always
+	 * returns a coherent position. The other getters return the latest value of their single field.
 	 */
-	@Override
-	public int getRawPointerVersion(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? -1 : this.mRawPointerVersion.get(pointerId);
-	}
-
 	@Override
 	public boolean isRawPointerDown(int pointerId) {
 		return pointerId >= 0 && pointerId < RAW_POINTER_CAPACITY && this.mRawPointerDown.get(pointerId) != 0;
 	}
 
 	@Override
-	public float getRawPointerSurfaceX(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : Float.intBitsToFloat(this.mRawPointerX.get(pointerId));
-	}
+	public boolean getRawPointerSurfacePosition(int pointerId, float[] out) {
+		if (pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY) {
+			return false;
+		}
 
-	@Override
-	public float getRawPointerSurfaceY(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : Float.intBitsToFloat(this.mRawPointerY.get(pointerId));
+		final long position = this.mRawPointerSurfacePosition.get(pointerId);
+
+		out[0] = Float.intBitsToFloat((int) (position >>> 32));
+		out[1] = Float.intBitsToFloat((int) position);
+
+		return true;
 	}
 
 	@Override
@@ -180,16 +166,14 @@ public abstract class BaseTouchController implements ITouchController  {
 	}
 
 	/**
-	 * Hard-reset all raw pointer state, including the version counters. Always runs,
+	 * Hard-reset all raw pointer state. Always runs,
 	 * regardless of {@link #mUseRawPointer}, so it can be used to wipe stale state when
 	 * switching modes (e.g. on map start).
 	 */
 	@Override
 	public void resetRawPointers() {
 		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
-			this.mRawPointerVersion.set(i, 0);
-			this.mRawPointerX.set(i, 0);
-			this.mRawPointerY.set(i, 0);
+			this.mRawPointerSurfacePosition.set(i, packSurfacePosition(0f, 0f));
 			this.mRawPointerDown.set(i, 0);
 			this.mRawPointerEventTime.set(i, 0L);
 		}
@@ -216,25 +200,26 @@ public abstract class BaseTouchController implements ITouchController  {
 	public void applyTouchOptions(final TouchOptions pTouchOptions) {
 		this.setUseRawPointer(pTouchOptions.isUseRawPointer());
 		this.setProcessHistoricalEvents(pTouchOptions.isProcessHistoricalEvents());
+		// BEGIN osu!droid modified - MotionEvent may not be retained
+		this.mRetainMotionEvent = pTouchOptions.isRetainMotionEvent();
+		// END osu!droid modified
 	}
 
 	protected final void updateRawPointer(final int id, final float x, final float y, final boolean down, final long eventTime) {
 		if (!this.mUseRawPointer || id < 0 || id >= RAW_POINTER_CAPACITY) {
 			return;
 		}
-		// Seqlock write: bump version to odd (write in progress), store data via
-		// volatile (atomic) array elements to guarantee store-store ordering on ARM,
-		// then bump version back to even (write done).
-		this.mRawPointerVersion.incrementAndGet(id);
-		this.mRawPointerX.set(id, Float.floatToRawIntBits(x));
-		this.mRawPointerY.set(id, Float.floatToRawIntBits(y));
 		this.mRawPointerDown.set(id, down ? 1 : 0);
 		this.mRawPointerEventTime.set(id, eventTime);
-		this.mRawPointerVersion.incrementAndGet(id);
+		this.mRawPointerSurfacePosition.set(id, packSurfacePosition(x, y));
 	}
 
 	protected final void clearRawPointer(final int id) {
 		updateRawPointer(id, 0f, 0f, false, 0L);
+	}
+
+	private static long packSurfacePosition(final float x, final float y) {
+		return ((long) Float.floatToRawIntBits(x) << 32) | (Float.floatToRawIntBits(y) & 0xFFFFFFFFL);
 	}
 	// END osu!droid modified
 
@@ -270,7 +255,13 @@ public abstract class BaseTouchController implements ITouchController  {
 		protected void onRecycle() {
 			super.onRecycle();
 			final TouchEvent touchEvent = this.mTouchEvent;
-			touchEvent.getMotionEvent().recycle();
+			// BEGIN osu!droid modified - MotionEvent may not be retained
+			final MotionEvent motionEvent = touchEvent.getMotionEvent();
+
+			if (motionEvent != null) {
+				motionEvent.recycle();
+			}
+			// END osu!droid modified
 			touchEvent.recycle();
 		}
 	}
