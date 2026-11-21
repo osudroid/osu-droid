@@ -43,7 +43,7 @@ public class OnlineManager {
     public static final String attestationChallengeEndpoint = endpoint + "attestation_challenge.php";
     public static final String defaultAvatarURL = getAvatarURL(0);
     public static final String profileBannerEndpoint = "https://" + hostname + "/user/banner/";
-    private static final String onlineVersion = "65";
+    private static final String onlineVersion = "67";
 
     public static final OkHttpClient client = new OkHttpClient();
 
