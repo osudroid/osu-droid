@@ -1867,7 +1867,8 @@ abstract class UIComponent : Entity(0f, 0f),
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChildByIndex(i)
-                if (child is ITouchArea && child.contains(localX, localY)) {
+                // A hidden child is not drawn, so it must not take touches meant for what is seen in its place.
+                if (child is ITouchArea && child.isVisible && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         // A release ends the gesture. Binding it would route the next press to this child,
                         // wherever it happens, e.g. after the press was consumed by an overlay that is gone by now.
