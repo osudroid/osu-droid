@@ -1592,6 +1592,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var touchOptions = new TouchOptions();
             touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
             touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
+            // Gameplay only needs each touch event's time, which is carried without retaining a MotionEvent copy.
+            touchOptions.setRetainMotionEvent(false);
 
             var touchController = engine.getTouchController();
             touchController.applyTouchOptions(touchOptions);
@@ -2153,7 +2155,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         Multiplayer.log("Match ended, moving to results scene.");
                         Multiplayer.roomScene.getChat().show();
 
-                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
+                        Multiplayer.session.enterResults();
+                        Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
@@ -2173,6 +2176,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             var touchOptions = new TouchOptions();
             touchOptions.setProcessHistoricalEvents(false);
             touchOptions.setUseRawPointer(false);
+            touchOptions.setRetainMotionEvent(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
@@ -2362,12 +2366,26 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
+    /**
+     * Leaves the multiplayer round this player is in, returning them to the room. If the round was being played,
+     * its score is submitted as it stands, since the round is over for this player.
+     * <p>
+     * The score is submitted at most once per round, so this can be called more than once and from any thread.
+     */
+    public void leaveMultiplayerRound() {
+        // A room is kept while reconnecting, so the score is queued until the connection is back.
+        if (Multiplayer.session.leaveRound() && Multiplayer.isConnected()) {
+            Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson()));
+        }
+    }
+
     public void quit() {
         // Disable historical event processing for more efficient ACTION_MOVE reports, since frequent reports are
         // not that relevant outside gameplay.
         var touchOptions = new TouchOptions();
         touchOptions.setProcessHistoricalEvents(false);
         touchOptions.setUseRawPointer(false);
+        touchOptions.setRetainMotionEvent(true);
 
         var touchController = engine.getTouchController();
         touchController.applyTouchOptions(touchOptions);
@@ -2389,6 +2407,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene = new GameUIScene();
 
         if (Multiplayer.isMultiplayer) {
+            leaveMultiplayerRound();
+
             releaseVideo();
 
             var songService = GlobalManager.getInstance().getSongService();
@@ -2829,9 +2849,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
         float offset = previousFrameTime > 0
-                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                ? (event.getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        int eventTime = (int) (gameplayClock.getCurrentTime() * 1000 + offset);
+        int eventTime = Math.round(gameplayClock.getCurrentTime() * 1000 + offset);
 
         if (replaying || isGameOver) {
             return false;
@@ -2947,7 +2967,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 cursor.addEvent(upEvent);
 
                 if (replay != null) {
-                    replay.addUp((int) time, i);
+                    replay.addUp(Math.round(time), i);
                 }
             }
 
@@ -2973,10 +2993,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             // Setting a delay of 300ms minimum for the player to tap back button again.
             if (lastBackPressTime > 0 && realTimeElapsed - lastBackPressTime > Math.max(300, Config.getBackButtonPressTime() * 1.5f))
             {
-                // Room being null can happen when the player disconnects from socket while playing
-                if (Multiplayer.isConnected())
-                    Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
-
                 Multiplayer.log("Player left the match.");
                 quit();
                 return;
@@ -3029,10 +3045,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (Multiplayer.isMultiplayer) {
-            if (Multiplayer.isConnected()) {
-                Multiplayer.log("Player has lost, moving to room scene.");
-                Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
-            }
+            Multiplayer.log("Player has lost, moving to room scene.");
             quit();
             return;
         }
@@ -4349,11 +4362,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Reused buffer to avoid allocations.
         private final float[] fastPathSurfaceCoords = new float[2];
 
-        // Stable fallback cache per pointer (surface space).
-        private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
-        private final float[] fastPathLastStableX = new float[CursorCount];
-        private final float[] fastPathLastStableY = new float[CursorCount];
-
         public GameUIScene() {
             super();
 
@@ -4439,7 +4447,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(isUpdatePathDown);
 
                 if (!isUpdatePathDown) {
-                    fastPathHasStableSnapshot[i] = false;
                     continue;
                 }
 
@@ -4449,16 +4456,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 ++updatePathActiveCount;
 
-                if (tryReadRawPointer(i)) {
-                    fastPathLastStableX[i] = fastPathSurfaceCoords[0];
-                    fastPathLastStableY[i] = fastPathSurfaceCoords[1];
-                    fastPathHasStableSnapshot[i] = true;
-                } else if (fastPathHasStableSnapshot[i]) {
-                    // Revert to latest stable coordinates if read fails.
-                    fastPathSurfaceCoords[0] = fastPathLastStableX[i];
-                    fastPathSurfaceCoords[1] = fastPathLastStableY[i];
-                } else {
-                    // No stable sample yet. Keep update thread position.
+                if (!touchController.getRawPointerSurfacePosition(i, fastPathSurfaceCoords)) {
+                    // Keep update thread position.
                     continue;
                 }
 
@@ -4468,37 +4467,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 sprite.setPosition(sceneCoords[0], sceneCoords[1]);
             }
-        }
-
-        private boolean tryReadRawPointer(int pointerId) {
-            var touchController = engine.getTouchController();
-
-            if (touchController == null) {
-                return false;
-            }
-
-            for (int attempt = 0; attempt < 2; ++attempt) {
-                int versionBefore = touchController.getRawPointerVersion(pointerId);
-
-                // An odd version means the main thread is updating this pointer, so we wait.
-                if ((versionBefore & 1) != 0) {
-                    continue;
-                }
-
-                float x = touchController.getRawPointerSurfaceX(pointerId);
-                float y = touchController.getRawPointerSurfaceY(pointerId);
-
-                int versionAfter = touchController.getRawPointerVersion(pointerId);
-
-                if (versionBefore == versionAfter && (versionAfter & 1) == 0) {
-                    // Successfully read a consistent snapshot.
-                    fastPathSurfaceCoords[0] = x;
-                    fastPathSurfaceCoords[1] = y;
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

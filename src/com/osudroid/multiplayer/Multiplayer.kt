@@ -5,6 +5,8 @@ import android.util.Log
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.Room
 import com.osudroid.multiplayer.api.data.RoomPlayer
+import com.osudroid.multiplayer.session.MultiplayerMatchSession
+import com.osudroid.multiplayer.session.MultiplayerOutbox
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.osudroid.ui.v2.multi.*
 import com.osudroid.utils.async
@@ -58,6 +60,12 @@ object Multiplayer {
     @JvmField
     @Volatile
     var isReconnecting = false
+
+    /**
+     * The state of the multiplayer match the client is in and the events waiting to be delivered to the server.
+     */
+    @JvmField
+    val session = MultiplayerMatchSession(MultiplayerOutbox(RoomAPI.transport))
 
     /**
      * Array containing final leaderboard
@@ -179,12 +187,21 @@ object Multiplayer {
         }
     }
 
-    fun onFinalLeaderboard(array: JSONArray) {
+    /**
+     * Shows the final leaderboard of a round on the results screen, if the player is still on the results of that round
+     * and it is not shown yet.
+     *
+     * The leaderboard is parsed on the calling thread and attached on the update thread, which is also where the results
+     * screen is loaded and left, so the two can never interleave.
+     *
+     * @param array The final leaderboard sent by the server.
+     * @param roundId The ID of the round the leaderboard belongs to.
+     */
+    fun onFinalLeaderboard(array: JSONArray, roundId: Int) {
 
-        finalData = null
-
-        // Avoiding data parsing if user left from ScoringScene
-        if (GlobalManager.getInstance().engine.scene == roomScene || GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().songMenu.scene) {
+        // Avoiding data parsing if the player is not on the results of this round, or already has its leaderboard.
+        if (!session.acceptsFinalLeaderboard(roundId)) {
+            log("Final leaderboard for round $roundId ignored, not on its results.")
             return
         }
 
@@ -223,10 +240,22 @@ object Multiplayer {
             }
         }
 
-        finalData = list.toTypedArray()
+        val leaderboard = list.toTypedArray()
 
-        // Reloading results screen
-        GlobalManager.getInstance().scoring.updateLeaderboard()
+        updateThread {
+            // The player may have left the results while the leaderboard was being parsed.
+            if (!session.acceptsFinalLeaderboard(roundId)) {
+                log("Final leaderboard for round $roundId ignored, results were left.")
+                return@updateThread
+            }
+
+            finalData = leaderboard
+            GlobalManager.getInstance().scoring.updateLeaderboard()
+
+            // Mark only after the leaderboard is attached, so that a leaderboard that
+            // failed to show can still be shown later.
+            session.markLeaderboardShown()
+        }
     }
 
 
@@ -261,6 +290,11 @@ object Multiplayer {
 
             reconnectionJob?.cancel()
             reconnectionJob = null
+
+            // Drop the last attempt's socket, so that a connection it completes after giving
+            // up is not taken for a new join of the room, which would discard the events still
+            // waiting to be delivered.
+            RoomAPI.disconnect()
 
             // Release UI await-locks so the room scene is interactive after the error toast,
             // even when navigation is deferred because a game session is still active.
@@ -368,7 +402,8 @@ object Multiplayer {
                         userId = OnlineManager.getInstance().userId,
                         gameSessionId = OnlineManager.getInstance().sessionId,
                         roomPassword = RoomAPI.lastRoomPassword,
-                        multiplayerSessionID = room.sessionID
+                        multiplayerSessionID = room.sessionID,
+                        lastChatId = session.lastChatId,
                     )
 
                     isWaitingAttemptResponse = true

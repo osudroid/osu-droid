@@ -47,6 +47,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
 import com.osudroid.FrameLimiterMode;
+import com.osudroid.beatmaplisting.BeatmapLink;
+import com.osudroid.beatmaplisting.BeatmapListing;
 import com.osudroid.beatmaps.BeatmapCache;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.debug.DebugPlaygroundScene;
@@ -100,6 +102,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okio.Okio;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -158,6 +161,9 @@ public class MainActivity extends BaseGameActivity implements
         // the debug broadcast survive an activity recreation.
         GlesDebugOptions.debugOutput = BuildConfig.DEBUG;
     }
+
+    private final AtomicReference<BeatmapLink> pendingBeatmapLink = new AtomicReference<>();
+    private volatile boolean startupFinished;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -505,6 +511,9 @@ public class MainActivity extends BaseGameActivity implements
                     }
 
                     SongSelect.INSTANCE.loadBeatmaps();
+                    startupFinished = true;
+                    openPendingBeatmapLink();
+
                     Execution.updateThread(() -> GlobalManager.getInstance().getMainMenuV2().loadBannerSprite());
                 });
             }
@@ -866,6 +875,24 @@ public class MainActivity extends BaseGameActivity implements
         final Uri data = intent.getData();
         if (data == null) return;
 
+        final var beatmapLink = BeatmapLink.parse(data.toString());
+
+        if (beatmapLink != null || "osu".equalsIgnoreCase(data.getScheme())) {
+            // Consume the action so that onStart() does not parse the link again.
+            intent.setAction(Intent.ACTION_MAIN);
+
+            // Malformed beatmap links are ignored.
+            if (beatmapLink != null) {
+                pendingBeatmapLink.set(beatmapLink);
+
+                // Before startup has finished, the link stays pending for the startup operation to consume.
+                if (startupFinished) {
+                    openPendingBeatmapLink();
+                }
+            }
+            return;
+        }
+
         if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
             final var globalManager = GlobalManager.getInstance();
 
@@ -1054,6 +1081,11 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && mEngine.getScene() == gameScene.getScene()) {
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
+
+                // The engine is stopped by now, so the quit below only runs once
+                // the app is back in the foreground. Leave the round right away
+                // so that the server is not left waiting for this player's score.
+                gameScene.leaveMultiplayerRound();
                 Execution.updateThread(gameScene::quit);
                 Multiplayer.log("Player left the match.");
             } else {
@@ -1448,13 +1480,61 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    private void openPendingBeatmapLink() {
+        Execution.updateThread(() -> {
+            var link = pendingBeatmapLink.getAndSet(null);
+
+            if (link == null) {
+                return;
+            }
+
+            if (mEngine != null) {
+                var scene = mEngine.getScene();
+                var gameScene = GlobalManager.getInstance().getGameScene();
+
+                if (scene instanceof GameLoaderScene
+                        || (scene != null && gameScene != null && scene == gameScene.getScene())) {
+                    ToastLogger.showText("Beatmap links cannot be opened during gameplay.", true);
+                    return;
+                }
+            }
+
+            new BeatmapListing(link).show();
+        });
+    }
+
+    private boolean isBeatmapLinkIntent(Intent intent) {
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction())) {
+            return false;
+        }
+
+        Uri data = intent.getData();
+        return data != null && BeatmapLink.parse(data.toString()) != null;
+    }
+
+    /**
+     * Parses an incoming intent and stores whatever it carries (invite link,
+     * beatmap link or file to import).
+     *
+     * @return Whether the intent carried something to handle. Malformed
+     * {@code osu://} links carry nothing and are ignored.
+     */
     private boolean parseIntent(Intent intent) {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri data = intent.getData();
 
             if (data != null) {
-                if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
+                var beatmapLink = BeatmapLink.parse(data.toString());
+
+                if (beatmapLink != null) {
+                    pendingBeatmapLink.set(beatmapLink);
+                } else if (data.toString().startsWith(LobbyAPI.INVITE_HOST)) {
                     roomInviteLink = data;
+                } else if ("osu".equalsIgnoreCase(data.getScheme())) {
+                    // Malformed beatmap link
+                    // Ignore it, but consume the action so it isn't handled again.
+                    intent.setAction(Intent.ACTION_MAIN);
+                    return false;
                 } else {
                     String scheme = data.getScheme();
                     if (ContentResolver.SCHEME_FILE.equals(scheme)) {

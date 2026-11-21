@@ -7,6 +7,7 @@ import com.osudroid.beatmaplisting.BeatmapListing
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.api.IPlayerEventListener
 import com.osudroid.multiplayer.api.IRoomEventListener
+import com.osudroid.multiplayer.api.MultiplayerClientEvent
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.PlayerStatus
 import com.osudroid.multiplayer.api.data.Room
@@ -17,6 +18,9 @@ import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.multiplayer.api.data.RoomTeam
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.multiplayer.session.MultiplayerReconcileAction
+import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
+import com.osudroid.multiplayer.session.MultiplayerUndeliveredReason
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.BeatmapInfoLayout
 import com.osudroid.ui.v2.GameLoaderScene
@@ -726,6 +730,9 @@ class RoomScene(
 
         runSafe { RoomAPI.disconnect() }
 
+        // Leaving the room ends the match, including any event that was still waiting to be delivered.
+        Multiplayer.session.reset()
+
         Multiplayer.room = null
         Multiplayer.roomScene = null
         Multiplayer.player = null
@@ -810,13 +817,18 @@ class RoomScene(
 
     // Connection
 
-    override fun onRoomConnect(newRoom: Room) {
+    override fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload, isReconnection: Boolean) {
 
         if (Multiplayer.room != newRoom) {
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
         }
 
-        ModMenu.clear()
+        // A reconnection keeps the mods the player picked, as clearing them would drop the player's own free mods.
+        // setMods still brings them in line with the room, which may have changed while disconnected.
+        if (!isReconnection) {
+            ModMenu.clear()
+        }
+
         ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange.set(true)
@@ -826,20 +838,29 @@ class RoomScene(
         updateInformation()
         updatePlayerList()
 
-        if (Multiplayer.isReconnecting) {
-            onRoomBeatmapChange(room.beatmap)
+        // Not Multiplayer.isReconnecting, as the reconnection may have been given up on since the session was restored.
+        // Skipping the reconciliation would leave events held during the disconnection unsent.
+        if (isReconnection) {
+            // The host or free mods settings may have changed while disconnected.
+            ModMenu.updateModButtonVisibility()
+            ModMenu.updateCustomizationMenuEnabledStates()
 
+            // The room's beatmap is usually the one already previewing, which should keep playing rather than start
+            // over on every reconnection.
+            applyRoomBeatmap(room.beatmap, restartMusicPreview = false)
+
+            // Ends the reconnection, which the status changes made by the actions below wait for.
             Multiplayer.onReconnectAttempt(true)
 
-            val player = Multiplayer.player ?: return
+            // Events that are still relevant are resent before this returns, so they reach the server ahead of anything
+            // the actions send.
+            val actions = Multiplayer.session.recover(
+                recovery.snapshot,
+                hasBeatmap = GlobalManager.getInstance().selectedBeatmap != null
+            )
 
-            // If the server reports Playing, the match started while the player was disconnected.
-            if (player.status == PlayerStatus.Playing && GlobalManager.getInstance().selectedBeatmap != null) {
-                onRoomMatchPlay()
-            } else {
-                // Always re-sync status after reconnection so that the isWaitingForStatusChange lock
-                // (set in onRoomDisconnect) is cleared and the player can toggle ready again.
-                invalidateStatus()
+            for (action in actions) {
+                applyReconcileAction(action, recovery)
             }
 
             return
@@ -852,6 +873,47 @@ class RoomScene(
         updateBeatmap(newRoom.beatmap)
 
         show()
+    }
+
+    /**
+     * Applies an action decided after a reconnection to converge with the server.
+     *
+     * @param action The action to apply.
+     * @param recovery What the server reported on reconnection.
+     */
+    private fun applyReconcileAction(action: MultiplayerReconcileAction, recovery: MultiplayerRecoveryPayload) {
+        Multiplayer.log("Reconnection: applying $action")
+
+        when (action) {
+            MultiplayerReconcileAction.InvalidateStatus -> invalidateStatus()
+            MultiplayerReconcileAction.ReleaseStatusLock -> isWaitingForStatusChange.set(false)
+
+            MultiplayerReconcileAction.ShowLastResults -> {
+                // Both are present whenever the server reports last results.
+                val scores = recovery.lastResultsScores
+                val roundId = recovery.snapshot.lastResultsRoundId
+
+                if (scores != null && roundId != null) {
+                    Multiplayer.onFinalLeaderboard(scores, roundId)
+                }
+            }
+
+            MultiplayerReconcileAction.StartImmediately -> onRoomMatchStart()
+            MultiplayerReconcileAction.ApplySkip -> onRoomMatchSkip()
+
+            is MultiplayerReconcileAction.JoinRound -> {
+                onRoomMatchPlay(action.roundId)
+
+                // The server already has this client as playing, so no status change will arrive to release the lock
+                // taken when the connection dropped.
+                isWaitingForStatusChange.set(false)
+            }
+
+            MultiplayerReconcileAction.SitOut -> {
+                invalidateStatus()
+                chat.onSystemChatMessage("A match started while you were reconnecting. You'll join the next one.", "#FFBFBF")
+            }
+        }
     }
 
     override fun onRoomDisconnect(reason: String?, byUser: Boolean) {
@@ -876,6 +938,38 @@ class RoomScene(
         }
 
         updateThread { back() }
+    }
+
+    override fun onEventNotDelivered(event: MultiplayerClientEvent, reason: MultiplayerUndeliveredReason) {
+        Multiplayer.log("WARNING: Event ${event.eventName} was not delivered (reason = $reason)")
+
+        when (reason) {
+            MultiplayerUndeliveredReason.NoResponse -> {
+                val lock = when (event) {
+                    MultiplayerClientEvent.PlayerStatusChanged -> isWaitingForStatusChange
+                    MultiplayerClientEvent.PlayerModsChanged, MultiplayerClientEvent.RoomModsChanged -> isWaitingForModsChange
+                    MultiplayerClientEvent.BeatmapChanged -> isWaitingForBeatmapChange
+                    else -> null
+                }
+
+                lock?.set(false)
+
+                chat.onSystemChatMessage(
+                    "Your last action may not have been delivered. Please try again if nothing changed.",
+                    "#FFBFBF"
+                )
+            }
+
+            // The action was refused while the session was down. The reconnection owns the wait locks and
+            // resynchronizes the room once it succeeds, so only tell the user to try again.
+            MultiplayerUndeliveredReason.NotSent -> chat.onSystemChatMessage(
+                "Your last action was not sent because the connection is being restored. Please try again once it is back.",
+                "#FFBFBF"
+            )
+
+            // Same as above, but a message per lost event would only be noise.
+            MultiplayerUndeliveredReason.ConnectionLost -> Unit
+        }
     }
 
     override fun onRoomConnectFail(error: String?) {
@@ -911,7 +1005,16 @@ class RoomScene(
         updatePlayerList()
     }
 
-    override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) {
+    override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) = applyRoomBeatmap(beatmap, restartMusicPreview = true)
+
+    /**
+     * Applies the room's beatmap and previews it.
+     *
+     * @param beatmap The room's beatmap.
+     * @param restartMusicPreview Whether to restart the music preview when it is already playing the same audio.
+     */
+    private fun applyRoomBeatmap(beatmap: RoomBeatmap?, restartMusicPreview: Boolean) {
+        val previousBeatmap = GlobalManager.getInstance().selectedBeatmap
 
         room.beatmap = beatmap
 
@@ -937,13 +1040,19 @@ class RoomScene(
             updateBeatmap(beatmap)
         }
 
+        val songService = GlobalManager.getInstance().songService
+
         if (selectedBeatmap == null) {
-            GlobalManager.getInstance().songService.stop()
+            songService.stop()
             return
         }
 
-        GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
-        GlobalManager.getInstance().songService.play()
+        if (!restartMusicPreview && songService.status != Status.STOPPED && selectedBeatmap.audioPath == previousBeatmap?.audioPath) {
+            return
+        }
+
+        songService.preLoad(selectedBeatmap.audioPath)
+        songService.play()
     }
 
     override fun onRoomHostChange(uid: Long) {
@@ -1065,9 +1174,15 @@ class RoomScene(
 
     // Match
 
-    override fun onRoomMatchPlay() {
+    override fun onRoomMatchPlay(roundId: Int) {
 
         val player = Multiplayer.player ?: return
+
+        // Checked before entering the round, so that the phase is never left loading a round that is not played.
+        if (!Multiplayer.session.tryEnterLoading(roundId)) {
+            Multiplayer.log("INFO: playBeatmap for round $roundId ignored, already started")
+            return
+        }
 
         if (player.status == PlayerStatus.MissingBeatmap) {
             // This client does not have the beatmap and will never call startGame(), so
@@ -1077,7 +1192,10 @@ class RoomScene(
             // match for everyone (EH-5).  Send the ACK immediately so the server can proceed
             // once all other players have loaded.
             Multiplayer.log("INFO: MissingBeatmap — sending immediate beatmapLoadComplete ACK (EH-5)")
-            RoomAPI.notifyBeatmapLoaded()
+            RoomAPI.notifyBeatmapLoaded(roundId)
+
+            // This client sits the round out.
+            Multiplayer.session.enterRoom()
         }
 
         updateThread {
@@ -1087,6 +1205,7 @@ class RoomScene(
 
                 if (global.selectedBeatmap == null) {
                     Multiplayer.log("WARNING: Attempt to start match with null track.")
+                    Multiplayer.session.enterRoom()
                     return@updateThread
                 }
 
@@ -1101,6 +1220,8 @@ class RoomScene(
     }
 
     override fun onRoomMatchStart() {
+        Multiplayer.session.enterPlaying()
+
         updateThread {
             if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
                 GlobalManager.getInstance().gameScene.isReadyToStart = true
@@ -1128,8 +1249,8 @@ class RoomScene(
         Multiplayer.onLiveLeaderboard(leaderboard)
     }
 
-    override fun onRoomFinalLeaderboard(leaderboard: JSONArray) {
-        Multiplayer.onFinalLeaderboard(leaderboard)
+    override fun onRoomFinalLeaderboard(leaderboard: JSONArray, roundId: Int) {
+        Multiplayer.onFinalLeaderboard(leaderboard, roundId)
     }
 
     // Player related events

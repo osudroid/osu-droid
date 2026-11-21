@@ -68,6 +68,13 @@ public class MultiTouchController extends BaseTouchController {
 		// See: https://developer.android.com/reference/android/view/MotionEvent#batching
 		// Process historical (batched) positions first, for accurate slider tracking.
 		// Use fireTouchEvent(eventTime, ...) so each historical sample carries its own timestamp.
+
+		// Publish the latest coordinates first, so that readers of the raw pointer state do not wait for the
+		// historical coordinates to be dispatched.
+		for (int i = 0; i < pMotionEvent.getPointerCount(); i++) {
+			updateRawPointer(pMotionEvent.getPointerId(i), pMotionEvent.getX(i), pMotionEvent.getY(i), true, pMotionEvent.getEventTime());
+		}
+
 		if (isProcessHistoricalEvents()) {
 			final int historySize = pMotionEvent.getHistorySize();
 			for (int h = 0; h < historySize; h++) {
@@ -78,13 +85,12 @@ public class MultiTouchController extends BaseTouchController {
 				}
 			}
 		}
-		// Process current positions and update raw pointer state
+		// Process current positions
 		for(int i = pMotionEvent.getPointerCount() - 1; i >= 0; i--) {
 			final int pointerIndex = i;
 			final int pointerID = pMotionEvent.getPointerId(pointerIndex);
 			final float x = pMotionEvent.getX(pointerIndex);
 			final float y = pMotionEvent.getY(pointerIndex);
-			updateRawPointer(pointerID, x, y, true, pMotionEvent.getEventTime());
 			this.fireTouchEvent(x, y, MotionEvent.ACTION_MOVE, pointerID, pMotionEvent);
 		}
 		// END osu!droid modified

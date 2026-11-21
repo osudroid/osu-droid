@@ -6,6 +6,8 @@ import com.osudroid.multiplayer.api.data.RoomGameplaySettings
 import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.multiplayer.session.MultiplayerRecoveryPayload
+import com.osudroid.multiplayer.session.MultiplayerUndeliveredReason
 import org.json.JSONArray
 
 interface IRoomEventListener {
@@ -13,11 +15,15 @@ interface IRoomEventListener {
     // Connection related events
 
     /**
-     * Emitted to a client when it connects to the room socket for the first time. Gives the following room info
-     * structure as a parameter.
+     * Emitted to a client when it connects to the room socket, including when it reconnects after a drop.
      *
+     * @param newRoom The room info the server sent.
+     * @param recovery What the server reported about the match in progress and the chat the client may have
+     * missed due to reconnection.
+     * @param isReconnection Whether this connection restores a dropped one, as decided when the connection was
+     * established.
      */
-    fun onRoomConnect(newRoom: Room)
+    fun onRoomConnect(newRoom: Room, recovery: MultiplayerRecoveryPayload, isReconnection: Boolean)
 
     /**
      * Called when the player disconnects from room socket, keep in mind this is also called when the user manually
@@ -29,6 +35,15 @@ interface IRoomEventListener {
      * Called when the connection fails.
      */
     fun onRoomConnectFail(error: String?)
+
+    /**
+     * Called when a [MultiplayerClientEvent] the client sent was not delivered to the server, so the action behind it
+     * did not happen.
+     *
+     * @param event The [MultiplayerClientEvent] that was not delivered.
+     * @param reason Why the [MultiplayerClientEvent] was not delivered.
+     */
+    fun onEventNotDelivered(event: MultiplayerClientEvent, reason: MultiplayerUndeliveredReason)
 
     /**
      * Emitted when the server encounters an error in processing info (maybe this can be displayed in a toast message).
@@ -84,8 +99,10 @@ interface IRoomEventListener {
 
     /**
      * Emit when the host initiates gameplay.
+     *
+     * @param roundId The ID of the round that is starting.
      */
-    fun onRoomMatchPlay()
+    fun onRoomMatchPlay(roundId: Int)
 
     /**
      * Emitted when all players have finished loading the beatmap after all clients receive the playBeatmap event.
@@ -117,6 +134,9 @@ interface IRoomEventListener {
 
     /**
      * Emitted when all players have submitted their score.
+     *
+     * @param leaderboard The final leaderboard.
+     * @param roundId The ID of the round the leaderboard belongs to.
      */
-    fun onRoomFinalLeaderboard(leaderboard: JSONArray)
+    fun onRoomFinalLeaderboard(leaderboard: JSONArray, roundId: Int)
 }

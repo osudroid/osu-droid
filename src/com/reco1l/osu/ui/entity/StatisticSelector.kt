@@ -1,8 +1,8 @@
 package com.reco1l.osu.ui.entity
 
 import android.opengl.GLES32
+import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.api.data.WinCondition.Accuracy
-import com.osudroid.multiplayer.Multiplayer
 import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
@@ -17,8 +17,11 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
  * Scoreboard list used for multiplayer scores in results screen.
+ *
+ * @param stats The scores to list.
+ * @param winCondition The win condition of the room.
  */
-class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchArea {
+class StatisticSelector(stats: Array<StatisticV2>?, private val winCondition: WinCondition) : ScrollableList(), ITouchArea {
 
 
     private var selected: StatisticV2? = getGlobal().scoring.currentStatistic
@@ -94,7 +97,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
                 ${stats.playerName}
                 ${getNumberInstance(US).format(stats.totalScoreWithMultiplier)}
                 ${
-                when (Multiplayer.room!!.winCondition) {
+                when (winCondition) {
                     Accuracy -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
                     else -> "${getNumberInstance(US).format(stats.scoreMaxCombo)}x"
                 }
