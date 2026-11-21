@@ -823,7 +823,12 @@ class RoomScene(
             chat.onSystemChatMessage(StringTable.get(R.string.multiplayer_room_welcome), "#459FFF")
         }
 
-        ModMenu.clear()
+        // A reconnection keeps the mods the player picked, as clearing them would drop the player's own free mods.
+        // setMods still brings them in line with the room, which may have changed while disconnected.
+        if (!isReconnection) {
+            ModMenu.clear()
+        }
+
         ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange.set(true)
@@ -836,7 +841,13 @@ class RoomScene(
         // Not Multiplayer.isReconnecting, as the reconnection may have been given up on since the session was restored.
         // Skipping the reconciliation would leave events held during the disconnection unsent.
         if (isReconnection) {
-            onRoomBeatmapChange(room.beatmap)
+            // The host or free mods settings may have changed while disconnected.
+            ModMenu.updateModButtonVisibility()
+            ModMenu.updateCustomizationMenuEnabledStates()
+
+            // The room's beatmap is usually the one already previewing, which should keep playing rather than start
+            // over on every reconnection.
+            applyRoomBeatmap(room.beatmap, restartMusicPreview = false)
 
             // Ends the reconnection, which the status changes made by the actions below wait for.
             Multiplayer.onReconnectAttempt(true)
@@ -994,7 +1005,16 @@ class RoomScene(
         updatePlayerList()
     }
 
-    override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) {
+    override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) = applyRoomBeatmap(beatmap, restartMusicPreview = true)
+
+    /**
+     * Applies the room's beatmap and previews it.
+     *
+     * @param beatmap The room's beatmap.
+     * @param restartMusicPreview Whether to restart the music preview when it is already playing the same audio.
+     */
+    private fun applyRoomBeatmap(beatmap: RoomBeatmap?, restartMusicPreview: Boolean) {
+        val previousBeatmap = GlobalManager.getInstance().selectedBeatmap
 
         room.beatmap = beatmap
 
@@ -1020,13 +1040,19 @@ class RoomScene(
             updateBeatmap(beatmap)
         }
 
+        val songService = GlobalManager.getInstance().songService
+
         if (selectedBeatmap == null) {
-            GlobalManager.getInstance().songService.stop()
+            songService.stop()
             return
         }
 
-        GlobalManager.getInstance().songService.preLoad(selectedBeatmap.audioPath)
-        GlobalManager.getInstance().songService.play()
+        if (!restartMusicPreview && songService.status != Status.STOPPED && selectedBeatmap.audioPath == previousBeatmap?.audioPath) {
+            return
+        }
+
+        songService.preLoad(selectedBeatmap.audioPath)
+        songService.play()
     }
 
     override fun onRoomHostChange(uid: Long) {
