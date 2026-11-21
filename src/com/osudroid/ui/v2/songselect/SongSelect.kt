@@ -254,6 +254,13 @@ object SongSelect : UIScene() {
                 onActionUp = { ModMenu.show() }
             }
 
+            // The options of the selected beatmap set, also shown by holding its panel.
+            textButton {
+                text = "Options"
+                leadingIcon = FontAwesomeIcon(Icon.Gear).apply { iconSize = 20f }
+                onActionUp = { showBeatmapOptions() }
+            }
+
             // Tap: random beatmap. Hold: go back to the previous selection, one step per second.
             randomButton = textButton {
                 text = "Random"
@@ -273,6 +280,19 @@ object SongSelect : UIScene() {
                 }
             }
         }
+    }
+
+
+    private fun showBeatmapOptions() {
+        val beatmapInfo = selectedBeatmap ?: return
+
+        // The set may not be listed, the search and the filters do not deselect it.
+        val model = findModel(beatmapInfo)
+            ?: allBeatmapSets.find { it.beatmapSetInfo.directory == beatmapInfo.setDirectory }
+            ?: return
+
+        ResourceManager.getInstance().getSound("click-short")?.play()
+        BeatmapOptionsDialog(model).show()
     }
 
 
