@@ -22,6 +22,9 @@ public class TouchOptions {
     private boolean mProcessHistoricalEvents;
     private boolean mUseRawPointer;
     // END osu!droid modified
+    // BEGIN osu!droid modified - Option for not retaining a copy of each MotionEvent
+    private boolean mRetainMotionEvent = true;
+    // END osu!droid modified
 
 	// ===========================================================
 	// Constructors
@@ -90,6 +93,36 @@ public class TouchOptions {
      */
     public boolean isUseRawPointer() {
         return this.mUseRawPointer;
+    }
+    // END osu!droid modified
+
+    // BEGIN osu!droid modified - Option for not retaining a copy of each MotionEvent
+    public TouchOptions enableRetainMotionEvent() {
+        return this.setRetainMotionEvent(true);
+    }
+
+    public TouchOptions disableRetainMotionEvent() {
+        return this.setRetainMotionEvent(false);
+    }
+
+    /**
+     * Sets whether a {@link org.anddev.andengine.input.touch.TouchEvent} that is handled on the update thread
+     * retains a copy of the {@link android.view.MotionEvent} it came from.
+     * <p>
+     * Copying allocates a {@link android.view.MotionEvent} per touch event once Android's pool of them runs out.
+     * When disabled, {@link org.anddev.andengine.input.touch.TouchEvent#getMotionEvent()} returns <code>null</code>
+     * for such events, so only disable this when nothing handling them needs it.
+     */
+    public TouchOptions setRetainMotionEvent(final boolean pRetainMotionEvent) {
+        this.mRetainMotionEvent = pRetainMotionEvent;
+        return this;
+    }
+
+    /**
+     * <u><b>Default:</b></u> <code>true</code>
+     */
+    public boolean isRetainMotionEvent() {
+        return this.mRetainMotionEvent;
     }
     // END osu!droid modified
 

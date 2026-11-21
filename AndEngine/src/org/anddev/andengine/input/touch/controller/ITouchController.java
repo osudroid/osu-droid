@@ -29,10 +29,18 @@ public interface ITouchController extends IUpdateHandler {
 	public boolean onHandleMotionEvent(final MotionEvent pMotionEvent);
 
 	// BEGIN osu!droid modified - raw pointer operations
-	int getRawPointerVersion(int pointerId);
 	boolean isRawPointerDown(int pointerId);
-	float getRawPointerSurfaceX(int pointerId);
-	float getRawPointerSurfaceY(int pointerId);
+
+	/**
+	 * Reads the latest surface coordinates of a pointer. This method is thread-safe.
+	 *
+	 * @param pointerId The ID of the pointer.
+	 * @param out An array of at least two elements receiving the X and Y coordinates, in that order.
+	 * @return <code>false</code> if the pointer is outside of {@link #getRawPointerCapacity()}, in which case
+	 * <code>out</code> is left untouched.
+	 */
+	boolean getRawPointerSurfacePosition(int pointerId, float[] out);
+
 	long getRawPointerEventTime(int pointerId);
 	int getRawPointerCapacity();
 	void clearRawPointers();

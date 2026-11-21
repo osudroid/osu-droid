@@ -7,7 +7,7 @@ import org.anddev.andengine.util.pool.RunnablePoolUpdateHandler;
 
 import android.view.MotionEvent;
 
-import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -29,16 +29,21 @@ public abstract class BaseTouchController implements ITouchController  {
 	private static final int RAW_POINTER_CAPACITY = 10;
 
 	private boolean mUseRawPointer;
-	private final float[] mRawPointerX = new float[RAW_POINTER_CAPACITY];
-	private final float[] mRawPointerY = new float[RAW_POINTER_CAPACITY];
+	// The surface X and Y coordinates of each pointer, packed into one long (X in the high 32 bits,
+	// Y in the low 32 bits).
+	private final AtomicLongArray mRawPointerSurfacePosition = new AtomicLongArray(RAW_POINTER_CAPACITY);
 	private final boolean[] mRawPointerDown = new boolean[RAW_POINTER_CAPACITY];
 	private final long[] mRawPointerEventTime = new long[RAW_POINTER_CAPACITY];
-	private final AtomicIntegerArray mRawPointerVersion =  new AtomicIntegerArray(RAW_POINTER_CAPACITY);
 	// END osu!droid modified
 
 	private ITouchEventCallback mTouchEventCallback;
 
 	private boolean mRunOnUpdateThread;
+
+	// BEGIN osu!droid modified - MotionEvent may not be retained
+	// Volatile since this is read on the UI thread, but applied from other threads.
+	private volatile boolean mRetainMotionEvent = true;
+	// END osu!droid modified
 
 	private final RunnablePoolUpdateHandler<TouchEventRunnablePoolItem> mTouchEventRunnablePoolUpdateHandler = new RunnablePoolUpdateHandler<TouchEventRunnablePoolItem>() {
 		@Override
@@ -86,7 +91,10 @@ public abstract class BaseTouchController implements ITouchController  {
 		final boolean handled;
 
 		if(this.mRunOnUpdateThread) {
-			final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, MotionEvent.obtain(pMotionEvent));
+			// BEGIN osu!droid modified - MotionEvent may not be retained
+			final MotionEvent motionEvent = this.mRetainMotionEvent ? MotionEvent.obtain(pMotionEvent) : null;
+			final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, pMotionEvent.getEventTime(), motionEvent);
+			// END osu!droid modified
 
 			final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
 			touchEventRunnablePoolItem.set(touchEvent);
@@ -105,16 +113,21 @@ public abstract class BaseTouchController implements ITouchController  {
     // BEGIN osu!droid modified - added method to fire touch events with custom event time
     protected boolean fireTouchEvent(final long pEventTime, final float pX, final float pY, final int pAction, final int pPointerID, final MotionEvent pMotionEvent) {
         final boolean handled;
-        final MotionEvent motionEvent = MotionEvent.obtain(pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(), pX, pY, pMotionEvent.getMetaState());
-        final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, motionEvent);
 
         if(this.mRunOnUpdateThread) {
+            final MotionEvent motionEvent = this.mRetainMotionEvent
+                ? MotionEvent.obtain(pMotionEvent.getDownTime(), pEventTime, pMotionEvent.getAction(), pX, pY, pMotionEvent.getMetaState())
+                : null;
+
+            final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, pEventTime, motionEvent);
+
             final TouchEventRunnablePoolItem touchEventRunnablePoolItem = this.mTouchEventRunnablePoolUpdateHandler.obtainPoolItem();
             touchEventRunnablePoolItem.set(touchEvent);
             this.mTouchEventRunnablePoolUpdateHandler.postPoolItem(touchEventRunnablePoolItem);
 
             handled = true;
         } else {
+            final TouchEvent touchEvent = TouchEvent.obtain(pX, pY, pAction, pPointerID, pEventTime, pMotionEvent);
             handled = this.mTouchEventCallback.onTouchEvent(touchEvent);
             touchEvent.recycle();
         }
@@ -131,27 +144,29 @@ public abstract class BaseTouchController implements ITouchController  {
 	public void applyTouchOptions(final TouchOptions pTouchOptions) {
 		this.mRunOnUpdateThread = pTouchOptions.isRunOnUpdateThread();
 		this.mUseRawPointer = pTouchOptions.isUseRawPointer();
+		// BEGIN osu!droid modified - MotionEvent may not be retained
+		this.mRetainMotionEvent = pTouchOptions.isRetainMotionEvent();
+		// END osu!droid modified
 	}
 
 	// BEGIN osu!droid modified - raw pointer getters and setters
-	@Override
-	public int getRawPointerVersion(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? -1 : this.mRawPointerVersion.get(pointerId);
-	}
-
 	@Override
 	public boolean isRawPointerDown(int pointerId) {
 		return pointerId >= 0 && pointerId < RAW_POINTER_CAPACITY && this.mRawPointerDown[pointerId];
 	}
 
 	@Override
-	public float getRawPointerSurfaceX(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f : this.mRawPointerX[pointerId];
-	}
+	public boolean getRawPointerSurfacePosition(int pointerId, float[] out) {
+		if (pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY) {
+			return false;
+		}
 
-	@Override
-	public float getRawPointerSurfaceY(int pointerId) {
-		return pointerId < 0 || pointerId >= RAW_POINTER_CAPACITY ? 0f  : this.mRawPointerY[pointerId];
+		final long position = this.mRawPointerSurfacePosition.get(pointerId);
+
+		out[0] = Float.intBitsToFloat((int) (position >>> 32));
+		out[1] = Float.intBitsToFloat((int) position);
+
+		return true;
 	}
 
 	@Override
@@ -176,9 +191,7 @@ public abstract class BaseTouchController implements ITouchController  {
 	@Override
 	public void resetRawPointers() {
 		for (int i = 0; i < RAW_POINTER_CAPACITY; ++i) {
-			this.mRawPointerVersion.set(i, 0);
-			this.mRawPointerX[i] = 0f;
-			this.mRawPointerY[i] = 0f;
+			this.mRawPointerSurfacePosition.set(i, packSurfacePosition(0f, 0f));
 			this.mRawPointerDown[i] = false;
 			this.mRawPointerEventTime[i] = 0L;
 		}
@@ -194,16 +207,17 @@ public abstract class BaseTouchController implements ITouchController  {
 			return;
 		}
 
-		this.mRawPointerVersion.incrementAndGet(id);
-		this.mRawPointerX[id] = x;
-		this.mRawPointerY[id] = y;
 		this.mRawPointerDown[id] = down;
 		this.mRawPointerEventTime[id] = eventTime;
-		this.mRawPointerVersion.incrementAndGet(id);
+		this.mRawPointerSurfacePosition.set(id, packSurfacePosition(x, y));
 	}
 
 	protected final void clearRawPointer(final int id) {
 		updateRawPointer(id, 0f, 0f, false, 0L);
+	}
+
+	private static long packSurfacePosition(final float x, final float y) {
+		return ((long) Float.floatToRawIntBits(x) << 32) | (Float.floatToRawIntBits(y) & 0xFFFFFFFFL);
 	}
 	// END osu!droid modified
 
@@ -239,7 +253,13 @@ public abstract class BaseTouchController implements ITouchController  {
 		protected void onRecycle() {
 			super.onRecycle();
 			final TouchEvent touchEvent = this.mTouchEvent;
-			touchEvent.getMotionEvent().recycle();
+			// BEGIN osu!droid modified - MotionEvent may not be retained
+			final MotionEvent motionEvent = touchEvent.getMotionEvent();
+
+			if (motionEvent != null) {
+				motionEvent.recycle();
+			}
+			// END osu!droid modified
 			touchEvent.recycle();
 		}
 	}

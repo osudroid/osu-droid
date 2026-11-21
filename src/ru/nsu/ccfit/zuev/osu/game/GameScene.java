@@ -1510,6 +1510,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(Config.isHighPrecisionInput());
             touchOptions.setUseRawPointer(Config.isHighPrecisionInput());
+            // Gameplay only needs each touch event's time, which is carried without retaining a MotionEvent copy.
+            touchOptions.setRetainMotionEvent(false);
 
             var touchController = engine.getTouchController();
             touchController.applyTouchOptions(touchOptions);
@@ -2090,6 +2092,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             touchOptions.setRunOnUpdateThread(true);
             touchOptions.setProcessHistoricalEvents(false);
             touchOptions.setUseRawPointer(false);
+            touchOptions.setRetainMotionEvent(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
             // Enable screen dimming
@@ -2299,6 +2302,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         touchOptions.setRunOnUpdateThread(true);
         touchOptions.setProcessHistoricalEvents(false);
         touchOptions.setUseRawPointer(false);
+        touchOptions.setRetainMotionEvent(true);
 
         var touchController = engine.getTouchController();
         touchController.applyTouchOptions(touchOptions);
@@ -2743,9 +2747,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
         float offset = previousFrameTime > 0
-                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                ? (event.getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
                 : 0;
-        int eventTime = (int) (gameplayClock.getCurrentTime() * 1000 + offset);
+        int eventTime = Math.round(gameplayClock.getCurrentTime() * 1000 + offset);
 
         if (replaying || isGameOver) {
             return false;
@@ -2861,7 +2865,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 cursor.addEvent(upEvent);
 
                 if (replay != null) {
-                    replay.addUp((int) time, i);
+                    replay.addUp(Math.round(time), i);
                 }
             }
 
@@ -4256,11 +4260,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // Reused buffer to avoid allocations.
         private final float[] fastPathSurfaceCoords = new float[2];
 
-        // Stable fallback cache per pointer (surface space).
-        private final boolean[] fastPathHasStableSnapshot = new boolean[CursorCount];
-        private final float[] fastPathLastStableX = new float[CursorCount];
-        private final float[] fastPathLastStableY = new float[CursorCount];
-
         public GameUIScene() {
             super();
 
@@ -4346,7 +4345,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(isUpdatePathDown);
 
                 if (!isUpdatePathDown) {
-                    fastPathHasStableSnapshot[i] = false;
                     continue;
                 }
 
@@ -4356,16 +4354,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 ++updatePathActiveCount;
 
-                if (tryReadRawPointer(i)) {
-                    fastPathLastStableX[i] = fastPathSurfaceCoords[0];
-                    fastPathLastStableY[i] = fastPathSurfaceCoords[1];
-                    fastPathHasStableSnapshot[i] = true;
-                } else if (fastPathHasStableSnapshot[i]) {
-                    // Revert to latest stable coordinates if read fails.
-                    fastPathSurfaceCoords[0] = fastPathLastStableX[i];
-                    fastPathSurfaceCoords[1] = fastPathLastStableY[i];
-                } else {
-                    // No stable sample yet. Keep update thread position.
+                if (!touchController.getRawPointerSurfacePosition(i, fastPathSurfaceCoords)) {
+                    // Keep update thread position.
                     continue;
                 }
 
@@ -4375,37 +4365,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
                 sprite.setPosition(sceneCoords[0], sceneCoords[1]);
             }
-        }
-
-        private boolean tryReadRawPointer(int pointerId) {
-            var touchController = engine.getTouchController();
-
-            if (touchController == null) {
-                return false;
-            }
-
-            for (int attempt = 0; attempt < 2; ++attempt) {
-                int versionBefore = touchController.getRawPointerVersion(pointerId);
-
-                // An odd version means the main thread is updating this pointer, so we wait.
-                if ((versionBefore & 1) != 0) {
-                    continue;
-                }
-
-                float x = touchController.getRawPointerSurfaceX(pointerId);
-                float y = touchController.getRawPointerSurfaceY(pointerId);
-
-                int versionAfter = touchController.getRawPointerVersion(pointerId);
-
-                if (versionBefore == versionAfter && (versionAfter & 1) == 0) {
-                    // Successfully read a consistent snapshot.
-                    fastPathSurfaceCoords[0] = x;
-                    fastPathSurfaceCoords[1] = y;
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
