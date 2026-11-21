@@ -267,6 +267,8 @@ object SongSelect : UIScene() {
                 anchor = Anchor.BottomLeft
                 origin = Anchor.BottomLeft
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
+                // The enabled mods are shown as a row of icons, which must not be squeezed into a square.
+                autoSizeTrailingIcon = Axes.None
                 onActionUp = { showModMenu() }
             }
 
