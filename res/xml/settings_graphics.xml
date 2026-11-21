@@ -27,6 +27,13 @@
 
         <CheckBoxPreference
                 android:defaultValue="false"
+                android:key="songSelectLegacySkin"
+                android:summary="Draw the panels and buttons of the song select with the images and colors of the skin"
+                android:title="Use skin in song select"
+                app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+                android:defaultValue="false"
                 android:key="skin"
                 android:summary="@string/opt_skin_summary"
                 android:title="@string/opt_skin_title"

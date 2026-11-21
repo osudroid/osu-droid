@@ -2,6 +2,7 @@ package com.osudroid.ui.v2.songselect
 
 import android.util.Log
 import com.osudroid.data.BeatmapInfo
+import com.osudroid.ui.v2.songselect.legacy.LegacySkin
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
@@ -13,6 +14,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.Color4
 import com.reco1l.framework.Interpolation
 import com.reco1l.framework.math.Vec4
+import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.random.Random
 
@@ -109,9 +111,21 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
         cornerRadius = Radius.XL
     }
 
+    private var isLegacy = false
+
+    /**
+     * The item background of the skin, shown in place of the cover with the legacy look.
+     */
+    private var legacyTexture: TextureRegion? = null
+
+    /**
+     * The [LegacySkin.version] the panel is drawn for.
+     */
+    private var legacyVersion = -1
+
 
     override var applyTheme: ThemeApplier = { theme ->
-        buttonBorder.color = theme.accentColor.copy(alpha = 0.3f)
+        buttonBorder.color = LegacySkin.setColor.copy(alpha = 0.3f)
         // Matches the former 60 % black overlay drawn over a 50 % background box.
         coverBackground.color = (theme.accentColor * 0.1f * 0.25f).copy(alpha = 0.8f)
     }
@@ -154,7 +168,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     alpha = 0f
                     background = UIBox().apply {
                         cornerRadius = Radius.XL
-                        applyTheme = { color = it.accentColor }
+                        applyTheme = { color = LegacySkin.setColor }
                     }
 
                     container {
@@ -165,7 +179,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                             anchor = Anchor.Center
                             origin = Anchor.Center
                             iconSize = 12f
-                            color = Colors.Black
+                            applyTheme = { color = LegacySkin.contrastOf(LegacySkin.setColor) }
                         }
                     }
                 }
@@ -189,13 +203,14 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
                     titleText = text {
                         text = "Unknown"
                         font = ResourceManager.getInstance().getFont("torusBoldLarge")
-                        applyTheme = { color = it.accentColor }
+                        // The legacy song menu applied the text colors of a skin to the difficulties only.
+                        applyTheme = { color = if (isLegacy) Colors.White else it.accentColor }
                     }
 
                     artistText = text {
                         text = "Unknown"
                         font = ResourceManager.getInstance().getFont("torusBold")
-                        applyTheme = { color = it.accentColor * 0.8f }
+                        applyTheme = { color = (if (isLegacy) Colors.White else it.accentColor) * 0.8f }
                     }
                 }
 
@@ -294,15 +309,27 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (legacyVersion != LegacySkin.version) {
+            legacyVersion = LegacySkin.version
+            isLegacy = LegacySkin.isEnabled
+            legacyTexture = LegacySkin.itemBackground
+
+            // Tinted again below.
+            coverBrightness = -1f
+
+            titleText.onThemeChanged(Theme.current)
+            artistText.onThemeChanged(Theme.current)
+        }
+
         // Covers are loaded and unloaded asynchronously by the carousel.
-        val coverTexture = boundData?.coverTexture
+        val coverTexture = if (isLegacy) legacyTexture else boundData?.coverTexture
         if (cover.textureRegion !== coverTexture) {
             cover.textureRegion = coverTexture
         }
 
         favoriteIcon.isVisible = boundData?.isFavorite == true
 
-        val accentColor = Theme.current.accentColor
+        val accentColor = LegacySkin.setColor
         val buttonContainerTargetWidth = if (isExpanded) width + 3f.rem else width
         val buttonContainerTargetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
         val buttonContainerTargetBorderWidth = if (isExpanded) SELECTED_BORDER_WIDTH else BORDER_WIDTH
@@ -322,11 +349,15 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
 
         updateCoverBounds()
 
-        // Brighter when selected.
-        val brightness = COVER_BRIGHTNESS + (SELECTED_COVER_BRIGHTNESS - COVER_BRIGHTNESS) * selectionProgress
+        // Brighter when selected. The image of a skin is tinted with its color and darkened less than a cover.
+        val brightness = if (isLegacy)
+            LEGACY_BRIGHTNESS + (1f - LEGACY_BRIGHTNESS) * selectionProgress
+        else
+            COVER_BRIGHTNESS + (SELECTED_COVER_BRIGHTNESS - COVER_BRIGHTNESS) * selectionProgress
+
         if (coverBrightness != brightness) {
             coverBrightness = brightness
-            cover.color = Color4(brightness, brightness, brightness)
+            cover.color = if (isLegacy) LegacySkin.setColor * brightness else Color4(brightness, brightness, brightness)
         }
 
         val panelContainerTargetHeight = if (isExpanded) panelsContainer.contentHeight else 0f
@@ -428,6 +459,7 @@ class BeatmapSetPanel(val beatmapCarrousel: BeatmapCarrousel) : RecyclableCompon
     companion object {
 
         private const val COVER_BRIGHTNESS = 0.4f
+        private const val LEGACY_BRIGHTNESS = 0.75f
         private const val SELECTED_COVER_BRIGHTNESS = 0.5f
 
         val BORDER_WIDTH

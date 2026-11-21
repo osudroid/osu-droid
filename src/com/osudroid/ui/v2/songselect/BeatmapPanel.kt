@@ -3,10 +3,12 @@ package com.osudroid.ui.v2.songselect
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.ui.v2.StarRatingBadge
 import com.osudroid.ui.v2.modmenu.ModMenu
+import com.osudroid.ui.v2.songselect.legacy.LegacySkin
 import com.reco1l.andengine.*
 import com.reco1l.andengine.component.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.theme.*
 import com.reco1l.andengine.ui.*
@@ -51,6 +53,7 @@ open class BeatmapPanel : UIClickableContainer() {
 
     private val selectionIndicator: UIContainer
     private lateinit var versionText: UIText
+    private lateinit var mappedByText: UIText
     private lateinit var creatorText: UIText
     private lateinit var starRatingBadge: StarRatingBadge
     private lateinit var difficultyStars: DifficultyStars
@@ -70,6 +73,28 @@ open class BeatmapPanel : UIClickableContainer() {
     }
 
     /**
+     * The item background of the skin, shown instead of the [backgroundBox] with the legacy look.
+     */
+    private val legacyBackground = UIShapedSprite().apply {
+        height = FillParent
+        // Crop draws the texture quad larger than the bounds, so clip the overflow.
+        clipToBounds = true
+        isVisible = false
+        shape = UIBox().apply {
+            cornerRadius = Radius.XL
+            color = Colors.Black
+        }
+    }
+
+    private var isLegacy = false
+
+    /**
+     * The [LegacySkin.version] and the selection the panel is drawn for.
+     */
+    private var legacyVersion = -1
+    private var legacySelection = false
+
+    /**
      * Animated from 0 to 1 while the difficulty gets selected, drives the selection strip and the background.
      */
     private var selectionProgress = 0f
@@ -80,9 +105,9 @@ open class BeatmapPanel : UIClickableContainer() {
     private var backgroundSelection = -1f
 
 
-    override var applyTheme: ThemeApplier = { theme ->
+    override var applyTheme: ThemeApplier = {
         backgroundSelection = -1f
-        borderBox.color = theme.accentColor.copy(alpha = 0.3f)
+        borderBox.color = LegacySkin.difficultyColor.copy(alpha = 0.3f)
     }
 
 
@@ -117,7 +142,7 @@ open class BeatmapPanel : UIClickableContainer() {
             alpha = 0f
             background = UIBox().apply {
                 cornerRadius = Radius.XL
-                applyTheme = { color = it.accentColor }
+                applyTheme = { color = LegacySkin.selectedDifficultyColor }
             }
 
             container {
@@ -128,12 +153,13 @@ open class BeatmapPanel : UIClickableContainer() {
                     anchor = Anchor.Center
                     origin = Anchor.Center
                     iconSize = 10f
-                    color = Colors.Black
+                    applyTheme = { color = LegacySkin.contrastOf(LegacySkin.selectedDifficultyColor) }
                 }
             }
         }
 
         +backgroundBox
+        +legacyBackground
 
         linearContainer {
             orientation = Orientation.Vertical
@@ -146,18 +172,18 @@ open class BeatmapPanel : UIClickableContainer() {
 
                 versionText = text {
                     font = ResourceManager.getInstance().getFont("torusBold")
-                    applyTheme = { color = it.accentColor }
+                    applyTheme = { color = textColor(it) }
                 }
 
-                text {
+                mappedByText = text {
                     text = "mapped by"
                     font = ResourceManager.getInstance().getFont("torusBold")
-                    applyTheme = { color = it.accentColor * 0.6f }
+                    applyTheme = { color = textColor(it) * 0.6f }
                 }
 
                 creatorText = text {
                     font = ResourceManager.getInstance().getFont("torusBold")
-                    applyTheme = { color = it.accentColor * 0.8f }
+                    applyTheme = { color = textColor(it) * 0.8f }
                 }
             }
 
@@ -199,8 +225,38 @@ open class BeatmapPanel : UIClickableContainer() {
         selectionProgress = 0f
         selectionIndicator.alpha = 0f
         selectionIndicator.isVisible = false
-        borderBox.color = Theme.current.accentColor.copy(alpha = 0.3f)
+        borderBox.color = LegacySkin.difficultyColor.copy(alpha = 0.3f)
         borderBox.lineWidth = BeatmapSetPanel.BORDER_WIDTH
+    }
+
+    private fun textColor(theme: Theme) = when {
+        !isLegacy -> theme.accentColor
+        isExpanded -> LegacySkin.selectedTextColor
+        else -> LegacySkin.textColor
+    }
+
+    /**
+     * Draws the panel with the look of the theme or the legacy look of the skin, whose colors depend on the
+     * selection.
+     */
+    private fun updateLegacyLook() {
+        if (legacyVersion == LegacySkin.version && legacySelection == isExpanded) {
+            return
+        }
+
+        legacyVersion = LegacySkin.version
+        legacySelection = isExpanded
+        isLegacy = LegacySkin.isEnabled
+
+        legacyBackground.isVisible = isLegacy
+        legacyBackground.textureRegion = LegacySkin.itemBackground
+        legacyBackground.color = if (isExpanded) LegacySkin.selectedDifficultyColor else LegacySkin.difficultyColor
+        backgroundBox.isVisible = !isLegacy
+        backgroundSelection = -1f
+
+        for (text in arrayOf(versionText, mappedByText, creatorText)) {
+            text.onThemeChanged(Theme.current)
+        }
     }
 
     /**
@@ -217,7 +273,9 @@ open class BeatmapPanel : UIClickableContainer() {
             return
         }
 
-        val accentColor = Theme.current.accentColor
+        updateLegacyLook()
+
+        val accentColor = if (isExpanded) LegacySkin.selectedDifficultyColor else LegacySkin.difficultyColor
         val targetBorderColor = if (isExpanded) accentColor else accentColor.copy(alpha = 0.3f)
         val targetBorderWidth = if (isExpanded) BeatmapSetPanel.SELECTED_BORDER_WIDTH else BeatmapSetPanel.BORDER_WIDTH
         val targetWidth = if (isExpanded) parent.innerWidth else parent.innerWidth - 2f.rem
@@ -255,6 +313,8 @@ open class BeatmapPanel : UIClickableContainer() {
     private fun updateBackgroundBounds() {
         backgroundBox.x = SELECTION_INDICATOR_WIDTH * selectionProgress
         backgroundBox.width = width - backgroundBox.x
+        legacyBackground.x = backgroundBox.x
+        legacyBackground.width = backgroundBox.width
     }
 
     /**

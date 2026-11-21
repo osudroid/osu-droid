@@ -12,6 +12,8 @@ import com.osudroid.difficulty.BeatmapDifficultyCalculator.calculateStandardDiff
 import com.osudroid.mods.ModNightCore
 import com.osudroid.ui.v2.ModsIndicator
 import com.osudroid.ui.v2.modmenu.ModMenu
+import com.osudroid.ui.v2.songselect.legacy.LegacySkin
+import com.osudroid.ui.v2.songselect.legacy.LegacySkinButton
 import com.osudroid.utils.DisplayCorners
 import com.osudroid.utils.calculateRate
 import com.osudroid.utils.updateThread
@@ -67,8 +69,17 @@ object SongSelect : UIScene() {
     private val beatmapInfoWedge = BeatmapInfoWedge()
     private val backgroundSprite: UISprite
 
+    private val buttons: UILinearContainer
+    private lateinit var backButton: UITextButton
     private lateinit var modsButton: UITextButton
+    private lateinit var optionsButton: UITextButton
     private lateinit var randomButton: UITextButton
+
+    // The buttons of the legacy song menu, shown instead of the ones above with the legacy look.
+    private val legacyBackButton = LegacySkinButton("menu-back", "BackButton", pressedScale = 1.25f)
+    private val legacyModsButton = LegacySkinButton("selection-mods", "ModsButton", imageScale = 1.5f)
+    private val legacyOptionsButton = LegacySkinButton("selection-options", "OptionsButton", imageScale = 1.5f)
+    private val legacyRandomButton = LegacySkinButton("selection-random", "RandomButton", imageScale = 1.5f)
 
     /**
      * Scrolls back to the selected beatmap, only shown while it is out of sight.
@@ -222,15 +233,15 @@ object SongSelect : UIScene() {
             }
         }
 
-        linearContainer {
+        buttons = linearContainer {
             orientation = Orientation.Horizontal
             anchor = Anchor.BottomLeft
             origin = Anchor.BottomLeft
-            padding = Vec4(2f.srem, 4f.srem)
-            spacing = 2f.srem
+            padding = BUTTONS_PADDING
+            spacing = BUTTONS_SPACING
 
             // Unlike Mods and Random it leaves the song select, so it stands out in the app's accent red.
-            textButton {
+            backButton = textButton {
                 text = "Back"
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
@@ -248,40 +259,54 @@ object SongSelect : UIScene() {
                 onActionUp = { onBackPressed() }
             }
 
+            +legacyBackButton.apply { onActionUp = { onBackPressed() } }
+
+            // At the bottom next to a legacy button, which can be taller.
             modsButton = textButton {
                 text = "Mods"
+                anchor = Anchor.BottomLeft
+                origin = Anchor.BottomLeft
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("mods"))
-                onActionUp = { ModMenu.show() }
+                onActionUp = { showModMenu() }
             }
 
+            +legacyModsButton.apply { onActionUp = { showModMenu() } }
+
             // The options of the selected beatmap set, also shown by holding its panel.
-            textButton {
+            optionsButton = textButton {
                 text = "Options"
+                anchor = Anchor.BottomLeft
+                origin = Anchor.BottomLeft
                 leadingIcon = FontAwesomeIcon(Icon.Gear).apply { iconSize = 20f }
                 onActionUp = { showBeatmapOptions() }
             }
 
+            +legacyOptionsButton.apply { onActionUp = { showBeatmapOptions() } }
+
             // Tap: random beatmap. Hold: go back to the previous selection, one step per second.
             randomButton = textButton {
                 text = "Random"
+                anchor = Anchor.BottomLeft
+                origin = Anchor.BottomLeft
                 leadingIcon = UISprite(ResourceManager.getInstance().getTexture("random"))
-                onActionDown = {
-                    randomHoldTime = 0f
-                    previousSelectionPerformed = false
-                }
-                onActionUp = {
-                    if (!previousSelectionPerformed) {
-                        selectRandomBeatmap()
-                    }
-                    previousSelectionPerformed = false
-                }
-                onActionCancel = {
-                    previousSelectionPerformed = false
-                }
+                onActionDown = { onRandomPressed() }
+                onActionUp = { onRandomReleased() }
+                onActionCancel = { previousSelectionPerformed = false }
+            }
+
+            +legacyRandomButton.apply {
+                onActionDown = { onRandomPressed() }
+                onActionUp = { onRandomReleased() }
+                onActionCancel = { previousSelectionPerformed = false }
             }
         }
     }
 
+
+    private fun showModMenu() {
+        ResourceManager.getInstance().getSound("click-short")?.play()
+        ModMenu.show()
+    }
 
     private fun showBeatmapOptions() {
         val beatmapInfo = selectedBeatmap ?: return
@@ -293,6 +318,18 @@ object SongSelect : UIScene() {
 
         ResourceManager.getInstance().getSound("click-short")?.play()
         BeatmapOptionsDialog(model).show()
+    }
+
+    private fun onRandomPressed() {
+        randomHoldTime = 0f
+        previousSelectionPerformed = false
+    }
+
+    private fun onRandomReleased() {
+        if (!previousSelectionPerformed) {
+            selectRandomBeatmap()
+        }
+        previousSelectionPerformed = false
     }
 
 
@@ -390,6 +427,7 @@ object SongSelect : UIScene() {
         if (childScene === ModMenu) {
             ModMenu.back()
         } else {
+            ResourceManager.getInstance().getSound("menuback")?.play()
             GlobalManager.getInstance().mainMenuV2.show()
         }
     }
@@ -663,7 +701,7 @@ object SongSelect : UIScene() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         // Holding the random button walks back through the previous selections, once per second.
-        if (::randomButton.isInitialized && randomButton.isPressed) {
+        if (::randomButton.isInitialized && (randomButton.isPressed || legacyRandomButton.isPressed)) {
             randomHoldTime += pSecondsElapsed
 
             if (randomHoldTime >= PREVIOUS_SELECTION_INTERVAL) {
@@ -720,6 +758,19 @@ object SongSelect : UIScene() {
     override fun onAttached() {
         super.onAttached()
 
+        // The setting and the skin may have been changed while the scene was not shown.
+        LegacySkin.refresh()
+        backButton.isVisible = !legacyBackButton.show(LegacySkin.isEnabled)
+        modsButton.isVisible = !legacyModsButton.show(LegacySkin.isEnabled)
+        optionsButton.isVisible = !legacyOptionsButton.show(LegacySkin.isEnabled)
+        randomButton.isVisible = !legacyRandomButton.show(LegacySkin.isEnabled)
+
+        // The legacy song menu had its buttons side by side in the corner of the screen.
+        val isLegacyRow = legacyBackButton.isVisible && legacyModsButton.isVisible
+            && legacyOptionsButton.isVisible && legacyRandomButton.isVisible
+        buttons.padding = if (isLegacyRow) Vec4.Zero else BUTTONS_PADDING
+        buttons.spacing = if (isLegacyRow) 0f else BUTTONS_SPACING
+
         // A score may have been set while the scene was not shown, e.g. when coming back from gameplay.
         leaderboard.onBeatmapSelected(selectedBeatmap)
 
@@ -759,6 +810,9 @@ object SongSelect : UIScene() {
      * Duration of the background fade-in in seconds.
      */
     private const val BACKGROUND_FADE_DURATION = 0.4f
+
+    private val BUTTONS_SPACING get() = 2f.srem
+    private val BUTTONS_PADDING get() = Vec4(2f.srem, 4f.srem)
 
     /**
      * Duration of the music fade-in in seconds.
