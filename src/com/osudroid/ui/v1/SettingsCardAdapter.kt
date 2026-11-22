@@ -47,7 +47,7 @@ class SettingsCardAdapter(group: PreferenceGroup) : PreferenceGroupAdapter(group
         return next?.isCardBoundary() ?: true
     }
 
-    private fun Preference.isCardBoundary() = this is PreferenceGroup
+    private fun Preference.isCardBoundary() = this is PreferenceGroup || this is SectionHeaderPreference
 
     companion object {
         private const val ROW_COLOR = 0xFF161622.toInt()
