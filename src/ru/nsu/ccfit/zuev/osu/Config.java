@@ -98,7 +98,8 @@ public class Config {
         playfieldSize,
         playfieldHorizontalPosition,
         playfieldVerticalPosition,
-        cursorSize;
+        cursorSize,
+        shakeIntensity;
 
     private static Map<String, String> skins;
 
@@ -149,6 +150,7 @@ public class Config {
         Map.entry("bgbrightness", new int[] { 0, 100 }),
         Map.entry("offset", new int[] { -750, 750 }),
         Map.entry("cursorSize", new int[] { 25, 300 }),
+        Map.entry("shakeIntensity", new int[] { 0, 100 }),
         Map.entry("playfieldSize", new int[] { 50, 100 }),
         Map.entry("playfieldHorizontalPosition", new int[] { 0, 100 }),
         Map.entry("playfieldVerticalPosition", new int[] { 0, 100 }),
@@ -201,6 +203,7 @@ public class Config {
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
             cursorSize = prefs.getInt("cursorSize", 50) / 100f;
+            shakeIntensity = prefs.getInt("shakeIntensity", 100) / 100f;
         }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
             prefs.edit()
                 .putInt("offset", 0)
@@ -208,6 +211,7 @@ public class Config {
                 .putInt("soundvolume", 100)
                 .putInt("bgmvolume", 100)
                 .putInt("cursorSize", 50)
+                .putInt("shakeIntensity", 100)
                 .commit();
             Config.loadConfig(context);
             return;
@@ -687,6 +691,10 @@ public class Config {
 
     public static float getCursorSize() {
         return cursorSize;
+    }
+
+    public static float getShakeIntensity() {
+        return shakeIntensity;
     }
 
     public static void setCursorSize(final float cursorSize) {

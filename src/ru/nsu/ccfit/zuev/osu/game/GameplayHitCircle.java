@@ -200,7 +200,13 @@ public class GameplayHitCircle extends GameObject {
     }
 
     private void startShake() {
-        float magnitude = getShakeMagnitude(beatmapCircle);
+        float intensity = Config.getShakeIntensity();
+
+        if (intensity == 0) {
+            return;
+        }
+
+        float magnitude = getShakeMagnitude(beatmapCircle) * intensity;
 
         ShakeKt.shake(circlePiece, magnitude);
         ShakeKt.shake(approachCircle, magnitude);

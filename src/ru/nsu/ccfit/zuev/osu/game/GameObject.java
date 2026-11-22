@@ -300,17 +300,13 @@ public abstract class GameObject {
     }
 
     /**
-     * Shake circle by 8 units inside the circle's local space, in which the circle is 128 units wide.
-     */
-    private static final float SHAKE_MAGNITUDE_RATIO = 8f / 128f;
-
-    /**
      * Obtains the shake magnitude for a {@link HitObject}, in screen pixels.
      *
      * @param hitObject The {@link HitObject} associated with this {@link GameObject}.
+     * @return The shake magnitude in screen pixels.
      */
     protected static float getShakeMagnitude(HitObject hitObject) {
-        return (float) (2 * hitObject.getScreenSpaceGameplayRadius()) * SHAKE_MAGNITUDE_RATIO;
+        return (float) hitObject.getScreenSpaceGameplayRadius() * 8f / HitObject.OBJECT_RADIUS;
     }
 
     //endregion

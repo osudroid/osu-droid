@@ -875,15 +875,27 @@ public class GameplaySlider extends GameObject {
     }
 
     private void startShake() {
-        float magnitude = getShakeMagnitude(beatmapSlider);
+        float intensity = Config.getShakeIntensity();
 
-        ShakeKt.shake(approachCircle, magnitude);
-        ShakeKt.shake(headCirclePiece, magnitude);
-        ShakeKt.shake(tailCirclePiece, magnitude);
-        ShakeKt.shake(startArrow, magnitude);
-        ShakeKt.shake(endArrow, magnitude);
-        ShakeKt.shake(sliderBody, magnitude);
-        ShakeKt.shake(tickContainer, magnitude);
+        if (intensity == 0) {
+            return;
+        }
+
+        float headMagnitude = getShakeMagnitude(beatmapSlider) * intensity;
+
+        ShakeKt.shake(approachCircle, headMagnitude);
+        ShakeKt.shake(headCirclePiece, headMagnitude);
+
+        // The body always shakes by 8 osu!pixels regardless of circle size.
+        float bodyMagnitude = 8 *
+                beatmapSlider.getScreenSpaceGameplayScale() / beatmapSlider.getGameplayScale() *
+                intensity;
+
+        ShakeKt.shake(tailCirclePiece, bodyMagnitude);
+        ShakeKt.shake(startArrow, bodyMagnitude);
+        ShakeKt.shake(endArrow, bodyMagnitude);
+        ShakeKt.shake(sliderBody, bodyMagnitude);
+        ShakeKt.shake(tickContainer, bodyMagnitude);
     }
 
     @Override
